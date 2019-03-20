@@ -1,0 +1,2 @@
+[MASTER]
+init-hook='import sys; sys.path.insert(1,"C:\\Develop\\mypython\\Stubber\stubs\\")'
