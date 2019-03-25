@@ -1,11 +1,12 @@
 # create stubs for (all) modules on a micropython board
 # ref: https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
 
-import uos as os
 import gc
 import logging
-logging.basicConfig(level=logging.INFO)
+import uos as os
+
 from machine import resetWDT
+logging.basicConfig(level=logging.INFO)
 
 class Stubber():
     def __init__(self, path="/flash/stubs"):
@@ -45,7 +46,8 @@ class Stubber():
             'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'websocket', 'writer', 'ymodem', 'zlib']
 
     def get_obj_attribs(self, obj: object):
-        result = [];errors = []
+        result = []
+        errors = []
         #self._log.info('get attributes {} {}'.format(repr(obj),obj ))
         for name in dir(obj):
             try:
@@ -62,7 +64,7 @@ class Stubber():
         try:
             for module_name in sorted(self.modules):
                 if not module_name.startswith("_"):
-                    file_name = "{}/{}.py".format(
+                    file_name = "{}/{}.pyi".format(
                         self.path,
                         module_name.replace(".", "/")
                     )
@@ -79,8 +81,8 @@ class Stubber():
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic name:{}".format(module_name))
             return
-        if file_name == None:
-            file_name = module_name + ".py"
+        if file_name is None:
+            file_name = module_name + ".pyi"
 
         #import the module (as new_module) to examine it
         try:
@@ -108,7 +110,7 @@ class Stubber():
             try:
                 #exec( "del sys.modules[\"{}\"]".format(module_name) )
                 del new_module
-            except:
+            except BaseException:
                 self._log.warning("could not unload module {}".format(module_name))
             finally:
                 gc.collect()
@@ -144,11 +146,10 @@ class Stubber():
                 s = indent + name + " = " + rep + "\n"
                 fp.write(s)
                 self._log.debug(s)
-
+            #new class
             elif typ == "<class 'type'>" and indent == "":
-                # full expansion only on toplevel
-                s = "\n" + indent + "class " + name + ":\n"  # What about superclass?
-                s += indent + "    ''\n"
+                # full expansion only on toplevel ?
+                s = "\n{}class {}(): ...\n".format(indent, name)
                 fp.write(s)
                 self._log.debug(s)
 
@@ -172,16 +173,15 @@ class Stubber():
     #     else:
     #         return {}
 
-import uos as os
 try:
-    #crude way to detect if the sd is already loaded 
+    #crude way to detect if the sd is already loaded
     _ = os.stat('/sd')
 except OSError as e:
     _ = os.sdconfig(os.SDMODE_SPI, clk=18, mosi=23, miso=19, cs=4)
     _ = os.mountsd()
 
 
-stubber = Stubber("/sd")
+stubber = Stubber("/sd/stubs")
 stubber.generate_all_stubs()
 
 

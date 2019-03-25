@@ -46,7 +46,7 @@ _level = 20
 _level_dict = None
 _loggers = None
 _stream = None
-def basicConfig():
+def basicConfig( ):
     pass
 
 def debug():
