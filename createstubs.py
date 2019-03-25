@@ -64,7 +64,7 @@ class Stubber():
         try:
             for module_name in sorted(self.modules):
                 if not module_name.startswith("_"):
-                    file_name = "{}/{}.pyi".format(
+                    file_name = "{}/{}.py".format(
                         self.path,
                         module_name.replace(".", "/")
                     )
@@ -82,7 +82,7 @@ class Stubber():
             self._log.warning("SKIPPING problematic name:{}".format(module_name))
             return
         if file_name is None:
-            file_name = module_name + ".pyi"
+            file_name = module_name + ".py"
 
         #import the module (as new_module) to examine it
         try:
@@ -117,10 +117,10 @@ class Stubber():
 
     def _dump_object_stubs(self, fp, object_expr: object, obj_name: str, indent: str):
         from time import sleep_ms
-        resetWDT() #avoid waking the dog
+        resetWDT() #avoid waking the dog 
         sleep_ms(2)
         if object_expr in self.problematic:
-            self._log.warning("SKIPPING problematic name:", object_expr)
+            self._log.warning("SKIPPING problematic name:" + object_expr)
             return
 
         self._log.debug("DUMPING : {}".format(object_expr))
@@ -186,8 +186,8 @@ stubber.generate_all_stubs()
 
 
 # for name in ['machine']:
-#     stubber.dump_module_stub(name,'/flash/stubs/{}.pyi'.format(name))
+#     stubber.dump_module_stub(name,'/flash/stubs/{}.py'.format(name))
 
 # for name in modules:
 #     print("Starting on module", name)
-#     stubber.dump_module_stub(name,'/flash/stubs/{}.pyi'.format(name))
+#     stubber.dump_module_stub(name,'/flash/stubs/{}.py'.format(name))
