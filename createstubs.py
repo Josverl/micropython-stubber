@@ -13,6 +13,7 @@ class Stubber():
         # log = logging.getLogger(__name__)
         self._log = logging.getLogger('Stubber')
         self.path = path
+        os.mkdir(self.path)
         # self.path = "{}/{}/{}".format(path, os.uname()[0], os.uname()[2]).replace('.','_')
         #FIXME: create multilevel path
         # self._log.info('path {}'.format(self.path))
@@ -116,7 +117,7 @@ class Stubber():
                 gc.collect()
 
     def _dump_object_stubs(self, fp, object_expr: object, obj_name: str, indent: str):
-        from time import sleep_ms
+        from utime import sleep_ms
         resetWDT() #avoid waking the dog 
         sleep_ms(2)
         if object_expr in self.problematic:
@@ -181,7 +182,7 @@ except OSError as e:
     _ = os.mountsd()
 
 
-stubber = Stubber("/sd/stubs")
+stubber = Stubber("/flash/stubs")
 stubber.generate_all_stubs()
 
 
