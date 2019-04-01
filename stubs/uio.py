@@ -1,7 +1,6 @@
 "Module 'uio' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 
-class BufferedWriter:
-    ''
+class BufferedWriter(): ...
     def flush():
         pass
 
@@ -9,8 +8,7 @@ class BufferedWriter:
         pass
 
 
-class BytesIO:
-    ''
+class BytesIO(): ...
     def close():
         pass
 
@@ -36,8 +34,7 @@ class BytesIO:
         pass
 
 
-class FileIO:
-    ''
+class FileIO(): ...
     def close():
         pass
 
@@ -66,8 +63,7 @@ class FileIO:
         pass
 
 
-class StringIO:
-    ''
+class StringIO(): ...
     def close():
         pass
 
@@ -93,8 +89,7 @@ class StringIO:
         pass
 
 
-class TextIOWrapper:
-    ''
+class TextIOWrapper(): ...
     def close():
         pass
 
