@@ -1,7 +1,6 @@
 "Module 'mpu9250' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 
-class AK8963:
-    ''
+class AK8963(): ...
     def _register_char():
         pass
 
@@ -15,8 +14,7 @@ class AK8963:
     magnetic = None
     whoami = None
 
-class MPU6500:
-    ''
+class MPU6500(): ...
     def _accel_fs():
         pass
 
@@ -36,8 +34,7 @@ class MPU6500:
     gyro = None
     whoami = None
 
-class MPU9250:
-    ''
+class MPU9250(): ...
     acceleration = None
     gyro = None
     magnetic = None

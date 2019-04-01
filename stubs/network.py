@@ -16,8 +16,7 @@ def WLANcallback():
     pass
 
 
-class ftp:
-    ''
+class ftp(): ...
     def pause():
         pass
 
@@ -37,8 +36,7 @@ class ftp:
         pass
 
 
-class mDNS:
-    ''
+class mDNS(): ...
     def addService():
         pass
 
@@ -58,8 +56,7 @@ class mDNS:
         pass
 
 
-class mqtt:
-    ''
+class mqtt(): ...
     def config():
         pass
 
@@ -88,8 +85,7 @@ def phy_mode():
     pass
 
 
-class telnet:
-    ''
+class telnet(): ...
     def pause():
         pass
 

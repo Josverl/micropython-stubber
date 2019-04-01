@@ -36,5 +36,4 @@ def sizeof():
     pass
 
 
-class struct:
-    ''
+class struct(): ...

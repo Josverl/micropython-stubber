@@ -1,7 +1,6 @@
 "Module 'uzlib' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 
-class DecompIO:
-    ''
+class DecompIO(): ...
     def read():
         pass
 

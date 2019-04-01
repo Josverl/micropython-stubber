@@ -1,8 +1,7 @@
 "Module 'upip_utarfile' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 DIRTYPE = 'dir'
 
-class FileSection:
-    ''
+class FileSection(): ...
     def read():
         pass
 
@@ -15,8 +14,7 @@ class FileSection:
 REGTYPE = 'file'
 TAR_HEADER = None
 
-class TarFile:
-    ''
+class TarFile(): ...
     def extractfile():
         pass
 
@@ -24,8 +22,7 @@ class TarFile:
         pass
 
 
-class TarInfo:
-    ''
+class TarInfo(): ...
 def roundup():
     pass
 

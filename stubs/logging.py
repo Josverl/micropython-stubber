@@ -4,8 +4,7 @@ DEBUG = 10
 ERROR = 40
 INFO = 20
 
-class Logger:
-    ''
+class Logger(): ...
     def _level_str():
         pass
 
@@ -42,11 +41,11 @@ class Logger:
 
 NOTSET = 0
 WARNING = 30
-_level = 20
+_level = 30
 _level_dict = None
 _loggers = None
 _stream = None
-def basicConfig( ):
+def basicConfig():
     pass
 
 def debug():

@@ -8,8 +8,7 @@ GYRO_FS_SEL_2000DPS = 24
 GYRO_FS_SEL_250DPS = 0
 GYRO_FS_SEL_500DPS = 8
 
-class I2C:
-    ''
+class I2C(): ...
     CBTYPE_ADDR = 1
     CBTYPE_NONE = 0
     CBTYPE_RXDATA = 2
@@ -103,8 +102,7 @@ class I2C:
         pass
 
 
-class MPU6500:
-    ''
+class MPU6500(): ...
     def _accel_fs():
         pass
 
@@ -124,8 +122,7 @@ class MPU6500:
     gyro = None
     whoami = None
 
-class Pin:
-    ''
+class Pin(): ...
     IN = 1
     INOUT = 3
     INOUT_OD = 7

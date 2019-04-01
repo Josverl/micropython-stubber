@@ -1,7 +1,6 @@
 "Module 'utimeq' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 
-class utimeq:
-    ''
+class utimeq(): ...
     def dump():
         pass
 

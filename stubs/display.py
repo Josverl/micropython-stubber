@@ -1,7 +1,6 @@
 "Module 'display' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 
-class TFT:
-    ''
+class TFT(): ...
     BLACK = 0
     BLUE = 255
     BMP = 2

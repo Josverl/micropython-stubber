@@ -1,7 +1,6 @@
 "Module 'machine' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
 
-class ADC:
-    ''
+class ADC(): ...
     ATTN_0DB = 0
     ATTN_11DB = 3
     ATTN_2_5DB = 1
@@ -45,8 +44,7 @@ class ADC:
         pass
 
 
-class DAC:
-    ''
+class DAC(): ...
     CIRCULAR = 1
     NOISE = 4
     NORMAL = 1
@@ -82,8 +80,7 @@ class DAC:
         pass
 
 
-class DHT:
-    ''
+class DHT(): ...
     DHT11 = 0
     DHT2X = 1
     def read():
@@ -96,8 +93,7 @@ EXT1_ALLLOW = 0
 EXT1_ANYHIGH = 1
 EXT1_ANYLOW = 2
 
-class GPS:
-    ''
+class GPS(): ...
     def distance():
         pass
 
@@ -126,8 +122,7 @@ class GPS:
         pass
 
 
-class I2C:
-    ''
+class I2C(): ...
     CBTYPE_ADDR = 1
     CBTYPE_NONE = 0
     CBTYPE_RXDATA = 2
@@ -227,8 +222,7 @@ LOG_NONE = 0
 LOG_VERBOSE = 5
 LOG_WARN = 2
 
-class Neopixel:
-    ''
+class Neopixel(): ...
     BLACK = 0
     BLUE = 255
     CYAN = 65535
@@ -296,8 +290,7 @@ class Neopixel:
         pass
 
 
-class Onewire:
-    ''
+class Onewire(): ...
     def crc8():
         pass
 
@@ -330,8 +323,7 @@ class Onewire:
         pass
 
 
-class PWM:
-    ''
+class PWM(): ...
     def deinit():
         pass
 
@@ -354,8 +346,7 @@ class PWM:
         pass
 
 
-class Pin:
-    ''
+class Pin(): ...
     IN = 1
     INOUT = 3
     INOUT_OD = 7
@@ -381,8 +372,7 @@ class Pin:
         pass
 
 
-class RTC:
-    ''
+class RTC(): ...
     EXT1_ALLHIGH = 2
     EXT1_ALLLOW = 0
     EXT1_ANYHIGH = 1
@@ -423,8 +413,7 @@ class RTC:
         pass
 
 
-class SPI:
-    ''
+class SPI(): ...
     HSPI = 1
     LSB = 1
     MSB = 0
@@ -463,8 +452,7 @@ def SetStackSize():
     pass
 
 
-class Signal:
-    ''
+class Signal(): ...
     def off():
         pass
 
@@ -475,8 +463,7 @@ class Signal:
         pass
 
 
-class Timer:
-    ''
+class Timer(): ...
     CHRONO = 2
     EXTBASE = 3
     EXTENDED = 3
@@ -522,8 +509,7 @@ class Timer:
         pass
 
 
-class TouchPad:
-    ''
+class TouchPad(): ...
     def config():
         pass
 
@@ -531,8 +517,7 @@ class TouchPad:
         pass
 
 
-class UART:
-    ''
+class UART(): ...
     CBTYPE_DATA = 1
     CBTYPE_ERROR = 3
     CBTYPE_PATTERN = 2
