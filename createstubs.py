@@ -3,17 +3,29 @@
 
 import gc
 import logging
+from utime import sleep_us
 import uos as os
 
-from machine import resetWDT
-logging.basicConfig(level=logging.INFO)
+try:  
+    #lobo specific 
+    from machine import resetWDT
+except:
+    def resetWDT():
+        pass
+
+logging.basicConfig(level=logging.WARNING)
 
 class Stubber():
     def __init__(self, path="/flash/stubs"):
         # log = logging.getLogger(__name__)
         self._log = logging.getLogger('Stubber')
         self.path = path
-        os.mkdir(self.path)
+        try:
+            os.mkdir(self.path)
+        except OSError as e:
+            self._log.exc(e, "creating stub folder")
+            pass #assume existing folder
+
         # self.path = "{}/{}/{}".format(path, os.uname()[0], os.uname()[2]).replace('.','_')
         #FIXME: create multilevel path
         # self._log.info('path {}'.format(self.path))
@@ -28,23 +40,21 @@ class Stubber():
         #         except:
         #             pass
         self._indent = 0
-        self.problematic = ["upysh"]
+        self.problematic = ["upysh","umqtt/robust","umqtt/simple","webrepl_setup.py"]
             #"docs.conf", "pulseio.PWMOut", "adafruit_hid",
             # "webrepl", "gc", "http_client", "http_server",
         self.excluded = ["webrepl", "_webrepl"]
 
-        #no option to discover modules from upythin, need to hardcode
-        self.modules = [ ##Loboris
-            '_thread', 'ak8963', 'array', 'binascii', 'btree', 'builtins',
-            'cmath', 'collections', 'curl', 'display', 'errno', 'framebuf',
-            'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'io',
-            'json', 'logging', 'machine', 'math', 'microWebSocket', 'microWebSrv',
-            'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'network', 'os',
-            'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306', 'ssh',
-            'ssl', 'struct', 'sys', 'time', 'tpcalib', 'ubinascii', 'ucollections',
-            'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'uos', 'upip',
-            'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket',
-            'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'websocket', 'writer', 'ymodem', 'zlib']
+        #no option to discover modules from upython, need to hardcode
+        # below contains the combines modules from ESP32 Micropython and 
+        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 
+        'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 
+        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'machine', 'math', 'microWebSocket',
+        'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 
+        'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 
+        'ubinascii', 'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 
+        'uos', 'upip', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 
+        'uwebsocket', 'uzlib', 'webrepl', 'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']   
 
     def get_obj_attribs(self, obj: object):
         result = []
@@ -69,6 +79,7 @@ class Stubber():
                         self.path,
                         module_name.replace(".", "/")
                     )
+                    print("dump module: {} to file: {}".format(module_name, file_name))
                     self._log.info("dump module: {} to file: {}".format(module_name, file_name))
                     self.dump_module_stub(module_name, file_name)
         finally:
@@ -90,7 +101,7 @@ class Stubber():
             new_module = __import__(module_name)
         except ImportError as e:
             #self._log.exception(e)
-            self._log.error("Unable to import module: {}".format(module_name))
+            self._log.warning("Unable to import module: {}".format(module_name))
             return None, e
         except e:
             self._log.error("Failed to import Module: {}".format(module_name))
@@ -106,8 +117,8 @@ class Stubber():
             else:
                 self._log.warning("skipped excluded module {}".format(module_name))
 
-        if not module_name in ["sys", "logging", "gc"]:
-            #try to unload the module
+        if not module_name in ["os", "sys", "logging", "gc"]:
+            #try to unload the module unless we use it 
             try:
                 #exec( "del sys.modules[\"{}\"]".format(module_name) )
                 del new_module
@@ -117,9 +128,6 @@ class Stubber():
                 gc.collect()
 
     def _dump_object_stubs(self, fp, object_expr: object, obj_name: str, indent: str):
-        from utime import sleep_ms
-        resetWDT() #avoid waking the dog 
-        sleep_ms(2)
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic name:" + object_expr)
             return
@@ -133,6 +141,9 @@ class Stubber():
             if name.startswith("__"):
                 #skip internals
                 continue
+            # allow the scheduler to run
+            resetWDT()
+            sleep_us(1)
 
             # self._log.debug("DUMPING", indent, object_expr, name)
             self._log.debug("  * " + name + " : " + typ)
@@ -160,35 +171,25 @@ class Stubber():
                 # keep only the name
                 fp.write(indent + name + " = None\n")
 
-    # def _get_builtins_info(self):
-    #     # assume this runs on the host ?
-    #     """
-    #     for p in self.path:
-    #         builtins_file = os.path.join(p, "__builtins__.py")
-    #         if os.path.exists(builtins_file):
-    #             return parse_api_information(builtins_file)
-    #     """
-    #     path = os.path.join(self.path, "builtins.py")
-    #     if os.path.exists(path):
-    #         return parse_api_information(path)
-    #     else:
-    #         return {}
 
-try:
-    #crude way to detect if the sd is already loaded
-    _ = os.stat('/sd')
-except OSError as e:
-    _ = os.sdconfig(os.SDMODE_SPI, clk=18, mosi=23, miso=19, cs=4)
-    _ = os.mountsd()
+# try:
+#     #crude way to detect if the sd is already loaded
+#     _ = os.stat('/sd')
+# except OSError as e:
+#     _ = os.sdconfig(os.SDMODE_SPI, clk=18, mosi=23, miso=19, cs=4)
+#     _ = os.mountsd()
 
 
-stubber = Stubber("/flash/stubs")
+#micropython std cwd is '/' /flash but /
+path = '{}/stubs'.format(os.getcwd()).replace('//','/')
+
+#Clean/remove files in stubfolder 
+for fn in os.listdir(path):
+    try:
+        os.remove("{}/{}".format(path,fn))
+    except:
+        pass
+
+stubber = Stubber(path)
 stubber.generate_all_stubs()
 
-
-# for name in ['machine']:
-#     stubber.dump_module_stub(name,'/flash/stubs/{}.py'.format(name))
-
-# for name in modules:
-#     print("Starting on module", name)
-#     stubber.dump_module_stub(name,'/flash/stubs/{}.py'.format(name))
