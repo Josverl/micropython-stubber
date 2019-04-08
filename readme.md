@@ -74,16 +74,32 @@ if you work with multiple firmwares or versions it is recomended to use a folder
     - \ESP32_LoBo_v3.1.20\
     - \ESP32_LoBo_v3.2.24\
     
-## module Duplication 
-Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
+### Tested firmwares :
+
+| Firmware         | Version                          | Comments        |
+|------------------|----------------------------------|-----------------|
+| Loboris ESP32    | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
+| Micropython ESP32| v1.10-247-g0fb15fc3f             | logging modules required 
+
 
 ## Stub format and limitations 
 
-1. no function parameters are generated 
-2. no return type is generated 
-3. instances of imported classess have no type (due to 2)
-4. standard micropython functions [unknown if these work]
-5. the stubs use the .py extention rather than .pyi (for autocomplete to work)   
+1. No function parameters are generated 
+2. No return types are generated 
+3. Instances of imported classess have no type (due to 2)
+4. Standard micropython functions [unknown if these work]
+5. The stubs use the .py extention rather than .pyi (for autocomplete to work) 
+6. Due to the method of generation nested modules are included, rather than referenced. While this leads to somwhat larger stubs, this should not be limiting for using the stubs on a PC.  
+
+### Module Duplication 
+Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
+
+### References
+PEP 3107 -- Function Annotations
+https://www.python.org/dev/peps/pep-3107/
+
+PEP 484 -- Type Hints
+https://www.python.org/dev/peps/pep-0484/
 
 ## kudos 
 The script to create the stubs is based on the work of Aivar Annamaa and the Thonny crew, however the code has been rewritten to run on the micropython board, rather than on a connected PC running python.  
@@ -91,10 +107,7 @@ The script to create the stubs is based on the work of Aivar Annamaa and the Tho
 Please refer to : 
 https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
 
-
 ## related 
-https://www.python.org/dev/peps/pep-0484/
-
 https://github.com/python/typeshed/
 
 stubgen , runs on host and extracts information from the source 
