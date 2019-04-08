@@ -1,15 +1,13 @@
 # simplify and improve the writing of micropython code in Visual Studio code and other modern editors
 
 In order to do this (I suggest) a few things are needed:
-- stub files for the native / enabled modules in the firmware using PEP 484 Type Hints
-- autocompletion / intellisense capabilities for python source files, using vVScode and the Python extension 
-- statical syntax checks, or linting, using pylint.
-- suppression of warnings that collide with the micropython principals or code optimization.
+- Stub files for the native / enabled modules in the firmware using PEP 484 Type Hints
+- Autocompletion / intellisense capabilities for python source files, using VScode and the Python extention 
+- Statical syntax checks, or linting, using pylint.
+- Suppression of warnings that collide with the micropython principals or code optimization.
 
-This is not limited to VSCode and Pylint, but thathappens to be the combination that I use.
+Not that the above is not limited to VSCode and Pylint, but it happens to be the combination that I use.
 Please feel free to suggest and add other combinations and the relevant steps to configure these. 
-
-
 
 
 ## Configuring Visual Studio Code 
@@ -57,8 +55,9 @@ disable = missing-docstring, line-too-long, trailing-newlines, broad-except, log
 
 ## Downloading the Stubs from GIThub 
 
-<Todo>
-
+This is not complete at this point.
+You may find stubs as part of this project, but I have not settled on a d=way to distribute them yet.
+If you have suggestions, then please contact me.
 
 ## Generating Stubs for a specific Firmware 
 
@@ -73,7 +72,9 @@ if you work with multiple firmwares or versions it is recomended to use a folder
 - \stubs
     - \ESP32_LoBo_v3.1.20\
     - \ESP32_LoBo_v3.2.24\
-    
+
+Note: I found out that you need to be mindfull of the path and filename limitations on the filesystem if you use IFSS. 
+
 ### Tested firmwares :
 
 | Firmware         | Version                          | Comments        |
@@ -81,6 +82,7 @@ if you work with multiple firmwares or versions it is recomended to use a folder
 | Loboris ESP32    | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
 | Micropython ESP32| v1.10-247-g0fb15fc3f             | logging modules required 
 
+Note: the logging module currently does not log .... but at least it runs.
 
 ## Stub format and limitations 
 
@@ -101,13 +103,17 @@ https://www.python.org/dev/peps/pep-3107/
 PEP 484 -- Type Hints
 https://www.python.org/dev/peps/pep-0484/
 
-## kudos 
+## Kudos 
 The script to create the stubs is based on the work of Aivar Annamaa and the Thonny crew, however the code has been rewritten to run on the micropython board, rather than on a connected PC running python.  
 
 Please refer to : 
 https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
 
-## related 
+## Related 
+
+Possible stub source: Micropython-lib > Cpython backports
+https://github.com/pfalcon/micropython-lib#cpython-backports
+
 https://github.com/python/typeshed/
 
 stubgen , runs on host and extracts information from the source 
