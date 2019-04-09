@@ -3,7 +3,6 @@
 import errno
 import gc
 import logging
-import sys
 
 import uos as os
 from utime import sleep_us
@@ -25,7 +24,7 @@ class Stubber():
             self._log.info("stub path : {}".format(self.path))
             os.mkdir(self.path)
         except OSError as e:
-            if e.args[0] != errno.EEXIST: 
+            if e.args[0] != errno.EEXIST:
                 self._log.exc(e, "error creating stub folder")
             #assume existing folder
 
@@ -42,21 +41,19 @@ class Stubber():
         #             os.mkdir(c)
         #         except:
         #             pass
-        self.problematic = ["upysh","webrepl_setup","umqtt/simple","umqtt/robust"]
-            #"docs.conf", "pulseio.PWMOut", "adafruit_hid",
-            # "webrepl", "gc", "http_client", "http_server",
-        self.excluded = ["webrepl", "_webrepl","webrepl_setup"]
-
-        #no option to discover modules from upython, need to hardcode
+        self.problematic = ["upysh", "webrepl_setup", "umqtt/simple", "umqtt/robust"]
+        self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
+        # FIXME: deal with umqtt/simple and /robust 
+        # there is no option to discover modules from upython, need to hardcode
         # below contains the combines modules from ESP32 Micropython and Loboris Modules
-        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 
-        'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 
-        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'machine', 'math', 'microWebSocket',
-        'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 
-        'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 
-        'ubinascii', 'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 
-        'uos', 'upip', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 
-        'uwebsocket', 'uzlib', 'webrepl', 'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']   
+        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath',
+                        'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
+                        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'machine', 'math', 'microWebSocket',
+                        'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb',
+                        'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib',
+                        'ubinascii', 'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple',
+                        'uos', 'upip', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq',
+                        'uwebsocket', 'uzlib', 'webrepl', 'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
     def get_obj_attribs(self, obj: object):
         result = []
@@ -97,9 +94,9 @@ class Stubber():
             return
 
         if file_name is None:
-            file_name = module_name.replace('.','_') + ".py"
-        #for nested modules 
-        module_name = module_name.replace('/','.')
+            file_name = module_name.replace('.', '_') + ".py"
+        #for nested modules
+        module_name = module_name.replace('/', '.')
 
         #import the module (as new_module) to examine it
         try:
@@ -112,7 +109,7 @@ class Stubber():
             self._log.error("Failed to import Module: {}".format(module_name))
             #self._log.exception(e)
             return None, e
-        
+
         #self._log.info( "create file : {} for {}".format(file_name,module_name))
         with open(file_name, "w") as fp:
             s = "\"Module '{}' on firmware '{}'\"\n".format(module_name, os.uname().version)
@@ -180,23 +177,22 @@ class Stubber():
         print("Clean/remove files in stubfolder")
         for fn in os.listdir(self.path):
             try:
-                os.remove("{}/{}".format(self.path , fn))
+                os.remove("{}/{}".format(self.path, fn))
             except:
                 pass
 
-    def report(self, filename = "modules.json"):
+    def report(self, filename="modules.json"):
         import ujson
-        f_name = "{}/{}.py".format(self.path , filename)
-        with open(f_name,'w') as f:
-             f.write(ujson.dumps(self._report))
+        f_name = "{}/{}.py".format(self.path, filename)
+        with open(f_name, 'w') as f:
+            f.write(ujson.dumps(self._report))
         print("Created stubs for {} modules on board {} - {}".format(
             len(self._report)-1,
             os.uname().machine,
             os.uname().release))
 
 def get_root():
-    # Determine the root folder of the device 
-    import os, errno
+    # Determine the root folder of the device
     try:
         r = "/flash"
         _ = os.stat(r)
@@ -204,20 +200,19 @@ def get_root():
         if e.args[0] == errno.ENOENT:
             r = os.getcwd()
     finally:
-        return r            
-
+        return r
 
 #handle different file roots
-path = "{}/stubs".format(get_root()).replace('//','/')
+path = "{}/stubs".format(get_root()).replace('//', '/')
 try:
     os.mkdir(path)
-except:    
+except:
     pass
 path = "{}/stubs/{}_{}".format(
     get_root(),
     os.uname().sysname,
-    os.uname().release.replace('.','_'),
-    ).replace('//','/')
+    os.uname().release.replace('.', '_'),
+    ).replace('//', '/')
 
 logging.basicConfig(level=logging.INFO)
 
