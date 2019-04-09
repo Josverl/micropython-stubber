@@ -1,30 +1,33 @@
 # create stubs for (all) modules on a micropython board
 # ref: https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
-
+import errno
 import gc
 import logging
-from utime import sleep_us
-import uos as os
+import sys
 
-try:  
-    #lobo specific 
+import uos as os
+from utime import sleep_us
+
+# deal with firmware specific implementations
+try:
     from machine import resetWDT
 except:
     def resetWDT():
         pass
 
-logging.basicConfig(level=logging.WARNING)
-
 class Stubber():
     def __init__(self, path="/flash/stubs"):
         # log = logging.getLogger(__name__)
         self._log = logging.getLogger('Stubber')
+        self._report = [os.uname()]
         self.path = path
         try:
+            self._log.info("stub path : {}".format(self.path))
             os.mkdir(self.path)
         except OSError as e:
-            self._log.exc(e, "creating stub folder")
-            pass #assume existing folder
+            if e.args[0] != errno.EEXIST: 
+                self._log.exc(e, "error creating stub folder")
+            #assume existing folder
 
         # self.path = "{}/{}/{}".format(path, os.uname()[0], os.uname()[2]).replace('.','_')
         #FIXME: create multilevel path
@@ -39,14 +42,13 @@ class Stubber():
         #             os.mkdir(c)
         #         except:
         #             pass
-        self._indent = 0
-        self.problematic = ["upysh","umqtt/robust","umqtt/simple","webrepl_setup.py"]
+        self.problematic = ["upysh","webrepl_setup","umqtt/simple","umqtt/robust"]
             #"docs.conf", "pulseio.PWMOut", "adafruit_hid",
             # "webrepl", "gc", "http_client", "http_server",
-        self.excluded = ["webrepl", "_webrepl"]
+        self.excluded = ["webrepl", "_webrepl","webrepl_setup"]
 
         #no option to discover modules from upython, need to hardcode
-        # below contains the combines modules from ESP32 Micropython and 
+        # below contains the combines modules from ESP32 Micropython and Loboris Modules
         self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 
         'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 
         'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'machine', 'math', 'microWebSocket',
@@ -93,8 +95,11 @@ class Stubber():
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic name:{}".format(module_name))
             return
+
         if file_name is None:
-            file_name = module_name + ".py"
+            file_name = module_name.replace('.','_') + ".py"
+        #for nested modules 
+        module_name = module_name.replace('/','.')
 
         #import the module (as new_module) to examine it
         try:
@@ -107,20 +112,20 @@ class Stubber():
             self._log.error("Failed to import Module: {}".format(module_name))
             #self._log.exception(e)
             return None, e
-
+        
         #self._log.info( "create file : {} for {}".format(file_name,module_name))
         with open(file_name, "w") as fp:
             s = "\"Module '{}' on firmware '{}'\"\n".format(module_name, os.uname().version)
             fp.write(s)
             if module_name not in self.excluded:
                 self._dump_object_stubs(fp, new_module, module_name, "")
+                self._report.append({"module":module_name, "file": file_name})
             else:
                 self._log.warning("skipped excluded module {}".format(module_name))
 
         if not module_name in ["os", "sys", "logging", "gc"]:
-            #try to unload the module unless we use it 
+            #try to unload the module unless we use it
             try:
-                #exec( "del sys.modules[\"{}\"]".format(module_name) )
                 del new_module
             except BaseException:
                 self._log.warning("could not unload module {}".format(module_name))
@@ -171,25 +176,53 @@ class Stubber():
                 # keep only the name
                 fp.write(indent + name + " = None\n")
 
+    def clean(self):
+        print("Clean/remove files in stubfolder")
+        for fn in os.listdir(self.path):
+            try:
+                os.remove("{}/{}".format(self.path , fn))
+            except:
+                pass
 
-# try:
-#     #crude way to detect if the sd is already loaded
-#     _ = os.stat('/sd')
-# except OSError as e:
-#     _ = os.sdconfig(os.SDMODE_SPI, clk=18, mosi=23, miso=19, cs=4)
-#     _ = os.mountsd()
+    def report(self, filename = "modules.json"):
+        import ujson
+        f_name = "{}/{}.py".format(self.path , filename)
+        with open(f_name,'w') as f:
+             f.write(ujson.dumps(self._report))
+        print("Created stubs for {} modules on board {} - {}".format(
+            len(self._report)-1,
+            os.uname().machine,
+            os.uname().release))
 
-
-#micropython std cwd is '/' /flash but /
-path = '{}/stubs'.format(os.getcwd()).replace('//','/')
-
-#Clean/remove files in stubfolder 
-for fn in os.listdir(path):
+def get_root():
+    # Determine the root folder of the device 
+    import os, errno
     try:
-        os.remove("{}/{}".format(path,fn))
-    except:
-        pass
+        r = "/flash"
+        _ = os.stat(r)
+    except OSError as e:
+        if e.args[0] == errno.ENOENT:
+            r = os.getcwd()
+    finally:
+        return r            
+
+
+#handle different file roots
+path = "{}/stubs".format(get_root()).replace('//','/')
+try:
+    os.mkdir(path)
+except:    
+    pass
+path = "{}/stubs/{}_{}".format(
+    get_root(),
+    os.uname().sysname,
+    os.uname().release,
+    ).replace('//','/')
+
+logging.basicConfig(level=logging.INFO)
 
 stubber = Stubber(path)
+stubber.clean()
 stubber.generate_all_stubs()
 
+stubber.report()

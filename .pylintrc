@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import sys; sys.path.insert(1,"C:\\Develop\\mypython\\Stubber\\stubs")'
+init-hook='import sys; sys.path.insert(1,"C:\\Develop\\mypython\\Stubber\\stubs");sys.path.insert(1,".\\lib")'
 
 [MESSAGES CONTROL]
 # Only show warnings with the listed confidence levels. Leave empty to show

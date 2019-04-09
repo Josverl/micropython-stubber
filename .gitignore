@@ -1,3 +1,6 @@
+.vscode/.ropeproject/
 project.pymakr
 downloaded/*
 *.zip
+
+downloadedstubs/
