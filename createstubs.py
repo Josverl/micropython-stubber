@@ -18,7 +18,10 @@ class Stubber():
     def __init__(self, path="/flash/stubs"):
         # log = logging.getLogger(__name__)
         self._log = logging.getLogger('Stubber')
-        self._report = [os.uname()]
+        self._report = []
+        u = os.uname()
+        self._report.append( { 'sysname': u.sysname, 'nodename': u.nodename , 'release': u.release , 'version': u.version, 'machine': u.machine } )
+
         self.path = path
         try:
             self._log.info("stub path : {}".format(self.path))
