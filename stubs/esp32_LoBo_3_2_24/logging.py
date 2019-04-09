@@ -41,7 +41,7 @@ class Logger(): ...
 
 NOTSET = 0
 WARNING = 30
-_level = 30
+_level = 20
 _level_dict = None
 _loggers = None
 _stream = None
