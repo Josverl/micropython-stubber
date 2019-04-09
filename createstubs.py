@@ -216,7 +216,7 @@ except:
 path = "{}/stubs/{}_{}".format(
     get_root(),
     os.uname().sysname,
-    os.uname().release,
+    os.uname().release.replace('.','_'),
     ).replace('//','/')
 
 logging.basicConfig(level=logging.INFO)
