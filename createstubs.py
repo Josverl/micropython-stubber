@@ -183,7 +183,7 @@ class Stubber():
 
     def report(self, filename="modules.json"):
         import ujson
-        f_name = "{}/{}.py".format(self.path, filename)
+        f_name = "{}/{}".format(self.path, filename)
         with open(f_name, 'w') as f:
             f.write(ujson.dumps(self._report))
         print("Created stubs for {} modules on board {} - {}".format(

@@ -9,34 +9,69 @@ In order to do this (I suggest) a few things are needed:
 Not that the above is not limited to VSCode and Pylint, but it happens to be the combination that I use.
 Please feel free to suggest and add other combinations and the relevant steps to configure these. 
 
+The (stretch)  goal is to create a vscode add-in to simplify the configuration, and allow easy switching between different firmwares and versions
+
+## File Structure 
+The file structure is based on my personal windows environment, but you should be able to adapt that without much hardship to you own preference and OS.
+
+| What            | Why                  | Where                             |
+|-----------------|----------------------|-----------------------------------|
+| stubber project | needed to make stubs | C:\develop\MyPython\Stubber\
+| stub files      | needed to use stubs  | C:\develop\MyPython\Stubber\stubs
+| config files    | configure vscode     | < any location you want > 
 
 ## Configuring Visual Studio Code 
 
-### vscode User Settings
-file: ~\.vscode\settings.json
-``` json
-{
-    // ...
-    "python.autoComplete.extraPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"],
-    "python.autoComplete.typeshedPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"],
-    "python.analysis.typeshedPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"],
-}
-```
+you will need to configure 2 modules 
+- the VSCode Python extension , which stores its configuration in the VSCode settings files
+- pylint, which stores its configuraton in a .pylintrc file
 
 ### vscode workspace settings 
-- Enable linting
-- using pylint 
+For simplicity in documentation I have configured most settings at workspace project level.
+The same settings could be configured at User level, where they would become defaults for all your projects, and can be overridden per workspace/project.
+
+Note: the below settings include the paths to multiple folders, containing stubs for different firmware. 
+you should remove ( or //comment ) the lines of firmwares that you to not use.
+
 file: .\.vscode\settings.json
 
 ```  json
 {
-    // ...
     "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true
+    "python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python36_64\\python.exe",
+
+    "python.autoComplete.extraPaths": [
+        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+    ],
+    "python.autoComplete.typeshedPaths": [
+        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+    ],
+    "python.analysis.typeshedPaths": [
+        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+    ],
+
+    "python.linting.pylintEnabled": true,
 }
 
 ```
-### pylint
+
+### vscode User Settings
+
+file: ~\.vscode\settings.json
+``` json
+{
+    // ...
+    "python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python36_64\\python.exe",
+}
+```
+
+### pylint - workspace settings 
 
 Pylint needs 2 settings :
 1. init-hook to inform it where the stubs are stored
@@ -45,7 +80,11 @@ Pylint needs 2 settings :
 file: .pylintrc
 ``` ini
 [MASTER]
-init-hook='import sys; sys.path.insert(1,"C:\\Develop\\mypython\\Stubber\\stubs")'
+# LoBo ESP 32
+init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24");sys.path.insert(1,"./lib")'
+
+# Micropython ESP 32
+# init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0");sys.path.insert(1,"./lib")'
 
 disable = missing-docstring, line-too-long, trailing-newlines, broad-except, logging-format-interpolation, invalid-name, 
         no-method-argument, assignment-from-no-return, too-many-function-args, unexpected-keyword-arg
@@ -56,16 +95,15 @@ disable = missing-docstring, line-too-long, trailing-newlines, broad-except, log
 ## Downloading the Stubs from GIThub 
 
 This is not complete at this point.
-You may find stubs as part of this project, but I have not settled on a d=way to distribute them yet.
-If you have suggestions, then please contact me.
+You will find stubs as part of this project located in the stubs folder , but I have not settled on a way to distribute them yet.
 
 ## Generating Stubs for a specific Firmware 
 
-The stub files are generated on a micropython board by running the script `createstybs.py`, 
+The stub files are generated on a micropython board by running the script `createstubs.py`, 
 this will generate the stubs on the board, either on flash or on the SD card.
 The generation will take a few minutes ( 2-5 minutes) depending on the speed of the board and the number of included modules.
 
-<todo: add board specific modules>  
+< todo: add board specific modules>  
 
 After this is completed, you will need to download the generated stubs from the micropython board, and save them on a folder on your computer. 
 if you work with multiple firmwares or versions it is recommended to use a folder name combining the firmware name and version
@@ -77,12 +115,11 @@ Note: I found out that you need to be mindful of the path and filename limitatio
 
 ### Tested firmwares :
 
-| Firmware         | Version                          | Comments        |
-|------------------|----------------------------------|-----------------|
-| Loboris ESP32    | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
-| Micropython ESP32| v1.10-247-g0fb15fc3f             | logging modules required 
+| Firmware         | Release  | Version                          | Comments        |
+|------------------|----------|----------------------------------|-----------------|
+| Loboris ESP32    | 3.2.24   | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
+| Micropython ESP32| 1.10.0   | v1.10-247-g0fb15fc3f             | umqtt modules missing
 
-Note: the logging module currently does not log .... but at least it runs.
 
 ## Stub format and limitations 
 
