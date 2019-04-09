@@ -1,8 +1,22 @@
+# Stubs for zipapp (Python 3.5+)
+from pathlib import Path
 import sys
-sys.path[1] = '../stubs'
+from typing import BinaryIO, Callable, Optional, Union
 
-import machine
-from machine import Pin
+_Path = Union[str, Path, BinaryIO]
 
+class ZipAppError(Exception): ...
 
+if sys.version_info >= (3, 7):
+    def create_archive(source: _Path, target: Optional[_Path] = ..., interpreter: Optional[str] = ..., main: Optional[str] = ...,
+                       filter: Optional[Callable[[Path], bool]] = ..., compressed: bool = ...) -> None: ...
+else:
+    def create_archive(source: _Path, target: Optional[_Path] = ..., interpreter: Optional[str] = ..., main: Optional[str] = ...) -> None: ...
+def get_interpreter(archive: _Path) -> str: ...
+
+import logging
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("test")
+log.debug("Test message: %d(%s)", 100, "foobar")
+log.info("Test message2: %d(%s)", 100, "foobar")
 

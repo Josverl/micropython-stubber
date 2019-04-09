@@ -2,8 +2,8 @@
 
 In order to do this (I suggest) a few things are needed:
 - Stub files for the native / enabled modules in the firmware using PEP 484 Type Hints
-- Autocompletion / intellisense capabilities for python source files, using VScode and the Python extention 
-- Statical syntax checks, or linting, using pylint.
+- Autocompletion / intellisense capabilities for python source files, using VSCode and the Python extension 
+- Static syntax checks, or linting, using Pylint.
 - Suppression of warnings that collide with the micropython principals or code optimization.
 
 Not that the above is not limited to VSCode and Pylint, but it happens to be the combination that I use.
@@ -18,13 +18,13 @@ file: ~\.vscode\settings.json
 {
     // ...
     "python.autoComplete.extraPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"],
+    "python.autoComplete.typeshedPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"],
     "python.analysis.typeshedPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"],
-    "python.autoComplete.typeshedPaths": ["C:\\develop\\MyPython\\Stubber\\stubs"]
 }
 ```
 
 ### vscode workspace settings 
-- Enalble linting
+- Enable linting
 - using pylint 
 file: .\.vscode\settings.json
 
@@ -40,7 +40,7 @@ file: .\.vscode\settings.json
 
 Pylint needs 2 settings :
 1. init-hook to inform it where the stubs are stored
-2. disable some pesty warnings that make no sense for micropython, and thatare caused by the stubs that have only limited information
+2. disable some pesky warnings that make no sense for micropython, and that are caused by the stubs that have only limited information
 
 file: .pylintrc
 ``` ini
@@ -68,12 +68,12 @@ The generation will take a few minutes ( 2-5 minutes) depending on the speed of 
 <todo: add board specific modules>  
 
 After this is completed, you will need to download the generated stubs from the micropython board, and save them on a folder on your computer. 
-if you work with multiple firmwares or versions it is recomended to use a folder name combining the firmware name and version
+if you work with multiple firmwares or versions it is recommended to use a folder name combining the firmware name and version
 - \stubs
     - \ESP32_LoBo_v3.1.20\
     - \ESP32_LoBo_v3.2.24\
 
-Note: I found out that you need to be mindfull of the path and filename limitations on the filesystem if you use IFSS. 
+Note: I found out that you need to be mindful of the path and filename limitations on the filesystem if you use IFSS. 
 
 ### Tested firmwares :
 
@@ -88,10 +88,10 @@ Note: the logging module currently does not log .... but at least it runs.
 
 1. No function parameters are generated 
 2. No return types are generated 
-3. Instances of imported classess have no type (due to 2)
+3. Instances of imported classes have no type (due to 2)
 4. Standard micropython functions [unknown if these work]
-5. The stubs use the .py extention rather than .pyi (for autocomplete to work) 
-6. Due to the method of generation nested modules are included, rather than referenced. While this leads to somwhat larger stubs, this should not be limiting for using the stubs on a PC.  
+5. The stubs use the .py extension rather than .pyi (for autocomplete to work) 
+6. Due to the method of generation nested modules are included, rather than referenced. While this leads to somewhat larger stubs, this should not be limiting for using the stubs on a PC.  
 
 ### Module Duplication 
 Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
