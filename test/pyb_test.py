@@ -9,7 +9,12 @@ pyb.hard_reset()
 
 
 i2c = pyb.I2C()
-i2c.init()
+i2c.init('x')
 
-i
+c = pyb.CAN()
+c.init()
+
+
+
+
 
