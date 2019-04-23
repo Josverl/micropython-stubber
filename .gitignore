@@ -7,3 +7,4 @@ downloadedstubs/
 
 #Ignore virtual environment
 .env/*
+*/__pycache__/*
