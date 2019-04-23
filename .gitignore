@@ -4,3 +4,6 @@ downloaded/*
 *.zip
 
 downloadedstubs/
+
+#virtual environment
+.env
