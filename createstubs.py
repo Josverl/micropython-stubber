@@ -140,7 +140,7 @@ class Stubber():
         self._log.debug("DUMPING : {}".format(object_expr))
         items, errors = self.get_obj_attribs(object_expr)
         if errors:
-            self._log.error("ERRORS", errors)
+            self._log.error(errors)
 
         for name, rep, typ, obj in sorted(items, key=lambda x: x[0]):
             if name.startswith("__"):

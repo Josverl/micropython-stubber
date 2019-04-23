@@ -35,4 +35,3 @@ pip install -t downloaded micropython-cpython-ure
 pip install -t downloaded micropython-cpython-usocket
 pip install -t downloaded micropython-cpython-uzlib
 pip install -t downloaded micropython-cpython-framebuf
-pip install -t downloaded 
