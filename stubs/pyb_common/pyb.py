@@ -585,7 +585,8 @@ class Pin:
         """
         ...
 
-    def af_list(self, cls):
+    @classmethod
+    def af_list(cls):
         """
         Returns an array of alternate functions available for this pin.
         """
