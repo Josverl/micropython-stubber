@@ -1,6 +1,11 @@
-"Module 'microWebSrv' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'microWebSrv' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 
-class MicroWebSocket(): ...
+class MicroWebSocket:
+    ''
     def Close():
         pass
 
@@ -44,7 +49,8 @@ class MicroWebSocket(): ...
         pass
 
 
-class MicroWebSrv(): ...
+class MicroWebSrv:
+    ''
     def GetMimeTypeFromFilename():
         pass
 
@@ -107,9 +113,11 @@ class MicroWebSrv(): ...
         pass
 
 
-class MicroWebSrvRoute(): ...
+class MicroWebSrvRoute:
+    ''
 
-class MicroWebTemplate(): ...
+class MicroWebTemplate:
+    ''
     def Execute():
         pass
 

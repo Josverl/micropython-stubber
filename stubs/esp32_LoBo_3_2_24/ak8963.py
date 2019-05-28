@@ -1,6 +1,11 @@
-"Module 'ak8963' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'ak8963' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 
-class AK8963(): ...
+class AK8963:
+    ''
     def _register_char():
         pass
 
@@ -14,7 +19,8 @@ class AK8963(): ...
     magnetic = None
     whoami = None
 
-class I2C(): ...
+class I2C:
+    ''
     CBTYPE_ADDR = 1
     CBTYPE_NONE = 0
     CBTYPE_RXDATA = 2
@@ -114,7 +120,8 @@ MODE_SINGLE_MEASURE = 1
 OUTPUT_14_BIT = 0
 OUTPUT_16_BIT = 16
 
-class Pin(): ...
+class Pin:
+    ''
     IN = 1
     INOUT = 3
     INOUT_OD = 7
