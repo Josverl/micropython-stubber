@@ -1,6 +1,11 @@
-"Module 'uio' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'uio' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 
-class BufferedWriter(): ...
+class BufferedWriter:
+    ''
     def flush():
         pass
 
@@ -8,7 +13,8 @@ class BufferedWriter(): ...
         pass
 
 
-class BytesIO(): ...
+class BytesIO:
+    ''
     def close():
         pass
 
@@ -34,7 +40,8 @@ class BytesIO(): ...
         pass
 
 
-class FileIO(): ...
+class FileIO:
+    ''
     def close():
         pass
 
@@ -63,7 +70,8 @@ class FileIO(): ...
         pass
 
 
-class StringIO(): ...
+class StringIO:
+    ''
     def close():
         pass
 
@@ -89,7 +97,8 @@ class StringIO(): ...
         pass
 
 
-class TextIOWrapper(): ...
+class TextIOWrapper:
+    ''
     def close():
         pass
 

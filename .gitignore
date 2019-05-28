@@ -5,5 +5,6 @@ downloaded/*
 
 downloadedstubs/
 
-#virtual environment
-.env
+#Ignore virtual environment
+.env/*
+*/__pycache__/*

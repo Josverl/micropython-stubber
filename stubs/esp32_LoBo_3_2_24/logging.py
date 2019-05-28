@@ -1,10 +1,15 @@
-"Module 'logging' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'logging' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 CRITICAL = 50
 DEBUG = 10
 ERROR = 40
 INFO = 20
 
-class Logger(): ...
+class Logger:
+    ''
     def _level_str():
         pass
 

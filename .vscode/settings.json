@@ -3,19 +3,22 @@
     "python.pythonPath": ".env\\Scripts\\python.exe",
 
     "python.autoComplete.extraPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\dev",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
     ],
     "python.autoComplete.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\dev",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
     ],
     "python.analysis.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\dev",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        // "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
     ],
 
     "python.linting.pylintEnabled": true,
