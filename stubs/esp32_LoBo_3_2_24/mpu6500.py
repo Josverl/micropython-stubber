@@ -1,4 +1,8 @@
-"Module 'mpu6500' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'mpu6500' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 ACCEL_FS_SEL_16G = 24
 ACCEL_FS_SEL_2G = 0
 ACCEL_FS_SEL_4G = 8
@@ -8,7 +12,8 @@ GYRO_FS_SEL_2000DPS = 24
 GYRO_FS_SEL_250DPS = 0
 GYRO_FS_SEL_500DPS = 8
 
-class I2C(): ...
+class I2C:
+    ''
     CBTYPE_ADDR = 1
     CBTYPE_NONE = 0
     CBTYPE_RXDATA = 2
@@ -102,7 +107,8 @@ class I2C(): ...
         pass
 
 
-class MPU6500(): ...
+class MPU6500:
+    ''
     def _accel_fs():
         pass
 
@@ -122,7 +128,8 @@ class MPU6500(): ...
     gyro = None
     whoami = None
 
-class Pin(): ...
+class Pin:
+    ''
     IN = 1
     INOUT = 3
     INOUT_OD = 7
