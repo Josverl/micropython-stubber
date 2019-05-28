@@ -59,4 +59,7 @@ modulepath = '../stubs/pyb_common/'
 make_stubfiles(modulepath)
 
 
+# step x : generate pyi files for the generated stubs
+
+make_stubfiles('../stubs/esp32_LoBo_3_2_24/')
 

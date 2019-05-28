@@ -1,10 +1,5 @@
-import pyb
-import btree
 
-x = pyb.ADC
-
-
-
+import stubs.dev.btree
 # First, we need to open a stream which holds a database
 # This is usually a file, but can be in-memory database
 # using uio.BytesIO, a raw flash partition, etc.
