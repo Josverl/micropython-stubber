@@ -1,5 +1,6 @@
-# create stubs for (all) modules on a micropython board
+# create stubs for (all) modules on a MicroPython board
 # ref: https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
+stubber_version = '1.0.0'
 import errno
 import gc
 import logging
@@ -21,6 +22,7 @@ class Stubber():
         self._report = []
         u = os.uname()
         self._report.append( { 'sysname': u.sysname, 'nodename': u.nodename , 'release': u.release , 'version': u.version, 'machine': u.machine } )
+        self._report.append( { 'stubber': stubber_version } )
 
         self.path = path
         try:
@@ -81,8 +83,8 @@ class Stubber():
                         self.path,
                         module_name.replace(".", "/")
                     )
-                    print("dump module: {} to file: {}".format(module_name, file_name))
-                    self._log.info("dump module: {} to file: {}".format(module_name, file_name))
+                    #print("dump module: {:<20} to file: {}".format(module_name, file_name))
+                    self._log.info("dump module: {:<20} to file: {}".format(module_name, file_name))
                     self.dump_module_stub(module_name, file_name)
         finally:
             self._log.info('Finally done')
@@ -106,7 +108,7 @@ class Stubber():
             new_module = __import__(module_name)
         except ImportError as e:
             #self._log.exception(e)
-            self._log.warning("Unable to import module: {}".format(module_name))
+            self._log.debug("Unable to import module: {}".format(module_name))
             return None, e
         except e:
             self._log.error("Failed to import Module: {}".format(module_name))
@@ -115,7 +117,7 @@ class Stubber():
 
         #self._log.info( "create file : {} for {}".format(file_name,module_name))
         with open(file_name, "w") as fp:
-            s = "\"Module '{}' on firmware '{}'\"\n".format(module_name, os.uname().version)
+            s = "\"\"\"\nModule: '{0}' on {1}\nMCU: {2}\nStubber: {3}\n\"\"\"\n".format(module_name,os.uname().sysname, os.uname(),stubber_version)
             fp.write(s)
             if module_name not in self.excluded:
                 self._dump_object_stubs(fp, new_module, module_name, "")
@@ -165,8 +167,13 @@ class Stubber():
                 self._log.debug(s)
             #new class
             elif typ == "<class 'type'>" and indent == "":
-                # full expansion only on toplevel ?
-                s = "\n{}class {}(): ...\n".format(indent, name)
+                # full expansion only on toplevel 
+                # stub style : ...
+                # s = "\n{}class {}(): ...\n".format(indent, name)
+                # stub style : Empty comment ... + hardcoded 4 spaces  
+                s = "\n" + indent + "class " + name + ":\n"  # What about superclass?
+                s += indent + "    ''\n"
+
                 fp.write(s)
                 self._log.debug(s)
 
@@ -177,7 +184,7 @@ class Stubber():
                 fp.write(indent + name + " = None\n")
 
     def clean(self):
-        print("Clean/remove files in stubfolder")
+        print("Clean/remove files in stubfolder: {}".format(self.path))
         for fn in os.listdir(self.path):
             try:
                 os.remove("{}/{}".format(self.path, fn))
@@ -206,12 +213,15 @@ def get_root():
         return r
 
 #handle different file roots
-path = "{}/stubs".format(get_root()).replace('//', '/')
+r_path = "{}/stubs".format(get_root()).replace('//', '/')
+#create first level folder
 try:
-    os.mkdir(path)
+    os.mkdir(r_path)
 except:
     pass
-path = "{}/stubs/{}_{}".format(
+
+#determine path for stubs  
+s_path = "{}/stubs/{}_{}".format(
     get_root(),
     os.uname().sysname,
     os.uname().release.replace('.', '_'),
@@ -219,8 +229,9 @@ path = "{}/stubs/{}_{}".format(
 
 logging.basicConfig(level=logging.INFO)
 
-stubber = Stubber(path)
+#Now clean up and get to work 
+stubber = Stubber(s_path)
 stubber.clean()
 stubber.generate_all_stubs()
-
 stubber.report()
+

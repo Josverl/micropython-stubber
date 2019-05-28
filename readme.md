@@ -103,15 +103,16 @@ The stub files are generated on a micropython board by running the script `creat
 this will generate the stubs on the board, either on flash or on the SD card.
 The generation will take a few minutes ( 2-5 minutes) depending on the speed of the board and the number of included modules.
 
-< todo: add board specific modules>  
-
 After this is completed, you will need to download the generated stubs from the micropython board, and save them on a folder on your computer. 
 if you work with multiple firmwares or versions it is recommended to use a folder name combining the firmware name and version
 - \stubs
-    - \ESP32_LoBo_v3.1.20\
-    - \ESP32_LoBo_v3.2.24\
+    - \ESP32_LoBo_v3_1_20\
+    - \ESP32_LoBo_v3_2_24\
+    - \ESP32_1_10_0\
 
-Note: I found out that you need to be mindful of the path and filename limitations on the filesystem if you use IFSS. 
+< todo: add board specific modules>  
+
+Note: I found out that you need to be mindful of the maximum path and filename limitations on the filesystem if you use IFSS.
 
 ### Tested firmwares :
 
