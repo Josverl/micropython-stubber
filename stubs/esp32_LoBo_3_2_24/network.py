@@ -1,4 +1,8 @@
-"Module 'network' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'network' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 AP_IF = 1
 AUTH_OPEN = 0
 AUTH_WEP = 1
@@ -16,7 +20,8 @@ def WLANcallback():
     pass
 
 
-class ftp(): ...
+class ftp:
+    ''
     def pause():
         pass
 
@@ -36,7 +41,8 @@ class ftp(): ...
         pass
 
 
-class mDNS(): ...
+class mDNS:
+    ''
     def addService():
         pass
 
@@ -56,7 +62,8 @@ class mDNS(): ...
         pass
 
 
-class mqtt(): ...
+class mqtt:
+    ''
     def config():
         pass
 
@@ -85,7 +92,8 @@ def phy_mode():
     pass
 
 
-class telnet(): ...
+class telnet:
+    ''
     def pause():
         pass
 

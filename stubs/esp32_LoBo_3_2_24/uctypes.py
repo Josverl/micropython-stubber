@@ -1,4 +1,8 @@
-"Module 'uctypes' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'uctypes' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 ARRAY = -1073741824
 BFINT16 = -671088640
 BFINT32 = -402653184
@@ -36,4 +40,5 @@ def sizeof():
     pass
 
 
-class struct(): ...
+class struct:
+    ''

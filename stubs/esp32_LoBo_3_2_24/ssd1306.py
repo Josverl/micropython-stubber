@@ -1,4 +1,8 @@
-"Module 'ssd1306' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'ssd1306' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 SET_CHARGE_PUMP = 141
 SET_COL_ADDR = 33
 SET_COM_OUT_DIR = 192
@@ -17,7 +21,8 @@ SET_PRECHARGE = 217
 SET_SEG_REMAP = 160
 SET_VCOM_DESEL = 219
 
-class SSD1306(): ...
+class SSD1306:
+    ''
     def contrast():
         pass
 
@@ -46,7 +51,8 @@ class SSD1306(): ...
         pass
 
 
-class SSD1306_I2C(): ...
+class SSD1306_I2C:
+    ''
     def contrast():
         pass
 
@@ -84,7 +90,8 @@ class SSD1306_I2C(): ...
         pass
 
 
-class SSD1306_SPI(): ...
+class SSD1306_SPI:
+    ''
     def contrast():
         pass
 

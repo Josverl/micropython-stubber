@@ -1,4 +1,8 @@
-"Module 'gsm' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'gsm' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 SMS_ALL = 0
 SMS_READ = 2
 SMS_UNREAD = 1

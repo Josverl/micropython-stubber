@@ -1,6 +1,11 @@
-"Module 'mpu9250' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'mpu9250' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 
-class AK8963(): ...
+class AK8963:
+    ''
     def _register_char():
         pass
 
@@ -14,7 +19,8 @@ class AK8963(): ...
     magnetic = None
     whoami = None
 
-class MPU6500(): ...
+class MPU6500:
+    ''
     def _accel_fs():
         pass
 
@@ -34,7 +40,8 @@ class MPU6500(): ...
     gyro = None
     whoami = None
 
-class MPU9250(): ...
+class MPU9250:
+    ''
     acceleration = None
     gyro = None
     magnetic = None

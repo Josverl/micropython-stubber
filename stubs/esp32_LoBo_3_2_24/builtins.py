@@ -1,60 +1,91 @@
-"Module 'builtins' on firmware 'ESP32_LoBo_v3.2.24 on 2018-09-06'"
+"""
+Module: 'builtins' on esp32_LoBo
+MCU: (sysname='esp32_LoBo', nodename='esp32_LoBo', release='3.2.24', version='ESP32_LoBo_v3.2.24 on 2018-09-06', machine='ESP32 board with ESP32')
+Stubber: 1.0.0
+"""
 
-class ArithmeticError(): ...
+class ArithmeticError:
+    ''
 
-class AssertionError(): ...
+class AssertionError:
+    ''
 
-class AttributeError(): ...
+class AttributeError:
+    ''
 
-class BaseException(): ...
+class BaseException:
+    ''
 
-class EOFError(): ...
+class EOFError:
+    ''
 Ellipsis = None
 
-class Exception(): ...
+class Exception:
+    ''
 
-class GeneratorExit(): ...
+class GeneratorExit:
+    ''
 
-class ImportError(): ...
+class ImportError:
+    ''
 
-class IndentationError(): ...
+class IndentationError:
+    ''
 
-class IndexError(): ...
+class IndexError:
+    ''
 
-class KeyError(): ...
+class KeyError:
+    ''
 
-class KeyboardInterrupt(): ...
+class KeyboardInterrupt:
+    ''
 
-class LookupError(): ...
+class LookupError:
+    ''
 
-class MemoryError(): ...
+class MemoryError:
+    ''
 
-class NameError(): ...
+class NameError:
+    ''
 NotImplemented = None
 
-class NotImplementedError(): ...
+class NotImplementedError:
+    ''
 
-class OSError(): ...
+class OSError:
+    ''
 
-class OverflowError(): ...
+class OverflowError:
+    ''
 
-class RuntimeError(): ...
+class RuntimeError:
+    ''
 
-class StopAsyncIteration(): ...
+class StopAsyncIteration:
+    ''
 
-class StopIteration(): ...
+class StopIteration:
+    ''
 
-class SyntaxError(): ...
+class SyntaxError:
+    ''
 
-class SystemExit(): ...
+class SystemExit:
+    ''
 
-class TypeError(): ...
+class TypeError:
+    ''
 
-class UnicodeError(): ...
+class UnicodeError:
+    ''
 
-class ValueError(): ...
+class ValueError:
+    ''
 
-class ZeroDivisionError(): ...
+class ZeroDivisionError:
+    ''
 def abs():
     pass
 
@@ -68,9 +99,11 @@ def bin():
     pass
 
 
-class bool(): ...
+class bool:
+    ''
 
-class bytearray(): ...
+class bytearray:
+    ''
     def append():
         pass
 
@@ -78,7 +111,8 @@ class bytearray(): ...
         pass
 
 
-class bytes(): ...
+class bytes:
+    ''
     def center():
         pass
 
@@ -167,17 +201,20 @@ def chr():
     pass
 
 
-class classmethod(): ...
+class classmethod:
+    ''
 def compile():
     pass
 
 
-class complex(): ...
+class complex:
+    ''
 def delattr():
     pass
 
 
-class dict(): ...
+class dict:
+    ''
     def clear():
         pass
 
@@ -218,7 +255,8 @@ def divmod():
     pass
 
 
-class enumerate(): ...
+class enumerate:
+    ''
 def eval():
     pass
 
@@ -229,14 +267,17 @@ def execfile():
     pass
 
 
-class filter(): ...
+class filter:
+    ''
 
-class float(): ...
+class float:
+    ''
 def float_precision():
     pass
 
 
-class frozenset(): ...
+class frozenset:
+    ''
     def copy():
         pass
 
@@ -286,7 +327,8 @@ def input():
     pass
 
 
-class int(): ...
+class int:
+    ''
     def from_bytes():
         pass
 
@@ -306,7 +348,8 @@ def len():
     pass
 
 
-class list(): ...
+class list:
+    ''
     def append():
         pass
 
@@ -344,12 +387,14 @@ def locals():
     pass
 
 
-class map(): ...
+class map:
+    ''
 def max():
     pass
 
 
-class memoryview(): ...
+class memoryview:
+    ''
 def min():
     pass
 
@@ -357,7 +402,8 @@ def next():
     pass
 
 
-class object(): ...
+class object:
+    ''
 def oct():
     pass
 
@@ -374,7 +420,8 @@ def print():
     pass
 
 
-class property(): ...
+class property:
+    ''
     def deleter():
         pass
 
@@ -385,17 +432,20 @@ class property(): ...
         pass
 
 
-class range(): ...
+class range:
+    ''
 def repr():
     pass
 
 
-class reversed(): ...
+class reversed:
+    ''
 def round():
     pass
 
 
-class set(): ...
+class set:
+    ''
     def add():
         pass
 
@@ -451,14 +501,17 @@ def setattr():
     pass
 
 
-class slice(): ...
+class slice:
+    ''
 def sorted():
     pass
 
 
-class staticmethod(): ...
+class staticmethod:
+    ''
 
-class str(): ...
+class str:
+    ''
     def center():
         pass
 
@@ -544,9 +597,11 @@ def sum():
     pass
 
 
-class super(): ...
+class super:
+    ''
 
-class tuple(): ...
+class tuple:
+    ''
     def count():
         pass
 
@@ -554,6 +609,8 @@ class tuple(): ...
         pass
 
 
-class type(): ...
+class type:
+    ''
 
-class zip(): ...
+class zip:
+    ''
