@@ -8,3 +8,6 @@ downloadedstubs/
 #Ignore virtual environment
 .env/*
 */__pycache__/*
+
+#ignore the scratchpad 
+scratch/*
