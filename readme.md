@@ -9,22 +9,26 @@ In order to do this (I suggest) a few things are needed:
 Not that the above is not limited to VSCode and Pylint, but it happens to be the combination that I use.
 Please feel free to suggest and add other combinations and the relevant steps to configure these. 
 
-The (stretch)  goal is to create a vscode add-in to simplify the configuration, and allow easy switching between different firmwares and versions
+The (stretch) goal is to create a vscode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
+For now you will need to configure this by hand as shown in the below section.
 
 ## File Structure 
 The file structure is based on my personal windows environment, but you should be able to adapt that without much hardship to you own preference and OS.
 
-| What            | Why                  | Where                             |
-|-----------------|----------------------|-----------------------------------|
-| stubber project | needed to make stubs | C:\develop\MyPython\Stubber\
-| stub files      | needed to use stubs  | C:\develop\MyPython\Stubber\stubs
-| config files    | configure vscode     | < any location you want > 
+| What                 | Why                      | Where                             |
+|----------------------|--------------------------|-----------------------------------|
+| stubber project      | needed to make stubs     | C:\develop\MyPython\Stubber\
+| stub root            |                          | C:\develop\MyPython\Stubber\stubs
+| generated stub files | needed to use stubs      | C:\develop\MyPython\Stubber\<firmware>
+| Frozen stub files    | better code intellisense | C:\develop\MyPython\Stubber\<firmware>_Frozen
+| vscode config        | configure vscode         | in project or global config
+| pylint config        | pylint has own config    | .pylintrc in project folder 
 
 ## Configuring Visual Studio Code 
 
 you will need to configure 2 modules 
 - the VSCode Python extension , which stores its configuration in the VSCode settings files
-- pylint, which stores its configuraton in a .pylintrc file
+- pylint, which stores its configuration in a .pylintrc file
 
 ### vscode workspace settings 
 For simplicity in documentation I have configured most settings at workspace project level.
@@ -33,7 +37,7 @@ The same settings could be configured at User level, where they would become def
 Note: the below settings include the paths to multiple folders, containing stubs for different firmware. 
 you should remove ( or //comment ) the lines of firmwares that you to not use.
 
-file: .\.vscode\settings.json
+File: .vscode\\settings.json
 
 ```  json
 {
@@ -41,18 +45,21 @@ file: .\.vscode\settings.json
     "python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python36_64\\python.exe",
 
     "python.autoComplete.extraPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0_Frozen",
         "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
     ],
     "python.autoComplete.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0_Frozen",
         "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
     ],
     "python.analysis.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\ESP_LoBo_v3.2.24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0_Frozen",
         "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
     ],
 
@@ -60,6 +67,11 @@ file: .\.vscode\settings.json
 }
 
 ```
+Note:  if you notice  problems 
+* The paths appear to be case sensitive(which may not be apparent for your platform)
+* in JSON notation the `\` (backslash) should be escaped as `\\` (double backslash)
+* Put the 'Frozen' module paths before the generated module paths. 
+The frozen modules offer more code completion, and vscode-python needs to load them first to make use of that.
 
 ### vscode User Settings
 
@@ -80,8 +92,8 @@ Pylint needs 2 settings :
 file: .pylintrc
 ``` ini
 [MASTER]
-# LoBo ESP 32
-init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24");sys.path.insert(1,"./lib")'
+# LoBo ESP 32 3.2.24
+init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24");sys.path.insert(1,"./lib")'
 
 # Micropython ESP 32
 # init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0");sys.path.insert(1,"./lib")'
@@ -106,13 +118,26 @@ The generation will take a few minutes ( 2-5 minutes) depending on the speed of 
 After this is completed, you will need to download the generated stubs from the micropython board, and save them on a folder on your computer. 
 if you work with multiple firmwares or versions it is recommended to use a folder name combining the firmware name and version
 - \stubs
-    - \ESP32_LoBo_v3_1_20\
-    - \ESP32_LoBo_v3_2_24\
-    - \ESP32_1_10_0\
-
-< todo: add board specific modules>  
+    - \ESP32_LoBo_v3_1_20
+    - \ESP32_LoBo_v3_2_24
+    - \ESP32_LoBo_v3_2_24_Frozen
+    - \ESP32_1_10_0
+    - \ESP32_1_10_0_Frozen
 
 Note: I found out that you need to be mindful of the maximum path and filename limitations on the filesystem if you use IFSS.
+
+## Frozen Modules 
+it is common for Firmwares to include a few (or many) modules as 'frozen' modules. This a way to pre-process .py modules so they're 'baked-in' to MicroPython's firmware and use less memory. Once the code is frozen it can be quickly loaded and interpreted by MicroPython without as much memory and processing time.
+
+Most OSS firmwares store these frozen modules as part of their repository, which allows us to: 
+1. Download the *.py from the (github) repo using `git clone` or a direct download 
+2. extract and store the 'unfrozen' modules (ie the *.py files)  in a <Firmware>_Frozen folder
+3. generate typeshed stubs of these files. (the .pyi files will be stored alongside the .py files)
+4. Include them in the configuration 
+
+
+ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-modules
+
 
 ### Tested firmwares :
 
@@ -127,9 +152,8 @@ Note: I found out that you need to be mindful of the maximum path and filename l
 1. No function parameters are generated 
 2. No return types are generated 
 3. Instances of imported classes have no type (due to 2)
-4. Standard micropython functions [unknown if these work]
-5. The stubs use the .py extension rather than .pyi (for autocomplete to work) 
-6. Due to the method of generation nested modules are included, rather than referenced. While this leads to somewhat larger stubs, this should not be limiting for using the stubs on a PC.  
+4. The stubs use the .py extension rather than .pyi (for autocomplete to work) 
+5. Due to the method of generation nested modules are included, rather than referenced. While this leads to somewhat larger stubs, this should not be limiting for using the stubs on a PC.  
 
 ### Module Duplication 
 Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
@@ -140,6 +164,9 @@ Due to the naming convention in micropython some modules will be duplicated , ie
 | dastultz/micropython-pyb   | a pyb.py file for use with IDEs in developing a project for the Pyboard |
 | 
 
+## A WIP command line app for initiating micropython projects with VSCode
+If you want a command line interface to setup a new project and configure the settings as described above for you then take a look at : https://github.com/BradenM/micropy-cli
+It's still WiP, but it might help you along.
 
 ### References
 PEP 3107 -- Function Annotations
