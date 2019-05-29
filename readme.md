@@ -168,28 +168,18 @@ Due to the naming convention in micropython some modules will be duplicated , ie
 If you want a command line interface to setup a new project and configure the settings as described above for you then take a look at : https://github.com/BradenM/micropy-cli
 It's still WiP, but it might help you along.
 
-### References
-PEP 3107 -- Function Annotations
-https://www.python.org/dev/peps/pep-3107/
 
-PEP 484 -- Type Hints
-https://www.python.org/dev/peps/pep-0484/
+# Licenses and contributions
+MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
 
-## Kudos 
-The script to create the stubs is based on the work of Aivar Annamaa and the Thonny crew, however the code has been rewritten to run on the micropython board, rather than on a connected PC running python.  
-
-Please refer to : 
+## Inspiration : Thonny - MicroPython _cmd_dump_api_info  _[MIT License]_
+The `createstubs.py` script to create the stubs is based on the work of Aivar Annamaa and the Thonny crew.
+It is somewhere deep in the code and is apparently only used during the development cycle but it showed a way how to extract/generate a representation of the MicroPython modules written in C
+While the concepts remain  the code has been rewritten to run on a micropython board, rather than on a connected PC running CPython.
+Please refer to :  
 https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
 
-## Related 
-
-Stub source: Micropython-lib > CPython backports
-https://github.com/pfalcon/micropython-lib#cpython-backports
-
-
-https://stackoverflow.com/questions/35602541/create-pyi-files-automatically
-
-## make_stub_files 
+## make_stub_files _[Public Domain]_
 https://github.com/edreamleo/make-stub-files
 
 This script makes a stub (.pyi) file in the output directory for each source file listed on the command line (wildcard file names are supported). 
@@ -197,6 +187,34 @@ This script makes a stub (.pyi) file in the output directory for each source fil
 The script does no type inference. Instead, the user supplies patterns in a configuration file. The script matches these patterns to:
 The names of arguments in functions and methods and
 The text of return expressions. Return expressions are the actual text of whatever follows the "return" keyword. The script removes all comments in return expressions and converts all strings to "str". This preprocessing greatly simplifies pattern matching.
+
+## Stub sources
+
+### LoBoris ESP32 firmware and frozen modules _[MIT, Apache 2]_
+https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo
+
+### Micropython firmware and frozen modules _[MIT, Python]_
+https://github.com/micropython/micropython
+
+### Stub source: Micropython-lib > CPython backports _[MIT, Python]_
+https://github.com/pfalcon/micropython-lib#cpython-backports
+
+### micropython_pyb _[Apache 2]_
+This project provides a pyb.py file for use with IDEs in developing a project for the Pyboard.
+
+https://github.com/dastultz/micropython-pyb
+
+## Related 
+
+### References
+PEP 3107 -- Function Annotations
+https://www.python.org/dev/peps/pep-3107/
+
+PEP 484 -- Type Hints
+https://www.python.org/dev/peps/pep-0484/
+
+### Stub generators
+https://stackoverflow.com/questions/35602541/create-pyi-files-automatically
 
 ### Typeshed 
 https://github.com/python/typeshed/
