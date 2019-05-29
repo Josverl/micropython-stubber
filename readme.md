@@ -158,11 +158,6 @@ ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-module
 ### Module Duplication 
 Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
 
-## Included custom stubs 
-| Github repo                | Contributions      | 
-|----------------------------|--------------------|
-| dastultz/micropython-pyb   | a pyb.py file for use with IDEs in developing a project for the Pyboard |
-| 
 
 ## A WIP command line app for initiating micropython projects with VSCode
 If you want a command line interface to setup a new project and configure the settings as described above for you then take a look at : https://github.com/BradenM/micropy-cli
@@ -196,12 +191,21 @@ https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo
 ### Micropython firmware and frozen modules _[MIT, Python]_
 https://github.com/micropython/micropython
 
+
+## Included custom stubs 
+
+| Github repo                | Contributions                                                           | License
+|----------------------------|-------------------------------------------------------------------------|---------
+| pfalcon/micropython-lib    | CPython backports                                                       | MIT, Python
+| dastultz/micropython-pyb   | a pyb.py file for use with IDEs in developing a project for the Pyboard | Apache 2
+
+
 ### Stub source: Micropython-lib > CPython backports _[MIT, Python]_
+While micropython-lib focuses on MicroPython, sometimes it may be beneficial to run MicroPython code using CPython, e.g. to use code coverage, debugging, etc. tools available for it. To facilitate such usage, micropython-lib also provides re-implementations ("backports") of MicroPython modules which run on CPython. 
 https://github.com/pfalcon/micropython-lib#cpython-backports
 
 ### micropython_pyb _[Apache 2]_
 This project provides a pyb.py file for use with IDEs in developing a project for the Pyboard.
-
 https://github.com/dastultz/micropython-pyb
 
 ## Related 
