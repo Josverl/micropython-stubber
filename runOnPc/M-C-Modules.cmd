@@ -9,7 +9,6 @@ pip install -t downloaded micropython-cpython-uhashlib
 pip install -t downloaded micropython-cpython-utarfile
 pip install -t downloaded micropython-cpython-uos
 pip install -t downloaded micropython-cpython-upip
-pip install -t downloaded micropython-cpython-machine
 pip install -t downloaded micropython-cpython-ucollections
 pip install -t downloaded micropython-cpython-ubinascii
 pip install -t downloaded micropython-cpython-btree
@@ -35,3 +34,6 @@ pip install -t downloaded micropython-cpython-ure
 pip install -t downloaded micropython-cpython-usocket
 pip install -t downloaded micropython-cpython-uzlib
 pip install -t downloaded micropython-cpython-framebuf
+
+Rem existing but empty modules ....
+rem pip install -t downloaded micropython-cpython-machine
