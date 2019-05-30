@@ -1,13 +1,14 @@
 # create stubs for (all) modules on a MicroPython board
 # ref: https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
-stubber_version = '1.0.0'
+# pylint: disable=bare-except
 import errno
 import gc
 import logging
+import os
+from time import sleep_us
+from ujson import dumps
 
-import uos as os
-from utime import sleep_us
-
+stubber_version = '1.0.1'
 # deal with firmware specific implementations
 try:
     from machine import resetWDT
@@ -16,49 +17,44 @@ except:
         pass
 
 class Stubber():
-    def __init__(self, path="/flash/stubs"):
+    "Generate stubs for (hopefully) all modules in the firmware"
+    def __init__(self, path: str = None):
         # log = logging.getLogger(__name__)
         self._log = logging.getLogger('Stubber')
         self._report = []
         u = os.uname()
-        self._report.append( { 'sysname': u.sysname, 'nodename': u.nodename , 'release': u.release , 'version': u.version, 'machine': u.machine } )
-        self._report.append( { 'stubber': stubber_version } )
+        self._report.append({'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': u.version, 'machine': u.machine})
+        self._report.append({'stubber': stubber_version})
+        if path is None:
+            #determine path for stubs
+            path = "{}/stubs/{}".format(
+                self.get_root(),
+                self.firmware_ID(asfile=True)
+                ).replace('//', '/')            
+        else:
+            #get rid of trailing slash
+            if path.endswith('/'):
+                path = path[:-1]
 
         self.path = path
         try:
-            self._log.info("stub path : {}".format(self.path))
-            os.mkdir(self.path)
-        except OSError as e:
-            if e.args[0] != errno.EEXIST:
-                self._log.exc(e, "error creating stub folder")
-            #assume existing folder
+            self.ensure_folder(path + "/")
+        except:
+            self._log.error("error creating stub folder %s" % path)
 
-        # self.path = "{}/{}/{}".format(path, os.uname()[0], os.uname()[2]).replace('.','_')
-        #FIXME: create multilevel path
-        # self._log.info('path {}'.format(self.path))
-        # c = ""
-        # for s in self.path.split('/'):
-        #     self._log.info('s = {}'.format(s))
-        #     if s != '':
-        #         c += '/'+s
-        #         try:
-        #             self._log.info('mkdir {}'.format(c))
-        #             os.mkdir(c)
-        #         except:
-        #             pass
-        self.problematic = ["upysh", "webrepl_setup", "umqtt/simple", "umqtt/robust"]
+        self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"] 
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
-        # FIXME: deal with umqtt/simple and /robust 
         # there is no option to discover modules from upython, need to hardcode
-        # below contains the combines modules from ESP32 Micropython and Loboris Modules
-        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath',
-                        'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
-                        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'machine', 'math', 'microWebSocket',
-                        'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb',
-                        'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib',
-                        'ubinascii', 'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple',
-                        'uos', 'upip', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq',
-                        'uwebsocket', 'uzlib', 'webrepl', 'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+        # below contains the combines modules from  Micropython ESP8622, ESP32 and Loboris Modules
+        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins',
+                        'cmath', 'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led',
+                        'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server',
+                        'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
+                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests',
+                        'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii',
+                        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile',
+                        'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl',
+                        'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
     def get_obj_attribs(self, obj: object):
         result = []
@@ -75,6 +71,10 @@ class Stubber():
         gc.collect()
         return result, errors
 
+    def add_modules(self, modules :list):
+        "Add additional modules to be exported"
+        self.modules = sorted(set(self.modules) | set(modules))
+    
     def generate_all_stubs(self):
         try:
             for module_name in sorted(self.modules):
@@ -83,7 +83,6 @@ class Stubber():
                         self.path,
                         module_name.replace(".", "/")
                     )
-                    #print("dump module: {:<20} to file: {}".format(module_name, file_name))
                     self._log.info("dump module: {:<20} to file: {}".format(module_name, file_name))
                     self.dump_module_stub(module_name, file_name)
         finally:
@@ -95,13 +94,15 @@ class Stubber():
             self._log.warning("SKIPPING internal module:{}".format(module_name))
             return
         if module_name in self.problematic:
-            self._log.warning("SKIPPING problematic name:{}".format(module_name))
+            self._log.warning("SKIPPING problematic module:{}".format(module_name))
             return
+        if '/' in module_name:
+            #for nested modules
+            self.ensure_folder(file_name)
+            module_name = module_name.replace('/', '.')
 
         if file_name is None:
             file_name = module_name.replace('.', '_') + ".py"
-        #for nested modules
-        module_name = module_name.replace('/', '.')
 
         #import the module (as new_module) to examine it
         try:
@@ -115,9 +116,9 @@ class Stubber():
             #self._log.exception(e)
             return None, e
 
-        #self._log.info( "create file : {} for {}".format(file_name,module_name))
+        # Start a new file
         with open(file_name, "w") as fp:
-            s = "\"\"\"\nModule: '{0}' on {1}\nMCU: {2}\nStubber: {3}\n\"\"\"\n".format(module_name,os.uname().sysname, os.uname(),stubber_version)
+            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.firmware_ID(), os.uname(), stubber_version)
             fp.write(s)
             if module_name not in self.excluded:
                 self._dump_object_stubs(fp, new_module, module_name, "")
@@ -136,7 +137,7 @@ class Stubber():
 
     def _dump_object_stubs(self, fp, object_expr: object, obj_name: str, indent: str):
         if object_expr in self.problematic:
-            self._log.warning("SKIPPING problematic name:" + object_expr)
+            self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
 
         self._log.debug("DUMPING : {}".format(object_expr))
@@ -167,10 +168,10 @@ class Stubber():
                 self._log.debug(s)
             #new class
             elif typ == "<class 'type'>" and indent == "":
-                # full expansion only on toplevel 
+                # full expansion only on toplevel
                 # stub style : ...
                 # s = "\n{}class {}(): ...\n".format(indent, name)
-                # stub style : Empty comment ... + hardcoded 4 spaces  
+                # stub style : Empty comment ... + hardcoded 4 spaces
                 s = "\n" + indent + "class " + name + ":\n"  # What about superclass?
                 s += indent + "    ''\n"
 
@@ -183,7 +184,24 @@ class Stubber():
                 # keep only the name
                 fp.write(indent + name + " = None\n")
 
+    @staticmethod
+    def firmware_ID(asfile: bool = False):
+        if os.uname().sysname in 'esp32_LoBo':
+            #version in release
+            ver = os.uname().release
+        else:
+            # version before '-' in version
+            ver = os.uname().version.split('-')[0]
+        fid = "{} {}".format(os.uname().sysname, ver)
+        if asfile:
+            # path name restrictions
+            chars = " .()/\\:$"
+            for c in chars:
+                fid = fid.replace(c, "_")
+        return fid
+
     def clean(self):
+        "Remove all files from the stub folder"
         print("Clean/remove files in stubfolder: {}".format(self.path))
         for fn in os.listdir(self.path):
             try:
@@ -191,47 +209,80 @@ class Stubber():
             except:
                 pass
 
-    def report(self, filename="modules.json"):
-        import ujson
-        f_name = "{}/{}".format(self.path, filename)
-        with open(f_name, 'w') as f:
-            f.write(ujson.dumps(self._report))
-        print("Created stubs for {} modules on board {} - {}".format(
-            len(self._report)-1,
+    def report(self, filename: str = "modules.json"):
+        "create json with list of exported modules"
+        print("Created stubs for {} modules on board {} - {}\nPath: {}".format(
+            len(self._report)-2,
             os.uname().machine,
-            os.uname().release))
+            os.uname().release,
+            self.path
+            ))
+        f_name = "{}/{}".format(self.path, filename)
+        gc.collect()
+        try:
+            # write json by node to reduce memory requirements
+            with open(f_name, 'w') as f:
+                start = True
+                for n in self._report:
+                    if start:
+                        f.write('[')
+                        start = False
+                    else:
+                        f.write(',')
+                    f.write(dumps(n))
+                f.write(']')
+        except:
+            print("Failed to create the report.")
 
-def get_root():
-    # Determine the root folder of the device
-    try:
-        r = "/flash"
-        _ = os.stat(r)
-    except OSError as e:
-        if e.args[0] == errno.ENOENT:
-            r = os.getcwd()
-    finally:
+    def ensure_folder(self, path: str):
+        "create nested folders if needed"
+        i = start = 0
+        while i != -1:
+            i = path.find('/', start)
+            if i != -1:
+                if i == 0:
+                    p = path[0]
+                else:
+                    p = path[0:i]
+                # p = partial folder
+                try:
+                    _ = os.stat(p)
+                except OSError as e:
+                    # folder does not exist
+                    if e.args[0] == errno.ENOENT:
+                        try:
+                            os.mkdir(p)
+                        except OSError as e2:
+                            self._log.error('failed to create folder {}'.format(p))
+                            raise e2
+                    else:
+                        self._log.error('failed to create folder {}'.format(p))
+                        raise e
+            #next level deep
+            start = i+1
+
+    @staticmethod
+    def get_root():
+        "Determine the root folder of the device"
+        try:
+            r = "/flash"
+            _ = os.stat(r)
+        except OSError as e:
+            if e.args[0] == errno.ENOENT:
+                r = os.getcwd()
+            else:
+                r = '/'
         return r
 
-#handle different file roots
-r_path = "{}/stubs".format(get_root()).replace('//', '/')
-#create first level folder
-try:
-    os.mkdir(r_path)
-except:
-    pass
 
-#determine path for stubs  
-s_path = "{}/stubs/{}_{}".format(
-    get_root(),
-    os.uname().sysname,
-    os.uname().release.replace('.', '_'),
-    ).replace('//', '/')
+def main():
+    logging.basicConfig(level=logging.INFO)
 
-logging.basicConfig(level=logging.INFO)
+    # Now clean up and get to work
+    stubber = Stubber()
+    stubber.add_modules(['xyz'])
+    stubber.clean()
+    # stubber.generate_all_stubs()
+    # stubber.report()
 
-#Now clean up and get to work 
-stubber = Stubber(s_path)
-stubber.clean()
-stubber.generate_all_stubs()
-stubber.report()
-
+main()
