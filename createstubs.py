@@ -93,13 +93,17 @@ class Stubber():
         if module_name.startswith("_") and module_name != '_thread':
             self._log.warning("SKIPPING internal module:{}".format(module_name))
             return
+
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
             return
+
         if '/' in module_name:
             #for nested modules
             self.ensure_folder(file_name)
             module_name = module_name.replace('/', '.')
+            self._log.warning("SKIPPING nested module:{}".format(module_name))
+            return
 
         if file_name is None:
             file_name = module_name.replace('.', '_') + ".py"
@@ -108,13 +112,12 @@ class Stubber():
         try:
             new_module = __import__(module_name)
         except ImportError as e:
-            #self._log.exception(e)
-            self._log.debug("Unable to import module: {}".format(module_name))
-            return None, e
+            self._log.debug("Unable to import module: {} : {}".format(module_name, e))
+            return 
         except e:
             self._log.error("Failed to import Module: {}".format(module_name))
-            #self._log.exception(e)
-            return None, e
+
+            return 
 
         # Start a new file
         with open(file_name, "w") as fp:
@@ -280,9 +283,9 @@ def main():
 
     # Now clean up and get to work
     stubber = Stubber()
-    stubber.add_modules(['xyz'])
+    #stubber.add_modules(['xyz'])
     stubber.clean()
-    # stubber.generate_all_stubs()
-    # stubber.report()
+    stubber.generate_all_stubs()
+    stubber.report()
 
 main()
