@@ -5,10 +5,11 @@ import errno
 import gc
 import logging
 import os
+import sys
 from time import sleep_us
 from ujson import dumps
 
-stubber_version = '1.0.1'
+stubber_version = '1.0.2'
 # deal with firmware specific implementations
 try:
     from machine import resetWDT
@@ -84,7 +85,12 @@ class Stubber():
                         module_name.replace(".", "/")
                     )
                     self._log.info("dump module: {:<20} to file: {}".format(module_name, file_name))
+                    gc.collect()
+                    m1 = gc.mem_free()
                     self.dump_module_stub(module_name, file_name)
+                    gc.collect()
+                    m2 = gc.mem_free()
+                    self._log.info("Memory     : {:>20} {:>6}".format(m1, m1-m2))
         finally:
             self._log.info('Finally done')
 
@@ -134,9 +140,12 @@ class Stubber():
             try:
                 del new_module
             except BaseException:
-                self._log.warning("could not unload module {}".format(module_name))
-            finally:
-                gc.collect()
+                self._log.warning("could not del new_module")
+            try:
+                del sys.modules[module_name]
+            except BaseException:
+                self._log.debug("could not del modules[{}]".format(module_name))
+            gc.collect()
 
     def _dump_object_stubs(self, fp, object_expr: object, obj_name: str, indent: str):
         if object_expr in self.problematic:
@@ -186,6 +195,9 @@ class Stubber():
             else:
                 # keep only the name
                 fp.write(indent + name + " = None\n")
+        del items
+        del errors
+        del name, rep, typ, obj
 
     @staticmethod
     def firmware_ID(asfile: bool = False):
