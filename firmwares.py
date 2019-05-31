@@ -85,9 +85,6 @@ print (sorted(lobo_esp32_only))
 shared_mpyEspXX = set(mpy_esp8622) & set(mpy_esp32) 
 print( "Shared mpy espxxx modules :", len(shared_mpyEspXX )) 
 
-
-
-
 print("\nall = ",end='')
 print (sorted(set(mpy_esp32) | set(lobo_esp32) | set(mpy_esp8622)))
 
@@ -108,14 +105,20 @@ lobo_esp32_only = ['ak8963', 'curl', 'display', 'freesans20', 'functools', 'gsm'
             'microWebTemplate', 'mpu6500', 'mpu9250', 'pye', 'requests', 'socket', 'ssd1306', 'ssh', 'tpcalib', 'upip', 
             'websocket', 'writer', 'ymodem']
 
-all = [ '_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 
+all = [ '_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'upip',
         'cmath', 'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 
         'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server', 
         'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate', 
         'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests', 
         'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 
-        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 
+        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos',  'upip_utarfile', 
         'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl', 
         'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+
+
+# Adjust order 
+# [m for m in all if '/' in m] + [m for m in all if '/' not in m]
+# todo: Move upip earlier 
+# todo: 
 
 
