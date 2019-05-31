@@ -1,7 +1,7 @@
 {
+    "python.pythonPath": ".env\\Scripts\\python.exe",
     "python.linting.enabled": true,
-    "python.pythonPath": "C:\\Users\\josverl\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
-
+    "python.linting.pylintEnabled": true,
     "python.autoComplete.extraPaths": [
         "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
         "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
@@ -15,13 +15,12 @@
 
     ],
     "python.analysis.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen\\3",
         "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
         //"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0"
 
     ],
 
-    "python.linting.pylintEnabled": false,
     "spellright.language": [
         "en"
     ],
