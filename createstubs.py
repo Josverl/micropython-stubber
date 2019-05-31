@@ -1,6 +1,7 @@
-# create stubs for (all) modules on a MicroPython board
-# ref: https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
-# pylint: disable=bare-except
+"""
+Create stubs for (all) modules on a MicroPython board
+Copyright (c) 2019 Jos Verlinde
+"""
 import errno
 import gc
 import logging
@@ -9,7 +10,7 @@ import sys
 from time import sleep_us
 from ujson import dumps
 
-stubber_version = '1.0.2'
+stubber_version = '1.1.0'
 # deal with firmware specific implementations
 try:
     from machine import resetWDT
@@ -20,8 +21,7 @@ except:
 class Stubber():
     "Generate stubs for modules in firmware"
     def __init__(self, path: str = None):
-        # log = logging.getLogger(__name__)
-        self._log = logging.getLogger('Stubber')
+        self._log = logging.getLogger('stubber')
         self._report = []
         u = os.uname()
         self._report.append({'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': u.version, 'machine': u.machine})
@@ -42,24 +42,24 @@ class Stubber():
             self.ensure_folder(path + "/")
         except:
             self._log.error("error creating stub folder {}".format(path))
-        #try to avoid running out of memory with nested mods
-        self.include_nested = gc.mem_free() > 3200
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
         # below contains the combines modules from  Micropython ESP8622, ESP32 and Loboris Modules
-        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins',
+        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'upip', #do upip early
                         'cmath', 'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led',
                         'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server',
                         'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
                         'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests',
                         'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio', 'uasyncio/core', 'ubinascii',
-                        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile',
+                        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip_utarfile',
                         'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl',
                         'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
+        #try to avoid running out of memory with nested mods
+        self.include_nested = gc.mem_free() > 3200
 
-        #self.m2 = ['uasyncio/__init__', 'uasyncio/core', 'umqtt/robust', 'umqtt/simple', 'urllib/urequest']
+
 
     def get_obj_attributes(self, obj: object):
         "extract information of the objects members and attributes"
@@ -84,24 +84,39 @@ class Stubber():
     def create_all_stubs(self):
         "Create stubs for all configured modules"
         self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.firmware_ID()))
-        try:
-            # start with the (more complex) modules with a / first to reduce memory problems
-            for module_name in [m for m in self.modules if '/' in m] + [m for m in self.modules if '/' not in m]:
-                if not module_name.startswith("_"):
-                    file_name = "{}/{}.py".format(
-                        self.path,
-                        module_name.replace(".", "/")
-                    )
-                    gc.collect()
-                    m1 = gc.mem_free()
-                    self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
+        # start with the (more complex) modules with a / first to reduce memory problems
+        self.module = [m for m in self.modules if '/' in m] + [m for m in self.modules if '/' not in m]
+        gc.collect()
+        for module_name in self.module:
+            #re-evaluate
+            if self.include_nested:
+                self.include_nested = gc.mem_free() > 3200
+            
+            if module_name.startswith("_") and module_name != '_thread':
+                self._log.warning("Skip module: {:<20}        : internal ".format(module_name))
+                continue
+            if module_name in self.problematic:
+                self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
+                continue
+            if module_name in self.excluded:
+                self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
+                continue
 
-                    self.create_module_stub(module_name, file_name)
-                    gc.collect()
-                    m2 = gc.mem_free()
-                    self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))
-        finally:
-            self._log.info('Finally done')
+            file_name = "{}/{}.py".format(
+                self.path,
+                module_name.replace(".", "/")
+            )
+            gc.collect()
+            m1 = gc.mem_free()
+            self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
+            try:
+                self.create_module_stub(module_name, file_name)
+            except:
+                pass
+            gc.collect()
+            m2 = gc.mem_free()
+            self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))
+        self._log.info('Finally done')
 
     def create_module_stub(self, module_name: str, file_name: str = None):
         "Create a Stub of a single python module"
@@ -234,10 +249,9 @@ class Stubber():
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info("Created stubs for {} modules on board {} - {}\nPath: {}".format(
+        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(
             len(self._report)-2,
-            os.uname().machine,
-            os.uname().release,
+            self.firmware_ID(),
             self.path
             ))
         f_name = "{}/{}".format(self.path, filename)
@@ -299,8 +313,10 @@ class Stubber():
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-
+    try:
+        logging.basicConfig(level=logging.INFO)
+    except:
+        pass
     # Now clean up and get to work
     stubber = Stubber()
     #stubber.add_modules(['xyz'])
