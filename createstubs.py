@@ -35,16 +35,16 @@ class Stubber():
             path = "{}/stubs/{}".format(
                 self.get_root(),
                 self.firmware_ID(asfile=True)
-                ).replace('//', '/')            
+                ).replace('//', '/')
 
         self.path = path
         try:
             self.ensure_folder(path + "/")
         except:
-            self._log.error(b"error creating stub folder %s" % path)
+            self._log.error("error creating stub folder {}".format(path))
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
-        self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"] 
+        self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
         # below contains the combines modules from  Micropython ESP8622, ESP32 and Loboris Modules
@@ -53,12 +53,16 @@ class Stubber():
                         'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server',
                         'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
                         'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests',
-                        'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii',
+                        'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio', 'uasyncio/core', 'ubinascii',
                         'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile',
                         'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl',
                         'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
-    def get_obj_attribs(self, obj: object):
+
+        #self.m2 = ['uasyncio/__init__', 'uasyncio/core', 'umqtt/robust', 'umqtt/simple', 'urllib/urequest']
+
+    def get_obj_attributes(self, obj: object):
+        "extract information of the objects members and attributes"
         result = []
         errors = []
         #self._log.info('get attributes {} {}'.format(repr(obj),obj ))
@@ -73,14 +77,16 @@ class Stubber():
         gc.collect()
         return result, errors
 
-    def add_modules(self, modules :list):
+    def add_modules(self, modules: list):
         "Add additional modules to be exported"
         self.modules = sorted(set(self.modules) | set(modules))
-    
-    def generate_all_stubs(self):
-        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version,self.firmware_ID()))
+
+    def create_all_stubs(self):
+        "Create stubs for all configured modules"
+        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.firmware_ID()))
         try:
-            for module_name in sorted(self.modules):
+            # start with the (more complex) modules with a / first to reduce memory problems
+            for module_name in [m for m in self.modules if '/' in m] + [m for m in self.modules if '/' not in m]:
                 if not module_name.startswith("_"):
                     file_name = "{}/{}.py".format(
                         self.path,
@@ -88,17 +94,17 @@ class Stubber():
                     )
                     gc.collect()
                     m1 = gc.mem_free()
-                    self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format( module_name, file_name, m1))
+                    self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
 
-                    self.dump_module_stub(module_name, file_name)
+                    self.create_module_stub(module_name, file_name)
                     gc.collect()
                     m2 = gc.mem_free()
                     self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))
         finally:
             self._log.info('Finally done')
 
-    # Create a Stub of a single python module
-    def dump_module_stub(self, module_name: str, file_name: str = None):
+    def create_module_stub(self, module_name: str, file_name: str = None):
+        "Create a Stub of a single python module"
         if module_name.startswith("_") and module_name != '_thread':
             self._log.warning("SKIPPING internal module:{}".format(module_name))
             return
@@ -106,7 +112,6 @@ class Stubber():
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
             return
-
         if '/' in module_name:
             #for nested modules
             self.ensure_folder(file_name)
@@ -123,21 +128,18 @@ class Stubber():
             new_module = __import__(module_name)
         except ImportError as e:
             self._log.debug("Unable to import module: {} : {}".format(module_name, e))
-            return 
+            return
         except e:
             self._log.error("Failed to import module: {}".format(module_name))
 
-            return 
+            return
 
         # Start a new file
         with open(file_name, "w") as fp:
             s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.firmware_ID(), os.uname(), stubber_version)
             fp.write(s)
-            if module_name not in self.excluded:
-                self._dump_object_stubs(fp, new_module, module_name, "")
-                self._report.append({"module":module_name, "file": file_name})
-            else:
-                self._log.warning("skipped excluded module {}".format(module_name))
+            self.write_object_stub(fp, new_module, module_name, "")
+            self._report.append({"module":module_name, "file": file_name})
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             #try to unload the module unless we use it
@@ -151,13 +153,14 @@ class Stubber():
                 self._log.debug("could not del modules[{}]".format(module_name))
             gc.collect()
 
-    def _dump_object_stubs(self, fp, object_expr: object, obj_name: str, indent: str):
+    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str):
+        "Write an object stub to an open file. Can call recursive."
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
 
         self._log.debug("DUMPING : {}".format(object_expr))
-        items, errors = self.get_obj_attribs(object_expr)
+        items, errors = self.get_obj_attributes(object_expr)
         if errors:
             self._log.error(errors)
 
@@ -169,8 +172,7 @@ class Stubber():
             resetWDT()
             sleep_us(1)
 
-            # self._log.debug("DUMPING", indent, object_expr, name)
-            self._log.debug("  * " + name + " : " + typ)
+            self._log.debug("DUMPING {}{}{}:{}".format(indent, object_expr, name, typ))
 
             if typ in ["<class 'function'>", "<class 'bound_method'>"]:
                 s = indent + "def " + name + "():\n"
@@ -185,8 +187,6 @@ class Stubber():
             #new class
             elif typ == "<class 'type'>" and indent == "":
                 # full expansion only on toplevel
-                # stub style : ...
-                # s = "\n{}class {}(): ...\n".format(indent, name)
                 # stub style : Empty comment ... + hardcoded 4 spaces
                 s = "\n" + indent + "class " + name + ":\n"  # What about superclass?
                 s += indent + "    ''\n"
@@ -195,16 +195,20 @@ class Stubber():
                 self._log.debug(s)
 
                 self._log.debug("#recursion !!")
-                self._dump_object_stubs(fp, obj, "{0}.{1}".format(obj_name, name), indent + "    ")
+                self.write_object_stub(fp, obj, "{0}.{1}".format(obj_name, name), indent + "    ")
             else:
                 # keep only the name
                 fp.write(indent + name + " = None\n")
         del items
         del errors
-        del name, rep, typ, obj
+        try:
+            del name, rep, typ, obj # pylint: disable=undefined-loop-variable
+        except:
+            pass
 
     @staticmethod
     def firmware_ID(asfile: bool = False):
+        "Get a sensible firmware ID"
         if os.uname().sysname in 'esp32_LoBo':
             #version in release
             ver = os.uname().release
@@ -254,7 +258,7 @@ class Stubber():
             self._log.error("Failed to create the report.")
 
     def ensure_folder(self, path: str):
-        "create nested folders if needed"
+        "Create nested folders if needed"
         i = start = 0
         while i != -1:
             i = path.find('/', start)
@@ -301,7 +305,7 @@ def main():
     stubber = Stubber()
     #stubber.add_modules(['xyz'])
     stubber.clean()
-    stubber.generate_all_stubs()
+    stubber.create_all_stubs()
     stubber.report()
 
 main()
