@@ -1,8 +1,8 @@
 """
-Module: 'ssd1306' on esp8266
-MCU: (sysname='esp8266', nodename='esp8266', release='2.2.0-dev(9422289)', version='v1.11-8-g48dcbbe60 on 2019-05-29', machine='ESP module with ESP8266')
-Stubber: 1.0.1
+Module: 'ssd1306' on esp8266 v1.11
 """
+# MCU: (sysname='esp8266', nodename='esp8266', release='2.2.0-dev(9422289)', version='v1.11-8-g48dcbbe60 on 2019-05-29', machine='ESP module with ESP8266')
+# Stubber: 1.1.0
 SET_CHARGE_PUMP = 141
 SET_COL_ADDR = 33
 SET_COM_OUT_DIR = 192
@@ -77,115 +77,3 @@ class SSD1306_I2C:
     def blit():
         pass
 
-    def contrast():
-        pass
-
-    def fill():
-        pass
-
-    def fill_rect():
-        pass
-
-    def hline():
-        pass
-
-    def init_display():
-        pass
-
-    def invert():
-        pass
-
-    def line():
-        pass
-
-    def pixel():
-        pass
-
-    def poweroff():
-        pass
-
-    def poweron():
-        pass
-
-    def rect():
-        pass
-
-    def scroll():
-        pass
-
-    def show():
-        pass
-
-    def text():
-        pass
-
-    def vline():
-        pass
-
-    def write_cmd():
-        pass
-
-    def write_data():
-        pass
-
-
-class SSD1306_SPI:
-    ''
-    def blit():
-        pass
-
-    def contrast():
-        pass
-
-    def fill():
-        pass
-
-    def fill_rect():
-        pass
-
-    def hline():
-        pass
-
-    def init_display():
-        pass
-
-    def invert():
-        pass
-
-    def line():
-        pass
-
-    def pixel():
-        pass
-
-    def poweroff():
-        pass
-
-    def poweron():
-        pass
-
-    def rect():
-        pass
-
-    def scroll():
-        pass
-
-    def show():
-        pass
-
-    def text():
-        pass
-
-    def vline():
-        pass
-
-    def write_cmd():
-        pass
-
-    def write_data():
-        pass
-
-def const():
-    pass
-
-framebuf = None
