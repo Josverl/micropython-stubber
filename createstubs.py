@@ -18,7 +18,7 @@ except:
         pass
 
 class Stubber():
-    "Generate stubs for (hopefully) all modules in the firmware"
+    "Generate stubs for modules in firmware"
     def __init__(self, path: str = None):
         # log = logging.getLogger(__name__)
         self._log = logging.getLogger('Stubber')
@@ -26,23 +26,24 @@ class Stubber():
         u = os.uname()
         self._report.append({'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': u.version, 'machine': u.machine})
         self._report.append({'stubber': stubber_version})
-        if path is None:
+        if path:
+            #get rid of trailing slash
+            if path.endswith('/'):
+                path = path[:-1]
+        else:
             #determine path for stubs
             path = "{}/stubs/{}".format(
                 self.get_root(),
                 self.firmware_ID(asfile=True)
                 ).replace('//', '/')            
-        else:
-            #get rid of trailing slash
-            if path.endswith('/'):
-                path = path[:-1]
 
         self.path = path
         try:
             self.ensure_folder(path + "/")
         except:
-            self._log.error("error creating stub folder %s" % path)
-
+            self._log.error(b"error creating stub folder %s" % path)
+        #try to avoid running out of memory with nested mods
+        self.include_nested = gc.mem_free() > 3200
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"] 
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
@@ -77,6 +78,7 @@ class Stubber():
         self.modules = sorted(set(self.modules) | set(modules))
     
     def generate_all_stubs(self):
+        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version,self.firmware_ID()))
         try:
             for module_name in sorted(self.modules):
                 if not module_name.startswith("_"):
@@ -84,13 +86,14 @@ class Stubber():
                         self.path,
                         module_name.replace(".", "/")
                     )
-                    self._log.info("dump module: {:<20} to file: {}".format(module_name, file_name))
                     gc.collect()
                     m1 = gc.mem_free()
+                    self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format( module_name, file_name, m1))
+
                     self.dump_module_stub(module_name, file_name)
                     gc.collect()
                     m2 = gc.mem_free()
-                    self._log.info("Memory     : {:>20} {:>6}".format(m1, m1-m2))
+                    self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))
         finally:
             self._log.info('Finally done')
 
@@ -108,8 +111,9 @@ class Stubber():
             #for nested modules
             self.ensure_folder(file_name)
             module_name = module_name.replace('/', '.')
-            self._log.warning("SKIPPING nested module:{}".format(module_name))
-            return
+            if not self.include_nested:
+                self._log.warning("SKIPPING nested module:{}".format(module_name))
+                return
 
         if file_name is None:
             file_name = module_name.replace('.', '_') + ".py"
@@ -121,7 +125,7 @@ class Stubber():
             self._log.debug("Unable to import module: {} : {}".format(module_name, e))
             return 
         except e:
-            self._log.error("Failed to import Module: {}".format(module_name))
+            self._log.error("Failed to import module: {}".format(module_name))
 
             return 
 
@@ -217,7 +221,7 @@ class Stubber():
 
     def clean(self):
         "Remove all files from the stub folder"
-        print("Clean/remove files in stubfolder: {}".format(self.path))
+        self._log.info("Clean/remove files in stubfolder: {}".format(self.path))
         for fn in os.listdir(self.path):
             try:
                 os.remove("{}/{}".format(self.path, fn))
@@ -226,7 +230,7 @@ class Stubber():
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        print("Created stubs for {} modules on board {} - {}\nPath: {}".format(
+        self._log.info("Created stubs for {} modules on board {} - {}\nPath: {}".format(
             len(self._report)-2,
             os.uname().machine,
             os.uname().release,
@@ -247,7 +251,7 @@ class Stubber():
                     f.write(dumps(n))
                 f.write(']')
         except:
-            print("Failed to create the report.")
+            self._log.error("Failed to create the report.")
 
     def ensure_folder(self, path: str):
         "create nested folders if needed"
