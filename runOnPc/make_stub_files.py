@@ -9,17 +9,21 @@ This file is in the public domain.
 
 Written by Edward K. Ream.
 '''
+# pylint: disable=unused-argument, redefined-outer-name, trailing-whitespace, bad-whitespace
+# todo: suppress unresolved-import
+
 import ast
 # from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 from collections import OrderedDict
     # Requires Python 2.7 or above. Without OrderedDict
     # the configparser will give random order for patterns.
 try:
-    import ConfigParser as configparser # Python 2
+    import ConfigParser as configparser # Python 2 
 except ImportError:
     import configparser # Python 3
 import glob
-import optparse
+#Todo: Depricated , replace with argparse  https://docs.python.org/3/library/argparse.html
+import optparse 
 import os
 import re
 import subprocess
@@ -978,7 +982,7 @@ class LeoGlobals:
     def cls(self):
         '''Clear the screen.'''
         if sys.platform.lower().startswith('win'):
-            os.system('cls')
+            os.system('cls')    # pylint: disable=no-member
     def execute_shell_commands(self, commands, trace=False):
         '''
         Execute each shell command in a separate process.
@@ -1108,9 +1112,9 @@ class LeoGlobals:
     # printTuple = printObj
 
     def shortFileName(self,fileName, n=None):
-        # pylint: disable=invalid-unary-operand-type
+        # pylint: disable=invalid-unary-operand-type, no-member
         if n is None or n < 1:
-            return os.path.basename(fileName)
+            return os.path.basename(fileName)               
         else:
             return '/'.join(fileName.replace('\\', '/').split('/')[-n:])
 
@@ -2392,7 +2396,8 @@ class StubTraverser (ast.NodeVisitor):
         if os.path.exists(fn) and not self.overwrite:
             print('file exists: %s' % fn)
         elif not dir_ or os.path.exists(dir_):
-            t1 = time.clock()
+            #time.clock has been deprecated in Python 3.3 and will be removed from Python 3.8: use time.perf_counter or time.process_time instead
+            t1 = time.perf_counter()
             # Delayed output allows sorting.
             self.parent_stub = Stub(kind='root', name='<new-stubs>')
             for z in self.prefix_lines or []:
@@ -2408,7 +2413,8 @@ class StubTraverser (ast.NodeVisitor):
                 self.output_file.close()
                 self.output_file = None
                 self.parent_stub = None
-            t2 = time.clock()
+            t2 = time.perf_counter()
+            #do some stuff
             if not self.silent:
                 print('wrote: %s in %4.2f sec' % (fn, t2 - t1))
         else:
@@ -2905,6 +2911,7 @@ class TestClass:
     # pylint: disable=no-self-argument
     # pylint: disable=no-method-argument
     # pylint: disable=unsubscriptable-object
+    # pylint: disable=undefined-variable
 
     def parse_group(group):
         # pylint: disable=unsupported-delete-operation
