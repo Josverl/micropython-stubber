@@ -7,10 +7,10 @@ import gc
 import logging
 import os
 import sys
-from time import sleep_us
+from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.1.0'
+stubber_version = '1.2.0'
 # deal with firmware specific implementations
 try:
     from machine import resetWDT
@@ -26,8 +26,8 @@ class Stubber():
         u = os.uname()
         # use sys.implementation for consistency
         v = ".".join([str(i) for i in sys.implementation.version])
-        self._report.append({'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine})
-        self._report.append({'stubber': stubber_version})
+        self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.firmware_ID()}}
+        self._report_stb = {'stubber':{'version': stubber_version}}
         del u
         del v
         if path:
@@ -63,8 +63,6 @@ class Stubber():
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
 
-
-
     def get_obj_attributes(self, obj: object):
         "extract information of the objects members and attributes"
         result = []
@@ -95,7 +93,7 @@ class Stubber():
             #re-evaluate
             if self.include_nested:
                 self.include_nested = gc.mem_free() > 3200
-            
+
             if module_name.startswith("_") and module_name != '_thread':
                 self._log.warning("Skip module: {:<20}        : internal ".format(module_name))
                 continue
@@ -150,7 +148,6 @@ class Stubber():
             return
         except e:
             self._log.error("Failed to import module: {}".format(module_name))
-
             return
 
         # Start a new file
@@ -254,7 +251,7 @@ class Stubber():
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(
-            len(self._report)-2,
+            len(self._report),
             self.firmware_ID(),
             self.path
             ))
@@ -263,15 +260,24 @@ class Stubber():
         try:
             # write json by node to reduce memory requirements
             with open(f_name, 'w') as f:
+                print('starting header')
+                f.write('{')
+                f.write(dumps(self._report_fwi)[1:-1])
+                f.write(',')
+                f.write(dumps(self._report_stb)[1:-1])
+                f.write(',')
+                print('starting modules')
+                f.write('"modules" :[')
                 start = True
                 for n in self._report:
                     if start:
-                        f.write('[')
                         start = False
                     else:
                         f.write(',')
+                    print('starting mod')
                     f.write(dumps(n))
-                f.write(']')
+                print('almost done')
+                f.write(']}')
         except:
             self._log.error("Failed to create the report.")
 
@@ -317,6 +323,7 @@ class Stubber():
 
 
 def main():
+    global stubber
     try:
         logging.basicConfig(level=logging.INFO)
     except:
@@ -325,6 +332,8 @@ def main():
     stubber = Stubber()
     #stubber.add_modules(['xyz'])
     stubber.clean()
+    # limit for debugging
+    stubber.modules = ['machine']
     stubber.create_all_stubs()
     stubber.report()
 
