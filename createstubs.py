@@ -24,8 +24,12 @@ class Stubber():
         self._log = logging.getLogger('stubber')
         self._report = []
         u = os.uname()
-        self._report.append({'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': u.version, 'machine': u.machine})
+        # use sys.implementation for consistency
+        v = ".".join([str(i) for i in sys.implementation.version])
+        self._report.append({'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine})
         self._report.append({'stubber': stubber_version})
+        del u
+        del v
         if path:
             #get rid of trailing slash
             if path.endswith('/'):
