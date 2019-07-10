@@ -330,10 +330,10 @@ def main():
         pass
     # Now clean up and get to work
     stubber = Stubber()
-    #stubber.add_modules(['xyz'])
     stubber.clean()
     # limit for debugging
-    stubber.modules = ['machine']
+    # stubber.modules = ['machine']
+    # stubber.add_modules(['xyz'])
     stubber.create_all_stubs()
     stubber.report()
 
