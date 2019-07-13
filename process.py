@@ -6,6 +6,7 @@ Pre/Post Processing for createstubs.py
 
 commands:
   minify                 Create minified version of createstubs.py
+  patch                  Apply a patch to createstubs.py
 
 """
 
@@ -220,8 +221,8 @@ def minify_script(patches=None):
     with SCRIPT.open('r') as f:
         content = f.read()
         for path in patches:
-            with path.open('r') as p:
-                content = apply_patch(content, p.read())
+            path = Path(path)
+            content = apply_patch(content, path.read_text())
         content = edit_lines(content, edits)
         tokens = token_utils.listified_tokenizer(content)
         source = minification.minify(tokens, minopts)
@@ -234,16 +235,12 @@ def get_patches():
         yield (f.stem, f.resolve())
 
 
-def cli_minify(**kwargs):
-    """minify cli handler"""
-    print("\nMinifying createstubs.py...")
-    out = kwargs.pop("dest")
-    patches = kwargs.pop("patches")
-    patch_paths = []
-    if not minification:
-        print("\npyminification is required to minify createstubs.py\n")
-        print("Please install via:\n  pip install pyminification")
-        sys.exit(1)
+def resolve_patches(patch_names):
+    """Validates/Provides help for patches"""
+    patch_files = list(get_patches())
+    patches = [next((p for p in patch_files if p[0] == n), (n, None))
+               for n in patch_names]
+    paths = []
     for name, path in patches:
         if path is None:
             print(f"Cannot find patch: {name}")
@@ -251,12 +248,43 @@ def cli_minify(**kwargs):
             print("\n".join(p[0] for p in get_patches()))
             sys.exit(0)
         print(f"Applying Patch: {name}")
-        patch_paths.append(path)
+        paths.append(path)
+    return paths
+
+
+def cli_patch(**kwargs):
+    """apply patch cli handler"""
+    print("Patching createstubs.py...")
+    out = kwargs.get("dest")
+    patch_names = kwargs.pop('opts')
+    if not patch_names:
+        patch_names.append("None Provided")
+    paths = resolve_patches(patch_names)
+    with SCRIPT.open('r') as f:
+        source = f.read()
+        for p in paths:
+            content = apply_patch(source, p.read_text())
+    with out.open('w+') as o:
+        o.write(content)
+    print("\nDone!")
+    print("Patched file written to:", out)
+
+
+def cli_minify(**kwargs):
+    """minify cli handler"""
+    print("\nMinifying createstubs.py...")
+    out = kwargs.pop("dest")
+    patches = kwargs.pop("patches")
+    if not minification:
+        print("\npyminification is required to minify createstubs.py\n")
+        print("Please install via:\n  pip install pyminification")
+        sys.exit(1)
+    patch_paths = resolve_patches(patches)
     with out.open('w+') as f:
         source = minify_script(patch_paths)
         f.write(source)
     print("\nDone!")
-    print(f"Minified file written to: {out}")
+    print("Minified file written to:", out)
 
 
 if __name__ == "__main__":
@@ -276,17 +304,14 @@ if __name__ == "__main__":
     parser.add_argument('command', nargs='+', help="Command to execute")
     parser.add_argument('-p', '--patch',
                         action='append',
-                        type=lambda x:
-                        next((p
-                              for p in patches if p[0] == x), (x, None)),
-                        help="Apply a patch to createstubs.py",
+                        help="Apply patch before minification",
                         default=[]
                         )
     parser.add_argument(
         "-d", "--dest",
-        help="Specify file to output to. Defaults to minified.py",
+        help="Specify file to output to. Defaults to processed.py",
         type=Path,
-        default=(ROOT / 'minified.py'))
+        default=(ROOT / 'processed.py'))
     args = parser.parse_args()
     cmd = args.command.pop(0)
     func = eval(f"cli_{cmd}")
