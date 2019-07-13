@@ -10,6 +10,7 @@ commands:
 """
 
 import argparse
+import itertools
 import re
 import sys
 from optparse import Values
@@ -87,14 +88,108 @@ def edit_lines(content, edits):
         str: edited string
     """
     def comment(l, x): return l.replace(x, f"# {x}")
-    def rprint(l, x): return l.replace(x, f"print")
+
+    def rprint(l, x):
+        split = l.split("(")
+        if len(split) > 1:
+            return l.replace(split[0].strip(), "print")
+        return l.replace(x, f"print")
+
     def rpass(l, x): return l.replace(x, f"pass")
+
+    def get_whitespace_context(content, index):
+        """Get whitespace count of lines surrounding index"""
+        def count_ws(line): return sum(
+            1 for _ in itertools.takewhile(str.isspace, line))
+        lines = content[index - 1:index+2]
+        context = (count_ws(l) for l in lines)
+        return context
+
+    def handle_multiline(content, index):
+        """Handles edits that require multiline comments
+
+        Example:
+            self._log.debug("info: {} {}".format(
+                1,
+                2
+            ))
+        Here, only commenting out the first self._log line will raise
+        an error. So this function returns all lines that need to
+        be commented out instead.
+
+        It also checks for situations such as this:
+            if condition:
+                self._log.debug('message')
+
+        Here, since the only functionality of the conditional is the call log,
+        both lines would be returned to comment out.
+
+        """
+        line = content[index]
+        open_cnt = line.count("(")
+        close_cnt = line.count(")")
+        ahead_index = 1
+        while not open_cnt == close_cnt:
+            look_ahead = l_index + ahead_index
+            ahead_index += 1
+            next_l = content[look_ahead]
+            open_cnt += next_l.count("(")
+            close_cnt += next_l.count(")")
+        if ahead_index > 1:
+            return range(index, look_ahead + 1)
+        prev = content[index - 1]
+        _, line_ws, post_ws = get_whitespace_context(content, index)
+        prev_words = prev.strip().strip(":").split()
+        if any(t in ('if', 'else', ) for t in prev_words) and line_ws != post_ws:
+            return range(index-1, index+1)
+
+    def handle_try_except(content, index):
+        """Checks if line at index is in try/except block
+
+        Handles situations like this:
+            try:
+                something()
+            except:
+                self._log.debug('some message')
+
+        Simply removing the self._log call would create a syntax error,
+        which is what this function checks for.
+
+        """
+        prev = content[index - 1]
+        _, line_ws, post_ws = get_whitespace_context(content, index)
+        if 'except' in prev and line_ws != post_ws:
+            return True
+
     lines = []
-    for line in content.splitlines(keepends=True):
+    multilines = set()
+    content = content.splitlines(keepends=True)
+    for line in content:
+        _line = line
         for edit, text in edits:
-            func = eval(edit)
-            line = func(line, text)
+            if text in line:
+                if edit == "comment":
+                    l_index = content.index(line)
+                    # Check if edit spans multiple lines
+                    mline = handle_multiline(content, l_index)
+                    if mline:
+                        multilines.update(mline)
+                        break
+                    # Check if line is only statement in try/except
+                    if handle_try_except(content, l_index):
+                        edit = "rpass"
+                        text = line.strip()
+                func = eval(edit)
+                line = func(line, text)
+                if line != _line:
+                    print(f"\n- {_line.strip()}")
+                    print(f"+ {line.strip()}")
+                    break
         lines.append(line)
+    for line_num in multilines:
+        # Go back and comment out multilines
+        line = lines[line_num]
+        lines[line_num] = comment(line, line.strip())
     stripped = "".join(lines)
     return stripped
 
@@ -111,14 +206,15 @@ def minify_script(patches=None):
     """
     patches = patches or []
     edits = [
+        ("rprint",
+         'self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))'),
+        ("comment", "print"),
         ("comment", "import logging"),
         ("comment", "self._log ="),
-        ("rpass",
-         'self._log.debug("could not del modules[{}]".format(module_name))'),
         ("comment", "self._log.debug"),
-        ("rprint", "self._log.warning"),
-        ("rprint", "self._log.info"),
-        ("rprint", "self._log.error"),
+        ("comment", "self._log.warning"),
+        ("comment", "self._log.info"),
+        ("comment", "self._log.error"),
     ]
     minopts = Values({'tabs': False})
     with SCRIPT.open('r') as f:
