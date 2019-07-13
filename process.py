@@ -195,20 +195,20 @@ def edit_lines(content, edits):
     return stripped
 
 
-def minify_script(patches=None):
+def minify_script(patches=None, keep_report=True):
     """minifies createstubs.py
 
     Args:
         patches ([PathLike], optional): List of paths to patches to apply.
             Defaults to None.
+        keep_report (bool, optional): Keeps single report line in createstubs
+            Defautls to True.
 
     Returns:
         str: minified source text
     """
     patches = patches or []
     edits = [
-        ("rprint",
-         'self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))'),
         ("comment", "print"),
         ("comment", "import logging"),
         ("comment", "self._log ="),
@@ -217,6 +217,11 @@ def minify_script(patches=None):
         ("comment", "self._log.info"),
         ("comment", "self._log.error"),
     ]
+    if keep_report:
+        report = ('rprint', ('self._log.info("Stub module: {:<20} to file:'
+                             ' {:<55} mem:{:>5}".'
+                             'format(module_name, file_name, m1))'))
+        edits.insert(0, report)
     minopts = Values({'tabs': False})
     with SCRIPT.open('r') as f:
         content = f.read()
@@ -256,7 +261,7 @@ def cli_patch(**kwargs):
     """apply patch cli handler"""
     print("Patching createstubs.py...")
     out = kwargs.get("dest")
-    patch_names = kwargs.pop('opts')
+    patch_names = kwargs.pop('command')
     if not patch_names:
         patch_names.append("None Provided")
     paths = resolve_patches(patch_names)
@@ -274,14 +279,15 @@ def cli_minify(**kwargs):
     """minify cli handler"""
     print("\nMinifying createstubs.py...")
     out = kwargs.pop("dest")
-    patches = kwargs.pop("patches")
+    patches = kwargs.pop("patch")
     if not minification:
         print("\npyminification is required to minify createstubs.py\n")
         print("Please install via:\n  pip install pyminification")
         sys.exit(1)
     patch_paths = resolve_patches(patches)
     with out.open('w+') as f:
-        source = minify_script(patch_paths)
+        report = kwargs.pop('no_report')
+        source = minify_script(patches=patch_paths, keep_report=report)
         f.write(source)
     print("\nDone!")
     print("Minified file written to:", out)
@@ -302,17 +308,25 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=HelpTextFormatter)
     parser.add_argument('command', nargs='+', help="Command to execute")
-    parser.add_argument('-p', '--patch',
-                        action='append',
-                        help="Apply patch before minification",
-                        default=[]
-                        )
+    parser.add_argument(
+        '-p', '--patch',
+        action='append',
+        help="Apply patch before minification",
+        default=[]
+    )
     parser.add_argument(
         "-d", "--dest",
         help="Specify file to output to. Defaults to processed.py",
         type=Path,
-        default=(ROOT / 'processed.py'))
+        default=(ROOT / 'processed.py')
+    )
+    parser.add_argument(
+        "-n", "--no-report",
+        help=("Disables all output from createstubs.py."
+              " Use if your having memory related issues."),
+        action="store_false"
+    )
     args = parser.parse_args()
     cmd = args.command.pop(0)
     func = eval(f"cli_{cmd}")
-    func(patches=args.patch, opts=args.command, dest=args.dest)
+    func(**vars(args))
