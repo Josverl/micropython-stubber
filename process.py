@@ -72,7 +72,7 @@ def apply_patch(s, patch, revert=False):
     return t
 
 
-def edit_lines(content, edits):
+def edit_lines(content, edits, show_diff=False):
     """Edit string by list of edits
 
     Args:
@@ -84,6 +84,7 @@ def edit_lines(content, edits):
                 rprint - replace text with print
                 rpass - replace text with pass
             The second string is the matching text to replace
+        show_diff (bool, optional): Prints diff of each edit. Defaults to False.
 
     Returns:
         str: edited string
@@ -183,8 +184,9 @@ def edit_lines(content, edits):
                 func = eval(edit)
                 line = func(line, text)
                 if line != _line:
-                    print(f"\n- {_line.strip()}")
-                    print(f"+ {line.strip()}")
+                    if show_diff:
+                        print(f"\n- {_line.strip()}")
+                        print(f"+ {line.strip()}")
                     break
         lines.append(line)
     for line_num in multilines:
@@ -195,7 +197,7 @@ def edit_lines(content, edits):
     return stripped
 
 
-def minify_script(patches=None, keep_report=True):
+def minify_script(patches=None, keep_report=True, show_diff=False):
     """minifies createstubs.py
 
     Args:
@@ -203,6 +205,7 @@ def minify_script(patches=None, keep_report=True):
             Defaults to None.
         keep_report (bool, optional): Keeps single report line in createstubs
             Defautls to True.
+        show_diff (bool, optional): Print diff from edits. Defaults to False.
 
     Returns:
         str: minified source text
@@ -228,7 +231,7 @@ def minify_script(patches=None, keep_report=True):
         for path in patches:
             path = Path(path)
             content = apply_patch(content, path.read_text())
-        content = edit_lines(content, edits)
+        content = edit_lines(content, edits, show_diff=show_diff)
         tokens = token_utils.listified_tokenizer(content)
         source = minification.minify(tokens, minopts)
     return source
@@ -260,7 +263,7 @@ def resolve_patches(patch_names):
 def cli_patch(**kwargs):
     """apply patch cli handler"""
     print("Patching createstubs.py...")
-    out = kwargs.get("dest")
+    out = kwargs.get("output")
     patch_names = kwargs.pop('command')
     if not patch_names:
         patch_names.append("None Provided")
@@ -278,7 +281,7 @@ def cli_patch(**kwargs):
 def cli_minify(**kwargs):
     """minify cli handler"""
     print("\nMinifying createstubs.py...")
-    out = kwargs.pop("dest")
+    out = kwargs.pop("output")
     patches = kwargs.pop("patch")
     if not minification:
         print("\npyminification is required to minify createstubs.py\n")
@@ -287,7 +290,12 @@ def cli_minify(**kwargs):
     patch_paths = resolve_patches(patches)
     with out.open('w+') as f:
         report = kwargs.pop('no_report')
-        source = minify_script(patches=patch_paths, keep_report=report)
+        diff = kwargs.pop('diff')
+        source = minify_script(
+            patches=patch_paths,
+            keep_report=report,
+            show_diff=diff
+        )
         f.write(source)
     print("\nDone!")
     print("Minified file written to:", out)
@@ -315,10 +323,15 @@ if __name__ == "__main__":
         default=[]
     )
     parser.add_argument(
-        "-d", "--dest",
+        "-o", "--output",
         help="Specify file to output to. Defaults to processed.py",
         type=Path,
         default=(ROOT / 'processed.py')
+    )
+    parser.add_argument(
+        "-d", "--diff",
+        help="Print diff report from minify",
+        action='store_true'
     )
     parser.add_argument(
         "-n", "--no-report",
