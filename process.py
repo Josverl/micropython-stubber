@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Pre/Post Processing for createstubs.py
+"""Pre/Post Processing for createstubs.py"""
 
-commands:
-  minify                 Create minified version of createstubs.py
-  patch                  Apply a patch to createstubs.py
-
-"""
 
 import argparse
 import itertools
@@ -51,7 +45,7 @@ def apply_patch(s, patch, revert=False):
         m = _hdr_pat.match(p[i])
         if not m:
             raise Exception("Bad patch -- regex mismatch [line "+str(i)+"]")
-        l = int(m.group(midx))-1 + (m.group(midx+1) == '0')
+        l = int(m.group(midx))-1 + (m.group(midx+1) == '0')  # noqa
         if sl > l or l > len(s):
             raise Exception("Bad patch -- bad line num [line "+str(i)+"]")
         t += ''.join(s[sl:l])
@@ -84,7 +78,8 @@ def edit_lines(content, edits, show_diff=False):
                 rprint - replace text with print
                 rpass - replace text with pass
             The second string is the matching text to replace
-        show_diff (bool, optional): Prints diff of each edit. Defaults to False.
+        show_diff (bool, optional): Prints diff of each edit. 
+            Defaults to False.
 
     Returns:
         str: edited string
@@ -142,7 +137,8 @@ def edit_lines(content, edits, show_diff=False):
         prev = content[index - 1]
         _, line_ws, post_ws = get_whitespace_context(content, index)
         prev_words = prev.strip().strip(":").split()
-        if any(t in ('if', 'else', ) for t in prev_words) and line_ws != post_ws:
+        check = any(t in ('if', 'else', ) for t in prev_words)
+        if check and line_ws != post_ws:
             return range(index-1, index+1)
 
     def handle_try_except(content, index):
@@ -264,9 +260,7 @@ def cli_patch(**kwargs):
     """apply patch cli handler"""
     print("Patching createstubs.py...")
     out = kwargs.get("output")
-    patch_names = kwargs.pop('command')
-    if not patch_names:
-        patch_names.append("None Provided")
+    patch_names = kwargs.pop('patches')
     paths = resolve_patches(patch_names)
     with SCRIPT.open('r') as f:
         source = f.read()
@@ -302,44 +296,53 @@ def cli_minify(**kwargs):
 
 
 if __name__ == "__main__":
-    class HelpTextFormatter(argparse.RawDescriptionHelpFormatter):
-        """Help Text Formatter
-        Credit - https://stackoverflow.com/a/35925919
-        """
-
-        def __add_whitespace(self, idx, iWSpace, text):
-            if idx == 0:
-                return text
-            return (" " * iWSpace) + text
-
-    patches = list(get_patches())
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=HelpTextFormatter)
-    parser.add_argument('command', nargs='+', help="Command to execute")
-    parser.add_argument(
-        '-p', '--patch',
-        action='append',
-        help="Apply patch before minification",
-        default=[]
-    )
+        description="Pre/Post Processing for createstubs.py")
+    parser.set_defaults(func=None)
     parser.add_argument(
         "-o", "--output",
         help="Specify file to output to. Defaults to processed.py",
         type=Path,
         default=(ROOT / 'processed.py')
     )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(help="Command to execute")
+
+    minify_parser = subparsers.add_parser("minify",
+                                          help=("Create minified version of"
+                                                " createstubs.py")
+                                          )
+
+    minify_parser.add_argument(
+        '-p', '--patch',
+        action='append',
+        help="Apply patch before minification",
+        default=[]
+    )
+    minify_parser.add_argument(
         "-d", "--diff",
         help="Print diff report from minify",
         action='store_true'
     )
-    parser.add_argument(
+    minify_parser.add_argument(
         "-n", "--no-report",
         help=("Disables all output from createstubs.py."
               " Use if your having memory related issues."),
         action="store_false"
     )
+    minify_parser.set_defaults(func=cli_minify)
+
+    patch_parser = subparsers.add_parser(
+        "patch",
+        help=("Apply a patch to createstubs.py"))
+    patch_parser.add_argument(
+        "patches",
+        help="List of patches to apply, seperated by a space.",
+        action='append',
+    )
+    patch_parser.set_defaults(func=cli_patch)
+
     args = parser.parse_args()
-    cmd = args.command.pop(0)
-    func = eval(f"cli_{cmd}")
-    func(**vars(args))
+    if not args.func:
+        parser.print_help()
+    else:
+        args.func(**vars(args))
