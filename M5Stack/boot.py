@@ -1,5 +1,5 @@
 import sys 
-sys.path.append('flowlib/lib')
+sys.path.append('os')
 
 import machine, time, m5base, uiflow
 from m5stack import *

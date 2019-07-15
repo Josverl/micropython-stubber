@@ -55,10 +55,26 @@ mpy_esp8622 = [
         'hashlib',           'select',            'uos'
         ]
 
+# M5 Flow (sysname='esp32', nodename='esp32', release='1.11.0', version='v1.10-272-g6fdd9e277 on 2019-06-06', machine='ESP32 module with ESP32')
+mods_m5_flow = [
+    "flowSetup", "peripheral", "gc", "uhashlib", "i2c_bus", "remote", "hashlib", "uheapq", 
+    "bmp280", "simple", "heapq", "uio", "chunk", "uiflow", "io", "ujson", "dht12", "unit", 
+    "json", "uos", "easyIO", "lidar", "upip", "emoji", "m5base", "upip_utarfile", "imu", 
+    "m5uart", "urandom", "mpu6050", "m5ui", "ure", "mstate", "machine", "uselect", "numbers", 
+    "math", "usocket", "pid", "microWebSocket", "ussl", "speak", "microWebSrv", "ustruct", 
+    "time_ex", "microWebTemplate", "utime", "urequests", "micropython", "utimeq", "wave", 
+    "neopixel", "uzlib", "wavplayer", "network", "zlib"
+]
+#units/_adc 
+#units/_ext_io ,  units/_gps, units/_env, units/_dac  , units/_color  . units/_cardKB, units/_button   , units/_angle ,  units/_dual_button , units/_earth   , units/_finger   
+
+print('Known firmwares ========================')
 print( "mpy  esp8622:", len(mpy_esp8622))
 print( "mpy  esp32  :", len(mpy_esp32) ) 
 print( "lobo esp32  :", len(lobo_esp32 )) 
+print( "m5 flow  :", len(mods_m5_flow )) 
 
+print('LoBoris ========================')
 shared_esp32 = set(mpy_esp32) & set(lobo_esp32) 
 print( "Shared esp32 modules :", len(shared_esp32 )) 
 
@@ -67,9 +83,24 @@ print( "mpy 32 only modules :", len(mpy_only))
 
 lobo_esp32_only = set(lobo_esp32) - set(mpy_esp32) 
 print( "lobo_esp32 only modules :", len(lobo_esp32_only)) 
-
-print( "mpy  modules :", len(mpy_esp32 ),  "=", len(mpy_only)+ len(shared_esp32)) 
 print( "lobo_esp32 modules :", len(lobo_esp32 ), "=", len(lobo_esp32_only)+ len(shared_esp32)) 
+
+print('M5 Stack ========================')
+M5_only = set(mpy_esp32) - set(mods_m5_flow) 
+M5_shrd = set(mpy_esp32) & set(mods_m5_flow) 
+print( "M5 shared esp32 modules :", len(M5_shrd)) 
+print( "M5 only   esp32 modules :", len(M5_only)) 
+
+#M5 Version 
+#import m5base
+# __VERSION__ = m5base.get_version()
+# 'V1.3.2'
+
+print(' MicroPython ========================')
+print( "mpy  modules :", len(mpy_esp32 ),  "=", len(mpy_only)+ len(shared_esp32)) 
+
+
+# Print module lists 
 
 print("\nshared_esp32 = ",end='')
 print (sorted(shared_esp32))
@@ -120,5 +151,7 @@ all = [ '_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106'
 # [m for m in all if '/' in m] + [m for m in all if '/' not in m]
 # todo: Move upip earlier 
 # todo: 
+
+
 
 
