@@ -7,12 +7,13 @@ PATCHES=`git for-each-ref refs/heads/patch --format='%(refname)' | cut -d/ -f3-`
 
 # Update Patches
 ROOT=`git rev-parse --show-toplevel`
+SCRIPT="$ROOT/createstubs.py"
 
 # Make Patches
 for patch in "${PATCHES[@]}"; do
 	NAME=`echo $patch | cut -c 7-`
 	OUT="$ROOT/patches/$NAME.patch"
-	git format-patch --stdout --root "$patch" -1 > "$OUT"
+	git format-patch -1 "$patch" "$SCRIPT" --no-signature --stdout > "$OUT"
 	# Stage
 	git add "$OUT"
 done
