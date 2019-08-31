@@ -57,98 +57,129 @@ mpy_esp8622 = [
 
 # M5 Flow (sysname='esp32', nodename='esp32', release='1.11.0', version='v1.10-272-g6fdd9e277 on 2019-06-06', machine='ESP32 module with ESP32')
 mods_m5_flow = [
-    "flowSetup", "peripheral", "gc", "uhashlib", "i2c_bus", "remote", "hashlib", "uheapq", 
-    "bmp280", "simple", "heapq", "uio", "chunk", "uiflow", "io", "ujson", "dht12", "unit", 
-    "json", "uos", "easyIO", "lidar", "upip", "emoji", "m5base", "upip_utarfile", "imu", 
-    "m5uart", "urandom", "mpu6050", "m5ui", "ure", "mstate", "machine", "uselect", "numbers", 
-    "math", "usocket", "pid", "microWebSocket", "ussl", "speak", "microWebSrv", "ustruct", 
-    "time_ex", "microWebTemplate", "utime", "urequests", "micropython", "utimeq", "wave", 
-    "neopixel", "uzlib", "wavplayer", "network", "zlib"
+        "__main__", "m5flow/m5mqtt", "math", "uerrno", "_thread", "m5flow/m5stack", "microWebSocket", 
+        "uhashlib", "ak8963", "m5flow/peripheral", "microWebSrv", "uheapq", "errno", "m5flow/unit/ext_io", 
+        "random", "ure", "freesans20", "m5flow/unit/ir", "re", "urequests", "functools", "m5flow/unit/ncir", "select", 
+        "uselect", "gc", "m5flow/unit/relay", "socket", "usocket", "hashlib", "m5flow/unit/rgb_", "ssd1306", "ussl", "heapq", 
+        "m5flow/unit/tof", "ssl", "ustruct", "io", "m5flow/units", "struct", "utime", "json", "m5flow/utils", "sys", "utimeq", 
+        "logging", "m5flow/wifichoose", "time", "uzlib", "m5base", "m5flow/wificonfig", "tpcalib", "websocket", "m5flow/app_manage", 
+        "m5flow/wifisetup", "ubinascii", "writer", "m5flow/i2c_bus", "m5ui", "ucollections", "ymodem", "m5flow/m5cloud", "machine", 
+        "uctypes", "zlib" 
 ]
-#units/_adc 
-#units/_ext_io ,  units/_gps, units/_env, units/_dac  , units/_color  . units/_cardKB, units/_button   , units/_angle ,  units/_dual_button , units/_earth   , units/_finger   
+
+mods_exclude = []
+mods_problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
+mods_excluded = ['__main__', '_boot', '_webrepl' ,'uasyncio/__init__'"webrepl", "webrepl_setup","uasyncio.__init__","_onewire"]
+
+
 
 print('Known firmwares ========================')
 print( "mpy  esp8622:", len(mpy_esp8622))
 print( "mpy  esp32  :", len(mpy_esp32) ) 
 print( "lobo esp32  :", len(lobo_esp32 )) 
-print( "m5 flow  :", len(mods_m5_flow )) 
+print( "m5 flow     :", len(mods_m5_flow )) 
 
-print('LoBoris ========================')
-shared_esp32 = set(mpy_esp32) & set(lobo_esp32) 
-print( "Shared esp32 modules :", len(shared_esp32 )) 
-
-mpy_only = set(mpy_esp32) - set(lobo_esp32) 
-print( "mpy 32 only modules :", len(mpy_only)) 
-
-lobo_esp32_only = set(lobo_esp32) - set(mpy_esp32) 
-print( "lobo_esp32 only modules :", len(lobo_esp32_only)) 
-print( "lobo_esp32 modules :", len(lobo_esp32 ), "=", len(lobo_esp32_only)+ len(shared_esp32)) 
-
-print('M5 Stack ========================')
-M5_only = set(mpy_esp32) - set(mods_m5_flow) 
-M5_shrd = set(mpy_esp32) & set(mods_m5_flow) 
-print( "M5 shared esp32 modules :", len(M5_shrd)) 
-print( "M5 only   esp32 modules :", len(M5_only)) 
-
-#M5 Version 
-#import m5base
-# __VERSION__ = m5base.get_version()
-# 'V1.3.2'
-
-print(' MicroPython ========================')
-print( "mpy  modules :", len(mpy_esp32 ),  "=", len(mpy_only)+ len(shared_esp32)) 
-
-
-# Print module lists 
-
-print("\nshared_esp32 = ",end='')
-print (sorted(shared_esp32))
-
-print("\nmpy_only = ",end='')
-print (sorted(mpy_only))
-
-print("\nlobo_esp32_only = ",end='')
-print (sorted(lobo_esp32_only))
-
-#Which are shared between mpy esp32 / esp8622 
-
-shared_mpyEspXX = set(mpy_esp8622) & set(mpy_esp32) 
-print( "Shared mpy espxxx modules :", len(shared_mpyEspXX )) 
-
-print("\nall = ",end='')
-print (sorted(set(mpy_esp32) | set(lobo_esp32) | set(mpy_esp8622)))
-
-
-## result is : 
-
-shared = ['_thread', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'errno', 'framebuf', 
-            'gc', 'hashlib', 'heapq', 'io', 'json', 'machine', 'math', 'micropython', 'network', 'os', 'random', 
-            're', 'select', 'ssl', 'struct', 'sys', 'time', 'ubinascii', 'ucollections', 'uctypes', 'uerrno', 
-            'uhashlib', 'uheapq', 'uio', 'ujson', 'uos', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 
-            'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'zlib']
-
-mpy_only = ['_boot', '_onewire', '_webrepl', 'apa106', 'dht', 'ds18x20', 'esp', 'esp32', 'flashbdev', 'inisetup', 
-            'neopixel', 'ntptime', 'onewire', 'socketupip', 'ucryptolib', 'umqtt/robust', 'umqtt/simple', 'uwebsocket', 
-            'webrepl', 'webrepl_setup', 'websocket_helper']
-
-lobo_esp32_only = ['ak8963', 'curl', 'display', 'freesans20', 'functools', 'gsm', 'logging', 'microWebSocket', 'microWebSrv', 
-            'microWebTemplate', 'mpu6500', 'mpu9250', 'pye', 'requests', 'socket', 'ssd1306', 'ssh', 'tpcalib', 'upip', 
-            'websocket', 'writer', 'ymodem']
-
-all = [ '_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'upip',
-        'cmath', 'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 
-        'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server', 
-        'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate', 
-        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests', 
-        'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 
-        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos',  'upip_utarfile', 
-        'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl', 
-        'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
-
+all = sorted(( set(mpy_esp32) | set(lobo_esp32) | set(mpy_esp8622) | set(mods_m5_flow) 
+                    )-set( set(mods_excluded) | set(mods_problematic ) ) )
 
 # Adjust order 
 # [m for m in all if '/' in m] + [m for m in all if '/' not in m]
+
+print( "all known   :", len(all )) 
+
+print("\nall = ",end='')
+print (all)
+
+all = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'curl', 'dht', 'display',
+ 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 'flashbdev', 'framebuf', 'freesans20', 
+'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage',
+ 'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io', 
+ 'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units', 
+ 'm5flow/utils', 'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket', 
+ 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 
+ 'os', 'port_diag', 'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 
+ 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib', 
+ 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 
+ 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket',
+  'uzlib', 'webrepl', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+
+# print('LoBoris ========================')
+# shared_esp32 = set(mpy_esp32) & set(lobo_esp32) 
+# print( "Shared esp32 modules :", len(shared_esp32 )) 
+
+# mpy_only = set(mpy_esp32) - set(lobo_esp32) 
+# print( "mpy 32 only modules :", len(mpy_only)) 
+
+# lobo_esp32_only = set(lobo_esp32) - set(mpy_esp32) 
+# print( "lobo_esp32 only modules :", len(lobo_esp32_only)) 
+# print( "lobo_esp32 modules :", len(lobo_esp32 ), "=", len(lobo_esp32_only)+ len(shared_esp32)) 
+
+# print('M5 Stack ========================')
+# M5_only = set(mpy_esp32) - set(mods_m5_flow) 
+# M5_shrd = set(mpy_esp32) & set(mods_m5_flow) 
+# print( "M5 shared esp32 modules :", len(M5_shrd)) 
+# print( "M5 only   esp32 modules :", len(M5_only)) 
+
+# #M5 Version 
+# #import m5base
+# # __VERSION__ = m5base.get_version()
+# # 'V1.3.2'
+
+# print(' MicroPython ========================')
+# print( "mpy  modules :", len(mpy_esp32 ),  "=", len(mpy_only)+ len(shared_esp32)) 
+
+
+# # Print module lists 
+
+# print("\nshared_esp32 = ",end='')
+# print (sorted(shared_esp32))
+
+# print("\nmpy_only = ",end='')
+# print (sorted(mpy_only))
+
+# print("\nlobo_esp32_only = ",end='')
+# print (sorted(lobo_esp32_only))
+
+# #Which are shared between mpy esp32 / esp8622 
+
+# shared_mpyEspXX = set(mpy_esp8622) & set(mpy_esp32) 
+# print( "Shared mpy espxxx modules :", len(shared_mpyEspXX )) 
+
+
+
+
+# ## result is : 
+
+# shared = ['_thread', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'errno', 'framebuf', 
+#             'gc', 'hashlib', 'heapq', 'io', 'json', 'machine', 'math', 'micropython', 'network', 'os', 'random', 
+#             're', 'select', 'ssl', 'struct', 'sys', 'time', 'ubinascii', 'ucollections', 'uctypes', 'uerrno', 
+#             'uhashlib', 'uheapq', 'uio', 'ujson', 'uos', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 
+#             'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'zlib']
+
+# mpy_only = ['_boot', '_onewire', '_webrepl', 'apa106', 'dht', 'ds18x20', 'esp', 'esp32', 'flashbdev', 'inisetup', 
+#             'neopixel', 'ntptime', 'onewire', 'socketupip', 'ucryptolib', 'umqtt/robust', 'umqtt/simple', 'uwebsocket', 
+#             'webrepl', 'webrepl_setup', 'websocket_helper']
+
+# lobo_esp32_only = ['ak8963', 'curl', 'display', 'freesans20', 'functools', 'gsm', 'logging', 'microWebSocket', 'microWebSrv', 
+#             'microWebTemplate', 'mpu6500', 'mpu9250', 'pye', 'requests', 'socket', 'ssd1306', 'ssh', 'tpcalib', 'upip', 
+#             'websocket', 'writer', 'ymodem']
+
+all = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 
+        'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 'flashbdev', 
+        'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server', 
+        'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage', 'm5flow/i2c_bus', 
+        'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io', 'm5flow/unit/ir', 
+        'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units', 'm5flow/utils', 
+        'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket', 'microWebSrv', 
+        'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 
+        'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 
+        'tpcalib', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 
+        'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 
+        'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl', 
+        'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+
+
+
 # todo: Move upip earlier 
 # todo: 
 

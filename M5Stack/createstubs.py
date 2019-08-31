@@ -49,16 +49,19 @@ class Stubber():
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
-        # below contains the combines modules from  Micropython ESP8622, ESP32 and Loboris Modules
-        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'upip', #do upip early
-                        'cmath', 'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led',
-                        'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server',
-                        'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
-                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests',
-                        'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio', 'uasyncio/core', 'ubinascii',
-                        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip_utarfile',
-                        'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl',
-                        'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+        # below contains the combines modules from  Micropython ESP8622, ESP32, Loboris and M5Stack 
+        self.modules = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 
+            'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 'flashbdev', 'framebuf', 'freesans20', 
+            'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage',
+            'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io', 
+            'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units', 
+            'm5flow/utils', 'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket', 
+            'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 
+            'os', 'port_diag', 'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 
+            'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib', 
+            'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 
+            'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket',
+            'uzlib', 'webrepl', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
@@ -141,14 +144,32 @@ class Stubber():
             file_name = module_name.replace('.', '_') + ".py"
 
         #import the module (as new_module) to examine it
+        failed = False
         try:
             new_module = __import__(module_name)
-        except ImportError as e:
-            self._log.debug("Unable to import module: {} : {}".format(module_name, e))
-            return
-        except e:
-            self._log.error("Failed to import module: {}".format(module_name))
-            return
+        except:
+            failed = True
+            self._log.debug("Failed to import module: {}".format(module_name))
+            if not '.' in module_name:
+                return
+
+        #re-try import after importing parents     
+        if failed and '.' in module_name: 
+            self._log.debug("re-try import with parents") 
+            levels = module_name.split('.')
+            for n in range(1,len(levels)):
+                parent_name = ".".join(levels[0:n])
+                try: 
+                    parent = __import__(parent_name)
+                    del parent
+                except:
+                    pass
+            try:
+                new_module = __import__(module_name)
+                self._log.debug("OK , imported module: {} ".format(module_name))
+            except: # now bail out
+                self._log.error("Failed to import module: {}".format(module_name))
+                return
 
         # Start a new file
         with open(file_name, "w") as fp:
@@ -260,13 +281,11 @@ class Stubber():
         try:
             # write json by node to reduce memory requirements
             with open(f_name, 'w') as f:
-                print('starting header')
                 f.write('{')
                 f.write(dumps(self._report_fwi)[1:-1])
                 f.write(',')
                 f.write(dumps(self._report_stb)[1:-1])
                 f.write(',')
-                print('starting modules')
                 f.write('"modules" :[')
                 start = True
                 for n in self._report:
@@ -274,7 +293,6 @@ class Stubber():
                         start = False
                     else:
                         f.write(',')
-                    print('starting mod')
                     f.write(dumps(n))
                 print('almost done')
                 f.write(']}')
@@ -323,7 +341,6 @@ class Stubber():
 
 
 def main():
-    global stubber
     try:
         logging.basicConfig(level=logging.INFO)
     except:
@@ -333,8 +350,6 @@ def main():
     #stubber.add_modules(['xyz'])
     stubber.clean()
     # limit for debugging
-    stubber.modules = ['machine']
     stubber.create_all_stubs()
     stubber.report()
-
 main()
