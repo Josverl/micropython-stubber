@@ -20,9 +20,10 @@ except:
 
 class Stubber():
     "Generate stubs for modules in firmware"
-    def __init__(self, path: str = None):
+    def __init__(self, path: str = None, firmware_id: str = None):
         self._log = logging.getLogger('stubber')
         self._report = []
+        self._fid = firmware_id
         u = os.uname()
         # use sys.implementation for consistency
         v = ".".join([str(i) for i in sys.implementation.version])
@@ -191,7 +192,7 @@ class Stubber():
             gc.collect()
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str):
-        "Write an object stub to an open file. Can call recursive."
+        "Write an module/object stub to an open file. Can be called recursive."
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
@@ -243,16 +244,18 @@ class Stubber():
         except:
             pass
 
-    @staticmethod
-    def firmware_ID(asfile: bool = False):
+    def firmware_ID(self, asfile: bool = False):
         "Get a sensible firmware ID"
-        if os.uname().sysname in 'esp32_LoBo':
-            #version in release
-            ver = os.uname().release
+        if self._fid:
+            fid = self._fid
         else:
-            # version before '-' in version
-            ver = os.uname().version.split('-')[0]
-        fid = "{} {}".format(os.uname().sysname, ver)
+            if os.uname().sysname in 'esp32_LoBo':
+                #version in release
+                ver = os.uname().release
+            else:
+                # version before '-' in version
+                ver = os.uname().version.split('-')[0]
+            fid = "{} {}".format(os.uname().sysname, ver)
         if asfile:
             # path name restrictions
             chars = " .()/\\:$"
@@ -260,14 +263,22 @@ class Stubber():
                 fid = fid.replace(c, "_")
         return fid
 
-    def clean(self):
+    def clean(self, path: str = None):
         "Remove all files from the stub folder"
-        self._log.info("Clean/remove files in stubfolder: {}".format(self.path))
-        for fn in os.listdir(self.path):
+        if path is None:
+            path = self.path
+        self._log.info("Clean/remove files in folder: {}".format(path))
+        for fn in os.listdir(path):
             try:
-                os.remove("{}/{}".format(self.path, fn))
+                item = "{}/{}".format(path, fn)
+                os.remove(item)
             except:
-                pass
+                try: #folder
+                    self.clean(item)
+                    os.rmdir(item)
+                except:
+                    pass  
+
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
@@ -294,7 +305,6 @@ class Stubber():
                     else:
                         f.write(',')
                     f.write(dumps(n))
-                print('almost done')
                 f.write(']}')
         except:
             self._log.error("Failed to create the report.")
@@ -345,11 +355,14 @@ def main():
         logging.basicConfig(level=logging.INFO)
     except:
         pass
-    # Now clean up and get to work
-    stubber = Stubber()
-    #stubber.add_modules(['xyz'])
-    stubber.clean()
-    # limit for debugging
+        
+    # stubber = Stubber()
+    # Specify a firmware name & version
+    stubber = Stubber(firmware_id='M5Flow v1.1.2')
+
+    # stubber.clean()
+    # stubber.add_modules(['xyz'])
+
     stubber.create_all_stubs()
     stubber.report()
 main()
