@@ -1,4 +1,14 @@
 #pylint:disable=bad-whitespace, trailing-whitespace, bad-continuation
+#######################################################################
+# the exceptions 
+#######################################################################
+mods_problematic = set(["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"])
+mods_excluded = set(['__main__', '_boot', '_webrepl' ,'uasyncio/__init__', "webrepl", "webrepl_setup","uasyncio.__init__","_onewire",'example_pub_button', 'example_sub_led'])
+remove = set( mods_excluded | mods_problematic  )
+
+#######################################################################
+# LoBo ESP32 3.2.24  
+#######################################################################
 lobo_esp32 = set([ ##Loboris
             '_thread', 'ak8963', 'array', 'binascii', 'btree', 'builtins',
             'cmath', 'collections', 'curl', 'display', 'errno', 'framebuf',
@@ -10,6 +20,10 @@ lobo_esp32 = set([ ##Loboris
             'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'uos', 'upip',
             'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket',
             'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'websocket', 'writer', 'ymodem', 'zlib'])
+
+#######################################################################
+# ESP32 v1.10?
+#######################################################################
 
 mpy_esp32 =set([ #standard ESP32 micropython        
         'framebuf',          'socket',            'upip',
@@ -31,6 +45,9 @@ mpy_esp32 =set([ #standard ESP32 micropython
         'esp32',             're',                'umqtt/simple',      'websocket_helper',
         'flashbdev',         'select',            'uos',               'zlib'
         ])
+#######################################################################
+# ESP8622 1.11
+#######################################################################
 
 #(sysname='esp8266', nodename='esp8266', release='2.2.0-dev(9422289)', version='v1.11-8-g48dcbbe60 on 2019-05-29', machine='ESP module with ESP8266')
 mpy_esp8622 = set([
@@ -56,6 +73,10 @@ mpy_esp8622 = set([
         'hashlib',           'select',            'uos'
         ])
 
+#######################################################################
+# M5Flow UI 1.2.1
+#######################################################################
+
 # 1.2.1 (sysname='esp32', nodename='esp32', release='1.11.0', version='v1.10-272-g6fdd9e277 on 2019-06-06', machine='ESP32 module with ESP32')
 mods_m5_flow = set( [
     '_thread','ak8963','array','binascii','btree','builtins','cmath','collections','display','errno',
@@ -72,6 +93,10 @@ mods_m5_flow = set( [
     'ujson','uos','upip','upip_utarfile','upysh','urandom','ure','urequests','uselect','usocket',
     'ussl','ustruct','utime','utimeq','uzlib','websocket','writer','ymodem','zlib'
 ])
+
+#######################################################################
+# M5 FlowUI 1.4.0-beta
+#######################################################################
 
 raw = """
 __main__          flowlib/lib/speak flowlib/units/_ext_io               neopixel
@@ -114,11 +139,36 @@ flowlib/lib/sh200q                  flowlib/units/_env                  mlx90640
 
 M5flowui = set(raw.split())
 
+#######################################################################
+# Lego EV3 MicroPython
+#######################################################################
+
+raw = """
+main parameters_c pybricks/uev3dev/messaging umachine
+_thread pybricks/init pybricks/uev3dev/sound uos
+array pybricks/display pybricks/uev3dev/util urandom
+boot pybricks/ev3brick sys ure
+btree pybricks/ev3devices termios uselect
+builtins pybricks/ev3devio tools usocket
+cmath pybricks/parameters ubinascii ussl
+ev3brick_c pybricks/robotics ucollections ustruct
+ev3devices_c pybricks/speaker ucryptolib utime
+ffi pybricks/tools uctypes utimeq
+framebuf pybricks/uev3dev/init uerrno uzlib
+gc pybricks/uev3dev/_alsa uhashlib websocket
+math pybricks/uev3dev/_wand uheapq
+micropython pybricks/uev3dev/display uio
+mmap pybricks/uev3dev/i2c ujson
+"""
+
+Lego_EV3 = set(raw.split())
+
+print("\nstubber.add_modules({})".format(sorted( Lego_EV3 - remove) ))
 
 
-mods_problematic = set(["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"])
-mods_excluded = set(['__main__', '_boot', '_webrepl' ,'uasyncio/__init__', "webrepl", "webrepl_setup","uasyncio.__init__","_onewire",'example_pub_button', 'example_sub_led'])
-
+#######################################################################
+# 
+#######################################################################
 
 
 print('Known firmwares ========================')
