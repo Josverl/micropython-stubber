@@ -10,7 +10,7 @@ import sys
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.1'
+stubber_version = '1.3.2'
 # deal with firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -50,19 +50,16 @@ class Stubber():
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
-        # below contains the combines modules from  Micropython ESP8622, ESP32, Loboris and M5Stack
-        self.modules = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections',
-            'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
-            'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage',
-            'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io',
-            'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units',
-            'm5flow/utils', 'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket',
-            'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire',
-            'os', 'port_diag', 'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl',
-            'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib',
-            'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile',
-            'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket',
-            'uzlib', 'webrepl', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris and pycom
+        self.modules = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 
+            'crypto', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 
+            'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 
+            'microWebSocket', 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 
+            'ntptime', 'onewire', 'os', 'port_diag', 'pycom', 'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306', 
+            'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib', 'uctypes', 
+            'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom', 
+            'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 
+            'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
