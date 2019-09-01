@@ -170,20 +170,29 @@ print("\nstubber.add_modules({})".format(sorted( Lego_EV3 - remove) ))
 # 
 #######################################################################
 
+pycom = set(['pycom', 'crypto'])
+
+#######################################################################
+# 
+#######################################################################
+
 
 print('Known firmwares ========================')
 print( "mpy  esp8622  :", len(mpy_esp8622))
 print( "mpy  esp32    :", len(mpy_esp32) ) 
 print( "lobo esp32    :", len(lobo_esp32 )) 
-print( "m5 flow 1.2   :", len(mods_m5_flow )) 
+print( "LEGO EV3      :", len(Lego_EV3)) 
+print( "pycom         :", len(pycom)) 
+
+print( "\nm5 flow 1.2   :", len(mods_m5_flow )) 
 print( "m5 flowui 1.4 :", len(M5flowui)) 
 
-print("\m5flow1.4.0_only = ",end='')
-print( sorted( (M5flowui - mpy_esp32) -set( mods_excluded | mods_problematic  ) ))
+# print("\m5flow1.4.0_only = ",end='')
+# print( sorted( (M5flowui - mpy_esp32) -set( mods_excluded | mods_problematic  ) ))
 
 
 
-all = sorted(( mpy_esp32 | lobo_esp32 | mpy_esp8622 | mods_m5_flow 
+all = sorted(( mpy_esp32 | lobo_esp32 | mpy_esp8622 | pycom
                     )-set( mods_excluded | mods_problematic  ) )
 
 # Adjust order 
