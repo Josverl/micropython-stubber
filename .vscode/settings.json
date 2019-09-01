@@ -21,12 +21,14 @@
 
     ],
 
-    "spellright.language": [
-        "en"
-    ],
-    "spellright.documentTypes": [
-        "markdown",
-        "latex",
-        "plaintext"
+     "cSpell.words": [
+        "Loboris",
+        "asfile",
+        "nodename",
+        "sysname",
+        "uname",
+        "upython",
+        "ustruct",
+        "webrepl"
     ]
 }
