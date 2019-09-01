@@ -1,5 +1,5 @@
 #pylint:disable=bad-whitespace, trailing-whitespace, bad-continuation
-lobo_esp32 = [ ##Loboris
+lobo_esp32 = set([ ##Loboris
             '_thread', 'ak8963', 'array', 'binascii', 'btree', 'builtins',
             'cmath', 'collections', 'curl', 'display', 'errno', 'framebuf',
             'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'io',
@@ -9,9 +9,9 @@ lobo_esp32 = [ ##Loboris
             'ssl', 'struct', 'sys', 'time', 'tpcalib', 'ubinascii', 'ucollections',
             'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'uos', 'upip',
             'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 'uselect', 'usocket',
-            'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'websocket', 'writer', 'ymodem', 'zlib']
+            'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'websocket', 'writer', 'ymodem', 'zlib'])
 
-mpy_esp32 = [ #standard ESP32 micropython        
+mpy_esp32 =set([ #standard ESP32 micropython        
         'framebuf',          'socket',            'upip',
         '_boot',             'gc',                'ssl',               'upip_utarfile',
         '_onewire',          'hashlib',           'struct',            'upysh',
@@ -30,10 +30,10 @@ mpy_esp32 = [ #standard ESP32 micropython
         'esp',               'random',            'umqtt/robust',      'webrepl_setup',
         'esp32',             're',                'umqtt/simple',      'websocket_helper',
         'flashbdev',         'select',            'uos',               'zlib'
-        ]
+        ])
 
 #(sysname='esp8266', nodename='esp8266', release='2.2.0-dev(9422289)', version='v1.11-8-g48dcbbe60 on 2019-05-29', machine='ESP module with ESP8266')
-mpy_esp8622 = [
+mpy_esp8622 = set([
         'http_client',       'socket',            'upip',
         '_boot',             'http_client_ssl',   'ssd1306',           'upip_utarfile',
         '_onewire',          'http_server',       'ssl',               'upysh',
@@ -54,10 +54,10 @@ mpy_esp8622 = [
         'framebuf',          'random',            'umqtt/robust',      'websocket_helper',
         'gc',                're',                'umqtt/simple',       'zlib',
         'hashlib',           'select',            'uos'
-        ]
+        ])
 
 # 1.2.1 (sysname='esp32', nodename='esp32', release='1.11.0', version='v1.10-272-g6fdd9e277 on 2019-06-06', machine='ESP32 module with ESP32')
-mods_m5_flow = [
+mods_m5_flow = set( [
     '_thread','ak8963','array','binascii','btree','builtins','cmath','collections','display','errno',
     'freesans20','functools','gc','hashlib','heapq','io','json','logging','m5base','m5flow/app_manage',
     'm5flow/i2c_bus','m5flow/m5cloud','m5flow/m5mqtt','m5flow/m5stack','m5flow/m5ucloud',
@@ -71,29 +71,75 @@ mods_m5_flow = [
     'sys','tpcalib','ubinascii','ucollections','uctypes','uerrno','uhashlib','uheapq','uio',
     'ujson','uos','upip','upip_utarfile','upysh','urandom','ure','urequests','uselect','usocket',
     'ussl','ustruct','utime','utimeq','uzlib','websocket','writer','ymodem','zlib'
-]
+])
+
+raw = """
+__main__          flowlib/lib/speak flowlib/units/_ext_io               neopixel
+_onewire          flowlib/lib/time_ex                 flowlib/units/_finger               network
+_thread           flowlib/lib/urequests               flowlib/units/_gps                  os
+array             flowlib/lib/wave  flowlib/units/_ir random
+binascii          flowlib/lib/wavplayer               flowlib/units/_joystick             re
+btree             flowlib/lib/wifiCardKB              flowlib/units/_light                select
+builtins          flowlib/lib/wifiCfg                 flowlib/units/_makey                socket
+cmath             flowlib/lib/wifiWebCfg              flowlib/units/_mlx90640             ssl
+collections       flowlib/m5cloud   flowlib/units/_ncir                 struct
+display           flowlib/m5mqtt    flowlib/units/_pahub                sys
+errno             flowlib/m5stack   flowlib/units/_pbhub                time
+esp               flowlib/m5ucloud  flowlib/units/_pir                  ubinascii
+esp32             flowlib/module    flowlib/units/_relay                ucollections
+espnow            flowlib/modules/_cellular           flowlib/units/_rfid                 ucryptolib
+flowlib/app_manage                  flowlib/modules/_lego               flowlib/units/_rgb                  uctypes
+flowlib/button    flowlib/modules/_legoBoard          flowlib/units/_rgb_multi            uerrno
+flowlib/face      flowlib/modules/_lidarBot           flowlib/units/_servo                uhashlib
+flowlib/faces/_calc                 flowlib/modules/_lorawan            flowlib/units/_tof                  uhashlib
+flowlib/faces/_encode               flowlib/modules/_m5bala             flowlib/units/_tracker              uheapq
+flowlib/faces/_joystick             flowlib/modules/_stepMotor          gc                uos
+flowlib/faces/_keyboard             flowlib/peripheral                  hashlib           upip
+flowlib/faces/_rfid                 flowlib/power     heapq             upip_utarfile
+flowlib/flowSetup flowlib/remote    io                urandom
+flowlib/i2c_bus   flowlib/simple    json              ure
+flowlib/lib/bmm150                  flowlib/timeSchedule                lidar             uselect
+flowlib/lib/bmp280                  flowlib/uiflow    logging           usocket
+flowlib/lib/chunk flowlib/unit      m5base            ussl
+flowlib/lib/dht12 flowlib/units/_adc                  m5uart            ustruct
+flowlib/lib/easyIO                  flowlib/units/_angle                m5ui              utime
+flowlib/lib/emoji flowlib/units/_button               machine           utimeq
+flowlib/lib/imu   flowlib/units/_cardKB               math              uwebsocket
+flowlib/lib/mpu6050                 flowlib/units/_color                microWebSocket    uzlib
+flowlib/lib/mstate                  flowlib/units/_dac                  microWebSrv       zlib
+flowlib/lib/numbers                 flowlib/units/_dual_button          microWebTemplate
+flowlib/lib/pid   flowlib/units/_earth                micropython
+flowlib/lib/sh200q                  flowlib/units/_env                  mlx90640
+"""
+
+M5flowui = set(raw.split())
 
 
 
-mods_problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
-mods_excluded = ['__main__', '_boot', '_webrepl' ,'uasyncio/__init__', "webrepl", "webrepl_setup","uasyncio.__init__","_onewire",'example_pub_button', 'example_sub_led']
+mods_problematic = set(["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"])
+mods_excluded = set(['__main__', '_boot', '_webrepl' ,'uasyncio/__init__', "webrepl", "webrepl_setup","uasyncio.__init__","_onewire",'example_pub_button', 'example_sub_led'])
 
 
 
 print('Known firmwares ========================')
-print( "mpy  esp8622:", len(mpy_esp8622))
-print( "mpy  esp32  :", len(mpy_esp32) ) 
-print( "lobo esp32  :", len(lobo_esp32 )) 
-print( "m5 flow     :", len(mods_m5_flow )) 
+print( "mpy  esp8622  :", len(mpy_esp8622))
+print( "mpy  esp32    :", len(mpy_esp32) ) 
+print( "lobo esp32    :", len(lobo_esp32 )) 
+print( "m5 flow 1.2   :", len(mods_m5_flow )) 
+print( "m5 flowui 1.4 :", len(M5flowui)) 
 
-all = sorted(( set(mpy_esp32) | set(lobo_esp32) | set(mpy_esp8622) | set(mods_m5_flow) 
-                    )-set( set(mods_excluded) | set(mods_problematic ) ) )
+print("\m5flow1.4.0_only = ",end='')
+print( sorted( (M5flowui - mpy_esp32) -set( mods_excluded | mods_problematic  ) ))
+
+
+
+all = sorted(( mpy_esp32 | lobo_esp32 | mpy_esp8622 | mods_m5_flow 
+                    )-set( mods_excluded | mods_problematic  ) )
 
 # Adjust order 
 # [m for m in all if '/' in m] + [m for m in all if '/' not in m]
 
 print( "all known   :", len(all )) 
-
 print("\nall = ",end='')
 print (all)
 
@@ -109,6 +155,11 @@ all = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'b
  'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 
  'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket',
   'uzlib', 'webrepl', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+
+
+
+
+
 
 # print('LoBoris ========================')
 # shared_esp32 = set(mpy_esp32) & set(lobo_esp32) 

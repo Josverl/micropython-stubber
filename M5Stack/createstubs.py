@@ -10,9 +10,9 @@ import sys
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.0'
-# deal with firmware specific implementations
-try: 
+stubber_version = '1.3.1'
+# deal with firmware specific implementations.
+try:
     from machine import resetWDT #LoBo
 except:
     def resetWDT():
@@ -20,13 +20,14 @@ except:
 
 class Stubber():
     "Generate stubs for modules in firmware"
-    def __init__(self, path: str = None):
+    def __init__(self, path: str = None, firmware_id: str = None):
         self._log = logging.getLogger('stubber')
         self._report = []
+        self._fid = firmware_id
         u = os.uname()
         # use sys.implementation for consistency
         v = ".".join([str(i) for i in sys.implementation.version])
-        self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.get_firmware_ID()}}
+        self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.firmware_ID()}}
         self._report_stb = {'stubber':{'version': stubber_version}}
         del u
         del v
@@ -38,7 +39,7 @@ class Stubber():
             #determine path for stubs
             path = "{}/stubs/{}".format(
                 self.get_root(),
-                self.get_firmware_ID(asfile=True)
+                self.firmware_ID(asfile=True)
                 ).replace('//', '/')
 
         self.path = path
@@ -49,17 +50,17 @@ class Stubber():
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
-        # below contains the combines modules from  Micropython ESP8622, ESP32, Loboris and M5Stack 
-        self.modules = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 
-            'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 'flashbdev', 'framebuf', 'freesans20', 
+        # below contains the combines modules from  Micropython ESP8622, ESP32, Loboris and M5Stack
+        self.modules = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections',
+            'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
             'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage',
-            'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io', 
-            'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units', 
-            'm5flow/utils', 'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket', 
-            'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 
-            'os', 'port_diag', 'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 
-            'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib', 
-            'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 
+            'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io',
+            'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units',
+            'm5flow/utils', 'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket',
+            'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire',
+            'os', 'port_diag', 'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl',
+            'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib',
+            'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile',
             'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket',
             'uzlib', 'webrepl', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
@@ -88,7 +89,7 @@ class Stubber():
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.get_firmware_ID()))
+        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.firmware_ID()))
         # start with the (more complex) modules with a / first to reduce memory problems
         self.modules = [m for m in self.modules if '/' in m] + [m for m in self.modules if '/' not in m]
         gc.collect()
@@ -146,34 +147,34 @@ class Stubber():
         #import the module (as new_module) to examine it
         failed = False
         try:
-            new_module = __import__(module_name)
+            new_module = __import__(module_name, None, None, ('*'))
         except:
             failed = True
             self._log.debug("Failed to import module: {}".format(module_name))
             if not '.' in module_name:
                 return
 
-        #re-try import after importing parents     
-        if failed and '.' in module_name: 
-            self._log.debug("re-try import with parents") 
+        #re-try import after importing parents
+        if failed and '.' in module_name:
+            self._log.debug("re-try import with parents")
             levels = module_name.split('.')
-            for n in range(1,len(levels)):
+            for n in range(1, len(levels)):
                 parent_name = ".".join(levels[0:n])
-                try: 
+                try:
                     parent = __import__(parent_name)
                     del parent
                 except:
                     pass
             try:
-                new_module = __import__(module_name)
+                new_module = __import__(module_name, None, None, ('*'))
                 self._log.debug("OK , imported module: {} ".format(module_name))
             except: # now bail out
-                self._log.error("Failed to import module: {}".format(module_name))
+                self._log.debug("Failed to import module: {}".format(module_name))
                 return
 
         # Start a new file
         with open(file_name, "w") as fp:
-            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.get_firmware_ID(), os.uname(), stubber_version)
+            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.firmware_ID(), os.uname(), stubber_version)
             fp.write(s)
             self.write_object_stub(fp, new_module, module_name, "")
             self._report.append({"module":module_name, "file": file_name})
@@ -243,11 +244,10 @@ class Stubber():
         except:
             pass
 
-    @staticmethod
-    def get_firmware_ID( asfile: bool = False):
+    def firmware_ID(self, asfile: bool = False):
         "Get a sensible firmware ID"
-        if 'firmware_id' in globals():
-            fid = firmware_id
+        if self._fid:
+            fid = self._fid
         else:
             if os.uname().sysname in 'esp32_LoBo':
                 #version in release
@@ -277,14 +277,13 @@ class Stubber():
                     self.clean(item)
                     os.rmdir(item)
                 except:
-                    pass  
-
+                    pass
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(
             len(self._report),
-            self.get_firmware_ID(),
+            self.firmware_ID(),
             self.path
             ))
         f_name = "{}/{}".format(self.path, filename)
@@ -349,18 +348,17 @@ class Stubber():
                 r = '/'
         return r
 
-
 def main():
     try:
         logging.basicConfig(level=logging.INFO)
     except:
         pass
-    # optionally specify a firmware name & version in the firmware_id variable
-    # firmware_id = 'Hoverbot v1.2.1'     
     stubber = Stubber()
-    stubber.clean('stubs')
-    # stubber.add_modules(['xyz'])
+    # Specify a firmware name & version
+    #stubber = Stubber(firmware_id='M5 FlowUI v1.4.0-beta')
 
+    stubber.clean()
+    # stubber.add_modules(['xyz'])
     stubber.create_all_stubs()
     stubber.report()
 main()

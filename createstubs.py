@@ -169,7 +169,7 @@ class Stubber():
                 new_module = __import__(module_name, None, None, ('*'))
                 self._log.debug("OK , imported module: {} ".format(module_name))
             except: # now bail out
-                self._log.error("Failed to import module: {}".format(module_name))
+                self._log.debug("Failed to import module: {}".format(module_name))
                 return
 
         # Start a new file
@@ -353,9 +353,10 @@ def main():
         logging.basicConfig(level=logging.INFO)
     except:
         pass
-    # stubber = Stubber()
+    stubber = Stubber()
     # Specify a firmware name & version
-    stubber = Stubber(firmware_id='M5Flow v1.1.2')
+    #stubber = Stubber(firmware_id='M5 FlowUI v1.4.0-beta')
+
     stubber.clean()
     # stubber.add_modules(['xyz'])
     stubber.create_all_stubs()

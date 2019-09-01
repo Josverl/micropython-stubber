@@ -143,11 +143,10 @@ the script tries to determine a firmware ID and version from the information pro
 this firmware ID is used in the stubs , and in the foldername to store the subs.
 
 If you need, or prefer, to specify a firmware ID you can do so by setting the firmware_id variable before importing createstubs
-
+for this you will need to edit the createstubs.py file 
 ``` python
->>>
-firmware_id = 'M5Flow v1.2.1'
-import createstubs
+    
+    firmware_id = 'HoverBot v1.2.1'
 ```
 The generation will take a few minutes ( 2-5 minutes) depending on the speed of the board and the number of included modules.
 
