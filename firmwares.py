@@ -1,3 +1,4 @@
+#pylint:disable=bad-whitespace, trailing-whitespace, bad-continuation
 lobo_esp32 = [ ##Loboris
             '_thread', 'ak8963', 'array', 'binascii', 'btree', 'builtins',
             'cmath', 'collections', 'curl', 'display', 'errno', 'framebuf',
@@ -11,7 +12,7 @@ lobo_esp32 = [ ##Loboris
             'ussl', 'ustruct', 'utime', 'utimeq', 'uzlib', 'websocket', 'writer', 'ymodem', 'zlib']
 
 mpy_esp32 = [ #standard ESP32 micropython        
-        'framebuf',          'socket'            'upip',
+        'framebuf',          'socket',            'upip',
         '_boot',             'gc',                'ssl',               'upip_utarfile',
         '_onewire',          'hashlib',           'struct',            'upysh',
         '_thread',           'heapq',             'sys',               'urandom',
@@ -67,9 +68,9 @@ mods_m5_flow = [
         "uctypes", "zlib" 
 ]
 
-mods_exclude = []
+
 mods_problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
-mods_excluded = ['__main__', '_boot', '_webrepl' ,'uasyncio/__init__'"webrepl", "webrepl_setup","uasyncio.__init__","_onewire"]
+mods_excluded = ['__main__', '_boot', '_webrepl' ,'uasyncio/__init__', "webrepl", "webrepl_setup","uasyncio.__init__","_onewire",'example_pub_button', 'example_sub_led']
 
 
 
@@ -90,8 +91,8 @@ print( "all known   :", len(all ))
 print("\nall = ",end='')
 print (all)
 
-all = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'curl', 'dht', 'display',
- 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led', 'flashbdev', 'framebuf', 'freesans20', 
+all = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 
+'curl', 'dht', 'display',  'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 
 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage',
  'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io', 
  'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units', 
