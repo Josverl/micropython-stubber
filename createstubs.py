@@ -10,19 +10,20 @@ import sys
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.2.0'
+stubber_version = '1.3.0'
 # deal with firmware specific implementations
 try:
-    from machine import resetWDT
+    from machine import resetWDT #LoBo
 except:
     def resetWDT():
         pass
 
 class Stubber():
     "Generate stubs for modules in firmware"
-    def __init__(self, path: str = None):
+    def __init__(self, path: str = None, firmware_id: str = None):
         self._log = logging.getLogger('stubber')
         self._report = []
+        self._fid = firmware_id
         u = os.uname()
         # use sys.implementation for consistency
         v = ".".join([str(i) for i in sys.implementation.version])
@@ -49,16 +50,19 @@ class Stubber():
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
-        # below contains the combines modules from  Micropython ESP8622, ESP32 and Loboris Modules
-        self.modules = ['_boot', '_onewire', '_thread', '_webrepl', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'upip', #do upip early
-                        'cmath', 'collections', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'example_pub_button', 'example_sub_led',
-                        'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'http_client', 'http_client_ssl', 'http_server',
-                        'http_server_ssl', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
-                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'port_diag', 'pye', 'random', 're', 'requests',
-                        'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio', 'uasyncio/core', 'ubinascii',
-                        'ucollections', 'ucryptolib', 'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip_utarfile',
-                        'upysh', 'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl',
-                        'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
+        # below contains the combines modules from  Micropython ESP8622, ESP32, Loboris and M5Stack
+        self.modules = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections',
+            'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
+            'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'm5base', 'm5flow/app_manage',
+            'm5flow/i2c_bus', 'm5flow/m5cloud', 'm5flow/m5mqtt', 'm5flow/m5stack', 'm5flow/peripheral', 'm5flow/unit/ext_io',
+            'm5flow/unit/ir', 'm5flow/unit/ncir', 'm5flow/unit/relay', 'm5flow/unit/rgb_', 'm5flow/unit/tof', 'm5flow/units',
+            'm5flow/utils', 'm5flow/wifichoose', 'm5flow/wificonfig', 'm5flow/wifisetup', 'm5ui', 'machine', 'math', 'microWebSocket',
+            'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire',
+            'os', 'port_diag', 'pye', 'random', 're', 'requests', 'select', 'socket', 'socketupip', 'ssd1306', 'ssh', 'ssl',
+            'struct', 'sys', 'time', 'tpcalib', 'uasyncio/__init__', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib',
+            'uctypes', 'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile',
+            'urandom', 'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket',
+            'uzlib', 'webrepl', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
 
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
@@ -141,14 +145,32 @@ class Stubber():
             file_name = module_name.replace('.', '_') + ".py"
 
         #import the module (as new_module) to examine it
+        failed = False
         try:
-            new_module = __import__(module_name)
-        except ImportError as e:
-            self._log.debug("Unable to import module: {} : {}".format(module_name, e))
-            return
-        except e:
-            self._log.error("Failed to import module: {}".format(module_name))
-            return
+            new_module = __import__(module_name, None, None, ('*'))
+        except:
+            failed = True
+            self._log.debug("Failed to import module: {}".format(module_name))
+            if not '.' in module_name:
+                return
+
+        #re-try import after importing parents
+        if failed and '.' in module_name:
+            self._log.debug("re-try import with parents")
+            levels = module_name.split('.')
+            for n in range(1, len(levels)):
+                parent_name = ".".join(levels[0:n])
+                try:
+                    parent = __import__(parent_name)
+                    del parent
+                except:
+                    pass
+            try:
+                new_module = __import__(module_name, None, None, ('*'))
+                self._log.debug("OK , imported module: {} ".format(module_name))
+            except: # now bail out
+                self._log.error("Failed to import module: {}".format(module_name))
+                return
 
         # Start a new file
         with open(file_name, "w") as fp:
@@ -170,7 +192,7 @@ class Stubber():
             gc.collect()
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str):
-        "Write an object stub to an open file. Can call recursive."
+        "Write an module/object stub to an open file. Can be called recursive."
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
@@ -222,16 +244,18 @@ class Stubber():
         except:
             pass
 
-    @staticmethod
-    def firmware_ID(asfile: bool = False):
+    def firmware_ID(self, asfile: bool = False):
         "Get a sensible firmware ID"
-        if os.uname().sysname in 'esp32_LoBo':
-            #version in release
-            ver = os.uname().release
+        if self._fid:
+            fid = self._fid
         else:
-            # version before '-' in version
-            ver = os.uname().version.split('-')[0]
-        fid = "{} {}".format(os.uname().sysname, ver)
+            if os.uname().sysname in 'esp32_LoBo':
+                #version in release
+                ver = os.uname().release
+            else:
+                # version before '-' in version
+                ver = os.uname().version.split('-')[0]
+            fid = "{} {}".format(os.uname().sysname, ver)
         if asfile:
             # path name restrictions
             chars = " .()/\\:$"
@@ -239,14 +263,21 @@ class Stubber():
                 fid = fid.replace(c, "_")
         return fid
 
-    def clean(self):
+    def clean(self, path: str = None):
         "Remove all files from the stub folder"
-        self._log.info("Clean/remove files in stubfolder: {}".format(self.path))
-        for fn in os.listdir(self.path):
+        if path is None:
+            path = self.path
+        self._log.info("Clean/remove files in folder: {}".format(path))
+        for fn in os.listdir(path):
             try:
-                os.remove("{}/{}".format(self.path, fn))
+                item = "{}/{}".format(path, fn)
+                os.remove(item)
             except:
-                pass
+                try: #folder
+                    self.clean(item)
+                    os.rmdir(item)
+                except:
+                    pass
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
@@ -317,20 +348,16 @@ class Stubber():
                 r = '/'
         return r
 
-
 def main():
-    global stubber
     try:
         logging.basicConfig(level=logging.INFO)
     except:
         pass
-    # Now clean up and get to work
-    stubber = Stubber()
+    # stubber = Stubber()
+    # Specify a firmware name & version
+    stubber = Stubber(firmware_id='M5Flow v1.1.2')
     stubber.clean()
-    # limit for debugging
-    # stubber.modules = ['machine']
     # stubber.add_modules(['xyz'])
     stubber.create_all_stubs()
     stubber.report()
-
 main()
