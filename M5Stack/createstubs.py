@@ -20,14 +20,13 @@ except:
 
 class Stubber():
     "Generate stubs for modules in firmware"
-    def __init__(self, path: str = None, firmware_id: str = None):
+    def __init__(self, path: str = None):
         self._log = logging.getLogger('stubber')
         self._report = []
-        self._fid = firmware_id
         u = os.uname()
         # use sys.implementation for consistency
         v = ".".join([str(i) for i in sys.implementation.version])
-        self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.firmware_ID()}}
+        self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.get_firmware_ID()}}
         self._report_stb = {'stubber':{'version': stubber_version}}
         del u
         del v
@@ -39,7 +38,7 @@ class Stubber():
             #determine path for stubs
             path = "{}/stubs/{}".format(
                 self.get_root(),
-                self.firmware_ID(asfile=True)
+                self.get_firmware_ID(asfile=True)
                 ).replace('//', '/')
 
         self.path = path
@@ -89,7 +88,7 @@ class Stubber():
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.firmware_ID()))
+        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.get_firmware_ID()))
         # start with the (more complex) modules with a / first to reduce memory problems
         self.modules = [m for m in self.modules if '/' in m] + [m for m in self.modules if '/' not in m]
         gc.collect()
@@ -174,7 +173,7 @@ class Stubber():
 
         # Start a new file
         with open(file_name, "w") as fp:
-            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.firmware_ID(), os.uname(), stubber_version)
+            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.get_firmware_ID(), os.uname(), stubber_version)
             fp.write(s)
             self.write_object_stub(fp, new_module, module_name, "")
             self._report.append({"module":module_name, "file": file_name})
@@ -244,10 +243,11 @@ class Stubber():
         except:
             pass
 
-    def firmware_ID(self, asfile: bool = False):
+    @staticmethod
+    def get_firmware_ID( asfile: bool = False):
         "Get a sensible firmware ID"
-        if self._fid:
-            fid = self._fid
+        if 'firmware_id' in globals():
+            fid = firmware_id
         else:
             if os.uname().sysname in 'esp32_LoBo':
                 #version in release
@@ -284,7 +284,7 @@ class Stubber():
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(
             len(self._report),
-            self.firmware_ID(),
+            self.get_firmware_ID(),
             self.path
             ))
         f_name = "{}/{}".format(self.path, filename)
@@ -355,12 +355,10 @@ def main():
         logging.basicConfig(level=logging.INFO)
     except:
         pass
-        
-    # stubber = Stubber()
-    # Specify a firmware name & version
-    stubber = Stubber(firmware_id='M5Flow v1.1.2')
-
-    # stubber.clean()
+    # optionally specify a firmware name & version in the firmware_id variable
+    # firmware_id = 'Hoverbot v1.2.1'     
+    stubber = Stubber()
+    stubber.clean('stubs')
     # stubber.add_modules(['xyz'])
 
     stubber.create_all_stubs()
