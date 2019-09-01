@@ -56,17 +56,23 @@ mpy_esp8622 = [
         'hashlib',           'select',            'uos'
         ]
 
-# M5 Flow (sysname='esp32', nodename='esp32', release='1.11.0', version='v1.10-272-g6fdd9e277 on 2019-06-06', machine='ESP32 module with ESP32')
+# 1.2.1 (sysname='esp32', nodename='esp32', release='1.11.0', version='v1.10-272-g6fdd9e277 on 2019-06-06', machine='ESP32 module with ESP32')
 mods_m5_flow = [
-        "__main__", "m5flow/m5mqtt", "math", "uerrno", "_thread", "m5flow/m5stack", "microWebSocket", 
-        "uhashlib", "ak8963", "m5flow/peripheral", "microWebSrv", "uheapq", "errno", "m5flow/unit/ext_io", 
-        "random", "ure", "freesans20", "m5flow/unit/ir", "re", "urequests", "functools", "m5flow/unit/ncir", "select", 
-        "uselect", "gc", "m5flow/unit/relay", "socket", "usocket", "hashlib", "m5flow/unit/rgb_", "ssd1306", "ussl", "heapq", 
-        "m5flow/unit/tof", "ssl", "ustruct", "io", "m5flow/units", "struct", "utime", "json", "m5flow/utils", "sys", "utimeq", 
-        "logging", "m5flow/wifichoose", "time", "uzlib", "m5base", "m5flow/wificonfig", "tpcalib", "websocket", "m5flow/app_manage", 
-        "m5flow/wifisetup", "ubinascii", "writer", "m5flow/i2c_bus", "m5ui", "ucollections", "ymodem", "m5flow/m5cloud", "machine", 
-        "uctypes", "zlib" 
+    '_thread','ak8963','array','binascii','btree','builtins','cmath','collections','display','errno',
+    'freesans20','functools','gc','hashlib','heapq','io','json','logging','m5base','m5flow/app_manage',
+    'm5flow/i2c_bus','m5flow/m5cloud','m5flow/m5mqtt','m5flow/m5stack','m5flow/m5ucloud',
+    'm5flow/peripheral','m5flow/remote','m5flow/simple','m5flow/ubutton','m5flow/unit/_adc',
+    'm5flow/unit/_button','m5flow/unit/_color','m5flow/unit/_dac','m5flow/unit/_dual_button',
+    'm5flow/unit/_ext_io','m5flow/unit/_finger','m5flow/unit/_ir','m5flow/unit/_ncir',
+    'm5flow/unit/_relay','m5flow/unit/_rfid','m5flow/unit/_rgb','m5flow/unit/_tof','m5flow/units',
+    'm5flow/utils','m5flow/wifichoose','m5flow/wificonfig','m5flow/wifisetup','m5uart','m5ui',
+    'machine','math','micropython','microWebSocket','microWebSrv','microWebTemplate','mpu6500',
+    'mpu9250','network','os','pye','random','re','select','socket','ssd1306','ssl','struct',
+    'sys','tpcalib','ubinascii','ucollections','uctypes','uerrno','uhashlib','uheapq','uio',
+    'ujson','uos','upip','upip_utarfile','upysh','urandom','ure','urequests','uselect','usocket',
+    'ussl','ustruct','utime','utimeq','uzlib','websocket','writer','ymodem','zlib'
 ]
+
 
 
 mods_problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
