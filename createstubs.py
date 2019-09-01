@@ -10,8 +10,8 @@ import sys
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.0'
-# deal with firmware specific implementations
+stubber_version = '1.3.1'
+# deal with firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
 except:
