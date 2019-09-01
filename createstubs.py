@@ -355,7 +355,7 @@ def main():
         pass
     stubber = Stubber()
     # Specify a firmware name & version
-    #stubber = Stubber(firmware_id='M5 FlowUI v1.4.0-beta')
+    #stubber = Stubber(firmware_id='HoverBot v1.2.1')
 
     stubber.clean()
     # stubber.add_modules(['xyz'])
