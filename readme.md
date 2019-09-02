@@ -34,6 +34,25 @@ you will need to configure 2 modules
 For simplicity in documentation I have configured most settings at workspace project level.
 The same settings could be configured at User level, where they would become defaults for all your projects, and can be overridden per workspace/project.
 
+#### Relevant VSCode settings
+
+Setting | Default   | Description  | ref  
+--------|-----------|--------------|--- 
+python.autoComplete.|||[Autocomplete Settings](https://code.visualstudio.com/docs/python/settings-reference#_autocomplete-settings)
+extraPaths | []	| Specifies locations of additional packages for which to load autocomplete data.| 
+typeshedPaths | [] | Specifies paths to local typeshed repository clone(s) for the Python language server. | [Git](https://github.com/DonJayamanne/pythonVSCode/commit/7a90e863c1742b7c7d8a6612596bdc0a34a595d1)
+python.linting. ||| [Linting Settings](https://code.visualstudio.com/docs/python/settings-reference#_linting-settings)
+enabled | true   | Specifies whether to enable linting in general.|
+pylintEnabled | true | Specifies whether to enable Pylint.|
+
+#### Python Language Server settings  
+The language server settings apply when python.jediEnabled is false.
+Setting | Default   | Description | ref 
+--------|-----------|--------------|--
+python.jediEnabled | Default *true*, must be set to FALSE | Indicates whether to use Jedi as the IntelliSense engine (true) or the Microsoft Python Language Server (false). Note that the language server requires a platform that supports .NET Core 2.1 or newer. |
+python.analysis. ||| [code analysis settings)](https://code.visualstudio.com/docs/python/settings-reference#_code-analysis-settings)
+typeshedPaths | [] | Paths to look for typeshed modules on GitHub.|
+
 Note: the below settings include the paths to multiple folders, containing stubs for different firmware. 
 you should remove ( or //comment ) the lines of firmwares that you to not use.
 
@@ -95,7 +114,7 @@ file: .pylintrc
 # LoBo ESP 32 3.2.24
 init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24");sys.path.insert(1,"./lib")'
 
-# Micropython ESP 32
+# MicroPython ESP 32
 # init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0");sys.path.insert(1,"./lib")'
 
 disable = missing-docstring, line-too-long, trailing-newlines, broad-except, logging-format-interpolation, invalid-name, 
@@ -111,11 +130,38 @@ You will find stubs as part of this project located in the stubs folder , but I 
 
 ## Generating Stubs for a specific Firmware 
 
-The stub files are generated on a micropython board by running the script `createstubs.py`, 
+The stub files are generated on a MicroPython board by running the script `createstubs.py`, 
 this will generate the stubs on the board, either on flash or on the SD card.
+
+if your firmware does not include the `logging` module, you will need to upload this to your board as well.
+
+``` python
+import createstubs
+```
 The generation will take a few minutes ( 2-5 minutes) depending on the speed of the board and the number of included modules.
 
-As the stubs are generated on the board, and as MicroPython is highly optimised to deal with the scarce resources, this unfortunately does mean that the stubs lack parameters details. So for these you must still use the documentation provided for that firmware.
+As the stubs are generated on the board, and as MicroPython is highly optimized to deal with the scarce resources, this unfortunately does mean that the stubs lack parameters details. So for these you must still use the documentation provided for that firmware.
+
+## Custom firmware 
+the script tries to determine a firmware ID and version from the information provided in `sys.uname()`
+this firmware ID is used in the stubs , and in the foldername to store the subs.
+
+If you need, or prefer, to specify a firmware ID you can do so by setting the firmware_id variable before importing createstubs
+For this you will need to edit the createstubs.py file.  
+
+The recommendation is to keep the firmware id short, and add a version as in the below example.
+
+``` python
+# almost at the end of the file
+def main():
+    stubber = Stubber(firmware_id='HoverBot v1.2.1')
+    # Add specific additional modules to be stubbed
+    stubber.add_modules(['hover'])
+
+```
+after this , upload the file and import it to generate the stubs using your custom name.
+
+## Downloading the files
 
 After this is completed, you will need to download the generated stubs from the micropython board, and save them on a folder on your computer. 
 if you work with multiple firmwares or versions it is recommended to use a folder name combining the firmware name and version
@@ -126,7 +172,7 @@ if you work with multiple firmwares or versions it is recommended to use a folde
     - \ESP32_1_10_0
     - \ESP32_1_10_0_Frozen
 
-Note: I found out that you need to be mindful of the maximum path and filename limitations on the filesystem if you use IFSS.
+Note: I found, that you need to be mindful of the maximum path and filename limitations on the filesystem if you use IFSS.
 
 ## Frozen Modules 
 It is common for Firmwares to include a few (or many) modules as 'frozen' modules. This a way to pre-process .py modules so they're 'baked-in' to MicroPython's firmware and use less memory. Once the code is frozen it can be quickly loaded and interpreted by MicroPython without as much memory and processing time.
@@ -140,16 +186,22 @@ Most OSS firmwares store these frozen modules as part of their repository, which
 
 ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-modules
 
+### Tested Firmwares :
+| Firmware              | Release  | Version                          | Comments        |
+|-----------------------|----------|----------------------------------|-----------------|
+| MicroPython ESP32     | 1.10.0   | v1.10-247-g0fb15fc3f             | umqtt modules missing
+| MicroPython ESP32     | 1.11.0   |                                  | 
+| MicroPython ESP8266   | 1.9.4    |                                  | 
+| MicroPython ESP8266   | 1.9.4    |                                  | 
+| MicroPython ESP8266   | 1.10.0   |                                  | 
+| MicroPython ESP8266   | 1.11.0   |                                  | 
+| Loboris ESP32         | 3.2.24     | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
+| M5Stack Flow          | 1.2.1    | based on ESP32_LoBo_v3.2.24      | 
+| M5Stack Flow          | 1.4.0-beta| based on MicroPython ESP32 1.11.0| 
 
-### Tested firmwares :
-
-| Firmware         | Release  | Version                          | Comments        |
-|------------------|----------|----------------------------------|-----------------|
-| Loboris ESP32    | 3.2.24   | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
-| Micropython ESP32| 1.10.0   | v1.10-247-g0fb15fc3f             | umqtt modules missing
 
 
-## Autogenerated Stub format and limitations 
+## Auto generated Stub format and limitations 
 
 1. No function parameters are generated 
 2. No return types are generated 
