@@ -278,8 +278,8 @@ def cli_minify(**kwargs):
     out = kwargs.pop("output")
     patches = kwargs.pop("patch")
     if not minification:
-        print("\npyminification is required to minify createstubs.py\n")
-        print("Please install via:\n  pip install pyminification")
+        print("\pyminifier is required to minify createstubs.py\n")
+        print("Please install via:\n  pip install pyminifier")
         sys.exit(1)
     patch_paths = resolve_patches(patches)
     with out.open('w+') as f:
