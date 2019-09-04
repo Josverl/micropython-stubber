@@ -20,11 +20,30 @@ except:
 
 class Stubber():
     "Generate stubs for modules in firmware"
-    def __init__(self, path: str = None, firmware_id: str = None):
+    def __init__(self, path: str = None, firmware_id: str = None, **kwargs):
         self._log = logging.getLogger('stubber')
         self._report = []
         self._fid = firmware_id
-        u = os.uname()
+        try:
+            # some micropython firmware lack os.uname function
+            os.uname()
+        except AttributeError:
+            self._log.info((
+                "System Information cannot be determined! "
+                "Using 'generic' attributes. To override this, "
+                "please pass additional kwargs: "
+                "[sysname, nodename, release, version, machine]\n"
+            ))
+            class UnameStub:
+                sysname = kwargs.pop('sysname', 'generic')
+                nodename = kwargs.pop('nodename', 'generic')
+                release = kwargs.pop('release', '0.0.0'),
+                version = kwargs.pop('version', '0.0.0'),
+                machine = kwargs.pop('machine', 'generic')
+            # monkeypatch uname to allow stub creation to take place
+            os.uname = UnameStub
+        finally:
+            u = os.uname()
         # use sys.implementation for consistency
         v = ".".join([str(i) for i in sys.implementation.version])
         self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.firmware_ID()}}
