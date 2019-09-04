@@ -40,6 +40,13 @@ class Stubber():
                 release = kwargs.pop('release', '0.0.0'),
                 version = kwargs.pop('version', '0.0.0'),
                 machine = kwargs.pop('machine', 'generic')
+
+                def __repr__(self):
+                    _attrs = ['sysname', 'nodename',
+                              'release', 'version', 'machine']
+                    attrs = ["{}={}".format(a, getattr(self, a))
+                             for a in _attrs]
+                    return "{}".format(", ".join(attrs))
             # monkeypatch uname to allow stub creation to take place
             os.uname = UnameStub
         finally:
