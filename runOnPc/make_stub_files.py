@@ -2408,7 +2408,6 @@ class StubTraverser (ast.NodeVisitor):
                 self.parent_stub = self.update(fn, new_root=self.parent_stub)
             if 1:
                 self.output_file = open(fn, 'w')
-                self.output_time_stamp()
                 self.output_stubs(self.parent_stub)
                 self.output_file.close()
                 self.output_file = None
