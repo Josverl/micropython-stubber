@@ -1629,6 +1629,7 @@ class StandAloneMakeStubFile:
         # out_fn = os.path.join(self.output_directory, base_fn)
         # out_fn = out_fn[:-3] + '.pyi'
         out_fn = fn + 'i'
+        self.output_fn = os.path.normpath(out_fn)
         try:
             s = open(fn).read()
             node = ast.parse(s,filename=fn,mode='exec')
