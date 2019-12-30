@@ -1630,9 +1630,13 @@ class StandAloneMakeStubFile:
         # out_fn = out_fn[:-3] + '.pyi'
         out_fn = fn + 'i'
         self.output_fn = os.path.normpath(out_fn)
-        s = open(fn).read()
-        node = ast.parse(s,filename=fn,mode='exec')
-        StubTraverser(controller=self).run(node)
+        try:
+            s = open(fn).read()
+            node = ast.parse(s,filename=fn,mode='exec')
+            StubTraverser(controller=self).run(node)
+        except:
+            print('Unexpected error occurred whilst parsing file %s:' % fn, sys.exc_info()[0])
+
 
     def run(self):
         '''
@@ -2408,7 +2412,6 @@ class StubTraverser (ast.NodeVisitor):
                 self.parent_stub = self.update(fn, new_root=self.parent_stub)
             if 1:
                 self.output_file = open(fn, 'w')
-                self.output_time_stamp()
                 self.output_stubs(self.parent_stub)
                 self.output_file.close()
                 self.output_file = None
