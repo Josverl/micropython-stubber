@@ -30,36 +30,52 @@ def download_files(repo, frozen_modules, savepath):
         download_file(url, savepath  )
 
 
-def make_stubfiles(modulepath):
+def make_stub_files(modulepath):
     cmd = "python make_stub_files.py -c ./make_stub_files.cfg -u {}*.py".format(modulepath)
     os.system(cmd)
 
 
+def get_frozen_lobo():
+    #Loboris frozen modules 
+    frozen_modules = ["README.md","ak8963.py","freesans20.py","functools.py","logging.py","microWebSocket.py","microWebSrv.py","microWebTemplate.py","mpu6500.py","mpu9250.py","pye.py","ssd1306.py","tpcalib.py","upip.py",
+    "upip_utarfile.py","upysh.py","urequests.py","writer.py"] 
+    repo = 'https://raw.githubusercontent.com/loboris/MicroPython_ESP32_psRAM_LoBo/master/MicroPython_BUILD/components/micropython/esp32/modules/{}'
 
-#Loboris frozen modules 
-frozen_modules = ["README.md","ak8963.py","freesans20.py","functools.py","logging.py","microWebSocket.py","microWebSrv.py","microWebTemplate.py","mpu6500.py","mpu9250.py","pye.py","ssd1306.py","tpcalib.py","upip.py",
-"upip_utarfile.py","upysh.py","urequests.py","writer.py"] 
-repo = 'https://raw.githubusercontent.com/loboris/MicroPython_ESP32_psRAM_LoBo/master/MicroPython_BUILD/components/micropython/esp32/modules/{}'
+    modulepath = '../stubs/esp32_lobo_frozen/'
 
-modulepath = '../stubs/esp32_lobo_frozen/'
+    #download 
+    download_files(repo, frozen_modules, modulepath )
+    #now generate / update stubs 
+    make_stub_files(modulepath)
 
-#download 
-download_files(repo, frozen_modules, modulepath )
-#now generate / update stubs 
-make_stubfiles(modulepath)
-
-
-
-# pyboard custom stub is included and doesn not need to be downloaded.
-modulepath = '../stubs/pyb_common/'
-    ## modules = ['pyb.py']
-    ## url = 'https://raw.githubusercontent.com/dastultz/micropython-pyb/master/lib/{}'
-    ## download_files(url, modules,  savepath )
-#now generate / update stubs 
-make_stubfiles(modulepath)
+def get_frozen_MP():
+    pass
 
 
-# step x : generate pyi files for the generated stubs
+def get_frozen_pyb():
+    # pyboard custom stub is included and does not need to be downloaded.
+    modulepath = '../stubs/pyb_common/'
+        ## modules = ['pyb.py']
+        ## url = 'https://raw.githubusercontent.com/dastultz/micropython-pyb/master/lib/{}'
+        ## download_files(url, modules,  savepath )
+    #now generate / update stubs 
+    make_stub_files(modulepath)
 
-make_stubfiles('../stubs/esp32_LoBo_3_2_24/')
+
+def get_cpython( modulepath = '../stubs/cpython-core/'):
+    "cpython overrides that mimick micropython"
+    # todo : Download from Git 
+
+    #now generate / update stubs 
+    make_stub_files(modulepath)
+
+
+def main():
+    # get_frozen_MP()
+    get_cpython()
+
+    # get_frozen_pyb()
+
+    # get_frozen_lobo()
+
 
