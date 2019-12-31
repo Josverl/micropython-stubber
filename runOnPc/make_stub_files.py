@@ -1881,8 +1881,7 @@ class StandAloneMakeStubFile:
         s = '\n'.join(aList)+'\n'
         if trace: g.trace(s)
         file_object = io.StringIO(s)
-        # pylint: disable=deprecated-method
-        self.parser.readfp(file_object)
+        self.parser.read_file(file_object)
 
     def is_section_name(self, s):
         
