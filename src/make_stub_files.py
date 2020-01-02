@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This script makes a stub (.pyi) file in the output directory for each
 source file listed on the command line (wildcard file names are supported).
@@ -17,10 +17,8 @@ import ast
 from collections import OrderedDict
     # Requires Python 2.7 or above. Without OrderedDict
     # the configparser will give random order for patterns.
-try:
-    import ConfigParser as configparser # Python 2 
-except ImportError:
-    import configparser # Python 3
+
+import configparser # Python 3
 import glob
 #Todo: Depricated , replace with argparse  https://docs.python.org/3/library/argparse.html
 import optparse 
@@ -30,10 +28,7 @@ import subprocess
 import sys
 import time
 import types
-try:
-    import StringIO as io # Python 2
-except ImportError:
-    import io # Python 3
+import io # Python 3
 
 isPython3 = sys.version_info >= (3, 0, 0)
 
@@ -304,7 +299,7 @@ class AstFormatter:
             if vararg: args2.append('*' + self.visit(vararg))
             kwarg = getattr(node, 'kwarg', None)
             if kwarg: args2.append('**' + self.visit(kwarg))
-        else:
+        else: # OLD PYTHON 2.x code 
             # Add the vararg and kwarg names.
             name = getattr(node, 'vararg', None)
             if name: args2.append('*' + name)
@@ -1000,7 +995,7 @@ class LeoGlobals:
         # pylint: disable=no-member
         if isPython3:
             return isinstance(s, str)
-        else:
+        else: # OLD Python 2
             return isinstance(s, types.StringTypes)
 
     def isUnicode(self, s):
@@ -1008,8 +1003,10 @@ class LeoGlobals:
         # pylint: disable=no-member
         if isPython3:
             return isinstance(s, str)
-        else:
+        else: # OLD Python 2
             return isinstance(s, types.UnicodeType)
+
+            
     def objToString(self, obj, indent='', printCaller=False, tag=None):
         '''Pretty print any Python object to a string.'''
         # pylint: disable=undefined-loop-variable
