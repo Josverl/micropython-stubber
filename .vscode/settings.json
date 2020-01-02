@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": ".env\\Scripts\\python.exe",
+    "python.pythonPath": "C:\\Users\\josverl\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.autoComplete.extraPaths": [
