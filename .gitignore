@@ -14,5 +14,5 @@ MCU/*
 
 M5Stack
 
-# ignore stubs 
-# stubs
+# ignore stubs in Master and Preview
+stubs
