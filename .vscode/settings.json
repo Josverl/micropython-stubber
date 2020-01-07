@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\josverl\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.autoComplete.extraPaths": [
@@ -20,15 +19,11 @@
         //"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0"
 
     ],
-
-     "cSpell.words": [
-        "Loboris",
-        "asfile",
-        "nodename",
-        "sysname",
-        "uname",
-        "upython",
-        "ustruct",
-        "webrepl"
-    ]
+    "python.pythonPath": "C:\\Users\\josverl\\AppData\\Local\\Programs\\Python\\Python38-32\\python.exe",
+    "python.testing.pytestArgs": [
+        "src"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
 }

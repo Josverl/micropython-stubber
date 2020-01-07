@@ -1,4 +1,4 @@
-.vscode/
+
 project.pymakr
 downloaded/*
 *.zip
@@ -14,5 +14,10 @@ MCU/*
 
 M5Stack
 
-# ignore stubs in Master and Preview
-stubs
+# ignore stubs 
+# stubs
+stubs/M5*
+
+# ignore test coverage report
+.coverage
+htmlcov
