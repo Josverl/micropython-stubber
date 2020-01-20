@@ -9,8 +9,7 @@ This file is in the public domain.
 
 Written by Edward K. Ream.
 '''
-# pylint: disable=unused-argument, redefined-outer-name, trailing-whitespace, bad-whitespace
-# todo: suppress unresolved-import
+# pylint: disable=unused-argument, redefined-outer-name, trailing-whitespace, bad-whitespace, too-many-lines, multiple-statements, import-outside-toplevel
 
 import ast
 # from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -31,6 +30,7 @@ import types
 import io # Python 3
 
 isPython3 = sys.version_info >= (3, 0, 0)
+debug_flag = False
 
 def is_known_type(s):
     '''
@@ -121,6 +121,7 @@ class AstFormatter:
     This does not have to be perfect, but it should be close.
     '''
     # pylint: disable=consider-using-enumerate
+    level = 0
 
     # Entries...
 
@@ -927,6 +928,7 @@ class LeoGlobals:
         def __getattr__(self, attr): return self
         def __setattr__(self, attr, val): return self
 
+    # pylint: disable=protected-access
     def _callerName(self, n=1, files=False):
         # print('_callerName: %s %s' % (n,files))
         try: # get the function name from the call stack.
@@ -1378,7 +1380,7 @@ class ReduceTypes:
         It suits the other methods of this class *not* to test inside inner
         brackets. This prevents unwanted Any types.
         '''
-        s1 = s
+        # s1 = s
         s = s.strip()
         table = (
             '', 'None', # Tricky.
@@ -1571,6 +1573,7 @@ class StandAloneMakeStubFile:
     every file mentioned in the [Source Files] section of
     ~/stubs/make_stub_files.cfg.
     '''
+    parser = None
 
     def __init__ (self):
         '''Ctor for StandAloneMakeStubFile class.'''
@@ -1780,23 +1783,16 @@ class StandAloneMakeStubFile:
         Make a dict whose keys are operators ('+', '+=', etc),
         and whose values are lists of values of ast.Node.__class__.__name__.
         '''
-        d = {
-            '.':   ['Attr',],
-            '(*)': ['Call', 'Tuple',],
-            '[*]': ['List', 'Subscript',],
-            '{*}': ['???',],
-            # 'and': 'BoolOp',
-            # 'or':  'BoolOp',
-        }
-        for op in (
-            '+', '-', '*', '/', '%', '**', '<<',
-            '>>', '|', '^', '&', '//',
-        ):
+        d = {'.':   ['Attr',],
+             '(*)': ['Call', 'Tuple',],
+             '[*]': ['List', 'Subscript',],
+             '{*}': ['???',],
+             # 'and': 'BoolOp',
+             # 'or':  'BoolOp',
+            }
+        for op in ('+', '-', '*', '/', '%', '**', '<<','>>', '|', '^', '&', '//', ):
             d[op] = ['BinOp',]
-        for op in (
-            '==', '!=', '<', '<=', '>', '>=',
-            'is', 'is not', 'in', 'not in',
-        ):
+        for op in ('==', '!=', '<', '<=', '>', '>=', 'is', 'is not', 'in', 'not in', ):
             d[op] = ['Compare',]
         return d
 
@@ -1917,11 +1913,11 @@ class StandAloneMakeStubFile:
                     g.trace('duplicate pattern', pattern)
                 else:
                     self.names_dict [name] = pattern.repl_s
-        if 0:
+        if debug_flag:
             g.trace('names_dict...')
             for z in sorted(self.names_dict):
                 print('  %s: %s' % (z, self.names_dict.get(z)))
-        if 0:
+        if debug_flag:
             g.trace('patterns_dict...')
             for z in sorted(self.patterns_dict):
                 aList = self.patterns_dict.get(z)
@@ -2158,6 +2154,7 @@ class StubFormatter (AstFormatter):
                 g.trace('**not found**', node.id)
         return s
 
+    # pylint: disable=using-constant-test
     def do_Tuple(self, node):
         '''StubFormatter.Tuple.'''
         elts = [self.visit(z) for z in node.elts]
@@ -2388,7 +2385,7 @@ class StubTraverser (ast.NodeVisitor):
             self.output_file.write(s+'\n')
         else:
             print(s)
-
+    # pylint: disable=using-constant-test
     def run(self, node):
         '''StubTraverser.run: write the stubs in node's tree to self.output_fn.'''
         fn = self.output_fn
@@ -2434,8 +2431,7 @@ class StubTraverser (ast.NodeVisitor):
     def output_time_stamp(self):
         '''Put a time-stamp in the output file.'''
         if self.output_file:
-            self.output_file.write('# make_stub_files: %s\n' %
-                time.strftime("%a %d %b %Y at %H:%M:%S"))
+            self.output_file.write('# make_stub_files: %s\n' % time.strftime("%a %d %b %Y at %H:%M:%S"))
 
     def update(self, fn, new_root):
         '''
@@ -2454,15 +2450,15 @@ class StubTraverser (ast.NodeVisitor):
             g.trace('Can not update stub files containing tabs.')
             return new_root
         # Read old_root from the .pyi file.
-        old_d, old_root = self.parse_stub_file(s, root_name='<old-stubs>')
+        old_d, old_root = self.parse_stub_file(s, root_name='<old-stubs>') # pylint: disable=unused-variable
         if old_root:
             # Merge new stubs into the old tree.
-            if 0:
+            if debug_flag:
                 print(self.trace_stubs(old_root, header='old_root'))
                 print(self.trace_stubs(new_root, header='new_root'))
             print('***** updating stubs from %s *****' % fn)
             self.merge_stubs(self.stubs_dict.values(), old_root, new_root)
-            if 0:
+            if debug_flag:
                 print(self.trace_stubs(old_root, header='updated_root'))
             return old_root
         else:
@@ -2589,7 +2585,7 @@ class StubTraverser (ast.NodeVisitor):
         # Check that all parents of to-be-delete nodes will be deleted.
         for z in aList:
             z1 = z
-            for i in range(20):
+            for i in range(20): # pylint: disable=unused-variable
                 z = z.parent
                 if not z:
                     g.trace('can not append: new root not found', z)
@@ -2807,7 +2803,7 @@ class StubTraverser (ast.NodeVisitor):
         # Step 1: Return None if there are no return statements.
         if trace and self.returns:
             g.trace('name: %s r:\n%s' % (name, r))
-        if not [z for z in self.returns if z.value != None]:
+        if not [z for z in self.returns if z.value is not None]:
             empty = not any(isinstance(z, ast.FunctionDef) for z in node.body)
             tail = ': ...' if empty else ':'
             return 'None' + tail
@@ -2935,12 +2931,14 @@ class TestClass:
 
     def return_list(self, a):
         return [a]
-
+    # pylint: disable=using-constant-test
     def return_two_lists(s):
         if 1:
             return aList
         else:
             return list(self.regex.finditer(s))
+
+
 g = LeoGlobals() # For ekr.
 if __name__ == "__main__":
     main()
