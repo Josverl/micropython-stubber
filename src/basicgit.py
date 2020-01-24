@@ -2,7 +2,6 @@
 import subprocess
 import os
 
-
 def scriptpath(script: str):
     try:
         _scriptpath = os.path.dirname(os.path.realpath(__file__))
@@ -35,8 +34,6 @@ def get_tag(repo: str = None) -> str:
         print("Error: ", e.returncode, e.stderr)
         raise Exception(e.stderr)
 
-
-
 def checkout_tag(tag: str, repo: str = None) -> bool:
     """
     get the most recent git version tag of a local repo"
@@ -49,30 +46,29 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     elif repo.endswith('.git'):
         repo = os.path.basename(repo)
 
-    cmd = ["pwsh", scriptpath('git-checkout-tag.ps1'), '-repo', repo,'-tag' , tag]
+    cmd = ["pwsh", scriptpath('git-checkout-tag.ps1'), '-repo', repo, '-tag', tag]
     try:
         result = subprocess.run(cmd, capture_output=True, check=True)
         if result.returncode >= 0:
             # actually a good result
             print(result.stderr.decode("utf-8"))
             return True
-        else: 
+        else:
             raise Exception(result.stderr.decode("utf-8"))
 
     except  subprocess.CalledProcessError as e:
         print(e)
         return False
 
-
     # todo: retry withouth powershell
     # cmd = ['git', 'checkout', 'tags/'+ tag]
     # try:
     #     result = subprocess.run(cmd, capture_output=True, check=True, cwd='../micropython')
     #     if result.stderr != b'':
-    #         print(result.stderr.decode("utf-8"))        # todo: raise error 
+    #         print(result.stderr.decode("utf-8"))
     #         return False
     #     print(result.stdout)
     #     return True
     # except  subprocess.CalledProcessError as e:
-    #     print("Error: ", e.returncode, e.stderr)        # todo: raise error 
+    #     print("Error: ", e.returncode, e.stderr)
     #     return False
