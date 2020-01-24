@@ -21,6 +21,13 @@ Done - check/verify/add micropython frozen modules
         freeze('$(MPY_DIR)/drivers/onewire')
         include('$(MPY_DIR)/extmod/webrepl/manifest.py')
 
+- exclude more modules 
+        = logging, as this is distributed , and can instead be generated from micropylib/logging
+        - standard frozen modules 
+
+        Also allow for force option to stub them anyway
+
+
 
 - read RST files 
 

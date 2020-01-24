@@ -20,7 +20,6 @@ import freezer_lobo
 
 def make_stub_files(stub_path, levels: int = 1):
     "generate typeshed files for all scripts in a folder"
-    # TODO: do this nicer by loading the module
 
     level = ""
     # make_sub_files.py only does one folder level at a time
@@ -31,13 +30,12 @@ def make_stub_files(stub_path, levels: int = 1):
         os.system(cmd)
         level = level + '/**'
 
-
-def get_frozen_pyb(stub_path):
-    # pyboard custom stub is included and does not need to be downloaded.
-    stub_path = './stubs/pyb_common'
-    ## modules = ['pyb.py']
-    ## url = 'https://raw.githubusercontent.com/dastultz/micropython-pyb/master/lib/{}'
-    ## download_files(url, modules,  savepath )
+# def get_frozen_pyb(stub_path):
+#     # pyboard custom stub is included and does not need to be downloaded.
+#     stub_path = './stubs/pyb_common'
+#     ## modules = ['pyb.py']
+#     ## url = 'https://raw.githubusercontent.com/dastultz/micropython-pyb/master/lib/{}'
+#     ## download_files(url, modules,  savepath )
 
 #def pip_download(requirements, path:str):
 def get_cpython(requirements, stub_path=None):

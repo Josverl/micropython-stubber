@@ -23,9 +23,9 @@
 
     "python.pythonPath": "C:\\Users\\josverl\\AppData\\Local\\Programs\\Python\\Python38-32\\python.exe",
     "python.testing.pytestArgs": [
-        "src"
+        "tests"
     ],
+    "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
-    "python.testing.pytestEnabled": true,
 }

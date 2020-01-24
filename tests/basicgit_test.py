@@ -1,3 +1,6 @@
+# import sys; sys.path[1:1]=['src']
+
+import os
 import pytest
 
 #SOT
@@ -10,7 +13,6 @@ def common_tst(tag):
     assert len(tag) >= 2, "tags are longer than 2 chars"
 
 def test_get_tag_current():
-    import os
     if not os.path.exists('.git'):
         pytest.skip("no git repo in current folder")
     else:
@@ -29,13 +31,14 @@ def test_get_failure_throws():
     with pytest.raises(Exception):
         git.get_tag('.not')
 
-def test_checkout_sibling():
-    x = git.get_tag('../micropython') 
+def test_checkout_sibling(gitrepo_micropython):
+    repo_path = gitrepo_micropython
+    x = git.get_tag(repo_path)
 
-    for ver in ['v1.11', 'v1.9.4' ,'v1.12']:
-        git.checkout_tag(ver, repo='../micropython')  
-        assert git.get_tag('../micropython') == ver
+    for ver in ['v1.11', 'v1.9.4', 'v1.12']:
+        git.checkout_tag(ver, repo=repo_path)
+        assert git.get_tag(repo_path) == ver
 
-    git.checkout_tag(x, repo='../micropython')
-    assert git.get_tag('../micropython') == x, "can restore to prior version"
+    git.checkout_tag(x, repo=repo_path)
+    assert git.get_tag(repo_path) == x, "can restore to prior version"
 
