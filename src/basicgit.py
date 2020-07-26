@@ -72,3 +72,52 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     # except  subprocess.CalledProcessError as e:
     #     print("Error: ", e.returncode, e.stderr)
     #     return False
+
+
+def fetch(repo: str = None) -> bool:
+    """
+    fetches a repo
+    repo should be in the form of : path/.git
+        ../micropython/.git
+    returns True on success
+    """
+    if not repo:
+        repo = './.git'
+    elif not repo.endswith('.git'):
+        repo += '/.git'
+
+    cmd = ['git', '--git-dir='+ repo, 'fetch origin']
+    try:
+        result = subprocess.run(cmd, capture_output=True, check=True)
+        if result.stderr != b'':
+            print(result.stderr.decode("utf-8"))
+            raise Exception(result.stderr.decode("utf-8"))
+        return True
+
+    except  subprocess.CalledProcessError as e:
+        print("Error: ", e.returncode, e.stderr)
+        raise Exception(e.stderr)
+
+def pull(repo: str = None, branch='master') -> bool:
+    """
+    pull a repo origin into master
+    repo should be in the form of : path/.git
+        ../micropython/.git
+    returns True on success
+    """
+    if not repo:
+        repo = './.git'
+    elif not repo.endswith('.git'):
+        repo += '/.git'
+
+    cmd = ['git', '--git-dir='+ repo, 'pull', 'origin', branch]
+    try:
+        result = subprocess.run(cmd, capture_output=True, check=True)
+        # if result.stderr != b'':
+        #     print(result.stderr.decode("utf-8"))
+        #     raise Exception(result.stderr.decode("utf-8"))
+        return result.returncode == 0
+
+    except  subprocess.CalledProcessError as e:
+        print("Error: ", e.returncode, e.stderr)
+        raise Exception(e.stderr)

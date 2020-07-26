@@ -2,28 +2,26 @@ import os
 import glob
 import pytest
 
-#SOT
+# pylint: disable=wrong-import-position,import-error
 import basicgit as git
+# Module Under Test
 import freezer_mpy
 
 # No Mocks, does actual extraction from repro
-# todo: get seperate test instaNCE OF THE REPO
-
-
 
 @pytest.mark.parametrize(
     "path, port, board",
-    [   ('C:\\develop\\MyPython\\micropython\\ports\\esp32\\modules\\_boot.py', 
+    [   ('C:\\develop\\MyPython\\micropython-stubbertest\\ports\\esp32\\modules\\_boot.py',
          'esp32', None),
-        ('/develop/micropython/ports/esp32/modules/_boot.py',
+        ('/develop/MyPython/micropython-stubbertest/ports/esp32/modules/_boot.py',
          'esp32', None),
-        ('../micropython/ports/esp32/modules/_boot.py',
+        ('../micropython-stubbertest/ports/esp32/modules/_boot.py',
          'esp32', None),
-        ('C:\\develop\\MyPython\\micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py',
+        ('C:\\develop\\MyPython\\micropython-stubbertest\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py',
          'stm32', 'PYBV11'),
-        ('/develop/micropython/ports/stm32/boards/PYBV11/modules/_boot.py',
+        ('/develop/MyPython/micropython-stubbertest/ports/stm32/boards/PYBV11/modules/_boot.py',
          'stm32', 'PYBV11'),
-        ('../micropython/ports/stm32/boards/PYBV11/modules/_boot.py',
+        ('../micropython-stubbertest/ports/stm32/boards/PYBV11/modules/_boot.py',
          'stm32', 'PYBV11'),
     ]
 )
@@ -44,10 +42,10 @@ def test_freezer_mpy_manifest(tmp_path, gitrepo_micropython):
     if version < mpy_version:
         git.checkout_tag(mpy_version, mpy_path)
         version = git.get_tag(mpy_path)
-        assert version == mpy_version, "prep: could not checkout version {} of ../micropython".format(mpy_version)
+        assert version == mpy_version, "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
 
     stub_path = tmp_path
-    freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib')
+    freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib') # Todo Move to config
     scripts = glob.glob(str(stub_path)  + '/**/*.py', recursive=True)
 
     assert scripts is not None, "can freeze scripts from manifest"
