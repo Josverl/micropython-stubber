@@ -12,23 +12,42 @@ Please feel free to suggest and add other combinations and the relevant steps to
 The (stretch) goal is to create a vscode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
 For now you will need to use the `microcli` tool, or configure this by hand as shown in the below sections.
 
-## 'micropy' A command line tool for managing MicroPython projects with VSCode
-If you want a command line interface to setup a new project and configure the settings as described above for you then take a look at :  
+## 'MicroPy' A command line tool for managing MicroPython projects with VSCode
+If you want a command line interface to setup a new project and configure the settings as described above for you, then take a look at :  
     https://github.com/BradenM/micropy-cli
     `pip install micropy-cl`
     then run `micropy init`
+
+Braden has essentially created a front-end for the use and distribution of micropython-stubber
 
 ## File Structure 
 The file structure is based on my personal windows environment, but you should be able to adapt that without much hardship to you own preference and OS.
 
 | What                 | Why                      | Where                             |
 |----------------------|--------------------------|-----------------------------------|
-| stubber project      | needed to make stubs     | C:\develop\MyPython\Stubber\
-| stub root            |                          | C:\develop\MyPython\Stubber\stubs
-| generated stub files | needed to use stubs      | C:\develop\MyPython\Stubber\<firmware>
-| Frozen stub files    | better code intellisense | C:\develop\MyPython\Stubber\<firmware>_Frozen
+| stubber project      | needed to make stubs     | C:\develop\Stubber\
+|                      |                          |
+| stub root            |                          | C:\develop\Stubber\stubs
+| cpython stubs for micropython core | adapt for differences between cpython and Micropython | C:\develop\Stubber\stubs\cpython-core
+| generated stub files | needed to use stubs      | C:\develop\Stubber\stubs\<firmware>
+| Frozen stub files    | better code intellisense | C:\develop\Stubber\stubs\<firmware>_Frozen
 | vscode config        | configure vscode         | in project or global config
 | pylint config        | pylint has own config    | .pylintrc in project folder 
+|                      |                          |
+| Micropython source   | extract frozen modules   | C:\develop\micropython-stubbertest
+| Micropython lib      | extract frozen modules   | C:\develop\micropython-lib
+|                      |                          |
+
+Note: U have used the folder `micropython-stubbertest` to avoid conflicts with any development that you might be doing on the `micropython` repo at the potential cost of a little diskspace.
+
+``` powershell
+cd /develop 
+
+git clone  https://github.com/josverl/micropython-stubber.git stubber 
+git clone  https://github.com/micropython/micropython.git stubber-micropython 
+git clone  https://github.com/micropython/micropython.git micropython-lib
+```  
+
 
 ## Configuring Visual Studio Code 
 
@@ -91,7 +110,7 @@ File: .vscode\\settings.json
 }
 
 ```
-Note:  if you notice  problems 
+Note:  if you notice problems 
 * The paths appear to be case sensitive(which may not be apparent for your platform)
 * in JSON notation the `\` (backslash) should be escaped as `\\` (double backslash)
 * Put the 'Frozen' module paths before the generated module paths. 
@@ -128,12 +147,12 @@ disable = missing-docstring, line-too-long, trailing-newlines, broad-except, log
 
 ```
 
-
-
-## Downloading the Stubs from GIThub 
+## Downloading the Stubs from GitHub 
 
 This is not complete at this point.
 You will find stubs as part of this project located in the stubs folder , but I have not settled on a way to distribute them yet.
+
+I suggest that you consider usising MicroPy as noted above.
 
 ## Generating Stubs for a specific Firmware 
 
@@ -230,6 +249,10 @@ ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-module
 ### Module Duplication 
 Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
 
+
+
+## Testing 
+MicroPython-Stubber has a numer of tests written in Pytest
 
 
 # Licenses and contributions
