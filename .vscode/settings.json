@@ -2,33 +2,32 @@
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.autoComplete.extraPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
+        "board\\stubs\\esp32_1_13_0",
+        "C:\\develop\\MyPython\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\stubs\\esp32_LoBo_3_2_24",
         //"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0"
-
+        
     ],
     "python.autoComplete.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
+        "board\\stubs\\esp32_1_13_0",
+        "C:\\develop\\MyPython\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\stubs\\esp32_LoBo_3_2_24",
         //"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0"
-
+        
     ],
     "python.analysis.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen\\3",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
+        "board\\stubs\\esp32_1_13_0",
+        "C:\\develop\\MyPython\\stubs\\esp32_LoBo_3_2_24_Frozen",
+        "C:\\develop\\MyPython\\stubs\\esp32_LoBo_3_2_24",
         //"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0"
 
     ],
 
-
-    "python.pythonPath": "C:\\Python\\Python38\\python.exe",
     "python.testing.pytestArgs": [
         "tests"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
-    "files.associations": {
-        "*.yaml": "home-assistant"
-    },
+
 }
