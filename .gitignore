@@ -16,8 +16,12 @@ M5Stack
 # ignore stubs 
 # stubs
 stubs/M5*
+board/stubs
 
 # ignore test coverage report
 .coverage
 htmlcov
 coverage_html_report
+
+# OS specific stuff
+desktop.ini

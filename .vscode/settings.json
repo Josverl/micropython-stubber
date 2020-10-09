@@ -21,11 +21,14 @@
     ],
 
 
-    "python.pythonPath": "C:\\Users\\josverl\\AppData\\Local\\Programs\\Python\\Python38-32\\python.exe",
+    "python.pythonPath": "C:\\Python\\Python38\\python.exe",
     "python.testing.pytestArgs": [
         "tests"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
+    "files.associations": {
+        "*.yaml": "home-assistant"
+    },
 }
