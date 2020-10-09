@@ -1,6 +1,6 @@
 """
 Create stubs for (all) modules on a MicroPython board
-Copyright (c) 2019 Jos Verlinde
+Copyright (c) 2019-2020 Jos Verlinde
 """
 import errno
 import gc
@@ -10,7 +10,7 @@ import sys
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.3'
+stubber_version = '1.3.4'
 # deal with firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -73,19 +73,22 @@ class Stubber():
             self.ensure_folder(path + "/")
         except:
             self._log.error("error creating stub folder {}".format(path))
-        self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
+        self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"] 
+#        self.problematic += ["uasyncio/core","io","uio","uctypes" ] # "builtins"
         self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
         # there is no option to discover modules from upython, need to hardcode
         # below contains combined modules from  Micropython ESP8622, ESP32, Loboris and pycom
-        self.modules = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections',
+        self.modules = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'bluetooth', 'builtins', 'cmath', 'collections',
                         'crypto', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
                         'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math',
                         'microWebSocket', 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network',
                         'ntptime', 'onewire', 'os', 'port_diag', 'pycom', 'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306',
-                        'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'uasyncio/core', 'ubinascii', 'ucollections', 'ucryptolib', 'uctypes',
+                        'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib',  'ubinascii', 'ucollections', 'ucryptolib', 'uctypes',
                         'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib',
                         'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib', 'pycom', 'crypto']
+        self.modules += ['uasyncio/lock','uasyncio/stream','uasyncio/__init__', 'uasyncio/core', 'uasyncio/event','uasyncio/funcs'] #1.13
+
 
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
@@ -95,14 +98,18 @@ class Stubber():
         result = []
         errors = []
         #self._log.info('get attributes {} {}'.format(repr(obj),obj ))
-        for name in dir(obj):
-            try:
-                val = getattr(obj, name)
-                # name , value , type
-                result.append((name, repr(val), repr(type(val)), val))
-                #self._log.info( result[-1])
-            except BaseException as e:
-                errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
+        try: 
+            for name in dir(obj):
+                try:
+                    val = getattr(obj, name)
+                    # name , value , type
+                    result.append((name, repr(val), repr(type(val)), val))
+                    #self._log.info( result[-1])
+                except BaseException as e:
+                    errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
+        except BaseException as e:
+            errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
+
         gc.collect()
         return result, errors
 
@@ -122,7 +129,7 @@ class Stubber():
                 self.include_nested = gc.mem_free() > 3200
 
             if module_name.startswith("_") and module_name != '_thread':
-                self._log.warning("Skip module: {:<20}        : internal ".format(module_name))
+                self._log.warning("Skip module: {:<20}        : Internal ".format(module_name))
                 continue
             if module_name in self.problematic:
                 self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
@@ -173,7 +180,7 @@ class Stubber():
             new_module = __import__(module_name, None, None, ('*'))
         except:
             failed = True
-            self._log.debug("Failed to import module: {}".format(module_name))
+            self._log.warning("Skip module: {:<20}        : Failed to import".format(module_name))
             if not '.' in module_name:
                 return
 
@@ -215,7 +222,7 @@ class Stubber():
             gc.collect()
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str):
-        "Write an module/object stub to an open file. Can be called recursive."
+        "Write a module/object stub to an open file. Can be called recursive."
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
@@ -229,7 +236,8 @@ class Stubber():
             if name.startswith("__"):
                 #skip internals
                 continue
-            # allow the scheduler to run
+
+            # allow the scheduler to run on LoBo based FW
             resetWDT()
             sleep_us(1)
 
@@ -276,7 +284,7 @@ class Stubber():
                 #version in release
                 ver = os.uname().release
             else:
-                # version before '-' in version
+                # version before '-' in version : v1.13-103-gb137d064e
                 ver = os.uname().version.split('-')[0]
             fid = "{} {}".format(os.uname().sysname, ver)
         if asfile:
@@ -374,6 +382,7 @@ class Stubber():
 def main():
     try:
         logging.basicConfig(level=logging.INFO)
+        #logging.basicConfig(level=logging.DEBUG)
     except:
         pass
     stubber = Stubber()
@@ -381,7 +390,7 @@ def main():
     #stubber = Stubber(firmware_id='HoverBot v1.2.1')
 
     stubber.clean()
-    # stubber.add_modules(['xyz'])
+    # stubber.add_modules(['bluetooth'])
     stubber.create_all_stubs()
     stubber.report()
 main()
