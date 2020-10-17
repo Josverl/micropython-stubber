@@ -2,11 +2,11 @@
 Create stubs for (all) modules on a MicroPython board
 Copyright (c) 2019-2020 Jos Verlinde
 """
+import sys
 import errno
 import gc
 import logging
-import os
-import sys
+import uos as os
 from utime import sleep_us
 from ujson import dumps
 
@@ -17,7 +17,6 @@ try:
 except:
     def resetWDT():
         pass
-
 
 class Stubber():
     "Generate stubs for modules in firmware"
@@ -30,8 +29,8 @@ class Stubber():
             os.uname()
         except AttributeError:
             self._log.info((
-                "System Information cannot be determined! "
-                "Using 'generic' attributes. To override this, "
+                "System Information cannot be determined "
+                "using 'generic' attributes. To override this, "
                 "please pass additional kwargs: "
                 "[sysname, nodename, release, version, machine]\n"
             ))
@@ -90,7 +89,6 @@ class Stubber():
                         'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib', 'pycom', 'crypto']
         self.modules += ['pyb','stm'] 
         self.modules += ['uasyncio/lock','uasyncio/stream','uasyncio/__init__', 'uasyncio/core', 'uasyncio/event','uasyncio/funcs'] #1.13
-
 
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200
@@ -309,7 +307,6 @@ class Stubber():
                 pass
         return fid
 
-
     def clean(self, path: str = None):
         "Remove all files from the stub folder"
         if path is None:
@@ -410,4 +407,5 @@ def main():
     # stubber.add_modules(['bluetooth'])
     stubber.create_all_stubs()
     stubber.report()
+
 main()
