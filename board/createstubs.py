@@ -18,6 +18,7 @@ except:
     def resetWDT():
         pass
 
+
 class Stubber():
     "Generate stubs for modules in firmware"
     def __init__(self, path: str = None, firmware_id: str = None, **kwargs):
@@ -87,6 +88,7 @@ class Stubber():
                         'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib',
                         'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib', 'pycom', 'crypto']
+        self.modules += ['pyb','stm'] 
         self.modules += ['uasyncio/lock','uasyncio/stream','uasyncio/__init__', 'uasyncio/core', 'uasyncio/event','uasyncio/funcs'] #1.13
 
 
@@ -274,25 +276,39 @@ class Stubber():
             del name, rep, typ, obj # pylint: disable=undefined-loop-variable
         except:
             pass
-
+    
     def firmware_ID(self, asfile: bool = False):
-        "Get a sensible firmware ID"
+        "Get a sensible firmware ID = <system> <release>[-build]"
         if self._fid:
             fid = self._fid
-        else:
-            if os.uname().sysname in 'esp32_LoBo':
-                #version in release
-                ver = os.uname().release
-            else:
-                # version before '-' in version : v1.13-103-gb137d064e
-                ver = os.uname().version.split('-')[0]
-            fid = "{} {}".format(os.uname().sysname, ver)
+        else: 
+            fid = self.newid(os.uname())
+            self._fid = fid
         if asfile:
             # path name restrictions
             chars = " .()/\\:$"
             for c in chars:
                 fid = fid.replace(c, "_")
         return fid
+
+    @staticmethod
+    def newid( uname:tuple)->str:
+        "fwid = system on release[-build]"
+        sysname = uname.sysname
+        # if sysname in ('pyboard','esp32'):
+        #     sysname = uname.machine.split(' ')[0].lower()
+        fid = "{} {}".format(sysname, uname.release)
+        build=''
+        if ' on ' in uname.version:
+            s = uname.version.split('on ')[0]
+            try:
+                build=s.split('-')[1]
+                #print("build", build)
+                fid += '-' + build
+            except IndexError:
+                pass
+        return fid
+
 
     def clean(self, path: str = None):
         "Remove all files from the stub folder"
@@ -365,6 +381,7 @@ class Stubber():
                         raise e
             #next level deep
             start = i+1
+
 
     @staticmethod
     def get_root():
