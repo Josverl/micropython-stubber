@@ -1,19 +1,22 @@
-.vscode/.ropeproject/
 project.pymakr
 *.zip
 
-#Ignore virtual environment
+# no python virtual environment
 .env/*
+# no compiled python 
 **/__pycache__/**
 
 #ignore the scratchpad 
 scratch/*
-MCU/*
 
-#ignore downloaded stubs in the boards folder 
-board/stubs/*/*
+# ignore stubs 
+# stubs
+board/stubs
 
-downloadedstubs/
-downloaded/*
+# ignore test coverage report
+.coverage
+htmlcov
+coverage_html_report
 
-#ignore the all_stubs folder symlinked 
+# OS specific stuff
+desktop.ini

@@ -1,5 +1,0 @@
-print("The below white on grey text is readable when executed Python, but not in the Pymakr REPL")
-print("\x1b[1;47m", end = '')
-print("This white on grey text is readable when executed Python, but not in the Pymakr REPL")
-print("\x1b[0m")
-print("Back to normal grey on black text")

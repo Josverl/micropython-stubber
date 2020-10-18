@@ -10,19 +10,44 @@ Not that the above is not limited to VSCode and Pylint, but it happens to be the
 Please feel free to suggest and add other combinations and the relevant steps to configure these. 
 
 The (stretch) goal is to create a vscode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
-For now you will need to configure this by hand as shown in the below section.
+For now you will need to use the `microcli` tool, or configure this by hand as shown in the below sections.
+
+## 'MicroPy' A command line tool for managing MicroPython projects with VSCode
+If you want a command line interface to setup a new project and configure the settings as described above for you, then take a look at :  
+    https://github.com/BradenM/micropy-cli
+    `pip install micropy-cl`
+    then run `micropy init`
+
+Braden has essentially created a front-end for the use and distribution of micropython-stubber
 
 ## File Structure 
 The file structure is based on my personal windows environment, but you should be able to adapt that without much hardship to you own preference and OS.
 
 | What                 | Why                      | Where                             |
 |----------------------|--------------------------|-----------------------------------|
-| stubber project      | needed to make stubs     | C:\develop\MyPython\Stubber\
-| stub root            |                          | C:\develop\MyPython\Stubber\stubs
-| generated stub files | needed to use stubs      | C:\develop\MyPython\Stubber\<firmware>
-| Frozen stub files    | better code intellisense | C:\develop\MyPython\Stubber\<firmware>_Frozen
+| stubber project      | needed to make stubs     | C:\develop\Stubber\
+|                      |                          |
+| stub root            |                          | C:\develop\Stubber\stubs
+| cpython stubs for micropython core | adapt for differences between cpython and Micropython | C:\develop\Stubber\stubs\cpython-core
+| generated stub files | needed to use stubs      | C:\develop\Stubber\stubs\<firmware>
+| Frozen stub files    | better code intellisense | C:\develop\Stubber\stubs\<firmware>_Frozen
 | vscode config        | configure vscode         | in project or global config
 | pylint config        | pylint has own config    | .pylintrc in project folder 
+|                      |                          |
+| Micropython source   | extract frozen modules   | C:\develop\micropython-stubbertest
+| Micropython lib      | extract frozen modules   | C:\develop\micropython-lib
+|                      |                          |
+
+Note: U have used the folder `micropython-stubbertest` to avoid conflicts with any development that you might be doing on the `micropython` repo at the potential cost of a little diskspace.
+
+``` powershell
+cd /develop 
+
+git clone  https://github.com/josverl/micropython-stubber.git stubber 
+git clone  https://github.com/micropython/micropython.git stubber-micropython 
+git clone  https://github.com/micropython/micropython.git micropython-lib
+```  
+
 
 ## Configuring Visual Studio Code 
 
@@ -35,7 +60,6 @@ For simplicity in documentation I have configured most settings at workspace pro
 The same settings could be configured at User level, where they would become defaults for all your projects, and can be overridden per workspace/project.
 
 #### Relevant VSCode settings
-
 Setting | Default   | Description  | ref  
 --------|-----------|--------------|--- 
 python.autoComplete.|||[Autocomplete Settings](https://code.visualstudio.com/docs/python/settings-reference#_autocomplete-settings)
@@ -86,7 +110,7 @@ File: .vscode\\settings.json
 }
 
 ```
-Note:  if you notice  problems 
+Note:  if you notice problems 
 * The paths appear to be case sensitive(which may not be apparent for your platform)
 * in JSON notation the `\` (backslash) should be escaped as `\\` (double backslash)
 * Put the 'Frozen' module paths before the generated module paths. 
@@ -123,10 +147,12 @@ disable = missing-docstring, line-too-long, trailing-newlines, broad-except, log
 
 ```
 
-## Downloading the Stubs from GIThub 
+## Downloading the Stubs from GitHub 
 
 This is not complete at this point.
 You will find stubs as part of this project located in the stubs folder , but I have not settled on a way to distribute them yet.
+
+I suggest that you consider usising MicroPy as noted above.
 
 ## Generating Stubs for a specific Firmware 
 
@@ -156,7 +182,7 @@ The recommendation is to keep the firmware id short, and add a version as in the
 def main():
     stubber = Stubber(firmware_id='HoverBot v1.2.1')
     # Add specific additional modules to be stubbed
-    stubber.add_modules(['hover'])
+    stubber.add_modules(['hover','rudder'])
 
 ```
 after this , upload the file and import it to generate the stubs using your custom name.
@@ -165,12 +191,12 @@ after this , upload the file and import it to generate the stubs using your cust
 
 After this is completed, you will need to download the generated stubs from the micropython board, and save them on a folder on your computer. 
 if you work with multiple firmwares or versions it is recommended to use a folder name combining the firmware name and version
-- \stubs
-    - \ESP32_LoBo_v3_1_20
-    - \ESP32_LoBo_v3_2_24
-    - \ESP32_LoBo_v3_2_24_Frozen
-    - \ESP32_1_10_0
-    - \ESP32_1_10_0_Frozen
+- /stubs
+    - /ESP32_LoBo_v3_1_20
+    - /ESP32_LoBo_v3_2_24
+    - /ESP32_LoBo_v3_2_24_Frozen
+    - /ESP32_1_10_0
+    - /ESP32_1_10_0_Frozen
 
 Note: I found, that you need to be mindful of the maximum path and filename limitations on the filesystem if you use IFSS.
 
@@ -179,9 +205,20 @@ It is common for Firmwares to include a few (or many) modules as 'frozen' module
 
 Most OSS firmwares store these frozen modules as part of their repository, which allows us to: 
 1. Download the *.py from the (github) repo using `git clone` or a direct download 
-2. extract and store the 'unfrozen' modules (ie the *.py files)  in a <Firmware>_Frozen folder
+2. Extract and store the 'unfrozen' modules (ie the *.py files) in a <Firmware>_Frozen folder.
+   if there are different port / boards or releses defined , there may be multiple folders such as: 
+   mstubs/mpy_1_12_frozen
+            /esp32
+                /GENERIC
+                /RELEASE
+                /TINYPICO
+            /stm32
+                /GENERIC
+                /PYBD_SF2
+            
 3. generate typeshed stubs of these files. (the .pyi files will be stored alongside the .py files)
-4. Include them in the configuration 
+4. Include/use them in the configuration 
+
 
 
 ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-modules
@@ -189,13 +226,13 @@ ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-module
 ### Tested Firmwares :
 | Firmware              | Release  | Version                          | Comments        |
 |-----------------------|----------|----------------------------------|-----------------|
-| MicroPython ESP32     | 1.10.0   | v1.10-247-g0fb15fc3f             | umqtt modules missing
+| MicroPython ESP32     | 1.10.0   | v1.10-247-g0fb15fc3f             | 
 | MicroPython ESP32     | 1.11.0   |                                  | 
 | MicroPython ESP8266   | 1.9.4    |                                  | 
 | MicroPython ESP8266   | 1.9.4    |                                  | 
 | MicroPython ESP8266   | 1.10.0   |                                  | 
 | MicroPython ESP8266   | 1.11.0   |                                  | 
-| Loboris ESP32         | 3.2.24     | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
+| Loboris ESP32         | 3.2.24   | ESP32_LoBo_v3.2.24 on 2018-09-06 | includes _threads module 
 | M5Stack Flow          | 1.2.1    | based on ESP32_LoBo_v3.2.24      | 
 | M5Stack Flow          | 1.4.0-beta| based on MicroPython ESP32 1.11.0| 
 
@@ -213,9 +250,9 @@ ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-module
 Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
 
 
-## A WIP command line app for initiating micropython projects with VSCode
-If you want a command line interface to setup a new project and configure the settings as described above for you then take a look at : https://github.com/BradenM/micropy-cli
-It's still WiP, but it might help you along.
+
+## Testing 
+MicroPython-Stubber has a numer of tests written in Pytest
 
 
 # Licenses and contributions
@@ -264,6 +301,8 @@ https://github.com/dastultz/micropython-pyb
 
 ## Related 
 
+[Type hints cheat sheet](https://github.com/python/mypy/blob/master/docs/source/cheat_sheet_py3.rst#type-hints-cheat-sheet-python-3)
+
 ### References
 PEP 3107 -- Function Annotations
 https://www.python.org/dev/peps/pep-3107/
@@ -273,6 +312,10 @@ https://www.python.org/dev/peps/pep-0484/
 
 ### Stub generators
 https://stackoverflow.com/questions/35602541/create-pyi-files-automatically
+
+
+### Mypy
+[Optional Static Typing for Python](https://github.com/python/mypy#mypy-optional-static-typing-for-python)
 
 ### Typeshed 
 https://github.com/python/typeshed/
