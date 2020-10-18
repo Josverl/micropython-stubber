@@ -1,9 +1,6 @@
 .vscode/.ropeproject/
 project.pymakr
-downloaded/*
 *.zip
-
-downloadedstubs/
 
 #Ignore virtual environment
 .env/*
@@ -13,10 +10,10 @@ downloadedstubs/
 scratch/*
 MCU/*
 
-M5Stack
-# !M5Stack/stubs
-# M5Stack/apps
-# M5Stack/blocks
-# M5Stack/im*
-# M5Stack/emo*
-# M5Stack/res*
+#ignore downloaded stubs in the boards folder 
+board/stubs/*/*
+
+downloadedstubs/
+downloaded/*
+
+#ignore the all_stubs folder symlinked 
