@@ -9,7 +9,7 @@ This file is in the public domain.
 
 Written by Edward K. Ream.
 '''
-# pylint: disable=unused-argument, redefined-outer-name, trailing-whitespace, bad-whitespace, too-many-lines, multiple-statements, import-outside-toplevel
+# pylint : disable=unused-argument, redefined-outer-name, trailing-whitespace, too-many-lines, multiple-statements, import-outside-toplevel
 
 import ast
 # from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -99,15 +99,16 @@ def main():
         print('done')
 
 
-def pdb(self):
-    '''Invoke a debugger during unit testing.'''
-    try:
-        import leo.core.leoGlobals as leo_g
-        assert leo_g
-        # leo_g.pdb()
-    except ImportError:
-        import pdb
-        pdb.set_trace()
+# def pdb(self):
+#     pass
+# #     '''Invoke a debugger during unit testing.'''
+# #     try:
+# #         import leo.core.leoGlobals as leo_g
+# #         assert leo_g
+# #         # leo_g.pdb()
+# #     except ImportError:
+# #         import pdb
+# #         pdb.set_trace()
 
 def truncate(s, n):
     '''Return s truncated to n characters.'''
@@ -1095,13 +1096,15 @@ class LeoGlobals:
         s = ''.join(result)
         return '%s...\n%s\n' % (tag, s) if tag else s
 
-    def pdb(self):
-        try:
-            import leo.core.leoGlobals as leo_g
-            leo_g.pdb()
-        except ImportError:
-            import pdb
-            pdb.set_trace()
+    # def pdb(self):
+    #     pass
+    # #     try:
+    # #         import leo.core.leoGlobals as leo_g
+    # #         leo_g.pdb()
+    # #     except ImportError:
+    # #         import pdb
+    # #         pdb.set_trace()
+
     def printObj(self, obj, indent='', printCaller=False, tag=None):
         '''Pretty print any Python object using g.pr.'''
         print(self.objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
@@ -1122,11 +1125,12 @@ class LeoGlobals:
         return s.splitlines(True) if s else []
 
     def trace(self, *args, **keys):
-        try:
-            import leo.core.leoGlobals as leo_g
-            leo_g.trace(caller_level=2, *args, **keys)
-        except ImportError:
-            print(args, keys)
+        pass
+        # try:
+        #     import leo.core.leoGlobals as leo_g
+        #     leo_g.trace(caller_level=2, *args, **keys)
+        # except ImportError:
+        #     print(args, keys)
 
 
 class Pattern(object):
@@ -2896,47 +2900,47 @@ class StubTraverser (ast.NodeVisitor):
             # New: return the entire node, not node.value.
 
 
-class TestClass:
-    '''
-    A class containing constructs that have caused difficulties.
-    This is in the make_stub_files directory, not the test directory.
-    '''
-    # pylint: disable=no-member
-    # pylint: disable=undefined-variable
-    # pylint: disable=no-self-argument
-    # pylint: disable=no-method-argument
-    # pylint: disable=unsubscriptable-object
-    # pylint: disable=undefined-variable
+# class TestClass:
+#     '''
+#     A class containing constructs that have caused difficulties.
+#     This is in the make_stub_files directory, not the test directory.
+#     '''
+#     # pylint: disable=no-member
+#     # pylint: disable=undefined-variable
+#     # pylint: disable=no-self-argument
+#     # pylint: disable=no-method-argument
+#     # pylint: disable=unsubscriptable-object
+#     # pylint: disable=undefined-variable
 
-    def parse_group(group):
-        # pylint: disable=unsupported-delete-operation
-        if len(group) >= 3 and group[-2] == 'as':
-            del group[-2:]
-        ndots = 0
-        i = 0
-        while len(group) > i and group[i].startswith('.'):
-            ndots += len(group[i])
-            i += 1
-        assert ''.join(group[:i]) == '.'*ndots, group
-        del group[:i]
-        assert all(g == '.' for g in group[1::2]), group
-        return ndots, os.sep.join(group[::2])
+#     def parse_group(group):                                 
+#         # pylint: disable=unsupported-delete-operation
+#         if len(group) >= 3 and group[-2] == 'as':
+#             del group[-2:]
+#         ndots = 0
+#         i = 0
+#         while len(group) > i and group[i].startswith('.'):
+#             ndots += len(group[i])
+#             i += 1
+#         assert ''.join(group[:i]) == '.'*ndots, group
+#         del group[:i]
+#         assert all(g == '.' for g in group[1::2]), group
+#         return ndots, os.sep.join(group[::2])
 
-    def return_all(self):
-        return all([is_known_type(z) for z in s3.split(',')])
-        # return all(['abc'])
+#     def return_all(self):
+#         return all([is_known_type(z) for z in s3.split(',')])   
+#         # return all(['abc'])
 
-    def return_array(self):
-        return f(s[1:-1])
+#     def return_array(self):
+#         return f(s[1:-1])
 
-    def return_list(self, a):
-        return [a]
-    # pylint: disable=using-constant-test
-    def return_two_lists(s):
-        if 1:
-            return aList
-        else:
-            return list(self.regex.finditer(s))
+#     def return_list(self, a):
+#         return [a]
+#     # pylint: disable=using-constant-test
+#     def return_two_lists(s):
+#         if 1:
+#             return aList
+#         else:
+#             return list(self.regex.finditer(s))
 
 
 g = LeoGlobals() # For ekr.
