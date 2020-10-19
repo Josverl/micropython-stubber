@@ -1,4 +1,9 @@
 ## stubber : 
+
+improve generation of class methods to include (self,...) 
+        Normal methods should have at least one parameter (the first of which should be 'self').
+
+
 ###  main 
 
   - See ESP32 : C:\develop\MyPython\micropython\ports\esp32\boards\manifest.py
