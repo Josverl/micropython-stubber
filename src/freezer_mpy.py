@@ -2,6 +2,8 @@
 """
 Collect modules and python stubs from MicroPython source projects (v1.12 +)
 """
+# pylint: disable= line-too-long,  W1202, invalid-name
+
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
 # some functions used from makemanifest.py,
@@ -40,7 +42,6 @@ def freeze_as_mpy(path, script=None, opt=0):
 def freeze_as_str(path):
     log.debug(" - freeze_as_str({})".format(path) )
     log.warning("WARNING: Currently freeze_as_string({:s}) is not supported/processed".format(path) )
-    pass
 
 # def freeze_as_str(path):
 #     """Freeze the given `path` and all .py scripts within it as a string,
@@ -172,15 +173,15 @@ def get_frozen(stub_path, mpy_path=None, lib_path=None):
     # manifest_release.py is used for the release builds
     manifests = glob.glob(mpy_path + '\\ports\\**\\manifest.py', recursive=True) + glob.glob(mpy_path + '\\ports\\**\\manifest_release.py', recursive=True)
 
-    # remove any manifests  that are below one of the virtual environments (venv) 
+    # remove any manifests  that are below one of the virtual environments (venv) \
     # 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\build-venv\\lib64\\python3.6\\site-packages\\pip\\_vendor\\distlib\\manifest.py'
     manifests = [m for m in manifests if not 'venv' in m]
 
     if len(manifests) > 0:
-        log.debug('MicroPython v1.12 and newer') 
+        log.debug('MicroPython v1.12 and newer')
         get_frozen_manifest(manifests, stub_path, mpy_path, lib_path)
     else:
-        log.debug('MicroPython v1.11, older or other') 
+        log.debug('MicroPython v1.11, older or other')
         # others
         get_frozen_folders(stub_path, mpy_path, lib_path)
 
@@ -324,7 +325,6 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str)
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)-8s:%(message)s',level=logging.INFO)
-    
     # MicroPython
     # todo: checkout micropython @ tag
     # get_frozen(stub_path='./scratch/mpy_1_12/frozen', mpy_path='../micropython', lib_path='../micropython-lib')

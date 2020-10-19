@@ -5,17 +5,17 @@ Collect modules and python stubs from other projects
 # pylint: disable= line-too-long, W1202
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-
+# pylint: disable= line-too-long
 import glob
 import os
 import shutil
 import subprocess
+import logging
 
 import basicgit as git
 import freezer_mpy
 import freezer_lobo
 
-import logging
 log = logging.getLogger(__name__)
 
 STUB_FOLDER = './all-stubs'

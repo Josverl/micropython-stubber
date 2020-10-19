@@ -2,6 +2,7 @@
 """
 Collect modules and python stubs from the Loboris MicroPython source project
 """
+# pylint: disable= line-too-long
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
 
