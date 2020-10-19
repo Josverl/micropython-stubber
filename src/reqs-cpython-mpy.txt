@@ -1,0 +1,37 @@
+# list of modules to mimic micropython on CPython
+# pycopy generally has more and more complete stubs
+pycopy-cpython-micropython
+pycopy-cpython-uerrno
+pycopy-cpython-uio
+pycopy-cpython-ujson
+pycopy-cpython-uos
+# pycopy-cpython-upip-tarfile
+pycopy-cpython-upip
+pycopy-cpython-ure
+pycopy-cpython-usocket
+pycopy-cpython-ussl
+pycopy-cpython-uzlib
+pycopy-cpython-pycopy
+pycopy-cpython-uheapq
+pycopy-cpython-uctypes
+pycopy-cpython-utime
+pycopy-cpython-ucollections
+pycopy-cpython-uselect
+pycopy-cpython-builtins
+pycopy-cpython-utimeq
+pycopy-cpython-ffi
+pycopy-cpython-machine
+pycopy-cpython-uhashlib
+pycopy-cpython-gc
+pycopy-cpython-usocket
+pycopy-cpython-ucryptolib
+pycopy-cpython-ulogging
+pycopy-cpython-btree
+pycopy-cpython-utokenize
+pycopy-cpython-uasyncio
+pycopy-cpython-framebuf
+pycopy-cpython-sys
+pycopy-cpython-array
+pycopy-cpython-ustruct
+pycopy-cpython-uarray
+pycopy-cpython-network
