@@ -9,16 +9,21 @@ Collect modules and python stubs from MicroPython source projects (v1.12 +)
 #   Copyright (c) 2019 Damien P. George
 
 # locating frozen modules :
-# tested on MicroPython v1.12
+# tested on MicroPython v1.12 - v1.13
+# - 1.13 - using manifests.py, and support for variant
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
-
 
 import glob
 import os
 import re
 import shutil
 
+import logging
+log = logging.getLogger(__name__)
+# log.setLevel(level=logging.DEBUG)
+
+# globals
 path_vars = {"MPY_DIR":"", "MPY_LIB_DIR":"", "PORT_DIR":"", "BOARD_DIR":""}
 stub_dir = None
 
@@ -28,7 +33,21 @@ class FreezeError(Exception):
 
 # freeze_as_mpy is only used by the unix port.
 def freeze_as_mpy(path, script=None, opt=0):
+    log.debug(" - freeze_as_mpy({},script={},opt={})".format(path,script,opt) )
     freeze(path, script, opt)
+
+# TODO: see if/how `freeze_as_str` should be handled, may need re-implementing based on the v1.13 code
+def freeze_as_str(path):
+    log.debug(" - freeze_as_str({})".format(path) )
+    log.warning("WARNING: Currently freeze_as_string({:s}) is not supported/processed".format(path) )
+    pass
+
+# def freeze_as_str(path):
+#     """Freeze the given `path` and all .py scripts within it as a string,
+#     which will be compiled upon import.
+#     """
+#     freeze_internal(KIND_AS_STR, path, None, 0)
+
 
 # function used commonly in manifest.py to freeze a set of scripts
 # pylint: disable=unused-argument, unused-variable
@@ -58,6 +77,7 @@ def freeze(path, script=None, opt=0):
     `opt` is the optimisation level to pass to mpy-cross when compiling .py
     to .mpy. (ignored in this implementation)
     """
+    log.debug(" - freeze(({},script={},opt={})".format(path,script,opt) )
     path = convert_path(path)
     if script is None:
         #folder of scripts.
@@ -80,20 +100,23 @@ def freeze(path, script=None, opt=0):
 # called by freeze.
 def freezedry(path, script):
     "copy the to-be-frozen module to the destination folder to be stubbed"
+
+    log.debug(" - freezedry({},{})".format(path,script) )
+
     script_path = os.path.join(path, script)
 
     if stub_dir:
-        print("freezedry : {:<20} to {}".format(script, stub_dir))
+        log.info("freezedry : {:<30} to {}".format(script, stub_dir))
         dest_path = os.path.dirname(os.path.join(stub_dir, script))
-        # ensure folder, including possible path prefic for script todo:
+        # todo: ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
         try:
             shutil.copy2(script_path, dest_path)
         except OSError as e:
-            print(e)
+            log.exception(e)
     else:
-        print('Stub folder not set')
+        log.error('Stub folder not set')
 
 def include(manifest):
     """Include another manifest.
@@ -113,7 +136,10 @@ def include(manifest):
             # Applies to includes and input files.
             prev_cwd = os.getcwd()
             os.chdir(os.path.dirname(manifest))
-            exec(f.read())  # pylint: disable=exec-used
+            try:
+                exec(f.read())  # pylint: disable=exec-used
+            except OSError:
+                log.warning('Could not process manifest: {}'.format(manifest))
             os.chdir(prev_cwd)
 
 def convert_path(path):
@@ -146,10 +172,18 @@ def get_frozen(stub_path, mpy_path=None, lib_path=None):
     # manifest_release.py is used for the release builds
     manifests = glob.glob(mpy_path + '\\ports\\**\\manifest.py', recursive=True) + glob.glob(mpy_path + '\\ports\\**\\manifest_release.py', recursive=True)
 
+    # remove any manifests  that are below one of the virtual environments (venv) 
+    # 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\build-venv\\lib64\\python3.6\\site-packages\\pip\\_vendor\\distlib\\manifest.py'
+    manifests = [m for m in manifests if not 'venv' in m]
+
     if len(manifests) > 0:
+        log.debug('MicroPython v1.12 and newer') 
         get_frozen_manifest(manifests, stub_path, mpy_path, lib_path)
     else:
+        log.debug('MicroPython v1.11, older or other') 
+        # others
         get_frozen_folders(stub_path, mpy_path, lib_path)
+
 
 def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str):
     """
@@ -166,16 +200,11 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str):
             mpy_board = "GENERIC"
 
         dest_path = os.path.join(stub_path, mpy_port, mpy_board)
-        print("freezedry : {:<20} to {}".format(script, dest_path))
+        log.info("freezedry : {:<30} to {}".format(script, dest_path))
         # ensure folder, including possible path prefic for script todo:
         os.makedirs(dest_path, exist_ok=True)
         # copy file
         shutil.copy2(script, dest_path)
-
-
-
-
-
 
 
 # def get_target_path(path:str)-> tuple:
@@ -243,17 +272,18 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str)
 
     # https://regexr.com/4rh39
     # but with an extry P for Python named groups...
-    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
     regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
+    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
+    regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)" # port & variant
     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
     # print( matches.group('port'), matches.group('board'))
 
     # Include top-level inputs, to generate the manifest
     for manifest in manifests:
-        print('Manifest:', manifest)
-        matches = re.search(regex_2, manifest)
+        log.info('Manifest: {}'.format(manifest))
         path_vars['PORT_DIR'] = ""
         path_vars['BOARD_DIR'] = ""
+        matches = re.search(regex_2, manifest)  # BOARD AND PORT
         if matches:
             # port and board
             path_vars['PORT_DIR'] = matches.group('port') or ""
@@ -261,10 +291,18 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str)
             if os.path.basename(matches.group('board')) == "manifest":
                 path_vars['BOARD_DIR'] = ""
         else:
-            #just port
-            matches = re.search(regex_1, manifest)
+            matches = re.search(regex_2, manifest)  # BOARD AND VARIANT
             if matches:
+                # port and variant
                 path_vars['PORT_DIR'] = matches.group('port') or ""
+                path_vars['BOARD_DIR'] = matches.group('board') or ""
+                if os.path.basename(matches.group('board')) == "manifest":
+                    path_vars['BOARD_DIR'] = ""
+            else:
+                #just port
+                matches = re.search(regex_1, manifest)
+                if matches:
+                    path_vars['PORT_DIR'] = matches.group('port') or ""
 
         port_name = os.path.basename(path_vars['PORT_DIR'])
         board_name = os.path.basename(path_vars['BOARD_DIR'])
@@ -281,15 +319,18 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str)
         try:
             include(manifest)
         except FreezeError as er:
-            print('freeze error executing "{}": {}'.format(manifest, er.args[0]))
+            log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(levelname)-8s:%(message)s',level=logging.INFO)
+    
     # MicroPython
     # todo: checkout micropython @ tag
     # get_frozen(stub_path='./scratch/mpy_1_12/frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-    get_frozen_folders(stub_path='./scratch/mpy_1_10/frozen', mpy_path='../micropython', lib_path='../micropython-lib')
+    # get_frozen_folders(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib')
 
+    get_frozen(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib')
 
 
     # PyCopy / LoBo - do not use manifests
