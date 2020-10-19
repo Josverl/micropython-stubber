@@ -1,6 +1,6 @@
 [MASTER]
 # Loaded Stubs:  esp32-micropython-1.11.0 
-init-hook='import sys;sys.path[1:1] = ["lib", ".micropy/cpython-core", ".micropy/BradenM-micropy-stubs-7a7d171/frozen", ".micropy/BradenM-micropy-stubs-452a204/frozen", ".micropy/BradenM-micropy-stubs-7a7d171/stubs",".micropy/thermo"]'
+init-hook='import sys;sys.path[1:1] = ["board/lib", ".micropy/thermo", "all-stubs/cpython-core", "all-stubs/mpy_1_12/frozen/esp32/GENERIC", "all-stubs/esp32_1_13_0-103",]'
 # Note : also add these paths to: VSCode Preferences > Workspace > python.autoComplete.extraPaths
 
 
