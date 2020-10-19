@@ -45,7 +45,7 @@ def get_cpython(requirements, stub_path=None):
     os.makedirs(stub_path, exist_ok=True)
     os.makedirs(build_path, exist_ok=True)
     try:
-        subprocess.run(["pip", "install", "--target", build_path, "-r", requirements, "--no-cache-dir", "--no-compile", "--upgrade"], capture_output=False, check=True)
+        subprocess.run(["pip", "install", "--target", build_path, "-r", requirements, "--no-cache-dir", "--no-compile", "--upgrade", "--no-binary=:all:"], capture_output=False, check=True)
         # copy *.py files in build folder to stub_path
         for filename in glob.glob(os.path.join(build_path, "*.py")):
             log.info("pipped : {}".format(filename))
@@ -90,7 +90,7 @@ def get_all():
         log.warning('Unable to find the micropython repo in folder : {}'.format(mpy_path))
 
 
-    # get_cpython(stub_path='./stubs/cpython-core', requirements='./src/micro-cpython.txt')
+    get_cpython(stub_path='{}/cpython-core'.format(STUB_FOLDER), requirements='./src/reqs-cpython-mpy.txt')
 
     # freezer_lobo.get_frozen(stub_path='./stubs/esp32_LoBo_3_2_24_Frozen')
 
@@ -102,6 +102,5 @@ def get_all():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format='%(name)-10s %(levelname)-8s:%(message)s')
-#                        format='%(name)-10s %(funcName)-20s %(levelname)-8s:%(message)s')
+
     get_all()
-    # get_cpython(stub_path='./stubs/cpython-core', requirements='./src/micro-cpython.txt')
