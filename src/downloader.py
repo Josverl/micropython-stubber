@@ -1,10 +1,12 @@
 "Download files from a public github repo"
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
+# pylint: disable= invalid-name
 import os
 import requests
 
 def download_file(url: str, module: str, folder: str = "./"):
+    "dowload a file from a public github repo"
     local_filename = os.path.abspath(os.path.join(folder, module))
     print("Downloading {:<20} to {}".format(module, local_filename))
     # NOTE the stream=True parameter below
@@ -18,6 +20,7 @@ def download_file(url: str, module: str, folder: str = "./"):
     return local_filename
 
 def download_files(repo, frozen_modules, savepath):
+    "dowload multiple files from a public github repo"
     if not os.path.exists(savepath):
         os.makedirs(savepath)
 

@@ -3,9 +3,10 @@ import subprocess
 import os
 
 def scriptpath(script: str):
+    "get path where the powershell helper script is located"
     try:
         _scriptpath = os.path.dirname(os.path.realpath(__file__))
-    except:
+    except OSError:
         _scriptpath = "./src"
     return os.path.join(_scriptpath, script)
 
@@ -30,9 +31,9 @@ def get_tag(repo: str = None) -> str:
         tag: str = result.stdout.decode("utf-8")
         tag = tag.replace('\r', '').replace('\n', '')
         return tag
-    except  subprocess.CalledProcessError as e:
-        print("Error: ", e.returncode, e.stderr)
-        raise Exception(e.stderr)
+    except  subprocess.CalledProcessError as err:
+        print("Error: ", err.returncode, err.stderr)
+        raise Exception(err.stderr) from err
 
 def checkout_tag(tag: str, repo: str = None) -> bool:
     """
@@ -56,8 +57,8 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
         else:
             raise Exception(result.stderr.decode("utf-8"))
 
-    except  subprocess.CalledProcessError as e:
-        print(e)
+    except  subprocess.CalledProcessError as err:
+        print(err)
         return False
 
     # todo: retry withouth powershell
@@ -94,9 +95,9 @@ def fetch(repo: str = None) -> bool:
             raise Exception(result.stderr.decode("utf-8"))
         return True
 
-    except  subprocess.CalledProcessError as e:
-        print("Error: ", e.returncode, e.stderr)
-        raise Exception(e.stderr)
+    except  subprocess.CalledProcessError as err:
+        print("Error: ", err.returncode, err.stderr)
+        raise Exception(err.stderr) from err
 
 def pull(repo: str = None, branch='master') -> bool:
     """
@@ -118,6 +119,6 @@ def pull(repo: str = None, branch='master') -> bool:
         #     raise Exception(result.stderr.decode("utf-8"))
         return result.returncode == 0
 
-    except  subprocess.CalledProcessError as e:
-        print("Error: ", e.returncode, e.stderr)
-        raise Exception(e.stderr)
+    except  subprocess.CalledProcessError as err:
+        print("Error: ", err.returncode, err.stderr)
+        raise Exception(err.stderr) from err
