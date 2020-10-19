@@ -1,4 +1,4 @@
-#pylint:disable=bad-whitespace, trailing-whitespace, bad-continuation
+#pylint:disable= trailing-whitespace, line-too-long
 #######################################################################
 # the exceptions 
 #######################################################################
@@ -230,12 +230,3 @@ all = ['_onewire', '_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii',
         'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'upysh', 'urandom', 'ure', 'urequests', 
         'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'webrepl', 
         'webrepl_setup', 'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
-
-
-
-# todo: Move upip earlier 
-# todo: 
-
-
-
-
