@@ -259,9 +259,28 @@ Due to the naming convention in micropython some modules will be duplicated , ie
 
 
 ## Testing 
-MicroPython-Stubber has a numer of tests written in Pytest
+MicroPython-Stubber has a (limited) number of tests written in Pytest
 
-# Licenses and contributions
+# contributions 
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4" width="100px;" alt=""/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubs/commits?author=josverl" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+
+# Licenses 
+
 MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
 
 ## Inspiration : Thonny - MicroPython _cmd_dump_api_info  _[MIT License]_
