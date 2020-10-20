@@ -20,6 +20,13 @@ If you want a command line interface to setup a new project and configure the se
 
 Braden has essentially created a front-end for the use and distribution of micropython-stubber
 
+## contributions
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-13-orange.svg?style=flat-square)](#contributors)
+<!-- ALL-CONTRIBUTORS-BADGE:END --> 
+
+
 ## File Structure 
 The file structure is based on my personal windows environment, but you should be able to adapt that without much hardship to you own preference and OS.
 
@@ -253,7 +260,6 @@ Due to the naming convention in micropython some modules will be duplicated , ie
 
 ## Testing 
 MicroPython-Stubber has a numer of tests written in Pytest
-
 
 # Licenses and contributions
 MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
