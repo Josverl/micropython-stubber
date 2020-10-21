@@ -1,37 +1,38 @@
 # list of modules to mimic micropython on CPython
 # pycopy generally has more and more complete stubs
+
+pycopy-cpython-ffi
 pycopy-cpython-micropython
+pycopy-cpython-uarray
+pycopy-cpython-uasyncio
+pycopy-cpython-ucollections
+pycopy-cpython-uctypes
 pycopy-cpython-uerrno
+pycopy-cpython-uhashlib
 pycopy-cpython-uio
 pycopy-cpython-ujson
+pycopy-cpython-ulogging
 pycopy-cpython-uos
-# pycopy-cpython-upip-tarfile
 pycopy-cpython-upip
 pycopy-cpython-ure
+pycopy-cpython-uselect
 pycopy-cpython-usocket
 pycopy-cpython-ussl
-pycopy-cpython-uzlib
-pycopy-cpython-pycopy
-pycopy-cpython-uheapq
-pycopy-cpython-uctypes
 pycopy-cpython-utime
-pycopy-cpython-ucollections
-pycopy-cpython-uselect
-pycopy-cpython-builtins
 pycopy-cpython-utimeq
-pycopy-cpython-ffi
-pycopy-cpython-machine
-pycopy-cpython-uhashlib
-pycopy-cpython-gc
-pycopy-cpython-usocket
-pycopy-cpython-ucryptolib
-pycopy-cpython-ulogging
-pycopy-cpython-btree
 pycopy-cpython-utokenize
-pycopy-cpython-uasyncio
-pycopy-cpython-framebuf
-pycopy-cpython-sys
-pycopy-cpython-array
-pycopy-cpython-ustruct
-pycopy-cpython-uarray
-pycopy-cpython-network
+pycopy-cpython-uzlib
+
+# below are on pypi ,but seem to be empty
+# pycopy-cpython-array
+# pycopy-cpython-btree
+# pycopy-cpython-builtins
+# pycopy-cpython-framebuf
+# pycopy-cpython-gc
+# pycopy-cpython-machine
+# pycopy-cpython-network
+# pycopy-cpython-pycopy
+# pycopy-cpython-sys
+# pycopy-cpython-ucryptolib
+# pycopy-cpython-uheapq
+# pycopy-cpython-ustruct

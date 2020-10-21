@@ -50,18 +50,17 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     cmd = ["pwsh", scriptpath('git-checkout-tag.ps1'), '-repo', repo, '-tag', tag]
     try:
         result = subprocess.run(cmd, capture_output=True, check=True)
-        if result.returncode >= 0:
-            # actually a good result
-            print(result.stderr.decode("utf-8"))
-            return True
-        else:
-            raise Exception(result.stderr.decode("utf-8"))
-
-    except  subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError as err:
         print(err)
         return False
+    if result.returncode < 0:
+        raise Exception(result.stderr.decode("utf-8"))
+    # actually a good result
+    print(result.stderr.decode("utf-8"))
+    return True
+    
 
-    # todo: retry withouth powershell
+    # todo: retry without powershell
     # cmd = ['git', 'checkout', 'tags/'+ tag]
     # try:
     #     result = subprocess.run(cmd, capture_output=True, check=True, cwd='../micropython')
