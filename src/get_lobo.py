@@ -5,8 +5,12 @@ Collect modules and python stubs from the Loboris MicroPython source project
 # pylint: disable= line-too-long
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-
+import logging
 import downloader
+
+family = 'lobo'
+log = logging.getLogger(__name__)
+# log.setLevel(level=logging.DEBUG)
 
 def get_frozen(stub_path, *, repo=None):
     "Loboris frozen modules"
@@ -20,3 +24,9 @@ def get_frozen(stub_path, *, repo=None):
                       "upip_utarfile.py", "upysh.py", "urequests.py", "writer.py"]
     #download
     downloader.download_files(repo, frozen_modules, stub_path)
+
+
+if __name__ == "__main__":
+    # just run a quick test
+    logging.basicConfig(format='%(levelname)-8s:%(message)s',level=logging.INFO)
+    get_frozen(stub_path='./scratch/esp32_lobo_frozen')
