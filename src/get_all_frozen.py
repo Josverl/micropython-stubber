@@ -39,7 +39,7 @@ def get_all():
         # folder/{family}_{version}_frozen
         family = 'mpy'
         stub_path = stubfolder( '{}_{}_frozen'.format(family, flat_version(version)))
-        get_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib')
+        get_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib', version = version)
     else:
         log.warning('Unable to find the micropython repo in folder : {}'.format(mpy_path))
 
