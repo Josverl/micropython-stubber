@@ -60,7 +60,7 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     return True
     
 
-    # todo: retry withouth powershell
+    # todo: retry without powershell
     # cmd = ['git', 'checkout', 'tags/'+ tag]
     # try:
     #     result = subprocess.run(cmd, capture_output=True, check=True, cwd='../micropython')

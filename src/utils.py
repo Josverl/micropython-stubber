@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+from version import VERSION
+
 log = logging.getLogger(__name__)
 
 STUB_FOLDER = './all-stubs'
@@ -59,7 +61,7 @@ def manifest(machine:None,sysname=None,nodename=None,version=None,release=None,f
                         "sysname": sysname
                     },
                     "stubber": {
-                        "version": version
+                        "version": VERSION
                     },
                     "modules": []
                 }
