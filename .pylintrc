@@ -19,6 +19,7 @@ confidence=
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 
-disable = missing-docstring, line-too-long, trailing-newlines, broad-except, logging-format-interpolation, invalid-name, empty-docstring,
-        no-method-argument, assignment-from-no-return, too-many-function-args, unexpected-keyword-arg, bare-except
+disable = missing-docstring, line-too-long, trailing-newlines, logging-format-interpolation, invalid-name, empty-docstring,
+        no-method-argument, assignment-from-no-return, too-many-function-args, unexpected-keyword-arg
+        # broad-except,
         # the 2nd  line deals with the limited information in the generated stubs.
