@@ -1,32 +1,18 @@
-## stubber : 
+# stubber : 
 
-improve generation of class methods to include (self,...) 
+-  improve generation of class methods to include (self,...) 
         Normal methods should have at least one parameter (the first of which should be 'self').
 
+- document - that gc and sys modules are somhowe ignored by pylint and will keep throwing errors 
 
-###  main 
+- add mpy information to manifest 
+- use 'nightly' naming convetion in createsubs.py
 
-  - See ESP32 : C:\develop\MyPython\micropython\ports\esp32\boards\manifest.py
+# frozen stubs 
+- Done - generate manifest.json 
+- add simple readme.md ?
 
-        freeze('$(PORT_DIR)/modules')                                       - included by braden 
-        freeze('$(MPY_DIR)/tools', ('upip.py', 'upip_utarfile.py'))         - ?
-        freeze('$(MPY_DIR)/ports/esp8266/modules', 'ntptime.py')            - ?
-        freeze('$(MPY_DIR)/drivers/dht', 'dht.py')                          - ?
-        freeze('$(MPY_DIR)/drivers/onewire')
-        include('$(MPY_DIR)/extmod/webrepl/manifest.py')
-
-- ESP8622 : C:\develop\MyPython\micropython\ports\esp8266\boards\manifest.py
-        freeze('$(PORT_DIR)/modules')
-        freeze('$(MPY_DIR)/tools', ('upip.py', 'upip_utarfile.py'))
-        freeze('$(MPY_DIR)/drivers/dht', 'dht.py')
-        freeze('$(MPY_DIR)/drivers/onewire')
-        include('$(MPY_DIR)/extmod/webrepl/manifest.py')
-
-- exclude more modules 
-        = logging, as this is distributed , and can instead be generated from micropylib/logging
-        - standard frozen modules 
-
-        Also allow for force option to stub them anyway
+# cpython
 
 - read RST files 
 
@@ -42,27 +28,7 @@ improve generation of class methods to include (self,...)
 
 - resolve import time issues 
 
-pylint : disable a few more ?
-
-done -support function decorators 
-        - @micropython.native / viper / bytecode
-        is resolved by
-        there is a CPython Dummy function decorators placeholder : https://github.com/micropython/micropython/blob/master/examples/micropython.py
-
-
-# Subclassing FrameBuffer provides support for graphics primitives
-# http://docs.micropython.org/en/latest/pyboard/library/framebuf.html
-class SSD1306(framebuf.FrameBuffer):
-- ssd1306 module
-    from ssd1306 import  SSD1306_I2C
-
-
 # Structuur op machine 
-
-- Apart Micropython-Stubs repo 
-- ..\micropython-stubs  linked to Stubber stubs ( submodule ?)
-- 
-
 
 # SYS en GC 
 #pylint: disable=no-member      ## workaround for sys and gc
