@@ -4,12 +4,13 @@ import shutil
 import subprocess
 import utils
 import json
+from version import VERSION
 
 import logging
 log = logging.getLogger(__name__)
 
 family = 'common'
-VERSION = '1.3.5'
+
 def get_core(requirements, stub_path=None):
     "Download MicroPython compatibility modules"
     if not stub_path:
@@ -40,7 +41,7 @@ def get_core(requirements, stub_path=None):
     finally:
         # remove build folder
         shutil.rmtree(build_path, ignore_errors=True)
-        #withe the module manifest 
+        #write the the module manifest
         with open(stub_path+"/modules.json", "w") as outfile:
             json.dump(mod_manifest, outfile)
 
