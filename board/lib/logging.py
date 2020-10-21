@@ -38,7 +38,7 @@ class Logger:
 
     def log(self, level, msg, *args):
         if level >= (self.level or _level):
-            _stream.write("%s:%s:" % (self._level_str(level), self.name))
+            _stream.write("%-6s:%-8s:" % (self._level_str(level), self.name))
             if not args:
                 print(msg, file=_stream)
             else:
@@ -61,7 +61,7 @@ class Logger:
 
     def exc(self, e, msg, *args):
         self.log(ERROR, msg, *args)
-        sys.print_exception(e, _stream)
+        sys.print_exception(e, _stream) # pylint: disable=no-member
 
     def exception(self, msg, *args):
         self.exc(sys.exc_info()[1], msg, *args)
