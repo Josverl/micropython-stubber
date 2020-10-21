@@ -1,4 +1,5 @@
 import os
+import glob
 import json
 import logging
 from version import VERSION
@@ -67,3 +68,16 @@ def manifest(machine:None,sysname=None,nodename=None,version=None,release=None,f
                 }
     return mod_manifest
 
+
+def make_manifest(folder:str, family:str, fmly:str, version:str)-> bool:
+    mod_manifest = manifest(machine=family, sysname=fmly, version=version)
+    try:
+        for filename in glob.glob(os.path.join(folder, "*.py")):
+            f_name, _ = os.path.splitext(os.path.basename(filename))
+            mod_manifest['modules'].append({ "file": os.path.basename(filename), "module":f_name})
+        #write the the module manifest
+        with open(folder+"/modules.json", "w") as outfile:
+            json.dump(mod_manifest, outfile)
+        return True
+    except OSError:
+        return False
