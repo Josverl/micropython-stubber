@@ -1,0 +1,11 @@
+# Production + dev requirements
+esptool
+pyminifier
+#python-minifier
+
+# dev requirements
+pytest
+pytest-xdist
+pytest-cov
+filelock
+

@@ -16,8 +16,17 @@
         {
             "name": "Python: Debug Current File",
             "type": "python",
-            "x-request": "test",
+            "request": "launch",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Debug process minify",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "program": "process.py",
+            "args": ["minify"]
+            
         }
 
     ]
