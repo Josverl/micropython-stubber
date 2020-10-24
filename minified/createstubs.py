@@ -132,7 +132,7 @@ class Stubber():
   if not module_name in["os","sys","logging","gc"]:
    try:
     del new_module
-   except(OSError,KeyError):
+   except KeyError:
     pass
    try:
     del sys.modules[module_name]
@@ -166,7 +166,7 @@ class Stubber():
   del errors
   try:
    del name,rep,typ,obj 
-  except(OSError,KeyError):
+  except KeyError:
    pass
  def firmware_ID(self,asfile:bool=False):
   if self._fid:

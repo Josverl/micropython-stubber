@@ -213,7 +213,7 @@ class Stubber():
             #try to unload the module unless we use it
             try:
                 del new_module
-            except (OSError, KeyError):
+            except KeyError:
                 self._log.warning("could not del new_module")
             try:
                 del sys.modules[module_name]
@@ -273,7 +273,7 @@ class Stubber():
         del errors
         try:
             del name, rep, typ, obj # pylint: disable=undefined-loop-variable
-        except (OSError, KeyError):
+        except KeyError:
             pass
 
     def firmware_ID(self, asfile: bool = False):
