@@ -3,7 +3,7 @@
 
 """Pre/Post Processing for createstubs.py"""
 
-
+import os
 import argparse
 import itertools
 import re
@@ -20,7 +20,8 @@ except ImportError:
     pass
 
 ROOT = Path(__file__).parent
-SCRIPT = ROOT / 'createstubs.py'
+SCRIPT = ROOT / 'board' / 'createstubs.py'
+DEST = ROOT / 'minified' / 'createstubs.py'
 PATCHES = ROOT / 'patches'
 
 
@@ -220,7 +221,10 @@ def minify_script(patches=None, keep_report=True, show_diff=False):
         report = ('rprint', ('self._log.info("Stub module: {:<20} to file:'
                              ' {:<55} mem:{:>5}".'
                              'format(module_name, file_name, m1))'))
+        clean = ('rprint', 'self._log.info("Clean/remove files in folder: {}".format(path))' )
         edits.insert(0, report)
+        edits.insert(1, clean)
+
     minopts = Values({'tabs': False})
     with SCRIPT.open('r') as f:
         content = f.read()
@@ -301,9 +305,9 @@ if __name__ == "__main__":
     parser.set_defaults(func=None)
     parser.add_argument(
         "-o", "--output",
-        help="Specify file to output to. Defaults to processed.py",
+        help="Specify file to output to. Defaults to ./minified/createstubs.py",
         type=Path,
-        default=(ROOT / 'processed.py')
+        default=DEST
     )
     subparsers = parser.add_subparsers(help="Command to execute")
 
@@ -311,7 +315,6 @@ if __name__ == "__main__":
                                           help=("Create minified version of"
                                                 " createstubs.py")
                                           )
-
     minify_parser.add_argument(
         '-p', '--patch',
         action='append',
