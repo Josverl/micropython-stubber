@@ -23,7 +23,7 @@ Braden has essentially created a front-end for the use and distribution of micro
 ## contributions
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END --> 
 
 
@@ -95,33 +95,39 @@ File: .vscode\\settings.json
     "python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python36_64\\python.exe",
 
     "python.autoComplete.extraPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+        "stubs/esp32_LoBo_3_2_24_Frozen",
+        "stubs/esp32_LoBo_3_2_24",
+        "stubs/esp32_1_10_0_Frozen",
+        "stubs/esp32_1_10_0",
     ],
     "python.autoComplete.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+        "stubs/esp32_LoBo_3_2_24_Frozen",
+        "stubs/esp32_LoBo_3_2_24",
+        "stubs/esp32_1_10_0_Frozen",
+        "stubs/esp32_1_10_0",
     ],
     "python.analysis.typeshedPaths": [
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0_Frozen",
-        "C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0",
+        "stubs/esp32_LoBo_3_2_24_Frozen",
+        "stubs/esp32_LoBo_3_2_24",
+        "stubs/esp32_1_10_0_Frozen",
+        "stubs/esp32_1_10_0",
     ],
 
     "python.linting.pylintEnabled": true,
 }
 
 ```
-Note:  if you notice problems 
+If you notice problems :
 * The paths appear to be case sensitive(which may not be apparent for your platform)
-* in JSON notation the `\` (backslash) should be escaped as `\\` (double backslash)
+* to allow the config to be used cross platform you can use forward slashes `/`, _note that this is also accepted on Windows_ 
+* if you uprefer to use a backslash :  in JSON notation the `\` (backslash) MUST be escaped as `\\` (double backslash)
 * Put the 'Frozen' module paths before the generated module paths. 
-The frozen modules offer more code completion, and vscode-python needs to load them first to make use of that.
+
+### Ordering or the stubs in your config:  
+1. the src/libs folder
+2. the cpython modules 
+3. The frozen modules offer more code completion, and vscode-python needs to load them first to make use of that.
+4. the stubs generated on or for your board,
 
 ### vscode User Settings
 
@@ -143,10 +149,10 @@ file: .pylintrc
 ``` ini
 [MASTER]
 # LoBo ESP 32 3.2.24
-init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24_Frozen");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_LoBo_3_2_24");sys.path.insert(1,"./lib")'
+init-hook='import sys; sys.path.insert(1,"stubs/esp32_LoBo_3_2_24_Frozen");sys.path.insert(1,"stubs/esp32_LoBo_3_2_24");sys.path.insert(1,"./lib")'
 
 # MicroPython ESP 32
-# init-hook='import sys; sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\core_1_10_0");sys.path.insert(1,"C:\\develop\\MyPython\\Stubber\\stubs\\esp32_1_10_0");sys.path.insert(1,"./lib")'
+# init-hook='import sys; sys.path.insert(1,"stubs/core_1_10_0");sys.path.insert(1,"stubs/esp32_1_10_0");sys.path.insert(1,"./lib")'
 
 disable = missing-docstring, line-too-long, trailing-newlines, broad-except, logging-format-interpolation, invalid-name, 
         no-method-argument, assignment-from-no-return, too-many-function-args, unexpected-keyword-arg
@@ -257,7 +263,6 @@ ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-module
 Due to the naming convention in micropython some modules will be duplicated , ie `uos` and `os` will both be included 
 
 
-
 ## Testing 
 MicroPython-Stubber has a (limited) number of tests written in Pytest
 
@@ -268,12 +273,33 @@ MicroPython-Stubber has a (limited) number of tests written in Pytest
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4" width="100px;" alt=""/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubs/commits?author=josverl" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/commits?author=josverl" title="Code">💻</a> <a href="#research-josverl" title="Research">🔬</a> <a href="#ideas-josverl" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-josverl" title="Content">🖋</a> <a href="#stubs-josverl" title="MicroPython stubs">📚</a> <a href="#test-josverl" title="Test">✔</a></td>
+    <td align="center"><a href="https://thonny.org/"><img src="https://avatars1.githubusercontent.com/u/46202078?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thonny, Python IDE for beginners</b></sub></a><br /><a href="#ideas-thonny" title="Ideas, Planning, & Feedback">🤔</a> <a href="#research-thonny" title="Research">🔬</a></td>
+    <td align="center"><a href="https://micropython.org/"><img src="https://avatars1.githubusercontent.com/u/6298560?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MicroPython</b></sub></a><br /><a href="#data-micropython" title="Data">🔣</a> <a href="#stubs-micropython" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://github.com/loboris"><img src="https://avatars3.githubusercontent.com/u/6280349?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Boris Lovosevic</b></sub></a><br /><a href="#data-loboris" title="Data">🔣</a> <a href="#stubs-loboris" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://github.com/pfalcon"><img src="https://avatars3.githubusercontent.com/u/500451?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paul Sokolovsky</b></sub></a><br /><a href="#data-pfalcon" title="Data">🔣</a> <a href="#stubs-pfalcon" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://github.com/pycopy"><img src="https://avatars0.githubusercontent.com/u/67273174?v=4?s=100" width="100px;" alt=""/><br /><sub><b>pycopy</b></sub></a><br /><a href="#data-pycopy" title="Data">🔣</a> <a href="#stubs-pycopy" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://github.com/pycom"><img src="https://avatars2.githubusercontent.com/u/16415153?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pycom</b></sub></a><br /><a href="#infra-pycom" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/BradenM"><img src="https://avatars1.githubusercontent.com/u/5913808?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Braden Mars</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/issues?q=author%3ABradenM" title="Bug reports">🐛</a> <a href="https://github.com/Josverl/micropython-stubbber/commits?author=BradenM" title="Code">💻</a> <a href="#stubs-BradenM" title="MicroPython stubs">📚</a> <a href="#platform-BradenM" title="Packaging/porting to new platform">📦</a></td>
+    <td align="center"><a href="https://binary.com.au/"><img src="https://avatars2.githubusercontent.com/u/175909?v=4?s=100" width="100px;" alt=""/><br /><sub><b>James Manners</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/commits?author=jmannau" title="Code">💻</a></td>
+    <td align="center"><a href="http://patrickwalters.us/"><img src="https://avatars0.githubusercontent.com/u/4002194?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/issues?q=author%3Aaskpatrickw" title="Bug reports">🐛</a> <a href="https://github.com/Josverl/micropython-stubbber/commits?author=askpatrickw" title="Code">💻</a> <a href="#stubs-askpatrickw" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://opencollective.com/pythonseverywhere"><img src="https://avatars3.githubusercontent.com/u/16009100?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paul m. p. P.</b></sub></a><br /><a href="#ideas-pmp-p" title="Ideas, Planning, & Feedback">🤔</a> <a href="#research-pmp-p" title="Research">🔬</a></td>
+    <td align="center"><a href="https://github.com/edreamleo"><img src="https://avatars0.githubusercontent.com/u/592928?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Edward K. Ream</b></sub></a><br /><a href="#plugin-edreamleo" title="Plugin/utility libraries">🔌</a></td>
+    <td align="center"><a href="https://github.com/dastultz"><img src="https://avatars3.githubusercontent.com/u/4334042?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daryl Stultz</b></sub></a><br /><a href="#stubs-dastultz" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://github.com/cabletie"><img src="https://avatars1.githubusercontent.com/u/2356734?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Keeping things together</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/issues?q=author%3Acabletie" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/vbolshakov"><img src="https://avatars2.githubusercontent.com/u/2453324?v=4?s=100" width="100px;" alt=""/><br /><sub><b>vbolshakov</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/issues?q=author%3Avbolshakov" title="Bug reports">🐛</a> <a href="#stubs-vbolshakov" title="MicroPython stubs">📚</a></td>
+    <td align="center"><a href="https://lemariva.com/"><img src="https://avatars2.githubusercontent.com/u/15173329?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mauro Riva</b></sub></a><br /><a href="#blog-lemariva" title="Blogposts">📝</a> <a href="https://github.com/Josverl/micropython-stubbber/issues?q=author%3Alemariva" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/MathijsNL"><img src="https://avatars0.githubusercontent.com/u/1612886?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MathijsNL</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubbber/issues?q=author%3AMathijsNL" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
-<!-- markdownlint-enable -->
+<!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

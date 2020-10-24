@@ -1,30 +1,50 @@
 {
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--rcfile", "${workspaceFolder}/.pylintrc-cpython"
+    ],
     "python.autoComplete.extraPaths": [
         "board/lib", 
         "all-stubs/cpython-core", 
-        "all-stubs/mpy_1_12/frozen/esp32/GENERIC", 
+        "all-stubs/mpy_1_13-nightly_frozen/esp32/GENERIC",
         "all-stubs/esp32_1_13_0-103"
     ],
     "python.autoComplete.typeshedPaths": [
         "board/lib", 
         "all-stubs/cpython-core", 
-        "all-stubs/mpy_1_12/frozen/esp32/GENERIC", 
+        "all-stubs/mpy_1_13-nightly_frozen/esp32/GENERIC",
         "all-stubs/esp32_1_13_0-103"
     ],
     "python.analysis.typeshedPaths": [
         "board/lib", 
         "all-stubs/cpython-core", 
-        "all-stubs/mpy_1_12/frozen/esp32/GENERIC", 
+        "all-stubs/mpy_1_13-nightly_frozen/esp32/GENERIC",
         "all-stubs/esp32_1_13_0-103"
     ],
-
+    
     "python.testing.pytestArgs": [
         "tests"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#914b09",
+        "activityBar.activeBorder": "#0bb45d",
+        "activityBar.background": "#914b09",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#0bb45d",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "statusBar.background": "#613206",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#914b09",
+        "titleBar.activeBackground": "#613206",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#61320699",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#613206",
 
 }
