@@ -1,10 +1,4 @@
+#production requirements
 esptool
-pytest
-pytest-xdist
-pytest-cov
-filelock
-
-
-#pytest-forked
-# pytest-dependency
+pyminifier
 
