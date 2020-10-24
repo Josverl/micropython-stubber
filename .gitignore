@@ -20,3 +20,5 @@ coverage_html_report
 
 # OS specific stuff
 desktop.ini
+.pytest_cache/*
+
