@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """Pre/Post Processing for createstubs.py"""
-
-import os
 import argparse
 import itertools
 import re
@@ -79,26 +77,28 @@ def edit_lines(content, edits, show_diff=False):
                 rprint - replace text with print
                 rpass - replace text with pass
             The second string is the matching text to replace
-        show_diff (bool, optional): Prints diff of each edit. 
+        show_diff (bool, optional): Prints diff of each edit.
             Defaults to False.
 
     Returns:
         str: edited string
     """
-    def comment(l, x): return l.replace(x, f"# {x}")
+    def comment(l, x):
+        return l.replace(x, f"# {x}")
 
-    def rprint(l, x):
+    def rprint(l, x):   #pylint: disable= unused-variable
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, f"print")
 
-    def rpass(l, x): return l.replace(x, f"pass")
+    def rpass(l, x):    #pylint: disable= unused-variable
+        return l.replace(x, f"pass")
 
     def get_whitespace_context(content, index):
         """Get whitespace count of lines surrounding index"""
-        def count_ws(line): return sum(
-            1 for _ in itertools.takewhile(str.isspace, line))
+        def count_ws(line):
+            return sum(1 for _ in itertools.takewhile(str.isspace, line))
         lines = content[index - 1:index+2]
         context = (count_ws(l) for l in lines)
         return context
@@ -178,7 +178,7 @@ def edit_lines(content, edits, show_diff=False):
                     if handle_try_except(content, l_index):
                         edit = "rpass"
                         text = line.strip()
-                func = eval(edit)
+                func = eval(edit)   #pylint: disable= eval-used
                 line = func(line, text)
                 if line != _line:
                     if show_diff:
@@ -221,7 +221,7 @@ def minify_script(patches=None, keep_report=True, show_diff=False):
         report = ('rprint', ('self._log.info("Stub module: {:<20} to file:'
                              ' {:<55} mem:{:>5}".'
                              'format(module_name, file_name, m1))'))
-        clean = ('rprint', 'self._log.info("Clean/remove files in folder: {}".format(path))' )
+        clean = ('rprint', 'self._log.info("Clean/remove files in folder: {}".format(path))')
         edits.insert(0, report)
         edits.insert(1, clean)
 
@@ -282,7 +282,7 @@ def cli_minify(**kwargs):
     out = kwargs.pop("output")
     patches = kwargs.pop("patch")
     if not minification:
-        print("\pyminifier is required to minify createstubs.py\n")
+        print("pyminifier is required to minify createstubs.py\n")
         print("Please install via:\n  pip install pyminifier")
         sys.exit(1)
     patch_paths = resolve_patches(patches)
