@@ -151,8 +151,7 @@ class Stubber():
             except OSError:
                 pass
             gc.collect()
-            m2 = gc.mem_free() # pylint: disable=no-member
-            self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-m2))
+            self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-gc.mem_free())) # pylint: disable=no-member
         self._log.info('Finally done')
 
     def create_module_stub(self, module_name: str, file_name: str = None):
@@ -292,7 +291,7 @@ class Stubber():
         return fid
 
     @staticmethod
-    def newid( uname:tuple)->str:
+    def newid(uname: tuple)->str:
         "fwid = system on release[-build]"
         sysname = uname.sysname
         # if sysname in ('pyboard','esp32'):

@@ -1,3 +1,7 @@
+# PYLINT for normal CPYTHON code 
+# Pylint cannot deal with multiple flavours of Python at the same time 
+# so you need ot have either the MPY or the CPYTHON version active 
+
 [MASTER]
 
 
