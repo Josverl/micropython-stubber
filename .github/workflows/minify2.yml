@@ -27,4 +27,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: minify
       run: |
-        python package.py minify
+        python process.py minify
