@@ -9,8 +9,9 @@ name: minify-RP
 on:
   workflow_dispatch:
   push:
-  pull_request:
-    branches: [ master ]
+  # pull_request:
+  #   branches: [ master ]
+  # TODO: for PR need to specify a base when committing the PR 
 
 jobs:
   minify:
