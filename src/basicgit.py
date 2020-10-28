@@ -23,17 +23,32 @@ def get_tag(repo: str = None) -> str:
         repo += '/.git'
 
     cmd = ['git', '--git-dir='+ repo, 'describe']
+    result = _run_git(cmd, expect_stderr=True)
+    if not result:
+        return None
+    tag: str = result.stdout.decode("utf-8")
+    tag = tag.replace('\r', '').replace('\n', '')
+    return tag
+
+
+def _run_git(cmd: str, expect_stderr=False):
+    "run a external (git) command and deal with some of the errors"
     try:
         result = subprocess.run(cmd, capture_output=True, check=True)
         if result.stderr != b'':
+            if not expect_stderr:
+                raise Exception(result.stderr.decode("utf-8"))
             print(result.stderr.decode("utf-8"))
-            raise Exception(result.stderr.decode("utf-8"))
-        tag: str = result.stdout.decode("utf-8")
-        tag = tag.replace('\r', '').replace('\n', '')
-        return tag
-    except  subprocess.CalledProcessError as err:
-        print("Error: ", err.returncode, err.stderr)
-        raise Exception(err.stderr) from err
+
+    except subprocess.CalledProcessError as err:
+        # raise exception?
+        raise Exception(err)
+        # print(err)
+        # return None
+
+    if result.returncode < 0:
+        raise Exception(result.stderr.decode("utf-8"))
+    return result
 
 def checkout_tag(tag: str, repo: str = None) -> bool:
     """
@@ -48,13 +63,9 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
         repo = os.path.basename(repo)
 
     cmd = ["pwsh", scriptpath('git-checkout-tag.ps1'), '-repo', repo, '-tag', tag]
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-    except subprocess.CalledProcessError as err:
-        print(err)
+    result = _run_git(cmd, expect_stderr=True)
+    if not result:
         return False
-    if result.returncode < 0:
-        raise Exception(result.stderr.decode("utf-8"))
     # actually a good result
     print(result.stderr.decode("utf-8"))
     return True
@@ -87,16 +98,10 @@ def fetch(repo: str = None) -> bool:
         repo += '/.git'
 
     cmd = ['git', '--git-dir='+ repo, 'fetch origin']
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        if result.stderr != b'':
-            print(result.stderr.decode("utf-8"))
-            raise Exception(result.stderr.decode("utf-8"))
-        return True
-
-    except  subprocess.CalledProcessError as err:
-        print("Error: ", err.returncode, err.stderr)
-        raise Exception(err.stderr) from err
+    result = _run_git(cmd)
+    if not result:
+        return False
+    return result.returncode == 0
 
 def pull(repo: str = None, branch='master') -> bool:
     """
@@ -110,14 +115,17 @@ def pull(repo: str = None, branch='master') -> bool:
     elif not repo.endswith('.git'):
         repo += '/.git'
 
-    cmd = ['git', '--git-dir='+ repo, 'pull', 'origin', branch]
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        # if result.stderr != b'':
-        #     print(result.stderr.decode("utf-8"))
-        #     raise Exception(result.stderr.decode("utf-8"))
-        return result.returncode == 0
+    # first checkout HEAD
+    cmd = ['git', '--git-dir='+ repo, 'reset', '--hard', 'head', '-q']
+    result = _run_git(cmd, expect_stderr=True)
+    if not result:
+        print("error durign git checkout heade", result)
+        return False
 
-    except  subprocess.CalledProcessError as err:
-        print("Error: ", err.returncode, err.stderr)
-        raise Exception(err.stderr) from err
+    cmd = ['git', '--git-dir='+ repo, 'pull', 'origin', branch, '-q']
+    result = _run_git(cmd, expect_stderr=True)
+    if not result:
+        print("error durign pull", result)
+        return False
+    return result.returncode == 0
+
