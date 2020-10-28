@@ -172,7 +172,7 @@ def get_frozen(stub_path:str, version:str, mpy_path=None, lib_path=None,):
     if not lib_path:
         lib_path = '../micropython-lib'
     if not stub_path:
-        stub_path =  '{}/{}_{}_frozen'.format(utils.STUB_FOLDER, fmly,utils.flat_version(version) )
+        stub_path =  '{}/{}_{}_frozen'.format(utils.STUB_FOLDER, fmly, utils.flat_version(version))
     # get the manifests of the different ports and boards
     mpy_path = os.path.abspath(mpy_path)
     lib_path = os.path.abspath(lib_path)
