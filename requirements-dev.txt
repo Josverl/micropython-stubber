@@ -5,7 +5,6 @@ pyminifier
 
 # dev requirements
 pytest
-pytest-xdist
 pytest-cov
 filelock
 

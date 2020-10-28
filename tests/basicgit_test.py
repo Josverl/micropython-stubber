@@ -3,6 +3,8 @@ import sys
 import os
 import pytest
 
+## Quickfix seems to be : >> git --no-optional-locks reset -q --hard HEAD --
+
 #make sure that the source can be found
 sys.path.insert(1, './src')
 
@@ -31,9 +33,9 @@ def test_get_failure_throws():
     with pytest.raises(Exception):
         git.get_tag('.not')
 
-def test_pull_master(gitrepo_micropython):
+def test_pull_master(testrepo_micropython):
     "test and force update to most recent"
-    repo_path = gitrepo_micropython
+    repo_path = testrepo_micropython
     x = git.pull(repo_path, 'master')
     #Should succeed.
     assert x
@@ -43,8 +45,8 @@ def test_get_tag_sibling():
     for testcase in ['../micropython', '..\\micropython']:
         common_tst(git.get_tag(testcase))
 
-def test_checkout_sibling(gitrepo_micropython):
-    repo_path = gitrepo_micropython
+def test_checkout_sibling(testrepo_micropython):
+    repo_path = testrepo_micropython
     x = git.get_tag(repo_path)
     # todo detect any pending local changes
     for ver in ['v1.11', 'v1.9.4', 'v1.12']:

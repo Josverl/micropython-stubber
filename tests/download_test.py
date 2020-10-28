@@ -4,7 +4,7 @@ import pytest
 #SOT
 import downloader
 #SOT 2
-import freezer_lobo
+import get_lobo
 
 # No Mocks , does actual download from github
 def test_download_files(tmp_path):
@@ -18,6 +18,3 @@ def test_download_files(tmp_path):
         fname = os.path.join(tmp_path, file)
         assert os.path.exists(fname), "file {} is downloaded".format(file)
 
-def test_freezer_lobo(tmp_path):
-    freezer_lobo.get_frozen(tmp_path)
-    assert len(list(tmp_path.iterdir())) == 18, "there should be 18 files downloaded"
