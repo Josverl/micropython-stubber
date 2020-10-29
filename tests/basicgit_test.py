@@ -1,9 +1,6 @@
-# import sys; sys.path[1:1]=['src']
 import sys
 import os
 import pytest
-
-## Quickfix seems to be : >> git --no-optional-locks reset -q --hard HEAD --
 
 #make sure that the source can be found
 sys.path.insert(1, './src')
@@ -39,7 +36,7 @@ def test_pull_master(testrepo_micropython):
     x = git.pull(repo_path, 'master')
     #Should succeed.
     assert x
-  
+
 def test_get_tag_sibling():
     # get version of sibling repro
     for testcase in ['../micropython', '..\\micropython']:
@@ -48,7 +45,7 @@ def test_get_tag_sibling():
 def test_checkout_sibling(testrepo_micropython):
     repo_path = testrepo_micropython
     x = git.get_tag(repo_path)
-    # todo detect any pending local changes
+
     for ver in ['v1.11', 'v1.9.4', 'v1.12']:
         git.checkout_tag(ver, repo=repo_path)
         assert git.get_tag(repo_path) == ver
