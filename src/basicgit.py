@@ -2,18 +2,13 @@
 import subprocess
 import os
 
-def scriptpath(script: str):
-    "get path where the powershell helper script is located"
+def _run_git(cmd: str, repo: str = None, expect_stderr=False):
+    "run a external (git) command in the repo's folder and deal with some of the errors"
     try:
-        _scriptpath = os.path.dirname(os.path.realpath(__file__))
-    except OSError:
-        _scriptpath = "./src"
-    return os.path.join(_scriptpath, script)
-
-def _run_git(cmd: str, expect_stderr=False):
-    "run a external (git) command and deal with some of the errors"
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
+        if repo:
+            result = subprocess.run(cmd, capture_output=True, check=True, cwd=os.path.abspath(repo))
+        else:
+            result = subprocess.run(cmd, capture_output=True, check=True)
         if result.stderr != b'':
             if not expect_stderr:
                 raise Exception(result.stderr.decode("utf-8"))
@@ -26,13 +21,6 @@ def _run_git(cmd: str, expect_stderr=False):
         raise Exception(result.stderr.decode("utf-8"))
     return result
 
-def repopath(repo: str)-> str:
-    "make a path into a logal git path"
-    if not repo:
-        repo = './.git'
-    elif not repo.endswith('.git'):
-        repo += '/.git'
-    return repo
 
 
 def get_tag(repo: str = None) -> str:
@@ -42,8 +30,8 @@ def get_tag(repo: str = None) -> str:
         ../micropython/.git
     returns the tag or None
     """
-    cmd = ['git', '--git-dir='+ repopath(repo), 'describe']
-    result = _run_git(cmd, expect_stderr=True)
+    cmd = ['git', 'describe']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return None
     tag: str = result.stdout.decode("utf-8")
@@ -57,9 +45,8 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
         ../micropython/.git
     returns the tag or None
     """
-#    cmd = ["pwsh", scriptpath('git-checkout-tag.ps1'), '-repo', repopath(repo), '-tag', tag]
-    cmd = ['git', '--git-dir='+ repopath(repo), 'checkout', 'tags/'+tag , '--quiet', '--force']    
-    result = _run_git(cmd, expect_stderr=True)
+    cmd = ['git', 'checkout', 'tags/'+tag, '--quiet', '--force']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return False
     # actually a good result
@@ -73,8 +60,8 @@ def fetch(repo: str = None) -> bool:
         ../micropython/.git
     returns True on success
     """
-    cmd = ['git', '--git-dir='+ repopath(repo), 'fetch origin']
-    result = _run_git(cmd)
+    cmd = ['git', 'fetch origin']
+    result = _run_git(cmd, repo=repo)
     if not result:
         return False
     return result.returncode == 0
@@ -87,14 +74,14 @@ def pull(repo: str = None, branch='master') -> bool:
     returns True on success
     """
     # first checkout HEAD
-    cmd = ['git', '--git-dir='+ repopath(repo), 'checkout', 'master', '--quiet', '--force']
-    result = _run_git(cmd, expect_stderr=True)
+    cmd = ['git', 'checkout', 'master', '--quiet', '--force']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
-        print("error durign git checkout master", result)
+        print("error during git checkout master", result)
         return False
 
-    cmd = ['git', '--git-dir='+ repopath(repo), 'pull', 'origin', branch, '--quiet']
-    result = _run_git(cmd, expect_stderr=True)
+    cmd = ['git', 'pull', 'origin', branch, '--quiet']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         print("error durign pull", result)
         return False
