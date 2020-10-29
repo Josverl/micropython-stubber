@@ -1,40 +1,43 @@
-import os
+
 import glob
 import pytest
 
 # pylint: disable=wrong-import-position,import-error
 import basicgit as git
 # Module Under Test
-import freezer_mpy
+import get_mpy
 
 # No Mocks, does actual extraction from repro
 
+# TODO: allow tests to work on any path, not just my own machine
+
 @pytest.mark.parametrize(
     "path, port, board",
-    [   ('C:\\develop\\MyPython\\micropython-stubbertest\\ports\\esp32\\modules\\_boot.py',
+    [   ('C:\\develop\\MyPython\\TESTREPO-micropython\\ports\\esp32\\modules\\_boot.py',
          'esp32', None),
-        ('/develop/MyPython/micropython-stubbertest/ports/esp32/modules/_boot.py',
+        ('/develop/MyPython/TESTREPO-micropython/ports/esp32/modules/_boot.py',
          'esp32', None),
-        ('../micropython-stubbertest/ports/esp32/modules/_boot.py',
+        ('../TESTREPO-micropython/ports/esp32/modules/_boot.py',
          'esp32', None),
-        ('C:\\develop\\MyPython\\micropython-stubbertest\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py',
+        ('C:\\develop\\MyPython\\TESTREPO-micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py',
          'stm32', 'PYBV11'),
-        ('/develop/MyPython/micropython-stubbertest/ports/stm32/boards/PYBV11/modules/_boot.py',
+        ('/develop/MyPython/TESTREPO-micropython/ports/stm32/boards/PYBV11/modules/_boot.py',
          'stm32', 'PYBV11'),
-        ('../micropython-stubbertest/ports/stm32/boards/PYBV11/modules/_boot.py',
+        ('../TESTREPO-micropython/ports/stm32/boards/PYBV11/modules/_boot.py',
          'stm32', 'PYBV11'),
     ]
 )
 
 def test_extract_target_names(path, port, board):
-    _port, _board = freezer_mpy.get_target_names(path)
+    _port, _board = get_mpy.get_target_names(path)
     assert _board == board
     assert _port == port
 
 
-def test_freezer_mpy_manifest(tmp_path, gitrepo_micropython):
+def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using manifest.py files"
-    mpy_path = gitrepo_micropython
+    mpy_path = testrepo_micropython
+    mpy_lib = testrepo_micropython_lib
     # mpy version must be at 1.12 or newer
     mpy_version = 'v1.12'
 
@@ -45,7 +48,7 @@ def test_freezer_mpy_manifest(tmp_path, gitrepo_micropython):
         assert version == mpy_version, "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
 
     stub_path = tmp_path
-    freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib') # Todo Move to config
+    get_mpy.get_frozen(str(stub_path), version= mpy_version, mpy_path= mpy_path, lib_path=mpy_lib)
     scripts = glob.glob(str(stub_path)  + '/**/*.py', recursive=True)
 
     assert scripts is not None, "can freeze scripts from manifest"
@@ -55,9 +58,9 @@ def test_freezer_mpy_manifest(tmp_path, gitrepo_micropython):
     #assert len(list(tmp_path.iterdir())) == 18, "there should be 18 files"
 
 
-def test_freezer_mpy_folders(tmp_path, gitrepo_micropython):
+def test_freezer_mpy_folders(tmp_path, testrepo_micropython):
     "test if we can freeze source using modules folders"
-    mpy_path = gitrepo_micropython
+    mpy_path = testrepo_micropython
 
     # mpy version must be older than 1.12 ( so use 1.10)
     mpy_version = 'v1.10'
@@ -69,7 +72,7 @@ def test_freezer_mpy_folders(tmp_path, gitrepo_micropython):
 
     stub_path = tmp_path
     # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib')
-    freezer_mpy.get_frozen_folders(stub_path, mpy_path, lib_path='../micropython-lib')
+    get_mpy.get_frozen_folders(stub_path, mpy_path, lib_path='../micropython-lib', version = mpy_version)
     assert True
 
 

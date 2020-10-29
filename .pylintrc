@@ -1,12 +1,8 @@
-# PYLINT for normal MICROPYTHON code 
+# PYLINT for normal CPYTHON code 
 # Pylint cannot deal with multiple flavours of Python at the same time 
 # so you need ot have either the MPY or the CPYTHON version active 
-# 
 
 [MASTER]
-# Loaded Stubs:  esp32-micropython-1.11.0 
-init-hook='import sys;sys.path[1:1] = ["board/lib", "all-stubs/cpython-core", "all-stubs/mpy_1_12/frozen/esp32/GENERIC", "all-stubs/esp32_1_13_0-103",]'
-# Note : also add these paths to: VSCode Preferences > Workspace > python.autoComplete.extraPaths
 
 
 [MESSAGES CONTROL]
@@ -24,7 +20,6 @@ confidence=
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 
-disable = missing-docstring, line-too-long, trailing-newlines, logging-format-interpolation, invalid-name, empty-docstring,
-        no-method-argument, assignment-from-no-return, too-many-function-args, unexpected-keyword-arg
-        # broad-except,
+disable = missing-docstring, line-too-long, trailing-newlines, broad-except, logging-format-interpolation, invalid-name, empty-docstring,
+        no-method-argument, assignment-from-no-return, too-many-function-args, unexpected-keyword-arg, bare-except
         # the 2nd  line deals with the limited information in the generated stubs.
