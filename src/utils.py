@@ -76,8 +76,15 @@ def make_manifest(folder:str, family:str, fmly:str, version:str)-> bool:
             f_name, _ = os.path.splitext(os.path.basename(filename))
             mod_manifest['modules'].append({ "file": os.path.basename(filename), "module":f_name})
         #write the the module manifest
-        with open(folder+"/modules.json", "w") as outfile:
+        with open(os.path.join(folder,"modules.json"), "w") as outfile:
             json.dump(mod_manifest, outfile)
         return True
     except OSError:
         return False
+
+def generate_all_stubs():
+    "just create typeshed stubs"
+    # now generate typeshed files for all scripts
+    print("Generate type hint files (pyi) in folder: {}".format(STUB_FOLDER))
+    make_stub_files(STUB_FOLDER, levels=7)
+

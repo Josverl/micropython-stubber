@@ -2,13 +2,26 @@
 import subprocess
 import os
 
-def scriptpath(script: str):
-    "get path where the powershell helper script is located"
+def _run_git(cmd: str, repo: str = None, expect_stderr=False):
+    "run a external (git) command in the repo's folder and deal with some of the errors"
     try:
-        _scriptpath = os.path.dirname(os.path.realpath(__file__))
-    except OSError:
-        _scriptpath = "./src"
-    return os.path.join(_scriptpath, script)
+        if repo:
+            result = subprocess.run(cmd, capture_output=True, check=True, cwd=os.path.abspath(repo))
+        else:
+            result = subprocess.run(cmd, capture_output=True, check=True)
+        if result.stderr != b'':
+            if not expect_stderr:
+                raise Exception(result.stderr.decode("utf-8"))
+            print(result.stderr.decode("utf-8"))
+
+    except subprocess.CalledProcessError as err:
+        raise Exception(err)
+
+    if result.returncode < 0:
+        raise Exception(result.stderr.decode("utf-8"))
+    return result
+
+
 
 def get_tag(repo: str = None) -> str:
     """
@@ -17,23 +30,13 @@ def get_tag(repo: str = None) -> str:
         ../micropython/.git
     returns the tag or None
     """
-    if not repo:
-        repo = './.git'
-    elif not repo.endswith('.git'):
-        repo += '/.git'
-
-    cmd = ['git', '--git-dir='+ repo, 'describe']
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        if result.stderr != b'':
-            print(result.stderr.decode("utf-8"))
-            raise Exception(result.stderr.decode("utf-8"))
-        tag: str = result.stdout.decode("utf-8")
-        tag = tag.replace('\r', '').replace('\n', '')
-        return tag
-    except  subprocess.CalledProcessError as err:
-        print("Error: ", err.returncode, err.stderr)
-        raise Exception(err.stderr) from err
+    cmd = ['git', 'describe']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        return None
+    tag: str = result.stdout.decode("utf-8")
+    tag = tag.replace('\r', '').replace('\n', '')
+    return tag
 
 def checkout_tag(tag: str, repo: str = None) -> bool:
     """
@@ -42,37 +45,13 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
         ../micropython/.git
     returns the tag or None
     """
-    if not repo:
-        repo = '.'
-    elif repo.endswith('.git'):
-        repo = os.path.basename(repo)
-
-    cmd = ["pwsh", scriptpath('git-checkout-tag.ps1'), '-repo', repo, '-tag', tag]
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-    except subprocess.CalledProcessError as err:
-        print(err)
+    cmd = ['git', 'checkout', 'tags/'+tag, '--quiet', '--force']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
         return False
-    if result.returncode < 0:
-        raise Exception(result.stderr.decode("utf-8"))
     # actually a good result
     print(result.stderr.decode("utf-8"))
     return True
-    
-
-    # todo: retry without powershell
-    # cmd = ['git', 'checkout', 'tags/'+ tag]
-    # try:
-    #     result = subprocess.run(cmd, capture_output=True, check=True, cwd='../micropython')
-    #     if result.stderr != b'':
-    #         print(result.stderr.decode("utf-8"))
-    #         return False
-    #     print(result.stdout)
-    #     return True
-    # except  subprocess.CalledProcessError as e:
-    #     print("Error: ", e.returncode, e.stderr)
-    #     return False
-
 
 def fetch(repo: str = None) -> bool:
     """
@@ -81,22 +60,11 @@ def fetch(repo: str = None) -> bool:
         ../micropython/.git
     returns True on success
     """
-    if not repo:
-        repo = './.git'
-    elif not repo.endswith('.git'):
-        repo += '/.git'
-
-    cmd = ['git', '--git-dir='+ repo, 'fetch origin']
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        if result.stderr != b'':
-            print(result.stderr.decode("utf-8"))
-            raise Exception(result.stderr.decode("utf-8"))
-        return True
-
-    except  subprocess.CalledProcessError as err:
-        print("Error: ", err.returncode, err.stderr)
-        raise Exception(err.stderr) from err
+    cmd = ['git', 'fetch origin']
+    result = _run_git(cmd, repo=repo)
+    if not result:
+        return False
+    return result.returncode == 0
 
 def pull(repo: str = None, branch='master') -> bool:
     """
@@ -105,19 +73,17 @@ def pull(repo: str = None, branch='master') -> bool:
         ../micropython/.git
     returns True on success
     """
-    if not repo:
-        repo = './.git'
-    elif not repo.endswith('.git'):
-        repo += '/.git'
+    # first checkout HEAD
+    cmd = ['git', 'checkout', 'master', '--quiet', '--force']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        print("error during git checkout master", result)
+        return False
 
-    cmd = ['git', '--git-dir='+ repo, 'pull', 'origin', branch]
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        # if result.stderr != b'':
-        #     print(result.stderr.decode("utf-8"))
-        #     raise Exception(result.stderr.decode("utf-8"))
-        return result.returncode == 0
+    cmd = ['git', 'pull', 'origin', branch, '--quiet']
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        print("error durign pull", result)
+        return False
+    return result.returncode == 0
 
-    except  subprocess.CalledProcessError as err:
-        print("Error: ", err.returncode, err.stderr)
-        raise Exception(err.stderr) from err
