@@ -8,7 +8,7 @@ import gc
 import uos as os
 from utime import sleep_us
 from ujson import dumps
-stubber_version='1.3.5'
+stubber_version='1.3.6'
 try:
  from machine import resetWDT 
 except ImportError:
@@ -18,6 +18,7 @@ class Stubber():
  def __init__(self,path:str=None,firmware_id:str=None,**kwargs):
   self._report=[]
   self._fid=firmware_id
+  self.uname= None
   try:
    os.uname()
   except AttributeError:
@@ -31,9 +32,10 @@ class Stubber():
      _attrs=['sysname','nodename','release','version','machine']
      attrs=["{}={}".format(a,getattr(self,a))for a in _attrs]
      return "{}".format(", ".join(attrs))
-   os.uname=UnameStub
-  finally:
-   u=os.uname()
+   self.uname=UnameStub
+  else:
+   self.uname=os.uname
+  u=self.uname
   v=".".join([str(i)for i in sys.implementation.version])
   self._report_fwi={'firmware':{'sysname':u.sysname,'nodename':u.nodename,'release':u.release,'version':v,'machine':u.machine,'firmware':self.firmware_ID()}}
   self._report_stb={'stubber':{'version':stubber_version}}
@@ -125,7 +127,7 @@ class Stubber():
    except ImportError:
     return
   with open(file_name,"w")as fp:
-   s="\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name,self.firmware_ID(),os.uname(),stubber_version)
+   s="\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name,self.firmware_ID(),self.uname(),stubber_version)
    fp.write(s)
    self.write_object_stub(fp,new_module,module_name,"")
    self._report.append({"module":module_name,"file":file_name})
@@ -195,8 +197,12 @@ class Stubber():
  def clean(self,path:str=None):
   if path is None:
    path=self.path
+  try:
+   items=os.listdir(path)
+  except AttributeError:
+   return
   print("Clean/remove files in folder: {}".format(path))
-  for fn in os.listdir(path):
+  for fn in items:
    try:
     item="{}/{}".format(path,fn)
     os.remove(item)
@@ -254,18 +260,25 @@ class Stubber():
    _=os.stat(r)
   except OSError as e:
    if e.args[0]==errno.ENOENT:
-    r=os.getcwd()
+    try:
+     r=os.getcwd()
+    except:
+     r='.'
    else:
     r='/'
   return r
 def main():
- if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103':
-  raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+ fwid=None
+ try:
+  if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103':
+   raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+ except AttributeError:
+  fwid="unknown_x.y.z"
  try:
   logging.basicConfig(level=logging.INFO)
  except NameError:
   pass
- stubber=Stubber()
+ stubber=Stubber(firmware_id=fwid)
  stubber.clean()
  stubber.create_all_stubs()
  stubber.report()

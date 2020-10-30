@@ -11,7 +11,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.5'
+stubber_version = '1.3.6'
 # deal with firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -25,6 +25,7 @@ class Stubber():
         self._log = logging.getLogger('stubber')
         self._report = []
         self._fid = firmware_id
+        self.uname =  None
         try:
             # some micropython firmware lack os.uname function
             os.uname()
@@ -48,11 +49,13 @@ class Stubber():
                     attrs = ["{}={}".format(a, getattr(self, a))
                              for a in _attrs]
                     return "{}".format(", ".join(attrs))
-            # monkeypatch uname to allow stub creation to take place
-            os.uname = UnameStub
-        finally:
-            u = os.uname()
-        # use sys.implementation for consistency
+            # monkeypatch does not work on linux port 
+            # os.uname = UnameStub
+            # can't use sys.implementation for consistency
+            self.uname = UnameStub
+        else:
+            self.uname = os.uname
+        u = self.uname
         v = ".".join([str(i) for i in sys.implementation.version])
         self._report_fwi = {'firmware': {'sysname': u.sysname, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.firmware_ID()}}
         self._report_stb = {'stubber':{'version': stubber_version}}
@@ -204,7 +207,8 @@ class Stubber():
 
         # Start a new file
         with open(file_name, "w") as fp:
-            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name, self.firmware_ID(), os.uname(), stubber_version)
+            s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(
+                module_name, self.firmware_ID(), self.uname(), stubber_version)
             fp.write(s)
             self.write_object_stub(fp, new_module, module_name, "")
             self._report.append({"module":module_name, "file": file_name})
@@ -312,8 +316,13 @@ class Stubber():
         "Remove all files from the stub folder"
         if path is None:
             path = self.path
+        try:
+            items = os.listdir(path)
+        except AttributeError:
+            # os.listdir fails on unix
+            return
         self._log.info("Clean/remove files in folder: {}".format(path))
-        for fn in os.listdir(path):
+        for fn in items:
             try:
                 item = "{}/{}".format(path, fn)
                 os.remove(item)
@@ -389,19 +398,29 @@ class Stubber():
             _ = os.stat(r)
         except OSError as e:
             if e.args[0] == errno.ENOENT:
-                r = os.getcwd()
+                try:
+                    r = os.getcwd()
+                except:
+                    # unix port
+                    r = '.'
             else:
                 r = '/'
         return r
 
 def main():
-    if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':
-        raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+    fwid = None
+    try:
+        if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':
+            raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+    except AttributeError:
+        # use a default firmware ID
+        fwid = "unknown_x.y.z"
+
     try:
         logging.basicConfig(level=logging.INFO)
     except NameError:
         pass
-    stubber = Stubber()
+    stubber = Stubber(firmware_id=fwid)
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
 
