@@ -1,4 +1,6 @@
 #production requirements
 esptool
 pyminifier
+requests
+
 

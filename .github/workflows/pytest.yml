@@ -14,7 +14,7 @@ on:
 
 
 jobs:
-  minify:
+  run tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,4 +39,4 @@ jobs:
 
     - name: Pytest common tests
       run: |
-        pytest test/common
+        pytest tests/common tests/board

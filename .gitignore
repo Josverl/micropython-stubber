@@ -12,6 +12,7 @@ scratch/*
 # ignore stubs 
 # stubs
 board/stubs
+minified/stubs
 
 # ignore test coverage report
 .coverage
