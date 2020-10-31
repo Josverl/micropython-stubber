@@ -1,4 +1,8 @@
 # .coveragerc to control coverage.py
+
+[html]
+directory = coverage_report
+
 [run]
 branch = True
 omit =
@@ -34,5 +38,3 @@ exclude_lines =
 
 ignore_errors = True
 
-[html]
-directory = coverage_html_report

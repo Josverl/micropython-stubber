@@ -8,7 +8,7 @@ import gc
 import uos as os
 from utime import sleep_us
 from ujson import dumps
-stubber_version='1.3.6'
+stubber_version='1.4.0'
 try:
  from machine import resetWDT 
 except ImportError:
@@ -37,7 +37,7 @@ class Stubber():
    self.uname=os.uname
   u=self.uname
   v=".".join([str(i)for i in sys.implementation.version])
-  self._report_fwi={'firmware':{'sysname':u.sysname,'nodename':u.nodename,'release':u.release,'version':v,'machine':u.machine,'firmware':self.firmware_ID()}}
+  self._report_fwi={'firmware':{'sysname':u.sysname,'platform':sys.platform,'nodename':u.nodename,'release':u.release,'version':v,'machine':u.machine,'firmware':self.firmware_ID()}}
   self._report_stb={'stubber':{'version':stubber_version}}
   del u
   del v
@@ -273,7 +273,10 @@ def main():
   if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103':
    raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
  except AttributeError:
-  fwid="unknown_x.y.z"
+  try:
+   fwid="{0}-{1}-{2}.{3}.{4}".format(sys.implementation.name,sys.platform,*sys.implementation.version,)
+  except AttributeError:
+   fwid="unknown"
  try:
   logging.basicConfig(level=logging.INFO)
  except NameError:

@@ -23,3 +23,4 @@ coverage_html_report
 desktop.ini
 .pytest_cache/*
 
+coverage_report
