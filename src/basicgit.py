@@ -2,10 +2,12 @@
 import subprocess
 import os
 
+
 def _run_git(cmd: str, repo: str = None, expect_stderr=False):
     "run a external (git) command in the repo's folder and deal with some of the errors"
     try:
         if repo:
+            repo=repo.replace('\\','/')
             result = subprocess.run(cmd, capture_output=True, check=True, cwd=os.path.abspath(repo))
         else:
             result = subprocess.run(cmd, capture_output=True, check=True)
@@ -26,10 +28,13 @@ def _run_git(cmd: str, repo: str = None, expect_stderr=False):
 def get_tag(repo: str = None) -> str:
     """
     get the most recent git version tag of a local repo"
-    repo should be in the form of : path/.git
-        ../micropython/.git
+    repo should be in the form of : path
+        ../micropython
     returns the tag or None
     """
+    if not repo:
+        repo = '.'
+    repo=repo.replace('\\','/')
     cmd = ['git', 'describe']
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
@@ -53,26 +58,32 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     print(result.stderr.decode("utf-8"))
     return True
 
-def fetch(repo: str = None) -> bool:
+def fetch(repo: str) -> bool:
     """
     fetches a repo
     repo should be in the form of : path/.git
         ../micropython/.git
     returns True on success
     """
+    if not repo:
+        raise NotADirectoryError
+    repo=repo.replace('\\','/')
     cmd = ['git', 'fetch origin']
     result = _run_git(cmd, repo=repo)
     if not result:
         return False
     return result.returncode == 0
 
-def pull(repo: str = None, branch='master') -> bool:
+def pull(repo: str, branch='master') -> bool:
     """
     pull a repo origin into master
     repo should be in the form of : path/.git
         ../micropython/.git
     returns True on success
     """
+    if not repo:
+        raise NotADirectoryError
+    repo=repo.replace('\\','/')
     # first checkout HEAD
     cmd = ['git', 'checkout', 'master', '--quiet', '--force']
     result = _run_git(cmd, repo=repo, expect_stderr=True)
