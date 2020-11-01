@@ -12,20 +12,15 @@ import pytest
 
 def test_createstubs(script_folder):
     # run createsubs in the unix versionof micropython
-    Path('./')
 
-    #why is this different on linux python 3.6.9 ? no option to capture the output ?
-    # capture_output is supported only with Python 3.7,
-        # By default, stdout and stderr are not captured, and those attributes
-        #     will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
-    os.getcwd()
-    scriptfolder = os.path.abspath(script_folder)
+    print(os.getcwd())
 
-    cmd = [os.path.abspath('tools/micropython'), 'createstubs.py']
-#    cmd = [os.path.abspath('tools/micropython')]
     #todo: delete stubs folder beforehand
     # import shutil
     # shutil.rmtree('remDemo/')
+
+    scriptfolder = os.path.abspath(script_folder)
+    cmd = [os.path.abspath('tools/micropython'), 'createstubs.py']
     try:
         subproc = subprocess.run(cmd,cwd=scriptfolder, timeout=100000)
         # assert (subproc.returncode == 0 ), "createstubs ran with an error"
