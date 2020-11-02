@@ -11,7 +11,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.4.0'
+stubber_version = '1.3.6'
 # deal with firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -21,65 +21,37 @@ except ImportError:
 
 class Stubber():
     "Generate stubs for modules in firmware"
-    def __init__(self, path: str = None, firmware_id: str = None, **kwargs):
+    def __init__(self, path: str = None, firmware_id: str = None):
+        try:
+            if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':
+                raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+        except AttributeError:
+            pass
+
         self._log = logging.getLogger('stubber')
         self._report = []
-        self._fid = firmware_id
-        self.uname =  None
-        try:
-            # some micropython firmware lack os.uname function
-            os.uname()
-        except AttributeError:
-            self._log.info((
-                "System Information cannot be determined "
-                "using 'generic' attributes. To override this, "
-                "please pass additional kwargs: "
-                "[sysname, nodename, release, version, machine]\n"
-            ))
-            class UnameStub:
-                sysname = kwargs.pop('sysname', 'generic')
-                nodename = kwargs.pop('nodename', 'generic')
-                release = kwargs.pop('release', '0.0.0'),
-                version = kwargs.pop('version', '0.0.0'),
-                machine = kwargs.pop('machine', 'generic')
+        self.info = self._info()
+        self._fwid = firmware_id or "{port}-{ver}".format(**self.info)
+        #self._fwid = firmware_id or "{family}-{port}-{ver}".format(**self.info)    #todo: add family
 
-                def __repr__(self):
-                    _attrs = ['sysname', 'nodename',
-                              'release', 'version', 'machine']
-                    attrs = ["{}={}".format(a, getattr(self, a))
-                             for a in _attrs]
-                    return "{}".format(", ".join(attrs))
-            # monkeypatch does not work on linux port 
-            # os.uname = UnameStub
-            # can't use sys.implementation for consistency
-            self.uname = UnameStub
-        else:
-            self.uname = os.uname
-        u = self.uname
-        v = ".".join([str(i) for i in sys.implementation.version])
-        self._report_fwi = {'firmware': {'sysname': u.sysname, 'platform': sys.platform, 'nodename': u.nodename, 'release': u.release, 'version': v, 'machine': u.machine, 'firmware': self.firmware_ID()}}
+        self._report_fwi = {'firmware': {'sysname': self.info['sysname'], 'platform': self.info['port'], 'nodename': self.info['nodename'], 
+                            'release': self.info['release'], 'version': self.info['ver'], 'machine': self.info['machine'], 'firmware': self._fwid}}
         self._report_stb = {'stubber':{'version': stubber_version}}
-        del u
-        del v
+
         if path:
-            #get rid of trailing slash
             if path.endswith('/'):
                 path = path[:-1]
         else:
-            #determine path for stubs
-            path = "{}/stubs/{}".format(
-                self.get_root(),
-                self.firmware_ID(asfile=True)
-                ).replace('//', '/')
+            path = self.get_root()
 
-        self.path = path
+        self.path = "{}/stubs/{}".format(path, self.flat_fid).replace('//', '/')
+        self._log.debug(self.path)
         try:
             self.ensure_folder(path + "/")
         except OSError:
             self._log.error("error creating stub folder {}".format(path))
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
-#        self.problematic += ["uasyncio/core","io","uio","uctypes" ] # "builtins"
-        self.excluded = ["webrepl", "_webrepl", "webrepl_setup"]
+        self.excluded = ["webrepl", "_webrepl","port_diag","example_sub_led.py","example_pub_button.py"]
         # there is no option to discover modules from upython, need to hardcode
         # below contains combined modules from  Micropython ESP8622, ESP32, Loboris and pycom
         self.modules = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'bluetooth', 'builtins', 'cmath', 'collections',
@@ -87,21 +59,90 @@ class Stubber():
                         'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math',
                         'microWebSocket', 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network',
                         'ntptime', 'onewire', 'os', 'port_diag', 'pycom', 'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306',
-                        'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib',  'ubinascii', 'ucollections', 'ucryptolib', 'uctypes',
+                        'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'ubinascii', 'ucollections', 'ucryptolib', 'uctypes',
                         'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib',
                         'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib', 'pycom', 'crypto']
-        self.modules += ['pyb','stm','pycopy']
-        self.modules += ['uasyncio/lock','uasyncio/stream','uasyncio/__init__', 'uasyncio/core', 'uasyncio/event','uasyncio/funcs'] #1.13
+        self.modules += ['pyb', 'stm', 'pycopy']
+        self.modules += ['uasyncio/lock', 'uasyncio/stream', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 'uasyncio/funcs'] #1.13
 
         #try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200 # pylint: disable=no-member
+
+    @staticmethod
+    def _info():
+        "collect base information on this runtime"
+        info={  'name': sys.implementation.name,    # - micropython
+                'release': '0.0.0',                 # mpy semver from sys.implementation or os.uname()release
+                'version': '0.0.0',                 # major.minor.0
+                'build': '',                        # parsed from version
+                'sysname': 'unknown',               # esp32
+                'nodename': 'unknown',              # ! not on all builds
+                'machine': 'unknown',               # ! not on all builds
+                'family': sys.implementation.name,  # fw families, micropython , pycopy , lobo , pycomm
+                'port': sys.platform,               # port: esp32 / win32 / linux
+                'ver': ''                           # short version
+                }
+        try:
+            info['release'] = ".".join([str(i) for i in sys.implementation.version])
+            info['version'] = info['release']
+            info['name'] = sys.implementation.name
+            info['mpy'] = sys.implementation.mpy
+        except AttributeError:
+            pass
+
+        if sys.platform not in ('unix', 'win32'):
+            try:
+                u = os.uname()
+                info['sysname'] = u.sysname
+                info['nodename'] = u.nodename
+                info['release'] = u.release
+                info['machine'] = u.machine
+                # parse micropython build info
+                if ' on ' in u.version:
+                    s = u.version.split('on ')[0]
+                    try:
+                        info['build'] = s.split('-')[1]
+                    except IndexError:
+                        pass
+            except (IndexError, AttributeError):
+                pass
+        # version info
+        info['ver'] = 'v'+info['release']
+        if 'esp32_LoBo' == sys.platform:
+            info['family'] = 'loboris'
+            # info['port'] = 'esp32'
+        else:
+            if info['release'] >= '1.10.0' and info['release'].endswith('.0'):
+                #drop the .0 for newer releases
+                info['ver'] = info['release'][:-2]
+            else:
+                info['ver'] = info['release']
+            # add the build nr
+            if info['build'] != '':
+                info['ver'] += '-'+info['build']
+        # if info['mpy'] != '':
+        #     sys_mpy = info['mpy']
+        #     arch = [None, 'x86', 'x64', 'armv6', 'armv6m',
+        #             'armv7m', 'armv7em', 'armv7emsp', 'armv7emdp',
+        #             'xtensa', 'xtensawin'][sys_mpy >> 10]
+        #     mpy_info = '0x{:x} = v{}'.format( sys_mpy,str( sys_mpy & 0xff))
+        #     mpy_info +=' mpy flags:'
+        #     if arch:
+        #         mpy_info +=' -march=' + arch
+        #     if sys_mpy & 0x100:
+        #         mpy_info +=' -mcache-lookup-bc'
+        #     if not sys_mpy & 0x200:
+        #         mpy_info +=' -mno-unicode'
+        #     info['mpy'] = mpy_info
+        return info
 
     def get_obj_attributes(self, obj: object):
         "extract information of the objects members and attributes"
         result = []
         errors = []
-        self._log.debug('get attributes {} {}'.format(repr(obj),obj ))
+        name = None
+        self._log.debug('get attributes {} {}'.format(repr(obj), obj))
         try:
             for name in dir(obj):
                 try:
@@ -123,7 +164,7 @@ class Stubber():
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self.firmware_ID()))
+        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self._fwid))
         # start with the (more complex) modules with a / first to reduce memory problems
         self.modules = [m for m in self.modules if '/' in m] + [m for m in self.modules if '/' not in m]
         gc.collect()
@@ -179,6 +220,7 @@ class Stubber():
 
         #import the module (as new_module) to examine it
         failed = False
+        new_module = None
         try:
             new_module = __import__(module_name, None, None, ('*'))
         except ImportError:
@@ -207,8 +249,9 @@ class Stubber():
 
         # Start a new file
         with open(file_name, "w") as fp:
+            # todo: improve header
             s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(
-                module_name, self.firmware_ID(), self.uname(), stubber_version)
+                module_name, self._fwid, self.info, stubber_version)
             fp.write(s)
             self.write_object_stub(fp, new_module, module_name, "")
             self._report.append({"module":module_name, "file": file_name})
@@ -280,48 +323,26 @@ class Stubber():
         except (OSError, KeyError):
             pass
 
-    def firmware_ID(self, asfile: bool = False):
-        "Get a sensible firmware ID = <system> <release>[-build]"
-        if self._fid:
-            fid = self._fid
-        else:
-            fid = self.newid(os.uname())
-            self._fid = fid
-        if asfile:
-            # path name restrictions
-            chars = " .()/\\:$"
-            for c in chars:
-                fid = fid.replace(c, "_")
-        return fid
-
-    @staticmethod
-    def newid(uname: tuple)->str:
-        "fwid = system on release[-build]"
-        sysname = uname.sysname
-        # if sysname in ('pyboard','esp32'):
-        #     sysname = uname.machine.split(' ')[0].lower()
-        fid = "{} {}".format(sysname, uname.release)
-        build=''
-        if ' on ' in uname.version:
-            s = uname.version.split('on ')[0]
-            try:
-                build=s.split('-')[1]
-                #print("build", build)
-                fid += '-' + build
-            except IndexError:
-                pass
-        return fid
+    @property
+    def flat_fid(self):
+        "Turn _fwid from 'v1.2.3' into '1_2_3' to be used in filename"
+        s = self._fwid
+        # path name restrictions
+        chars = " .()/\\:$"
+        for c in chars:
+            s = s.replace(c, "_")
+        return s
 
     def clean(self, path: str = None):
         "Remove all files from the stub folder"
         if path is None:
             path = self.path
+        self._log.info("Clean/remove files in folder: {}".format(path))
         try:
             items = os.listdir(path)
-        except AttributeError:
+        except (OSError, AttributeError):
             # os.listdir fails on unix
             return
-        self._log.info("Clean/remove files in folder: {}".format(path))
         for fn in items:
             try:
                 item = "{}/{}".format(path, fn)
@@ -337,7 +358,7 @@ class Stubber():
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(
             len(self._report),
-            self.firmware_ID(),
+            self._fwid,
             self.path
             ))
         f_name = "{}/{}".format(self.path, filename)
@@ -391,7 +412,7 @@ class Stubber():
 
 
     @staticmethod
-    def get_root():
+    def get_root()->str:
         "Determine the root folder of the device"
         try:
             r = "/flash"
@@ -407,31 +428,35 @@ class Stubber():
                 r = '/'
         return r
 
-def main():
-    fwid = None
-    try:
-        # todo: Move to init 
-        if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':
-            raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
-    except AttributeError:
-        # use a default firmware ID
-        try:
-            # todo: improve naming convention
-            fwid = "{0}-{1}-{2}.{3}.{4}".format( sys.implementation.name,sys.platform, *sys.implementation.version,)
-        except AttributeError:
-            fwid = "unknown"
+def show_help():
+    print("-p, --path   path to store the stubs in, defaults to '.'")
+    sys.exit(1)
 
+def read_path()->str:
+    "get --path from cmdline. [unix/win]"
+    path = None
+    print("argv: " ,sys.argv)
+    if len(sys.argv) == 3:
+        cmd = (sys.argv[1]).lower()
+        if cmd in ('--path', '-p'):
+            path  = sys.argv[2]
+        else:
+            show_help()
+    elif len(sys.argv) >= 2:
+        show_help()
+    return path
+
+def main():
     try:
         logging.basicConfig(level=logging.INFO)
     except NameError:
         pass
-    stubber = Stubber(firmware_id=fwid)
+    stubber = Stubber(path=read_path())
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
-
     stubber.clean()
-    # Option: Add your own modules
-    # stubber.add_modules(['bluetooth','GPS'])
+    # # Option: Add your own modules
+    # # stubber.add_modules(['bluetooth','GPS'])
     stubber.create_all_stubs()
     stubber.report()
 
