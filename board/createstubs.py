@@ -12,7 +12,7 @@ from ujson import dumps
 
 ENOENT = 2
 stubber_version = '1.3.7'
-# deal with firmware specific implementations.
+# deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
 except ImportError:

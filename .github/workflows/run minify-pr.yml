@@ -42,7 +42,7 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/tools/* -v
         MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
 
-    - name: run `process minify`
+    - name: minify createstubs
       run: |
         python process.py minify
 
@@ -52,7 +52,7 @@ jobs:
         # ignore Unable to import '<upythonmodule>' (import-error)
         # ignore Module 'gc' has no 'mem_free' member (no-member)
 
-    - name: run minified
+    - name: run minified/createstubs.py
       run: |
         mkdir $GITHUB_WORKSPACE/scratch
         cd $GITHUB_WORKSPACE/scratch
