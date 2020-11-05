@@ -3,12 +3,12 @@ Create stubs for (all) modules on a MicroPython board
 Copyright (c) 2019-2020 Jos Verlinde
 """
 import sys
-import errno
 import gc
 import uos as os
 from utime import sleep_us
 from ujson import dumps
-stubber_version='1.3.6'
+ENOENT=2
+stubber_version='1.3.7'
 try:
  from machine import resetWDT 
 except ImportError:
@@ -83,7 +83,7 @@ class Stubber():
     info['ver']=info['release']
    if info['build']!='':
     info['ver']+='-'+info['build']
-  if info['mpy']!='': 
+  if 'mpy' in info: 
    sys_mpy=info['mpy']
    arch=[None,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][sys_mpy>>10]
    if arch:
@@ -263,7 +263,7 @@ class Stubber():
     try:
      _=os.stat(p)
     except OSError as e:
-     if e.args[0]==errno.ENOENT:
+     if e.args[0]==ENOENT:
       try:
        os.mkdir(p)
       except OSError as e2:
@@ -277,7 +277,7 @@ class Stubber():
    r="/flash"
    _=os.stat(r)
   except OSError as e:
-   if e.args[0]==errno.ENOENT:
+   if e.args[0]==ENOENT:
     try:
      r=os.getcwd()
     except:
