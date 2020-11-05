@@ -42,10 +42,21 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/tools/* -v
         MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
 
-   - name: create/update minified version
+    - name: create or update minified version
       run: |
         python process.py minify
 
-    - name: Pytest common tests
-      run: |
-        pytest tests/common tests/board
+    # - name: Pytest common tests
+    #   run: |
+    #     pytest tests/common tests/board
+
+    - name: Test with pytest
+      run: pytest tests/common tests/board --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: pytest-results-${{ matrix.python-version }}
+        path: junit/test-results-${{ matrix.python-version }}.xml
+      # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}
