@@ -24,3 +24,6 @@ desktop.ini
 .pytest_cache/*
 
 coverage_report
+
+all_stubs
+all-stubs
