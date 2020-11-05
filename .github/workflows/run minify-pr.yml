@@ -58,10 +58,6 @@ jobs:
         cd $GITHUB_WORKSPACE/scratch
         ../tools/micropython ../minified/createstubs.py
 
-    - name: import minified
-      run: |
-        ../tools/micropython -m ../minified/createstubs
-
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v3
