@@ -13,11 +13,14 @@ jobs:
             
     - name: ls
       run: |
+        pwd
+        cd /home/runner/work/micropython-stubber/micropython-stubber
         ls ./tools
         MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
 
     - name: run
       run: |
+        
         ls ./tools
         MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
 
