@@ -83,7 +83,7 @@ class Stubber():
     info['ver']=info['release']
    if info['build']!='':
     info['ver']+='-'+info['build']
-  if info['mpy']!='': 
+  if 'mpy' in info: 
    sys_mpy=info['mpy']
    arch=[None,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][sys_mpy>>10]
    if arch:

@@ -126,7 +126,7 @@ class Stubber():
             # add the build nr
             if info['build'] != '':
                 info['ver'] += '-'+info['build']
-        if info['mpy'] != '':       # mpy on some v1.11+ builds
+        if 'mpy' in info:          # mpy on some v1.11+ builds
             sys_mpy = info['mpy']
             arch = [None, 'x86', 'x64', 'armv6', 'armv6m',
                     'armv7m', 'armv7em', 'armv7emsp', 'armv7emdp',
