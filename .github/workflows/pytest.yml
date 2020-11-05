@@ -42,6 +42,10 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/tools/* -v
         MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
 
+   - name: create/update minified version
+      run: |
+        python process.py minify
+
     - name: Pytest common tests
       run: |
         pytest tests/common tests/board
