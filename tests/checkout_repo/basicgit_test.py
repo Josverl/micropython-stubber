@@ -20,10 +20,8 @@ def test_get_tag_current():
         pytest.skip("no git repo in current folder")
     else:
         # get tag of current repro
-        common_tst(git.get_tag())
-
-        for testcase in ['.', '.git', './.git', '.\\.git']:
-            common_tst(git.get_tag(testcase))
+        tag = git.get_tag()
+        common_tst(tag)
 
 
 def test_get_failure_throws():
@@ -40,7 +38,8 @@ def test_pull_master(testrepo_micropython):
 def test_get_tag_sibling():
     # get version of sibling repro
     for testcase in ['../micropython', '..\\micropython']:
-        common_tst(git.get_tag(testcase))
+        tag = git.get_tag(testcase)
+        common_tst(tag)
 
 def test_checkout_sibling(testrepo_micropython):
     repo_path = testrepo_micropython
