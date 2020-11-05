@@ -1,6 +1,6 @@
 # run createsubs in the unix version of micropython
 import os
-import sys
+import json
 import subprocess
 from pathlib import Path
 import pytest
@@ -11,28 +11,40 @@ import pytest
     "script_folder", [ ('./board') , ('./minified') ]
 )
 
-def test_createstubs(tmp_path, script_folder):
+@pytest.mark.parametrize(
+    "firmware", [ ('micropython_1_12')  ]
+)
+#TODO  get versions tht do not sugger from the memory alloc / segmentation fault 
+# ('micropython_1_13'), ('pycopy_3_3_2')
+
+def test_createstubs(firmware, tmp_path, script_folder):
     # run createsubs in the unix version of micropython
     # Use temp_path to generate stubs 
     scriptfolder = os.path.abspath(script_folder)
-    cmd = [os.path.abspath('tools/micropython'), 'createstubs.py', '--path', tmp_path]
+    cmd = [os.path.abspath('tools/'+firmware), 'createstubs.py', '--path', tmp_path]
     try:
         subproc = subprocess.run(cmd,cwd=scriptfolder, timeout=100000)
         assert (subproc.returncode == 0 ), "createstubs ran with an error"
+        # assert (subproc.returncode <= 0 ), "createstubs ran with an error"
     except ImportError:
         pass
     # did it run without error ?
-    
+
     stubfolder = Path(tmp_path)  / 'stubs'
     stubfiles = list(stubfolder.rglob('*.py'))
     # filecount 
     assert (len(stubfiles) >= 45 ), "there should be 45 stubs or more"
 
     # manifest exists
-    jsons = list(stubfolder.rglob('*.json'))
+    jsons = list(stubfolder.rglob('modules.json'))
     assert (len(jsons) == 1 ), "there should be 1 manifest"
 
-    # manifest is valid json 
-    pass
+    # manifest is valid json
+    # read file
+    manifest = None
+    with open(jsons[0], 'r') as file:
+        manifest=json.load(file)
 
+    assert (len(manifest) == 3 ), "module manifest should contain firmware, stubber , modules"
 
+    assert (len(manifest['modules']) == len(stubfiles) ), "number of modules must match count of stubfiles"

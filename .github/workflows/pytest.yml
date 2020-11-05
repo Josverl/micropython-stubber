@@ -37,6 +37,35 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-    - name: Pytest common tests
+    - name: flag tools executable
       run: |
-        pytest tests/common tests/board
+        chmod +x $GITHUB_WORKSPACE/tools/* -v
+        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+
+    - name: create or update minified version
+      run: |
+        python process.py minify
+
+    - name: verify minified using pylint
+      run: |
+        pylint minified/createstubs.py -E -d E0401,E1101
+        # ignore Unable to import '<upythonmodule>' (import-error)
+        # ignore Module 'gc' has no 'mem_free' member (no-member)
+
+    # - name: Pytest common tests
+    #   run: |
+    #     pytest tests/common tests/board
+
+    - name: Test with pytest
+      run: pytest tests/common tests/board --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: pytest-results-${{ matrix.python-version }}
+        path: junit/test-results-${{ matrix.python-version }}.xml
+      # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}
+
+
+      

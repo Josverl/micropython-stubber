@@ -4,15 +4,15 @@ Copyright (c) 2019-2020 Jos Verlinde
 """
 #pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import sys
-import errno
 import gc
 import logging
 import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.6'
-# deal with firmware specific implementations.
+ENOENT = 2
+stubber_version = '1.3.7'
+# deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
 except ImportError:
@@ -126,7 +126,7 @@ class Stubber():
             # add the build nr
             if info['build'] != '':
                 info['ver'] += '-'+info['build']
-        if info['mpy'] != '':       # mpy on some v1.11+ builds
+        if 'mpy' in info:          # mpy on some v1.11+ builds
             sys_mpy = info['mpy']
             arch = [None, 'x86', 'x64', 'armv6', 'armv6m',
                     'armv7m', 'armv7em', 'armv7emsp', 'armv7emdp',
@@ -258,7 +258,7 @@ class Stubber():
             #try to unload the module unless we use it
             try:
                 del new_module
-            except (OSError, KeyError):
+            except (OSError, KeyError):#lgtm [py/unreachable-statement]
                 self._log.warning("could not del new_module")
             try:
                 del sys.modules[module_name]
@@ -318,7 +318,7 @@ class Stubber():
         del errors
         try:
             del name, rep, typ, obj # pylint: disable=undefined-loop-variable
-        except (OSError, KeyError):
+        except (OSError, KeyError):#lgtm [py/unreachable-statement]
             pass
 
     @property
@@ -338,7 +338,7 @@ class Stubber():
         self._log.info("Clean/remove files in folder: {}".format(path))
         try:
             items = os.listdir(path)
-        except (OSError, AttributeError):
+        except (OSError, AttributeError):#lgtm [py/unreachable-statement]
             # os.listdir fails on unix
             return
         for fn in items:
@@ -398,7 +398,7 @@ class Stubber():
                     _ = os.stat(p)
                 except OSError as e:
                     # folder does not exist
-                    if e.args[0] == errno.ENOENT:
+                    if e.args[0] == ENOENT:
                         try:
                             os.mkdir(p)
                         except OSError as e2:
@@ -418,7 +418,7 @@ class Stubber():
             r = "/flash"
             _ = os.stat(r)
         except OSError as e:
-            if e.args[0] == errno.ENOENT:
+            if e.args[0] == ENOENT:
                 try:
                     r = os.getcwd()
                 except:
