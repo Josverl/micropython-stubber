@@ -1,5 +1,6 @@
 # run createsubs in the unix version of micropython
 import os
+import sys
 import subprocess
 from pathlib import Path
 import pytest
@@ -10,25 +11,19 @@ import pytest
     "script_folder", [ ('./board') , ('./minified') ]
 )
 
-def test_createstubs(script_folder):
-    # run createsubs in the unix versionof micropython
-
-    print(os.getcwd())
-
-    #todo: delete stubs folder beforehand
-    # import shutil
-    # shutil.rmtree('remDemo/')
-
+def test_createstubs(tmp_path, script_folder):
+    # run createsubs in the unix version of micropython
+    # Use temp_path to generate stubs 
     scriptfolder = os.path.abspath(script_folder)
-    cmd = [os.path.abspath('tools/micropython'), 'createstubs.py']
+    cmd = [os.path.abspath('tools/micropython'), 'createstubs.py', '--path', tmp_path]
     try:
         subproc = subprocess.run(cmd,cwd=scriptfolder, timeout=100000)
-        # assert (subproc.returncode == 0 ), "createstubs ran with an error"
+        assert (subproc.returncode == 0 ), "createstubs ran with an error"
     except ImportError:
         pass
     # did it run without error ?
     
-    stubfolder = Path(scriptfolder)  / 'stubs'
+    stubfolder = Path(tmp_path)  / 'stubs'
     stubfiles = list(stubfolder.rglob('*.py'))
     # filecount 
     assert (len(stubfiles) >= 45 ), "there should be 45 stubs or more"

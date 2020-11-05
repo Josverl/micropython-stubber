@@ -2,7 +2,7 @@
 Create stubs for (all) modules on a MicroPython board
 Copyright (c) 2019-2020 Jos Verlinde
 """
-#pylint: disable= invalid-name, missing-function-docstring
+#pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import sys
 import errno
 import gc
@@ -31,12 +31,8 @@ class Stubber():
         self._log = logging.getLogger('stubber')
         self._report = []
         self.info = self._info()
-        self._fwid = firmware_id or "{port}-{ver}".format(**self.info)
-        #self._fwid = firmware_id or "{family}-{port}-{ver}".format(**self.info)    #todo: add family
-
-        self._report_fwi = {'firmware': {'sysname': self.info['sysname'], 'platform': self.info['port'], 'nodename': self.info['nodename'], 
-                            'release': self.info['release'], 'version': self.info['ver'], 'machine': self.info['machine'], 'firmware': self._fwid}}
-        self._report_stb = {'stubber':{'version': stubber_version}}
+        self._fwid = firmware_id or "{family}-{port}-{ver}".format(**self.info)
+        self._start_free = gc.mem_free()
 
         if path:
             if path.endswith('/'):
@@ -44,7 +40,7 @@ class Stubber():
         else:
             path = self.get_root()
 
-        self.path = "{}/stubs/{}".format(path, self.flat_fid).replace('//', '/')
+        self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace('//', '/')
         self._log.debug(self.path)
         try:
             self.ensure_folder(path + "/")
@@ -66,13 +62,13 @@ class Stubber():
         self.modules += ['pyb', 'stm', 'pycopy']
         self.modules += ['uasyncio/lock', 'uasyncio/stream', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 'uasyncio/funcs'] #1.13
 
-        #try to avoid running out of memory with nested mods
+        # try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200 # pylint: disable=no-member
 
     @staticmethod
     def _info():
         "collect base information on this runtime"
-        info={  'name': sys.implementation.name,    # - micropython
+        info = {'name': sys.implementation.name,    # - micropython
                 'release': '0.0.0',                 # mpy semver from sys.implementation or os.uname()release
                 'version': '0.0.0',                 # major.minor.0
                 'build': '',                        # parsed from version
@@ -80,6 +76,7 @@ class Stubber():
                 'nodename': 'unknown',              # ! not on all builds
                 'machine': 'unknown',               # ! not on all builds
                 'family': sys.implementation.name,  # fw families, micropython , pycopy , lobo , pycomm
+                'platform': sys.platform,               # port: esp32 / win32 / linux
                 'port': sys.platform,               # port: esp32 / win32 / linux
                 'ver': ''                           # short version
                 }
@@ -107,12 +104,20 @@ class Stubber():
                         pass
             except (IndexError, AttributeError):
                 pass
+
+        try: # families
+            from pycopy import const
+            info['family'] = 'pycopy'
+            del const
+        except (ImportError, KeyError):
+            pass
+        if info['platform'] == 'esp32_LoBo':
+            info['family'] = 'loboris'
+            info['port'] = 'esp32'
+
         # version info
         info['ver'] = 'v'+info['release']
-        if 'esp32_LoBo' == sys.platform:
-            info['family'] = 'loboris'
-            # info['port'] = 'esp32'
-        else:
+        if info['family'] != 'loboris':
             if info['release'] >= '1.10.0' and info['release'].endswith('.0'):
                 #drop the .0 for newer releases
                 info['ver'] = info['release'][:-2]
@@ -121,20 +126,13 @@ class Stubber():
             # add the build nr
             if info['build'] != '':
                 info['ver'] += '-'+info['build']
-        # if info['mpy'] != '':
-        #     sys_mpy = info['mpy']
-        #     arch = [None, 'x86', 'x64', 'armv6', 'armv6m',
-        #             'armv7m', 'armv7em', 'armv7emsp', 'armv7emdp',
-        #             'xtensa', 'xtensawin'][sys_mpy >> 10]
-        #     mpy_info = '0x{:x} = v{}'.format( sys_mpy,str( sys_mpy & 0xff))
-        #     mpy_info +=' mpy flags:'
-        #     if arch:
-        #         mpy_info +=' -march=' + arch
-        #     if sys_mpy & 0x100:
-        #         mpy_info +=' -mcache-lookup-bc'
-        #     if not sys_mpy & 0x200:
-        #         mpy_info +=' -mno-unicode'
-        #     info['mpy'] = mpy_info
+        if info['mpy'] != '':       # mpy on some v1.11+ builds
+            sys_mpy = info['mpy']
+            arch = [None, 'x86', 'x64', 'armv6', 'armv6m',
+                    'armv7m', 'armv7em', 'armv7emsp', 'armv7emdp',
+                    'xtensa', 'xtensawin'][sys_mpy >> 10]
+            if arch:
+                info['arch'] = arch
         return info
 
     def get_obj_attributes(self, obj: object):
@@ -195,7 +193,7 @@ class Stubber():
             except OSError:
                 pass
             gc.collect()
-            self._log.debug("Memory     : {:>20} {:>6}".format(m1, m1-gc.mem_free())) # pylint: disable=no-member
+            self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1-gc.mem_free())) # pylint: disable=no-member
         self._log.info('Finally done')
 
     def create_module_stub(self, module_name: str, file_name: str = None):
@@ -324,7 +322,7 @@ class Stubber():
             pass
 
     @property
-    def flat_fid(self):
+    def flat_fwid(self):
         "Turn _fwid from 'v1.2.3' into '1_2_3' to be used in filename"
         s = self._fwid
         # path name restrictions
@@ -367,9 +365,9 @@ class Stubber():
             # write json by node to reduce memory requirements
             with open(f_name, 'w') as f:
                 f.write('{')
-                f.write(dumps(self._report_fwi)[1:-1])
+                f.write(dumps({'firmware': self.info})[1:-1])
                 f.write(',')
-                f.write(dumps(self._report_stb)[1:-1])
+                f.write(dumps({'stubber':{'version': stubber_version}})[1:-1])
                 f.write(',')
                 f.write('"modules" :[')
                 start = True
@@ -380,6 +378,8 @@ class Stubber():
                         f.write(',')
                     f.write(dumps(n))
                 f.write(']}')
+            used = self._start_free - gc.mem_free() # pylint: disable=no-member
+            self._log.info("Memory used: {0} Kb".format( used//1024))
         except OSError:
             self._log.error("Failed to create the report.")
 
@@ -435,7 +435,6 @@ def show_help():
 def read_path()->str:
     "get --path from cmdline. [unix/win]"
     path = None
-    print("argv: " ,sys.argv)
     if len(sys.argv) == 3:
         cmd = (sys.argv[1]).lower()
         if cmd in ('--path', '-p'):
@@ -447,6 +446,7 @@ def read_path()->str:
     return path
 
 def main():
+    print('stubber version :', stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)
     except NameError:
