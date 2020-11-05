@@ -37,6 +37,11 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+    - name: flag tools executable
+      run: |
+        chmod +x $GITHUB_WORKSPACE/tools/* -v
+        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+
     - name: run `process minify`
       run: |
         python process.py minify
@@ -47,6 +52,14 @@ jobs:
         # ignore Unable to import '<upythonmodule>' (import-error)
         # ignore Module 'gc' has no 'mem_free' member (no-member)
 
+    - name: run minified
+      run: |
+        MICROPYPATH=./board tools/micropython ./minified/createstubs.py
+
+    - name: import minified
+      run: |
+        MICROPYPATH=./board tools/micropython -m ./minified/createstubs
+
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v3
@@ -54,6 +67,7 @@ jobs:
       with:
         title: '${{ steps.extract_branch.outputs.branch }} : update minified/createstubs.py'
         commit-message: add/update minified
+        path: minified
         branch: minify-${{ steps.extract_branch.outputs.branch }}
         labels: |
           automated pr

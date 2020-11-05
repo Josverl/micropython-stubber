@@ -46,6 +46,12 @@ jobs:
       run: |
         python process.py minify
 
+    - name: verify minified using pylint
+      run: |
+        pylint minified/createstubs.py -E -d E0401,E1101
+        # ignore Unable to import '<upythonmodule>' (import-error)
+        # ignore Module 'gc' has no 'mem_free' member (no-member)
+
     # - name: Pytest common tests
     #   run: |
     #     pytest tests/common tests/board
@@ -60,3 +66,6 @@ jobs:
         path: junit/test-results-${{ matrix.python-version }}.xml
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
+
+
+      
