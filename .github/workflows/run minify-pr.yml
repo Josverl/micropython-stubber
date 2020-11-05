@@ -54,11 +54,13 @@ jobs:
 
     - name: run minified
       run: |
-        MICROPYPATH=./board tools/micropython ./minified/createstubs.py
+        mkdir $GITHUB_WORKSPACE/scratch
+        cd $GITHUB_WORKSPACE/scratch
+        ../tools/micropython ./minified/createstubs.py
 
     - name: import minified
       run: |
-        MICROPYPATH=./board tools/micropython -m ./minified/createstubs
+        ../tools/micropython -m ./minified/createstubs
 
     - name: Create Pull Request
       id: cpr
@@ -67,7 +69,6 @@ jobs:
       with:
         title: '${{ steps.extract_branch.outputs.branch }} : update minified/createstubs.py'
         commit-message: add/update minified
-        path: minified
         branch: minify-${{ steps.extract_branch.outputs.branch }}
         labels: |
           automated pr
