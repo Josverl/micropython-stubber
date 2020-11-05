@@ -4,14 +4,14 @@ Copyright (c) 2019-2020 Jos Verlinde
 """
 #pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import sys
-import errno
 import gc
 import logging
 import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = '1.3.6'
+ENOENT = 2
+stubber_version = '1.3.7'
 # deal with firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -398,7 +398,7 @@ class Stubber():
                     _ = os.stat(p)
                 except OSError as e:
                     # folder does not exist
-                    if e.args[0] == errno.ENOENT:
+                    if e.args[0] == ENOENT:
                         try:
                             os.mkdir(p)
                         except OSError as e2:
@@ -418,7 +418,7 @@ class Stubber():
             r = "/flash"
             _ = os.stat(r)
         except OSError as e:
-            if e.args[0] == errno.ENOENT:
+            if e.args[0] == ENOENT:
                 try:
                     r = os.getcwd()
                 except:
