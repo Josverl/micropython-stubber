@@ -14,12 +14,6 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: Debug Current File",
-            "type": "python",
-            "request": "launch",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "Python: Debug process minify",
             "type": "python",
             "request": "launch",

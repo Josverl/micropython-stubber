@@ -1,6 +1,6 @@
 
-import glob
 import pytest
+from pathlib import Path
 
 # pylint: disable=wrong-import-position,import-error
 import basicgit as git
@@ -36,6 +36,8 @@ def test_extract_target_names(path, port, board):
 
 def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using manifest.py files"
+    # mpy_path = Path(testrepo_micropython)
+    # mpy_lib = Path(testrepo_micropython_lib)
     mpy_path = testrepo_micropython
     mpy_lib = testrepo_micropython_lib
     # mpy version must be at 1.12 or newer
@@ -47,15 +49,12 @@ def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropyth
         version = git.get_tag(mpy_path)
         assert version == mpy_version, "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
 
-    stub_path = tmp_path
+    stub_path = Path(tmp_path)
     get_mpy.get_frozen(str(stub_path), version= mpy_version, mpy_path= mpy_path, lib_path=mpy_lib)
-    scripts = glob.glob(str(stub_path)  + '/**/*.py', recursive=True)
+    scripts = list(stub_path.rglob('*.py'))
 
     assert scripts is not None, "can freeze scripts from manifest"
-    assert len(scripts) > 50, "expect at least 50 files, only found {}".format(len(scripts))
-
-
-    #assert len(list(tmp_path.iterdir())) == 18, "there should be 18 files"
+    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
 
 
 def test_freezer_mpy_folders(tmp_path, testrepo_micropython):

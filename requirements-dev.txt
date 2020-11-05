@@ -7,4 +7,4 @@ pyminifier
 pytest
 pytest-cov
 filelock
-
+Jinja2
