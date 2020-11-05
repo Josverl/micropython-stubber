@@ -56,11 +56,11 @@ jobs:
       run: |
         mkdir $GITHUB_WORKSPACE/scratch
         cd $GITHUB_WORKSPACE/scratch
-        ../tools/micropython ./minified/createstubs.py
+        ../tools/micropython ../minified/createstubs.py
 
     - name: import minified
       run: |
-        ../tools/micropython -m ./minified/createstubs
+        ../tools/micropython -m ../minified/createstubs
 
     - name: Create Pull Request
       id: cpr
