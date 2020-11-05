@@ -14,8 +14,9 @@ jobs:
     - name: ls
       run: |
         pwd
-        cd /home/runner/work/micropython-stubber/micropython-stubber
+        cd $GITHUB_WORKSPACE
         ls ./tools
+        chmod +x $GITHUB_WORKSPACE/tools/micropython
         MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
 
     - name: run
