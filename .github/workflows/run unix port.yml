@@ -11,10 +11,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
             
-    - name: TESTRUN ruN
+    - name: ls
       run: |
         ls ./tools
-        MICROPYPATH=./board tools/micropython -c "import sys;print(sys.path);import logging" 
+        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+
+    - name: run
+      run: |
+        ls ./tools
+        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+
 
     - name: run in linux 
       run: |
