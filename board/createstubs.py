@@ -258,7 +258,7 @@ class Stubber():
             #try to unload the module unless we use it
             try:
                 del new_module
-            except (OSError, KeyError):
+            except (OSError, KeyError):#lgtm [py/unreachable-statement]
                 self._log.warning("could not del new_module")
             try:
                 del sys.modules[module_name]
@@ -318,7 +318,7 @@ class Stubber():
         del errors
         try:
             del name, rep, typ, obj # pylint: disable=undefined-loop-variable
-        except (OSError, KeyError):
+        except (OSError, KeyError):#lgtm [py/unreachable-statement]
             pass
 
     @property
@@ -338,7 +338,7 @@ class Stubber():
         self._log.info("Clean/remove files in folder: {}".format(path))
         try:
             items = os.listdir(path)
-        except (OSError, AttributeError):
+        except (OSError, AttributeError):#lgtm [py/unreachable-statement]
             # os.listdir fails on unix
             return
         for fn in items:
