@@ -37,6 +37,11 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+    - name: flag tools executable
+      run: |
+        chmod +x $GITHUB_WORKSPACE/tools/* -v
+        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+
     - name: Pytest common tests
       run: |
         pytest tests/common tests/board
