@@ -28,7 +28,7 @@ def get_frozen(stub_path, *, repo=None, version = '3.2.24'):
     #download
     downloader.download_files(repo, frozen_modules, stub_path)
     # make a manifest 
-    utils.make_manifest(stub_path, family, fmly, version=version)
+    utils.make_manifest(stub_path, family, "frozen", fmly, version=version)
 
 if __name__ == "__main__":
     # just run a quick test
