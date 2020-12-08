@@ -1,0 +1,22 @@
+#######################################################################
+# ESP32 v1.10?
+#######################################################################
+
+        framebuf          socket            upip
+        _boot             gc                ssl               upip_utarfile
+        _onewire          hashlib           struct            upysh
+        _thread           heapq             sys               urandom
+        _webrepl          inisetup          time              ure
+        apa106            io                ubinascii         urequests
+        array             json              ucollections      uselect
+        binascii          machine           ucryptolib        usocket
+        btree             math              uctypes           ussl
+        builtins          micropython       uerrno            ustruct
+        cmath             neopixel          uhashlib          utime
+        collections       network           uhashlib          utimeq
+        dht               ntptime           uheapq            uwebsocket
+        ds18x20           onewire           uio               uzlib
+        errno             os                ujson             webrepl
+        esp               random            umqtt/robust      webrepl_setup
+        esp32             re                umqtt/simple      websocket_helper
+        flashbdev         select            uos               zlib
