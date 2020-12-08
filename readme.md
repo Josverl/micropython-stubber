@@ -39,7 +39,7 @@ MicroPython-Stubber is licensed under the MIT license, and all contributions sho
 
 ## Contributions
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#11--contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#11---contributions)
 <!-- ALL-CONTRIBUTORS-BADGE:END --> 
 
 ---
@@ -715,7 +715,7 @@ https://github.com/python/mypy/blob/master/mypy/stubgen.py
 
 ----------------
 
-# 11 - contributions
+# 11 - Contributions
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
