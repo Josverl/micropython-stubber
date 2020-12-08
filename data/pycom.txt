@@ -1,4 +1,0 @@
-#manual addition
-
-pycom
-crypto ucrypto
