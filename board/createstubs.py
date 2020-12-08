@@ -49,18 +49,18 @@ class Stubber():
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
         self.excluded = ["webrepl", "_webrepl","port_diag","example_sub_led.py","example_pub_button.py"]
         # there is no option to discover modules from upython, need to hardcode
-        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris and pycom
-        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 
-                        'crypto', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 
-                        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math', 
-                        'microWebSocket', 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 
+        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
+        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections',
+                        'crypto', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
+                        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math',
+                        'microWebSocket', 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network',
                         'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306',
-                        'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 
-                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 'ucryptolib', 'uctypes', 
-                        'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
+                        'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event',
+                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 'ucryptolib', 'uctypes',
+                        'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'ulab.approx', 'ulab.compare', 'ulab.fft', 'ulab.filter', 'ulab.linalg',
+                        'ulab.numerical', 'ulab.poly', 'ulab.user', 'ulab.vector', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'usys', 'utime', 'utimeq', 'uwebsocket', 'uzlib',
-                        'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib'] 
-                        
+                        'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
         # try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200 # pylint: disable=no-member
 
