@@ -57,8 +57,8 @@ class Stubber():
                         'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306',
                         'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event',
                         'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 'ucryptolib', 'uctypes',
-                        'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'ulab.approx', 'ulab.compare', 'ulab.fft', 'ulab.filter', 'ulab.linalg',
-                        'ulab.numerical', 'ulab.poly', 'ulab.user', 'ulab.vector', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
+                        'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'ulab/approx', 'ulab/compare', 'ulab/fft', 'ulab/filter', 'ulab/linalg',
+                        'ulab/numerical', 'ulab/poly', 'ulab/user', 'ulab/vector', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'usys', 'utime', 'utimeq', 'uwebsocket', 'uzlib',
                         'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib']
         # try to avoid running out of memory with nested mods
