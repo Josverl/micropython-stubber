@@ -1,4 +1,0 @@
-# manual addition payboard modules
-
-pyb  stm 
-
