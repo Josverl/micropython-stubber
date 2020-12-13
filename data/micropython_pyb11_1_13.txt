@@ -1,0 +1,13 @@
+# MicroPython v1.13-95-g0fff2e03f on 2020-10-03; PYBv1.1 with STM32F405RG
+
+__main__          micropython       uasyncio/stream   urandom
+_onewire          network           ubinascii         ure
+_uasyncio         onewire           ucollections      uselect
+builtins          pyb               uctypes           usocket
+cmath             stm               uerrno            ustruct
+dht               uarray            uhashlib          usys
+framebuf          uasyncio/__init__ uheapq            utime
+gc                uasyncio/core     uio               utimeq
+lcd160cr          uasyncio/event    ujson             uzlib
+lcd160cr_test     uasyncio/funcs    umachine
+math              uasyncio/lock     uos
