@@ -12,11 +12,14 @@ from pathlib import Path
 from typing import Set
 
 
-def read_modules(path:Path = None)->Set:
+def read_modules(path: Path = None)->Set:
     """
-    docstring
+    read text files with modules per firmware.
+    each contains the output of help("modules")
+        lines starting with # are comments.
+            split the other lines at whitespace seperator,
+            and add each module to a set
     """
-    # 
     path = Path(path or "./data")
     all_modules = set()
     for file in path.glob("*.txt"):
@@ -39,12 +42,30 @@ def read_modules(path:Path = None)->Set:
 
     return all_modules
 
+def wrapped(modules : Set)-> str:
+    "wrap code line at spaces"
+    long_line = str(modules)
+    _wrapped = "        self.modules = "
+    IDENT = len(_wrapped)
+    MAX_WIDTH = 135
+
+    #find seperator
+    while len(long_line) > MAX_WIDTH:
+        p1 = long_line.find("', ", MAX_WIDTH)
+        #drop space
+        p1 += 3
+        short = long_line[0:p1-1] 
+        _wrapped += short + '\n' + ' '*IDENT
+        long_line = long_line[p1-1:]
+    _wrapped += long_line
+    return _wrapped
+
 
 def main():
     """
-    docstring
+    helper script 
+    generate a few lines of cxode with all modules to be stubbed by createstubs
     """
-
     #######################################################################
     # the exceptions
     #######################################################################
@@ -52,12 +73,13 @@ def main():
     mods_excluded = set(["__main__", "_boot", "webrepl", "_webrepl", "port_diag", "example_sub_led", "example_pub_button"])
 
     all_modules = read_modules()
-
     modules_to_stub = sorted(all_modules - set(mods_excluded | mods_problematic))
 
+    # remove pycom MQTT* from defaults
+    modules_to_stub  = sorted({m for m in modules_to_stub if not m.startswith('MQTT')})
+    
     print("modules to stub :", len(modules_to_stub))
-    print("\nself.modules =", modules_to_stub)
-
+    print(wrapped(modules_to_stub))
 
 if __name__ == "__main__":
     main()
