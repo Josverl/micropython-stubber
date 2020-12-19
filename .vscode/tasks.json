@@ -9,11 +9,19 @@
             "type": "shell",
             "command": " ${file} -O 3",
             "problemMatcher": [],
+        },
+        {
+            "label": "minify",
+            "detail": "minify for esp8622",
+            "type": "shell",
+            "command": " python process.py minify",
+            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
+
         {
             "label": "pylint all",
             "detail": "py -m pylint: whole project",
