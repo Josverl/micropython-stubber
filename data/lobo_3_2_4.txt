@@ -1,0 +1,14 @@
+#######################################################################
+# LoBo ESP32 3.2.24  
+#######################################################################
+
+_thread ak8963 array binascii btree builtins
+cmath collections curl display errno framebuf
+freesans20 functools gc gsm hashlib heapq io
+json logging machine math microWebSocket microWebSrv
+microWebTemplate micropython mpu6500 mpu9250 network os
+pye random re requests select socket ssd1306 ssh
+ssl struct sys time tpcalib ubinascii ucollections
+uctypes uerrno uhashlib uheapq uio ujson uos upip
+upip_utarfile upysh urandom ure urequests uselect usocket
+ussl ustruct utime utimeq uzlib websocket writer ymodem zlib

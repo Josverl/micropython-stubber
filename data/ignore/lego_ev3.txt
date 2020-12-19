@@ -2,7 +2,7 @@
 # Lego EV3 MicroPython
 #######################################################################
 
-raw = """
+
 main parameters_c pybricks/uev3dev/messaging umachine
 _thread pybricks/init pybricks/uev3dev/sound uos
 array pybricks/display pybricks/uev3dev/util urandom
@@ -18,4 +18,3 @@ gc pybricks/uev3dev/_alsa uhashlib websocket
 math pybricks/uev3dev/_wand uheapq
 micropython pybricks/uev3dev/display uio
 mmap pybricks/uev3dev/i2c ujson
-"""

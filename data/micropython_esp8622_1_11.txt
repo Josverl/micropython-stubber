@@ -1,0 +1,26 @@
+#######################################################################
+# ESP8622 1.11
+#######################################################################
+
+#(sysname=esp8266 nodename=esp8266 release=2.2.0-dev(9422289) version=v1.11-8-g48dcbbe60 on 2019-05-29 machine=ESP module with ESP8266)
+
+        http_client       socket            upip
+        _boot             http_client_ssl   ssd1306           upip_utarfile
+        _onewire          http_server       ssl               upysh
+        _webrepl          http_server_ssl   struct            urandom
+        apa102            inisetup          sys               ure
+        array             io                time              urequests
+        binascii          json              uasyncio/__init__ urllib/urequest
+        btree             lwip              uasyncio/core      uselect
+        builtins          machine           ubinascii         usocket
+        collections       math              ucollections      ussl
+        dht               micropython       ucryptolib        ustruct
+        ds18x20           neopixel          uctypes           utime
+        errno             network           uerrno            utimeq
+        esp               ntptime           uhashlib          uwebsocket
+        example_pub_button onewire           uheapq            uzlib
+        example_sub_led   os                uio               webrepl
+        flashbdev         port_diag         ujson             webrepl_setup
+        framebuf          random            umqtt/robust      websocket_helper
+        gc                re                umqtt/simple       zlib
+        hashlib           select            uos
