@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = '1.3.7'
+stubber_version = '1.3.9'
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -47,21 +47,20 @@ class Stubber():
         except OSError:
             self._log.error("error creating stub folder {}".format(path))
         self.problematic = ["upysh", "webrepl_setup", "http_client", "http_client_ssl", "http_server", "http_server_ssl"]
-        self.excluded = ["webrepl", "_webrepl","port_diag","example_sub_led.py","example_pub_button.py"]
+        self.excluded = ["webrepl", "_webrepl", "port_diag", "example_sub_led.py", "example_pub_button.py"]
         # there is no option to discover modules from upython, need to hardcode
-        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris and pycom
-        self.modules = ['_thread', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'bluetooth', 'builtins', 'cmath', 'collections',
-                        'crypto', 'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20',
-                        'functools', 'gc', 'gsm', 'hashlib', 'heapq', 'inisetup', 'io', 'json', 'logging', 'lwip', 'machine', 'math',
-                        'microWebSocket', 'microWebSrv', 'microWebTemplate', 'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network',
-                        'ntptime', 'onewire', 'os', 'port_diag', 'pycom', 'pye', 'random', 're', 'requests', 'select', 'socket', 'ssd1306',
-                        'ssh', 'ssl', 'struct', 'sys', 'time', 'tpcalib', 'ubinascii', 'ucollections', 'ucryptolib', 'uctypes',
-                        'uerrno', 'uhashlib', 'uheapq', 'uio', 'ujson', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'urandom',
-                        'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'utime', 'utimeq', 'uwebsocket', 'uzlib',
-                        'websocket', 'websocket_helper', 'writer', 'ymodem', 'zlib', 'pycom', 'crypto']
-        self.modules += ['pyb', 'stm', 'pycopy']
-        self.modules += ['uasyncio/lock', 'uasyncio/stream', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 'uasyncio/funcs'] #1.13
-
+        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
+        # modules to stub : 118
+        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'crypto',
+                        'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib',
+                        'heapq', 'inisetup', 'io', 'json', 'lcd160cr', 'lcd160cr_test', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
+                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'queue', 'random', 're', 'requests',       
+                        'select', 'socket', 'ssd1306', 'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 
+                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 'ucryptolib', 'uctypes', 'uerrno',
+                        'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'ulab/approx', 'ulab/compare', 'ulab/fft', 'ulab/filter', 'ulab/linalg', 'ulab/numerical',
+                        'ulab/poly', 'ulab/user', 'ulab/vector', 'umachine', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'uqueue', 'urandom',
+                        'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'usys', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'websocket',
+                        'websocket_helper', 'writer', 'ymodem', 'zlib']
         # try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200 # pylint: disable=no-member
 
