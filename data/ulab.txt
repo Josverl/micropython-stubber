@@ -1,0 +1,14 @@
+# manual addition
+# See: https://micropython-ulab.readthedocs.io/en/latest/
+
+ulab
+ulab/approx 
+ulab/compare 
+ulab/fft 
+ulab/filter 
+ulab/linalg 
+ulab/numerical 
+ulab/poly 
+ulab/vector 
+
+ulab/user 

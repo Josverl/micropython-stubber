@@ -1,0 +1,23 @@
+# Pycom MicroPython 1.20.0.rc13 [v1.9.4-94bb382] on 2019-08-22; WiPy with ESP32
+
+
+MQTTClient        errno             ssl               uos
+MQTTConst         framebuf          struct            uqueue
+MQTTDeviceShadow  gc                sys               ure
+MQTTLib           hashlib           time              uselect
+MQTTMsgHandler    json              ubinascii         uselect
+MQTTShadowManager machine           ubinascii         usocket
+__main__          math              ucollections      ussl
+_boot             micropython       ucrypto           ustruct
+_main             network           uctypes           utime
+_thread           os                uerrno            utimeq
+array             pycom             uerrno            uzlib
+binascii          queue             uhashlib          websocket
+builtins          re                uio
+cmath             select            ujson
+crypto            socket            umachine
+
+pycom
+crypto ucrypto
+
+
