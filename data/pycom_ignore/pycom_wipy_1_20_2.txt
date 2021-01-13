@@ -1,0 +1,22 @@
+
+# Pycom MicroPython 1.20.2.r2 [v1.11-3a7776d] on 2020-11-23; WiPy with ESP32
+
+_OTA              _pybytes_library  machine           uctypes
+__main__          _pybytes_machine_learning           math              uerrno
+_boot             _pybytes_main     micropython       uerrno
+_coap             _pybytes_protocol network           uhashlib
+_flash_control_OTA                  _pybytes_pymesh_config              os                uio
+_main             _terminal         pycom             ujson
+_main_pybytes     _thread           queue             umachine
+_mqtt             _urequest         re                uos
+_mqtt_core        array             select            uqueue
+_msg_handl        binascii          socket            ure
+_periodical_pin   builtins          ssl               uselect
+_pybytes          cmath             struct            uselect
+_pybytes_ca       crypto            sys               usocket
+_pybytes_config   errno             time              ussl
+_pybytes_config_reader              framebuf          ubinascii         ustruct
+_pybytes_connection                 gc                ubinascii         utime
+_pybytes_constants                  hashlib           ucollections      utimeq
+_pybytes_debug    json              ucrypto           uzlib
+

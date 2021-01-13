@@ -106,7 +106,8 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/175909?v=4",
       "profile": "https://binary.com.au/",
       "contributions": [
-        "code","bug"
+        "code",
+        "bug"
       ]
     },
     {
@@ -185,8 +186,28 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "CallumJHays",
+      "name": "Callum Jacob Hays",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/13251689?v=4",
+      "profile": "http://comingsoon.tm/",
+      "contributions": [
+        "bug",
+        "test"
+      ]
+    },
+    {
+      "login": "v923z",
+      "name": "Zoltán Vörös",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1310472?v=4",
+      "profile": "https://github.com/v923z",
+      "contributions": [
+        "data"
+      ]
     }
   ],
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#11---contributions)",
   "projectName": "micropython-stubber",
   "projectOwner": "Josverl",
   "repoType": "github",
