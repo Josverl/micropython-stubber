@@ -23,7 +23,10 @@ class Stubber():
    pass
   self._report=[]
   self.info=self._info()
-  self._fwid=str(firmware_id).lower()or "{family}-{port}-{ver}".format(**self.info).lower()
+  if firmware_id:
+   self._fwid=str(firmware_id).lower()
+  else:
+   self._fwid="{family}-{port}-{ver}".format(**self.info).lower()
   self._start_free=gc.mem_free()
   if path:
    if path.endswith('/'):
@@ -307,4 +310,5 @@ def main():
  stubber.clean()
  stubber.create_all_stubs()
  stubber.report()
-main()
+if __name__=="__main__":
+ main()
