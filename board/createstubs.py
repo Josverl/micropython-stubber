@@ -104,7 +104,7 @@ class Stubber():
                         info['build'] = s.split('-')[1]
                     except IndexError:
                         pass
-            except (IndexError, AttributeError):
+            except (IndexError, AttributeError, TypeError):
                 pass
 
         try: # families
@@ -116,11 +116,22 @@ class Stubber():
         if info['platform'] == 'esp32_LoBo':
             info['family'] = 'loboris'
             info['port'] = 'esp32'
+        elif info['sysname'] == 'ev3':
+            # ev3 pybricks
+            info['family'] = 'ev3-pybricks'
+            info['release'] = "1.0.0"
+            try:
+                # Version 2.0 introduces the EV3Brick() class. 
+                from pybricks.hubs import EV3Brick
+                info['release'] = "2.0.0"
+            except ImportError:
+                pass
 
         # version info
-        info['ver'] = 'v'+info['release']
+        if info['release']:
+            info['ver'] = 'v'+info['release']
         if info['family'] != 'loboris':
-            if info['release'] >= '1.10.0' and info['release'].endswith('.0'):
+            if info['release'] and info['release'] >= '1.10.0' and info['release'].endswith('.0'):
                 #drop the .0 for newer releases
                 info['ver'] = info['release'][:-2]
             else:
