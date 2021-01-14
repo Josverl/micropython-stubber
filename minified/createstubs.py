@@ -18,7 +18,7 @@ class Stubber():
  def __init__(self,path:str=None,firmware_id:str=None):
   try:
    if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103':
-    raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+    raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
   except AttributeError:
    pass
   self._report=[]
