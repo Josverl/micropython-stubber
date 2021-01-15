@@ -2,20 +2,23 @@ import sys
 from collections import namedtuple
 import pytest
 
+# pylint: disable=import-error,wrong-import-position
+# pyright: reportMissingImports=false
+
 UName = namedtuple('UName', ['sysname', 'nodename', 'release', 'version', 'machine'])
 
-if sys.path[0] != 'c:\\develop\\MyPython\\micropython-stubber\\board':
- sys.path[0:0] = ['c:\\develop\\MyPython\\micropython-stubber\\board']
+if sys.path[0] != './board':
+    sys.path[0:0] = ['./board']
 
 # allow loading of the cpython mockalikes
-if sys.path[1] != 'c:\\develop\\MyPython\\micropython-stubber\\all-stubs\\cpython_core':
- sys.path[1:1] = ['c:\\develop\\MyPython\\micropython-stubber\\all-stubs\\cpython_core']
+if sys.path[1] != './all-stubs/cpython_core':
+    sys.path[1:1] = ['./all-stubs./cpython_core']
 
-from createstubs import Stubber
+from createstubs import Stubber # type: ignore
 
 def test_stubber_info():
-    stubber = Stubber()
-    assert stubber != None, "Can't create Stubber instance"
+    stubber = Stubber() # type: ignore
+    assert stubber is not None, "Can't create Stubber instance"
 
     info = stubber._info()
     print(info)
@@ -29,30 +32,9 @@ def test_stubber_info():
     assert ' ' not in stubber.flat_fwid , "flat_fwid must not contain any spaces"
     assert '.' not in stubber.flat_fwid , "flat_fwid must not contain any dots"
 
-
-
-
-
-
-# sys.implementation.name <-- Mock
-#       CPYTHON  namespace(cache_tag='cpython-38', hexversion=50857456, name='cpython', version=sys.version_info(major=3, minor=8, micro=5, releaselevel='final', serial=0))
-#  sys.platform, <-- Mock 
-#       CPYTHON 'win32'  
-
-# OS
-# os.uname()
-
-
-    # if sys.platform not in ('unix', 'win32'):
-    # try:
-    #     u = os.uname()    To Mock <-----
-    #     info['sysname'] = u.sysname
-    #     info['nodename'] = u.nodename
-    #     info['release'] = u.release
-    #     info['machine'] = u.machine
-    #     info['platform'] == 'esp32_LoBo':
-
-    # u.version:
+#################################################
+# test the fwid naming on the different platforms
+#################################################
 
 from collections import namedtuple
 UName = namedtuple('uname', 'sysname nodename release version machine')
@@ -68,12 +50,10 @@ mpy_110         = UName(sysname='esp32', nodename='esp32', release='1.10.0', ver
 
 mpy_194         = UName(sysname='esp32', nodename='esp32', release='1.9.4', version='v1.9.4 on 2018-05-11', machine='ESP32 module with ESP32')
 
-
 mpy_esp8622     = UName(sysname='esp8266', nodename='esp8266', release='2.2.0-dev(9422289)', version='v1.11-8-g48dcbbe60 on 2019-05-29', machine='ESP module with ESP8266')
 
 pyb1_113        = UName(sysname='pyboard', nodename='pyboard', release='1.13.0', version='v1.13-95-g0fff2e03f on 2020-10-03', machine='PYBv1.1 with STM32F405RG')
 
-ev3_110         = UName(machine = 'ev3', nodename = 'ev3', release = None, sysname = 'ev3', version = None)
 
 @pytest.mark.parametrize(
     "fwid,  sys_imp_name, sys_platform, os_uname",
@@ -83,8 +63,8 @@ ev3_110         = UName(machine = 'ev3', nodename = 'ev3', release = None, sysna
         ('micropython-esp32-1.10', 'micropython', 'esp32', mpy_110),
 
         ('micropython-esp32-1.13-103', 'micropython', 'esp32', mpy_113_build),
-        ('micropython-esp32-1.13-latest', 'micropython', 'esp32', mpy_113_build),
         # mpy esp8622
+        # FIXME: Use version over release
         ('micropython-esp8622-2.2.0-dev(9422289)-8', 'micropython', 'esp8622', mpy_esp8622),
         # mpy pyb1
         ('micropython-pyb1-1.13-95', 'micropython', 'pyb1', pyb1_113),
@@ -94,12 +74,15 @@ ev3_110         = UName(machine = 'ev3', nodename = 'ev3', release = None, sysna
         ('loboris-esp32-v3.2.24', 'micropython', 'esp32_LoBo', lobo_bt_ram),
 
         # ev3_pybricks_1_0_0
-        ( 'pybricks-ev3-linux-1.0.0', '', 'linux', UName(machine = 'ev3', nodename = 'ev3', release = None, sysname = 'ev3', version = None))
-
-        # 
+        (
+            'ev3-pybricks-linux-1.0.0', '', 'linux',
+            UName(machine='ev3', nodename='ev3', release=None, sysname='ev3', version=None)
+        )
     ]
 )
 
+#        # TODO: add support for -Latest
+#        #('micropython-esp32-1.13-latest', 'micropython', 'esp32', mpy_113_build),
 
 def test_stubber_fwid(mocker, fwid,  sys_imp_name, sys_platform, os_uname):
     # class.property : just pass a value
@@ -120,8 +103,8 @@ def test_stubber_fwid(mocker, fwid,  sys_imp_name, sys_platform, os_uname):
         mock_uname
     )
     # now run the tests 
-    stubber = Stubber()
-    assert stubber != None, "Can't create Stubber instance"
+    stubber = Stubber()  
+    assert stubber is not None, "Can't create Stubber instance"
 
     info = stubber._info()
     print('-=-=-')
@@ -140,8 +123,3 @@ def test_stubber_fwid(mocker, fwid,  sys_imp_name, sys_platform, os_uname):
     chars = " .()/\\:$"
     for c in chars:
         assert c not in stubber.flat_fwid, "flat_fwid must not contain '{}'".format(c)
-
-
-
-if __name__ == "__main__":
-    test_stubber_info()
