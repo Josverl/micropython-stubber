@@ -585,9 +585,7 @@ see below overview
 
 **Testing on linux port**
 
-in order to be able to test `createstubs.py`  it has been updated to run on linux, and accept a --path parameter to indicate tha pathe where the stubs should be stored.
-
-
+in order to be able to test `createstubs.py`, it has been updated to run on linux, and accept a --path parameter to indicate the path where the stubs should be stored.
 
 ## 7.4 github actions
 
