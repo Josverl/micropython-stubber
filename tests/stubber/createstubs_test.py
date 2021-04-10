@@ -1,4 +1,5 @@
 import sys
+## todo: adjust paths for WSL/Linux
 if sys.path[0] != 'c:\\develop\\MyPython\\micropython-stubber\\board':
  sys.path[0:0] = ['c:\\develop\\MyPython\\micropython-stubber\\board']
 
