@@ -308,5 +308,4 @@ def main():
  stubber.clean()
  stubber.create_all_stubs()
  stubber.report()
-if __name__=="__main__":
- main()
+main()

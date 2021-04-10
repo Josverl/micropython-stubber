@@ -54,12 +54,14 @@ class Stubber():
         # there is no option to discover modules from upython, need to hardcode
         # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
         # modules to stub : 118
-        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'crypto',
+        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 
+'cmath', 'collections', 'crypto',
                         'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib',
                         'heapq', 'inisetup', 'io', 'json', 'lcd160cr', 'lcd160cr_test', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
-                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'queue', 'random', 're', 'requests',       
-                        'select', 'socket', 'ssd1306', 'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 
-                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 'ucryptolib', 'uctypes', 'uerrno',
+                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'queue', 'random', 're', 'requests',
+                        'select', 'socket', 'ssd1306', 'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event',
+                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 
+'ucryptolib', 'uctypes', 'uerrno',
                         'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'ulab/approx', 'ulab/compare', 'ulab/fft', 'ulab/filter', 'ulab/linalg', 'ulab/numerical',
                         'ulab/poly', 'ulab/user', 'ulab/vector', 'umachine', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'uqueue', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'usys', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'websocket',
@@ -462,5 +464,4 @@ def main():
     stubber.create_all_stubs()
     stubber.report()
 
-if __name__ == "__main__":
-    main()
+main()

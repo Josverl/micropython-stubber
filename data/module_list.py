@@ -32,12 +32,12 @@ def read_modules(path: Path = None)->Set:
                     file_mods = line.split()
                     # print(line[0:-1])
                     # print( set(file_mods))
-                    all_modules = set( all_modules |  set(file_mods))
+                    all_modules = set(all_modules | set(file_mods))
                 # next
                 line = f.readline()
 
     #     print("-" * 40)
-    
+
     # print(">" * 40)
 
     return all_modules
@@ -64,7 +64,7 @@ def wrapped(modules : Set)-> str:
 def main():
     """
     helper script 
-    generate a few lines of cxode with all modules to be stubbed by createstubs
+    generate a few lines of code with all modules to be stubbed by createstubs
     """
     #######################################################################
     # the exceptions

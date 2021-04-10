@@ -1,0 +1,19 @@
+# MicroPython v1.14 on 2021-02-02; ESP32 module (spiram) with ESP32
+# Type "help()" for more information.
+# >>> help('modules')
+__main__          gc                ubinascii         urandom  
+_boot             inisetup          ubluetooth        ure      
+_onewire          machine           ucollections      urequests
+_thread           math              ucryptolib        uselect  
+_uasyncio         micropython       uctypes           usocket  
+_webrepl          neopixel          uerrno            ussl     
+apa106            network           uhashlib          ustruct  
+btree             ntptime           uheapq            usys     
+builtins          onewire           uio               utime
+cmath             uarray            ujson             utimeq
+dht               uasyncio/__init__ umqtt/robust      uwebsocket
+ds18x20           uasyncio/core     umqtt/simple      uzlib
+esp               uasyncio/event    uos               webrepl
+esp32             uasyncio/funcs    upip              webrepl_setup
+flashbdev         uasyncio/lock     upip_utarfile     websocket_helper
+framebuf          uasyncio/stream   upysh
