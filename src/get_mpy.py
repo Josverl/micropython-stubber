@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Collect modules and python stubs from MicroPython source projects (v1.12 +)
+Collect modules and python stubs from MicroPython source projects (v1.12 +) and stores them in the all_stubs folder
+The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
+
 """
 # pylint: disable= line-too-long,  W1202, invalid-name
 
@@ -30,8 +32,8 @@ log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
 
 # globals
-family = 'micropython'
-fmly = 'mpy'
+FAMILY = 'micropython'
+
 path_vars = {"MPY_DIR":"", "MPY_LIB_DIR":"", "PORT_DIR":"", "BOARD_DIR":""}
 stub_dir = None
 
@@ -87,7 +89,7 @@ def freeze(path, script=None, opt=0):
     `opt` is the optimisation level to pass to mpy-cross when compiling .py
     to .mpy. (ignored in this implementation)
     """
-    log.debug(" - freeze(({},script={},opt={})".format(path,script,opt) )
+    log.debug(" - freeze(({},script={},opt={})".format(path, script, opt) )
     path = convert_path(path)
     if script is None:
         #folder of scripts.
@@ -175,7 +177,7 @@ def get_frozen(stub_path:str, version:str, mpy_path=None, lib_path=None,):
     if not lib_path:
         lib_path = '../micropython-lib'
     if not stub_path:
-        stub_path =  '{}/{}_{}_frozen'.format(utils.STUB_FOLDER, fmly, utils.flat_version(version))
+        stub_path =  '{}/{}_{}_frozen'.format(utils.STUB_FOLDER, FAMILY, utils.flat_version(version))
     # get the manifests of the different ports and boards
     mpy_path = os.path.abspath(mpy_path)
     lib_path = os.path.abspath(lib_path)
@@ -227,7 +229,7 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version:str
         # make a module manifest
         port = dest_path.split(os.path.sep)[-2]
         #todo: add board / variant into manifest files ?
-        utils.make_manifest(dest_path, family=family, port=port, fmly=fmly, version=version )
+        utils.make_manifest(dest_path, family=FAMILY, port=port, version=version )
 
 
 
@@ -348,16 +350,15 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str,
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # make a module manifest 
-        utils.make_manifest(stub_dir, family, "frozen", fmly, version)
+        utils.make_manifest(stub_dir, FAMILY, "frozen", version)
 
-def quicktest():
-    # just run a quick test       
-    # checkout micropython @ tag
-    # get_frozen(stub_path='./scratch/mpy_1_12/frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-    # get_frozen_folders(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-
-    #get_frozen(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.13.0')
-    get_frozen(stub_path='./scratch/mpy_1_10_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.10.0')
+# def quicktest():
+#     # just run a quick test       
+#     # checkout micropython @ tag
+#     # get_frozen(stub_path='./scratch/mpy_1_12/frozen', mpy_path='../micropython', lib_path='../micropython-lib')
+#     # get_frozen_folders(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib')
+#     #get_frozen(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.13.0')
+#     get_frozen(stub_path='./scratch/mpy_1_10_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.10.0')
 
 if __name__ == "__main__":
     "just gather for the current version"
@@ -369,8 +370,7 @@ if __name__ == "__main__":
     if version:
         log.info("found micropython version : {}".format(version))
         # folder/{family}_{version}_frozen
-        family = 'mpy'
-        stub_path = stubfolder('{}_{}_frozen'.format(family, flat_version(version)))
+        stub_path = stubfolder('{}-{}-frozen'.format(FAMILY, flat_version(version)))
         get_frozen(stub_path, version=version, mpy_path=mpy_path, lib_path=lib_path)
         exit(0)
     else:

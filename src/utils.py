@@ -21,7 +21,7 @@ def clean_version(version: str, build: bool = False):
 
 def stubfolder(path: str)->str:
     "return path in the stub folder"
-    return '{}/{}'.format(STUB_FOLDER,path)
+    return '{}/{}'.format(STUB_FOLDER, path)
 
 def flat_version(version: str):
     "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
@@ -78,8 +78,8 @@ def manifest(family=None, machine=None, port=None, platform=None, sysname=None, 
                 }
     return mod_manifest
 
-def make_manifest(folder: str, family: str, port: str, fmly: str, version: str)-> bool:
-    mod_manifest = manifest(family=family, port=port, sysname=fmly, version=version)
+def make_manifest(folder: str, family: str, port: str, version: str)-> bool:
+    mod_manifest = manifest(family=family, port=port, sysname=family, version=version)
     try:
         for filename in glob.glob(os.path.join(folder, "*.py")):
             f_name, _ = os.path.splitext(os.path.basename(filename))

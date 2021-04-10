@@ -1,3 +1,8 @@
+"""
+Download or update the micropyton compatibility modules from pycopy and stores them in the all_stubs folder
+The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
+"""
+
 import os
 import glob
 import shutil
@@ -39,7 +44,7 @@ def get_core(requirements, stub_path=None):
             except OSError as err:
                 log.exception(err)
     except OSError as err:
-        log.error("An error occurred while trying to run pip to dowload the MicroPython compatibility modules from PyPi: {}".format(err))
+        log.error("An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err))
     finally:
         # remove build folder
         shutil.rmtree(build_path, ignore_errors=True)
