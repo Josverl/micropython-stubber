@@ -20,7 +20,7 @@ def testrepo_micropython_lib():
 def testrepo_micropython():
     "get exclusive access to micropython repo to prevent multiple tests from interfering with each other"
     return TESTREPO
-    # disabled parrallel testing --> way too many issues introduced by this
+    # disabled parallel testing --> way too many issues introduced by this
     # if not worker_id:
     #     return foldername
     #     # not executing in with multiple workers, just go for it

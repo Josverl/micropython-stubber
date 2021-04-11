@@ -308,6 +308,13 @@ def read_path()->str:
  elif len(sys.argv)>=2:
   show_help()
  return path
+def isMicroPython()->bool:
+ try:
+  a=eval("1and 0")
+  b=bytes("abc",encoding="utf8")
+  return False
+ except(NotImplementedError,SyntaxError):
+  return True
 def main():
  try:
   logging.basicConfig(level=logging.INFO)
@@ -317,4 +324,5 @@ def main():
  stubber.clean()
  stubber.create_all_stubs()
  stubber.report()
-main()
+if __name__=="__main__" or isMicroPython():
+ main()
