@@ -65,7 +65,7 @@ class Stubber():
       info['build']=s.split('-')[1]
      except IndexError:
       pass
-   except(IndexError,AttributeError):
+   except(IndexError,AttributeError,TypeError):
     pass
   try:
    from pycopy import const
@@ -76,9 +76,18 @@ class Stubber():
   if info['platform']=='esp32_LoBo':
    info['family']='loboris'
    info['port']='esp32'
-  info['ver']='v'+info['release']
+  elif info['sysname']=='ev3':
+   info['family']='ev3-pybricks'
+   info['release']="1.0.0"
+   try:
+    from pybricks.hubs import EV3Brick
+    info['release']="2.0.0"
+   except ImportError:
+    pass
+  if info['release']:
+   info['ver']='v'+info['release']
   if info['family']!='loboris':
-   if info['release']>='1.10.0' and info['release'].endswith('.0'):
+   if info['release']and info['release']>='1.10.0' and info['release'].endswith('.0'):
     info['ver']=info['release'][:-2]
    else:
     info['ver']=info['release']
