@@ -460,6 +460,19 @@ def read_path()->str:
         show_help()
     return path
 
+def isMicroPython()->bool:
+    "runtime test to determine full or micropython"
+    #pylint: disable=unused-variable,eval-used
+    try:
+        # either test should fail on micropython
+        # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
+        # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
+        a = eval("1and 0")
+        b = bytes("abc", encoding="utf8")
+        return False
+    except (NotImplementedError, SyntaxError):
+        return True
+
 def main():
     print('stubber version :', stubber_version)
     try:
@@ -475,4 +488,5 @@ def main():
     stubber.create_all_stubs()
     stubber.report()
 
-main()
+if __name__ == "__main__" or isMicroPython():
+    main()

@@ -581,10 +581,20 @@ see below overview
 | checkout_repo | simple_git module<br />retrieval of frozen modules | does not use mocking but actually retrieves different firmware versions locally using git or dowNloads modules for online | local windows           |
 | common        | all other tests                                    | common                                                       | local + github action   |
 
+also see [test documentation](tests/readme.md)
 
+**Platform detection to support pytest**
+In order to allow both simple usability om MicroPython and testability on Full Python,
+createsubs dos a runtimne test to determin the actual platform it is runnin on while importing the module
+This is similar to using the `if __name__ == "__main__":` preamble 
+If running on MicroPython,
+    then it starts stubbing 
 
-**Testing on linux port**
-
+``` python
+if isMicroPython():
+    main()
+```
+**Testing on micropython linux port(s)**
 in order to be able to test `createstubs.py`, it has been updated to run on linux, and accept a --path parameter to indicate the path where the stubs should be stored.
 
 ## 7.4 github actions
