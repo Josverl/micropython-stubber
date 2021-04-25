@@ -398,8 +398,6 @@ Note that some of these modules are in fact included in the frozen modules that 
 
 # 5 - CPython and Frozen modules 
 
-
-
 ## 5.1 - Frozen Modules 
 
 It is common for Firmwares to include a few (or many) python modules as 'frozen' modules. 
@@ -433,28 +431,39 @@ Most OSS firmwares store these frozen modules as part of their repository, which
 
 ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-modules
 
+## 5.2 - Collect Frozen Stubs (micropython) 
 
+This is run daily though the github action workflow : get-all-frozen in the micropython-stubs repo.
 
+If you want to run this manually 
+- Check out repos side-by-side:
+    - micropython-stubs
+    - micropython-stubber
+    - micropython
+    - micropython-lib
 
-## 5.2 - TODO: Collect Frozen Stubs 
+- link repos using all_stubs symlink
+- checkout tag / version in the micropython folder  
+  (for most accurate results should checkout micropython-lib for the same date)
+- run `src/get-frozen.py`
+- run `src/update-stubs.py`
 
-< todo:  how to run >
+- create a PR for changes to the stubs repo 
 
-- repos used 
-- run .../py TODO:
-- copy to sister-repo 
+## 5.3 - Postprocessing 
 
+You can run postprocessing for all stubs by running eith of the two scripts
+Powershell:  
+``` powershell
+./scripts/updates_stubs.ps1
 
+```
+or python  
+``` bash
+python ./src/update_stubs.py
+```
 
-## 5.3 - TODO: postprocessing 
-
-< todo:  how to 
-
-run postprocessing for firmware stubs 
-
-run postprocessing for all stubs 
-
-
+This will generate or update the `.pyi` for all new (and existing) stubs in the `all_stubs` folder.
 
 # 6 - Repo structure 
 
