@@ -1,2 +1,2 @@
 #Run 
-&python .\src\update_stubs.py
+&python ./src/update_stubs.py

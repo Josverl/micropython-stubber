@@ -32,8 +32,9 @@ def make_stub_files(stub_path, levels: int = 1):
     level = ""
     # make_sub_files.py only does one folder level at a time
     # so lets try 7 levels /** ,  /**/** , etc
+    # and does not work well if loaded as a module
     for i in range(levels):
-        cmd = "py ./src/make_stub_files.py -c ./src/make_stub_files.cfg -u {}{}/*.py".format(stub_path, level)
+        cmd = "python ./src/make_stub_files.py -c ./src/make_stub_files.cfg -u {}{}/*.py".format(stub_path, level)
         log.debug("level {} : {}".format(i+1, cmd))
         os.system(cmd)
         level = level + '/**'
