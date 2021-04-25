@@ -71,18 +71,3 @@ jobs:
         path: junit/test-results-${{ matrix.python-version }}.xml
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
-
-
-
-    # does not work at all 
-    # - name: run coveralls
-    #   run: |
-    #     coveralls
-
-    # - name: Send to Coveralls
-    #   uses: coverallsapp/github-action@master
-    #   with:
-    #     github-token: ${{ secrets.GITHUB_TOKEN }}
-    #   if: ${{ always() }}
-
-
