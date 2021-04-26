@@ -452,19 +452,21 @@ If you want to run this manually
 
 ## 5.3 - Postprocessing 
 
-You can run postprocessing for all stubs by running eith of the two scripts
+You can run postprocessing for all stubs by running either of the two scripts.
+There is an optional parameter to tpeficy the location of the stub folder. The default path is `./all_stubs`
+
 Powershell:  
 ``` powershell
-./scripts/updates_stubs.ps1
+./scripts/updates_stubs.ps1 [-path ./mystubs]
 
 ```
 or python  
 ``` bash
-python ./src/update_stubs.py
+python ./src/update_stubs.py [./mystubs]
 ```
 
-This will generate or update the `.pyi` for all new (and existing) stubs in the `all_stubs` folder.
-
+This will generate or update the `.pyi` stubs for all new (and existing) stubs in the `./all_stubs` or specified folder.
+(up to 7 levels deep)
 # 6 - Repo structure 
 
 - [This and sister repos](#this-and-sister-repos) 
