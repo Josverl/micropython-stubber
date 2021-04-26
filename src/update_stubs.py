@@ -10,10 +10,17 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # pylint: disable= line-too-long
 import logging
 import utils
+import sys
 
 log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    # now generate typeshed files for all scripts
-    log.info("Generate type hint files (pyi) in folder: {}".format(utils.STUB_FOLDER))
-    utils.make_stub_files(utils.STUB_FOLDER, levels=7)
+    # generate typeshed files for all scripts
+
+    if len(sys.argv) == 1:
+        # no params
+        stub_path = utils.STUB_FOLDER
+    elif len(sys.argv) == 2:
+        stub_path = sys.argv[1]
+    log.info("Generate type hint files (pyi) in folder: {}".format(stub_path))
+    utils.make_stub_files(stub_path, levels=7)
