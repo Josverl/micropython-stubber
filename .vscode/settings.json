@@ -1,15 +1,15 @@
 {
     "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
+    "python.linting.pylintEnabled": false,
     // "python.linting.pylintArgs": [
     //     "--rcfile", "${workspaceFolder}/.pylintrc-cpython"
     // ],
-    // "python.autoComplete.extraPaths": [
-    //     "board/lib", 
-    //     "all-stubs/cpython-core", 
-    //     "all-stubs/micropython-1_14-frozen/esp32/GENERIC",
-    //     "all-stubs/micropython-esp32-1_14"
-    // ],
+    "python.autoComplete.extraPaths": [
+        "board/lib", 
+        "all-stubs/cpython-core", 
+        "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
+        "all-stubs/micropython-esp32-1_15"
+    ],
 
     
     "python.testing.pytestArgs": [
