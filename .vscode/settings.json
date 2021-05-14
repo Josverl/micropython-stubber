@@ -37,5 +37,11 @@
         "titleBar.inactiveBackground": "#61320699",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
+    "python.analysis.extraPaths": [
+        "board/lib",
+        "all-stubs/cpython-core",
+        "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
+        "all-stubs/micropython-esp32-1_15"
+    ],
 
 }
