@@ -165,7 +165,7 @@ def convert_path(path):
     return os.path.abspath(path)
 
 
-def get_frozen(stub_path:str, version:str, mpy_path=None, lib_path=None,):
+def get_frozen(stub_path:str, version:str, mpy_path:str=None, lib_path:str=None,):
     """
     get and parse the to-be-fozen .py modules for micropython to extract the static type information
     - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
