@@ -39,7 +39,7 @@ def make_stub_files(stub_path, levels: int = 1):
         os.system(cmd)
         level = level + '/**'
 
-def manifest(family=None, machine=None, port=None, platform=None, sysname=None, nodename=None, version=None, release=None, firmware=None) -> dict:
+def manifest(family:str=None, machine:str=None, port:str=None, platform:str=None, sysname:str=None, nodename:str=None, version:str=None, release:str=None, firmware:str=None) -> dict:
     "create a new empty manifest dict"
     if  family is None:
         family = 'micropython' #family
@@ -81,11 +81,16 @@ def manifest(family=None, machine=None, port=None, platform=None, sysname=None, 
 
 def make_manifest(folder: str, family: str, port: str, version: str)-> bool:
     mod_manifest = manifest(family=family, port=port, sysname=family, version=version)
+    mods = []
     try:
         for filename in glob.glob(os.path.join(folder, "*.py")):
             f_name, _ = os.path.splitext(os.path.basename(filename))
-            mod_manifest['modules'].append({ "file": os.path.basename(filename), "module":f_name})
-        #write the the module manifest
+            mods.append({ "file": os.path.basename(filename), "module":f_name})
+        if len(mods) == 0:
+            return False
+        # sort the list of module manifests on filename
+        mod_manifest['modules'] =  sorted(mods, key=lambda m: m['file'])
+        # write the the module manifest
         with open(os.path.join(folder, "modules.json"), "w") as outfile:
             json.dump(mod_manifest, outfile)
         return True
