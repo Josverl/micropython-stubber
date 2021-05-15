@@ -16,11 +16,9 @@ log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     # generate typeshed files for all scripts
-
-    if len(sys.argv) == 1:
-        # no params
-        stub_path = utils.STUB_FOLDER
-    elif len(sys.argv) == 2:
+    stub_path = utils.STUB_FOLDER
+    if len(sys.argv) == 2:
         stub_path = sys.argv[1]
+
     log.info("Generate type hint files (pyi) in folder: {}".format(stub_path))
     utils.make_stub_files(stub_path, levels=7)
