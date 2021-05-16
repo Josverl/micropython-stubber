@@ -135,12 +135,19 @@ def manifest(family=None, machine=None, port=None, platform=None, sysname=None, 
                 }
     return mod_manifest
 
-def make_manifest(folder: str, family: str, port: str, version: str)-> bool:
+def make_manifest(folder: Path, family: str, port: str, version: str)-> bool:
+    """ Create a `module.json` manifest listing all files/stubs in this folder and subfolders.
+    """
     mod_manifest = manifest(family=family, port=port, sysname=family, version=version)
+
     try:
-        for filename in glob.glob(os.path.join(folder, "*.py")):
-            f_name, _ = os.path.splitext(os.path.basename(filename))
-            mod_manifest['modules'].append({ "file": os.path.basename(filename), "module":f_name})
+        #list all *.py files, not strictly modules but decent enough for documentation
+        for file in folder.glob( "**/*.py"):
+            mod_manifest['modules'].append(
+                { 
+                    "file": str(file.relative_to(folder)),
+                    "module":file.stem 
+                })
         #write the the module manifest
         with open(os.path.join(folder, "modules.json"), "w") as outfile:
             json.dump(mod_manifest, outfile)
