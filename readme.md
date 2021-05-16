@@ -109,7 +109,7 @@ for frozen modules : {firmware}-{version}-frozen
 * ***version*** : digits only , dots replaced by underscore, follow version in documentation rather than semver 
   * 1_13
   * 1_9_4
-* ***build***, only for nightly build, the buildnr extracted from the git tag 
+* ***build***, only for nightly build, the build nr. extracted from the git tag 
   * Nothing , for released versions
   * 103 
   * N ( short notation)
@@ -299,7 +299,7 @@ The steps are :
 
 1. connect to your board 
 2. upload the script to your board [optional]
-3. run/import the `createsubs.py` script 
+3. run/import the `createstubs.py` script 
 4. download the generated stubs to a folder on your PC
 5. run the post-processor [optional, but recommended]
 
@@ -309,7 +309,7 @@ The steps are :
 
 ***Note:***  There is a memory allocation bug in MicroPython 1.30 that prevents createstubs.py to work.  this was fixed in nightly build v1.13-103 and newer.
 
-If you try to create stubs on this defective version, the stubber will raise *NotImplementedError*("MicroPyton 1.13.0 cannot be stubbed")
+If you try to create stubs on this defective version, the stubber will raise *NotImplementedError*("MicroPython 1.13.0 cannot be stubbed")
 
 ## 4.2 - Generating Stubs for a specific Firmware 
 
@@ -318,7 +318,7 @@ The stub files are generated on a MicroPython board by running the script `creat
 **Normal and minified versions**
 
 The  script is available in 2 versions : 
-1) The [normal version](tree/master/board), which includes logging, but also requires to logging module to be avaialble.
+1) The [normal version](tree/master/board), which includes logging, but also requires to logging module to be available.
 2) A [minified version](tree/master/minified),  which requires less memory and only  very basic logging. this is specially suited for low memory devices such as the esp8622 
 Both versions have the exact same functionality.
 
@@ -349,9 +349,6 @@ if you work with multiple firmwares, ports or version it is simple to keep the s
 
   - /loboris-esp32_LoBo-3_2_24
 
-    Note: I found, that you need to be mindful of the maximum path and filename limitations on the filesystem if your firmware uses IFSS as a filesystem.
-    therefore 
-
 ## 4.4 - Custom firmware 
 
 The script tries to determine a firmware ID and version from the information provided in `sys.implementation `,  `  sys.uname()` and the existence of specific modules..
@@ -378,7 +375,7 @@ after this , upload the file and import it to generate the stubs using your cust
 
 There are a limited number of modules that cannot be stubbed by createstubs.py for a number of different reasons. Some simply raise errors , others my reboot the MCU, or require a specific configuration or state before they are loaded.
 
-a few of the frozen modules are just included as a sample rather \t would not be very usefull to generate stubs for these
+a few of the frozen modules are just included as a sample rather \t would not be very useful to generate stubs for these
 
 the problematic category throw errors or lock up the stubbing process altogether: 
 
@@ -392,7 +389,7 @@ the excluded category provides no relevant stub information
  self.excluded=["webrepl","_webrepl","port_diag","example_sub_led.py","example_pub_button.py"]
 ```
 
-`createsubs.py` will not process a module in either category.
+`createstubs.py` will not process a module in either category.
 
 Note that some of these modules are in fact included in the frozen modules that are gathered for those ports or boards
 
@@ -453,7 +450,7 @@ If you want to run this manually
 ## 5.3 - Postprocessing 
 
 You can run postprocessing for all stubs by running either of the two scripts.
-There is an optional parameter to tpeficy the location of the stub folder. The default path is `./all_stubs`
+There is an optional parameter to specify the location of the stub folder. The default path is `./all_stubs`
 
 Powershell:  
 ``` powershell
@@ -466,7 +463,17 @@ python ./src/update_stubs.py [./mystubs]
 ```
 
 This will generate or update the `.pyi` stubs for all new (and existing) stubs in the `./all_stubs` or specified folder.
-(up to 7 levels deep)
+
+From version '1.3.8' the  `.pyi` stubs are generated using `stubgen`, before that the `make_stub_files.py` script was used.
+
+Stubgen is run on each 'collected stub folder' (that contains a `modules.json` manifest) using the options : `--ignore-errors --include-private` and the resulting `.pyi` files are stored in the same folder (`foo.py` and `foo.pyi` are stored next to each other).
+
+In some cases `stubgen` detects duplicate modules in a 'collected stub folder', and subsequently does not generate any stubs for any `.py` module or script.
+then __Plan B__ is to run stubgen for each separate `*.py` file in that folder. THis is significantly slower and according to the stubgen documentation the resulting stubs may of lesser quality, but that is better than no stubs at all.
+
+**Note**: In several cases `stubgen` creates folders in inappropriate locations (reason undetermined), which would cause issues when re-running `stubgen` at a later time.
+to compensate for this behaviour the known-incorrect .pyi files are removed before and after stubgen is run [see: `cleanup(modules_folder)` in `utils.py`](src\utils.py)
+
 # 6 - Repo structure 
 
 - [This and sister repos](#this-and-sister-repos) 
@@ -510,7 +517,7 @@ The file structure is based on my personal windows environment, but you should b
 
 Note: I found that, for me, using submodules caused more problems than it solved. So instead I link the two main repo's using a [symlink][].
 
-***Note:*** I in the repo tests I have used the folders `TESTREPO-micropython`  and `TESTREPO-micropython-lib` to avoid conflicts with any development that you might be doing on similar `micropython` repos at the potential cost of a little diskspace.
+***Note:*** I in the repo tests I have used the folders `TESTREPO-micropython`  and `TESTREPO-micropython-lib` to avoid conflicts with any development that you might be doing on similar `micropython` repos at the potential cost of a little disk space.
 
 ``` powershell
 cd /develop 
@@ -588,7 +595,7 @@ see below overview
 
 | folder        | what                                               | how                                                          | used where              |
 | ------------- | -------------------------------------------------- | ------------------------------------------------------------ | ----------------------- |
-| board         | createsubs.py<br />normal & minified               | runs createstubs.py on micropython-linux ports               | WSL2 and github actions |
+| board         | createstubs.py<br />normal & minified              | runs createstubs.py on micropython-linux ports               | WSL2 and github actions |
 | checkout_repo | simple_git module<br />retrieval of frozen modules | does not use mocking but actually retrieves different firmware versions locally using git or dowNloads modules for online | local windows           |
 | common        | all other tests                                    | common                                                       | local + github action   |
 
@@ -596,7 +603,7 @@ also see [test documentation](tests/readme.md)
 
 **Platform detection to support pytest**
 In order to allow both simple usability om MicroPython and testability on Full Python,
-createsubs dos a runtimne test to determin the actual platform it is runnin on while importing the module
+createstubs does a runtime test to determine the actual platform it is running on while importing the module
 This is similar to using the `if __name__ == "__main__":` preamble 
 If running on MicroPython,
     then it starts stubbing 
@@ -690,17 +697,24 @@ While the concepts remain,  the code has been rewritten to run on a micropython 
 Please refer to :  
 https://github.com/thonny/thonny/blob/786f63ff4460abe84f28c14dad2f9e78fe42cc49/thonny/plugins/micropython/__init__.py#L608
 
+
+### MyPy Stubgen
+
+[MyPy stubgen](https://github.com/python/mypy/blob/master/docs/source/stubgen.rst#automatic-stub-generation-stubgen) is used to generate stubs for the frozen modules and for the `*.py` stubs that were generated on a board.  
+
 ### make_stub_files _[Public Domain]_
 
 https://github.com/edreamleo/make-stub-files
 
-This script makes a stub (.pyi) file in the output directory for each source file listed on the command line (wildcard file names are supported). 
+This script `make_stub_files.py` makes a stub (.pyi) file in the output directory for each source file listed on the command line (wildcard file names are supported). 
 
 The script does no type inference. Instead, the user supplies patterns in a configuration file. The script matches these patterns to:
 The names of arguments in functions and methods and
 The text of return expressions. Return expressions are the actual text of whatever follows the "return" keyword. The script removes all comments in return expressions and converts all strings to "str". This preprocessing greatly simplifies pattern matching.
 
-
+Note: it was found that the stubs / prototypes of some functions with complex arguments were not handled correctly,
+resulting in incorrectly formatted stubs (.pyi) 
+Therefore this functionality has been replaced by  MyPy `stubgen` 
 
 # 10 - Related 
 
@@ -718,7 +732,7 @@ https://www.python.org/dev/peps/pep-0484/
 
 https://stackoverflow.com/questions/35602541/create-pyi-files-automatically
 
-## 10.3 - Mypy
+## 10.3 - MyPy
 
 [Optional Static Typing for Python](https://github.com/python/mypy#mypy-optional-static-typing-for-python)
 
@@ -735,10 +749,12 @@ https://github.com/python/mypy/blob/master/mypy/stubgen.py
 ----------------
 
 # 11 - Contributions
+<!-- spell-checker: disable -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+
 <table>
   <tr>
     <td align="center"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=josverl" title="Code">💻</a> <a href="#research-josverl" title="Research">🔬</a> <a href="#ideas-josverl" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-josverl" title="Content">🖋</a> <a href="#stubs-josverl" title="MicroPython stubs">📚</a> <a href="#test-josverl" title="Test">✔</a></td>
