@@ -8,7 +8,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version='1.3.9'
+stubber_version='1.3.11'
 try:
  from machine import resetWDT 
 except ImportError:
@@ -142,13 +142,13 @@ class Stubber():
    return
   if module_name in self.problematic:
    return
+  if file_name is None:
+   file_name=module_name.replace('.','_')+".py"
   if '/' in module_name:
    self.ensure_folder(file_name)
    module_name=module_name.replace('/','.')
    if not self.include_nested:
     return
-  if file_name is None:
-   file_name=module_name.replace('.','_')+".py"
   failed=False
   new_module=None
   try:
@@ -173,6 +173,7 @@ class Stubber():
   with open(file_name,"w")as fp:
    s="\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name,self._fwid,self.info,stubber_version)
    fp.write(s)
+   fp.write("from typing import Any\n\n")
    self.write_object_stub(fp,new_module,module_name,"")
    self._report.append({"module":module_name,"file":file_name})
   if not module_name in["os","sys","logging","gc"]:
@@ -185,7 +186,7 @@ class Stubber():
    except KeyError:
     pass
    gc.collect()
- def write_object_stub(self,fp,object_expr:object,obj_name:str,indent:str):
+ def write_object_stub(self,fp,object_expr:object,obj_name:str,indent:str,in_class:int=0):
   if object_expr in self.problematic:
    return
   items,errors=self.get_obj_attributes(object_expr)
@@ -195,7 +196,10 @@ class Stubber():
    resetWDT()
    sleep_us(1)
    if typ in["<class 'function'>","<class 'bound_method'>"]:
-    s=indent+"def "+name+"():\n" 
+    if in_class>0:
+     s=indent+"def "+name+"(self) -> Any:\n"
+    else:
+     s=indent+"def "+name+"() -> Any:\n"
     s+=indent+"    pass\n\n"
     fp.write(s)
    elif typ in["<class 'str'>","<class 'int'>","<class 'float'>"]:
@@ -205,9 +209,9 @@ class Stubber():
     s="\n"+indent+"class "+name+":\n" 
     s+=indent+"    ''\n"
     fp.write(s)
-    self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ")
+    self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1)
    else:
-    fp.write(indent+name+" = None\n")
+    fp.write(indent+name+" = Any\n")
   del items
   del errors
   try:
