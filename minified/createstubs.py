@@ -17,7 +17,7 @@ except ImportError:
 class Stubber():
  def __init__(self,path:str=None,firmware_id:str=None):
   try:
-   if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103':
+   if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103': 
     raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
   except AttributeError:
    pass
@@ -44,23 +44,25 @@ class Stubber():
   self.include_nested=gc.mem_free()>3200 
  @staticmethod
  def _info():
-  info={'name':sys.implementation.name,'release':'0.0.0','version':'0.0.0','build':'','sysname':'unknown','nodename':'unknown','machine':'unknown','family':sys.implementation.name,'platform':sys.platform,'port':sys.platform,'ver':''}
+  _n=sys.implementation.name 
+  _p= sys.platform
+  info={'name':_n,'release':'0.0.0','version':'0.0.0','build':'','sysname':'unknown','nodename':'unknown','machine':'unknown','family':_n,'platform':_p,'port':_p,'ver':''}
   try:
    info['release']=".".join([str(i)for i in sys.implementation.version])
    info['version']=info['release']
-   info['name']=sys.implementation.name
-   info['mpy']=sys.implementation.mpy
+   info['name']=sys.implementation.name 
+   info['mpy']=sys.implementation.mpy 
   except AttributeError:
    pass
   if sys.platform not in('unix','win32'):
    try:
     u=os.uname()
-    info['sysname']=u.sysname
-    info['nodename']=u.nodename
-    info['release']=u.release
-    info['machine']=u.machine
-    if ' on ' in u.version:
-     s=u.version.split('on ')[0]
+    info['sysname']=u.sysname 
+    info['nodename']=u.nodename 
+    info['release']=u.release 
+    info['machine']=u.machine 
+    if ' on ' in u.version: 
+     s=u.version.split('on ')[0] 
      try:
       info['build']=s.split('-')[1]
      except IndexError:
@@ -68,7 +70,7 @@ class Stubber():
    except(IndexError,AttributeError,TypeError):
     pass
   try:
-   from pycopy import const
+   from pycopy import const 
    info['family']='pycopy'
    del const
   except(ImportError,KeyError):
@@ -80,7 +82,7 @@ class Stubber():
    info['family']='ev3-pybricks'
    info['release']="1.0.0"
    try:
-    from pybricks.hubs import EV3Brick
+    from pybricks.hubs import EV3Brick 
     info['release']="2.0.0"
    except ImportError:
     pass
@@ -207,7 +209,9 @@ class Stubber():
     fp.write(s)
    elif typ=="<class 'type'>" and indent=="":
     s="\n"+indent+"class "+name+":\n" 
-    s+=indent+"    ''\n"
+    s+=indent+"    def __init__(self):\n"
+    s+=indent+"        ''\n"
+    s+=indent+"        pass\n"
     fp.write(s)
     self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1)
    else:
@@ -234,8 +238,8 @@ class Stubber():
   except(OSError,AttributeError):
    return
   for fn in items:
+   item="{}/{}".format(path,fn)
    try:
-    item="{}/{}".format(path,fn)
     os.remove(item)
    except OSError:
     try:
