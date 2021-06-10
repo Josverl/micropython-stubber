@@ -1,0 +1,7 @@
+# exclude stub folders and files from regenerating the *.pyi files
+# format is the same as for a .gitignore file 
+# The below files should not be deleted 
+
+stubs/micropython-*-1_1?/*.pyi
+#stubs/micropython-*-1_14/*.pyi
+
