@@ -278,7 +278,7 @@ class Stubber:
                 info["ver"] += "-" + info["build"]
         # spell-checker: disable
         if "mpy" in info:  # mpy on some v1.11+ builds
-            sys_mpy = info["mpy"]
+            sys_mpy = int(info["mpy"])
             arch = [
                 None,
                 "x86",
