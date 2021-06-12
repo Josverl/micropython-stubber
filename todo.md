@@ -1,16 +1,21 @@
 # stubber : 
-
+<!-- spell-checker: disable -->
 -  improve generation of class methods to include (self,...) 
         Normal methods should have at least one parameter (the first of which should be 'self').
 
-- document - that gc and sys modules are somhowe ignored by pylint and will keep throwing errors 
+- document - that gc and sys modules are somehow ignored by pylint and will keep throwing errors 
 
 - add mpy information to manifest 
-- use 'nightly' naming convetion in createsubs.py
+- use 'nightly' naming convention in createstubs.py
 
 # frozen stubs 
 - Done - generate manifest.json 
 - add simple readme.md ?
+
+
+# Stub augmentation/ merging typeinfomration from copied / generated typerich info
+https://libcst.readthedocs.io/en/latest/tutorial.html
+
 
 # cpython
 
@@ -21,14 +26,14 @@
 
 - add prototypes from Source ? 
         check if https://github.com/python/mypy/blob/master/mypy/stubgenc.py
-        might bge usefull
+        might be useful
 
-- test to automerge common prototypes by stubber
+- test to auto-merge common prototypes by stubber
         ie. add common return types to make_stub_files.cfg
 
 - resolve import time issues 
 
-# Structuur op machine 
+# Structure on machine 
 
 # SYS en GC 
 #pylint: disable=no-member      ## workaround for sys and gc
@@ -66,7 +71,7 @@ import os
 os.<tab>
 
 --> this shows a dropdown with *
-and thesre are listed in the output window
+and these are listed in the output window
 
 
 import uos
@@ -94,7 +99,6 @@ Info  - 13:07:10] Deep learning IntelliCode recommendations service returned in 
 [Info  - 13:08:01] Deep learning IntelliCode recommendations service returned in 4 millis
 ```
 
-
-
+## MyPy Stubgen errors
 
 

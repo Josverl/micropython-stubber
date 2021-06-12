@@ -27,4 +27,4 @@ coverage_report
 desktop.ini
 .pytest_cache/*
 
-
+dev-stubs
