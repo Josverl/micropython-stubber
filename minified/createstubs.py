@@ -8,16 +8,16 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version='1.3.11'
+stubber_version="1.3.11"
 try:
  from machine import resetWDT 
 except ImportError:
  def resetWDT():
   pass
-class Stubber():
+class Stubber:
  def __init__(self,path:str=None,firmware_id:str=None):
   try:
-   if os.uname().release=='1.13.0' and os.uname().version<'v1.13-103': 
+   if os.uname().release=="1.13.0" and os.uname().version<"v1.13-103": 
     raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
   except AttributeError:
    pass
@@ -29,77 +29,77 @@ class Stubber():
    self._fwid="{family}-{port}-{ver}".format(**self.info).lower()
   self._start_free=gc.mem_free()
   if path:
-   if path.endswith('/'):
+   if path.endswith("/"):
     path=path[:-1]
   else:
    path=self.get_root()
-  self.path="{}/stubs/{}".format(path,self.flat_fwid).replace('//','/')
+  self.path="{}/stubs/{}".format(path,self.flat_fwid).replace("//","/")
   try:
    self.ensure_folder(path+"/")
   except OSError:
    pass
-  self.problematic=["upysh","webrepl_setup","http_client","http_client_ssl","http_server","http_server_ssl"]
-  self.excluded=["webrepl","_webrepl","port_diag","example_sub_led.py","example_pub_button.py"]
-  self.modules=['_onewire','_thread','_uasyncio','ak8963','apa102','apa106','array','binascii','btree','builtins','cmath','collections','crypto','curl','dht','display','ds18x20','errno','esp','esp32','flashbdev','framebuf','freesans20','functools','gc','gsm','hashlib','heapq','inisetup','io','json','lcd160cr','lcd160cr_test','logging','lwip','machine','math','microWebSocket','microWebSrv','microWebTemplate','micropython','mpu6500','mpu9250','neopixel','network','ntptime','onewire','os','pyb','pycom','pye','queue','random','re','requests','select','socket','ssd1306','ssh','ssl','stm','struct','sys','time','tpcalib','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','ubinascii','ubluetooth','ucollections','ucrypto','ucryptolib','uctypes','uerrno','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/robust','umqtt/simple','uos','upip','upip_utarfile','uqueue','urandom','ure','urequests','urllib/urequest','uselect','usocket','ussl','ustruct','usys','utime','utimeq','uwebsocket','uzlib','websocket','websocket_helper','writer','ymodem','zlib']
+  self.problematic=["upysh","webrepl_setup","http_client","http_client_ssl","http_server","http_server_ssl",]
+  self.excluded=["webrepl","_webrepl","port_diag","example_sub_led.py","example_pub_button.py",]
+  self.modules=["_onewire","_thread","_uasyncio","ak8963","apa102","apa106","array","binascii","btree","builtins","cmath","collections","crypto","curl","dht","display","ds18x20","errno","esp","esp32","flashbdev","framebuf","freesans20","functools","gc","gsm","hashlib","heapq","inisetup","io","json","lcd160cr","lcd160cr_test","logging","lwip","machine","math","microWebSocket","microWebSrv","microWebTemplate","micropython","mpu6500","mpu9250","neopixel","network","ntptime","onewire","os","pyb","pycom","pye","queue","random","re","requests","select","socket","ssd1306","ssh","ssl","stm","struct","sys","time","tpcalib","uarray","uasyncio/__init__","uasyncio/core","uasyncio/event","uasyncio/funcs","uasyncio/lock","uasyncio/stream","ubinascii","ubluetooth","ucollections","ucrypto","ucryptolib","uctypes","uerrno","uhashlib","uheapq","uio","ujson","ulab","ulab/approx","ulab/compare","ulab/fft","ulab/filter","ulab/linalg","ulab/numerical","ulab/poly","ulab/user","ulab/vector","umachine","umqtt/robust","umqtt/simple","uos","upip","upip_utarfile","uqueue","urandom","ure","urequests","urllib/urequest","uselect","usocket","ussl","ustruct","usys","utime","utimeq","uwebsocket","uzlib","websocket","websocket_helper","writer","ymodem","zlib",]
   self.include_nested=gc.mem_free()>3200 
  @staticmethod
  def _info():
   _n=sys.implementation.name 
-  _p= sys.platform
-  info={'name':_n,'release':'0.0.0','version':'0.0.0','build':'','sysname':'unknown','nodename':'unknown','machine':'unknown','family':_n,'platform':_p,'port':_p,'ver':''}
+  _p=sys.platform
+  info={"name":_n,"release":"0.0.0","version":"0.0.0","build":"","sysname":"unknown","nodename":"unknown","machine":"unknown","family":_n,"platform":_p,"port":_p,"ver":"",}
   try:
-   info['release']=".".join([str(i)for i in sys.implementation.version])
-   info['version']=info['release']
-   info['name']=sys.implementation.name 
-   info['mpy']=sys.implementation.mpy 
+   info["release"]=".".join([str(i)for i in sys.implementation.version]) 
+   info["version"]=info["release"]
+   info["name"]=sys.implementation.name 
+   info["mpy"]=sys.implementation.mpy 
   except AttributeError:
    pass
-  if sys.platform not in('unix','win32'):
+  if sys.platform not in("unix","win32"):
    try:
     u=os.uname()
-    info['sysname']=u.sysname 
-    info['nodename']=u.nodename 
-    info['release']=u.release 
-    info['machine']=u.machine 
-    if ' on ' in u.version: 
-     s=u.version.split('on ')[0] 
+    info["sysname"]=u.sysname 
+    info["nodename"]=u.nodename 
+    info["release"]=u.release 
+    info["machine"]=u.machine 
+    if " on " in u.version: 
+     s=u.version.split("on ")[0] 
      try:
-      info['build']=s.split('-')[1]
+      info["build"]=s.split("-")[1]
      except IndexError:
       pass
    except(IndexError,AttributeError,TypeError):
     pass
-  try:
+  try: 
    from pycopy import const 
-   info['family']='pycopy'
+   info["family"]="pycopy"
    del const
   except(ImportError,KeyError):
    pass
-  if info['platform']=='esp32_LoBo':
-   info['family']='loboris'
-   info['port']='esp32'
-  elif info['sysname']=='ev3':
-   info['family']='ev3-pybricks'
-   info['release']="1.0.0"
+  if info["platform"]=="esp32_LoBo":
+   info["family"]="loboris"
+   info["port"]="esp32"
+  elif info["sysname"]=="ev3":
+   info["family"]="ev3-pybricks"
+   info["release"]="1.0.0"
    try:
     from pybricks.hubs import EV3Brick 
-    info['release']="2.0.0"
+    info["release"]="2.0.0"
    except ImportError:
     pass
-  if info['release']:
-   info['ver']='v'+info['release']
-  if info['family']!='loboris':
-   if info['release']and info['release']>='1.10.0' and info['release'].endswith('.0'):
-    info['ver']=info['release'][:-2]
+  if info["release"]:
+   info["ver"]="v"+info["release"]
+  if info["family"]!="loboris":
+   if(info["release"]and info["release"]>="1.10.0" and info["release"].endswith(".0")):
+    info["ver"]=info["release"][:-2]
    else:
-    info['ver']=info['release']
-   if info['build']!='':
-    info['ver']+='-'+info['build']
-  if 'mpy' in info: 
-   sys_mpy=info['mpy']
-   arch=[None,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][sys_mpy>>10]
+    info["ver"]=info["release"]
+   if info["build"]!="":
+    info["ver"]+="-"+info["build"]
+  if "mpy" in info: 
+   sys_mpy=info["mpy"]
+   arch=[None,"x86","x64","armv6","armv6m","armv7m","armv7em","armv7emsp","armv7emdp","xtensa","xtensawin",][sys_mpy>>10]
    if arch:
-    info['arch']=arch
+    info["arch"]=arch
   return info
  def get_obj_attributes(self,obj:object):
   result=[]
@@ -119,48 +119,49 @@ class Stubber():
  def add_modules(self,modules:list):
   self.modules=sorted(set(self.modules)|set(modules))
  def create_all_stubs(self):
-  self.modules=[m for m in self.modules if '/' in m]+[m for m in self.modules if '/' not in m]
+  self.modules=[m for m in self.modules if "/" in m]+[m for m in self.modules if "/" not in m]
   gc.collect()
   for module_name in self.modules:
    if self.include_nested:
     self.include_nested=gc.mem_free()>3200 
-   if module_name.startswith("_")and module_name!='_thread':
+   if module_name.startswith("_")and module_name!="_thread":
     continue
    if module_name in self.problematic:
+    self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
     continue
    if module_name in self.excluded:
+    self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
     continue
    file_name="{}/{}.py".format(self.path,module_name.replace(".","/"))
    gc.collect()
-   m1=gc.mem_free()
-   print("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name,file_name,m1))
+   m1=gc.mem_free() 
    try:
     self.create_module_stub(module_name,file_name)
    except OSError:
     pass
    gc.collect()
  def create_module_stub(self,module_name:str,file_name:str=None):
-  if module_name.startswith("_")and module_name!='_thread':
+  if module_name.startswith("_")and module_name!="_thread":
    return
   if module_name in self.problematic:
    return
   if file_name is None:
-   file_name=module_name.replace('.','_')+".py"
-  if '/' in module_name:
+   file_name=module_name.replace(".","_")+".py"
+  if "/" in module_name:
    self.ensure_folder(file_name)
-   module_name=module_name.replace('/','.')
+   module_name=module_name.replace("/",".")
    if not self.include_nested:
     return
   failed=False
   new_module=None
   try:
-   new_module=__import__(module_name,None,None,('*'))
+   new_module=__import__(module_name,None,None,("*"))
   except ImportError:
    failed=True
-   if not '.' in module_name:
+   if not "." in module_name:
     return
-  if failed and '.' in module_name:
-   levels=module_name.split('.')
+  if failed and "." in module_name:
+   levels=module_name.split(".")
    for n in range(1,len(levels)):
     parent_name=".".join(levels[0:n])
     try:
@@ -169,11 +170,11 @@ class Stubber():
     except(ImportError,KeyError):
      pass
    try:
-    new_module=__import__(module_name,None,None,('*'))
-   except ImportError:
+    new_module=__import__(module_name,None,None,("*"))
+   except ImportError: 
     return
   with open(file_name,"w")as fp:
-   s="\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(module_name,self._fwid,self.info,stubber_version)
+   s='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name,self._fwid,self.info,stubber_version)
    fp.write(s)
    fp.write("from typing import Any\n\n")
    self.write_object_stub(fp,new_module,module_name,"")
@@ -181,7 +182,7 @@ class Stubber():
   if not module_name in["os","sys","logging","gc"]:
    try:
     del new_module
-   except(OSError,KeyError):
+   except(OSError,KeyError): 
     pass
    try:
     del sys.modules[module_name]
@@ -213,14 +214,14 @@ class Stubber():
     s+=indent+"        ''\n"
     s+=indent+"        pass\n"
     fp.write(s)
-    self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1)
+    self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1,)
    else:
     fp.write(indent+name+" = Any\n")
   del items
   del errors
   try:
    del name,rep,typ,obj 
-  except(OSError,KeyError):
+  except(OSError,KeyError): 
    pass
  @property
  def flat_fwid(self):
@@ -235,44 +236,45 @@ class Stubber():
   print("Clean/remove files in folder: {}".format(path))
   try:
    items=os.listdir(path)
-  except(OSError,AttributeError):
+  except(OSError,AttributeError): 
    return
   for fn in items:
    item="{}/{}".format(path,fn)
    try:
     os.remove(item)
    except OSError:
-    try:
+    try: 
      self.clean(item)
      os.rmdir(item)
     except OSError:
      pass
  def report(self,filename:str="modules.json"):
+  self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report),self._fwid,self.path))
   f_name="{}/{}".format(self.path,filename)
   gc.collect()
   try:
-   with open(f_name,'w')as f:
-    f.write('{')
-    f.write(dumps({'firmware':self.info})[1:-1])
-    f.write(',')
-    f.write(dumps({'stubber':{'version':stubber_version}})[1:-1])
-    f.write(',')
+   with open(f_name,"w")as f:
+    f.write("{")
+    f.write(dumps({"firmware":self.info})[1:-1])
+    f.write(",")
+    f.write(dumps({"stubber":{"version":stubber_version}})[1:-1])
+    f.write(",")
     f.write('"modules" :[')
     start=True
     for n in self._report:
      if start:
       start=False
      else:
-      f.write(',')
+      f.write(",")
      f.write(dumps(n))
-    f.write(']}')
-   used=self._start_free-gc.mem_free()
+    f.write("]}")
+   used=self._start_free-gc.mem_free() 
   except OSError:
    pass
  def ensure_folder(self,path:str):
   i=start=0
   while i!=-1:
-   i=path.find('/',start)
+   i=path.find("/",start)
    if i!=-1:
     if i==0:
      p=path[0]
@@ -299,9 +301,9 @@ class Stubber():
     try:
      r=os.getcwd()
     except:
-     r='.'
+     r="."
    else:
-    r='/'
+    r="/"
   return r
 def show_help():
  sys.exit(1)
@@ -309,8 +311,8 @@ def read_path()->str:
  path=None
  if len(sys.argv)==3:
   cmd=(sys.argv[1]).lower()
-  if cmd in('--path','-p'):
-   path =sys.argv[2]
+  if cmd in("--path","-p"):
+   path=sys.argv[2]
   else:
    show_help()
  elif len(sys.argv)>=2:
