@@ -180,4 +180,3 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
 
 def test_read_path():
     assert createstubs.read_path() == None
-
