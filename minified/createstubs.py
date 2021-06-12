@@ -8,7 +8,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version="1.3.11"
+stubber_version="1.3.12"
 try:
  from machine import resetWDT 
 except ImportError:
@@ -210,7 +210,7 @@ class Stubber:
     fp.write(s)
    elif typ=="<class 'type'>" and indent=="":
     s="\n"+indent+"class "+name+":\n" 
-    s+=indent+"    def __init__(self):\n"
+    s+=indent+"    def __init__(self, *args):\n"
     s+=indent+"        ''\n"
     s+=indent+"        pass\n"
     fp.write(s)
