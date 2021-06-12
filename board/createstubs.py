@@ -481,12 +481,12 @@ class Stubber:
 
             if typ in ["<class 'function'>", "<class 'bound_method'>"]:
                 # module Function or class method
+                # will accept any number of params
                 # return type Any
-                # Todo:Unknown params,
                 if in_class > 0:
-                    s = indent + "def " + name + "(self) -> Any:\n"
+                    s = indent + "def " + name + "(self, *args) -> Any:\n"
                 else:
-                    s = indent + "def " + name + "() -> Any:\n"
+                    s = indent + "def " + name + "(*args) -> Any:\n"
                 s += indent + "    pass\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
