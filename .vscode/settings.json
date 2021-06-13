@@ -62,6 +62,7 @@
         "pfalcon",
         "pybd",
         "pyboard",
+        "pybricks",
         "pylintrc",
         "pyright",
         "pytest",
@@ -74,6 +75,7 @@
         "thonny",
         "tinypico",
         "typeshed",
+        "ulab",
         "unstubbables",
         "upysh"
     ],
