@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = "1.3.12"
+stubber_version = "1.3.13"
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -26,7 +26,7 @@ class Stubber:
 
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
@@ -38,7 +38,7 @@ class Stubber:
             self._fwid = str(firmware_id).lower()
         else:
             self._fwid = "{family}-{port}-{ver}".format(**self.info).lower()
-        self._start_free = gc.mem_free()
+        self._start_free = gc.mem_free()  # type: ignore
 
         if path:
             if path.endswith("/"):
@@ -67,7 +67,7 @@ class Stubber:
             "example_sub_led.py",
             "example_pub_button.py",
         ]
-        # there is no option to discover modules from upython, need to hardcode
+        # there is no option to discover modules from micropython, need to hardcode
         # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
         # spell-checker: disable
         # modules to stub : 118
@@ -193,7 +193,7 @@ class Stubber:
         ]
         # spell-checker: enable
         # try to avoid running out of memory with nested mods
-        self.include_nested = gc.mem_free() > 3200  # pylint: disable=no-member
+        self.include_nested = gc.mem_free() > 3200    # type: ignore
 
     @staticmethod
     def _info():
@@ -201,36 +201,36 @@ class Stubber:
         _n = sys.implementation.name  # type: ignore
         _p = sys.platform
         info = {
-            "name": _n,  # - micropython
-            "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
-            "version": "0.0.0",  # major.minor.0
-            "build": "",  # parsed from version
-            "sysname": "unknown",  # esp32
+            "name": _n,             # - micropython
+            "release": "0.0.0",     # mpy semver from sys.implementation or os.uname()release
+            "version": "0.0.0",     # major.minor.0
+            "build": "",            # parsed from version
+            "sysname": "unknown",   # esp32
             "nodename": "unknown",  # ! not on all builds
-            "machine": "unknown",  # ! not on all builds
-            "family": _n,  # fw families, micropython , pycopy , lobo , pycom
-            "platform": _p,  # port: esp32 / win32 / linux
-            "port": _p,  # port: esp32 / win32 / linux
-            "ver": "",  # short version
+            "machine": "unknown",   # ! not on all builds
+            "family": _n,           # fw families, micropython , pycopy , lobo , pycom
+            "platform": _p,         # port: esp32 / win32 / linux
+            "port": _p,             # port: esp32 / win32 / linux
+            "ver": "",              # short version
         }
         try:
-            info["release"] = ".".join([str(i) for i in sys.implementation.version])  # type: ignore
+            info["release"] = ".".join([str(n) for n in sys.implementation.version]) 
             info["version"] = info["release"]
-            info["name"] = sys.implementation.name  # type: ignore
-            info["mpy"] = sys.implementation.mpy  # type: ignore
+            info["name"] = sys.implementation.name
+            info["mpy"] = sys.implementation.mpy # type: ignore
         except AttributeError:
             pass
 
         if sys.platform not in ("unix", "win32"):
             try:
                 u = os.uname()
-                info["sysname"] = u.sysname  # type: ignore
-                info["nodename"] = u.nodename  # type: ignore
-                info["release"] = u.release  # type: ignore
-                info["machine"] = u.machine  # type: ignore
+                info["sysname"] = u.sysname
+                info["nodename"] = u.nodename
+                info["release"] = u.release
+                info["machine"] = u.machine
                 # parse micropython build info
-                if " on " in u.version:  # type: ignore
-                    s = u.version.split("on ")[0]  # type: ignore
+                if " on " in u.version:
+                    s = u.version.split("on ")[0]
                     try:
                         info["build"] = s.split("-")[1]
                     except IndexError:
@@ -343,7 +343,7 @@ class Stubber:
         for module_name in self.modules:
             # re-evaluate
             if self.include_nested:
-                self.include_nested = gc.mem_free() > 3200  # pylint: disable=no-member
+                self.include_nested = gc.mem_free() > 3200  # type: ignore
 
             if module_name.startswith("_") and module_name != "_thread":
                 self._log.warning(
@@ -363,7 +363,7 @@ class Stubber:
 
             file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
             gc.collect()
-            m1 = gc.mem_free()  # pylint: disable=no-member
+            m1 = gc.mem_free()  # type: ignore
             self._log.info(
                 "Stub module: {:<20} to file: {:<55} mem:{:>5}".format(
                     module_name, file_name, m1
@@ -375,8 +375,8 @@ class Stubber:
                 pass
             gc.collect()
             self._log.debug(
-                "Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free())
-            )  # pylint: disable=no-member
+                "Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()) # type: ignore
+            )  
         self._log.info("Finally done")
 
     def create_module_stub(self, module_name: str, file_name: str = None):
@@ -582,7 +582,7 @@ class Stubber:
                         f.write(",")
                     f.write(dumps(n))
                 f.write("]}")
-            used = self._start_free - gc.mem_free()  # pylint: disable=no-member
+            used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
         except OSError:
             self._log.error("Failed to create the report.")
@@ -639,7 +639,7 @@ def show_help():
 
 def read_path() -> str:
     "get --path from cmdline. [unix/win]"
-    path = None
+    path = ""
     if len(sys.argv) == 3:
         cmd = (sys.argv[1]).lower()
         if cmd in ("--path", "-p"):
