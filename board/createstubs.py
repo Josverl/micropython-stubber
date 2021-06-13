@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = "1.3.13"
+stubber_version = "1.3.14"
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -392,9 +392,9 @@ class Stubber:
         if file_name is None:
             file_name = module_name.replace(".", "_") + ".py"
 
+        self.ensure_folder(file_name)
         if "/" in module_name:
             # for nested modules
-            self.ensure_folder(file_name)
             module_name = module_name.replace("/", ".")
             if not self.include_nested:
                 self._log.warning("SKIPPING nested module:{}".format(module_name))
@@ -669,7 +669,7 @@ def main():
     print("stubber version :", stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)
-    #        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
     stubber = Stubber(path=read_path())
