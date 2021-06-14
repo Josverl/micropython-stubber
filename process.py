@@ -130,6 +130,7 @@ def edit_lines(content, edits, show_diff=False):
         open_cnt = line.count("(")
         close_cnt = line.count(")")
         ahead_index = 1
+        look_ahead = 0
         while not open_cnt == close_cnt:
             look_ahead = l_index + ahead_index
             ahead_index += 1
