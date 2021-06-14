@@ -384,9 +384,8 @@ class Stubber:
             return
 
         if file_name is None:
-            file_name = module_name.replace(".", "_") + ".py"
+            file_name = self.path + '/' + module_name.replace(".", "_") + ".py"
 
-        self.ensure_folder(file_name)
         if "/" in module_name:
             # for nested modules
             module_name = module_name.replace("/", ".")
@@ -426,6 +425,7 @@ class Stubber:
                 return
 
         # Start a new file
+        self.ensure_folder(file_name)        
         with open(file_name, "w") as fp:
             # todo: improve header
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
