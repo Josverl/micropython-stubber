@@ -79,5 +79,9 @@
         "unstubbables",
         "upysh"
     ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--extend-exclude minified "
+    ],
 
 }
