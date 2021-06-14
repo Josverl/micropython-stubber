@@ -4,6 +4,7 @@ project.pymakr
 # no python virtual environment
 .env/*
 # no compiled python 
+.py_cache
 **/__pycache__/**
 
 #ignore the scratchpad 
