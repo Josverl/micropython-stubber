@@ -17,7 +17,7 @@ if sys.path[1] != core_mocks:
 # Specify wether to load the normal or minified version of the test 
 # ----------------------------------------------------------------------------------------
 prefix = "minified."
-from minified.createstubs import Stubber as Minified, read_path
+from minified.createstubs import Stubber, read_path
 
 # ----------------------------------------------------------------------------------------
 # Below this the tests are identical between :
@@ -27,7 +27,7 @@ from minified.createstubs import Stubber as Minified, read_path
 
 
 def test_stubber_info_basic():
-    stubber = Minified() # type: ignore
+    stubber = Stubber() # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
     info = stubber._info()
@@ -44,7 +44,7 @@ def test_stubber_info_basic():
 
 def test_stubber_info_custom():
     myid = "MyCustomID"
-    stubber = Minified(firmware_id=myid)  # type: ignore
+    stubber = Stubber(firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
     assert stubber._fwid != "none"
@@ -171,7 +171,7 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
 
     mocker.patch(prefix + "createstubs.os.uname", mock_uname, create=True)
     # now run the tests
-    stubber = Minified()
+    stubber = Stubber()
     assert stubber is not None, "Can't create Stubber instance"
 
     info = stubber._info()
@@ -198,7 +198,7 @@ def test_read_path():
 
 
 def test_get_obj_attributes():
-    stubber = Minified() # type: ignore
+    stubber = Stubber() # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     items, errors = stubber.get_obj_attributes(sys)
     assert items != []
@@ -211,7 +211,7 @@ def test_get_obj_attributes():
 def test_create_all_stubs(tmp_path:Path):
     myid = "MyCustomID"
 
-    stubber = Minified(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     stubber.modules = ["json","_thread","array"]
     stubber.add_modules(["http_client","webrepl","_internal"])
@@ -228,7 +228,7 @@ def test_create_all_stubs(tmp_path:Path):
     assert len(stublist) == 0
 
 def test_get_root():
-    stubber = Minified()
+    stubber = Stubber()
     assert stubber is not None, "Can't create Stubber instance"
     x = stubber.get_root()
     assert type(x) == str
@@ -237,7 +237,7 @@ def test_get_root():
     
 def test_create_module_stub(tmp_path:Path):
     myid = "MyCustomID"
-    stubber = Minified(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # just in the test folder , no structure
     stubber.create_module_stub("json", str( tmp_path / "json.py" ))
@@ -249,7 +249,7 @@ def test_create_module_stub(tmp_path:Path):
 
 def test_create_module_stub_folder(tmp_path:Path):
     myid = "MyCustomID"
-    stubber = Minified(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     
     stubber.create_module_stub("json" )
@@ -259,7 +259,7 @@ def test_create_module_stub_folder(tmp_path:Path):
 
 def test_create_module_stub_ignored(tmp_path:Path):
     myid = "MyCustomID"
-    stubber = Minified(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     #should not generate
     stubber.create_module_stub("_internal", str(tmp_path / "_internal.py" ))
@@ -274,7 +274,7 @@ def test_create_module_stub_ignored(tmp_path:Path):
 
 def test_nested_modules(tmp_path:Path):
     myid = "MyCustomID"
-    stubber = Minified(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # just in the test folder , no structure
     stubber.create_module_stub("urllib/request", str( tmp_path / "request.py" ))
@@ -283,7 +283,7 @@ def test_nested_modules(tmp_path:Path):
 
 def test_unavailable_modules(tmp_path:Path):
     myid = "MyCustomID"
-    stubber = Minified(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # this should not generate a module , but also should not th
     stubber.create_module_stub("notamodule1", str( tmp_path / "notamodule1.py" ))
@@ -296,7 +296,7 @@ def test_unavailable_modules(tmp_path:Path):
 #     myid = "MyCustomID"
 #     test_path = str(tmp_path)
 #     stub_path =  Path(test_path) /"stubs"/ myid.lower() 
-#     stubber = Minified(path = test_path, firmware_id=myid)  
+#     stubber = Stubber(path = test_path, firmware_id=myid)  
 #     stubber.clean()
 
 #     #Create a file
