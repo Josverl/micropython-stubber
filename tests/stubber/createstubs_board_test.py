@@ -7,18 +7,23 @@ from pathlib import Path
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
 
-# # if sys.path[0] != "./board":
-# #     sys.path[0:0] = ["./board"]
-# variant = "./board"
-# if sys.path[0] != variant:
-#     sys.path[0:0] = [variant]
-
 # allow loading of the cpython mock-a-likes
 core_mocks = "./tests/mocks/micropython-cpython_core"
 if sys.path[1] != core_mocks:
     sys.path[1:1] = [core_mocks]
 
+# ----------------------------------------------------------------------------------------
+# Specify wether to load the normal or minified version of the test 
+# ----------------------------------------------------------------------------------------
+
+prefix = "board."
 from board.createstubs import Stubber,  read_path
+
+# ----------------------------------------------------------------------------------------
+# Below this the tests are identical between 
+# - createstubs_board.test.py
+# - createstubs_minified.test.py
+# ----------------------------------------------------------------------------------------
 
 def test_stubber_info_basic():
     stubber = Stubber()  # type: ignore
@@ -155,15 +160,15 @@ pyb1_113 = UName(
 
 def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
     # class.property : just pass a value
-    mocker.patch("board.createstubs.sys.platform", sys_platform)
-    mocker.patch("board.createstubs.sys.implementation.name", sys_imp_name)
+    mocker.patch(prefix + "createstubs.sys.platform", sys_platform)
+    mocker.patch(prefix + "createstubs.sys.implementation.name", sys_imp_name)
     # class.method--> mock using function
     fake_uname = os_uname
 
     def mock_uname():
         return fake_uname
 
-    mocker.patch("board.createstubs.os.uname", mock_uname, create=True)
+    mocker.patch(prefix + "createstubs.os.uname", mock_uname, create=True)
     # now run the tests
     stubber = Stubber()
     assert stubber is not None, "Can't create Stubber instance"
@@ -239,6 +244,15 @@ def test_create_module_stub(tmp_path:Path):
    
     stublist = list(tmp_path.glob('**/*.py'))
     assert len(stublist) == 2
+
+def test_create_module_stub_folder(tmp_path:Path):
+    myid = "MyCustomID"
+    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    assert stubber is not None, "Can't create Stubber instance"
+    
+    stubber.create_module_stub("json" )
+    stublist = list((tmp_path / "stubs" / myid.lower()).glob('**/*.py'))
+    assert len(stublist) == 1 , "should create stub in stub folder if no folder specified"    
 
 def test_create_module_stub_ignored(tmp_path:Path):
     myid = "MyCustomID"
