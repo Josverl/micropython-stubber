@@ -7,6 +7,9 @@ from pathlib import Path
 from version import VERSION
 from typing import List
 
+import mypy.stubgen as stubgen
+import sys
+
 
 log = logging.getLogger(__name__)
 
@@ -64,16 +67,45 @@ def cleanup(modules_folder: Path):
                 pass
 
 
-def make_stub_files(stub_path: str, levels: int = 0) -> bool:
-    "generate typeshed files for all scripts in a folder using mypy/stubgen"
-    # levels is ignored for backward compat with make_stub_files_old
+def generate_pyi_from_file(file:Path) -> bool:
+    """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
+    # if 0: 
+    #     cmd = "stubgen {0} --output {1} --include-private --ignore-errors".format(file, file.parent)
+    #     print(" >stubgen on {0}".format(file))
+    #     result = os.system(cmd)
+    #     return result == 0
+    sg_opt = stubgen.Options(
+                pyversion=(3,5), 
+                no_import=False, 
+                include_private= True, 
+                doc_dir= "", 
+                search_path=[], 
+                interpreter=sys.executable,
+                parse_only=False,
+                ignore_errors=True,
+                modules=[],
+                packages=[],
+                files=[],
+                output_dir="",
+                verbose=True,
+                quiet=False,
+                export_less=False)
+
+    sg_opt.files=[str(file)]
+    sg_opt.output_dir=str(file.parent)
+    try:
+        stubgen.generate_stubs(sg_opt)
+        return True
+    except BaseException:
+        return False
+
+def generate_pyi_files(modules_folder: Path) -> bool:
+    """generate typeshed files for all scripts in a folder using mypy/stubgen"""
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
 
-    modlist = list(Path(stub_path).glob("**/modules.json"))
-    if len(modlist) == 0:
-        return False
-    for file in modlist:
-        modules_folder = file.parent
+    modlist = list(modules_folder.glob("**/modules.json"))
+    if len(modlist) <= 1:
+        ## generate fyi files for folder 
         # clean before to clean any old stuff
         cleanup(modules_folder)
 
@@ -85,36 +117,53 @@ def make_stub_files(stub_path: str, levels: int = 0) -> bool:
         # Check on error
         if result != 0:
             # in case of failure then Plan B
-            # - run stubgen on each *.py
+            # - run stubgen on each *.py 
             print("Failure on folder, attempt to stub per file.py")
             py_files = modules_folder.glob("**/*.py")
             for py in py_files:
-                cmd = (
-                    "stubgen {0} --output {1} --include-private --ignore-errors".format(
-                        py, py.parent
-                    )
-                )
-                print(" >stubgen on {0}".format(py))
-                result = os.system(cmd)
+                generate_pyi_from_file(py)
+                #todo: report failures 
+
+        # for py missing pyi:
+        py_files = list(modules_folder.rglob('*.py'))
+        pyi_files = list(modules_folder.rglob('*.pyi'))
+
+        for pyi in pyi_files:
+            # remove all py files that have been stubbed successfully
+            try:
+                py_files.remove(pyi.with_suffix(".py"))
+            except ValueError:
+                pass
+        # now stub the rest
+        for py in py_files:
+            generate_pyi_from_file(py)
+            #todo: report failures 
 
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
+         
         return True
+        ##
+    for mod_manifest in modlist:
+        ## generate fyi files for folder 
+        generate_pyi_files(mod_manifest.parent)
 
 
-def make_stub_files_old(stub_path, levels: int = 1):
-    "generate typeshed files for all scripts in a folder using make_sub_files.py"
-    level = ""
-    # make_sub_files.py only does one folder level at a time
-    # so lets try 7 levels /** ,  /**/** , etc
-    # and does not work well if loaded as a module
-    for i in range(levels):
-        cmd = "python ./src/make_stub_files.py -c ./src/make_stub_files.cfg -u {}{}/*.py".format(
-            stub_path, level
-        )
-        log.debug("level {} : {}".format(i + 1, cmd))
-        os.system(cmd)
-        level = level + "/**"
+        #todo: collect and report results
+
+# def make_stub_files_old(stub_path, levels: int = 1):
+#     "generate typeshed files for all scripts in a folder using make_sub_files.py"
+#     level = ""
+#     # make_sub_files.py only does one folder level at a time
+#     # so lets try 7 levels /** ,  /**/** , etc
+#     # and does not work well if loaded as a module
+#     for i in range(levels):
+#         cmd = "python ./src/make_stub_files.py -c ./src/make_stub_files.cfg -u {}{}/*.py".format(
+#             stub_path, level
+#         )
+#         log.debug("level {} : {}".format(i + 1, cmd))
+#         os.system(cmd)
+#         level = level + "/**"
 
 
 def manifest(
@@ -189,7 +238,7 @@ def generate_all_stubs():
     "just create typeshed stubs"
     # now generate typeshed files for all scripts
     print("Generate type hint files (pyi) in folder: {}".format(STUB_FOLDER))
-    make_stub_files(STUB_FOLDER, levels=7)
+    generate_pyi_files(Path(STUB_FOLDER))
 
 
 def read_exclusion_file(path: Path = None) -> List[str]:
