@@ -33,11 +33,20 @@ def test_clean_version(commit, build, clean):
 def test_make_stub_files(tmp_path):
     dest = tmp_path / "stubs"
     shutil.copytree("scratch/stubs", dest)
-    assert utils.make_stub_files(dest)
+    result = utils.generate_pyi_files(dest)
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
     assert py_count == pyi_count, "1:1 py:pyi"
-
+    # for py missing pyi:
+    py_files = list(dest.rglob("*.py"))
+    pyi_files = list(dest.rglob("*.pyi"))
+    for pyi in pyi_files:
+        # remove all py files that have been stubbed successfully
+        try:
+            py_files.remove(pyi.with_suffix(".py"))
+        except ValueError:
+            pass
+    assert len(py_files) == 0 , "py and pyi files should match 1:1 and stored in the same folder"
 
 def test_read_exclusion():
     exclusions = utils.read_exclusion_file()
