@@ -20,6 +20,7 @@ import basicgit as git
 
 import utils
 from utils import clean_version, stubfolder, flat_version
+from pathlib import Path
 
 import get_cpython
 import get_mpy
@@ -63,7 +64,7 @@ def get_all():
 
     # now generate typeshed files for all scripts
     log.info("Generate type hint files (pyi) in folder: {}".format(STUB_FOLDER))
-    utils.make_stub_files(STUB_FOLDER, levels=7)
+    utils.generate_pyi_files(Path(STUB_FOLDER))
 
 
 if __name__ == "__main__":
