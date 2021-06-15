@@ -325,7 +325,6 @@ def isMicroPython()->bool:
 def main():
  try:
   logging.basicConfig(level=logging.INFO)
-  logging.basicConfig(level=logging.DEBUG)
  except NameError:
   pass
  stubber=Stubber(path=read_path())
