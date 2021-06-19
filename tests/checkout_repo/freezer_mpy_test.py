@@ -78,7 +78,7 @@ def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropyth
     )
 
 
-def test_freezer_mpy_folders(tmp_path, testrepo_micropython):
+def test_freezer_mpy_folders(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using modules folders"
     mpy_path = testrepo_micropython
 
@@ -90,11 +90,11 @@ def test_freezer_mpy_folders(tmp_path, testrepo_micropython):
         version = git.get_tag(mpy_path)
         assert (
             version == mpy_version
-        ), "prep: could not checkout version {} of ../micropython".format(mpy_version)
+        ), "prep: could not checkout version {} of ./micropython".format(mpy_version)
 
     stub_path = tmp_path
-    # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib')
+    # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='./micropython-lib')
     get_mpy.get_frozen_folders(
-        stub_path, mpy_path, lib_path="../micropython-lib", version=mpy_version
+        stub_path, mpy_path, lib_path=testrepo_micropython_lib, version=mpy_version
     )
     assert True

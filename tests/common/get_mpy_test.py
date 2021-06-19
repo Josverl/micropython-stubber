@@ -8,8 +8,9 @@ import basicgit as git
 
 def test_get_mpy(tmp_path):
 
-    mpy_path = "../micropython"
-    lib_path = "../micropython-lib"
+    # Use Submodules 
+    mpy_path = "./micropython"
+    lib_path = "./micropython-lib"
     version = clean_version(git.get_tag(mpy_path))
 
     assert version, "could not find micropython version"

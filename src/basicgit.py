@@ -30,7 +30,7 @@ def get_tag(repo: str = None) -> str:
     """
     get the most recent git version tag of a local repo"
     repo should be in the form of : path
-        ../micropython
+        ./micropython
     returns the tag or None
     """
     if not repo:
@@ -65,7 +65,7 @@ def fetch(repo: str) -> bool:
     """
     fetches a repo
     repo should be in the form of : path/.git
-        ../micropython/.git
+        ./micropython/.git
     returns True on success
     """
     if not repo:
@@ -82,7 +82,7 @@ def pull(repo: str, branch="master") -> bool:
     """
     pull a repo origin into master
     repo should be in the form of : path/.git
-        ../micropython/.git
+        ./micropython/.git
     returns True on success
     """
     if not repo:

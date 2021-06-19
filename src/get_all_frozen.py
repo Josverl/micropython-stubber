@@ -32,9 +32,10 @@ import get_lobo
 log = logging.getLogger(__name__)
 
 STUB_FOLDER = "./all-stubs"
+MPY_PATH = "./micropython"
 
 
-def get_all():
+def get_all(mpy_path= MPY_PATH):
     "get all frozen modules for the current version of micropython"
 
     #
@@ -42,7 +43,6 @@ def get_all():
         stub_path=stubfolder("cpython_core"), requirements="./src/reqs-cpython-mpy.txt"
     )
 
-    mpy_path = "../micropython"
     version = clean_version(git.get_tag(mpy_path))
 
     if version:
@@ -51,7 +51,7 @@ def get_all():
         family = "micropython"
         stub_path = stubfolder("{}-{}-frozen".format(family, flat_version(version)))
         get_mpy.get_frozen(
-            stub_path, version=version, mpy_path=mpy_path, lib_path="../micropython-lib"
+            stub_path, version=version, mpy_path=mpy_path, lib_path="./micropython-lib"
         )
     else:
         log.warning(
