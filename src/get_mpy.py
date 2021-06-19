@@ -189,9 +189,9 @@ def get_frozen(
     """
 
     if not mpy_path:
-        mpy_path = "../micropython"
+        mpy_path = "./micropython"
     if not lib_path:
-        lib_path = "../micropython-lib"
+        lib_path = "./micropython-lib"
     if not stub_path:
         stub_path = "{}/{}_{}_frozen".format(
             utils.STUB_FOLDER, FAMILY, utils.flat_version(version)
@@ -243,12 +243,13 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
         if not dest_path in targets:
             targets.append(dest_path)
 
+
     for dest_path in targets:
         # make a module manifest
         port = dest_path.split(os.path.sep)[-2]
         # todo: add board / variant into manifest files ?
         utils.make_manifest(Path(dest_path), family=FAMILY, port=port, version=version)
-
+    return targets
 
 # def get_target_path(path:str)-> tuple:
 #     "get path to port and board folder(s) from a path"
@@ -373,19 +374,11 @@ def get_frozen_manifest(
         utils.make_manifest(Path(stub_dir), FAMILY, "frozen", version)
 
 
-# def quicktest():
-#     # just run a quick test
-#     # checkout micropython @ tag
-#     # get_frozen(stub_path='./scratch/mpy_1_12/frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-#     # get_frozen_folders(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-#     #get_frozen(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.13.0')
-#     get_frozen(stub_path='./scratch/mpy_1_10_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.10.0')
-
 if __name__ == "__main__":
     "just gather for the current version"
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    mpy_path = "../micropython"
-    lib_path = "../micropython-lib"
+    mpy_path = "./micropython"
+    lib_path = "./micropython-lib"
     version = utils.clean_version(git.get_tag(mpy_path))
 
     if version:
