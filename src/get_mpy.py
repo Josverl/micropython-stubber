@@ -8,7 +8,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-# some functions used from makemanifest.py,
+# some functions used from micropython/micropython/tools/makemanifest.py,
 #   part of the MicroPython project, http://micropython.org/
 #   Copyright (c) 2019 Damien P. George
 
@@ -17,10 +17,12 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.13 - using manifests.py, and support for variant
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
+import sys
 import os
 import glob
 import re
 import shutil
+import warnings
 import logging
 
 import basicgit as git
@@ -239,9 +241,15 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
         # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
-        shutil.copy2(script, dest_path)
-        if not dest_path in targets:
-            targets.append(dest_path)
+        try:
+            shutil.copy2(script, dest_path)
+            if not dest_path in targets:
+                targets.append(dest_path)
+        except OSError as e:
+            ## Ignore errors that are caused by reorganisation of Micropython-lib
+            #print(e)
+            warnings.warn("unable to freeze {} due to error {}".format(e.filename, str(e)))
+
 
 
     for dest_path in targets:
