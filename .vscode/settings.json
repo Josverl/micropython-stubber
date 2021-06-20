@@ -79,6 +79,8 @@
     ],
     "python.formatting.provider": "black",
     "python.formatting.blackArgs": [
-        "--extend-exclude minified "
+        "--extend-exclude",
+        "minified"
     ],
+    "editor.formatOnSave": true,
 }
