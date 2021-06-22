@@ -52,15 +52,7 @@ jobs:
           # ignore Module 'gc' has no 'mem_free' member (no-member)
 
       - name: Test with pytest
-        run: pytest tests/common tests/board --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
-
-      - name: report code coverage
-        uses: codecov/codecov-action@v1
-        with:
-          file: junit/test-results-${{ matrix.python-version }}.xml
-          name: codecov-umbrella # optional
-          verbose: true # optional (default = false)
-        if: ${{ always() }}
+        run: pytest tests --junitxml=junit/test-results-${{ matrix.python-version }}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
