@@ -87,13 +87,13 @@ def edit_lines(content, edits, show_diff=False):
     def comment(l, x):
         return l.replace(x, f"# {x}")
 
-    def rprint(l, x):  # pylint: disable= unused-variable
+    def rprint(l, x):  # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, f"print")
 
-    def rpass(l, x):  # pylint: disable= unused-variable
+    def rpass(l, x):  # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         return l.replace(x, f"pass")
 
     def get_whitespace_context(content, index):
