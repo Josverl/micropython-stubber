@@ -15,11 +15,8 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # MIT license
 # pylint: disable= line-too-long
 import logging
-
 import basicgit as git
-
 import utils
-from utils import clean_version, stubfolder, flat_version
 from pathlib import Path
 
 import get_cpython
@@ -40,16 +37,16 @@ def get_all(mpy_path= MPY_PATH):
 
     #
     get_cpython.get_core(
-        stub_path=stubfolder("cpython_core"), requirements="./src/reqs-cpython-mpy.txt"
+        stub_path=utils.stubfolder("cpython_core"), requirements="./src/reqs-cpython-mpy.txt"
     )
 
-    version = clean_version(git.get_tag(mpy_path))
+    version = utils.clean_version(git.get_tag(mpy_path))
 
     if version:
         log.info("found micropython version : {}".format(version))
         # folder/{family}-{version}-frozen
         family = "micropython"
-        stub_path = stubfolder("{}-{}-frozen".format(family, flat_version(version)))
+        stub_path = utils.stubfolder("{}-{}-frozen".format(family, utils.flat_version(version)))
         get_mpy.get_frozen(
             stub_path, version=version, mpy_path=mpy_path, lib_path="./micropython-lib"
         )
