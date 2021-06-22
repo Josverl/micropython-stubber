@@ -22,7 +22,7 @@ def test_get_mpy(tmp_path):
         str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path
     )
 
-    if version == "v1.15":
+    if version >= "v1.15":
         modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
         assert modules_count >= 7, "there should at least 7 module manifests"
 
