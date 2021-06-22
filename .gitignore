@@ -26,8 +26,13 @@ htmlcov
 coverage_html_report
 coverage_report
 
+# and tests results
+junit/*
+
+
 # OS specific stuff
 desktop.ini
 .pytest_cache/*
 
 dev-stubs
+

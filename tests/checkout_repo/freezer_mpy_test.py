@@ -56,6 +56,7 @@ def test_extract_target_names(path, port, board):
     assert _port == port
 
 
+@pytest.mark.basicgit
 def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using manifest.py files"
     # mpy_path = Path(testrepo_micropython)
@@ -85,6 +86,7 @@ def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropyth
     )
 
 
+@pytest.mark.basicgit
 def test_freezer_mpy_folders(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using modules folders"
     mpy_path = testrepo_micropython
