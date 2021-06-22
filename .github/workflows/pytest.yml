@@ -17,7 +17,11 @@ jobs:
     runs-on: ubuntu-20.04 # ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: "true"
+          # token: ${{ secrets.PAT_TOKEN }}  PAT token needed for Private Repo
 
       # - name: Extract branch name
       #   id: extract_branch
@@ -52,7 +56,7 @@ jobs:
           # ignore Module 'gc' has no 'mem_free' member (no-member)
 
       - name: Test with pytest
-        run: pytest tests  -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+        run: pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
