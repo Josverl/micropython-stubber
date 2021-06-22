@@ -38,7 +38,7 @@ jobs:
 
       - name: flag tools executable
         run: |
-          chmod +x $GITHUB_WORKSPACE/tests/tools/* ---recursive --verbose
+          chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
           MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging"
 
       - name: create or update minified version
