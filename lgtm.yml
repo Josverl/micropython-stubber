@@ -1,0 +1,21 @@
+path_classifiers:
+  test:
+    - "tests/*"
+    - exclude:
+        - "tools/*"
+
+  library:
+    - board/logging.py
+    - board/micropip.py
+    - src/make_stub_files.py
+
+  docs:
+    - generate_javadoc.py
+
+queries:
+  - exclude: py/insecure-default-protocol # used in usocket
+
+extraction:
+  python:
+    python_setup:
+      version: 3.4
