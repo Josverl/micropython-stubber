@@ -1,6 +1,6 @@
 # This workflow will :
-# - create a minified version of createstubs.py 
-# - run a quick test on that 
+# - create a minified version of createstubs.py
+# - run a quick test on that
 # - and submit a PR to the branch <branch>-minify
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
@@ -11,69 +11,65 @@ on:
   push:
   # pull_request:
   #   branches: [ master ]
-  # TODO: for PR need to specify a base when committing the PR 
+  # TODO: for PR need to specify a base when committing the PR
 
 jobs:
   minify:
-    runs-on: ubuntu-18.04 # ubuntu-latest = 20.04 does not work with the current micropython binaries 
+    runs-on: ubuntu-20.04 # ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Extract branch name (for potential PR)
-      id: extract_branch
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      - name: Extract branch name (for potential PR)
+        id: extract_branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pylint
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pylint
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-    - name: flag tools executable
-      run: |
-        chmod +x $GITHUB_WORKSPACE/tools/* -v
-        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+      - name: flag tools executable
+        run: |
+          chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
+          MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_16 -c "import sys;print(sys.path);import logging"
 
-    - name: minify createstubs
-      run: |
-        python process.py minify
+      - name: minify createstubs
+        run: |
+          python process.py minify
 
-    - name: verify minified using pylint
-      run: |
-        pylint minified/createstubs.py -E -d E0401,E1101
-        # ignore Unable to import '<upythonmodule>' (import-error)
-        # ignore Module 'gc' has no 'mem_free' member (no-member)
+      - name: verify minified using pylint
+        run: |
+          pylint minified/createstubs.py -E -d E0401,E1101
+          # ignore Unable to import '<upythonmodule>' (import-error)
+          # ignore Module 'gc' has no 'mem_free' member (no-member)
 
-    - name: run minified/createstubs.py
-      run: |
-        mkdir $GITHUB_WORKSPACE/scratch
-        cd $GITHUB_WORKSPACE/scratch
-        ../tools/micropython ../minified/createstubs.py
+      - name: run minified/createstubs.py
+        run: |
+          mkdir $GITHUB_WORKSPACE/scratch
+          cd $GITHUB_WORKSPACE/scratch
+          ../tests/tools/ubuntu_20_04/micropython_v1_16 ../minified/createstubs.py
 
-    - name: Create Pull Request
-      id: cpr
-      uses: peter-evans/create-pull-request@v3
-      # ref: https://github.com/peter-evans/create-pull-request
-      with:
-        title: '${{ steps.extract_branch.outputs.branch }} : update minified/createstubs.py'
-        commit-message: add/update minified
-        branch: ${{ steps.extract_branch.outputs.branch }}-minify
-        labels: |
-          automated pr
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        # ref: https://github.com/peter-evans/create-pull-request
+        with:
+          title: "${{ steps.extract_branch.outputs.branch }} : update minified/createstubs.py"
+          commit-message: add/update minified
+          branch: ${{ steps.extract_branch.outputs.branch }}-minify
+          labels: |
+            automated pr
 
-    - name: Check outputs
-      run: |
-        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-        echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-
-
-
-
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

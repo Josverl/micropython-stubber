@@ -614,7 +614,7 @@ class Stubber:
             if e.args[0] == ENOENT:
                 try:
                     r = os.getcwd()
-                except:
+                except (OSError, AttributeError):
                     # unix port
                     r = "."
             else:
@@ -648,8 +648,8 @@ def isMicroPython() -> bool:
         # either test should fail on micropython
         # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
-        a = eval("1and 0")
-        b = bytes("abc", encoding="utf8")
+        a = eval("1and 0")                      # lgtm [py/unused-local-variable] 
+        b = bytes("abc", encoding="utf8")       # lgtm [py/unused-local-variable]
         return False
     except (NotImplementedError, SyntaxError):
         return True

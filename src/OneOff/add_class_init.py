@@ -29,7 +29,7 @@ def add_init_methods(filename) -> int:
 
 print("Add missing __init__ methods to stub classes")
 
-for stubfile in Path("../micropython-stubs/stubs").glob(r"**/*.py"):
+for stubfile in Path("./micropython-stubs/stubs").glob(r"**/*.py"):
     print(stubfile, end=" ,")
     x = add_init_methods(stubfile)
     print(x)
