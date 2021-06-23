@@ -12,7 +12,7 @@ if not sys.warnoptions:
 # No Mocks, does actual download from github
 import basicgit as git
 
-
+@pytest.mark.basicgit
 def test_get_mpy(tmp_path):
 
     # Use Submodules 
@@ -34,17 +34,15 @@ def test_get_mpy(tmp_path):
     get_mpy.get_frozen(
         str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path
     )
+    
+    modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
+    stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
+    if version == "v1.x":
+        assert modules_count >= 4, "there should at least 4 module manifests"
+        assert stub_count >= 10, "there should > 10 frozen modules"
 
-    if version >= "v1.15":
-        modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
+    elif version >= "v1.15":
         assert modules_count >= 7, "there should at least 7 module manifests"
-
-        stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
         assert stub_count >= 100, "there should > 100 frozen modules"
 
-    elif version >= "v1.x":
-        modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
-        assert modules_count >= 4, "there should at least 7 module manifests"
 
-        stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
-        assert stub_count >= 10, "there should > 100 frozen modules"
