@@ -1,6 +1,13 @@
 # Module Under Test
+import sys
 import get_mpy
 from utils import clean_version, flat_version
+
+if not sys.warnoptions:
+    import os, warnings
+    warnings.simplefilter('default' ) # Change the filter in this process
+    os.environ["PYTHONWARNINGS"] = "default" # Also affect subprocesses
+
 
 # No Mocks, does actual download from github
 import basicgit as git
@@ -14,7 +21,10 @@ def test_get_mpy(tmp_path):
     try: 
         version = clean_version(git.get_tag(mpy_path))
     except:
-        version = "v1.15"
+        warnings.warn(
+            "Could not find the micropython version Tag - assuming v1.x"
+        )
+        version = "v1.x"
 
     assert version, "could not find micropython version"
     print("found micropython version : {}".format(version))
@@ -31,3 +41,10 @@ def test_get_mpy(tmp_path):
 
         stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
         assert stub_count >= 100, "there should > 100 frozen modules"
+
+    elif version >= "v1.x":
+        modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
+        assert modules_count >= 4, "there should at least 7 module manifests"
+
+        stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
+        assert stub_count >= 10, "there should > 100 frozen modules"
