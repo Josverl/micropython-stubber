@@ -2,7 +2,9 @@ project.pymakr
 *.zip
 
 # no python virtual environment
-.env/*
+.env
+.venv
+
 # no compiled python 
 .py_cache
 **/__pycache__/**
@@ -16,7 +18,7 @@ board/stubs
 minified/stubs
 all_stubs
 all-stubs
-stubs
+stubs/*
 
 # ignore test coverage report
 .coverage
@@ -24,8 +26,13 @@ htmlcov
 coverage_html_report
 coverage_report
 
+# and tests results
+junit/*
+
+
 # OS specific stuff
 desktop.ini
 .pytest_cache/*
 
 dev-stubs
+

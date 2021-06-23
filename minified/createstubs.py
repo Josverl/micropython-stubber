@@ -297,7 +297,7 @@ class Stubber:
    if e.args[0]==ENOENT:
     try:
      r=os.getcwd()
-    except:
+    except(OSError,AttributeError):
      r="."
    else:
     r="/"
@@ -317,8 +317,8 @@ def read_path()->str:
  return path
 def isMicroPython()->bool:
  try:
-  a=eval("1and 0")
-  b=bytes("abc",encoding="utf8")
+  a=eval("1and 0") 
+  b=bytes("abc",encoding="utf8") 
   return False
  except(NotImplementedError,SyntaxError):
   return True

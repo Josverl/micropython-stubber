@@ -9,9 +9,12 @@ import pytest
 #  ROOT = Path(__file__).parent
 
 
-@pytest.mark.parametrize("script_folder", [("./board"), ("./minified")])
+@pytest.mark.parametrize("script_folder", ["./board", "./minified"])
 @pytest.mark.parametrize(
-    "firmware", [("micropython_1_12"), ("micropython_1_13"), ("pycopy_3_3_2-25")]
+    # Ubuntu 18.04
+    # "firmware", [("micropython_1_12"), ("micropython_1_13"), ("pycopy_3_3_2-25")] 
+    # Ubuntu 20.04
+    "firmware", ["micropython_v1_11","micropython_v1_12","micropython_v1_14","micropython_v1_15","micropython_v1_16"] 
 )
 
 # only run createsubs in the unix version of micropython
@@ -19,12 +22,13 @@ import pytest
 def test_createstubs(firmware, tmp_path, script_folder):
     # Use temp_path to generate stubs
     scriptfolder = os.path.abspath(script_folder)
-    cmd = [os.path.abspath("tools/" + firmware), "createstubs.py", "--path", tmp_path]
+    cmd = [os.path.abspath("tests/tools/ubuntu_20_04/" + firmware), "createstubs.py", "--path", tmp_path]
     try:
         subproc = subprocess.run(cmd, cwd=scriptfolder, timeout=100000)
         assert subproc.returncode == 0, "createstubs ran with an error"
         # assert (subproc.returncode <= 0 ), "createstubs ran with an error"
-    except ImportError:
+    except ImportError as e:
+        print(e)
         pass
     # did it run without error ?
 
