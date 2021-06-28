@@ -3,6 +3,8 @@ project.pymakr
 
 # no python virtual environment
 .env/*
+.venv
+
 # no compiled python 
 **/__pycache__/**
 
