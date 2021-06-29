@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = "1.3.14"
+stubber_version = "1.3.15"
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -462,7 +462,7 @@ class Stubber:
         if errors:
             self._log.error(errors)
 
-        for name, rep, typ, obj in sorted(items, key=lambda x: x[0]):
+        for name, rep, typ, obj in items:
             if name.startswith("__") and name not in ("__new__", "__init__", "__call__") :
                 # skip internals
                 continue
@@ -477,11 +477,17 @@ class Stubber:
                 # module Function or class method
                 # will accept any number of params
                 # return type Any
+                ret = "Any"
+                slf = ""
                 if in_class > 0:
-                    s = indent + "def " + name + "(self, *args) -> Any:\n"
-                else:
-                    s = indent + "def " + name + "(*args) -> Any:\n"
-                s += indent + "    pass\n\n"
+                    slf = "self, "
+                    if name == "__init__":
+                        ret = "None"
+                s = "{}def {}({}*args) -> {}:\n".format(
+                    indent, name, slf, ret
+                )
+                s += indent + "    ''\n"
+                s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
 
@@ -494,9 +500,7 @@ class Stubber:
                 # full expansion only on toplevel
                 # stub style : generic __init__ with Empty comment and pass
                 s = "\n" + indent + "class " + name + ":\n"  #
-                s += indent + "    def __init__(self, *args):\n"
-                s += indent + "        ''\n"
-                s += indent + "        pass\n"
+                s += indent + "    ''\n"
 
                 fp.write(s)
                 self._log.debug("\n" + s)
