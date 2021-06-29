@@ -8,7 +8,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-# some functions used from makemanifest.py,
+# some functions used from micropython/micropython/tools/makemanifest.py,
 #   part of the MicroPython project, http://micropython.org/
 #   Copyright (c) 2019 Damien P. George
 
@@ -21,12 +21,10 @@ import os
 import glob
 import re
 import shutil
+import warnings
 import logging
-
 import basicgit as git
-
 import utils
-
 from pathlib import Path  # start moving from os & glob to pathlib
 
 log = logging.getLogger(__name__)
@@ -189,9 +187,9 @@ def get_frozen(
     """
 
     if not mpy_path:
-        mpy_path = "../micropython"
+        mpy_path = "./micropython"
     if not lib_path:
-        lib_path = "../micropython-lib"
+        lib_path = "./micropython-lib"
     if not stub_path:
         stub_path = "{}/{}_{}_frozen".format(
             utils.STUB_FOLDER, FAMILY, utils.flat_version(version)
@@ -239,39 +237,23 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
         # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
-        shutil.copy2(script, dest_path)
-        if not dest_path in targets:
-            targets.append(dest_path)
+        try:
+            shutil.copy2(script, dest_path)
+            if not dest_path in targets:
+                targets.append(dest_path)
+        except OSError as e:
+            ## Ignore errors that are caused by reorganisation of Micropython-lib
+            #print(e)
+            warnings.warn("unable to freeze {} due to error {}".format(e.filename, str(e)))
+
+
 
     for dest_path in targets:
         # make a module manifest
         port = dest_path.split(os.path.sep)[-2]
         # todo: add board / variant into manifest files ?
         utils.make_manifest(Path(dest_path), family=FAMILY, port=port, version=version)
-
-
-# def get_target_path(path:str)-> tuple:
-#     "get path to port and board folder(s) from a path"
-
-#     # https://regexr.com/4rh39
-#     # but with an extra P for Python named groups...
-#     regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
-#     regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
-#     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
-#     # print( matches.group('port'), matches.group('board'))
-
-#     mpy_port = mpy_board = ""
-#     matches = re.search(regex_2, path)
-#     if matches:
-#         # port and board
-#         mpy_port = matches.group('port') or ""
-#         mpy_board = matches.group('board') or ""
-#     else:
-#         #just port
-#         matches = re.search(regex_1, path)
-#         if matches:
-#             mpy_port = matches.group('port') or ""
-#     return mpy_port, mpy_board
+    return targets
 
 
 def get_target_names(path: str) -> tuple:
@@ -318,10 +300,12 @@ def get_frozen_manifest(
 
     # https://regexr.com/4rh39
     # but with an extra P for Python named groups...
-    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"  # port
-    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"  # port & board
+    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
+    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
+
     # todo: variants
-    regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)"  # port & variant
+    # regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)"  # port & variant
+
     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
     # print( matches.group('port'), matches.group('board'))
 
@@ -373,19 +357,11 @@ def get_frozen_manifest(
         utils.make_manifest(Path(stub_dir), FAMILY, "frozen", version)
 
 
-# def quicktest():
-#     # just run a quick test
-#     # checkout micropython @ tag
-#     # get_frozen(stub_path='./scratch/mpy_1_12/frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-#     # get_frozen_folders(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib')
-#     #get_frozen(stub_path='./scratch/mpy_1_13_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.13.0')
-#     get_frozen(stub_path='./scratch/mpy_1_10_0_Frozen', mpy_path='../micropython', lib_path='../micropython-lib',version='1.10.0')
-
 if __name__ == "__main__":
     "just gather for the current version"
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    mpy_path = "../micropython"
-    lib_path = "../micropython-lib"
+    mpy_path = "./micropython"
+    lib_path = "./micropython-lib"
     version = utils.clean_version(git.get_tag(mpy_path))
 
     if version:

@@ -1,10 +1,9 @@
 # Production + dev requirements
-esptool
-pyminifier
-#python-minifier
+esptool         >= 3.1
+pyminifier      >= 2.1                  #python-minifier
 
 # dev requirements
-pytest
-pytest-cov
-filelock
-Jinja2
+pytest          >= 6.2.4 
+pytest-cov      >= 2.12.1
+pytest-mock     >= 1.13.0
+mock            >= 4.0.3

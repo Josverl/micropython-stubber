@@ -1,3 +1,4 @@
+import sys
 import pytest
 from pathlib import Path
 
@@ -6,6 +7,12 @@ import basicgit as git
 
 # Module Under Test
 import get_mpy
+
+
+if not sys.warnoptions:
+    import os, warnings
+    warnings.simplefilter('default' ) # Change the filter in this process
+    os.environ["PYTHONWARNINGS"] = "default" # Also affect subprocesses
 
 # No Mocks, does actual extraction from repro
 
@@ -49,6 +56,7 @@ def test_extract_target_names(path, port, board):
     assert _port == port
 
 
+@pytest.mark.basicgit
 def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using manifest.py files"
     # mpy_path = Path(testrepo_micropython)
@@ -78,11 +86,12 @@ def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropyth
     )
 
 
-def test_freezer_mpy_folders(tmp_path, testrepo_micropython):
+@pytest.mark.basicgit
+def test_freezer_mpy_folders(tmp_path, testrepo_micropython, testrepo_micropython_lib):
     "test if we can freeze source using modules folders"
     mpy_path = testrepo_micropython
 
-    # mpy version must be older than 1.12 ( so use 1.10)
+    # mpy version must not be older than 1.12 ( so use 1.10)
     mpy_version = "v1.10"
     version = git.get_tag(mpy_path)
     if version != mpy_version:
@@ -90,11 +99,11 @@ def test_freezer_mpy_folders(tmp_path, testrepo_micropython):
         version = git.get_tag(mpy_path)
         assert (
             version == mpy_version
-        ), "prep: could not checkout version {} of ../micropython".format(mpy_version)
+        ), "prep: could not checkout version {} of ./micropython".format(mpy_version)
 
     stub_path = tmp_path
-    # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='../micropython-lib')
+    # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='./micropython-lib')
     get_mpy.get_frozen_folders(
-        stub_path, mpy_path, lib_path="../micropython-lib", version=mpy_version
+        stub_path, mpy_path, lib_path=str(testrepo_micropython_lib), version=mpy_version
     )
     assert True
