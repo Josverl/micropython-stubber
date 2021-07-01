@@ -61,9 +61,6 @@
         "upysh"
     ],
     "python.formatting.provider": "black",
-    // "python.formatting.blackArgs": [
-    //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
-    // ],
     "editor.formatOnSave": true,
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#914b09",
@@ -80,5 +77,6 @@
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#61320699",
         "titleBar.inactiveForeground": "#e7e7e799"
-    },
+    }
 }
+

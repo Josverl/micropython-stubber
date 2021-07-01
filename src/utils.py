@@ -35,6 +35,7 @@ def stubfolder(path: str) -> str:
 
 def flat_version(version: str):
     "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
+
     return version.replace("v", "").replace(".", "_")
 
 
@@ -150,22 +151,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 
         # todo: collect and report results
 
-
-# def make_stub_files_old(stub_path, levels: int = 1):
-#     "generate typeshed files for all scripts in a folder using make_sub_files.py"
-#     level = ""
-#     # make_sub_files.py only does one folder level at a time
-#     # so lets try 7 levels /** ,  /**/** , etc
-#     # and does not work well if loaded as a module
-#     for i in range(levels):
-#         cmd = "python ./src/make_stub_files.py -c ./src/make_stub_files.cfg -u {}{}/*.py".format(
-#             stub_path, level
-#         )
-#         log.debug("level {} : {}".format(i + 1, cmd))
-#         os.system(cmd)
-#         level = level + "/**"
-
-
 def manifest(
     family=None,
     machine=None,
@@ -177,6 +162,7 @@ def manifest(
     release=None,
     firmware=None,
 ) -> dict:
+
     "create a new empty manifest dict"
     if family is None:
         family = "micropython"  # family
