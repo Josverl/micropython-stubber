@@ -24,7 +24,7 @@ A lot of subs have already been generated and are shared on github or other mean
 
 For now you will need to [configure this by hand](#manual-configuration), or use the [micropy cli` tool](#using-micropy-cli)
 
-1. The sister-repo MicroPython-stubs**][stubs-repo] contains [all stubs][all-stubs] I have collected with the help of others, and which can be used directly.
+1. The sister-repo [**MicroPython-stubs**][stubs-repo] contains [all stubs][all-stubs] I have collected with the help of others, and which can be used directly.
 That repo also contains examples configuration files that can be easily adopted to your setup.
 
 2. A second repo [micropy-stubs repo][stubs-repo2] maintained by BradenM,  also contains stubs but in a structure used and distributed by the [micropy-cli](#using-micropy-cli) tool.
@@ -398,8 +398,6 @@ Note that some of these modules are in fact included in the frozen modules that 
 
 # 5 - CPython and Frozen modules 
 
-
-
 ## 5.1 - Frozen Modules 
 
 It is common for Firmwares to include a few (or many) python modules as 'frozen' modules. 
@@ -433,29 +431,42 @@ Most OSS firmwares store these frozen modules as part of their repository, which
 
 ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-modules
 
+## 5.2 - Collect Frozen Stubs (micropython) 
 
+This is run daily though the github action workflow : get-all-frozen in the micropython-stubs repo.
 
+If you want to run this manually 
+- Check out repos side-by-side:
+    - micropython-stubs
+    - micropython-stubber
+    - micropython
+    - micropython-lib
 
-## 5.2 - TODO: Collect Frozen Stubs 
+- link repos using all_stubs symlink
+- checkout tag / version in the micropython folder  
+  (for most accurate results should checkout micropython-lib for the same date)
+- run `src/get-frozen.py`
+- run `src/update-stubs.py`
 
-< todo:  how to run >
+- create a PR for changes to the stubs repo 
 
-- repos used 
-- run .../py TODO:
-- copy to sister-repo 
+## 5.3 - Postprocessing 
 
+You can run postprocessing for all stubs by running either of the two scripts.
+There is an optional parameter to tpeficy the location of the stub folder. The default path is `./all_stubs`
 
+Powershell:  
+``` powershell
+./scripts/updates_stubs.ps1 [-path ./mystubs]
 
-## 5.3 - TODO: postprocessing 
+```
+or python  
+``` bash
+python ./src/update_stubs.py [./mystubs]
+```
 
-< todo:  how to 
-
-run postprocessing for firmware stubs 
-
-run postprocessing for all stubs 
-
-
-
+This will generate or update the `.pyi` stubs for all new (and existing) stubs in the `./all_stubs` or specified folder.
+(up to 7 levels deep)
 # 6 - Repo structure 
 
 - [This and sister repos](#this-and-sister-repos) 
@@ -581,13 +592,21 @@ see below overview
 | checkout_repo | simple_git module<br />retrieval of frozen modules | does not use mocking but actually retrieves different firmware versions locally using git or dowNloads modules for online | local windows           |
 | common        | all other tests                                    | common                                                       | local + github action   |
 
+also see [test documentation](tests/readme.md)
 
+**Platform detection to support pytest**
+In order to allow both simple usability om MicroPython and testability on Full Python,
+createsubs dos a runtimne test to determin the actual platform it is runnin on while importing the module
+This is similar to using the `if __name__ == "__main__":` preamble 
+If running on MicroPython,
+    then it starts stubbing 
 
-**Testing on linux port**
-
-in order to be able to test `createstubs.py`  it has been updated to run on linux, and accept a --path parameter to indicate tha pathe where the stubs should be stored.
-
-
+``` python
+if isMicroPython():
+    main()
+```
+**Testing on micropython linux port(s)**
+in order to be able to test `createstubs.py`, it has been updated to run on linux, and accept a --path parameter to indicate the path where the stubs should be stored.
 
 ## 7.4 github actions
 

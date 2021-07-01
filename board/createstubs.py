@@ -24,14 +24,17 @@ class Stubber():
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
             if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':
-                raise NotImplementedError("MicroPyton 1.13.0 cannot be stubbed")
+                raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
 
         self._log = logging.getLogger('stubber')
         self._report = []
         self.info = self._info()
-        self._fwid = str(firmware_id).lower() or "{family}-{port}-{ver}".format(**self.info).lower()
+        if firmware_id:
+            self._fwid = str(firmware_id).lower() 
+        else:
+            self._fwid = "{family}-{port}-{ver}".format(**self.info).lower()
         self._start_free = gc.mem_free()
 
         if path:
@@ -51,12 +54,14 @@ class Stubber():
         # there is no option to discover modules from upython, need to hardcode
         # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
         # modules to stub : 118
-        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 'cmath', 'collections', 'crypto',
+        self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 
+'cmath', 'collections', 'crypto',
                         'curl', 'dht', 'display', 'ds18x20', 'errno', 'esp', 'esp32', 'flashbdev', 'framebuf', 'freesans20', 'functools', 'gc', 'gsm', 'hashlib',
                         'heapq', 'inisetup', 'io', 'json', 'lcd160cr', 'lcd160cr_test', 'logging', 'lwip', 'machine', 'math', 'microWebSocket', 'microWebSrv', 'microWebTemplate',
-                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'queue', 'random', 're', 'requests',       
-                        'select', 'socket', 'ssd1306', 'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event', 
-                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 'ucryptolib', 'uctypes', 'uerrno',
+                        'micropython', 'mpu6500', 'mpu9250', 'neopixel', 'network', 'ntptime', 'onewire', 'os', 'pyb', 'pycom', 'pye', 'queue', 'random', 're', 'requests',
+                        'select', 'socket', 'ssd1306', 'ssh', 'ssl', 'stm', 'struct', 'sys', 'time', 'tpcalib', 'uarray', 'uasyncio/__init__', 'uasyncio/core', 'uasyncio/event',
+                        'uasyncio/funcs', 'uasyncio/lock', 'uasyncio/stream', 'ubinascii', 'ubluetooth', 'ucollections', 'ucrypto', 
+'ucryptolib', 'uctypes', 'uerrno',
                         'uhashlib', 'uheapq', 'uio', 'ujson', 'ulab', 'ulab/approx', 'ulab/compare', 'ulab/fft', 'ulab/filter', 'ulab/linalg', 'ulab/numerical',
                         'ulab/poly', 'ulab/user', 'ulab/vector', 'umachine', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'uqueue', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'usys', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'websocket',
@@ -101,7 +106,7 @@ class Stubber():
                         info['build'] = s.split('-')[1]
                     except IndexError:
                         pass
-            except (IndexError, AttributeError):
+            except (IndexError, AttributeError, TypeError):
                 pass
 
         try: # families
@@ -113,11 +118,22 @@ class Stubber():
         if info['platform'] == 'esp32_LoBo':
             info['family'] = 'loboris'
             info['port'] = 'esp32'
+        elif info['sysname'] == 'ev3':
+            # ev3 pybricks
+            info['family'] = 'ev3-pybricks'
+            info['release'] = "1.0.0"
+            try:
+                # Version 2.0 introduces the EV3Brick() class. 
+                from pybricks.hubs import EV3Brick
+                info['release'] = "2.0.0"
+            except ImportError:
+                pass
 
         # version info
-        info['ver'] = 'v'+info['release']
+        if info['release']:
+            info['ver'] = 'v'+info['release']
         if info['family'] != 'loboris':
-            if info['release'] >= '1.10.0' and info['release'].endswith('.0'):
+            if info['release'] and info['release'] >= '1.10.0' and info['release'].endswith('.0'):
                 #drop the .0 for newer releases
                 info['ver'] = info['release'][:-2]
             else:
@@ -444,6 +460,19 @@ def read_path()->str:
         show_help()
     return path
 
+def isMicroPython()->bool:
+    "runtime test to determine full or micropython"
+    #pylint: disable=unused-variable,eval-used
+    try:
+        # either test should fail on micropython
+        # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
+        # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
+        a = eval("1and 0")
+        b = bytes("abc", encoding="utf8")
+        return False
+    except (NotImplementedError, SyntaxError):
+        return True
+
 def main():
     print('stubber version :', stubber_version)
     try:
@@ -459,4 +488,5 @@ def main():
     stubber.create_all_stubs()
     stubber.report()
 
-main()
+if __name__ == "__main__" or isMicroPython():
+    main()

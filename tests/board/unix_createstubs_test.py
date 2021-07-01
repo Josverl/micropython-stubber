@@ -1,6 +1,7 @@
 # run createsubs in the unix version of micropython
 import os
 import json
+import sys
 import subprocess
 from pathlib import Path
 import pytest
@@ -15,9 +16,9 @@ import pytest
     "firmware", [ ('micropython_1_12') , ('micropython_1_13'), ('pycopy_3_3_2-25') ]
 )
 
-
+# only run createsubs in the unix version of micropython
+@pytest.mark.skipif(sys.platform == 'win32', reason="requires linux")
 def test_createstubs(firmware, tmp_path, script_folder):
-    # run createsubs in the unix version of micropython
     # Use temp_path to generate stubs 
     scriptfolder = os.path.abspath(script_folder)
     cmd = [os.path.abspath('tools/'+firmware), 'createstubs.py', '--path', tmp_path]
