@@ -8,7 +8,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version="1.3.15"
+stubber_version="1.3.16"
 try:
  from machine import resetWDT 
 except ImportError:
@@ -114,6 +114,7 @@ class Stubber:
      errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name,obj,e))
   except AttributeError as e:
    errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name,obj,e))
+  result=[i for i in result if not(i[0].startswith("_")and i[0]!="__init__")]
   gc.collect()
   return result,errors
  def add_modules(self,modules:list):
@@ -192,36 +193,43 @@ class Stubber:
    return
   items,errors=self.get_obj_attributes(object_expr)
   for name,rep,typ,obj in items:
-   if name.startswith("__")and name not in("__new__","__init__","__call__"):
-    continue
    resetWDT()
    sleep_us(1)
-   if typ in["<class 'function'>","<class 'bound_method'>"]:
-    ret="Any"
-    slf=""
-    if in_class>0:
-     slf="self, "
-     if name=="__init__":
-      ret="None"
-    s="{}def {}({}*args) -> {}:\n".format(indent,name,slf,ret)
-    s+=indent+"    ''\n"
-    s+=indent+"    ...\n\n"
-    fp.write(s)
-   elif typ in["<class 'str'>","<class 'int'>","<class 'float'>"]:
-    s=indent+name+" = "+rep+"\n"
-    fp.write(s)
-   elif typ=="<class 'type'>" and indent=="":
+   cls_mtd_tps=["<class 'function'>","<class 'bound_method'>"]
+   if typ=="<class 'type'>" and indent=="":
     s="\n"+indent+"class "+name+":\n" 
     s+=indent+"    ''\n"
     fp.write(s)
     self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1,)
-   else:
-    fp.write(indent+name+" = Any\n")
+   elif typ in cls_mtd_tps:
+    ret="Any"
+    slf=""
+    if typ==cls_mtd_tps[0]:
+     slf="self, "
+     if name=="__init__":
+      ret="None"
+    if typ==cls_mtd_tps[1]:
+     s="{}@classmethod\n".format(indent)
+     s+="{}def {}(cls) -> {}:\n".format(indent,name,ret)
+    else:
+     s="{}def {}({}*args) -> {}:\n".format(indent,name,slf,ret)
+    s+=indent+"    ''\n"
+    s+=indent+"    ...\n\n"
+    fp.write(s)
+   elif typ.startswith("<class '"):
+    t=typ[8:-2]
+    s=""
+    if t in["str","int","float","bool","bytearray"]:
+     s="{0}{1} = {2} # type: {3}\n".format(indent,name,rep,t)
+    if t in["dict","list","tuple"]:
+     ev={"dict":"{}","list":"[]","tuple":"()"}
+     s="{0}{1} = {2} # type: {3}\n".format(indent,name,ev[t],t)
+    fp.write(s)
   del items
   del errors
   try:
    del name,rep,typ,obj 
-  except(OSError,KeyError): 
+  except(OSError,KeyError,NameError): 
    pass
  @property
  def flat_fwid(self):
@@ -255,18 +263,18 @@ class Stubber:
    with open(f_name,"w")as f:
     f.write("{")
     f.write(dumps({"firmware":self.info})[1:-1])
-    f.write(",")
+    f.write(",\n")
     f.write(dumps({"stubber":{"version":stubber_version}})[1:-1])
-    f.write(",")
-    f.write('"modules" :[')
+    f.write(",\n")
+    f.write('"modules" :[\n')
     start=True
     for n in self._report:
      if start:
       start=False
      else:
-      f.write(",")
+      f.write(",\n")
      f.write(dumps(n))
-    f.write("]}")
+    f.write("\n]}")
    used=self._start_free-gc.mem_free() 
   except OSError:
    pass
