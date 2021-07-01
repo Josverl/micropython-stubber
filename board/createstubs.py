@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = "1.3.15"
+stubber_version = "1.3.16"
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -322,7 +322,8 @@ class Stubber:
                     name, obj, e
                 )
             )
-
+        #remove internal __ 
+        result = [i for i in result if not ( i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
         return result, errors
 
@@ -463,40 +464,14 @@ class Stubber:
             self._log.error(errors)
 
         for name, rep, typ, obj in items:
-            if name.startswith("__") and name not in ("__new__", "__init__", "__call__") :
-                # skip internals
-                continue
-
             # allow the scheduler to run on LoBo based FW
             resetWDT()
             sleep_us(1)
 
             self._log.debug("DUMPING {}{}{}:{}".format(indent, object_expr, name, typ))
+            cls_mtd_tps = ["<class 'function'>", "<class 'bound_method'>"]
 
-            if typ in ["<class 'function'>", "<class 'bound_method'>"]:
-                # module Function or class method
-                # will accept any number of params
-                # return type Any
-                ret = "Any"
-                slf = ""
-                if in_class > 0:
-                    slf = "self, "
-                    if name == "__init__":
-                        ret = "None"
-                s = "{}def {}({}*args) -> {}:\n".format(
-                    indent, name, slf, ret
-                )
-                s += indent + "    ''\n"
-                s += indent + "    ...\n\n"
-                fp.write(s)
-                self._log.debug("\n" + s)
-
-            elif typ in ["<class 'str'>", "<class 'int'>", "<class 'float'>"]:
-                s = indent + name + " = " + rep + "\n"
-                fp.write(s)
-                self._log.debug("\n" + s)
-            # new class
-            elif typ == "<class 'type'>" and indent == "":
+            if typ == "<class 'type'>" and indent == "":
                 # full expansion only on toplevel
                 # stub style : generic __init__ with Empty comment and pass
                 s = "\n" + indent + "class " + name + ":\n"  #
@@ -513,9 +488,48 @@ class Stubber:
                     indent + "    ",
                     in_class + 1,
                 )
-            else:
-                # keep only the name
-                fp.write(indent + name + " = Any\n")
+            # Class Methods 
+            elif typ in cls_mtd_tps:
+                # module Function or class method
+                # will accept any number of params
+                # return type Any
+                ret = "Any"
+                slf = ""
+                # Self parameter only on class functions
+                if typ == cls_mtd_tps[0]:
+                    slf = "self, "
+                    # __init__ returns None
+                    if name == "__init__":
+                        ret = "None"
+                # class method - add function decoration
+                if typ == cls_mtd_tps[1]:
+                    s = "{}@classmethod\n".format(indent)
+                    s += "{}def {}(cls) -> {}:\n".format(
+                        indent, name, ret
+                    )
+                else:
+                    s = "{}def {}({}*args) -> {}:\n".format(
+                        indent, name, slf, ret
+                    )
+                s += indent + "    ''\n"
+                s += indent + "    ...\n\n"
+                fp.write(s)
+                self._log.debug("\n" + s)
+            # constants of known types & values
+            elif typ.startswith("<class '"):
+                t = typ[8:-2]
+                s = ""
+                if t in ["str", "int", "float", "bool", "bytearray"]:
+                    #use actual value 
+                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name,  rep, t)
+                if t in ["dict", "list","tuple"]:
+                    # use empty value
+                    ev = {"dict":"{}", "list":"[]","tuple":"()"}
+                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name,  ev[t], t)
+                fp.write(s)
+                self._log.debug("\n" + s)
+
+
         del items
         del errors
         try:
