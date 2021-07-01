@@ -4,10 +4,27 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "mpy-cross",
-            "detail": "mpy-cross compile current file",
+            "label": "run createstubs",
+            "detail": "run createstubs in linux port",
             "type": "shell",
-            "command": " ${file} -O 3",
+            "windows": {
+                "command": "ubuntu run MICROPYPATH=./board ./tools/micropython board/createstubs.py"
+            },
+            "linux": {
+                "command": "MICROPYPATH=./board ./tools/micropython board/createstubs.py"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "minify",
+            "detail": "run minification",
+            "type": "shell",
+            "windows": {
+                "command": "python process.py minify --diff"
+            },
+            "linux": {
+                "command": "python3 process.py minify --diff"
+            },
             "problemMatcher": [],
         },
         {
@@ -22,6 +39,29 @@
             }
         },
 
+        {
+            "label": "run minified",
+            "detail": "run minified createstubs in linux port",
+            "dependsOn": [
+                "minify"
+            ],
+            "type": "shell",
+            "windows": {
+                "command": "ubuntu run ./tools/micropython minified/createstubs.py"
+            },
+            "linux": {
+                "command": "./tools/micropython minified/createstubs.py"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "mpy-cross",
+            "detail": "mpy-cross compile current file",
+            "type": "shell",
+            "command": " ${file} -O 3",
+            "problemMatcher": [],
+            "group": "build"
+        },
         {
             "label": "pylint all",
             "detail": "py -m pylint: whole project",

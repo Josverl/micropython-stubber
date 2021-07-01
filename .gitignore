@@ -3,6 +3,8 @@ project.pymakr
 
 # no python virtual environment
 .env/*
+.venv
+
 # no compiled python 
 **/__pycache__/**
 
@@ -15,7 +17,8 @@ board/stubs
 minified/stubs
 all_stubs
 all-stubs
-stubs
+stubs/*
+dev-stubs/*
 
 # ignore test coverage report
 .coverage
@@ -27,4 +30,6 @@ coverage_report
 desktop.ini
 .pytest_cache/*
 
+
+.py_cache
 

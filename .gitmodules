@@ -1,0 +1,4 @@
+[submodule "micropython"]
+	branch = master
+[submodule "micropython-lib"]
+	branch = master

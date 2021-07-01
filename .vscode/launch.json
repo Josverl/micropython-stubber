@@ -29,7 +29,18 @@
             "program": "process.py",
             "args": ["minify"]
             
-        }
+        },
+        {
+            // disable pytest coverage report as it conflicts with debugging tests
+            "name": "Debug pytest tests",
+            "type": "python",
+            "request": "test",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false,
+                "env": {"PYTEST_ADDOPTS": "--no-cov"}
+            // "envFile": "${workspaceFolder}/.env.test",
+        },
 
     ]
 }

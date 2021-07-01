@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Collect modules and python stubs from the Loboris MicroPython source project
+Collect modules and python stubs from the Loboris MicroPython source project and stores them in the all_stubs folder
+The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
+
 # pylint: disable= line-too-long
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
@@ -11,7 +13,6 @@ import downloader
 import utils
 
 FAMILY = 'loboris'
-fmly = 'lobo'
 PORT = 'esp32_lobo'
 
 
@@ -32,8 +33,8 @@ def get_frozen(stub_path=None, *, repo=None, version='3.2.24'):
                       "upip_utarfile.py", "upysh.py", "urequests.py", "writer.py"]
     #download
     downloader.download_files(repo, frozen_modules, stub_path)
-    # make a manifest 
-    utils.make_manifest(stub_path, FAMILY, "frozen", fmly, version=version)
+    # make a manifest
+    utils.make_manifest(stub_path, FAMILY, "frozen", version=version)
 
 
 if __name__ == "__main__":
