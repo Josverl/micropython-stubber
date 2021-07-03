@@ -24,7 +24,7 @@ dev-stubs/*
 
 
 # ignore test coverage report
-.coverage
+.coverage*
 htmlcov
 coverage_html_report
 coverage_report
@@ -40,4 +40,3 @@ desktop.ini
 dev-stubs
 
 .py_cache
-
