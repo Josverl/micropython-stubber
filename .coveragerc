@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 
 [html]
-directory = coverage_report
+directory = coverage
 
 [run]
 branch = True
