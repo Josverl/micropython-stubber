@@ -20,22 +20,30 @@ from libcst import (
 class TypingCollector(cst.CSTVisitor):
     def __init__(self):
         # stack for storing the canonical name of the current function def
-        self.stack: List[Tuple[str, ...]] = []
+        self.stack: List[str, Tuple[str, ...]]] = []
         # store the annotations
         self.annotations: Dict[
-            Tuple[str, ...],  # key: tuple of canonical class/function name
+        Tuple[str, ...],                        # key: tuple of canonical class/function name
             Tuple[
-                cst.Parameters, Optional[cst.Annotation], Optional[str]
-            ],  # value: (params, returns, docstring)
+                Optional[cst.Parameters],       # Params 
+                Optional[cst.Annotation],       # returns
+                Optional[Sequence[cst.Arg]],    # Class bases 
+                Optional[str]                   # Docstring 
+            ],  # value: (params, returns, bases, docstring)
         ] = {}
 
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+        # found class def in the source
+        # stack +=  [name]
+        # annotations+=  [gramps.parent.name], base classes, None,  docstring
         self.stack.append(node.name.value)
         docstring = node.get_docstring(clean=False)
         ##todo: or possible use deep_clone op copy tree
         # classDef>body>identedblock>body>SimpleStatementLine>SimpleString
         bases = node.bases
-        self.annotations[tuple(self.stack)] = (bases, None, docstring)
+        key : Tuple[str, ...]= tuple(self.stack)
+        self.annotations[key] = ( None, None,bases, docstring)
+        print(tuple(self.stack))
 
     def leave_ClassDef(self, node: cst.ClassDef) -> None:
         self.stack.pop()
@@ -43,7 +51,7 @@ class TypingCollector(cst.CSTVisitor):
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         docstring = node.get_docstring(clean=False)
-        self.annotations[tuple(self.stack)] = (node.params, node.returns, docstring)
+        self.annotations[tuple(self.stack)] = (node.params, node.returns,None, docstring)
         return False  # pyi files don't support inner functions, return False to stop the traversal.
 
     def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
