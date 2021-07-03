@@ -25,9 +25,7 @@ dev-stubs/*
 
 # ignore test coverage report
 .coverage*
-htmlcov
-coverage_html_report
-coverage_report
+coverage
 
 # and tests results
 junit/*
