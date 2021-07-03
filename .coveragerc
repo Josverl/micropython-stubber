@@ -10,6 +10,7 @@ source =
     board
     minified
 omit =
+    */commands/__init__.py	
     */boot.py
     */main.py
     */logging.py
@@ -39,11 +40,21 @@ exclude_lines =
     #
     if __name__ == "__main__" or isMicroPython():
     main()
-    show help()
+    # utility functions
+    show_help()
+    isMicroPython()
+    read_path()
 
     #unreachable 
     info["release"] = "2.0.0" 
     if arch
+
+    # Micropython detection
+    except (NotImplementedError, SyntaxError): 
+
+    # catch error 
+    except (OSError, KeyError):
+    except (OSError, AttributeError):
 
 
 ignore_errors = True
