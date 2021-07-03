@@ -34,55 +34,62 @@ debug = False
 g_install_path = os.getcwd()  # Default install path
 gzdict_sz = 16 + 15
 
+
 def version():
-    print('Python version 3.2 or above is required.')
+    print("Python version 3.2 or above is required.")
     sys.exit(1)
+
 
 if sys.version_info.major < 3:
     version()
 elif sys.version_info.major == 3 and sys.version_info.minor < 2:
     version()
 
+
 class NotFoundError(Exception):
     pass
 
+
 # Read a line from a socket
 def read_line(sock):
-    ret = b''
+    ret = b""
     while True:
         c = sock.recv(1)
-        if c == b'':
+        if c == b"":
             break
-        elif c == b'\n':
+        elif c == b"\n":
             ret += c
             break
         else:
             ret += c
     return ret
 
+
 # Read multiple lines from a socket
 def read_lines(sock):
-    s = b''
+    s = b""
     while True:
         s1 = read_line(sock)
         s += s1
-        if s1 == b'\r\n' or s1 == b'':
+        if s1 == b"\r\n" or s1 == b"":
             break
     return s
+
 
 # Expects absolute path and *file* name
 def _makedirs(name):
     dirname = os.path.dirname(name)
+
     def split_path(lst, path):
         q = os.path.split(path)
-        if q[1] != '':
+        if q[1] != "":
             lst.append(q[1])
             split_path(lst, q[0])
 
     lst = []
     split_path(lst, dirname)
     lst.reverse()
-    mypath = os.path.abspath('/')
+    mypath = os.path.abspath("/")
     for elem in lst:
         mypath = os.path.join(mypath, elem)
         if not os.path.exists(mypath):
@@ -96,16 +103,16 @@ def _makedirs(name):
 def install_tar(f, prefix):
     meta = {}
     for info in f:
-        #print(info)
+        # print(info)
         fname = info.name
         try:
-            fname = fname[fname.index("/") + 1:]
+            fname = fname[fname.index("/") + 1 :]
         except ValueError:
             fname = ""
 
         save = True
         for p in ("setup.", "PKG-INFO", "README"):
-            #print(fname, p)
+            # print(fname, p)
             if fname.startswith(p) or ".egg-info" in fname:
                 if fname.endswith("/requires.txt"):
                     meta["deps"] = f.extractfile(info).read()
@@ -125,14 +132,17 @@ def install_tar(f, prefix):
                     outf.write(subf.read())
     return meta
 
+
 warn_ussl = True
+
+
 def url_open(url):
     global warn_ussl
 
     if debug:
         print(url)
 
-    proto, _, host, urlpath = url.split('/', 3)
+    proto, _, host, urlpath = url.split("/", 3)
     try:
         ai = usocket.getaddrinfo(host, 443)
     except OSError as e:
@@ -149,7 +159,9 @@ def url_open(url):
         s.connect(addr)
         s.setblocking(True)
 
-        s.send(("GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n" % (urlpath, host)).encode('UTF8'))
+        s.send(
+            ("GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n" % (urlpath, host)).encode("UTF8")
+        )
         l = read_line(s)
         protover, status, msg = l.split(None, 2)
         if status != b"200":
@@ -160,13 +172,14 @@ def url_open(url):
             l = read_line(s)
             if not l:
                 raise ValueError("Unexpected EOF in HTTP headers")
-            if l == b'\r\n':
+            if l == b"\r\n":
                 break
     except Exception as e:
         s.close()
         raise e
 
     return s
+
 
 # Now searches official library first before looking on PyPi for user packages
 def get_pkg_metadata(name):
@@ -176,13 +189,15 @@ def get_pkg_metadata(name):
         f = url_open("https://pypi.org/pypi/%s/json" % name)
     s = read_lines(f)
     try:
-        return json.loads(s.decode('UTF8'))
+        return json.loads(s.decode("UTF8"))
     finally:
         f.close()
+
 
 def fatal(msg):
     print("Error:", msg)
     sys.exit(1)
+
 
 def install_pkg(pkg_spec, install_path):
     data = get_pkg_metadata(pkg_spec)
@@ -199,7 +214,9 @@ def install_pkg(pkg_spec, install_path):
         with tempfile.TemporaryFile() as temp_file:
             temp_file.write(str1)
             temp_file.seek(0)
-            with tarfile.TarFile(fileobj=temp_file) as tar_file:  # Expects a file object
+            with tarfile.TarFile(
+                fileobj=temp_file
+            ) as tar_file:  # Expects a file object
                 meta = install_tar(tar_file, install_path)
     finally:
         f1.close()
@@ -208,7 +225,7 @@ def install_pkg(pkg_spec, install_path):
 
 def install(to_install):
     install_path = g_install_path
-    install_path = os.path.join(install_path, '')  # Append final /
+    install_path = os.path.join(install_path, "")  # Append final /
     if not isinstance(to_install, list):
         to_install = [to_install]
     print("Installing to: " + install_path)
@@ -230,11 +247,17 @@ def install(to_install):
                 deps = deps.decode("utf-8").split("\n")
                 to_install.extend(deps)
     except Exception as e:
-        print("Error installing '{}': {}, packages may be partially installed".format(
-            pkg_spec, e), file=sys.stderr)
+        print(
+            "Error installing '{}': {}, packages may be partially installed".format(
+                pkg_spec, e
+            ),
+            file=sys.stderr,
+        )
+
 
 def help_msg():
-    print("""\
+    print(
+        """\
 micropip - Simple PyPI package manager for MicroPython
 Runs on a PC under Python 3.2 or above, and installs to a PC directory for
 subsequent transfer to target hardware.
@@ -247,7 +270,9 @@ If <path> is not given, packages will be installed into the current directory.
 
 Note: only MicroPython packages (usually, named micropython-*) are supported
 for installation, upip does not support arbitrary code in setup.py.
-""")
+"""
+    )
+
 
 def main():
     global debug

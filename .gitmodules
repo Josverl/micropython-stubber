@@ -1,4 +1,6 @@
 [submodule "micropython"]
-	branch = master
+	path = micropython
+	url = https://github.com/micropython/micropython.git
 [submodule "micropython-lib"]
-	branch = master
+	path = micropython-lib
+	url = https://github.com/micropython/micropython-lib.git

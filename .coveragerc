@@ -5,18 +5,17 @@ directory = coverage_report
 
 [run]
 branch = True
+source = 
+    src
+    board
+    minified
 omit =
-    
-    # no stubs in coverage
-    stubs
-    # exclude tests from cov 
-    src/test_*.py
-    src/*_test.py
-    # exclude external files 
-    src/make_stub_files.py
-    src/micropip.py
-    
-    src/firmwares.py
+    */boot.py
+    */main.py
+    */logging.py
+    */make_stub_files.py
+    */micropip.py
+
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -27,6 +26,7 @@ exclude_lines =
     # Don't complain about missing debug-only code:
     def __repr__
     if self\.debug
+    self._log.debug
 
     # Don't complain if tests don't hit defensive assertion code:
     raise AssertionError
@@ -35,6 +35,16 @@ exclude_lines =
     # Don't complain if non-runnable code isn't run:
     if 0:
     if __name__ == .__main__.:
+
+    #
+    if __name__ == "__main__" or isMicroPython():
+    main()
+    show help()
+
+    #unreachable 
+    info["release"] = "2.0.0" 
+    if arch
+
 
 ignore_errors = True
 

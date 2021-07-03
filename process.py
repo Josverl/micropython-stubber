@@ -18,9 +18,9 @@ except ImportError:
     pass
 
 ROOT = Path(__file__).parent
-SCRIPT = ROOT / 'board' / 'createstubs.py'
-DEST = ROOT / 'minified' / 'createstubs.py'
-PATCHES = ROOT / 'patches'
+SCRIPT = ROOT / "board" / "createstubs.py"
+DEST = ROOT / "minified" / "createstubs.py"
+PATCHES = ROOT / "patches"
 
 
 def apply_patch(s, patch, revert=False):
@@ -35,33 +35,33 @@ def apply_patch(s, patch, revert=False):
     _hdr_pat = re.compile(r"@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@")
     s = s.splitlines(True)
     p = patch.splitlines(True)
-    t = ''
+    t = ""
     i = sl = 0
-    (midx, sign) = (1, '+') if not revert else (3, '-')
+    (midx, sign) = (1, "+") if not revert else (3, "-")
     while i < len(p) and not p[i].startswith("@@"):
         i += 1  # skip header lines
     while i < len(p):
         m = _hdr_pat.match(p[i])
         if not m:
-            raise Exception("Bad patch -- regex mismatch [line "+str(i)+"]")
-        l = int(m.group(midx))-1 + (m.group(midx+1) == '0')  # noqa
+            raise Exception("Bad patch -- regex mismatch [line " + str(i) + "]")
+        l = int(m.group(midx)) - 1 + (m.group(midx + 1) == "0")  # noqa
         if sl > l or l > len(s):
-            raise Exception("Bad patch -- bad line num [line "+str(i)+"]")
-        t += ''.join(s[sl:l])
+            raise Exception("Bad patch -- bad line num [line " + str(i) + "]")
+        t += "".join(s[sl:l])
         sl = l
         i += 1
-        while i < len(p) and p[i][0] != '@':
-            if i+1 < len(p) and p[i+1][0] == '\\':
+        while i < len(p) and p[i][0] != "@":
+            if i + 1 < len(p) and p[i + 1][0] == "\\":
                 line = p[i][:-1]
                 i += 2
             else:
                 line = p[i]
                 i += 1
             if len(line) > 0:
-                if line[0] == sign or line[0] == ' ':
+                if line[0] == sign or line[0] == " ":
                     t += line[1:]
-                sl += (line[0] != sign)
-    t += ''.join(s[sl:])
+                sl += line[0] != sign
+    t += "".join(s[sl:])
     return t
 
 
@@ -83,23 +83,26 @@ def edit_lines(content, edits, show_diff=False):
     Returns:
         str: edited string
     """
+
     def comment(l, x):
         return l.replace(x, f"# {x}")
 
-    def rprint(l, x):   #pylint: disable= unused-variable
+    def rprint(l, x):  # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, f"print")
 
-    def rpass(l, x):    #pylint: disable= unused-variable
+    def rpass(l, x):  # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         return l.replace(x, f"pass")
 
     def get_whitespace_context(content, index):
         """Get whitespace count of lines surrounding index"""
+
         def count_ws(line):
             return sum(1 for _ in itertools.takewhile(str.isspace, line))
-        lines = content[index - 1:index+2]
+
+        lines = content[index - 1 : index + 2]
         context = (count_ws(l) for l in lines)
         return context
 
@@ -127,6 +130,7 @@ def edit_lines(content, edits, show_diff=False):
         open_cnt = line.count("(")
         close_cnt = line.count(")")
         ahead_index = 1
+        look_ahead = 0
         while not open_cnt == close_cnt:
             look_ahead = l_index + ahead_index
             ahead_index += 1
@@ -138,9 +142,16 @@ def edit_lines(content, edits, show_diff=False):
         prev = content[index - 1]
         _, line_ws, post_ws = get_whitespace_context(content, index)
         prev_words = prev.strip().strip(":").split()
-        check = any(t in ('if', 'else', ) for t in prev_words)
+        check = any(
+            t
+            in (
+                "if",
+                "else",
+            )
+            for t in prev_words
+        )
         if check and line_ws != post_ws:
-            return range(index-1, index+1)
+            return range(index - 1, index + 1)
 
     def handle_try_except(content, index):
         """Checks if line at index is in try/except block
@@ -157,7 +168,7 @@ def edit_lines(content, edits, show_diff=False):
         """
         prev = content[index - 1]
         _, line_ws, post_ws = get_whitespace_context(content, index)
-        if 'except' in prev and line_ws != post_ws:
+        if "except" in prev and line_ws != post_ws:
             return True
 
     lines = []
@@ -178,7 +189,7 @@ def edit_lines(content, edits, show_diff=False):
                     if handle_try_except(content, l_index):
                         edit = "rpass"
                         text = line.strip()
-                func = eval(edit)   #pylint: disable= eval-used
+                func = eval(edit)  # pylint: disable= eval-used
                 line = func(line, text)
                 if line != _line:
                     if show_diff:
@@ -218,15 +229,23 @@ def minify_script(patches=None, keep_report=True, show_diff=False):
         ("comment", "self._log.error"),
     ]
     if keep_report:
-        report = ('rprint', ('self._log.info("Stub module: {:<20} to file:'
-                             ' {:<55} mem:{:>5}".'
-                             'format(module_name, file_name, m1))'))
-        clean = ('rprint', 'self._log.info("Clean/remove files in folder: {}".format(path))')
+        report = (
+            "rprint",
+            (
+                'self._log.info("Stub module: {:<20} to file:'
+                ' {:<55} mem:{:>5}".'
+                "format(module_name, file_name, m1))"
+            ),
+        )
+        clean = (
+            "rprint",
+            'self._log.info("Clean/remove files in folder: {}".format(path))',
+        )
         edits.insert(0, report)
         edits.insert(1, clean)
 
-    minopts = Values({'tabs': False})
-    with SCRIPT.open('r') as f:
+    minopts = Values({"tabs": False})
+    with SCRIPT.open("r") as f:
         content = f.read()
         for path in patches:
             path = Path(path)
@@ -246,8 +265,9 @@ def get_patches():
 def resolve_patches(patch_names):
     """Validates/Provides help for patches"""
     patch_files = list(get_patches())
-    patches = [next((p for p in patch_files if p[0] == n), (n, None))
-               for n in patch_names]
+    patches = [
+        next((p for p in patch_files if p[0] == n), (n, None)) for n in patch_names
+    ]
     paths = []
     for name, path in patches:
         if path is None:
@@ -264,13 +284,13 @@ def cli_patch(**kwargs):
     """apply patch cli handler"""
     print("Patching createstubs.py...")
     out = kwargs.get("output")
-    patch_names = kwargs.pop('patches')
+    patch_names = kwargs.pop("patches")
     paths = resolve_patches(patch_names)
-    with SCRIPT.open('r') as f:
+    with SCRIPT.open("r") as f:
         source = f.read()
         for p in paths:
             content = apply_patch(source, p.read_text())
-    with out.open('w+') as o:
+    with out.open("w+") as o:
         o.write(content)
     print("\nDone!")
     print("Patched file written to:", out)
@@ -286,14 +306,10 @@ def cli_minify(**kwargs):
         print("Please install via:\n  pip install pyminifier")
         sys.exit(1)
     patch_paths = resolve_patches(patches)
-    with out.open('w+') as f:
-        report = kwargs.pop('no_report')
-        diff = kwargs.pop('diff')
-        source = minify_script(
-            patches=patch_paths,
-            keep_report=report,
-            show_diff=diff
-        )
+    with out.open("w+") as f:
+        report = kwargs.pop("no_report")
+        diff = kwargs.pop("diff")
+        source = minify_script(patches=patch_paths, keep_report=report, show_diff=diff)
         f.write(source)
     print("\nDone!")
     print("Minified file written to:", out)
@@ -301,46 +317,49 @@ def cli_minify(**kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Pre/Post Processing for createstubs.py")
+        description="Pre/Post Processing for createstubs.py"
+    )
     parser.set_defaults(func=None)
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         help="Specify file to output to. Defaults to ./minified/createstubs.py",
         type=Path,
-        default=DEST
+        default=DEST,
     )
     subparsers = parser.add_subparsers(help="Command to execute")
 
-    minify_parser = subparsers.add_parser("minify",
-                                          help=("Create minified version of"
-                                                " createstubs.py")
-                                          )
+    minify_parser = subparsers.add_parser(
+        "minify", help=("Create minified version of" " createstubs.py")
+    )
     minify_parser.add_argument(
-        '-p', '--patch',
-        action='append',
+        "-p",
+        "--patch",
+        action="append",
         help="Apply patch before minification",
-        default=[]
+        default=[],
     )
     minify_parser.add_argument(
-        "-d", "--diff",
-        help="Print diff report from minify",
-        action='store_true'
+        "-d", "--diff", help="Print diff report from minify", action="store_true"
     )
     minify_parser.add_argument(
-        "-n", "--no-report",
-        help=("Disables all output from createstubs.py."
-              " Use if your having memory related issues."),
-        action="store_false"
+        "-n",
+        "--no-report",
+        help=(
+            "Disables all output from createstubs.py."
+            " Use if your having memory related issues."
+        ),
+        action="store_false",
     )
     minify_parser.set_defaults(func=cli_minify)
 
     patch_parser = subparsers.add_parser(
-        "patch",
-        help=("Apply a patch to createstubs.py"))
+        "patch", help=("Apply a patch to createstubs.py")
+    )
     patch_parser.add_argument(
         "patches",
         help="List of patches to apply, seperated by a space.",
-        action='append',
+        action="append",
     )
     patch_parser.set_defaults(func=cli_patch)
 

@@ -1,6 +1,10 @@
 #production requirements
-esptool
-pyminifier
-requests
+esptool >= 2.8
 
+pyminifier >= 2.1
+requests >= 2.25.1
 
+mypy >= 0.812
+
+# stub refactoring
+libcst >= 0.3.19
