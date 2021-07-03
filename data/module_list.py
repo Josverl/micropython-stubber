@@ -5,6 +5,7 @@ for this :
     - split the lines into individual module names
     - combine them in one set
     - remove the ones than cannot be stubbed
+    - remove test modules, ending in `_test`
     - todo: remove the frozen modules from this list
 """
 
@@ -32,6 +33,8 @@ def read_modules(path: Path = None) -> Set:
                     file_mods = line.split()
                     # print(line[0:-1])
                     # print( set(file_mods))
+                    # remove modules ending in _test
+                    file_mods = [m for m in file_mods if not m.endswith("_test")]
                     all_modules = set(all_modules | set(file_mods))
                 # next
                 line = f.readline()

@@ -1,0 +1,46 @@
+// https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+{
+    "include": [
+        "src",
+        "board",
+        "data"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "src/experimental",
+        "src/typestubs"
+    ],
+    "ignore": [
+        "data",
+        "all_stubs",
+    ],
+    "stubPath": "src/stubs",
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.8",
+    "pythonPlatform": "Linux",
+    "executionEnvironments": [
+        {
+            "root": "board",
+            "pythonVersion": "3.5",
+            "pythonPlatform": "Linux",
+            "extraPaths": [
+                "board/lib",
+                "all-stubs/cpython-core",
+                "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
+                "all-stubs/micropython-esp32-1_15"
+            ],
+            "verboseOutput": true
+        },
+        {
+            "root": "src",
+        },
+        {
+            "root": "tests",
+            // "extraPaths": [
+            //     "tests/mocks",
+            // ]
+        }
+    ]
+}

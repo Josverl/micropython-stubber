@@ -1,5 +1,5 @@
 # This workflow will :
-# - test the workstation scripts 
+# - test the workstation scripts
 # - test the createstubs on  multiple micropyton linux versions
 # - test the minified createstubs on  multiple micropyton linux versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
@@ -12,62 +12,94 @@ on:
   pull_request:
   #   branches: [ master ]
 
-
 jobs:
   run_tests:
-    runs-on: ubuntu-latest
+    name: Test on (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-20.04 # ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: "true"
+          # token: ${{ secrets.PAT_TOKEN }}  PAT token needed for Private Repo
 
-    # - name: Extract branch name
-    #   id: extract_branch
-    #   shell: bash
-    #   run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      # - name: Extract branch name
+      #   id: extract_branch
+      #   shell: bash
+      #   run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pylint
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pylint
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-    - name: flag tools executable
-      run: |
-        chmod +x $GITHUB_WORKSPACE/tools/* -v
-        MICROPYPATH=./board ./tools/micropython -c "import sys;print(sys.path);import logging" 
+      - name: flag tools executable
+        run: |
+          chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
+          MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_16 -c "import sys;print(sys.path);import logging"
 
-    - name: create or update minified version
-      run: |
-        python process.py minify
+      - name: create or update minified version
+        run: |
+          python process.py minify
 
-    - name: verify minified using pylint
-      run: |
-        pylint minified/createstubs.py -E -d E0401,E1101
-        # ignore Unable to import '<upythonmodule>' (import-error)
-        # ignore Module 'gc' has no 'mem_free' member (no-member)
+      - name: verify minified using pylint
+        run: |
+          pylint minified/createstubs.py -E -d E0401,E1101
+          # ignore Unable to import '<upythonmodule>' (import-error)
+          # ignore Module 'gc' has no 'mem_free' member (no-member)
 
-    - name: Test with pytest
-      run: pytest tests/common tests/board --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+      - name: Test with pytest
+        run: pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}.xml
 
-    - name: report code coverage
-      uses: codecov/codecov-action@v1
-      with:
-        file: junit/test-results-${{ matrix.python-version }}.xml
-        name: codecov-umbrella # optional
-        verbose: true # optional (default = false)      
-      if: ${{ always() }}
-             
+      - name: Upload Unit Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit Test Results (Python ${{ matrix.python-version }})
+          path: junit/test-results*.xml
 
-    - name: Upload pytest test results
-      uses: actions/upload-artifact@v2
-      with:
-        name: pytest-results-${{ matrix.python-version }}
-        path: junit/test-results-${{ matrix.python-version }}.xml
-      # Use always() to always run this step to publish test results when there are test failures
-      if: ${{ always() }}
+      # # https://github.com/marketplace/actions/publish-unit-test-results
+      # - name: Publish Unit Test Results
+      #   uses: EnricoMi/publish-unit-test-result-action@v1
+      #   if: always()
+      #   with:
+      #     files: junit/test-results*.xml
+
+      # - name: Upload pytest test results
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: pytest-results-${{ matrix.python-version }}
+      #     path: junit/test-results-${{ matrix.python-version }}.xml
+      #   # Use always() to always run this step to publish test results when there are test failures
+      #   if: always()
+
+  publish-test-results:
+    name: "Publish Unit Tests Results"
+    needs: run_tests
+    runs-on: ubuntu-latest
+    # the run_tests job might be skipped, we don't need to run this job then
+    if: success() || failure()
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: artifacts/**/*.xml

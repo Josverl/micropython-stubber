@@ -1,10 +1,12 @@
-
 from typing import Any, Dict, Optional, Sequence, Tuple, Union
+
 Node = Any
-class TokenInfo(namedtuple(Tuple[, , , , ])):
+
+class TokenInfo(namedtuple(Tuple[Any, Any, Any, Any, Any])):
     def __str__(self) -> Any: ...
-        #   0: return %(self.type, tok_name[self.type], self.string, self.start, self.line)
-        # ? 0: return %Tuple[self.type, tok_name[self.type], self.string, self.start, self.line]
+    #   0: return %(self.type, tok_name[self.type], self.string, self.start, self.line)
+    # ? 0: return %Tuple[self.type, tok_name[self.type], self.string, self.start, self.line]
+
 def get_indent(l: Any) -> Tuple[int, Any]: ...
 def get_str(l: Any, readline: Any) -> Tuple[str, Any, Any]: ...
 def tokenize(readline: Any) -> None: ...
