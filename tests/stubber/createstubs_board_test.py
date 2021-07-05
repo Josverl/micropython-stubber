@@ -57,10 +57,6 @@ def test_stubber_info_custom():
 # test the fwid naming on the different platforms
 #################################################
 
-from collections import namedtuple
-
-UName = namedtuple("uname", "sysname nodename release version machine")
-
 # Lobo
 lobo = UName(
     sysname="esp32_LoBo",
