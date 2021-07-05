@@ -18,7 +18,8 @@
 
 - postprocessing 
     - minification adjusted to work with `black`
-    - use `mypy.stubgen`
+    - use `mypy.stubgen` to generate stubs 
+    - remove dependency and 'make_stub_files.py' as this is no longer maintained and has several issues.
     - run per folder 
         - verify 1:1 relation .py-.pyi
         - run `mypy.stubgen` to generate missing .pyi files
