@@ -1,6 +1,6 @@
 # Ref: https://github.com/typeddjango/django-stubs/blob/99ed5b1a094bc441115a56fb01828b89e6906372/scripts/merge_stubs_into_django.py
 
-from libcst import parse_module
+from libcst import parse_module, CSTValidationError
 from libcst.codemod import CodemodContext
 from libcst.codemod.visitors import ApplyTypeAnnotationsVisitor
 
@@ -56,14 +56,28 @@ for key in stubs_dict:
     except:
         prRed("No corresponding file for stub: " + stubs_dict[key])
         continue
+    source_module = ""
+    try:
+        source_module = parse_module(source)
 
-    source_module = parse_module(source)
-    result = visitor.transform_module(source_module)
+        result = visitor.transform_module(source_module)
+        # will throw errors on incorrect stub application / syntax
+        # - Must have at least one kwonly param if ParamStar is used.
+        # - Must have at least one posonly param if ParamSlash is used.
+        #       def time_pulse_us(pin: Pin, pulse_level: int, timeout_us: int = 1000000, /) -> int:
+        #       works when changed to :
+        #       def time_pulse_us(__pin: Pin, pulse_level: int, timeout_us: int = 1000000, /) -> int:
+        # so we'll need to check the manual typehints somehow for these type of notation mistakes
+
+    except CSTValidationError as e:
+        print(e)
 
     try:
-        file = open(sources_dict[key], "w")
-        file.write(result.code)
-        file.close()
         prGreen(sources_dict[key])
+        print(result.code)
+        prGreen(sources_dict[key])
+        # file = open(sources_dict[key], "w")
+        # file.write(result.code)
+        # file.close()
     except:
         prRed("Error saving file: " + sources_dict[key])
