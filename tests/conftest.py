@@ -6,8 +6,8 @@ import pytest
 
 # from filelock import FileLock
 
-# make sure that the source can be found
-sys.path.insert(1, "./src")
+# # make sure that the source can be found
+# sys.path.insert(1, "./src")
 
 # Test repos are submodules of this repo
 TESTREPO = "./micropython"
