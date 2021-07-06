@@ -14,6 +14,8 @@ from libcst.codemod import Codemod, CodemodContext, CodemodTest
 from codemod.visitors import ApplyStubberAnnotationsVisitor
 from libcst.testing.utils import data_provider
 
+PYTHON_GRAMMER = "3.8"
+
 TEST_DATA = (
     # base test, update return type
     (
@@ -132,7 +134,7 @@ class TestApplyAnnotationsVisitor(CodemodTest):
             before,
             after,
             context_override=context,
-            python_version="3.5",
+            python_version=PYTHON_GRAMMER,
         )
 
     @data_provider(
@@ -161,7 +163,11 @@ class TestApplyAnnotationsVisitor(CodemodTest):
         )
         # Test setting the overwrite flag on the codemod instance.
         self.assertCodemod(
-            before, after, context_override=context, overwrite_existing_annotations=True
+            before,
+            after,
+            context_override=context,
+            overwrite_existing_annotations=True,
+            python_version=PYTHON_GRAMMER,
         )
 
         # Test setting the flag when storing the stub in the context.
@@ -171,7 +177,12 @@ class TestApplyAnnotationsVisitor(CodemodTest):
             parse_module(textwrap.dedent(stub.rstrip())),
             overwrite_existing_annotations=True,
         )
-        self.assertCodemod(before, after, context_override=context)
+        self.assertCodemod(
+            before,
+            after,
+            context_override=context,
+            python_version=PYTHON_GRAMMER,
+        )
 
     @data_provider(
         (
@@ -231,11 +242,15 @@ class TestApplyAnnotationsVisitor(CodemodTest):
     def test_ata_add_missing_params(self, stub: str, before: str, after: str) -> None:
         context = CodemodContext()
         ApplyStubberAnnotationsVisitor.store_stub_in_context(
-            context,
-            parse_module(textwrap.dedent(stub.rstrip())),
+            context=context,
+            stub=parse_module(textwrap.dedent(stub.rstrip())),
             overwrite_existing_annotations=True,
         )
         # Test setting the overwrite flag on the codemod instance.
         self.assertCodemod(
-            before, after, context_override=context, overwrite_existing_annotations=True
+            before,
+            after,
+            context_override=context,
+            overwrite_existing_annotations=True,
+            python_version=PYTHON_GRAMMER,
         )
