@@ -1,6 +1,6 @@
 #
 from libcst.codemod import CodemodTest
-from src.codemod.commands.noop import NOOPCommand
+from codemod.commands.noop import NOOPCommand
 
 
 class TestNOOPCodemod(CodemodTest):

@@ -46,17 +46,12 @@ class ConvertConstantCommand(VisitorBasedCodemodCommand):
         self.constant = constant
 
     def leave_SimpleString(
-        self, original_node: cst.SimpleString, updated_node: cst.SimpleString
+        self, 
+        original_node: cst.SimpleString, 
+        updated_node: cst.SimpleString
     ) -> Union[cst.SimpleString, cst.Name]:
         if literal_eval(updated_node.value) == self.string:
-            # Check to see if the string matches what we want to replace. If so,
-            # then we do the replacement. We also know at this point that we need
-            # to import the constant itself.
-            AddImportsVisitor.add_needed_import(
-                self.context,
-                "utils.constants",
-                self.constant,
-            )
+
             return cst.Name(self.constant)
         # This isn't a string we're concerned with, so leave it unchanged.
         return updated_node
