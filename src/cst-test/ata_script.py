@@ -1,8 +1,9 @@
 # Ref: https://github.com/typeddjango/django-stubs/blob/99ed5b1a094bc441115a56fb01828b89e6906372/scripts/merge_stubs_into_django.py
 
-from libcst import parse_module, CSTValidationError
+
+from libcst import parse_module, CSTValidationError, Module
 from libcst.codemod import CodemodContext
-from libcst.codemod.visitors import ApplyTypeAnnotationsVisitor
+from codemod.visitors import ApplyStubberAnnotationsVisitor
 
 from pathlib import Path
 
@@ -16,7 +17,7 @@ def prGreen(skk):
 
 
 context = CodemodContext()
-visitor = ApplyTypeAnnotationsVisitor(context)
+visitor = ApplyStubberAnnotationsVisitor(context)
 
 # Stubs := Rich
 # Sources: to be enriched
@@ -56,10 +57,9 @@ for key in stubs_dict:
     except:
         prRed("No corresponding file for stub: " + stubs_dict[key])
         continue
-    source_module = ""
+    source_module: Module
     try:
         source_module = parse_module(source)
-
         result = visitor.transform_module(source_module)
         # will throw errors on incorrect stub application / syntax
         # - Must have at least one kwonly param if ParamStar is used.
@@ -81,3 +81,27 @@ for key in stubs_dict:
         # file.close()
     except:
         prRed("Error saving file: " + sources_dict[key])
+
+    # Also look at
+    # https://github.com/sandnattanicha/Final-Project/blob/a45db843058f8b1844c146a35911a674eb8a01aa/dir-name/libcst/codemod/visitors/tests/test_apply_type_annotations.py
+
+    # def tst_annotate_functions_with_existing_annotations(
+    #     self, stub: str, before: str, after: str
+    # ) -> None:
+    #     context = CodemodContext()
+    #     ApplyTypeAnnotationsVisitor.store_stub_in_context(
+    #         context, parse_module(textwrap.dedent(stub.rstrip()))
+    #     )
+    #     # Test setting the overwrite flag on the codemod instance.
+    #     self.assertCodemod(
+    #         before, after, context_override=context, overwrite_existing_annotations=True
+    #     )
+
+    #     # Test setting the flag when storing the stub in the context.
+    #     context = CodemodContext()
+    #     ApplyTypeAnnotationsVisitor.store_stub_in_context(
+    #         context,
+    #         parse_module(textwrap.dedent(stub.rstrip())),
+    #         overwrite_existing_annotations=True,
+    #     )
+    #     self.assertCodemod(before, after, context_override=context)
