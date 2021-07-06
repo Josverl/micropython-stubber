@@ -1,74 +1,85 @@
+import pytest
+
 #
 from libcst.codemod import CodemodTest
 from codemod.commands.noop import NOOPCommand
 
+################################################################################
+# Define a few codeblock for testing of the libcst parser
+################################################################################
 
+basic = """
+    # Basic 
+    foo = "" 
+
+    class Class:
+        pass
+
+    def foo(a: Class, **kwargs: str) -> Class:
+        t= Class()  # This is a comment
+        bar = ""
+        return t
+
+    bar = Class()
+    foo(bar, baz="bla")
+"""
+
+positional = """
+    # Positional /
+
+    def positional(a, b, /, c:int=None, d=None) -> int:
+        print( f"a={a}, b={b} ,c={c} ,d={d}")
+        return c
+"""
+
+keywords = """
+    # Keywords * 
+    def keywords(a, b, *, e=42, f=False):
+        print(f"a={a}, b={b} ,e={e} ,f={f}")
+"""
+
+both = """
+    # both keywords and positional
+    def both(a, b, /, c:int=None, d=None, *, e=42, f=False):
+        print(f"a={a}, b={b} ,e={e} ,f={f}")
+"""
+################################################################################
+# libCtS testing is based on unittest, use this class but call it from pytest
+################################################################################
 class TestNOOPCodemod(CodemodTest):
     TRANSFORM = NOOPCommand
 
-    def test_noop_36(self) -> None:
+    def tst_noop_36(self, before, after, version) -> None:
         "Python 3.6 and newer"
-        before = """
-            foo: str = ""
+        self.assertCodemod(before, after, python_version=version)
 
-            class Class:
-                pass
 
-            def foo(a: Class, **kwargs: str) -> Class:
-                t: Class = Class()  # This is a comment
-                bar = ""
-                return t
+################################################################################
+# test the support for the Micropython annotation syntax
+# Pytest test matrix
+################################################################################
+@pytest.mark.parametrize(
+    "before, after",
+    [
+        (basic, basic),
+        (keywords, keywords),
+        (positional, positional),
+        (both, both),
+    ],
+    ids=lambda t: str(t).split()[1],  # use 1st comment as test ID
+)
+@pytest.mark.parametrize(
+    "version",
+    [("3.8"), ("3.7"), ("3.5")],
+)
+def test_LibCST_noop_codemod(version, before, after) -> None:
+    # wrap unittest in Pytest for simpler matrix testing
+    # known failures
+    if "keywords" in before and version < "3.7":
+        pytest.xfail("STAR param not supported on older pythons")
 
-            bar = Class()
-            foo(bar, baz="bla")
-        """
-        after = """
-            foo: str = ""
+    if "positional" in before and version < "3.8":
+        pytest.xfail("SLASH param not supported on older pythons")
 
-            class Class:
-                pass
-
-            def foo(a: Class, **kwargs: str) -> Class:
-                t: Class = Class()  # This is a comment
-                bar = ""
-                return t
-
-            bar = Class()
-            foo(bar, baz="bla")
-        """
-
-        self.assertCodemod(before, after)
-        self.assertCodemod(before, after, python_version="3.6")
-
-    def test_noop_35(self) -> None:
-        "Python 3.5 or older code"
-        before = """
-            foo = "" 
-
-            class Class:
-                pass
-
-            def foo(a: Class, **kwargs: str) -> Class:
-                t= Class()  # This is a comment
-                bar = ""
-                return t
-
-            bar = Class()
-            foo(bar, baz="bla")
-        """
-        after = """
-            foo = "" 
-
-            class Class:
-                pass
-
-            def foo(a: Class, **kwargs: str) -> Class:
-                t= Class()  # This is a comment
-                bar = ""
-                return t
-
-            bar = Class()
-            foo(bar, baz="bla")
-        """
-        self.assertCodemod(before, after, python_version="3.3")
-        self.assertCodemod(before, after, python_version="3.5")
+    Sot = TestNOOPCodemod()
+    Sot.tst_noop_36(before, before, version)
