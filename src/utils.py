@@ -105,7 +105,8 @@ def generate_pyi_from_file(file: Path) -> bool:
 def generate_pyi_files(modules_folder: Path) -> bool:
     """generate typeshed files for all scripts in a folder using mypy/stubgen"""
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
-
+    py_files: List[Path]
+    pyi_files: List[Path]
     modlist = list(modules_folder.glob("**/modules.json"))
     if len(modlist) <= 1:
         ## generate fyi files for folder
@@ -120,7 +121,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             # in case of failure then Plan B
             # - run stubgen on each *.py
             print("Failure on folder, attempt to stub per file.py")
-            py_files = modules_folder.glob("**/*.py")
+            py_files = List(modules_folder.glob("**/*.py"))
             for py in py_files:
                 generate_pyi_from_file(py)
                 # todo: report failures
@@ -142,7 +143,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
-
         return True
         ##
     for mod_manifest in modlist:
@@ -150,6 +150,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         generate_pyi_files(mod_manifest.parent)
 
         # todo: collect and report results
+    return True
 
 
 def manifest(
