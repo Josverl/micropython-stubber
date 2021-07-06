@@ -1,7 +1,11 @@
+# documentation 
+	Add link to 
+	https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html
 
+	add details on what version of types used ( 3.4/3.5 )
 
-
-
+# add reference to mypy.stubgen
+	https://mypy.readthedocs.io/en/stable/stubgen.html
 
 - how to run post-processing
 - how the debug setup works 
