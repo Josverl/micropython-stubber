@@ -27,6 +27,7 @@
     "cSpell.words": [
         "aivar",
         "annamaa",
+        "asname",
         "braden",
         "chdir",
         "cpython",
@@ -77,6 +78,7 @@
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#61320699",
         "titleBar.inactiveForeground": "#e7e7e799"
-    }
+    },
+    "python.linting.mypyEnabled": true,
+    //"python.terminal.activateEnvInCurrentTerminal": true
 }
-
