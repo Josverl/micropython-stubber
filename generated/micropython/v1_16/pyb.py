@@ -1,0 +1,1615 @@
+# .. module:: pyb
+# origin: micropython\docs\library\pyb.rst
+# v1.16
+"""
+   :synopsis: functions related to the board
+
+The ``pyb`` module contains specific functions related to the board.
+"""
+
+from typing import Any, Optional, Union, Tuple
+
+# .. module:: pyb
+# .. function:: delay(ms)
+def delay(ms) -> Any:
+    """
+    Delay for the given number of milliseconds.
+    """
+    ...
+
+
+# .. function:: millis()
+def millis() -> Any:
+    """
+    Returns the number of milliseconds since the board was last reset.
+
+    The result is always a MicroPython smallint (31-bit signed number), so
+    after 2^30 milliseconds (about 12.4 days) this will start to return
+    negative numbers.
+
+    Note that if :meth:`pyb.stop()` is issued the hardware counter supporting this
+    function will pause for the duration of the "sleeping" state. This
+    will affect the outcome of :meth:`pyb.elapsed_millis()`.
+    """
+    ...
+
+
+# .. function:: elapsed_millis(start)
+def elapsed_millis(start) -> Any:
+    """
+    Returns the number of milliseconds which have elapsed since ``start``.
+
+    This function takes care of counter wrap, and always returns a positive
+    number. This means it can be used to measure periods up to about 12.4 days.
+
+    Example::
+
+        start = pyb.millis()
+        while pyb.elapsed_millis(start) < 1000:
+            # Perform some operation
+    """
+    ...
+
+
+# .. function:: hard_reset()
+def hard_reset() -> Any:
+    """
+    Resets the pyboard in a manner similar to pushing the external RESET
+    button.
+    """
+    ...
+
+
+# .. function:: fault_debug(value)
+def fault_debug(value) -> Any:
+    """
+    Enable or disable hard-fault debugging.  A hard-fault is when there is a fatal
+    error in the underlying system, like an invalid memory access.
+
+    If the *value* argument is ``False`` then the board will automatically reset if
+    there is a hard fault.
+
+    If *value* is ``True`` then, when the board has a hard fault, it will print the
+    registers and the stack trace, and then cycle the LEDs indefinitely.
+
+    The default value is disabled, i.e. to automatically reset.
+    """
+    ...
+
+
+# .. function:: disable_irq()
+def disable_irq() -> Any:
+    """
+    Disable interrupt requests.
+    Returns the previous IRQ state: ``False``/``True`` for disabled/enabled IRQs
+    respectively.  This return value can be passed to enable_irq to restore
+    the IRQ to its original state.
+    """
+    ...
+
+
+# .. function:: freq([sysclk[, hclk[, pclk1[, pclk2]]]])
+def freq(sysclk, hclk, pclk1, pclk2) -> Any:
+    """
+    If given no arguments, returns a tuple of clock frequencies:
+    (sysclk, hclk, pclk1, pclk2).
+    These correspond to:
+
+     - sysclk: frequency of the CPU
+     - hclk: frequency of the AHB bus, core memory and DMA
+     - pclk1: frequency of the APB1 bus
+     - pclk2: frequency of the APB2 bus
+
+    If given any arguments then the function sets the frequency of the CPU,
+    and the buses if additional arguments are given.  Frequencies are given in
+    Hz.  Eg freq(120000000) sets sysclk (the CPU frequency) to 120MHz.  Note that
+    not all values are supported and the largest supported frequency not greater
+    than the given value will be selected.
+
+    Supported sysclk frequencies are (in MHz): 8, 16, 24, 30, 32, 36, 40, 42, 48,
+    54, 56, 60, 64, 72, 84, 96, 108, 120, 144, 168.
+
+    The maximum frequency of hclk is 168MHz, of pclk1 is 42MHz, and of pclk2 is
+    84MHz.  Be sure not to set frequencies above these values.
+
+    The hclk, pclk1 and pclk2 frequencies are derived from the sysclk frequency
+    using a prescaler (divider).  Supported prescalers for hclk are: 1, 2, 4, 8,
+    16, 64, 128, 256, 512.  Supported prescalers for pclk1 and pclk2 are: 1, 2,
+    4, 8.  A prescaler will be chosen to best match the requested frequency.
+
+    A sysclk frequency of
+    8MHz uses the HSE (external crystal) directly and 16MHz uses the HSI
+    (internal oscillator) directly.  The higher frequencies use the HSE to
+    drive the PLL (phase locked loop), and then use the output of the PLL.
+
+    Note that if you change the frequency while the USB is enabled then
+    the USB may become unreliable.  It is best to change the frequency
+    in boot.py, before the USB peripheral is started.  Also note that sysclk
+    frequencies below 36MHz do not allow the USB to function correctly.
+    """
+    ...
+
+
+# .. function:: stop()
+def stop() -> Any:
+    """
+    Put the pyboard in a "sleeping" state.
+
+    This reduces power consumption to less than 500 uA.  To wake from this
+    sleep state requires an external interrupt or a real-time-clock event.
+    Upon waking execution continues where it left off.
+
+    See :meth:`rtc.wakeup` to configure a real-time-clock wakeup event.
+    """
+    ...
+
+
+# .. function:: have_cdc()
+def have_cdc() -> Any:
+    """
+    Return True if USB is connected as a serial device, False otherwise.
+
+    .. note:: This function is deprecated.  Use pyb.USB_VCP().isconnected() instead.
+    """
+    ...
+
+
+# .. function:: info([dump_alloc_table])
+def info(dump_alloc_table: Optional[Any]) -> Any:
+    """
+    Print out lots of information about the board.
+    """
+    ...
+
+
+# .. function:: mount(device, mountpoint, *, readonly=False, mkfs=False)
+def mount(device, mountpoint, *, readonly=False, mkfs=False) -> Any:
+    """
+    .. note:: This function is deprecated. Mounting and unmounting devices should
+       be performed by :meth:`uos.mount` and :meth:`uos.umount` instead.
+
+    Mount a block device and make it available as part of the filesystem.
+    ``device`` must be an object that provides the block protocol. (The
+    following is also deprecated. See :class:`uos.AbstractBlockDev` for the
+    correct way to create a block device.)
+
+     - ``readblocks(self, blocknum, buf)``
+     - ``writeblocks(self, blocknum, buf)`` (optional)
+     - ``count(self)``
+     - ``sync(self)`` (optional)
+
+    ``readblocks`` and ``writeblocks`` should copy data between ``buf`` and
+    the block device, starting from block number ``blocknum`` on the device.
+    ``buf`` will be a bytearray with length a multiple of 512.  If
+    ``writeblocks`` is not defined then the device is mounted read-only.
+    The return value of these two functions is ignored.
+
+    ``count`` should return the number of blocks available on the device.
+    ``sync``, if implemented, should sync the data on the device.
+
+    The parameter ``mountpoint`` is the location in the root of the filesystem
+    to mount the device.  It must begin with a forward-slash.
+
+    If ``readonly`` is ``True``, then the device is mounted read-only,
+    otherwise it is mounted read-write.
+
+    If ``mkfs`` is ``True``, then a new filesystem is created if one does not
+    already exist.
+    """
+    ...
+
+
+# .. function:: rng()
+def rng() -> Any:
+    """
+    Return a 30-bit hardware generated random number.
+    """
+    ...
+
+
+# .. function:: unique_id()
+def unique_id() -> Any:
+    """
+    Returns a string of 12 bytes (96 bits), which is the unique ID of the MCU.
+    """
+    ...
+
+
+# .. toctree::
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.Accel:
+# .. class:: pyb.Accel()
+# .. class:: pyb.Accel()
+
+# class:: Accel
+class Accel:
+    """
+    Create and return an accelerometer object.
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        ...
+
+    # .. method:: Accel.filtered_xyz()
+    def filtered_xyz(
+        self,
+    ) -> Any:
+        """
+        Get a 3-tuple of filtered x, y and z values.
+
+        Implementation note: this method is currently implemented as taking the
+        sum of 4 samples, sampled from the 3 previous calls to this function along
+        with the sample from the current call.  Returned values are therefore 4
+        times the size of what they would be from the raw x(), y() and z() calls.
+        """
+        ...
+
+    # .. method:: Accel.x()
+    def x(
+        self,
+    ) -> Any:
+        """
+        Get the x-axis value.
+        """
+        ...
+
+    # .. method:: Accel.z()
+    def z(
+        self,
+    ) -> Any:
+        """
+        Get the z-axis value.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.ADC:
+# .. class:: pyb.ADC(pin)
+# .. class:: pyb.ADC(pin)
+
+# class:: ADC
+class ADC:
+    """
+    Create an ADC object associated with the given pin.
+    This allows you to then read analog values on that pin.
+    """
+
+    def __init__(self, pin) -> None:
+        ...
+
+    # .. method:: ADC.read()
+    def read(
+        self,
+    ) -> Any:
+        """
+        Read the value on the analog pin and return it.  The returned value
+        will be between 0 and 4095.
+        """
+        ...
+
+    # .. method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
+    def read_timed_multi(self, adcs, bufs, timer) -> Any:
+        """
+        This is a static method. It can be used to extract relative timing or
+        phase data from multiple ADC's.
+
+        It reads analog values from multiple ADC's into buffers at a rate set by
+        the *timer* object. Each time the timer triggers a sample is rapidly
+        read from each ADC in turn.
+
+        ADC and buffer instances are passed in tuples with each ADC having an
+        associated buffer. All buffers must be of the same type and length and
+        the number of buffers must equal the number of ADC's.
+
+        Buffers can be ``bytearray`` or ``array.array`` for example. The ADC values
+        have 12-bit resolution and are stored directly into the buffer if its element
+        size is 16 bits or greater.  If buffers have only 8-bit elements (eg a
+        ``bytearray``) then the sample resolution will be reduced to 8 bits.
+
+        *timer* must be a Timer object. The timer must already be initialised
+        and running at the desired sampling frequency.
+
+        Example reading 3 ADC's::
+
+            adc0 = pyb.ADC(pyb.Pin.board.X1)    # Create ADC's
+            adc1 = pyb.ADC(pyb.Pin.board.X2)
+            adc2 = pyb.ADC(pyb.Pin.board.X3)
+            tim = pyb.Timer(8, freq=100)        # Create timer
+            rx0 = array.array('H', (0 for i in range(100))) # ADC buffers of
+            rx1 = array.array('H', (0 for i in range(100))) # 100 16-bit words
+            rx2 = array.array('H', (0 for i in range(100)))
+            # read analog values into buffers at 100Hz (takes one second)
+            pyb.ADC.read_timed_multi((adc0, adc1, adc2), (rx0, rx1, rx2), tim)
+            for n in range(len(rx0)):
+                print(rx0[n], rx1[n], rx2[n])
+
+        This function does not allocate any heap memory. It has blocking behaviour:
+        it does not return to the calling program until the buffers are full.
+
+        The function returns ``True`` if all samples were acquired with correct
+        timing. At high sample rates the time taken to acquire a set of samples
+        can exceed the timer period. In this case the function returns ``False``,
+        indicating a loss of precision in the sample interval. In extreme cases
+        samples may be missed.
+
+        The maximum rate depends on factors including the data width and the
+        number of ADC's being read. In testing two ADC's were sampled at a timer
+        rate of 210kHz without overrun. Samples were missed at 215kHz.  For three
+        ADC's the limit is around 140kHz, and for four it is around 110kHz.
+        At high sample rates disabling interrupts for the duration can reduce the
+        risk of sporadic data loss.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.CAN:
+# .. class:: pyb.CAN(bus, ...)
+# .. class:: pyb.CAN(bus, ...)
+
+# class:: CAN
+class CAN:
+    """
+    Construct a CAN object on the given bus.  *bus* can be 1-2, or ``'YA'`` or ``'YB'``.
+    With no additional parameters, the CAN object is created but not
+    initialised (it has the settings from the last initialisation of
+    the bus, if any).  If extra arguments are given, the bus is initialised.
+    See :meth:`CAN.init` for parameters of initialisation.
+
+    The physical pins of the CAN buses are:
+
+      - ``CAN(1)`` is on ``YA``: ``(RX, TX) = (Y3, Y4) = (PB8, PB9)``
+      - ``CAN(2)`` is on ``YB``: ``(RX, TX) = (Y5, Y6) = (PB12, PB13)``
+    """
+
+    def __init__(self, bus, *args) -> None:
+        ...
+
+    # .. classmethod:: CAN.initfilterbanks(nr)
+    # .. method:: CAN.init(mode, extframe=False, prescaler=100, *, sjw=1, bs1=6, bs2=8, auto_restart=False, baudrate=0, sample_point=75)
+    def init(
+        self,
+        mode,
+        extframe=False,
+        prescaler=100,
+        *,
+        sjw=1,
+        bs1=6,
+        bs2=8,
+        auto_restart=False,
+        baudrate=0,
+        sample_point=75
+    ) -> Any:
+        """
+        Initialise the CAN bus with the given parameters:
+
+          - *mode* is one of:  NORMAL, LOOPBACK, SILENT, SILENT_LOOPBACK
+          - if *extframe* is True then the bus uses extended identifiers in the frames
+            (29 bits); otherwise it uses standard 11 bit identifiers
+          - *prescaler* is used to set the duration of 1 time quanta; the time quanta
+            will be the input clock (PCLK1, see :meth:`pyb.freq()`) divided by the prescaler
+          - *sjw* is the resynchronisation jump width in units of the time quanta;
+            it can be 1, 2, 3, 4
+          - *bs1* defines the location of the sample point in units of the time quanta;
+            it can be between 1 and 1024 inclusive
+          - *bs2* defines the location of the transmit point in units of the time quanta;
+            it can be between 1 and 16 inclusive
+          - *auto_restart* sets whether the controller will automatically try and restart
+            communications after entering the bus-off state; if this is disabled then
+            :meth:`~CAN.restart()` can be used to leave the bus-off state
+          - *baudrate* if a baudrate other than 0 is provided, this function will try to automatically
+            calculate a CAN bit-timing (overriding *prescaler*, *bs1* and *bs2*) that satisfies both
+            the baudrate and the desired *sample_point*.
+          - *sample_point* given in a percentage of the bit time, the *sample_point* specifies the position
+            of the last bit sample with respect to the whole bit time. The default *sample_point* is 75%.
+
+        The time quanta tq is the basic unit of time for the CAN bus.  tq is the CAN
+        prescaler value divided by PCLK1 (the frequency of internal peripheral bus 1);
+        see :meth:`pyb.freq()` to determine PCLK1.
+
+        A single bit is made up of the synchronisation segment, which is always 1 tq.
+        Then follows bit segment 1, then bit segment 2.  The sample point is after bit
+        segment 1 finishes.  The transmit point is after bit segment 2 finishes.
+        The baud rate will be 1/bittime, where the bittime is 1 + BS1 + BS2 multiplied
+        by the time quanta tq.
+
+        For example, with PCLK1=42MHz, prescaler=100, sjw=1, bs1=6, bs2=8, the value of
+        tq is 2.38 microseconds.  The bittime is 35.7 microseconds, and the baudrate
+        is 28kHz.
+
+        See page 680 of the STM32F405 datasheet for more details.
+        """
+        ...
+
+    # .. method:: CAN.restart()
+    def restart(
+        self,
+    ) -> Any:
+        """
+        Force a software restart of the CAN controller without resetting its
+        configuration.
+
+        If the controller enters the bus-off state then it will no longer participate
+        in bus activity.  If the controller is not configured to automatically restart
+        (see :meth:`~CAN.init()`) then this method can be used to trigger a restart,
+        and the controller will follow the CAN protocol to leave the bus-off state and
+        go into the error active state.
+        """
+        ...
+
+    # .. method:: CAN.info([list])
+    def info(self, list: Optional[Any]) -> Any:
+        """
+        Get information about the controller's error states and TX and RX buffers.
+        If *list* is provided then it should be a list object with at least 8 entries,
+        which will be filled in with the information.  Otherwise a new list will be
+        created and filled in.  In both cases the return value of the method is the
+        populated list.
+
+        The values in the list are:
+
+        - TEC value
+        - REC value
+        - number of times the controller enterted the Error Warning state (wrapped
+          around to 0 after 65535)
+        - number of times the controller enterted the Error Passive state (wrapped
+          around to 0 after 65535)
+        - number of times the controller enterted the Bus Off state (wrapped
+          around to 0 after 65535)
+        - number of pending TX messages
+        - number of pending RX messages on fifo 0
+        - number of pending RX messages on fifo 1
+        """
+        ...
+
+    # .. method:: CAN.clearfilter(bank)
+    def clearfilter(self, bank) -> Any:
+        """
+        Clear and disables a filter bank:
+
+        - *bank* is the filter bank that is to be cleared.
+        """
+        ...
+
+    # .. method:: CAN.recv(fifo, list=None, *, timeout=5000)
+    def recv(self, fifo, list=None, *, timeout=5000) -> Any:
+        """
+        Receive data on the bus:
+
+          - *fifo* is an integer, which is the FIFO to receive on
+          - *list* is an optional list object to be used as the return value
+          - *timeout* is the timeout in milliseconds to wait for the receive.
+
+        Return value: A tuple containing four values.
+
+          - The id of the message.
+          - A boolean that indicates if the message is an RTR message.
+          - The FMI (Filter Match Index) value.
+          - An array containing the data.
+
+        If *list* is ``None`` then a new tuple will be allocated, as well as a new
+        bytes object to contain the data (as the fourth element in the tuple).
+
+        If *list* is not ``None`` then it should be a list object with a least four
+        elements.  The fourth element should be a memoryview object which is created
+        from either a bytearray or an array of type 'B' or 'b', and this array must
+        have enough room for at least 8 bytes.  The list object will then be
+        populated with the first three return values above, and the memoryview object
+        will be resized inplace to the size of the data and filled in with that data.
+        The same list and memoryview objects can be reused in subsequent calls to
+        this method, providing a way of receiving data without using the heap.
+        For example::
+
+             buf = bytearray(8)
+             lst = [0, 0, 0, memoryview(buf)]
+             # No heap memory is allocated in the following call
+             can.recv(0, lst)
+        """
+        ...
+
+    # .. method:: CAN.rxcallback(fifo, fun)
+    def rxcallback(self, fifo, fun) -> Any:
+        """
+        Register a function to be called when a message is accepted into a empty fifo:
+
+        - *fifo* is the receiving fifo.
+        - *fun* is the function to be called when the fifo becomes non empty.
+
+        The callback function takes two arguments the first is the can object it self the second is
+        a integer that indicates the reason for the callback.
+
+        +--------+------------------------------------------------+
+        | Reason |                                                |
+        +========+================================================+
+        | 0      | A message has been accepted into a empty FIFO. |
+        +--------+------------------------------------------------+
+        | 1      | The FIFO is full                               |
+        +--------+------------------------------------------------+
+        | 2      | A message has been lost due to a full FIFO     |
+        +--------+------------------------------------------------+
+
+        Example use of rxcallback::
+
+          def cb0(bus, reason):
+            print('cb0')
+            if reason == 0:
+                print('pending')
+            if reason == 1:
+                print('full')
+            if reason == 2:
+                print('overflow')
+
+          can = CAN(1, CAN.LOOPBACK)
+          can.rxcallback(0, cb0)
+        """
+        ...
+
+
+# .. data:: CAN.NORMAL
+# .. data:: CAN.STOPPED
+# .. data:: CAN.LIST16
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.DAC:
+# .. class:: pyb.DAC(port, bits=8, *, buffering=None)
+# .. class:: pyb.DAC(port, bits=8, *, buffering=None)
+
+# class:: DAC
+class DAC:
+    """
+    Construct a new DAC object.
+
+    ``port`` can be a pin object, or an integer (1 or 2).
+    DAC(1) is on pin X5 and DAC(2) is on pin X6.
+
+    ``bits`` is an integer specifying the resolution, and can be 8 or 12.
+    The maximum value for the write and write_timed methods will be
+    2\*\*``bits``-1.
+
+    The *buffering* parameter selects the behaviour of the DAC op-amp output
+    buffer, whose purpose is to reduce the output impedance.  It can be
+    ``None`` to select the default (buffering enabled for :meth:`DAC.noise`,
+    :meth:`DAC.triangle` and :meth:`DAC.write_timed`, and disabled for
+    :meth:`DAC.write`), ``False`` to disable buffering completely, or ``True``
+    to enable output buffering.
+
+    When buffering is enabled the DAC pin can drive loads down to 5KΩ.
+    Otherwise it has an output impedance of 15KΩ maximum: consequently
+    to achieve a 1% accuracy without buffering requires the applied load
+    to be less than 1.5MΩ.  Using the buffer incurs a penalty in accuracy,
+    especially near the extremes of range.
+    """
+
+    def __init__(self, port, bits=8, *, buffering=None) -> None:
+        ...
+
+    # .. method:: DAC.init(bits=8, *, buffering=None)
+    def init(self, bits=8, *, buffering=None) -> Any:
+        """
+        Reinitialise the DAC.  *bits* can be 8 or 12.  *buffering* can be
+        ``None``, ``False`` or ``True``; see above constructor for the meaning
+        of this parameter.
+        """
+        ...
+
+    # .. method:: DAC.noise(freq)
+    def noise(self, freq) -> Any:
+        """
+        Generate a pseudo-random noise signal.  A new random sample is written
+        to the DAC output at the given frequency.
+        """
+        ...
+
+    # .. method:: DAC.write(value)
+    def write(self, value) -> Any:
+        """
+        Direct access to the DAC output.  The minimum value is 0.  The maximum
+        value is 2\*\*``bits``-1, where ``bits`` is set when creating the DAC
+        object or by using the ``init`` method.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.ExtInt:
+# .. class:: pyb.ExtInt(pin, mode, pull, callback)
+# .. class:: pyb.ExtInt(pin, mode, pull, callback)
+
+# class:: ExtInt
+class ExtInt:
+    """
+    Create an ExtInt object:
+
+      - ``pin`` is the pin on which to enable the interrupt (can be a pin object or any valid pin name).
+      - ``mode`` can be one of:
+        - ``ExtInt.IRQ_RISING`` - trigger on a rising edge;
+        - ``ExtInt.IRQ_FALLING`` - trigger on a falling edge;
+        - ``ExtInt.IRQ_RISING_FALLING`` - trigger on a rising or falling edge.
+      - ``pull`` can be one of:
+        - ``pyb.Pin.PULL_NONE`` - no pull up or down resistors;
+        - ``pyb.Pin.PULL_UP`` - enable the pull-up resistor;
+        - ``pyb.Pin.PULL_DOWN`` - enable the pull-down resistor.
+      - ``callback`` is the function to call when the interrupt triggers.  The
+        callback function must accept exactly 1 argument, which is the line that
+        triggered the interrupt.
+
+    """
+
+    def __init__(self, pin, mode, pull, callback) -> None:
+        ...
+
+    # .. classmethod:: ExtInt.regs()
+    # .. method:: ExtInt.disable()
+    def disable(
+        self,
+    ) -> Any:
+        """
+        Disable the interrupt associated with the ExtInt object.
+        This could be useful for debouncing.
+        """
+        ...
+
+    # .. method:: ExtInt.line()
+    def line(
+        self,
+    ) -> Any:
+        """
+        Return the line number that the pin is mapped to.
+        """
+        ...
+
+
+# .. data:: ExtInt.IRQ_FALLING
+# .. data:: ExtInt.IRQ_RISING
+# .. data:: ExtInt.IRQ_RISING_FALLING
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.Flash:
+# .. class:: pyb.Flash()
+# .. class:: pyb.Flash()
+
+# class:: Flash
+class Flash:
+    """
+    Create and return a block device that represents the flash device presented
+    to the USB mass storage interface.
+
+    It includes a virtual partition table at the start, and the actual flash
+    starts at block ``0x100``.
+
+    This constructor is deprecated and will be removed in a future version of MicroPython.
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        ...
+
+    # .. method:: Flash.readblocks(block_num, buf)
+    def readblocks(self, block_num, buf) -> Any:
+        """
+        Flash.readblocks(block_num, buf, offset)
+        """
+        ...
+
+    # .. method:: Flash.ioctl(cmd, arg)
+    def ioctl(self, cmd, arg) -> Any:
+        """
+        These methods implement the simple and :ref:`extended
+        <block-device-interface>` block protocol defined by
+        :class:`uos.AbstractBlockDev`.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.I2C:
+# .. class:: pyb.I2C(bus, ...)
+# .. class:: pyb.I2C(bus, ...)
+
+# class:: I2C
+class I2C:
+    """
+    Construct an I2C object on the given bus.  ``bus`` can be 1 or 2, 'X' or
+    'Y'. With no additional parameters, the I2C object is created but not
+    initialised (it has the settings from the last initialisation of
+    the bus, if any).  If extra arguments are given, the bus is initialised.
+    See ``init`` for parameters of initialisation.
+
+    The physical pins of the I2C buses on Pyboards V1.0 and V1.1 are:
+
+      - ``I2C(1)`` is on the X position: ``(SCL, SDA) = (X9, X10) = (PB6, PB7)``
+      - ``I2C(2)`` is on the Y position: ``(SCL, SDA) = (Y9, Y10) = (PB10, PB11)``
+
+    On the Pyboard Lite:
+
+      - ``I2C(1)`` is on the X position: ``(SCL, SDA) = (X9, X10) = (PB6, PB7)``
+      - ``I2C(3)`` is on the Y position: ``(SCL, SDA) = (Y9, Y10) = (PA8, PB8)``
+
+    Calling the constructor with 'X' or 'Y' enables portability between Pyboard
+    types.
+    """
+
+    def __init__(self, bus, *args) -> None:
+        ...
+
+    # .. method:: I2C.deinit()
+    def deinit(
+        self,
+    ) -> Any:
+        """
+        Turn off the I2C bus.
+        """
+        ...
+
+    # .. method:: I2C.is_ready(addr)
+    def is_ready(self, addr) -> Any:
+        """
+        Check if an I2C device responds to the given address.  Only valid when in master mode.
+        """
+        ...
+
+    # .. method:: I2C.mem_write(data, addr, memaddr, *, timeout=5000, addr_size=8)
+    def mem_write(self, data, addr, memaddr, *, timeout=5000, addr_size=8) -> Any:
+        """
+        Write to the memory of an I2C device:
+
+          - ``data`` can be an integer or a buffer to write from
+          - ``addr`` is the I2C device address
+          - ``memaddr`` is the memory location within the I2C device
+          - ``timeout`` is the timeout in milliseconds to wait for the write
+          - ``addr_size`` selects width of memaddr: 8 or 16 bits
+
+        Returns ``None``.
+        This is only valid in master mode.
+        """
+        ...
+
+    # .. method:: I2C.send(send, addr=0x00, *, timeout=5000)
+    def send(self, send, addr=0x00, *, timeout=5000) -> Any:
+        """
+        Send data on the bus:
+
+          - ``send`` is the data to send (an integer to send, or a buffer object)
+          - ``addr`` is the address to send to (only required in master mode)
+          - ``timeout`` is the timeout in milliseconds to wait for the send
+
+        Return value: ``None``.
+        """
+        ...
+
+
+# .. data:: I2C.MASTER
+# .. data:: I2C.SLAVE
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.LCD:
+# .. class:: pyb.LCD(skin_position)
+# .. class:: pyb.LCD(skin_position)
+
+# class:: LCD
+class LCD:
+    """
+    Construct an LCD object in the given skin position.  ``skin_position`` can be 'X' or 'Y', and
+    should match the position where the LCD pyskin is plugged in.
+
+    """
+
+    def __init__(self, skin_position) -> None:
+        ...
+
+    # .. method:: LCD.command(instr_data, buf)
+    def command(self, instr_data, buf) -> Any:
+        """
+        Send an arbitrary command to the LCD.  Pass 0 for ``instr_data`` to send an
+        instruction, otherwise pass 1 to send data.  ``buf`` is a buffer with the
+        instructions/data to send.
+        """
+        ...
+
+    # .. method:: LCD.fill(colour)
+    def fill(self, colour) -> Any:
+        """
+        Fill the screen with the given colour (0 or 1 for white or black).
+
+        This method writes to the hidden buffer.  Use ``show()`` to show the buffer.
+        """
+        ...
+
+    # .. method:: LCD.light(value)
+    def light(self, value) -> Any:
+        """
+        Turn the backlight on/off.  True or 1 turns it on, False or 0 turns it off.
+        """
+        ...
+
+    # .. method:: LCD.show()
+    def show(
+        self,
+    ) -> Any:
+        """
+        Show the hidden buffer on the screen.
+        """
+        ...
+
+    # .. method:: LCD.write(str)
+    def write(self, str) -> Any:
+        """
+        Write the string ``str`` to the screen.  It will appear immediately.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.LED:
+# .. class:: pyb.LED(id)
+# .. class:: pyb.LED(id)
+
+# class:: LED
+class LED:
+    """
+    Create an LED object associated with the given LED:
+
+      - ``id`` is the LED number, 1-4.
+
+    """
+
+    def __init__(self, id) -> None:
+        ...
+
+    # .. method:: LED.intensity([value])
+    def intensity(self, value: Optional[Any]) -> Any:
+        """
+        Get or set the LED intensity.  Intensity ranges between 0 (off) and 255 (full on).
+        If no argument is given, return the LED intensity.
+        If an argument is given, set the LED intensity and return ``None``.
+
+        *Note:* Only LED(3) and LED(4) can have a smoothly varying intensity, and
+        they use timer PWM to implement it.  LED(3) uses Timer(2) and LED(4) uses
+        Timer(3).  These timers are only configured for PWM if the intensity of the
+        relevant LED is set to a value between 1 and 254.  Otherwise the timers are
+        free for general purpose use.
+        """
+        ...
+
+    # .. method:: LED.on()
+    def on(
+        self,
+    ) -> Any:
+        """
+        Turn the LED on, to maximum intensity.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.Pin:
+# .. class:: pyb.Pin(id, ...)
+# .. class:: pyb.Pin(id, ...)
+
+# class:: Pin
+class Pin:
+    """
+    Create a new Pin object associated with the id.  If additional arguments are given,
+    they are used to initialise the pin.  See :meth:`pin.init`.
+    """
+
+    def __init__(self, id, *args) -> None:
+        ...
+
+    # .. classmethod:: Pin.debug([state])
+    # .. classmethod:: Pin.dict([dict])
+    # .. classmethod:: Pin.mapper([fun])
+    # .. method:: Pin.init(mode, pull=Pin.PULL_NONE, \*, value=None, alt=-1)
+    def init(self, mode, pull=Pin.PULL_NONE, *, value=None, alt=-1) -> Any:
+        """
+        Initialise the pin:
+
+          - *mode* can be one of:
+
+             - ``Pin.IN`` - configure the pin for input;
+             - ``Pin.OUT_PP`` - configure the pin for output, with push-pull control;
+             - ``Pin.OUT_OD`` - configure the pin for output, with open-drain control;
+             - ``Pin.AF_PP`` - configure the pin for alternate function, pull-pull;
+             - ``Pin.AF_OD`` - configure the pin for alternate function, open-drain;
+             - ``Pin.ANALOG`` - configure the pin for analog.
+
+          - *pull* can be one of:
+
+             - ``Pin.PULL_NONE`` - no pull up or down resistors;
+             - ``Pin.PULL_UP`` - enable the pull-up resistor;
+             - ``Pin.PULL_DOWN`` - enable the pull-down resistor.
+
+          - *value* if not None will set the port output value before enabling the pin.
+
+          - *alt* can be used when mode is ``Pin.AF_PP`` or ``Pin.AF_OD`` to set the
+            index or name of one of the alternate functions associated with a pin.
+            This arg was previously called *af* which can still be used if needed.
+
+        Returns: ``None``.
+        """
+        ...
+
+    # .. method:: Pin.__str__()
+    def __str__(
+        self,
+    ) -> Any:
+        """
+        Return a string describing the pin object.
+        """
+        ...
+
+    # .. method:: Pin.af_list()
+    def af_list(
+        self,
+    ) -> Any:
+        """
+        Returns an array of alternate functions available for this pin.
+        """
+        ...
+
+    # .. method:: Pin.mode()
+    def mode(
+        self,
+    ) -> Any:
+        """
+        Returns the currently configured mode of the pin. The integer returned
+        will match one of the allowed constants for the mode argument to the init
+        function.
+        """
+        ...
+
+    # .. method:: Pin.names()
+    def names(
+        self,
+    ) -> Any:
+        """
+        Returns the cpu and board names for this pin.
+        """
+        ...
+
+    # .. method:: Pin.port()
+    def port(
+        self,
+    ) -> Any:
+        """
+        Get the pin port.
+        """
+        ...
+
+    # .. data:: Pin.AF_OD
+    # .. data:: Pin.AF_PP
+    # .. data:: Pin.ANALOG
+    # .. data:: Pin.IN
+    # .. data:: Pin.OUT_OD
+    # .. data:: Pin.OUT_PP
+    # .. data:: Pin.PULL_DOWN
+    # .. data:: Pin.PULL_NONE
+    # .. data:: Pin.PULL_UP
+    # .. method:: pinaf.__str__()
+    class pinaf:
+        """ """
+
+        def __str__(
+            self,
+        ) -> Any:
+            """
+            Return a string describing the alternate function.
+            """
+            ...
+
+        # .. method:: pinaf.name()
+        def name(
+            self,
+        ) -> Any:
+            """
+            Return the name of the alternate function.
+            """
+            ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.RTC:
+# .. class:: pyb.RTC()
+# .. class:: pyb.RTC()
+
+# class:: RTC
+class RTC:
+    """
+    Create an RTC object.
+
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        ...
+
+    # .. method:: RTC.datetime([datetimetuple])
+    def datetime(self, datetimetuple: Optional[Any]) -> Any:
+        """
+        Get or set the date and time of the RTC.
+
+        With no arguments, this method returns an 8-tuple with the current
+        date and time.  With 1 argument (being an 8-tuple) it sets the date
+        and time (and ``subseconds`` is reset to 255).
+
+        The 8-tuple has the following format:
+
+            (year, month, day, weekday, hours, minutes, seconds, subseconds)
+
+        ``weekday`` is 1-7 for Monday through Sunday.
+
+        ``subseconds`` counts down from 255 to 0
+        """
+        ...
+
+    # .. method:: RTC.info()
+    def info(
+        self,
+    ) -> Any:
+        """
+        Get information about the startup time and reset source.
+
+         - The lower 0xffff are the number of milliseconds the RTC took to
+           start up.
+         - Bit 0x10000 is set if a power-on reset occurred.
+         - Bit 0x20000 is set if an external reset occurred
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.Servo:
+# .. note:: The Servo objects use Timer(5) to produce the PWM output.  You can
+# .. class:: pyb.Servo(id)
+# .. class:: pyb.Servo(id)
+
+# class:: Servo
+class Servo:
+    """
+    Create a servo object.  ``id`` is 1-4, and corresponds to pins X1 through X4.
+
+    """
+
+    def __init__(self, id) -> None:
+        ...
+
+    # .. method:: Servo.angle([angle, time=0])
+    def angle(self, angle: Optional[Any], time=0) -> Any:
+        """
+        If no arguments are given, this function returns the current angle.
+
+        If arguments are given, this function sets the angle of the servo:
+
+          - ``angle`` is the angle to move to in degrees.
+          - ``time`` is the number of milliseconds to take to get to the specified
+            angle.  If omitted, then the servo moves as quickly as possible to its
+            new position.
+        """
+        ...
+
+    # .. method:: Servo.pulse_width([value])
+    def pulse_width(self, value: Optional[Any]) -> Any:
+        """
+        If no arguments are given, this function returns the current raw pulse-width
+        value.
+
+        If an argument is given, this function sets the raw pulse-width value.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.SPI:
+# .. class:: pyb.SPI(bus, ...)
+# .. class:: pyb.SPI(bus, ...)
+
+# class:: SPI
+class SPI:
+    """
+    Construct an SPI object on the given bus.  ``bus`` can be 1 or 2, or
+    'X' or 'Y'. With no additional parameters, the SPI object is created but
+    not initialised (it has the settings from the last initialisation of
+    the bus, if any).  If extra arguments are given, the bus is initialised.
+    See ``init`` for parameters of initialisation.
+
+    The physical pins of the SPI buses are:
+
+      - ``SPI(1)`` is on the X position: ``(NSS, SCK, MISO, MOSI) = (X5, X6, X7, X8) = (PA4, PA5, PA6, PA7)``
+      - ``SPI(2)`` is on the Y position: ``(NSS, SCK, MISO, MOSI) = (Y5, Y6, Y7, Y8) = (PB12, PB13, PB14, PB15)``
+
+    At the moment, the NSS pin is not used by the SPI driver and is free
+    for other use.
+    """
+
+    def __init__(self, bus, *args) -> None:
+        ...
+
+    # .. method:: SPI.deinit()
+    def deinit(
+        self,
+    ) -> Any:
+        """
+        Turn off the SPI bus.
+        """
+        ...
+
+    # .. method:: SPI.recv(recv, *, timeout=5000)
+    def recv(self, recv, *, timeout=5000) -> Any:
+        """
+        Receive data on the bus:
+
+          - ``recv`` can be an integer, which is the number of bytes to receive,
+            or a mutable buffer, which will be filled with received bytes.
+          - ``timeout`` is the timeout in milliseconds to wait for the receive.
+
+        Return value: if ``recv`` is an integer then a new buffer of the bytes received,
+        otherwise the same buffer that was passed in to ``recv``.
+        """
+        ...
+
+    # .. method:: SPI.send_recv(send, recv=None, *, timeout=5000)
+    def send_recv(self, send, recv=None, *, timeout=5000) -> Any:
+        """
+        Send and receive data on the bus at the same time:
+
+          - ``send`` is the data to send (an integer to send, or a buffer object).
+          - ``recv`` is a mutable buffer which will be filled with received bytes.
+            It can be the same as ``send``, or omitted.  If omitted, a new buffer will
+            be created.
+          - ``timeout`` is the timeout in milliseconds to wait for the receive.
+
+        Return value: the buffer with the received bytes.
+        """
+        ...
+
+
+# .. data:: SPI.MASTER
+# .. data:: SPI.SLAVE
+# .. data:: SPI.LSB
+# .. data:: SPI.MSB
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.Switch:
+# .. class:: pyb.Switch()
+# .. class:: pyb.Switch()
+
+# class:: Switch
+class Switch:
+    """
+    Create and return a switch object.
+
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        ...
+
+    # .. method:: Switch.__call__()
+    def __call__(
+        self,
+    ) -> Any:
+        """
+        Call switch object directly to get its state: ``True`` if pressed down,
+        ``False`` otherwise.
+        """
+        ...
+
+    # .. method:: Switch.callback(fun)
+    def callback(self, fun) -> Any:
+        """
+        Register the given function to be called when the switch is pressed down.
+        If ``fun`` is ``None``, then it disables the callback.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.Timer:
+# .. class:: pyb.Timer(id, ...)
+# .. class:: pyb.Timer(id, ...)
+
+# class:: Timer
+class Timer:
+    """
+    Construct a new timer object of the given id.  If additional
+    arguments are given, then the timer is initialised by ``init(...)``.
+    ``id`` can be 1 to 14.
+    """
+
+    def __init__(self, id, *args) -> None:
+        ...
+
+    # .. method:: Timer.init(*, freq, prescaler, period, mode=Timer.UP, div=1, callback=None, deadtime=0)
+    def init(self, *, freq, prescaler, period, mode=UP, div=1, callback=None, deadtime=0) -> Any:
+        """
+        Initialise the timer.  Initialisation must be either by frequency (in Hz)
+        or by prescaler and period::
+
+            tim.init(freq=100)                  # set the timer to trigger at 100Hz
+            tim.init(prescaler=83, period=999)  # set the prescaler and period directly
+
+        Keyword arguments:
+
+          - ``freq`` --- specifies the periodic frequency of the timer. You might also
+            view this as the frequency with which the timer goes through one complete cycle.
+
+          - ``prescaler`` [0-0xffff] - specifies the value to be loaded into the
+            timer's Prescaler Register (PSC). The timer clock source is divided by
+            (``prescaler + 1``) to arrive at the timer clock. Timers 2-7 and 12-14
+            have a clock source of 84 MHz (pyb.freq()[2] \* 2), and Timers 1, and 8-11
+            have a clock source of 168 MHz (pyb.freq()[3] \* 2).
+
+          - ``period`` [0-0xffff] for timers 1, 3, 4, and 6-15. [0-0x3fffffff] for timers 2 & 5.
+            Specifies the value to be loaded into the timer's AutoReload
+            Register (ARR). This determines the period of the timer (i.e. when the
+            counter cycles). The timer counter will roll-over after ``period + 1``
+            timer clock cycles.
+
+          - ``mode`` can be one of:
+
+            - ``Timer.UP`` - configures the timer to count from 0 to ARR (default)
+            - ``Timer.DOWN`` - configures the timer to count from ARR down to 0.
+            - ``Timer.CENTER`` - configures the timer to count from 0 to ARR and
+              then back down to 0.
+
+          - ``div`` can be one of 1, 2, or 4. Divides the timer clock to determine
+            the sampling clock used by the digital filters.
+
+          - ``callback`` - as per Timer.callback()
+
+          - ``deadtime`` - specifies the amount of "dead" or inactive time between
+            transitions on complimentary channels (both channels will be inactive)
+            for this time). ``deadtime`` may be an integer between 0 and 1008, with
+            the following restrictions: 0-128 in steps of 1. 128-256 in steps of
+            2, 256-512 in steps of 8, and 512-1008 in steps of 16. ``deadtime``
+            measures ticks of ``source_freq`` divided by ``div`` clock ticks.
+            ``deadtime`` is only available on timers 1 and 8.
+
+         You must either specify freq or both of period and prescaler.
+        """
+        ...
+
+    # .. method:: Timer.callback(fun)
+    def callback(self, fun) -> Any:
+        """
+        Set the function to be called when the timer triggers.
+        ``fun`` is passed 1 argument, the timer object.
+        If ``fun`` is ``None`` then the callback will be disabled.
+        """
+        ...
+
+    # .. method:: Timer.counter([value])
+    def counter(self, value: Optional[Any]) -> Any:
+        """
+        Get or set the timer counter.
+        """
+        ...
+
+    # .. method:: Timer.period([value])
+    def period(self, value: Optional[Any]) -> Any:
+        """
+        Get or set the period of the timer.
+        """
+        ...
+
+    # .. method:: Timer.source_freq()
+    def source_freq(
+        self,
+    ) -> Any:
+        """
+        Get the frequency of the source of the timer.
+        """
+        ...
+
+    # .. method:: timerchannel.callback(fun)
+    class timerchannel:
+        """ """
+
+        def callback(self, fun) -> Any:
+            """
+            Set the function to be called when the timer channel triggers.
+            ``fun`` is passed 1 argument, the timer object.
+            If ``fun`` is ``None`` then the callback will be disabled.
+            """
+            ...
+
+        # .. method:: timerchannel.compare([value])
+        def compare(self, value: Optional[Any]) -> Any:
+            """
+            Get or set the compare value associated with a channel.
+            capture, compare, and pulse_width are all aliases for the same function.
+            compare is the logical name to use when the channel is in output compare mode.
+            """
+            ...
+
+        # .. method:: timerchannel.pulse_width_percent([value])
+        def pulse_width_percent(self, value: Optional[Any]) -> Any:
+            """
+            Get or set the pulse width percentage associated with a channel.  The value
+            is a number between 0 and 100 and sets the percentage of the timer period
+            for which the pulse is active.  The value can be an integer or
+            floating-point number for more accuracy.  For example, a value of 25 gives
+            a duty cycle of 25%.
+            """
+            ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.UART:
+# .. class:: pyb.UART(bus, ...)
+# .. class:: pyb.UART(bus, ...)
+
+# class:: UART
+class UART:
+    """
+    Construct a UART object on the given bus.
+    For Pyboard ``bus`` can be 1-4, 6, 'XA', 'XB', 'YA', or 'YB'.
+    For Pyboard Lite ``bus`` can be 1, 2, 6, 'XB', or 'YA'.
+    For Pyboard D ``bus`` can be 1-4, 'XA', 'YA' or 'YB'.
+    With no additional parameters, the UART object is created but not
+    initialised (it has the settings from the last initialisation of
+    the bus, if any).  If extra arguments are given, the bus is initialised.
+    See ``init`` for parameters of initialisation.
+
+    The physical pins of the UART buses on Pyboard are:
+
+      - ``UART(4)`` is on ``XA``: ``(TX, RX) = (X1, X2) = (PA0, PA1)``
+      - ``UART(1)`` is on ``XB``: ``(TX, RX) = (X9, X10) = (PB6, PB7)``
+      - ``UART(6)`` is on ``YA``: ``(TX, RX) = (Y1, Y2) = (PC6, PC7)``
+      - ``UART(3)`` is on ``YB``: ``(TX, RX) = (Y9, Y10) = (PB10, PB11)``
+      - ``UART(2)`` is on: ``(TX, RX) = (X3, X4) = (PA2, PA3)``
+
+    The Pyboard Lite supports UART(1), UART(2) and UART(6) only, pins are:
+
+      - ``UART(1)`` is on ``XB``: ``(TX, RX) = (X9, X10) = (PB6, PB7)``
+      - ``UART(6)`` is on ``YA``: ``(TX, RX) = (Y1, Y2) = (PC6, PC7)``
+      - ``UART(2)`` is on: ``(TX, RX) = (X1, X2) = (PA2, PA3)``
+
+    The Pyboard D supports UART(1), UART(2), UART(3) and UART(4) only, pins are:
+
+      - ``UART(4)`` is on ``XA``: ``(TX, RX) = (X1, X2) = (PA0, PA1)``
+      - ``UART(1)`` is on ``YA``: ``(TX, RX) = (Y1, Y2) = (PA9, PA10)``
+      - ``UART(3)`` is on ``YB``: ``(TX, RX) = (Y9, Y10) = (PB10, PB11)``
+      - ``UART(2)`` is on: ``(TX, RX) = (X3, X4) = (PA2, PA3)``
+
+    *Note:* Pyboard D has ``UART(1)`` on ``YA``, unlike Pyboard and Pyboard Lite that both
+    have ``UART(1)`` on ``XB`` and ``UART(6)`` on ``YA``.
+    """
+
+    def __init__(self, bus, *args) -> None:
+        ...
+
+    # .. method:: UART.init(baudrate, bits=8, parity=None, stop=1, *, timeout=0, flow=0, timeout_char=0, read_buf_len=64)
+    def init(
+        self,
+        baudrate,
+        bits=8,
+        parity=None,
+        stop=1,
+        *,
+        timeout=0,
+        flow=0,
+        timeout_char=0,
+        read_buf_len=64
+    ) -> Any:
+        """
+        Initialise the UART bus with the given parameters:
+
+          - ``baudrate`` is the clock rate.
+          - ``bits`` is the number of bits per character, 7, 8 or 9.
+          - ``parity`` is the parity, ``None``, 0 (even) or 1 (odd).
+          - ``stop`` is the number of stop bits, 1 or 2.
+          - ``flow`` sets the flow control type. Can be 0, ``UART.RTS``, ``UART.CTS``
+            or ``UART.RTS | UART.CTS``.
+          - ``timeout`` is the timeout in milliseconds to wait for writing/reading the first character.
+          - ``timeout_char`` is the timeout in milliseconds to wait between characters while writing or reading.
+          - ``read_buf_len`` is the character length of the read buffer (0 to disable).
+
+        This method will raise an exception if the baudrate could not be set within
+        5% of the desired value.  The minimum baudrate is dictated by the frequency
+        of the bus that the UART is on; UART(1) and UART(6) are APB2, the rest are on
+        APB1.  The default bus frequencies give a minimum baudrate of 1300 for
+        UART(1) and UART(6) and 650 for the others.  Use :func:`pyb.freq <pyb.freq>`
+        to reduce the bus frequencies to get lower baudrates.
+
+        *Note:* with parity=None, only 8 and 9 bits are supported.  With parity enabled,
+        only 7 and 8 bits are supported.
+        """
+        ...
+
+    # .. method:: UART.any()
+    def any(
+        self,
+    ) -> Any:
+        """
+        Returns the number of bytes waiting (may be 0).
+        """
+        ...
+
+    # .. method:: UART.readchar()
+    def readchar(
+        self,
+    ) -> Any:
+        """
+        Receive a single character on the bus.
+
+        Return value: The character read, as an integer.  Returns -1 on timeout.
+        """
+        ...
+
+    # .. method:: UART.readline()
+    def readline(
+        self,
+    ) -> Any:
+        """
+        Read a line, ending in a newline character. If such a line exists, return is
+        immediate. If the timeout elapses, all available data is returned regardless
+        of whether a newline exists.
+
+        Return value: the line read or ``None`` on timeout if no data is available.
+        """
+        ...
+
+    # .. method:: UART.writechar(char)
+    def writechar(self, char) -> Any:
+        """
+        Write a single character on the bus.  ``char`` is an integer to write.
+        Return value: ``None``. See note below if CTS flow control is used.
+        """
+        ...
+
+
+# .. data:: UART.RTS
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.USB_HID:
+# .. class:: pyb.USB_HID()
+# .. class:: pyb.USB_HID()
+
+# class:: USB_HID
+class USB_HID:
+    """
+    Create a new USB_HID object.
+
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        ...
+
+    # .. method:: USB_HID.recv(data, *, timeout=5000)
+    def recv(self, data, *, timeout=5000) -> Any:
+        """
+        Receive data on the bus:
+
+          - ``data`` can be an integer, which is the number of bytes to receive,
+            or a mutable buffer, which will be filled with received bytes.
+          - ``timeout`` is the timeout in milliseconds to wait for the receive.
+
+        Return value: if ``data`` is an integer then a new buffer of the bytes received,
+        otherwise the number of bytes read into ``data`` is returned.
+        """
+        ...
+
+
+# .. currentmodule:: pyb
+# currentmodule:: pyb
+# .. _pyb.USB_VCP:
+# .. class:: pyb.USB_VCP(id=0)
+# .. class:: pyb.USB_VCP(id=0)
+
+# class:: USB_VCP
+class USB_VCP:
+    """
+    Create a new USB_VCP object.  The *id* argument specifies which USB VCP port to
+    use.
+
+    """
+
+    def __init__(self, id=0) -> None:
+        ...
+
+    # .. method:: USB_VCP.init(*, flow=-1)
+    def init(self, *, flow=-1) -> Any:
+        """
+        Configure the USB VCP port.  If the *flow* argument is not -1 then the value sets
+        the flow control, which can be a bitwise-or of ``USB_VCP.RTS`` and ``USB_VCP.CTS``.
+        RTS is used to control read behaviour and CTS, to control write behaviour.
+        """
+        ...
+
+    # .. method:: USB_VCP.isconnected()
+    def isconnected(
+        self,
+    ) -> Any:
+        """
+        Return ``True`` if USB is connected as a serial device, else ``False``.
+        """
+        ...
+
+    # .. method:: USB_VCP.close()
+    def close(
+        self,
+    ) -> Any:
+        """
+        This method does nothing.  It exists so the USB_VCP object can act as
+        a file.
+        """
+        ...
+
+    # .. method:: USB_VCP.readinto(buf, [maxlen])
+    def readinto(self, buf, maxlen: Optional[Any]) -> Any:
+        """
+        Read bytes from the serial device and store them into ``buf``, which
+        should be a buffer-like object.  At most ``len(buf)`` bytes are read.
+        If ``maxlen`` is given and then at most ``min(maxlen, len(buf))`` bytes
+        are read.
+
+        Returns the number of bytes read and stored into ``buf`` or ``None``
+        if no pending data available.
+        """
+        ...
+
+    # .. method:: USB_VCP.readlines()
+    def readlines(
+        self,
+    ) -> Any:
+        """
+        Read as much data as possible from the serial device, breaking it into
+        lines.
+
+        Returns a list of bytes objects, each object being one of the lines.
+        Each line will include the newline character.
+        """
+        ...
+
+    # .. method:: USB_VCP.recv(data, *, timeout=5000)
+    def recv(self, data, *, timeout=5000) -> Any:
+        """
+        Receive data on the bus:
+
+          - ``data`` can be an integer, which is the number of bytes to receive,
+            or a mutable buffer, which will be filled with received bytes.
+          - ``timeout`` is the timeout in milliseconds to wait for the receive.
+
+        Return value: if ``data`` is an integer then a new buffer of the bytes received,
+        otherwise the number of bytes read into ``data`` is returned.
+        """
+        ...
+
+    # .. method:: USB_VCP.irq(handler=None, trigger=IRQ_RX, hard=False)
+    def irq(self, handler=None, trigger=IRQ_RX, hard=False) -> Any:
+        """
+        Register *handler* to be called whenever an event specified by *trigger*
+        occurs.  The *handler* function must take exactly one argument, which will
+        be the USB VCP object.  Pass in ``None`` to disable the callback.
+
+        Valid values for *trigger* are:
+
+          - ``USB_VCP.IRQ_RX``: new data is available for reading from the USB VCP object.
+
+        """
+        ...
+
+
+# .. data:: USB_VCP.RTS
+# .. data:: USB_VCP.IRQ_RX
