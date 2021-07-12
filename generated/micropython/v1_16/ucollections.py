@@ -33,23 +33,25 @@ def deque(iterable, maxlen, flags: Optional[Any]) -> Any:
 
 
 #     .. method:: deque.append(x)
-def append(self, x) -> Any:
-    """
-    Add *x* to the right side of the deque.
-    Raises IndexError if overflow checking is enabled and there is no more room left.
-    """
-    ...
+class deque:
+    """ """
 
+    def append(self, x) -> Any:
+        """
+        Add *x* to the right side of the deque.
+        Raises IndexError if overflow checking is enabled and there is no more room left.
+        """
+        ...
 
-#     .. method:: deque.popleft()
-def popleft(
-    self,
-) -> Any:
-    """
-    Remove and return an item from the left side of the deque.
-    Raises IndexError if no items are present.
-    """
-    ...
+    #     .. method:: deque.popleft()
+    def popleft(
+        self,
+    ) -> Any:
+        """
+        Remove and return an item from the left side of the deque.
+        Raises IndexError if no items are present.
+        """
+        ...
 
 
 # .. function:: namedtuple(name, fields)

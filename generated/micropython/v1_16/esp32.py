@@ -164,17 +164,14 @@ class Partition:
         cls,
     ) -> Any:
         """
-            Signals that the current boot is considered successful.
-            Calling ``mark_app_valid_cancel_rollback`` is required on the first boot of a new
-            partition to avoid an automatic rollback at the next boot.
-            This uses the ESP-IDF "app rollback" feature with "CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE"
-            and  an ``OSError(-261)`` is raised if called on firmware that doesn't have the
-            feature enabled.
-            It is OK to call ``mark_app_valid_cancel_rollback`` on every boot and it is not
-            necessary when booting firmare that was loaded using esptool.
-
-        Constants
-        ~~~~~~~~~
+        Signals that the current boot is considered successful.
+        Calling ``mark_app_valid_cancel_rollback`` is required on the first boot of a new
+        partition to avoid an automatic rollback at the next boot.
+        This uses the ESP-IDF "app rollback" feature with "CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE"
+        and  an ``OSError(-261)`` is raised if called on firmware that doesn't have the
+        feature enabled.
+        It is OK to call ``mark_app_valid_cancel_rollback`` on every boot and it is not
+        necessary when booting firmare that was loaded using esptool.
         """
         ...
 
