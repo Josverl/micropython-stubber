@@ -31,7 +31,11 @@ class select:
     def __init__(self, rlist, wlist, xlist, timeout: Optional[Any]) -> None:
         ...
 
-    # .. method:: poll.register(obj[, eventmask])
+
+# .. method:: poll.register(obj[, eventmask])
+class poll:
+    """ """
+
     def register(self, obj, eventmask: Optional[Any]) -> Any:
         """
         Register `stream` *obj* for polling. *eventmask* is logical OR of:

@@ -243,7 +243,7 @@ def have_cdc() -> Any:
 
 #    .. note:: This function is deprecated.  Use pyb.USB_VCP().isconnected() instead.
 # .. function:: hid((buttons, x, y, z))
-def hid((buttons, x, y, z)) -> Any:
+def hid(hidtuple) -> Any:
     """
     Takes a 4-tuple (or list) and sends it to the USB host (the PC) to
     signal a HID mouse-motion event.
@@ -1553,16 +1553,20 @@ class Pin:
         """
         ...
 
-    # .. data:: Pin.AF_OD
-    # .. data:: Pin.AF_PP
-    # .. data:: Pin.ANALOG
-    # .. data:: Pin.IN
-    # .. data:: Pin.OUT_OD
-    # .. data:: Pin.OUT_PP
-    # .. data:: Pin.PULL_DOWN
-    # .. data:: Pin.PULL_NONE
-    # .. data:: Pin.PULL_UP
-    # .. method:: pinaf.__str__()
+
+# .. data:: Pin.AF_OD
+# .. data:: Pin.AF_PP
+# .. data:: Pin.ANALOG
+# .. data:: Pin.IN
+# .. data:: Pin.OUT_OD
+# .. data:: Pin.OUT_PP
+# .. data:: Pin.PULL_DOWN
+# .. data:: Pin.PULL_NONE
+# .. data:: Pin.PULL_UP
+# .. method:: pinaf.__str__()
+class pinaf:
+    """ """
+
     def __str__(
         self,
     ) -> Any:
@@ -2117,7 +2121,11 @@ class Timer:
         """
         ...
 
-    # .. method:: timerchannel.callback(fun)
+
+# .. method:: timerchannel.callback(fun)
+class timerchannel:
+    """ """
+
     def callback(self, fun) -> Any:
         """
         Set the function to be called when the timer channel triggers.
