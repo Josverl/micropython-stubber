@@ -93,227 +93,213 @@ def inet_pton(af, txt_addr) -> Any:
 # .. data:: usocket.SO_*
 # .. data:: IPPROTO_SEC
 # .. method:: socket.close()
-def close(
-    self,
-) -> Any:
-    """
-    Mark the socket closed and release all resources. Once that happens, all future operations
-    on the socket object will fail. The remote end will receive EOF indication if
-    supported by protocol.
+class socket:
+    """ """
 
-    Sockets are automatically closed when they are garbage-collected, but it is recommended
-    to `close()` them explicitly as soon you finished working with them.
-    """
-    ...
+    def close(
+        self,
+    ) -> Any:
+        """
+        Mark the socket closed and release all resources. Once that happens, all future operations
+        on the socket object will fail. The remote end will receive EOF indication if
+        supported by protocol.
 
+        Sockets are automatically closed when they are garbage-collected, but it is recommended
+        to `close()` them explicitly as soon you finished working with them.
+        """
+        ...
 
-# .. method:: socket.bind(address)
-def bind(self, address) -> Any:
-    """
-    Bind the socket to *address*. The socket must not already be bound.
-    """
-    ...
+    # .. method:: socket.bind(address)
+    def bind(self, address) -> Any:
+        """
+        Bind the socket to *address*. The socket must not already be bound.
+        """
+        ...
 
+    # .. method:: socket.listen([backlog])
+    def listen(self, backlog: Optional[Any]) -> Any:
+        """
+        Enable a server to accept connections. If *backlog* is specified, it must be at least 0
+        (if it's lower, it will be set to 0); and specifies the number of unaccepted connections
+        that the system will allow before refusing new connections. If not specified, a default
+        reasonable value is chosen.
+        """
+        ...
 
-# .. method:: socket.listen([backlog])
-def listen(self, backlog: Optional[Any]) -> Any:
-    """
-    Enable a server to accept connections. If *backlog* is specified, it must be at least 0
-    (if it's lower, it will be set to 0); and specifies the number of unaccepted connections
-    that the system will allow before refusing new connections. If not specified, a default
-    reasonable value is chosen.
-    """
-    ...
+    # .. method:: socket.accept()
+    def accept(
+        self,
+    ) -> Any:
+        """
+        Accept a connection. The socket must be bound to an address and listening for connections.
+        The return value is a pair (conn, address) where conn is a new socket object usable to send
+        and receive data on the connection, and address is the address bound to the socket on the
+        other end of the connection.
+        """
+        ...
 
+    # .. method:: socket.connect(address)
+    def connect(self, address) -> Any:
+        """
+        Connect to a remote socket at *address*.
+        """
+        ...
 
-# .. method:: socket.accept()
-def accept(
-    self,
-) -> Any:
-    """
-    Accept a connection. The socket must be bound to an address and listening for connections.
-    The return value is a pair (conn, address) where conn is a new socket object usable to send
-    and receive data on the connection, and address is the address bound to the socket on the
-    other end of the connection.
-    """
-    ...
+    # .. method:: socket.send(bytes)
+    def send(self, bytes) -> Any:
+        """
+        Send data to the socket. The socket must be connected to a remote socket.
+        Returns number of bytes sent, which may be smaller than the length of data
+        ("short write").
+        """
+        ...
 
+    # .. method:: socket.sendall(bytes)
+    def sendall(self, bytes) -> Any:
+        """
+        Send all data to the socket. The socket must be connected to a remote socket.
+        Unlike `send()`, this method will try to send all of data, by sending data
+        chunk by chunk consecutively.
 
-# .. method:: socket.connect(address)
-def connect(self, address) -> Any:
-    """
-    Connect to a remote socket at *address*.
-    """
-    ...
+        The behaviour of this method on non-blocking sockets is undefined. Due to this,
+        on MicroPython, it's recommended to use `write()` method instead, which
+        has the same "no short writes" policy for blocking sockets, and will return
+        number of bytes sent on non-blocking sockets.
+        """
+        ...
 
+    # .. method:: socket.recv(bufsize)
+    def recv(self, bufsize) -> Any:
+        """
+        Receive data from the socket. The return value is a bytes object representing the data
+        received. The maximum amount of data to be received at once is specified by bufsize.
+        """
+        ...
 
-# .. method:: socket.send(bytes)
-def send(self, bytes) -> Any:
-    """
-    Send data to the socket. The socket must be connected to a remote socket.
-    Returns number of bytes sent, which may be smaller than the length of data
-    ("short write").
-    """
-    ...
+    # .. method:: socket.sendto(bytes, address)
+    def sendto(self, bytes, address) -> Any:
+        """
+        Send data to the socket. The socket should not be connected to a remote socket, since the
+        destination socket is specified by *address*.
+        """
+        ...
 
+    # .. method:: socket.recvfrom(bufsize)
+    def recvfrom(self, bufsize) -> Any:
+        """
+        Receive data from the socket. The return value is a pair *(bytes, address)* where *bytes* is a
+        bytes object representing the data received and *address* is the address of the socket sending
+        the data.
+        """
+        ...
 
-# .. method:: socket.sendall(bytes)
-def sendall(self, bytes) -> Any:
-    """
-    Send all data to the socket. The socket must be connected to a remote socket.
-    Unlike `send()`, this method will try to send all of data, by sending data
-    chunk by chunk consecutively.
+    # .. method:: socket.setsockopt(level, optname, value)
+    def setsockopt(self, level, optname, value) -> Any:
+        """
+        Set the value of the given socket option. The needed symbolic constants are defined in the
+        socket module (SO_* etc.). The *value* can be an integer or a bytes-like object representing
+        a buffer.
+        """
+        ...
 
-    The behaviour of this method on non-blocking sockets is undefined. Due to this,
-    on MicroPython, it's recommended to use `write()` method instead, which
-    has the same "no short writes" policy for blocking sockets, and will return
-    number of bytes sent on non-blocking sockets.
-    """
-    ...
+    # .. method:: socket.settimeout(value)
+    def settimeout(self, value) -> Any:
+        """
+        **Note**: Not every port supports this method, see below.
 
+        Set a timeout on blocking socket operations. The value argument can be a nonnegative floating
+        point number expressing seconds, or None. If a non-zero value is given, subsequent socket operations
+        will raise an `OSError` exception if the timeout period value has elapsed before the operation has
+        completed. If zero is given, the socket is put in non-blocking mode. If None is given, the socket
+        is put in blocking mode.
 
-# .. method:: socket.recv(bufsize)
-def recv(self, bufsize) -> Any:
-    """
-    Receive data from the socket. The return value is a bytes object representing the data
-    received. The maximum amount of data to be received at once is specified by bufsize.
-    """
-    ...
+        Not every :term:`MicroPython port` supports this method. A more portable and
+        generic solution is to use `uselect.poll` object. This allows to wait on
+        multiple objects at the same time (and not just on sockets, but on generic
+        `stream` objects which support polling). Example::
 
+             # Instead of:
+             s.settimeout(1.0)  # time in seconds
+             s.read(10)  # may timeout
 
-# .. method:: socket.sendto(bytes, address)
-def sendto(self, bytes, address) -> Any:
-    """
-    Send data to the socket. The socket should not be connected to a remote socket, since the
-    destination socket is specified by *address*.
-    """
-    ...
+             # Use:
+             poller = uselect.poll()
+             poller.register(s, uselect.POLLIN)
+             res = poller.poll(1000)  # time in milliseconds
+             if not res:
+                 # s is still not ready for input, i.e. operation timed out
+        """
+        ...
 
+    #    .. admonition:: Difference to CPython
+    # .. method:: socket.setblocking(flag)
+    def setblocking(self, flag) -> Any:
+        """
+        Set blocking or non-blocking mode of the socket: if flag is false, the socket is set to non-blocking,
+        else to blocking mode.
 
-# .. method:: socket.recvfrom(bufsize)
-def recvfrom(self, bufsize) -> Any:
-    """
-    Receive data from the socket. The return value is a pair *(bytes, address)* where *bytes* is a
-    bytes object representing the data received and *address* is the address of the socket sending
-    the data.
-    """
-    ...
+        This method is a shorthand for certain `settimeout()` calls:
 
+        * ``sock.setblocking(True)`` is equivalent to ``sock.settimeout(None)``
+        * ``sock.setblocking(False)`` is equivalent to ``sock.settimeout(0)``
+        """
+        ...
 
-# .. method:: socket.setsockopt(level, optname, value)
-def setsockopt(self, level, optname, value) -> Any:
-    """
-    Set the value of the given socket option. The needed symbolic constants are defined in the
-    socket module (SO_* etc.). The *value* can be an integer or a bytes-like object representing
-    a buffer.
-    """
-    ...
+    # .. method:: socket.makefile(mode='rb', buffering=0, /)
+    def makefile(self, mode="rb", buffering=0, /) -> Any:
+        """
+        Return a file object associated with the socket. The exact returned type depends on the arguments
+        given to makefile(). The support is limited to binary modes only ('rb', 'wb', and 'rwb').
+        CPython's arguments: *encoding*, *errors* and *newline* are not supported.
+        """
+        ...
 
+    #    .. admonition:: Difference to CPython
+    #    .. admonition:: Difference to CPython
+    # .. method:: socket.read([size])
+    def read(self, size: Optional[Any]) -> Any:
+        """
+        Read up to size bytes from the socket. Return a bytes object. If *size* is not given, it
+        reads all data available from the socket until EOF; as such the method will not return until
+        the socket is closed. This function tries to read as much data as
+        requested (no "short reads"). This may be not possible with
+        non-blocking socket though, and then less data will be returned.
+        """
+        ...
 
-# .. method:: socket.settimeout(value)
-def settimeout(self, value) -> Any:
-    """
-    **Note**: Not every port supports this method, see below.
+    # .. method:: socket.readinto(buf[, nbytes])
+    def readinto(self, buf, nbytes: Optional[Any]) -> Any:
+        """
+        Read bytes into the *buf*.  If *nbytes* is specified then read at most
+        that many bytes.  Otherwise, read at most *len(buf)* bytes. Just as
+        `read()`, this method follows "no short reads" policy.
 
-    Set a timeout on blocking socket operations. The value argument can be a nonnegative floating
-    point number expressing seconds, or None. If a non-zero value is given, subsequent socket operations
-    will raise an `OSError` exception if the timeout period value has elapsed before the operation has
-    completed. If zero is given, the socket is put in non-blocking mode. If None is given, the socket
-    is put in blocking mode.
+        Return value: number of bytes read and stored into *buf*.
+        """
+        ...
 
-    Not every :term:`MicroPython port` supports this method. A more portable and
-    generic solution is to use `uselect.poll` object. This allows to wait on
-    multiple objects at the same time (and not just on sockets, but on generic
-    `stream` objects which support polling). Example::
+    # .. method:: socket.readline()
+    def readline(
+        self,
+    ) -> Any:
+        """
+        Read a line, ending in a newline character.
 
-         # Instead of:
-         s.settimeout(1.0)  # time in seconds
-         s.read(10)  # may timeout
+        Return value: the line read.
+        """
+        ...
 
-         # Use:
-         poller = uselect.poll()
-         poller.register(s, uselect.POLLIN)
-         res = poller.poll(1000)  # time in milliseconds
-         if not res:
-             # s is still not ready for input, i.e. operation timed out
-    """
-    ...
+    # .. method:: socket.write(buf)
+    def write(self, buf) -> Any:
+        """
+        Write the buffer of bytes to the socket. This function will try to
+        write all data to a socket (no "short writes"). This may be not possible
+        with a non-blocking socket though, and returned value will be less than
+        the length of *buf*.
 
-
-#    .. admonition:: Difference to CPython
-# .. method:: socket.setblocking(flag)
-def setblocking(self, flag) -> Any:
-    """
-    Set blocking or non-blocking mode of the socket: if flag is false, the socket is set to non-blocking,
-    else to blocking mode.
-
-    This method is a shorthand for certain `settimeout()` calls:
-
-    * ``sock.setblocking(True)`` is equivalent to ``sock.settimeout(None)``
-    * ``sock.setblocking(False)`` is equivalent to ``sock.settimeout(0)``
-    """
-    ...
-
-
-# .. method:: socket.makefile(mode='rb', buffering=0, /)
-def makefile(self, mode="rb", buffering=0, /) -> Any:
-    """
-    Return a file object associated with the socket. The exact returned type depends on the arguments
-    given to makefile(). The support is limited to binary modes only ('rb', 'wb', and 'rwb').
-    CPython's arguments: *encoding*, *errors* and *newline* are not supported.
-    """
-    ...
-
-
-#    .. admonition:: Difference to CPython
-#    .. admonition:: Difference to CPython
-# .. method:: socket.read([size])
-def read(self, size: Optional[Any]) -> Any:
-    """
-    Read up to size bytes from the socket. Return a bytes object. If *size* is not given, it
-    reads all data available from the socket until EOF; as such the method will not return until
-    the socket is closed. This function tries to read as much data as
-    requested (no "short reads"). This may be not possible with
-    non-blocking socket though, and then less data will be returned.
-    """
-    ...
-
-
-# .. method:: socket.readinto(buf[, nbytes])
-def readinto(self, buf, nbytes: Optional[Any]) -> Any:
-    """
-    Read bytes into the *buf*.  If *nbytes* is specified then read at most
-    that many bytes.  Otherwise, read at most *len(buf)* bytes. Just as
-    `read()`, this method follows "no short reads" policy.
-
-    Return value: number of bytes read and stored into *buf*.
-    """
-    ...
-
-
-# .. method:: socket.readline()
-def readline(
-    self,
-) -> Any:
-    """
-    Read a line, ending in a newline character.
-
-    Return value: the line read.
-    """
-    ...
-
-
-# .. method:: socket.write(buf)
-def write(self, buf) -> Any:
-    """
-    Write the buffer of bytes to the socket. This function will try to
-    write all data to a socket (no "short writes"). This may be not possible
-    with a non-blocking socket though, and returned value will be less than
-    the length of *buf*.
-
-    Return value: number of bytes written.
-    """
-    ...
+        Return value: number of bytes written.
+        """
+        ...
 
 
 # .. exception:: usocket.error

@@ -551,7 +551,7 @@ class ADC:
 
 # .. currentmodule:: machine
 # currentmodule:: machine
-# .. class:: PWM(dest, \*, freq, duty_u16, duty_ns)
+# .. class:: PWM(dest, *, freq, duty_u16, duty_ns)
 # class:: PWM
 class PWM:
     """
@@ -573,7 +573,7 @@ class PWM:
     def __init__(self, dest, *, freq, duty_u16, duty_ns) -> None:
         ...
 
-    # .. method:: PWM.init(\*, freq, duty_u16, duty_ns)
+    # .. method:: PWM.init(*, freq, duty_u16, duty_ns)
     def init(self, *, freq, duty_u16, duty_ns) -> Any:
         """
         Modify settings for the PWM object.  See the above constructor for details

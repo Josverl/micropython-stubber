@@ -1,5 +1,6 @@
 # read text
 import re
+import subprocess
 from typing import List, Tuple
 from pathlib import Path
 
@@ -18,6 +19,10 @@ def _red(*args) -> str:
 
 
 class RSTReader:
+    __debug = False  # a
+    verbose = False
+    no_explicit_init = False  # True to avoid overloading __init__
+
     def __init__(self):
         self.sep = "::"
         self.current_module = ""
@@ -26,7 +31,6 @@ class RSTReader:
         self.rst_text: List[str] = []
         self.max_line = 0
         self.output: List[str] = []
-        self.verbose = False
         self.source_tag = "v1.16"
         self.target = ".py"  # py/pyi
         self.classes: List[str] = []
@@ -49,6 +53,14 @@ class RSTReader:
     def dedent(self, n=4):
         self.depth = max(0, self.depth - n)
 
+    def leave_class(self):
+        if self.current_class != "":
+            if self.verbose or self.__debug:
+                self.writeln(f"{self.indent}# End of class: {self.current_class}")
+                self.writeln(f"{self.indent}# ..................................")
+            self.dedent()
+            self.current_class = ""
+
     def read_file(self, filename):
         print(f" - Reading from: {filename}")
         # ingore Unicode decoding issues
@@ -69,7 +81,7 @@ class RSTReader:
             print(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
-            return True
+                return True
         except OSError as e:
             print(e)
             return False
@@ -129,8 +141,8 @@ class RSTReader:
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
         params = params.replace("]", ": Optional[Any]")
-        # change \* --> *
-        params = params.replace("\\*", "*")
+        # # change \* --> *
+        # params = params.replace("\\*", "*")
         # ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args")
@@ -189,7 +201,7 @@ class RSTReader:
 
     def output_class_hdr(self, name: str, params: str, docstr: List[str]):
         # hack assume no classes in classes  or functions in functions
-        self.dedent()
+        self.leave_class()
 
         # write a class header
         self.writeln(f"{self.indent}class {name}:")
@@ -249,8 +261,8 @@ class RSTReader:
                 # todo: parse return type from docstring
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
-                # hack assume no inner.classes or fnctions in functions
-                self.dedent()
+                # assume functions in classes
+                self.leave_class()
                 # if function name is the same as the module
                 # then this is probably documenting a class ()
                 # FIXME: usocket socket
@@ -281,7 +293,6 @@ class RSTReader:
                 n, docstr = self.read_textblock(n)
 
                 # write a class header
-                self.dedent()
                 self.output_class_hdr(name, params, docstr)
 
             # todo: detect end of class to dedent
@@ -312,7 +323,7 @@ class RSTReader:
                     class_name = self.current_class
                 name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-                if name == "__init__":
+                if name == "__init__" and self.no_explicit_init:
                     # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
                     # FIXME: ucryptolib aes.__init__(key, mode, [IV])
                     n += 1
@@ -327,7 +338,11 @@ class RSTReader:
                     n, docstr = self.read_textblock(n)
 
                     # todo: parse return type from docstring
-                    if re.search(r"\.\. classmethod::", line):
+                    if name == "__init__":
+                        # explicitly documented __init__ ( only a few classes)
+                        self.writeln(f"{self.indent}def {name}(self, {params} -> None:")
+                        ...
+                    elif re.search(r"\.\. classmethod::", line):
                         self.writeln(f"{self.indent}@classmethod")
                         self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
                         ...
@@ -454,3 +469,17 @@ for file in files:
     reader.read_file(rst_folder / file)
     reader.parse()
     reader.write_file((dest_folder / file).with_suffix(".py"))
+
+cmd = f"black {dest_folder}"
+result = subprocess.run(cmd, capture_output=True, check=True)
+if result.returncode != 0:
+    raise Exception(result.stderr.decode("utf-8"))
+print(result.stderr.decode("utf-8"))
+
+
+# todo
+# constants
+# usocket : class is defined twice - discontinuous documentation
+# Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
+
+# ucollection   : docs incorrectlty states classes as functions --> upstream
