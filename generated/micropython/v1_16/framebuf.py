@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: framebuf
 # origin: micropython\docs\library\framebuf.rst
 # v1.16
@@ -7,13 +9,7 @@
 This module provides a general frame buffer which can be used to create
 bitmap images, which can then be sent to a display.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: framebuf
 # .. class:: FrameBuffer(buffer, width, height, format, stride=width, /)
-# .. class:: FrameBuffer(buffer, width, height, format, stride=width, /)
-
 # class:: FrameBuffer
 class FrameBuffer:
     """
@@ -51,14 +47,47 @@ class FrameBuffer:
         """
         ...
 
+    # .. method:: FrameBuffer.pixel(x, y[, c])
+    def pixel(self, x, y, c: Optional[Any]) -> Any:
+        """
+        If *c* is not given, get the color value of the specified pixel.
+        If *c* is given, set the specified pixel to the given color.
+        """
+        ...
+
     # .. method:: FrameBuffer.hline(x, y, w, c)
     def hline(self, x, y, w, c) -> Any:
         """ """
         ...
 
+    # .. method:: FrameBuffer.vline(x, y, h, c)
+    def vline(self, x, y, h, c) -> Any:
+        """ """
+        ...
+
+    # .. method:: FrameBuffer.line(x1, y1, x2, y2, c)
+    def line(self, x1, y1, x2, y2, c) -> Any:
+        """
+        Draw a line from a set of coordinates using the given color and
+        a thickness of 1 pixel. The `line` method draws the line up to
+        a second set of coordinates whereas the `hline` and `vline`
+        methods draw horizontal and vertical lines respectively up to
+        a given length.
+        """
+        ...
+
     # .. method:: FrameBuffer.rect(x, y, w, h, c)
     def rect(self, x, y, w, h, c) -> Any:
         """ """
+        ...
+
+    # .. method:: FrameBuffer.fill_rect(x, y, w, h, c)
+    def fill_rect(self, x, y, w, h, c) -> Any:
+        """
+        Draw a rectangle at the given location, size and color. The `rect`
+        method draws only a 1 pixel outline whereas the `fill_rect` method
+        draws both the outline and interior.
+        """
         ...
 
     # .. method:: FrameBuffer.text(s, x, y[, c])
@@ -77,6 +106,20 @@ class FrameBuffer:
         """
         Shift the contents of the FrameBuffer by the given vector. This may
         leave a footprint of the previous colors in the FrameBuffer.
+        """
+        ...
+
+    # .. method:: FrameBuffer.blit(fbuf, x, y[, key])
+    def blit(self, fbuf, x, y, key: Optional[Any]) -> Any:
+        """
+        Draw another FrameBuffer on top of the current one at the given coordinates.
+        If *key* is specified then it should be a color integer and the
+        corresponding color will be considered transparent: all pixels with that
+        color value will not be drawn.
+
+        This method works between FrameBuffer instances utilising different formats,
+        but the resulting colors may be unexpected due to the mismatch in color
+        formats.
         """
         ...
 

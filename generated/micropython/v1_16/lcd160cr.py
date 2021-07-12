@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: lcd160cr
 # origin: micropython\docs\library\lcd160cr.rst
 # v1.16
@@ -6,13 +8,8 @@
 
 This module provides control of the MicroPython LCD160CR display.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: lcd160cr
+# .. image:: http://micropython.org/resources/LCD160CRv10-persp.jpg
 # .. class:: LCD160CR(connect=None, *, pwr=None, i2c=None, spi=None, i2c_addr=98)
-# .. class:: LCD160CR(connect=None, *, pwr=None, i2c=None, spi=None, i2c_addr=98)
-
 # class:: LCD160CR
 class LCD160CR:
     """
@@ -54,7 +51,24 @@ class LCD160CR:
         ...
 
     # .. staticmethod:: LCD160CR.rgb(r, g, b)
+    @staticmethod
+    def rgb(r, g, b) -> Any:
+        """
+        Return a 16-bit integer representing the given rgb color values.  The
+        16-bit value can be used to set the font color (see
+        :meth:`LCD160CR.set_text_color`) pen color (see :meth:`LCD160CR.set_pen`)
+        and draw individual pixels.
+        """
+        ...
+
     # .. staticmethod:: LCD160CR.clip_line(data, w, h):
+    @staticmethod
+    def clip_line(data, w, h) -> Any:
+        """
+        Clip the given line data.  This is for internal use.
+        """
+        ...
+
     # .. data:: LCD160CR.w
     # .. data:: LCD160CR.h
     # .. method:: LCD160CR.set_power(on)
@@ -65,6 +79,14 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.set_orient(orient)
+    def set_orient(self, orient) -> Any:
+        """
+        Set the orientation of the display.  The *orient* parameter can be one
+        of `PORTRAIT`, `LANDSCAPE`, `PORTRAIT_UPSIDEDOWN`, `LANDSCAPE_UPSIDEDOWN`.
+        """
+        ...
+
     # .. method:: LCD160CR.set_brightness(value)
     def set_brightness(self, value) -> Any:
         """
@@ -72,10 +94,26 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.set_i2c_addr(addr)
+    def set_i2c_addr(self, addr) -> Any:
+        """
+        Set the I2C address of the display.  The *addr* value must have the
+        lower 2 bits cleared.
+        """
+        ...
+
     # .. method:: LCD160CR.set_uart_baudrate(baudrate)
     def set_uart_baudrate(self, baudrate) -> Any:
         """
         Set the baudrate of the UART interface.
+        """
+        ...
+
+    # .. method:: LCD160CR.set_startup_deco(value)
+    def set_startup_deco(self, value) -> Any:
+        """
+        Set the start-up decoration of the display.  The *value* parameter can be a
+        logical or of `STARTUP_DECO_NONE`, `STARTUP_DECO_MLOGO`, `STARTUP_DECO_INFO`.
         """
         ...
 
@@ -97,6 +135,13 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.get_pixel(x, y)
+    def get_pixel(self, x, y) -> Any:
+        """
+        Get the 16-bit value of the specified pixel.
+        """
+        ...
+
     # .. method:: LCD160CR.get_line(x, y, buf)
     def get_line(self, x, y, buf) -> Any:
         """
@@ -104,6 +149,18 @@ class LCD160CR:
         To read *n* pixels *buf* should be *2*n+1* bytes in length.  The first byte
         is a dummy byte and should be ignored, and subsequent bytes represent the
         pixels in the line starting at coordinate *(x, y)*.
+        """
+        ...
+
+    # .. method:: LCD160CR.screen_dump(buf, x=0, y=0, w=None, h=None)
+    def screen_dump(self, buf, x=0, y=0, w=None, h=None) -> Any:
+        """
+        Dump the contents of the screen to the given buffer.  The parameters *x* and *y*
+        specify the starting coordinate, and *w* and *h* the size of the region.  If *w*
+        or *h* are ``None`` then they will take on their maximum values, set by the size
+        of the screen minus the given *x* and *y* values.  *buf* should be large enough
+        to hold ``2*w*h`` bytes.  If it's smaller then only the initial horizontal lines
+        will be stored.
         """
         ...
 
@@ -119,6 +176,13 @@ class LCD160CR:
         """
         Set the position for text output using :meth:`LCD160CR.write`.  The position
         is the upper-left corner of the text.
+        """
+        ...
+
+    # .. method:: LCD160CR.set_text_color(fg, bg)
+    def set_text_color(self, fg, bg) -> Any:
+        """
+        Set the foreground and background color of the text.
         """
         ...
 
@@ -144,10 +208,28 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.write(s)
+    def write(self, s) -> Any:
+        """
+        Write text to the display, using the current position, color and font.
+        As text is written the position is automatically incremented.  The
+        display supports basic VT100 control codes such as newline and backspace.
+        """
+        ...
+
     # .. method:: LCD160CR.set_pen(line, fill)
     def set_pen(self, line, fill) -> Any:
         """
         Set the line and fill color for primitive shapes.
+        """
+        ...
+
+    # .. method:: LCD160CR.erase()
+    def erase(
+        self,
+    ) -> Any:
+        """
+        Erase the entire display to the pen fill color.
         """
         ...
 
@@ -156,6 +238,16 @@ class LCD160CR:
         """
         Draw a single pixel at the given location using the pen line color.
         """
+        ...
+
+    # .. method:: LCD160CR.rect(x, y, w, h)
+    def rect(self, x, y, w, h) -> Any:
+        """ """
+        ...
+
+    # .. method:: LCD160CR.rect_outline(x, y, w, h)
+    def rect_outline(self, x, y, w, h) -> Any:
+        """ """
         ...
 
     # .. method:: LCD160CR.rect_interior(x, y, w, h)
@@ -168,8 +260,25 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.line(x1, y1, x2, y2)
+    def line(self, x1, y1, x2, y2) -> Any:
+        """
+        Draw a line between the given coordinates using the pen line color.
+        """
+        ...
+
     # .. method:: LCD160CR.dot_no_clip(x, y)
     def dot_no_clip(self, x, y) -> Any:
+        """ """
+        ...
+
+    # .. method:: LCD160CR.rect_no_clip(x, y, w, h)
+    def rect_no_clip(self, x, y, w, h) -> Any:
+        """ """
+        ...
+
+    # .. method:: LCD160CR.rect_outline_no_clip(x, y, w, h)
+    def rect_outline_no_clip(self, x, y, w, h) -> Any:
         """ """
         ...
 
@@ -178,12 +287,28 @@ class LCD160CR:
         """ """
         ...
 
+    # .. method:: LCD160CR.line_no_clip(x1, y1, x2, y2)
+    def line_no_clip(self, x1, y1, x2, y2) -> Any:
+        """
+        These methods are as above but don't do any clipping on the input
+        coordinates.  They are faster than the clipping versions and can be
+        used when you know that the coordinates are within the display.
+        """
+        ...
+
     # .. method:: LCD160CR.poly_dot(data)
     def poly_dot(self, data) -> Any:
         """
         Draw a sequence of dots using the pen line color.
         The *data* should be a buffer of bytes, with each successive pair of
         bytes corresponding to coordinate pairs (x, y).
+        """
+        ...
+
+    # .. method:: LCD160CR.poly_line(data)
+    def poly_line(self, data) -> Any:
+        """
+        Similar to :meth:`LCD160CR.poly_dot` but draws lines between the dots.
         """
         ...
 
@@ -201,6 +326,16 @@ class LCD160CR:
               line low when a touch force is detected.  If *irq* is ``False`` then this
               feature is disabled.  If *irq* is ``None`` (the default value) then no
               change is made to this setting.
+        """
+        ...
+
+    # .. method:: LCD160CR.is_touched()
+    def is_touched(
+        self,
+    ) -> Any:
+        """
+        Returns a boolean: ``True`` if there is currently a touch force on the screen,
+        ``False`` otherwise.
         """
         ...
 
@@ -222,6 +357,21 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.fast_spi(flush=True)
+    def fast_spi(self, flush=True) -> Any:
+        """
+        Ready the display to accept RGB pixel data on the SPI bus, resetting the location
+        of the first byte to go to the top-left corner of the window set by
+        :meth:`LCD160CR.set_spi_win`.
+        The method returns an SPI object which can be used to write the pixel data.
+
+        Pixels should be sent as 16-bit RGB values in the 5-6-5 format.  The destination
+        counter will increase as data is sent, and data can be sent in arbitrary sized
+        chunks.  Once the destination counter reaches the end of the window specified by
+        :meth:`LCD160CR.set_spi_win` it will wrap around to the top-left corner of that window.
+        """
+        ...
+
     # .. method:: LCD160CR.show_framebuf(buf)
     def show_framebuf(self, buf) -> Any:
         """
@@ -232,6 +382,14 @@ class LCD160CR:
         The `framebuf <framebuf.html>`_ module can be used to construct frame buffers
         and provides drawing primitives. Using a frame buffer will improve
         performance of animations when compared to drawing directly to the screen.
+        """
+        ...
+
+    # .. method:: LCD160CR.set_scroll(on)
+    def set_scroll(self, on) -> Any:
+        """
+        Turn scrolling on or off.  This controls globally whether any window regions will
+        scroll.
         """
         ...
 
@@ -254,6 +412,18 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.set_scroll_win_param(win, param, value)
+    def set_scroll_win_param(self, win, param, value) -> Any:
+        """
+        Set a single parameter of a scrolling window region:
+
+            - *win* is the window id, 0..8.
+            - *param* is the parameter number to configure, 0..7, and corresponds
+              to the parameters in the `set_scroll_win` method.
+            - *value* is the value to set.
+        """
+        ...
+
     # .. method:: LCD160CR.set_scroll_buf(s)
     def set_scroll_buf(self, s) -> Any:
         """
@@ -262,9 +432,29 @@ class LCD160CR:
         """
         ...
 
+    # .. method:: LCD160CR.jpeg(buf)
+    def jpeg(self, buf) -> Any:
+        """
+        Display a JPEG.  *buf* should contain the entire JPEG data. JPEG data should
+        not include EXIF information. The following encodings are supported: Baseline
+        DCT, Huffman coding, 8 bits per sample, 3 color components, YCbCr4:2:2.
+        The origin of the JPEG is set by :meth:`LCD160CR.set_pos`.
+        """
+        ...
+
     # .. method:: LCD160CR.jpeg_start(total_len)
     def jpeg_start(self, total_len) -> Any:
         """ """
+        ...
+
+    # .. method:: LCD160CR.jpeg_data(buf)
+    def jpeg_data(self, buf) -> Any:
+        """
+        Display a JPEG with the data split across multiple buffers.  There must be
+        a single call to `jpeg_start` to begin with, specifying the total number of
+        bytes in the JPEG.  Then this number of bytes must be transferred to the
+        display using one or more calls to the `jpeg_data` command.
+        """
         ...
 
     # .. method:: LCD160CR.feed_wdt()
@@ -275,6 +465,15 @@ class LCD160CR:
         The first call to this method will start the display's internal watchdog
         timer.  Subsequent calls will feed the watchdog.  The timeout is roughly 30
         seconds.
+        """
+        ...
+
+    # .. method:: LCD160CR.reset()
+    def reset(
+        self,
+    ) -> Any:
+        """
+        Reset the display.
         """
         ...
 

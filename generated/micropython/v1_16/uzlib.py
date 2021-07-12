@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: uzlib
 # origin: micropython\docs\library\uzlib.rst
 # v1.16
@@ -11,10 +13,6 @@ This module allows to decompress binary data compressed with
 (commonly used in zlib library and gzip archiver). Compression
 is not yet implemented.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: uzlib
 # .. function:: decompress(data, wbits=0, bufsize=0, /)
 def decompress(data, wbits=0, bufsize=0, /) -> Any:
     """
@@ -26,3 +24,21 @@ def decompress(data, wbits=0, bufsize=0, /) -> Any:
     CPython and is ignored.
     """
     ...
+
+
+# .. class:: DecompIO(stream, wbits=0, /)
+# class:: DecompIO
+class DecompIO:
+    """
+    Create a `stream` wrapper which allows transparent decompression of
+    compressed data in another *stream*. This allows to process compressed
+    streams with data larger than available heap size. In addition to
+    values described in :func:`decompress`, *wbits* may take values
+    24..31 (16 + 8..15), meaning that input stream has gzip header.
+    """
+
+    def __init__(self, stream, wbits=0, /) -> None:
+        ...
+
+
+#    .. admonition:: Difference to CPython

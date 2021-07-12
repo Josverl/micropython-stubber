@@ -12,7 +12,6 @@ and helper functions.
 
 from typing import Any, Optional, Union, Tuple
 
-# .. module:: uio
 # .. admonition:: Difference to CPython
 # .. function:: open(name, mode='r', **kwargs)
 def open(name, mode="r", **kwargs) -> Any:
@@ -47,14 +46,38 @@ class FileIO:
         def __init__(self, string: Optional[Any]) -> None:
             ...
 
-        # .. class:: StringIO(alloc_size)
-        # .. class:: StringIO(alloc_size)
+        #     .. method:: getvalue()
+        class getvalue:
+            """ """
 
-        # class:: StringIO
-        class StringIO:
-            """
-            :noindex:
-            """
-
-            def __init__(self, alloc_size) -> None:
+            def getvalue(
+                self,
+            ) -> Any:
+                """
+                Get the current contents of the underlying buffer which holds data.
+                """
                 ...
+
+            # .. class:: BytesIO(alloc_size)
+            # .. class:: BytesIO(alloc_size)
+
+            # class:: BytesIO
+            class BytesIO:
+                """
+                :noindex:
+
+                Create an empty `StringIO`/`BytesIO` object, preallocated to hold up
+                to *alloc_size* number of bytes. That means that writing that amount
+                of bytes won't lead to reallocation of the buffer, and thus won't hit
+                out-of-memory situation or lead to memory fragmentation. These constructors
+                are a MicroPython extension and are recommended for usage only in special
+                cases and in system-level libraries, not for end-user applications.
+
+                .. admonition:: Difference to CPython
+                    :class: attention
+
+                    These constructors are a MicroPython extension.
+                """
+
+                def __init__(self, alloc_size) -> None:
+                    ...

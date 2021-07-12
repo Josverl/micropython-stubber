@@ -1,6 +1,20 @@
 # read text
+import re
 from typing import List, Tuple
 from pathlib import Path
+
+
+def _color(c, *args) -> str:
+    s = str(*args)
+    return f"\033[{c}m {s}\033[00m"
+
+
+def _green(*args) -> str:
+    return _color(92, *args)
+
+
+def _red(*args) -> str:
+    return _color(91, *args)
 
 
 class RSTReader:
@@ -16,7 +30,10 @@ class RSTReader:
         self.verbose = False
         self.source_tag = "v1.16"
         self.target = ".py"  # py/pyi
-        self.in_class: List[str] = []
+        self.classes: List[str] = []
+        self.current_class = ""
+
+        self.writeln("\nfrom typing import Any, Optional, Union, Tuple\n")
 
     def log(self, *arg):
         if self.verbose or 1:
@@ -66,9 +83,14 @@ class RSTReader:
         try:
             while (
                 n < len(self.rst_text)
-                and not self.rst_text[n].startswith("..")  # function / method
+                and not self.rst_text[n]
+                .lstrip()
+                .startswith(
+                    ".."
+                )  # stop at anchor ( however .. note: could be considered tp be added)
                 and not self.rst_text[min(n + 1, self.max_line)].startswith("--")  # Heading --
                 and not self.rst_text[min(n + 1, self.max_line)].startswith("==")  # Heading ==
+                and not self.rst_text[min(n + 1, self.max_line)].startswith("~~")  # Heading ~~
             ):
                 line = self.rst_text[n]
                 block.append(line.rstrip())
@@ -80,23 +102,28 @@ class RSTReader:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
-        return (n + 1, block)
+        return (n, block)
 
     def fix_parameters(self, params: str):
-        "change notation issues into a supported version"
+        "change parameter notation issues into a supported version"
+        params = params.strip()
+        if not params.endswith(")"):
+            # remove all after the closing bracket
+            params = params[0 : params.rfind(")") + 1]
         # multiple optionals
         # # .. method:: Servo.angle([angle, time=0])
         params = params.replace("[angle, time=0]", "[angle], time=0")
+        # .. method:: Servo.speed([speed, time=0])
+        params = params.replace("[speed, time=0]", "[speed], time=0")
+
         # sublist parameters are not supported in python 3
         # method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
         params = params.replace("(adcx, adcy, ...), (bufx, bufy, ...)", "adcs, bufs")
-        params = params.replace("", "")
-        params = params.replace("", "")
 
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
-        params = params.replace("]", ":Optional[Any]")
+        params = params.replace("]", ": Optional[Any]")
         # change \* --> *
         params = params.replace("\\*", "*")
         # ... not allowed in .py
@@ -117,11 +144,18 @@ class RSTReader:
         # .. function:: ussl.wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)
         params = params.replace("cert_reqs=CERT_NONE", "cert_reqs=None")  # Q&D
 
+        # network.rst method:: WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
+        params = params.replace("='dhcp' or configtuple:Optional[Any]", " :Union[str,Tuple]='dhcp'")
+
+        # network.rst .. method:: CC3K.patch_program('pgm')
+        params = params.replace("'pgm')", "cmd:str ,/)")
+
         # ifconfig
         params = params.replace(
-            "(ip, subnet, gateway, dns):Optional[Any]", "config:Optional[Tuple]"
+            "(ip, subnet, gateway, dns):Optional[Any]", "config: Optional[Tuple]"
         )  # Q&D
 
+        # formatting
         return params
 
     def output_docstring(self, docstr):
@@ -144,8 +178,9 @@ class RSTReader:
             self.updent()
             self.writeln(f"{self.indent}...\n")
             self.dedent()
+        self.current_class = name
         # helper to keep track of indentation
-        self.in_class.append(name.lower())
+        self.classes.append(name.lower())
 
     def parse(self, depth: int = 0):
         self.depth = depth
@@ -157,7 +192,7 @@ class RSTReader:
             line = self.rst_text[n]
             #    self.writeln(">"+line)
 
-            if line.startswith(".. module::"):
+            if re.search(r"\.\. module::", line):
                 self.log(f"# {line.rstrip()}")
                 this_module = line.split(self.sep)[-1].strip()
                 self.writeln(f"# origin: {self.filename}\n# {self.source_tag}")
@@ -165,9 +200,9 @@ class RSTReader:
                 self.current_module = this_module
                 n, docstr = self.read_textblock(n)
                 self.output_docstring(docstr)
-                self.writeln("\nfrom typing import Any, Optional, Union, Tuple\n")
 
-            if line.startswith(".. currentmodule::"):
+            elif re.search(r"\.\. currentmodule::", line):
+                n += 1
                 self.log(f"# {line.rstrip()}")
                 this_module = line.split(self.sep)[-1].strip()
                 self.log(f"# currentmodule:: {this_module}")
@@ -175,12 +210,12 @@ class RSTReader:
                 # todo: check if same module
                 # todo: read first block and do something with it
 
-            elif line.startswith(".. function::"):
+            elif re.search(r"\.\. function::", line):
                 self.log(f"# {line.rstrip()}")
                 this_function = line.split(self.sep)[-1].strip()
                 ret_type = "Any"
                 n, docstr = self.read_textblock(n)
-                name, params = this_function.split("(", 2)
+                name, params = this_function.split("(", maxsplit=1)
                 # ussl docstring uses a prefix
                 # remove module name from the start of the function name
                 if name.startswith(f"{self.current_module}."):
@@ -189,23 +224,24 @@ class RSTReader:
                 # todo: parse return type from docstring
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
-
+                # hack assume no inner.classes or fnctions in functions
+                self.dedent()
                 # if function name is the same as the module
                 # then this is probably documenting a class ()
-                # usocket socket
+                # FIXME: usocket socket
                 if self.current_module in (name, f"u{name}"):
                     # write a class header
                     self.output_class_hdr(name, params, docstr)
                 else:
-                    self.writeln(f"{self.indent}def {name}({params} ->{ret_type}:")
+                    self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
                     self.updent()
                     self.output_docstring(docstr)
-                    self.writeln(f"{self.indent}...\n")
+                    self.writeln(f"{self.indent}...\n\n")
                     self.dedent()
 
-            elif line.startswith(".. class::"):
+            elif re.search(r"\.\. class::?", line):
+                # todo: Docbug # .. _class: Poll micropython\docs\library\uselect.rst
                 self.log(f"# {line.rstrip()}")
-                self.log(f"# {line}")
                 this_class = line.split(self.sep)[-1].strip()
                 name = this_class
                 params = ""
@@ -220,6 +256,7 @@ class RSTReader:
                 n, docstr = self.read_textblock(n)
 
                 # write a class header
+                self.dedent()
                 self.output_class_hdr(name, params, docstr)
 
             # todo: detect end of class to dedent
@@ -228,7 +265,13 @@ class RSTReader:
             #     # self.dedent()
             #     self.log(f"# Constant: ~end of class dedent to {self.depth}")
 
-            elif line.startswith(".. method::"):
+            elif (
+                re.search(r"\.\. method::", line)
+                or re.search(r"\.\. staticmethod::", line)
+                or re.search(r"\.\. classmethod::", line)
+            ):
+                ## py:staticmethod  - py:classmethod - py:decorator
+                # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
                 self.log(f"# {line.rstrip()}")
                 this_method = line.split(self.sep)[-1].strip()
                 ret_type = "Any"
@@ -236,24 +279,43 @@ class RSTReader:
                 # self.writeln(f"# method:: {name}")
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
-                # todo: deal with longer / deeper classes
-                class_name = name.split(".")[0]
+                if "." in name:
+                    # todo: deal with longer / deeper classes
+                    class_name = name.split(".")[0]
+                else:
+                    # if nothing specified lets assume part of current class
+                    class_name = self.current_class
                 name = name.split(".")[-1]  # Take only the last part from Pin.toggle
-                # todo: check if the class statement has already been started
-                if class_name.lower() not in self.in_class:
-                    self.output_class_hdr(class_name, "", [])
-                n, docstr = self.read_textblock(n)
 
-                # todo: parse return type from docstring
+                if name == "__init__":
+                    # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
+                    # FIXME: ucryptolib aes.__init__(key, mode, [IV])
+                    n += 1
+                else:
+                    # todo: check if the class statement has already been started
+                    if class_name != self.current_class:
+                        self.output_class_hdr(class_name, "", [])
+                    n, docstr = self.read_textblock(n)
 
-                self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
-                self.updent()
-                self.output_docstring(docstr)
-                self.writeln(f"{self.indent}...\n")
-                self.dedent()
+                    # todo: parse return type from docstring
+                    if re.search(r"\.\. classmethod::", line):
+                        self.writeln(f"{self.indent}@classmethod")
+                        self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
+                        ...
+                    elif re.search(r"\.\. staticmethod::", line):
+                        self.writeln(f"{self.indent}@staticmethod")
+                        self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
+                        ...
+                    else:
+                        self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
+                    self.updent()
+                    self.output_docstring(docstr)
+                    self.writeln(f"{self.indent}...\n")
+                    self.dedent()
 
-            elif line.startswith(".. data::"):
+            elif re.search(r"\.\. data::", line):
                 self.log(f"# {line.rstrip()}")
+                n += 1
                 # todo: find a way to reliably add Constants at the correct level
                 # Note : makestubs has no issue with this
 
@@ -274,7 +336,7 @@ class RSTReader:
                 # .. data:: IPPROTO_UDP
                 #           IPPROTO_TCP
 
-            elif line.startswith(".. toctree::"):
+            elif re.search(r"\.\. toctree::", line):
                 self.log(f"# {line.rstrip()}")
                 # process additional files
                 n += 1  # skip one line
@@ -287,12 +349,16 @@ class RSTReader:
                     reader.parse()
                 # reset to done
                 self.rst_text = []
-                n = 0
+                n = 1
             # todo: errorclasses
 
-            elif line.startswith(".."):
+            elif re.search(r"\.\. \w+::", line):
                 self.log(f"# {line.rstrip()}")
-            n += 1
+                print(_red(line.rstrip()))
+                n += 1
+            else:
+                # NOTHING TO SEE HERE , MOVE ON
+                n += 1
 
 
 files = [
@@ -341,7 +407,10 @@ files = [
 # reader.parse()
 
 
-# files = [
+files = [
+    "ucryptolib.rst",
+    # "esp32.rst",
+]
 #     "usocket.rst",
 #     #     "btree.rst",
 #     #     "machine.rst",

@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: utime
 # origin: micropython\docs\library\utime.rst
 # v1.16
@@ -33,10 +35,6 @@ If actual calendar time is not maintained with a system/MicroPython RTC,
 functions below which require reference to current absolute time may
 behave not as expected.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: utime
 # .. function:: gmtime([secs])
 def gmtime(secs: Optional[Any]) -> Any:
     """
@@ -63,6 +61,16 @@ def gmtime(secs: Optional[Any]) -> Any:
     ...
 
 
+# .. function:: mktime()
+def mktime() -> Any:
+    """
+    This is inverse function of localtime. It's argument is a full 8-tuple
+    which expresses a time as per localtime. It returns an integer which is
+    the number of seconds since Jan 1, 2000.
+    """
+    ...
+
+
 # .. function:: sleep(seconds)
 def sleep(seconds) -> Any:
     """
@@ -70,6 +78,14 @@ def sleep(seconds) -> Any:
     floating-point number to sleep for a fractional number of seconds. Note that
     other boards may not accept a floating-point argument, for compatibility with
     them use `sleep_ms()` and `sleep_us()` functions.
+    """
+    ...
+
+
+# .. function:: sleep_ms(ms)
+def sleep_ms(ms) -> Any:
+    """
+    Delay for given number of milliseconds, should be positive or 0.
     """
     ...
 
@@ -82,10 +98,54 @@ def sleep_us(us) -> Any:
     ...
 
 
+# .. function:: ticks_ms()
+def ticks_ms() -> Any:
+    """
+    Returns an increasing millisecond counter with an arbitrary reference point, that
+    wraps around after some value.
+
+    The wrap-around value is not explicitly exposed, but we will
+    refer to it as *TICKS_MAX* to simplify discussion. Period of the values is
+    *TICKS_PERIOD = TICKS_MAX + 1*. *TICKS_PERIOD* is guaranteed to be a power of
+    two, but otherwise may differ from port to port. The same period value is used
+    for all of `ticks_ms()`, `ticks_us()`, `ticks_cpu()` functions (for
+    simplicity). Thus, these functions will return a value in range [*0* ..
+    *TICKS_MAX*], inclusive, total *TICKS_PERIOD* values. Note that only
+    non-negative values are used. For the most part, you should treat values returned
+    by these functions as opaque. The only operations available for them are
+    `ticks_diff()` and `ticks_add()` functions described below.
+
+    Note: Performing standard mathematical operations (+, -) or relational
+    operators (<, <=, >, >=) directly on these value will lead to invalid
+    result. Performing mathematical operations and then passing their results
+    as arguments to `ticks_diff()` or `ticks_add()` will also lead to
+    invalid results from the latter functions.
+    """
+    ...
+
+
 # .. function:: ticks_us()
 def ticks_us() -> Any:
     """
     Just like `ticks_ms()` above, but in microseconds.
+    """
+    ...
+
+
+# .. function:: ticks_cpu()
+def ticks_cpu() -> Any:
+    """
+    Similar to `ticks_ms()` and `ticks_us()`, but with the highest possible resolution
+    in the system. This is usually CPU clocks, and that's why the function is named that
+    way. But it doesn't have to be a CPU clock, some other timing source available in a
+    system (e.g. high-resolution timer) can be used instead. The exact timing unit
+    (resolution) of this function is not specified on ``utime`` module level, but
+    documentation for a specific port may provide more specific information. This
+    function is intended for very fine benchmarking or very tight real-time loops.
+    Avoid using it in portable code.
+
+    Availability: Not every port implements this function.
+
     """
     ...
 
@@ -120,6 +180,75 @@ def ticks_add(ticks, delta) -> Any:
     ...
 
 
+# .. function:: ticks_diff(ticks1, ticks2)
+def ticks_diff(ticks1, ticks2) -> Any:
+    """
+    Measure ticks difference between values returned from `ticks_ms()`, `ticks_us()`,
+    or `ticks_cpu()` functions, as a signed value which may wrap around.
+
+    The argument order is the same as for subtraction
+    operator, ``ticks_diff(ticks1, ticks2)`` has the same meaning as ``ticks1 - ticks2``.
+    However, values returned by `ticks_ms()`, etc. functions may wrap around, so
+    directly using subtraction on them will produce incorrect result. That is why
+    `ticks_diff()` is needed, it implements modular (or more specifically, ring)
+    arithmetics to produce correct result even for wrap-around values (as long as they not
+    too distant inbetween, see below). The function returns **signed** value in the range
+    [*-TICKS_PERIOD/2* .. *TICKS_PERIOD/2-1*] (that's a typical range definition for
+    two's-complement signed binary integers). If the result is negative, it means that
+    *ticks1* occurred earlier in time than *ticks2*. Otherwise, it means that
+    *ticks1* occurred after *ticks2*. This holds **only** if *ticks1* and *ticks2*
+    are apart from each other for no more than *TICKS_PERIOD/2-1* ticks. If that does
+    not hold, incorrect result will be returned. Specifically, if two tick values are
+    apart for *TICKS_PERIOD/2-1* ticks, that value will be returned by the function.
+    However, if *TICKS_PERIOD/2* of real-time ticks has passed between them, the
+    function will return *-TICKS_PERIOD/2* instead, i.e. result value will wrap around
+    to the negative range of possible values.
+
+    Informal rationale of the constraints above: Suppose you are locked in a room with no
+    means to monitor passing of time except a standard 12-notch clock. Then if you look at
+    dial-plate now, and don't look again for another 13 hours (e.g., if you fall for a
+    long sleep), then once you finally look again, it may seem to you that only 1 hour
+    has passed. To avoid this mistake, just look at the clock regularly. Your application
+    should do the same. "Too long sleep" metaphor also maps directly to application
+    behaviour: don't let your application run any single task for too long. Run tasks
+    in steps, and do time-keeping inbetween.
+
+    `ticks_diff()` is designed to accommodate various usage patterns, among them:
+
+    * Polling with timeout. In this case, the order of events is known, and you will deal
+      only with positive results of `ticks_diff()`::
+
+         # Wait for GPIO pin to be asserted, but at most 500us
+         start = time.ticks_us()
+         while pin.value() == 0:
+             if time.ticks_diff(time.ticks_us(), start) > 500:
+                 raise TimeoutError
+
+    * Scheduling events. In this case, `ticks_diff()` result may be negative
+      if an event is overdue::
+
+         # This code snippet is not optimized
+         now = time.ticks_ms()
+         scheduled_time = task.scheduled_time()
+         if ticks_diff(scheduled_time, now) > 0:
+             print("Too early, let's nap")
+             sleep_ms(ticks_diff(scheduled_time, now))
+             task.run()
+         elif ticks_diff(scheduled_time, now) == 0:
+             print("Right at time!")
+             task.run()
+         elif ticks_diff(scheduled_time, now) < 0:
+             print("Oops, running late, tell task to run faster!")
+             task.run(run_faster=true)
+
+    Note: Do not pass `time()` values to `ticks_diff()`, you should use
+    normal mathematical operations on them. But note that `time()` may (and will)
+    also overflow. This is known as https://en.wikipedia.org/wiki/Year_2038_problem .
+
+    """
+    ...
+
+
 # .. function:: time()
 class time:
     """
@@ -132,23 +261,19 @@ class time:
     timestamps, use `time_ns()`.  If relative times are acceptable then use the
     `ticks_ms()` and `ticks_us()` functions.  If you need calendar time, `gmtime()` or
     `localtime()` without an argument is a better choice.
-
-    .. admonition:: Difference to CPython
-       :class: attention
-
-       In CPython, this function returns number of
-       seconds since Unix epoch, 1970-01-01 00:00 UTC, as a floating-point,
-       usually having microsecond precision. With MicroPython, only Unix port
-       uses the same Epoch, and if floating-point precision allows,
-       returns sub-second precision. Embedded hardware usually doesn't have
-       floating-point precision to represent both long time ranges and subsecond
-       precision, so they use integer value with second precision. Some embedded
-       hardware also lacks battery-powered RTC, so returns number of seconds
-       since last power-up or from other relative, hardware-specific point
-       (e.g. reset).
     """
 
     def __init__(
         self,
     ) -> None:
         ...
+
+
+#    .. admonition:: Difference to CPython
+# .. function:: time_ns()
+def time_ns() -> Any:
+    """
+    Similar to `time()` but returns nanoseconds since the Epoch, as an integer (usually
+    a big integer, so will allocate on the heap).
+    """
+    ...

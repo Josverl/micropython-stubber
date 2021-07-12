@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: _thread
 # origin: micropython\docs\library\_thread.rst
 # v1.16
@@ -11,7 +13,3 @@ This module implements multithreading support.
 This module is highly experimental and its API is not yet fully settled
 and not yet described in this documentation.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: _thread

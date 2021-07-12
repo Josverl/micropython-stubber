@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: uhashlib
 # origin: micropython\docs\library\uhashlib.rst
 # v1.16
@@ -24,13 +26,7 @@ be implemented:
   selected boards, targeting interoperability with legacy applications,
   will offer this.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: uhashlib
 # .. class:: uhashlib.sha256([data])
-# .. class:: uhashlib.sha256([data])
-
 # class:: sha256
 class sha256:
     """
@@ -40,34 +36,51 @@ class sha256:
     def __init__(self, data: Optional[Any]) -> None:
         ...
 
-    # .. class:: uhashlib.md5([data])
-    # .. class:: uhashlib.md5([data])
 
-    # class:: md5
-    class md5:
+# .. class:: uhashlib.sha1([data])
+# class:: sha1
+class sha1:
+    """
+    Create an SHA1 hasher object and optionally feed ``data`` into it.
+    """
+
+    def __init__(self, data: Optional[Any]) -> None:
+        ...
+
+
+# .. class:: uhashlib.md5([data])
+# class:: md5
+class md5:
+    """
+    Create an MD5 hasher object and optionally feed ``data`` into it.
+    """
+
+    def __init__(self, data: Optional[Any]) -> None:
+        ...
+
+    # .. method:: hash.update(data)
+    def update(self, data) -> Any:
         """
-        Create an MD5 hasher object and optionally feed ``data`` into it.
+        Feed more binary data into hash.
         """
+        ...
 
-        def __init__(self, data: Optional[Any]) -> None:
-            ...
+    # .. method:: hash.digest()
+    def digest(
+        self,
+    ) -> Any:
+        """
+        Return hash for all data passed through hash, as a bytes object. After this
+        method is called, more data cannot be fed into the hash any longer.
+        """
+        ...
 
-        # .. method:: hash.update(data)
-        class hash:
-            """ """
-
-            def update(self, data) -> Any:
-                """
-                Feed more binary data into hash.
-                """
-                ...
-
-            # .. method:: hash.hexdigest()
-            def hexdigest(
-                self,
-            ) -> Any:
-                """
-                This method is NOT implemented. Use ``ubinascii.hexlify(hash.digest())``
-                to achieve a similar effect.
-                """
-                ...
+    # .. method:: hash.hexdigest()
+    def hexdigest(
+        self,
+    ) -> Any:
+        """
+        This method is NOT implemented. Use ``ubinascii.hexlify(hash.digest())``
+        to achieve a similar effect.
+        """
+        ...
