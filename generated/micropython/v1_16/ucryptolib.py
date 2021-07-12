@@ -12,7 +12,7 @@ class aes:
     """ """
 
     #     .. classmethod:: __init__(key, mode, [IV])
-    def __init__(self, key, mode, IV: Optional[Any]) -> none:
+    def __init__(self, key, mode, IV: Optional[Any]) -> None:
         """
         Initialize cipher object, suitable for encryption/decryption. Note:
         after initialization, cipher object can be use only either for
