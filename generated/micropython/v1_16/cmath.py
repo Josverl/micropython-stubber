@@ -17,7 +17,7 @@ required for this module.
 # .. function:: cos(z)
 def cos(z) -> Any:
     """
-       Return the cosine of ``z``.
+    Return the cosine of ``z``.
     """
     ...
 
@@ -25,7 +25,7 @@ def cos(z) -> Any:
 # .. function:: exp(z)
 def exp(z) -> Any:
     """
-       Return the exponential of ``z``.
+    Return the exponential of ``z``.
     """
     ...
 
@@ -33,7 +33,7 @@ def exp(z) -> Any:
 # .. function:: log(z)
 def log(z) -> Any:
     """
-       Return the natural logarithm of ``z``.  The branch cut is along the negative real axis.
+    Return the natural logarithm of ``z``.  The branch cut is along the negative real axis.
     """
     ...
 
@@ -41,7 +41,7 @@ def log(z) -> Any:
 # .. function:: log10(z)
 def log10(z) -> Any:
     """
-       Return the base-10 logarithm of ``z``.  The branch cut is along the negative real axis.
+    Return the base-10 logarithm of ``z``.  The branch cut is along the negative real axis.
     """
     ...
 
@@ -49,7 +49,7 @@ def log10(z) -> Any:
 # .. function:: phase(z)
 def phase(z) -> Any:
     """
-       Returns the phase of the number ``z``, in the range (-pi, +pi].
+    Returns the phase of the number ``z``, in the range (-pi, +pi].
     """
     ...
 
@@ -57,7 +57,7 @@ def phase(z) -> Any:
 # .. function:: polar(z)
 def polar(z) -> Any:
     """
-       Returns, as a tuple, the polar form of ``z``.
+    Returns, as a tuple, the polar form of ``z``.
     """
     ...
 
@@ -65,7 +65,7 @@ def polar(z) -> Any:
 # .. function:: rect(r, phi)
 def rect(r, phi) -> Any:
     """
-       Returns the complex number with modulus ``r`` and phase ``phi``.
+    Returns the complex number with modulus ``r`` and phase ``phi``.
     """
     ...
 
@@ -73,7 +73,7 @@ def rect(r, phi) -> Any:
 # .. function:: sin(z)
 def sin(z) -> Any:
     """
-       Return the sine of ``z``.
+    Return the sine of ``z``.
     """
     ...
 
@@ -81,7 +81,7 @@ def sin(z) -> Any:
 # .. function:: sqrt(z)
 def sqrt(z) -> Any:
     """
-       Return the square-root of ``z``.
+    Return the square-root of ``z``.
     """
     ...
 
