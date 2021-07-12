@@ -134,7 +134,7 @@ class AbstractNIC:
         ...
 
     # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
-    def ifconfig(self, config: Optional[Tuple]) -> Any:
+    def ifconfig(self, configtuple: Optional[Any]) -> Any:
         """
         Get/set IP-level network interface parameters: IP address, subnet mask,
         gateway and DNS server. When called with no arguments, this method returns
@@ -274,7 +274,7 @@ class WLAN:
         ...
 
     # .. method:: WLAN.ifconfig([(ip, subnet, gateway, dns)])
-    def ifconfig(self, config: Optional[Tuple]) -> Any:
+    def ifconfig(self, configtuple: Optional[Any]) -> Any:
         """
         Get/set IP-level network interface parameters: IP address, subnet mask,
         gateway and DNS server. When called with no arguments, this method returns
@@ -607,7 +607,7 @@ class WIZNET5K:
         ...
 
     # .. method:: WIZNET5K.ifconfig([(ip, subnet, gateway, dns)])
-    def ifconfig(self, config: Optional[Tuple]) -> Any:
+    def ifconfig(self, configtuple: Optional[Any]) -> Any:
         """
         Get/set IP address, subnet mask, gateway and DNS.
 

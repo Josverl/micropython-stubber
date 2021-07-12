@@ -58,7 +58,11 @@ class md5:
     def __init__(self, data: Optional[Any]) -> None:
         ...
 
-    # .. method:: hash.update(data)
+
+# .. method:: hash.update(data)
+class hash:
+    """ """
+
     def update(self, data) -> Any:
         """
         Feed more binary data into hash.

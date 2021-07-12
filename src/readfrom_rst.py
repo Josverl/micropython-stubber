@@ -20,7 +20,6 @@ def _red(*args) -> str:
 class RSTReader:
     def __init__(self):
         self.sep = "::"
-        self.this_module = ""
         self.current_module = ""
         self.filename = ""
         self.depth = 0
@@ -33,7 +32,7 @@ class RSTReader:
         self.classes: List[str] = []
         self.current_class = ""
 
-        self.writeln("\nfrom typing import Any, Optional, Union, Tuple\n")
+        self.writeln("from typing import Any, Optional, Union, Tuple\n")
 
     def log(self, *arg):
         if self.verbose or 1:
@@ -120,6 +119,9 @@ class RSTReader:
         # method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
         params = params.replace("(adcx, adcy, ...), (bufx, bufy, ...)", "adcs, bufs")
 
+        # network: # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
+        params = params.replace("(ip, subnet, gateway, dns)", "configtuple")
+
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
@@ -134,21 +136,38 @@ class RSTReader:
         # params = params.replace("pins=(SCK, MOSI, MISO)", "")  # Q&D
 
         # todo:  machine.IDLE --> IDLE      - module level
+
+        # param default to module constant
+        #   def foo(x =module.CONST): ...
+        if f"{self.current_module}." in params:
+            params = params.replace("{self.current_module}.", "")  # Q&D
+
+        # param default to class constant
+        #   def __init__(self, x =class.CONST): ...
+        if f"{self.current_module}." in params:
+            params = params.replace("{self.current_class}.", "")  # Q&D
+
         params = params.replace("machine.", "")  # Q&D
+
         # todo:  SPI.MSB --> MSB      - class level
         params = params.replace("SPI.", "")  # Q&D
         params = params.replace("Timer.", "")  # Q&D
 
         # loose documentation
-        params = params.replace("'param'", "param")  # Q&D
+        if "'param'" in params:
+            params = params.replace("'param'", "param")  # Q&D
+
         # .. function:: ussl.wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)
         params = params.replace("cert_reqs=CERT_NONE", "cert_reqs=None")  # Q&D
 
-        # network.rst method:: WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
-        params = params.replace("='dhcp' or configtuple:Optional[Any]", " :Union[str,Tuple]='dhcp'")
-
-        # network.rst .. method:: CC3K.patch_program('pgm')
-        params = params.replace("'pgm')", "cmd:str ,/)")
+        if "dhcp" in params:
+            # network.rst method:: WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
+            params = params.replace(
+                "='dhcp' or configtuple: Optional[Any]", ": Union[str,Tuple]='dhcp'"
+            )
+        if "'pgm'" in params:
+            # network.rst .. method:: CC3K.patch_program('pgm')
+            params = params.replace("'pgm')", "cmd:str ,/)")
 
         # ifconfig
         params = params.replace(
@@ -166,6 +185,9 @@ class RSTReader:
         self.writeln(f'{self.indent}"""')
 
     def output_class_hdr(self, name: str, params: str, docstr: List[str]):
+        # hack assume no classes in classes  or functions in functions
+        self.dedent()
+
         # write a class header
         self.writeln(f"{self.indent}class {name}:")
 
@@ -293,7 +315,11 @@ class RSTReader:
                     n += 1
                 else:
                     # todo: check if the class statement has already been started
-                    if class_name != self.current_class:
+
+                    if (
+                        not class_name in self.current_class
+                        and not class_name.lower() in self.current_class.lower()
+                    ):
                         self.output_class_hdr(class_name, "", [])
                     n, docstr = self.read_textblock(n)
 
@@ -342,7 +368,7 @@ class RSTReader:
                 n += 1  # skip one line
                 n, toctree = self.read_textblock(n)
                 # cleanup toctree
-                toctree = [x.strip() for x in toctree if f"{self.this_module}." in x]
+                toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
 
                 for file in toctree:
                     reader.read_file(f"micropython/docs/library/{file.strip()}")
@@ -407,10 +433,10 @@ files = [
 # reader.parse()
 
 
-files = [
-    "ucryptolib.rst",
-    # "esp32.rst",
-]
+# files = [
+#     # "ucryptolib.rst",
+#     # "esp32.rst",
+# ]
 #     "usocket.rst",
 #     #     "btree.rst",
 #     #     "machine.rst",
