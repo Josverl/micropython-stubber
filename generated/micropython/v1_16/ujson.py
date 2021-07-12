@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: ujson
 # origin: micropython\docs\library\ujson.rst
 # v1.16
@@ -9,14 +11,18 @@
 This modules allows to convert between Python objects and the JSON
 data format.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: ujson
 # .. function:: dump(obj, stream)
 def dump(obj, stream) -> Any:
     """
     Serialise *obj* to a JSON string, writing it to the given *stream*.
+    """
+    ...
+
+
+# .. function:: dumps(obj)
+def dumps(obj) -> Any:
+    """
+    Return *obj* represented as a JSON string.
     """
     ...
 
@@ -30,5 +36,14 @@ def load(stream) -> Any:
 
     Parsing continues until end-of-file is encountered.
     A :exc:`ValueError` is raised if the data in *stream* is not correctly formed.
+    """
+    ...
+
+
+# .. function:: loads(str)
+def loads(str) -> Any:
+    """
+    Parse the JSON *str* and return an object.  Raises :exc:`ValueError` if the
+    string is not correctly formed.
     """
     ...

@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: btree
 # origin: micropython\docs\library\btree.rst
 # v1.16
@@ -73,10 +75,6 @@ Example::
     f.close()
 
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: btree
 # .. function:: open(stream, *, flags=0, pagesize=0, cachesize=0, minkeypage=0)
 def open(stream, *, flags=0, pagesize=0, cachesize=0, minkeypage=0) -> Any:
     """
@@ -121,6 +119,15 @@ class btree:
         """
         ...
 
+    # .. method:: btree.flush()
+    def flush(
+        self,
+    ) -> Any:
+        """
+        Flush any data in cache to the underlying stream.
+        """
+        ...
+
     # .. method:: btree.__getitem__(key)
     def __getitem__(self, key) -> Any:
         """
@@ -130,6 +137,16 @@ class btree:
                  btree.__contains__(key)
 
         Standard dictionary methods.
+        """
+        ...
+
+    # .. method:: btree.__iter__()
+    def __iter__(
+        self,
+    ) -> Any:
+        """
+        A BTree object can be iterated over directly (similar to a dictionary)
+        to get access to all keys in order.
         """
         ...
 

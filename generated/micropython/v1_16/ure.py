@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: ure
 # origin: micropython\docs\library\ure.rst
 # v1.16
@@ -106,14 +108,19 @@ Example::
     # Result:
     # ['line1', 'line2', 'line3', '', '']
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: ure
 # .. function:: compile(regex_str, [flags])
 def compile(regex_str, flags: Optional[Any]) -> Any:
     """
     Compile regular expression, return `regex <regex>` object.
+    """
+    ...
+
+
+# .. function:: match(regex_str, string)
+def match(regex_str, string) -> Any:
+    """
+    Compile *regex_str* and match against *string*. Match always happens
+    from starting position in a string.
     """
     ...
 
@@ -128,44 +135,91 @@ def search(regex_str, string) -> Any:
     ...
 
 
+# .. function:: sub(regex_str, replace, string, count=0, flags=0, /)
+def sub(regex_str, replace, string, count=0, flags=0, /) -> Any:
+    """
+    Compile *regex_str* and search for it in *string*, replacing all matches
+    with *replace*, and returning the new string.
+
+    *replace* can be a string or a function.  If it is a string then escape
+    sequences of the form ``\<number>`` and ``\g<number>`` can be used to
+    expand to the corresponding group (or an empty string for unmatched groups).
+    If *replace* is a function then it must take a single argument (the match)
+    and should return a replacement string.
+
+    If *count* is specified and non-zero then substitution will stop after
+    this many substitutions are made.  The *flags* argument is ignored.
+
+    Note: availability of this function depends on :term:`MicroPython port`.
+    """
+    ...
+
+
 # .. data:: DEBUG
-# .. _regex:
 # .. method:: regex.match(string)
-class regex:
-    """ """
+def match(self, string) -> Any:
+    """
+             regex.search(string)
+             regex.sub(replace, string, count=0, flags=0, /)
 
-    def match(self, string) -> Any:
-        """
-                 regex.search(string)
-                 regex.sub(replace, string, count=0, flags=0, /)
+    Similar to the module-level functions :meth:`match`, :meth:`search`
+    and :meth:`sub`.
+    Using methods is (much) more efficient if the same regex is applied to
+    multiple strings.
+    """
+    ...
 
-        Similar to the module-level functions :meth:`match`, :meth:`search`
-        and :meth:`sub`.
-        Using methods is (much) more efficient if the same regex is applied to
-        multiple strings.
-        """
-        ...
 
-    # .. method:: match.group(index)
-    class match:
-        """ """
+# .. method:: regex.split(string, max_split=-1, /)
+def split(self, string, max_split=-1, /) -> Any:
+    """
+    Split a *string* using regex. If *max_split* is given, it specifies
+    maximum number of splits to perform. Returns list of strings (there
+    may be up to *max_split+1* elements if it's specified).
+    """
+    ...
 
-        def group(self, index) -> Any:
-            """
-            Return matching (sub)string. *index* is 0 for entire match,
-            1 and above for each capturing group. Only numeric groups are supported.
-            """
-            ...
 
-        # .. method:: match.start([index])
-        def start(self, index: Optional[Any]) -> Any:
-            """
-                     match.end([index])
+# .. method:: match.group(index)
+def group(self, index) -> Any:
+    """
+    Return matching (sub)string. *index* is 0 for entire match,
+    1 and above for each capturing group. Only numeric groups are supported.
+    """
+    ...
 
-            Return the index in the original string of the start or end of the
-            substring group that was matched.  *index* defaults to the entire
-            group, otherwise it will select a group.
 
-            Note: availability of these methods depends on :term:`MicroPython port`.
-            """
-            ...
+# .. method:: match.groups()
+def groups(
+    self,
+) -> Any:
+    """
+    Return a tuple containing all the substrings of the groups of the match.
+
+    Note: availability of this method depends on :term:`MicroPython port`.
+    """
+    ...
+
+
+# .. method:: match.start([index])
+def start(self, index: Optional[Any]) -> Any:
+    """
+             match.end([index])
+
+    Return the index in the original string of the start or end of the
+    substring group that was matched.  *index* defaults to the entire
+    group, otherwise it will select a group.
+
+    Note: availability of these methods depends on :term:`MicroPython port`.
+    """
+    ...
+
+
+# .. method:: match.span([index])
+def span(self, index: Optional[Any]) -> Any:
+    """
+    Returns the 2-tuple ``(match.start(index), match.end(index))``.
+
+    Note: availability of this method depends on :term:`MicroPython port`.
+    """
+    ...

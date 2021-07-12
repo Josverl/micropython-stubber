@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: uheapq
 # origin: micropython\docs\library\uheapq.rst
 # v1.16
@@ -12,14 +14,21 @@ This module implements the
 A heap queue is essentially a list that has its elements stored in such a way
 that the first item of the list is always the smallest.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: uheapq
 # .. function:: heappush(heap, item)
 def heappush(heap, item) -> Any:
     """
     Push the ``item`` onto the ``heap``.
+    """
+    ...
+
+
+# .. function:: heappop(heap)
+def heappop(heap) -> Any:
+    """
+    Pop the first item from the ``heap``, and return it.  Raise ``IndexError`` if
+    ``heap`` is empty.
+
+    The returned item will be the smallest item in the ``heap``.
     """
     ...
 

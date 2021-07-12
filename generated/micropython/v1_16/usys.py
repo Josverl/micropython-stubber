@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: usys
 # origin: micropython\docs\library\usys.rst
 # v1.16
@@ -6,10 +8,6 @@
 
 |see_cpython_module| :mod:`python:sys`.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: usys
 # .. function:: exit(retval=0, /)
 def exit(retval=0, /) -> Any:
     """
@@ -20,28 +18,32 @@ def exit(retval=0, /) -> Any:
     ...
 
 
+# .. function:: atexit(func)
+def atexit(func) -> Any:
+    """
+    Register *func* to be called upon termination.  *func* must be a callable
+    that takes no arguments, or ``None`` to disable the call.  The ``atexit``
+    function will return the previous value set by this function, which is
+    initially ``None``.
+    """
+    ...
+
+
+#    .. admonition:: Difference to CPython
 # .. function:: print_exception(exc, file=usys.stdout, /)
 def print_exception(exc, file=usys.stdout, /) -> Any:
     """
     Print exception with a traceback to a file-like object *file* (or
     `usys.stdout` by default).
-
-    .. admonition:: Difference to CPython
-       :class: attention
-
-       This is simplified version of a function which appears in the
-       ``traceback`` module in CPython. Unlike ``traceback.print_exception()``,
-       this function takes just exception value instead of exception type,
-       exception value, and traceback object; *file* argument should be
-       positional; further arguments are not supported. CPython-compatible
-       ``traceback`` module can be found in `micropython-lib`.
     """
     ...
 
 
+#    .. admonition:: Difference to CPython
 # .. data:: argv
 # .. data:: byteorder
 # .. data:: implementation
+#    .. admonition:: Difference to CPython
 # .. data:: maxsize
 # .. data:: modules
 # .. data:: path
@@ -51,3 +53,4 @@ def print_exception(exc, file=usys.stdout, /) -> Any:
 # .. data:: stdout
 # .. data:: version
 # .. data:: version_info
+#     .. admonition:: Difference to CPython

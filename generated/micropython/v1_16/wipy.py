@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: wipy
 # origin: micropython\docs\library\wipy.rst
 # v1.16
@@ -7,10 +9,6 @@
 The ``wipy`` module contains functions to control specific features of the
 WiPy, such as the heartbeat LED.
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: wipy
 # .. function:: heartbeat([enable])
 def heartbeat(enable: Optional[Any]) -> Any:
     """

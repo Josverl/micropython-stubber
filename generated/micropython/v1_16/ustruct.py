@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: ustruct
 # origin: micropython\docs\library\ustruct.rst
 # v1.16
@@ -12,14 +14,19 @@ Supported format codes: ``b``, ``B``, ``h``, ``H``, ``i``, ``I``, ``l``,
 ``L``, ``q``, ``Q``, ``s``, ``P``, ``f``, ``d`` (the latter 2 depending
 on the floating-point support).
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: ustruct
 # .. function:: calcsize(fmt)
 def calcsize(fmt) -> Any:
     """
     Return the number of bytes needed to store the given *fmt*.
+    """
+    ...
+
+
+# .. function:: pack(fmt, v1, v2, ...)
+def pack(fmt, v1, v2, *args) -> Any:
+    """
+    Pack the values *v1*, *v2*, ... according to the format string *fmt*.
+    The return value is a bytes object encoding the values.
     """
     ...
 
@@ -30,6 +37,15 @@ def pack_into(fmt, buffer, offset, v1, v2, *args) -> Any:
     Pack the values *v1*, *v2*, ... according to the format string *fmt*
     into a *buffer* starting at *offset*. *offset* may be negative to count
     from the end of *buffer*.
+    """
+    ...
+
+
+# .. function:: unpack(fmt, data)
+def unpack(fmt, data) -> Any:
+    """
+    Unpack from the *data* according to the format string *fmt*.
+    The return value is a tuple of the unpacked values.
     """
     ...
 

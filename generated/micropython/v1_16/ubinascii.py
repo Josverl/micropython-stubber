@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: ubinascii
 # origin: micropython\docs\library\ubinascii.rst
 # v1.16
@@ -9,10 +11,6 @@
 This module implements conversions between binary data and various
 encodings of it in ASCII form (in both directions).
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: ubinascii
 # .. function:: hexlify(data, [sep])
 def hexlify(data, sep: Optional[Any]) -> Any:
     """
@@ -25,11 +23,30 @@ def hexlify(data, sep: Optional[Any]) -> Any:
     ...
 
 
+# .. function:: unhexlify(data)
+def unhexlify(data) -> Any:
+    """
+    Convert hexadecimal data to binary representation. Returns bytes string.
+    (i.e. inverse of hexlify)
+    """
+    ...
+
+
 # .. function:: a2b_base64(data)
 def a2b_base64(data) -> Any:
     """
     Decode base64-encoded data, ignoring invalid characters in the input.
     Conforms to `RFC 2045 s.6.8 <https://tools.ietf.org/html/rfc2045#section-6.8>`_.
     Returns a bytes object.
+    """
+    ...
+
+
+# .. function:: b2a_base64(data)
+def b2a_base64(data) -> Any:
+    """
+    Encode binary data in base64 format, as in `RFC 3548
+    <https://tools.ietf.org/html/rfc3548.html>`_. Returns the encoded data
+    followed by a newline character, as a bytes object.
     """
     ...

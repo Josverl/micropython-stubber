@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. module:: esp
 # origin: micropython\docs\library\esp.rst
 # v1.16
@@ -9,10 +11,6 @@ ESP32 modules.  Some functions are only available on one or the other of these
 ports.
 
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: esp
 # .. function:: sleep_type([sleep_type])
 def sleep_type(sleep_type: Optional[Any]) -> Any:
     """
@@ -36,12 +34,35 @@ def sleep_type(sleep_type: Optional[Any]) -> Any:
     ...
 
 
+# .. function:: deepsleep(time_us=0, /)
+def deepsleep(time_us=0, /) -> Any:
+    """
+    **Note**: ESP8266 only - use `machine.deepsleep()` on ESP32
+
+    Enter deep sleep.
+
+    The whole module powers down, except for the RTC clock circuit, which can
+    be used to restart the module after the specified time if the pin 16 is
+    connected to the reset pin. Otherwise the module will sleep until manually
+    reset.
+    """
+    ...
+
+
 # .. function:: flash_id()
 def flash_id() -> Any:
     """
     **Note**: ESP8266 only
 
     Read the device ID of the flash memory.
+    """
+    ...
+
+
+# .. function:: flash_size()
+def flash_size() -> Any:
+    """
+    Read the total size of the flash memory.
     """
     ...
 
@@ -54,8 +75,20 @@ def flash_user_start() -> Any:
     ...
 
 
+# .. function:: flash_read(byte_offset, length_or_buffer)
+def flash_read(byte_offset, length_or_buffer) -> Any:
+    """ """
+    ...
+
+
 # .. function:: flash_write(byte_offset, bytes)
 def flash_write(byte_offset, bytes) -> Any:
+    """ """
+    ...
+
+
+# .. function:: flash_erase(sector_no)
+def flash_erase(sector_no) -> Any:
     """ """
     ...
 

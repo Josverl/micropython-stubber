@@ -1,3 +1,5 @@
+from typing import Any, Optional, Union, Tuple
+
 # .. currentmodule:: rp2
 # currentmodule:: rp2
 # .. module:: rp2
@@ -16,10 +18,6 @@ for more information, and `pico-micropython-examples
 for example code.
 
 """
-
-from typing import Any, Optional, Union, Tuple
-
-# .. module:: rp2
 # .. function:: asm_pio(*, out_init=None, set_init=None, sideset_init=None, in_shiftdir=0, out_shiftdir=0, autopush=False, autopull=False, push_thresh=32, pull_thresh=32, fifo_join=PIO.JOIN_NONE)
 def asm_pio(
     *,
@@ -71,9 +69,19 @@ def asm_pio(
     ...
 
 
-# .. class:: PIOASMError
-# .. class:: PIOASMError
+# .. function:: asm_pio_encode(instr, sideset_count)
+def asm_pio_encode(instr, sideset_count) -> Any:
+    """
+    Assemble a single PIO instruction. You usually want to use `asm_pio()`
+    instead.
 
+    >>> rp2.asm_pio_encode("set(0, 1)", 0)
+    57345
+    """
+    ...
+
+
+# .. class:: PIOASMError
 # class:: PIOASMError
 class PIOASMError:
     """
@@ -86,10 +94,7 @@ class PIOASMError:
 # .. toctree::
 # .. currentmodule:: rp2
 # currentmodule:: rp2
-# .. _rp2.Flash:
 # .. class:: Flash()
-# .. class:: Flash()
-
 # class:: Flash
 class Flash:
     """
@@ -109,6 +114,13 @@ class Flash:
         """
         ...
 
+    # .. method:: Flash.writeblocks(block_num, buf)
+    def writeblocks(self, block_num, buf) -> Any:
+        """
+        Flash.writeblocks(block_num, buf, offset)
+        """
+        ...
+
     # .. method:: Flash.ioctl(cmd, arg)
     def ioctl(self, cmd, arg) -> Any:
         """
@@ -121,10 +133,7 @@ class Flash:
 
 # .. currentmodule:: rp2
 # currentmodule:: rp2
-# .. _rp2.PIO:
 # .. class:: PIO(id)
-# .. class:: PIO(id)
-
 # class:: PIO
 class PIO:
     """
@@ -149,6 +158,17 @@ class PIO:
         """
         ...
 
+    # .. method:: PIO.remove_program([program])
+    def remove_program(self, program: Optional[Any]) -> Any:
+        """
+        Remove *program* from the instruction memory of this PIO instance.
+
+        If no program is provided, it removes all programs.
+
+        It is not an error to remove a program which has already been removed.
+        """
+        ...
+
     # .. method:: PIO.state_machine(id, [program, ...])
     def state_machine(self, id, program, *args: Optional[Any]) -> Any:
         """
@@ -162,6 +182,18 @@ class PIO:
         """
         ...
 
+    # .. method:: PIO.irq(handler=None, trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3, hard=False)
+    def irq(self, handler=None, trigger=IRQ_SM0 | IRQ_SM1 | IRQ_SM2 | IRQ_SM3, hard=False) -> Any:
+        """
+        Returns the IRQ object for this PIO instance.
+
+        MicroPython only uses IRQ 0 on each PIO instance. IRQ 1 is not available.
+
+        Optionally configure it.
+
+        """
+        ...
+
 
 # .. data:: PIO.IN_LOW
 # .. data:: PIO.SHIFT_LEFT
@@ -169,10 +201,7 @@ class PIO:
 # .. data:: PIO.IRQ_SM0
 # .. currentmodule:: rp2
 # currentmodule:: rp2
-# .. _rp2.StateMachine:
 # .. class:: StateMachine(id, [program, ...])
-# .. class:: StateMachine(id, [program, ...])
-
 # class:: StateMachine
 class StateMachine:
     """
@@ -237,6 +266,18 @@ class StateMachine:
         """
         ...
 
+    # .. method:: StateMachine.active([value])
+    def active(self, value: Optional[Any]) -> Any:
+        """
+        Gets or sets whether the state machine is currently running.
+
+        >>> sm.active()
+        True
+        >>> sm.active(0)
+        False
+        """
+        ...
+
     # .. method:: StateMachine.restart()
     def restart(
         self,
@@ -255,6 +296,16 @@ class StateMachine:
         """
         ...
 
+    # .. method:: StateMachine.exec(instr)
+    def exec(self, instr) -> Any:
+        """
+        Execute a single PIO instruction. Uses `asm_pio_encode` to encode the
+        instruction from the given string *instr*.
+
+        >>> sm.exec("set(0, 1)")
+        """
+        ...
+
     # .. method:: StateMachine.get(buf=None, shift=0)
     def get(self, buf=None, shift=0) -> Any:
         """
@@ -268,6 +319,19 @@ class StateMachine:
         """
         ...
 
+    # .. method:: StateMachine.put(value, shift=0)
+    def put(self, value, shift=0) -> Any:
+        """
+        Push a word onto the state machine's TX FIFO.
+
+        If the FIFO is full, it blocks until there is space (i.e. the state machine
+        pulls a word).
+
+        The value is first shifted left by *shift* bits, i.e. the state machine
+        receives ``value << shift``.
+        """
+        ...
+
     # .. method:: StateMachine.rx_fifo()
     def rx_fifo(
         self,
@@ -278,6 +342,19 @@ class StateMachine:
 
         Useful for checking if data is waiting to be read, before calling
         `StateMachine.get()`.
+        """
+        ...
+
+    # .. method:: StateMachine.tx_fifo()
+    def tx_fifo(
+        self,
+    ) -> Any:
+        """
+        Returns the number of words in the state machine's TX FIFO. A value of 0
+        indicates the FIFO is empty.
+
+        Useful for checking if there is space to push another word using
+        `StateMachine.put()`.
         """
         ...
 
