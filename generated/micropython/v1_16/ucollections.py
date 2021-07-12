@@ -11,8 +11,9 @@ from typing import Any, Optional, Union, Tuple
 This module implements advanced collection and container types to
 hold/accumulate various objects.
 """
-# .. function:: deque(iterable, maxlen[, flags])
-def deque(iterable, maxlen, flags: Optional[Any]) -> Any:
+# .. class:: deque(iterable, maxlen[, flags])
+# class:: deque
+class deque:
     """
     Deques (double-ended queues) are a list-like container that support O(1)
     appends and pops from either side of the deque.  New deques are created
@@ -29,13 +30,11 @@ def deque(iterable, maxlen, flags: Optional[Any]) -> Any:
     As well as supporting `bool` and `len`, deque objects have the following
     methods:
     """
-    ...
 
+    def __init__(self, iterable, maxlen, flags: Optional[Any]) -> None:
+        ...
 
-#     .. method:: deque.append(x)
-class deque:
-    """ """
-
+    #     .. method:: deque.append(x)
     def append(self, x) -> Any:
         """
         Add *x* to the right side of the deque.
@@ -54,8 +53,9 @@ class deque:
         ...
 
 
-# .. function:: namedtuple(name, fields)
-def namedtuple(name, fields) -> Any:
+# .. class:: namedtuple(name, fields)
+# class:: namedtuple
+class namedtuple:
     """
     This is factory function to create a new namedtuple type with a specific
     name and set of fields. A namedtuple is a subclass of tuple which allows
@@ -73,11 +73,14 @@ def namedtuple(name, fields) -> Any:
         print(t1.name)
         assert t2.name == t2[1]
     """
-    ...
+
+    def __init__(self, name, fields) -> None:
+        ...
 
 
-# .. function:: OrderedDict(...)
-def OrderedDict(*args) -> Any:
+# .. class:: OrderedDict(...)
+# class:: OrderedDict
+class OrderedDict:
     """
     ``dict`` type subclass which remembers and preserves the order of keys
     added. When ordered dict is iterated over, keys/items are returned in
@@ -101,4 +104,6 @@ def OrderedDict(*args) -> Any:
         w 5
         b 3
     """
-    ...
+
+    def __init__(self, *args) -> None:
+        ...

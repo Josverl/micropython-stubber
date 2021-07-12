@@ -1415,7 +1415,7 @@ class Pin:
         """
         ...
 
-    # .. method:: Pin.init(mode, pull=Pin.PULL_NONE, \*, value=None, alt=-1)
+    # .. method:: Pin.init(mode, pull=Pin.PULL_NONE, *, value=None, alt=-1)
     def init(self, mode, pull=Pin.PULL_NONE, *, value=None, alt=-1) -> Any:
         """
         Initialise the pin:
