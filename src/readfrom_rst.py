@@ -219,6 +219,17 @@ class RSTReader:
         # helper to keep track of indentation
         self.classes.append(name.lower())
 
+    def parse_toc(self, n: int):
+        "process table of content with additional rst files, and add / include them in the current module"
+        n += 1  # skip one line
+        n, toctree = self.read_textblock(n)
+        # cleanup toctree
+        toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
+
+        for file in toctree:
+            self.read_file(f"micropython/docs/library/{file.strip()}")
+            self.parse()
+
     def parse(self, depth: int = 0):
         self.depth = depth
         # todo : replace by while and n+=1
@@ -376,26 +387,12 @@ class RSTReader:
                 # self.writeln(f"{self.indent}{name} : {type} = None")
                 # self.dedent()
 
-                # todo: documentation contains  repeated vars with the same identation
-                # .. data:: IPPROTO_UDP
-                #           IPPROTO_TCP
-
             elif re.search(r"\.\. toctree::", line):
                 self.log(f"# {line.rstrip()}")
-                # process additional files
-                n += 1  # skip one line
-                n, toctree = self.read_textblock(n)
-                # cleanup toctree
-                toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
-
-                for file in toctree:
-                    reader.read_file(f"micropython/docs/library/{file.strip()}")
-                    reader.parse()
+                self.parse_toc(n)
                 # reset to done
                 self.rst_text = []
                 n = 1
-            # todo: errorclasses
-
             elif re.search(r"\.\. \w+::", line):
                 self.log(f"# {line.rstrip()}")
                 print(_red(line.rstrip()))
@@ -405,81 +402,43 @@ class RSTReader:
                 n += 1
 
 
-files = [
-    "_thread.rst",
-    "btree.rst",
-    "builtins.rst",
-    "cmath.rst",
-    "esp.rst",
-    "esp32.rst",
-    "framebuf.rst",
-    "gc.rst",
-    #    "index.rst",
-    "lcd160cr.rst",
-    "machine.rst",
-    "math.rst",
-    "micropython.rst",
-    "network.rst",
-    "pyb.rst",
-    "rp2.rst",
-    "uarray.rst",
-    "uasyncio.rst",
-    "ubinascii.rst",
-    "ubluetooth.rst",
-    "ucollections.rst",
-    "ucryptolib.rst",
-    "uctypes.rst",
-    "uerrno.rst",
-    "uhashlib.rst",
-    "uheapq.rst",
-    "uio.rst",
-    "ujson.rst",
-    "uos.rst",
-    "ure.rst",
-    "uselect.rst",
-    "usocket.rst",
-    "ussl.rst",
-    "ustruct.rst",
-    "usys.rst",
-    "utime.rst",
-    "uzlib.rst",
-    "wipy.rst",
-]
+def generate_from_rst(rst_folder: Path, dst_folder: Path):
+    if not dst_folder.exists():
+        dst_folder.mkdir(parents=True)
+    # no index, and mudule.xxx.rst is included in module.py
+    files = [f for f in rst_folder.glob("*.rst") if f.stem != "index" and "." not in f.stem]
+    for file in files:
+        reader = RSTReader()
+        reader.read_file(file)
+        reader.parse()
+        reader.write_file((dst_folder / file.name).with_suffix(".py"))
+
+    cmd = f"black {dst_folder}"
+    result = subprocess.run(cmd, capture_output=True, check=True)
+    if result.returncode != 0:
+        raise Exception(result.stderr.decode("utf-8"))
+    print(result.stderr.decode("utf-8"))
 
 
-# reader.read_file(f"micropython/docs/library/machine.rst")
-# reader.parse()
-
-
-# files = [
-#     # "ucryptolib.rst",
-#     # "esp32.rst",
-# ]
-#     "usocket.rst",
-#     #     "btree.rst",
-#     #     "machine.rst",
-# ]
-rst_folder = Path("micropython/docs/library")
-dest_folder = Path("generated/micropython") / "v1_16"
-if not dest_folder.exists():
-    dest_folder.mkdir(parents=True)
-
-for file in files:
-    reader = RSTReader()
-    reader.read_file(rst_folder / file)
-    reader.parse()
-    reader.write_file((dest_folder / file).with_suffix(".py"))
-
-cmd = f"black {dest_folder}"
-result = subprocess.run(cmd, capture_output=True, check=True)
-if result.returncode != 0:
-    raise Exception(result.stderr.decode("utf-8"))
-print(result.stderr.decode("utf-8"))
-
+if __name__ == "__main__":
+    v_tag = "v1_16"
+    rst_folder = Path("micropython/docs/library")
+    dst_folder = Path("generated/micropython") / v_tag
+    generate_from_rst(rst_folder, dst_folder)
 
 # todo
 # constants
 # usocket : class is defined twice - discontinuous documentation
+
+# todo: errorclasses
+
+# todo: documentation contains  repeated vars with the same identation
+# .. data:: IPPROTO_UDP
+#           IPPROTO_TCP
+
+
+# Done
+
 # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
 
 # ucollection   : docs incorrectlty states classes as functions --> upstream
