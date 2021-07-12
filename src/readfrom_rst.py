@@ -122,6 +122,9 @@ class RSTReader:
         # network: # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
         params = params.replace("(ip, subnet, gateway, dns)", "configtuple")
 
+        # pyb  .. function:: hid((buttons, x, y, z))
+        params = params.replace("(buttons, x, y, z)", "hidtuple")
+
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting

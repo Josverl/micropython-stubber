@@ -157,69 +157,71 @@ def sub(regex_str, replace, string, count=0, flags=0, /) -> Any:
 
 # .. data:: DEBUG
 # .. method:: regex.match(string)
-def match(self, string) -> Any:
-    """
-             regex.search(string)
-             regex.sub(replace, string, count=0, flags=0, /)
+class regex:
+    """ """
 
-    Similar to the module-level functions :meth:`match`, :meth:`search`
-    and :meth:`sub`.
-    Using methods is (much) more efficient if the same regex is applied to
-    multiple strings.
-    """
-    ...
+    def match(self, string) -> Any:
+        """
+                 regex.search(string)
+                 regex.sub(replace, string, count=0, flags=0, /)
 
+        Similar to the module-level functions :meth:`match`, :meth:`search`
+        and :meth:`sub`.
+        Using methods is (much) more efficient if the same regex is applied to
+        multiple strings.
+        """
+        ...
 
-# .. method:: regex.split(string, max_split=-1, /)
-def split(self, string, max_split=-1, /) -> Any:
-    """
-    Split a *string* using regex. If *max_split* is given, it specifies
-    maximum number of splits to perform. Returns list of strings (there
-    may be up to *max_split+1* elements if it's specified).
-    """
-    ...
+    # .. method:: regex.split(string, max_split=-1, /)
+    def split(self, string, max_split=-1, /) -> Any:
+        """
+        Split a *string* using regex. If *max_split* is given, it specifies
+        maximum number of splits to perform. Returns list of strings (there
+        may be up to *max_split+1* elements if it's specified).
+        """
+        ...
 
 
 # .. method:: match.group(index)
-def group(self, index) -> Any:
-    """
-    Return matching (sub)string. *index* is 0 for entire match,
-    1 and above for each capturing group. Only numeric groups are supported.
-    """
-    ...
+class match:
+    """ """
 
+    def group(self, index) -> Any:
+        """
+        Return matching (sub)string. *index* is 0 for entire match,
+        1 and above for each capturing group. Only numeric groups are supported.
+        """
+        ...
 
-# .. method:: match.groups()
-def groups(
-    self,
-) -> Any:
-    """
-    Return a tuple containing all the substrings of the groups of the match.
+    # .. method:: match.groups()
+    def groups(
+        self,
+    ) -> Any:
+        """
+        Return a tuple containing all the substrings of the groups of the match.
 
-    Note: availability of this method depends on :term:`MicroPython port`.
-    """
-    ...
+        Note: availability of this method depends on :term:`MicroPython port`.
+        """
+        ...
 
+    # .. method:: match.start([index])
+    def start(self, index: Optional[Any]) -> Any:
+        """
+                 match.end([index])
 
-# .. method:: match.start([index])
-def start(self, index: Optional[Any]) -> Any:
-    """
-             match.end([index])
+        Return the index in the original string of the start or end of the
+        substring group that was matched.  *index* defaults to the entire
+        group, otherwise it will select a group.
 
-    Return the index in the original string of the start or end of the
-    substring group that was matched.  *index* defaults to the entire
-    group, otherwise it will select a group.
+        Note: availability of these methods depends on :term:`MicroPython port`.
+        """
+        ...
 
-    Note: availability of these methods depends on :term:`MicroPython port`.
-    """
-    ...
+    # .. method:: match.span([index])
+    def span(self, index: Optional[Any]) -> Any:
+        """
+        Returns the 2-tuple ``(match.start(index), match.end(index))``.
 
-
-# .. method:: match.span([index])
-def span(self, index: Optional[Any]) -> Any:
-    """
-    Returns the 2-tuple ``(match.start(index), match.end(index))``.
-
-    Note: availability of this method depends on :term:`MicroPython port`.
-    """
-    ...
+        Note: availability of this method depends on :term:`MicroPython port`.
+        """
+        ...
