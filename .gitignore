@@ -27,6 +27,7 @@ dev-stubs/*
 .coverage*
 coverage
 
+
 # and tests results
 junit/*
 
