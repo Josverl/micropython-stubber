@@ -123,16 +123,19 @@ class RSTReader:
             params = params[0 : params.rfind(")") + 1]
         # multiple optionals
         # # .. method:: Servo.angle([angle, time=0])
-        params = params.replace("[angle, time=0]", "[angle], time=0")
+        if "[angle, time=0]" in params:
+            params = params.replace("[angle, time=0]", "[angle], time=0")
         # .. method:: Servo.speed([speed, time=0])
-        params = params.replace("[speed, time=0]", "[speed], time=0")
+        elif "[speed, time=0]" in params:
+            params = params.replace("[speed, time=0]", "[speed], time=0")
 
         # sublist parameters are not supported in python 3
-        # method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
-        params = params.replace("(adcx, adcy, ...), (bufx, bufy, ...)", "adcs, bufs")
-
-        # network: # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
-        params = params.replace("(ip, subnet, gateway, dns)", "configtuple")
+        elif "(adcx, adcy, ...)" in params:
+            # method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
+            params = params.replace("(adcx, adcy, ...), (bufx, bufy, ...)", "adcs, bufs")
+        elif "(ip, subnet, gateway, dns)" in params:
+            # network: # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
+            params = params.replace("(ip, subnet, gateway, dns)", "configtuple")
 
         # pyb  .. function:: hid((buttons, x, y, z))
         params = params.replace("(buttons, x, y, z)", "hidtuple")
@@ -142,7 +145,8 @@ class RSTReader:
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
         params = params.replace("]", ": Optional[Any]")
         # # change \* --> *
-        # params = params.replace("\\*", "*")
+        if "\\*" in params:
+            params = params.replace("\\*", "*")
         # ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args")
@@ -154,19 +158,11 @@ class RSTReader:
 
         # param default to module constant
         #   def foo(x =module.CONST): ...
-        if f"{self.current_module}." in params:
-            params = params.replace("{self.current_module}.", "")  # Q&D
-
         # param default to class constant
         #   def __init__(self, x =class.CONST): ...
-        if f"{self.current_module}." in params:
-            params = params.replace("{self.current_class}.", "")  # Q&D
-
-        params = params.replace("machine.", "")  # Q&D
-
-        # todo:  SPI.MSB --> MSB      - class level
-        params = params.replace("SPI.", "")  # Q&D
-        params = params.replace("Timer.", "")  # Q&D
+        for prefix in (f"{self.current_module}.", f"{self.current_class}."):
+            if len(prefix) > 1 and prefix in params:
+                params = params.replace(prefix, "")  # dynamic
 
         # loose documentation
         if "'param'" in params:
@@ -402,7 +398,7 @@ class RSTReader:
                 n += 1
 
 
-def generate_from_rst(rst_folder: Path, dst_folder: Path):
+def generate_from_rst(rst_folder: Path, dst_folder: Path, black=True) -> int:
     if not dst_folder.exists():
         dst_folder.mkdir(parents=True)
     # no index, and mudule.xxx.rst is included in module.py
@@ -413,11 +409,14 @@ def generate_from_rst(rst_folder: Path, dst_folder: Path):
         reader.parse()
         reader.write_file((dst_folder / file.name).with_suffix(".py"))
 
-    cmd = f"black {dst_folder}"
-    result = subprocess.run(cmd, capture_output=True, check=True)
-    if result.returncode != 0:
-        raise Exception(result.stderr.decode("utf-8"))
-    print(result.stderr.decode("utf-8"))
+    if black:
+        cmd = f"black {dst_folder}"
+        result = subprocess.run(cmd, capture_output=True, check=True)
+        if result.returncode != 0:
+            raise Exception(result.stderr.decode("utf-8"))
+        print(result.stderr.decode("utf-8"))
+
+    return len(files)
 
 
 if __name__ == "__main__":
