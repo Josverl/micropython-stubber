@@ -15,7 +15,7 @@
         "data",
         "all_stubs",
     ],
-    "stubPath": "src/stubs",
+    //"stubPath": "src/stubs",
     "reportMissingImports": true,
     "reportMissingTypeStubs": false,
     "pythonVersion": "3.8",
