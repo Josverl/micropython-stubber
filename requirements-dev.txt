@@ -9,3 +9,4 @@ pytest-mock     >= 1.13.0
 mock            >= 4.0.3
 
 black
+pyright 	    >= 0.0.5
