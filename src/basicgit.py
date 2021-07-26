@@ -1,6 +1,7 @@
 "simple Git module, where needed via powershell "
 import subprocess
 import os
+from typing import Union
 
 
 def _run_git(cmd: str, repo: str = None, expect_stderr=False):
@@ -8,9 +9,7 @@ def _run_git(cmd: str, repo: str = None, expect_stderr=False):
     try:
         if repo:
             repo = repo.replace("\\", "/")
-            result = subprocess.run(
-                cmd, capture_output=True, check=True, cwd=os.path.abspath(repo)
-            )
+            result = subprocess.run(cmd, capture_output=True, check=True, cwd=os.path.abspath(repo))
         else:
             result = subprocess.run(cmd, capture_output=True, check=True)
         if result.stderr != b"":
@@ -26,12 +25,12 @@ def _run_git(cmd: str, repo: str = None, expect_stderr=False):
     return result
 
 
-def get_tag(repo: str = None) -> str:
+def get_tag(repo: str = None, nightly: bool = True) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo"
     repo should be in the form of : path
         ./micropython
-    returns the tag or None
+    returns the tag or ""
     """
     if not repo:
         repo = "."
@@ -42,6 +41,13 @@ def get_tag(repo: str = None) -> str:
         return None
     tag: str = result.stdout.decode("utf-8")
     tag = tag.replace("\r", "").replace("\n", "")
+    if "-" in tag:
+        if nightly:
+            # 'v1.16-54-gad1fce42c' -> 'v1.16-nightly'
+            tag = f"{tag.split('-')[0]}-nightly"
+        else:
+            # 'v1.16-54-gad1fce42c' -> 'v1.16-54'
+            tag = "-".join(tag.split("-")[0:2])
     return tag
 
 
