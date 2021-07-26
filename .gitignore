@@ -39,3 +39,6 @@ desktop.ini
 dev-stubs
 
 .py_cache
+
+# generated stubs
+generated
