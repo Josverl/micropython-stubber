@@ -103,12 +103,12 @@ def test_rst_parse_class(filename, expected):
             "(if_id=0, config=['dhcp' or configtuple])",
             "(if_id=0, config: Union[str,Tuple]='dhcp')",
         ),
-        ("()", "()"),
-        ("()", "()"),
-        ("()", "()"),
-        ("()", "()"),
-        ("()", "()"),
-        ("()", "()"),
+        ("lambda)", "lambda_fn)"),
+        # ("()", "()"),
+        # ("()", "()"),
+        # ("()", "()"),
+        # ("()", "()"),
+        # ("()", "()"),
     ],
 )
 def test_fix_param(param_in, param_out):
@@ -157,44 +157,93 @@ def test_fix_param_dynamic():
     assert result == param_in
 
 
-@pytest.mark.skip(msg="test not yet built")
+import subprocess
+import json
+
+
+@pytest.fixture
+def pyright():
+    cmd = ["pyright", "generated\\micropython\\v1_16", "--outputjson"]
+    # cmd = ["pyright", stubfolder.as_posix(), "--outputjson"]
+    try:
+        result = subprocess.run(cmd, capture_output=True)
+    except OSError as e:
+        raise e
+    results = json.loads(result.stdout)
+    assert results["summary"]["filesAnalyzed"] >= 40, ">= 40 files checked"
+
+    return results
+
+
+@pytest.mark.skip(reason="not strictly needed (yet)")
+def test_undefined_variable(pyright, capsys):
+    issues = pyright["generalDiagnostics"]
+    issues = list(filter(lambda diag: diag["rule"] == "reportUndefinedVariable", issues))
+    with capsys.disabled():
+        for issue in issues:
+            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    assert len(issues) == 0, "there should be no type issues"
+
+
+def test_invalid_strings(pyright, capsys):
+    issues = pyright["generalDiagnostics"]
+
+    # Only fail on errors
+    issues = list(filter(lambda diag: diag["severity"] == "error", issues))
+    issues = list(filter(lambda diag: diag["rule"] == "reportInvalidStringEscapeSequence", issues))
+    with capsys.disabled():
+        for issue in issues:
+            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    assert len(issues) == 0, "all string should be valid"
+
+
+def test_obscured_definitions(pyright, capsys):
+    issues = pyright["generalDiagnostics"]
+    # Only look at errors
+    issues = list(filter(lambda diag: diag["severity"] == "error", issues))
+    issues = list(
+        filter(
+            lambda diag: diag["rule"] == "reportGeneralTypeIssues"
+            and "is obscured by a declaration" in diag["message"],
+            issues,
+        )
+    )
+    with capsys.disabled():
+        for issue in issues:
+            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    assert len(issues) == 0, "no redefinitions that obscure earlier defs"
+
+
+@pytest.mark.skip(reason="test not yet built")
 def test_data_module_level():
+    "all modules should have a docstring"
     ...
 
 
-@pytest.mark.skip(msg="test not yet built")
+@pytest.mark.skip(reason="test not yet built")
 def test_data_class_level():
+    "all classes should have a docstring"
     ...
 
 
-@pytest.mark.skip(msg="test not yet built")
+@pytest.mark.skip(reason="test not yet built")
 def test_exception():
     ...
 
 
-@pytest.mark.skip(msg="test not yet built")
-def test_docstring():
-    ...
-
-
-@pytest.mark.skip(msg="test not yet built")
+@pytest.mark.skip(reason="test not yet built")
 def test_undocumented_class():
     ...
 
 
-@pytest.mark.skip(msg="test not yet built")
+@pytest.mark.skip(reason="test not yet built")
 def test_find_return_type():
     ...
 
 
-@pytest.mark.skip(msg="test not yet built")
+@pytest.mark.skip(reason="test not yet built")
 def test_dup_init():
     ...
 
 
 # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
-
-
-@pytest.mark.skip(msg="test not yet built")
-def test_overloaded_defintions():
-    ...
