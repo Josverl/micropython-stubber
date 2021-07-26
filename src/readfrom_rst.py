@@ -3,6 +3,7 @@ import re
 import subprocess
 from typing import List, Tuple
 from pathlib import Path
+import basicgit as git
 
 
 def _color(c, *args) -> str:
@@ -19,11 +20,11 @@ def _red(*args) -> str:
 
 
 class RSTReader:
-    __debug = False  # a
+    __debug = True  # a
     verbose = False
     no_explicit_init = False  # True to avoid overloading __init__
 
-    def __init__(self):
+    def __init__(self, v_tag="v1.xx"):
         self.sep = "::"
         self.current_module = ""
         self.filename = ""
@@ -31,7 +32,7 @@ class RSTReader:
         self.rst_text: List[str] = []
         self.max_line = 0
         self.output: List[str] = []
-        self.source_tag = "v1.16"
+        self.source_tag = v_tag
         self.target = ".py"  # py/pyi
         self.classes: List[str] = []
         self.current_class = ""
@@ -76,7 +77,14 @@ class RSTReader:
         if self.verbose:
             print(new)
 
+    def _cleanup(self):
+        "clean up some trailing spaces and commas"
+        for n in range(0, len(self.output)):
+            if "(self, ) ->" in self.output[n]:
+                self.output[n] = self.output[n].replace("(self, ) ->", "(self) ->")
+
     def write_file(self, filename: Path) -> bool:
+        self._cleanup()
         try:
             print(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
@@ -140,21 +148,29 @@ class RSTReader:
         # pyb  .. function:: hid((buttons, x, y, z))
         params = params.replace("(buttons, x, y, z)", "hidtuple")
 
+        # esp v1.15.2 .. function:: getaddrinfo((hostname, port, lambda))
+        params = params.replace("(hostname, port, lambda)", "tuple")
+
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
         params = params.replace("]", ": Optional[Any]")
-        # # change \* --> *
-        if "\\*" in params:
-            params = params.replace("\\*", "*")
+
+        # # change weirdly written wildcards \* --> *
+        wilds = (
+            ("\\*", "*"),
+            (r"\**", "*"),
+            ("**", "*"),
+        )
+        for pair in wilds:
+            if pair[0] in params:
+                params = params.replace(pair[0], pair[1])
         # ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args")
             params = params.replace("...", "*args")
         # todo: change or remove value hints (...|....)
         # params = params.replace("pins=(SCK, MOSI, MISO)", "")  # Q&D
-
-        # todo:  machine.IDLE --> IDLE      - module level
 
         # param default to module constant
         #   def foo(x =module.CONST): ...
@@ -180,10 +196,17 @@ class RSTReader:
             # network.rst .. method:: CC3K.patch_program('pgm')
             params = params.replace("'pgm')", "cmd:str ,/)")
 
+        if "block_device" in params:
+            params = params.replace("block_device or path", "block_device_or_path")
+
         # ifconfig
         params = params.replace(
             "(ip, subnet, gateway, dns):Optional[Any]", "config: Optional[Tuple]"
         )  # Q&D
+
+        # illegal keywords
+        if "lambda" in params:
+            params = params.replace("lambda", "lambda_fn")
 
         # formatting
         return params
@@ -260,28 +283,33 @@ class RSTReader:
                 ret_type = "Any"
                 n, docstr = self.read_textblock(n)
                 name, params = this_function.split("(", maxsplit=1)
-                # ussl docstring uses a prefix
-                # remove module name from the start of the function name
-                if name.startswith(f"{self.current_module}."):
-                    name = name[len(f"{self.current_module}.") :]
+                if name not in ("classmethod", "staticmethod"):
+                    # ussl docstring uses a prefix
+                    # remove module name from the start of the function name
+                    if name.startswith(f"{self.current_module}."):
+                        name = name[len(f"{self.current_module}.") :]
 
-                # todo: parse return type from docstring
-                # fixup optional [] variables
-                params = self.fix_parameters(params)
-                # assume functions in classes
-                self.leave_class()
-                # if function name is the same as the module
-                # then this is probably documenting a class ()
-                # FIXME: usocket socket
-                if self.current_module in (name, f"u{name}"):
-                    # write a class header
-                    self.output_class_hdr(name, params, docstr)
-                else:
-                    self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
-                    self.updent()
-                    self.output_docstring(docstr)
-                    self.writeln(f"{self.indent}...\n\n")
-                    self.dedent()
+                    # todo: parse return type from docstring
+                    # fixup optional [] variables
+                    params = self.fix_parameters(params)
+                    # assume functions in classes
+                    self.leave_class()
+                    # if function name is the same as the module
+                    # then this is probably documenting a class ()
+                    # FIXME: usocket socket
+                    # if self.current_module in (name, f"u{name}"):
+                    if name in (self.current_module, f"u{self.current_module}"):
+                        if self.verbose or self.__debug:
+                            self.writeln(f"{self.indent}# ..................................")
+                            self.writeln(f"{self.indent}# 'Promote' function to class: {name}")
+                        # write a class header
+                        self.output_class_hdr(name, params, docstr)
+                    else:
+                        self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
+                        self.updent()
+                        self.output_docstring(docstr)
+                        self.writeln(f"{self.indent}...\n\n")
+                        self.dedent()
 
             elif re.search(r"\.\. class::?", line):
                 # todo: Docbug # .. _class: Poll micropython\docs\library\uselect.rst
@@ -302,23 +330,23 @@ class RSTReader:
                 # write a class header
                 self.output_class_hdr(name, params, docstr)
 
-            # todo: detect end of class to dedent
-
-            # elif line.startswith("Constants"):
-            #     # self.dedent()
-            #     self.log(f"# Constant: ~end of class dedent to {self.depth}")
-
             elif (
                 re.search(r"\.\. method::", line)
                 or re.search(r"\.\. staticmethod::", line)
                 or re.search(r"\.\. classmethod::", line)
             ):
+                name = ""
+                this_method = ""
+                params = ")"
                 ## py:staticmethod  - py:classmethod - py:decorator
                 # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
                 self.log(f"# {line.rstrip()}")
-                this_method = line.split(self.sep)[-1].strip()
+                this_method = line.split(self.sep)[1].strip()
                 ret_type = "Any"
-                name, params = this_method.split("(", 1)  # split methodname from params
+                try:
+                    name, params = this_method.split("(", 1)  # split methodname from params
+                except ValueError:
+                    name = this_method
                 # self.writeln(f"# method:: {name}")
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
@@ -364,6 +392,16 @@ class RSTReader:
                     self.writeln(f"{self.indent}...\n")
                     self.dedent()
 
+            elif re.search(r"\.\. exception::", line):
+                self.log(f"# {line.rstrip()}")
+                n += 1
+                name = line.split(self.sep)[1].strip()
+                if "." in name:
+                    name = name.split(".")[-1]  # Take only the last part from Pin.toggle
+                self.writeln(f"{self.indent}class {name}(BaseException) : ...")
+
+                # class Exception(BaseException): ...
+
             elif re.search(r"\.\. data::", line):
                 self.log(f"# {line.rstrip()}")
                 n += 1
@@ -373,7 +411,7 @@ class RSTReader:
                 # self.updent()
                 # # BUG: check if this is the correct identation for root level ?
                 # this_const = line.split(self.sep)[-1].strip()
-                # name = this_const.split(".")[-1]  # Take only the last part from Pin.toggle
+                # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
                 # type = "Any"
                 # # deal with documentation wildcards
                 # if "*" in name:
@@ -398,46 +436,57 @@ class RSTReader:
                 n += 1
 
 
-def generate_from_rst(rst_folder: Path, dst_folder: Path, black=True) -> int:
+def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True) -> int:
     if not dst_folder.exists():
         dst_folder.mkdir(parents=True)
     # no index, and mudule.xxx.rst is included in module.py
     files = [f for f in rst_folder.glob("*.rst") if f.stem != "index" and "." not in f.stem]
     for file in files:
-        reader = RSTReader()
+        reader = RSTReader(v_tag)
         reader.read_file(file)
         reader.parse()
         reader.write_file((dst_folder / file.name).with_suffix(".py"))
 
     if black:
-        cmd = f"black {dst_folder}"
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        if result.returncode != 0:
-            raise Exception(result.stderr.decode("utf-8"))
-        print(result.stderr.decode("utf-8"))
+        try:
+            cmd = f"black {dst_folder.as_posix()}"
+            result = subprocess.run(cmd, capture_output=False, check=True)
+            if result.returncode != 0:
+                raise Exception(result.stderr.decode("utf-8"))
+        except subprocess.SubprocessError:
+            print(_red("some of the files are not in a proper format"))
 
     return len(files)
 
 
 if __name__ == "__main__":
-    v_tag = "v1_16"
-    rst_folder = Path("micropython/docs/library")
+    base_path = "micropython"
+    v_tag = git.get_tag(base_path)
+    if not v_tag:
+        # if we can't find a tag , bail
+        raise ValueError
+
+    rst_folder = Path(base_path) / "docs" / "library"
     dst_folder = Path("generated/micropython") / v_tag
-    generate_from_rst(rst_folder, dst_folder)
+    generate_from_rst(rst_folder, dst_folder, v_tag)
 
 # todo
 # constants
 # usocket : class is defined twice - discontinuous documentation
 
-# todo: errorclasses
+# todo: .. exception:: IndexError
 
 # todo: documentation contains  repeated vars with the same identation
 # .. data:: IPPROTO_UDP
 #           IPPROTO_TCP
 
+# todo: cleanup '(self, ) -> Any:' -> (self) -> Any:'
 
 # Done
 
 # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
 
 # ucollection   : docs incorrectlty states classes as functions --> upstream
+
+# cmd = 'black generated/micropython/v1.5.2'
+# subprocess.run(cmd, capture_output=False, check=True)
