@@ -4,6 +4,7 @@ import subprocess
 from typing import List, Tuple
 from pathlib import Path
 import basicgit as git
+from utils import flat_version
 
 
 def _color(c, *args) -> str:
@@ -326,9 +327,12 @@ class RSTReader:
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
                 n, docstr = self.read_textblock(n)
-
-                # write a class header
-                self.output_class_hdr(name, params, docstr)
+                if any(":noindex:" in line for line in docstr):
+                    # if the class docstring contains ':noindex:' on any line then skip
+                    self.log(f"# Skip :noindex: class {name}")
+                else:
+                    # write a class header
+                    self.output_class_hdr(name, params, docstr)
 
             elif (
                 re.search(r"\.\. method::", line)
@@ -348,7 +352,7 @@ class RSTReader:
                 except ValueError:
                     name = this_method
                 # self.writeln(f"# method:: {name}")
-                # fixup optional [] variables
+                # fixup optional [] parameters and other notations
                 params = self.fix_parameters(params)
                 if "." in name:
                     # todo: deal with longer / deeper classes
@@ -467,7 +471,7 @@ if __name__ == "__main__":
         raise ValueError
 
     rst_folder = Path(base_path) / "docs" / "library"
-    dst_folder = Path("generated/micropython") / v_tag
+    dst_folder = Path("generated/micropython") / flat_version(v_tag)
     generate_from_rst(rst_folder, dst_folder, v_tag)
 
 # todo
