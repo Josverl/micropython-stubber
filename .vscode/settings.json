@@ -80,5 +80,7 @@
         "titleBar.inactiveForeground": "#e7e7e799"
     },
     "python.linting.mypyEnabled": true,
+    "restructuredtext.confPath": "${workspaceFolder}\\.venv\\Lib\\site-packages\\mypyc\\doc",
+    "python.terminal.activateEnvInCurrentTerminal": true,
     //"python.terminal.activateEnvInCurrentTerminal": true
 }
