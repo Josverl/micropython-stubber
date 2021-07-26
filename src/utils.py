@@ -36,7 +36,9 @@ def stubfolder(path: str) -> str:
 def flat_version(version: str):
     "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
 
-    return version.replace("v", "").replace(".", "_")
+    version = version.replace("v", "")
+    version = version.replace(".", "_")
+    return version
 
 
 def cleanup(modules_folder: Path):
