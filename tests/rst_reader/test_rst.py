@@ -7,22 +7,21 @@ from readfrom_rst import RSTReader, generate_from_rst
 
 
 def test_rst_all(tmp_path):
-    ...
     v_tag = "v1_16"
     rst_folder = Path("micropython/docs/library")
     dst_folder = tmp_path / "noblack"
-    x = generate_from_rst(rst_folder, dst_folder, black=False)
+    x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=False)
     assert type(x) == int, "returns a number"
     assert x > 0, "should generate at least 1 file"
 
     dst_folder = tmp_path / "black"
-    x = generate_from_rst(rst_folder, dst_folder, black=True)
+    x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
     assert type(x) == int, "returns a number"
     assert x > 0, "should generate at least 1 file"
 
     # rerun in same folder, same options
     dst_folder = tmp_path / "black"
-    x = generate_from_rst(rst_folder, dst_folder, black=True)
+    x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
     assert type(x) == int, "returns a number"
     assert x > 0, "should generate at least 1 file"
 
