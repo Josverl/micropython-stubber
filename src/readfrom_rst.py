@@ -443,7 +443,7 @@ class RSTReader:
 def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True) -> int:
     if not dst_folder.exists():
         dst_folder.mkdir(parents=True)
-    # no index, and mudule.xxx.rst is included in module.py
+    # no index, and module.xxx.rst is included in module.py
     files = [f for f in rst_folder.glob("*.rst") if f.stem != "index" and "." not in f.stem]
     for file in files:
         reader = RSTReader(v_tag)
@@ -490,7 +490,7 @@ if __name__ == "__main__":
 
 # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
 
-# ucollection   : docs incorrectlty states classes as functions --> upstream
+# ucollection   : docs incorrectly states classes as functions --> upstream
 
 # cmd = 'black generated/micropython/v1.5.2'
 # subprocess.run(cmd, capture_output=False, check=True)
