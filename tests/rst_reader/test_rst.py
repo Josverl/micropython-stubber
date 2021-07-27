@@ -1,5 +1,5 @@
 # others
-from typing import List
+from typing import Dict, List
 import pytest
 from pathlib import Path
 
@@ -143,7 +143,7 @@ def test_rst_parse_class(filename, expected):
     [
         ("", ""),
         ("()", "()"),
-        ("() :", "()"),  # aditional stuff
+        ("() :", "()"),  # additional stuff
         ("(\\*, something)", "(*, something)"),  # wrong escaping
         ("([angle])", "(angle: Optional[Any])"),  # simple optional
         ("([angle, time=0])", "(angle: Optional[Any], time=0)"),  # dual optional - hardcoded
@@ -214,7 +214,7 @@ import json
 @pytest.mark.skip(reason="not strictly needed (yet)")
 def test_pyright_undefined_variable(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
-    issues = pyright["generalDiagnostics"]
+    issues: List[Dict] = pyright["generalDiagnostics"]
     issues = list(filter(lambda diag: diag["rule"] == "reportUndefinedVariable", issues))
     with capsys.disabled():
         for issue in issues:
@@ -222,10 +222,9 @@ def test_pyright_undefined_variable(pyright, capsys):
     assert len(issues) == 0, "there should be no type issues"
 
 
-# @pytest.mark.skip(reason="dont know how to fix")
 def test_pyright_reportGeneralTypeIssues(pyright, capsys):
     "use pyright to check the validity of the generated stubs - reportGeneralTypeIssues"
-    issues = pyright["generalDiagnostics"]
+    issues: List[Dict] = pyright["generalDiagnostics"]
     issues = list(
         filter(
             lambda diag: diag["rule"] == "reportGeneralTypeIssues"
@@ -243,7 +242,7 @@ def test_pyright_reportGeneralTypeIssues(pyright, capsys):
 
 def test_pyright_invalid_strings(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
-    issues = pyright["generalDiagnostics"]
+    issues: List[Dict] = pyright["generalDiagnostics"]
 
     # Only fail on errors
     issues = list(filter(lambda diag: diag["severity"] == "error", issues))
@@ -256,7 +255,7 @@ def test_pyright_invalid_strings(pyright, capsys):
 
 def test_pyright_obscured_definitions(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
-    issues = pyright["generalDiagnostics"]
+    issues: List[Dict] = pyright["generalDiagnostics"]
     # Only look at errors
     issues = list(filter(lambda diag: diag["severity"] == "error", issues))
     issues = list(
