@@ -38,6 +38,21 @@ def rst_stubs(tmp_path):
 
 
 ###################################################################################################
+# Helper
+####################################################################################################
+
+
+def read_stub(folder, stubname):
+    "Read the content of a generated stub"
+    file = list(folder.rglob(stubname))[0]
+    content = []
+    if file:
+        with open(file) as f:
+            content = f.readlines()
+    return content
+
+
+###################################################################################################
 #
 ###################################################################################################
 
@@ -197,7 +212,8 @@ import json
 
 
 @pytest.mark.skip(reason="not strictly needed (yet)")
-def test_undefined_variable(pyright, capsys):
+def test_pyright_undefined_variable(pyright, capsys):
+    "use pyright to check the validity of the generated stubs"
     issues = pyright["generalDiagnostics"]
     issues = list(filter(lambda diag: diag["rule"] == "reportUndefinedVariable", issues))
     with capsys.disabled():
@@ -206,7 +222,27 @@ def test_undefined_variable(pyright, capsys):
     assert len(issues) == 0, "there should be no type issues"
 
 
-def test_invalid_strings(pyright, capsys):
+# @pytest.mark.skip(reason="dont know how to fix")
+def test_pyright_reportGeneralTypeIssues(pyright, capsys):
+    "use pyright to check the validity of the generated stubs - reportGeneralTypeIssues"
+    issues = pyright["generalDiagnostics"]
+    issues = list(
+        filter(
+            lambda diag: diag["rule"] == "reportGeneralTypeIssues"
+            and not "is obscured by a declaration" in diag["message"],
+            issues,
+        )
+    )
+    with capsys.disabled():
+        for issue in issues:
+            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    # TODO: 1 known issue
+    # 'Cannot access member "MSB" for type "Type[SPI]"\n\xa0\xa0Member "MSB" is unknown'
+    assert len(issues) == 1, "there should be no type issues"
+
+
+def test_pyright_invalid_strings(pyright, capsys):
+    "use pyright to check the validity of the generated stubs"
     issues = pyright["generalDiagnostics"]
 
     # Only fail on errors
@@ -218,7 +254,8 @@ def test_invalid_strings(pyright, capsys):
     assert len(issues) == 0, "all string should be valid"
 
 
-def test_obscured_definitions(pyright, capsys):
+def test_pyright_obscured_definitions(pyright, capsys):
+    "use pyright to check the validity of the generated stubs"
     issues = pyright["generalDiagnostics"]
     # Only look at errors
     issues = list(filter(lambda diag: diag["severity"] == "error", issues))
@@ -272,16 +309,11 @@ def test_dup_init():
 # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
 
 
-@pytest.mark.skip(reason="test not yet built")
-def test_deepsleep_stub():
+def test_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
-    file = list(rst_stubs.rglob("machine.py"))[0]
-    if file:
-        content = []
-        with open(file) as f:
-            content = f.readlines()
-        found = any("def deepsleep(time_ms: Optional[Any]) -> Any:" in line for line in content)
-        assert found, "usocket.socket should be stubbed as a class, not as a function"
+    content = read_stub(rst_stubs, "machine.py")
+    found = any("def deepsleep(time_ms: Optional[Any]) -> Any:" in line for line in content)
+    assert found, "machine.deepsleep should be stubbed as a function"
 
     # # .. function:: deepsleep([time_ms])
     # def deepsleep(time_ms: Optional[Any]) -> Any:
@@ -303,37 +335,30 @@ def test_Flash_init_overload():
 
 def test_usocket_class_def(rst_stubs: Path):
     "make sense of `usocket.socket` class documented as a function - Upstream Docfix pending"
-    file = list(rst_stubs.rglob("usocket.py"))[0]
-    if file:
-        content = []
-        with open(file) as f:
-            content = f.readlines()
-        found = any("def socket(" in line for line in content)
-        assert not found, "usocket.socket should be stubbed as a class, not as a function"
+    content = read_stub(rst_stubs, "usocket.py")
 
-        found = any("class socket:" in line for line in content)
-        assert found, "usocket.socket classdef should be generated"
+    found = any("def socket(" in line for line in content)
+    assert not found, "usocket.socket should be stubbed as a class, not as a function"
 
-        found = any(
-            "def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> None:"
-            in line
-            for line in content
-        )
-        assert found, "usocket.socket __init__ should be generated"
+    found = any("class socket:" in line for line in content)
+    assert found, "usocket.socket classdef should be generated"
+
+    found = any(
+        "def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> None:" in line
+        for line in content
+    )
+    assert found, "usocket.socket __init__ should be generated"
 
 
 def test_poll_class_def(rst_stubs: Path):
     "make sense of `uselect.socket` class documented as a function - Upstream Docfix pending"
-    file = list(rst_stubs.rglob("uselect.py"))[0]
-    if file:
-        content = []
-        with open(file) as f:
-            content = f.readlines()
-        found = any("def poll()" in line for line in content)
-        assert not found, "uselect.poll class should not be stubbed as a function"
+    content = read_stub(rst_stubs, "uselect.py")
 
-        found = any("class poll:" in line for line in content)
-        assert found, "uselect.poll should be stubbed as a class"
+    found = any("def poll()" in line for line in content)
+    assert not found, "uselect.poll class should not be stubbed as a function"
+
+    found = any("class poll:" in line for line in content)
+    assert found, "uselect.poll should be stubbed as a class"
 
 
 # def socket(af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> Any:
