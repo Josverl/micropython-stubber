@@ -8,10 +8,9 @@ from readfrom_rst import RSTReader, generate_from_rst
 
 ###################################################################################################
 # Fixtures for re-use by different test methods
+# shared across this module
 ###################################################################################################
-
-# TODO:
-@pytest.fixture
+@pytest.fixture(scope="module")
 def pyright(rst_stubs):
     "Run pyright over folder with rst generated stubs, and return the results"
 
@@ -24,17 +23,21 @@ def pyright(rst_stubs):
         raise e
     results = json.loads(result.stdout)
     assert results["summary"]["filesAnalyzed"] >= 40, ">= 40 files checked"
-    return results
+    yield results
+    # cleanup code here
 
 
-@pytest.fixture
-def rst_stubs(tmp_path):
-    "Generate stubs from RST files"
-    dst_folder = tmp_path
-    rst_folder = Path("micropython/docs/library")
+# TODO: Source version and tag
+@pytest.fixture(scope="module")
+def rst_stubs(tmp_path_factory: pytest.TempPathFactory):
+    "Generate stubs from RST files - once for this module"
     v_tag = "v1_16"
+    # setup our on folder for testing
+    dst_folder = tmp_path_factory.mktemp("stubs") / v_tag
+    rst_folder = Path("micropython/docs/library")
     x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
-    return tmp_path
+    yield dst_folder
+    # cleanup code here
 
 
 ###################################################################################################
