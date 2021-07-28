@@ -146,7 +146,7 @@ def test_rst_parse_class(filename, expected):
     [
         ("", ""),
         ("()", "()"),
-        ("() :", "()"),  # additional stuff
+        ("() :", "()"),  # strip additional stuff
         ("(\\*, something)", "(*, something)"),  # wrong escaping
         ("([angle])", "(angle: Optional[Any])"),  # simple optional
         ("([angle, time=0])", "(angle: Optional[Any], time=0)"),  # dual optional - hardcoded
@@ -157,7 +157,7 @@ def test_rst_parse_class(filename, expected):
             "(if_id=0, config: Union[str,Tuple]='dhcp')",
         ),
         ("lambda)", "lambda_fn)"),
-        # ("()", "()"),
+        ("(block_device or path)", "(block_device_or_path)"),
         # ("()", "()"),
         # ("()", "()"),
         # ("()", "()"),
@@ -165,6 +165,7 @@ def test_rst_parse_class(filename, expected):
     ],
 )
 def test_fix_param(param_in, param_out):
+    "validate known parameter typing notation errors"
     r = RSTReader()
     result = r.fix_parameters(param_in)
     assert result == param_out

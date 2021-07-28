@@ -1,7 +1,8 @@
 # read text
+import json
 import re
 import subprocess
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from pathlib import Path
 import basicgit as git
 from utils import flat_version
@@ -20,6 +21,10 @@ def _red(*args) -> str:
     return _color(91, *args)
 
 
+# Development
+GATHER_DOC = True
+
+
 class RSTReader:
     __debug = True  # a
     verbose = False
@@ -27,16 +32,20 @@ class RSTReader:
 
     def __init__(self, v_tag="v1.xx"):
         self.sep = "::"
-        self.current_module = ""
         self.filename = ""
+
+        self.current_module = ""
+        self.current_class = ""
+        self.current_function = ""  # function & method
+
         self.depth = 0
         self.rst_text: List[str] = []
         self.max_line = 0
         self.output: List[str] = []
         self.source_tag = v_tag
         self.target = ".py"  # py/pyi
-        self.classes: List[str] = []
-        self.current_class = ""
+        self.classes: List[str] = []  # is this used ?
+        self.return_info: List[Tuple] = []  # development aid only
 
         self.writeln("from typing import Any, Optional, Union, Tuple\n")
 
@@ -90,10 +99,16 @@ class RSTReader:
             print(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
-                return True
         except OSError as e:
             print(e)
             return False
+        if GATHER_DOC:
+            print(f" - Writing to: {filename}")
+            with open(filename.with_suffix(".json"), mode="w", encoding="utf8") as file:
+                json.dump(self.return_info, file, ensure_ascii=False, indent=4)
+            self.return_info = []
+
+        return True
 
     def read_textblock(self, n: int) -> Tuple[int, List[str]]:
         if n >= len(self.rst_text):
@@ -122,6 +137,10 @@ class RSTReader:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
+        if GATHER_DOC and len(block) > 0:
+            self.return_info.append(
+                (self.current_module, self.current_class, self.current_function, block)
+            )
         return (n, block)
 
     def fix_parameters(self, params: str):
@@ -266,6 +285,7 @@ class RSTReader:
                 self.writeln(f"# origin: {self.filename}\n# {self.source_tag}")
                 # get module docstring
                 self.current_module = this_module
+                self.current_function = self.current_class = ""
                 n, docstr = self.read_textblock(n)
                 self.output_docstring(docstr)
 
@@ -275,6 +295,7 @@ class RSTReader:
                 this_module = line.split(self.sep)[-1].strip()
                 self.log(f"# currentmodule:: {this_module}")
                 self.current_module = this_module
+                self.current_function = self.current_class = ""
                 # todo: check if same module
                 # todo: read first block and do something with it
 
@@ -284,12 +305,12 @@ class RSTReader:
                 ret_type = "Any"
                 n, docstr = self.read_textblock(n)
                 name, params = this_function.split("(", maxsplit=1)
+                self.current_function = name
                 if name not in ("classmethod", "staticmethod"):
                     # ussl docstring uses a prefix
                     # remove module name from the start of the function name
                     if name.startswith(f"{self.current_module}."):
                         name = name[len(f"{self.current_module}.") :]
-
                     # todo: parse return type from docstring
                     # fixup optional [] variables
                     params = self.fix_parameters(params)
@@ -320,6 +341,8 @@ class RSTReader:
                 params = ""
                 if "(" in this_class:
                     name, params = this_class.split("(", 2)
+                self.current_class = name
+                self.current_function = ""
                 # remove module name from the start of the class name
                 if name.startswith(f"{self.current_module}."):
                     name = name[len(f"{self.current_module}.") :]
@@ -351,6 +374,7 @@ class RSTReader:
                     name, params = this_method.split("(", 1)  # split methodname from params
                 except ValueError:
                     name = this_method
+                self.current_function = name
                 # self.writeln(f"# method:: {name}")
                 # fixup optional [] parameters and other notations
                 params = self.fix_parameters(params)
@@ -432,6 +456,7 @@ class RSTReader:
                 self.rst_text = []
                 n = 1
             elif re.search(r"\.\. \w+::", line):
+                #
                 self.log(f"# {line.rstrip()}")
                 print(_red(line.rstrip()))
                 n += 1
@@ -450,6 +475,7 @@ def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True
         reader.read_file(file)
         reader.parse()
         reader.write_file((dst_folder / file.name).with_suffix(".py"))
+        del reader
 
     if black:
         try:
