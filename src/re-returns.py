@@ -1,3 +1,19 @@
+""" Work in Progress  
+Tries to determine the return type by parsing the docstring 
+ - use re to find phrases such as:
+    - 'Returns ..... '
+    - 'Gets  ..... '
+ - then parses the resulting sentences to find references to known types and gives then a rating 
+ - builds a list return type candidates 
+ - selects the highest ranking candidate 
+ - the default Type is 'Any'
+
+todo: 
+    - filter out obvious wrong types ( deny-list) 
+    - also pass in the function/method/class defenition as that may/SHOULD contain the return type, in which case that should take precedence
+    - build test and  % report 
+    - 
+"""
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/D5ddB2/1
 
@@ -49,15 +65,30 @@ def distill_return(return_text: str) -> List[Dict]:
         result["confidence"] = 0.8  # OK
         candidates.append(result)
 
-        # tuple ?
-        # usocket.socket.socket.recvfrom           bytes           - 0.8 ('value is a pair *(bytes, address)* where *bytes* is a',)
-        # usocket.socket.socket.accept             Any             - 0.2 ('value is a pair (conn, address) where conn is a new socket object usable to send',)
-        # uasyncio.Lock.Lock.release               Any             - 0.2 ('a pair of streams: a reader and a writer stream.',)
-    if any(num in my_type for num in ("number", "integer", "count", " int ", "length", "index")):
-        # Assume numbers are number
+    if any(num in my_type for num in ("unsigned integer", "unsigned int", "unsigned")):
+        # Assume unsigned are uint
+        result = base.copy()
+        result["type"] = "uint"
+        result["confidence"] = 0.8  # OK
+        candidates.append(result)
+
+    if any(
+        num in my_type
+        for num in (
+            "number",
+            "integer",
+            "count",
+            " int ",
+            "length",
+            "index",
+            "**signed** value",
+            "0 or 1",
+        )
+    ):
+        # Assume numbers are signed int
         result = base.copy()
         result["type"] = "int"
-        result["confidence"] = 0.8  # OK
+        result["confidence"] = 0.7  # OK
         candidates.append(result)
 
     if any(t in my_type for t in ("bytearray",)):
@@ -80,7 +111,15 @@ def distill_return(return_text: str) -> List[Dict]:
 
     if any(
         t in my_type
-        for t in ("float", "logarithm", "sine", "tangent", "exponential", "complex number", "phase")
+        for t in (
+            "float",
+            "logarithm",
+            "sine",
+            "tangent",
+            "exponential",
+            "complex number",
+            "phase",
+        )
     ):
         result = base.copy()
         result["type"] = "float"
@@ -93,16 +132,11 @@ def distill_return(return_text: str) -> List[Dict]:
         result["confidence"] = 0.8  # OK
         candidates.append(result)
 
-    if any(t in my_type for t in ("``None``",)):
+    if any(t in my_type for t in ("``None``", "None")):
         result = base.copy()
         result["type"] = "None"
         result["confidence"] = 0.8  # OK
         candidates.append(result)
-
-    # signed int
-    # ===========
-    # utime..ticks_add                         Any             - 0.2 ('**signed** value in the range',)
-    # esp32.NVS.NVS.get_i32                    int             - 0.8 ('the signed integer value for the specified key. Raises an OSError if the key does not',)
 
     if any(t in my_type for t in ("Object", "object")):
         words = my_type.split(" ")
@@ -117,53 +151,35 @@ def distill_return(return_text: str) -> List[Dict]:
 
         if i > 0:
             object = words[i - 1]
-            if object == "stream-like":
+            if object in ("stream-like", "file"):
                 object = "stream"
+            elif object == "callback":
+                object = "Callable[..., Any]"
+                # todo: requires additional 'from typing import Callable'
 
             # clean
             object = re.sub(r"[^a-z.A-Z0-9]", "", object)
             result = base.copy()
             result["type"] = object
             if object[0].isupper():
-                result["confidence"] = 0.8  # OK
+                result["confidence"] = 0.8  # Good
             else:
-                result["confidence"] = 0.6  # OK
+                result["confidence"] = 0.3  # not so good
 
             candidates.append(result)
-
-    # Object
-    # ===========
-    #                                                                ('a file object associated with the socket)
-    # ure..                                    Any             - 0.2 ('`regex <regex>` object',)
-    # network.WLANWiPy.WLANWiPy.irq            Any             - 0.2 ('an IRQ object',)
-    # network.CC3K.                            Any             - 0.2 ('the CC3K object.',)
-    # pyb..mount                               Any             - 0.2 ('or set the UART object where the REPL is repeated on',)
-    # pyb.pyb.Accel.                           Any             - 0.2 ('an accelerometer object',)
-    # rp2.StateMachine.StateMachine.irq        Any             - 0.2 ('the IRQ object for the given StateMachine.',)
-    # uasyncio..open_connection                Any             - 0.2 ('a `Server` object.',)
-    # ujson..load                              Any             - 0.2 ('an object.  Raises :exc:`ValueError` if the',)
-
-    # Iterator
-    # ========
-    # uselect.poll.poll.ipoll                  Any             - 0.2 ('an iterator which yields a',)
 
     if " " in my_type:
         result = base.copy()
         result = {"type": "Any", "confidence": 0.2}
         candidates.append(result)
+    elif my_type[0].isdigit() or len(my_type) < 3 or my_type in ("them", "the", "immediately"):
+        # avoid short words, starts with digit, or a few detected
+        result = base.copy()
+        result = {"type": "Any", "confidence": 0.2}
+        candidates.append(result)
+
     else:
-        # TODO : Sanity check
-        # prevent simple words
-        # =====================
-        # esp32.Partition.Partition.find           a               - 0.5 ('a',)
-        # esp32.RMT.RMT.source_freq                80MHz           - 0.5 ('80MHz',)
-        # pyb.pinaf.pinaf.reg                      stm             - 0.5 ('stm',)
-        # pyb.UART.UART.readline                   is              - 0.5 ('is',)
-        # pyb.USB_VCP.USB_VCP.read                 immediately     - 0.5 ('immediately',)
-        # uasyncio.Event.Event.wait                immediately     - 0.5 ('    immediately.',)
-        # uasyncio.Stream.Stream.read              them            - 0.5 ('them.',)
-        # uasyncio.Stream.Stream.readline          it              - 0.5 ('it.',)
-        # ubluetooth.BLE.BLE.active                the             - 0.5 ('the',)
+
         assert not " " in my_type
         assert not ":" in my_type
         result = base.copy()
@@ -216,8 +232,11 @@ def process(pattern: str):
             for item in docstrings:
                 if item[3] != []:
                     r = type_from_docstring(item[3])
-                    # print("{0}, {1}".format(*item))
-                    if r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != "":
+
+                    isGood = r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
+                    isBad = r["confidence"] <= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
+                    if isBad:
+
                         context = ".".join((item[0], item[1], item[2]))
                         try:
                             print(

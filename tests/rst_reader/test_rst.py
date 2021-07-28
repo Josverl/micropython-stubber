@@ -223,7 +223,7 @@ def test_pyright_undefined_variable(pyright, capsys):
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
-    assert len(issues) == 0, "there should be no type issues"
+    assert len(issues) == 0, "there should be no `Undefined Variables`"
 
 
 def test_pyright_reportGeneralTypeIssues(pyright, capsys):
@@ -277,6 +277,26 @@ def test_pyright_obscured_definitions(pyright, capsys):
 
 
 @pytest.mark.skip(reason="test not yet built")
+def test_dup_init():
+    #  classes with multiple __init__ methods
+    # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
+    ...
+
+
+@pytest.mark.skip(reason="test not yet built")
+def test_Flash_init_overload():
+    # "pyb.Flash_init_overload is generated"
+    # class Flash:
+    #     """
+    #     :noindex:
+    #     Create and return a block device that accesses the flash at the specified offset. The length defaults to the remaining size of the device.
+    #     The *start* and *len* offsets are in bytes, and must be a multiple of the block size (typically 512 for internal flash).
+    #     """
+    #     def __init__(self, *, start=-1, len=-1) -> None:
+    ...
+
+
+@pytest.mark.skip(reason="test not yet built")
 def test_data_module_level():
     "all modules should have a docstring"
     ...
@@ -296,20 +316,17 @@ def test_exception():
 
 @pytest.mark.skip(reason="test not yet built")
 def test_undocumented_class():
+    # percentage of classes with docstring
+    # list classes without a docstring
+    # >> similar for function / methods
     ...
 
 
 @pytest.mark.skip(reason="test not yet built")
 def test_find_return_type():
+    # check return types for a number of known functions / methods
+    # check % return type !=  Any ?
     ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_dup_init():
-    ...
-
-
-# Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
 
 
 def test_deepsleep_stub(rst_stubs):
@@ -320,19 +337,6 @@ def test_deepsleep_stub(rst_stubs):
 
     # # .. function:: deepsleep([time_ms])
     # def deepsleep(time_ms: Optional[Any]) -> Any:
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_Flash_init_overload():
-    "pyb.Flash_init_overload is generated"
-    # class Flash:
-    #     """
-    #     :noindex:
-    #     Create and return a block device that accesses the flash at the specified offset. The length defaults to the remaining size of the device.
-    #     The *start* and *len* offsets are in bytes, and must be a multiple of the block size (typically 512 for internal flash).
-    #     """
-    #     def __init__(self, *, start=-1, len=-1) -> None:
     ...
 
 
