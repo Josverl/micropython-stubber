@@ -15,6 +15,11 @@ exclude = '''
 )
 '''
 
+[tool.pytest.ini_options]
+junit_family = "xunit1"
+addopts = "-v -sv --cov --cov-report xml:cov.xml --cov-report html"
+
+# coverage reports
 [tool.coverage.run]
 parallel = false
 branch = true
