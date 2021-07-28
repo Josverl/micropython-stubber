@@ -1,4 +1,31 @@
-# read text
+""" Work in Progress
+    Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking 
+
+    - uses a custom build parser to read the RST files 
+    - generates 
+        modules 
+            - docstrings
+        function definitions 
+            - function parameters based on documentation
+            - docstrings
+        classes
+            - docstrings
+            __init__ method
+            - parameters based on documentation for class 
+            methods
+                - parameters based on documentation for the method
+                - docstrings
+        exceptions
+
+    The generated stub files are formatted using `black` and checked for validity using `pyright`
+
+    WIP 
+    - tries to determine the return type by parsing the docstring 
+    Not yet implemented 
+    - Literals 
+    - ordering of inter-dependent classes in the same module
+"""
+
 import json
 import re
 import subprocess
