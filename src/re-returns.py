@@ -9,8 +9,15 @@ Tries to determine the return type by parsing the docstring
  - the default Type is 'Any'
 
 todo: 
+
     - filter out obvious wrong types ( deny-list) 
     - also pass in the function/method/class defenition as that may/SHOULD contain the return type, in which case that should take precedence
+    - regex :
+        - multiline regex end at '.' or ; 
+        - 'With no arguments the frequency in Hz is returned.'
+        - 'Get or set' --> indicates overloaded/optional return Union[None|...]
+        - add regex for 'Query' ` Otherwise, query current state if no argument is provided. `
+
     - build test and  % report 
     - 
 """

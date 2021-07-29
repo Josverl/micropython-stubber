@@ -21,9 +21,26 @@
 
     WIP 
     - tries to determine the return type by parsing the docstring 
+    FIX Needed 
+        - improve docstring extraction 
+            - move report out of docstring to fix name skew 
+            - add class/function signature to export 
+        - End of debug Class marker is now broken , reports new class
+                # .. toctree::
+                # .. currentmodule:: network
+                # currentmodule:: network
+                # .. class:: WLAN(interface_id)
+                # class:: WLAN
+                # End of class: WLAN
+
     Not yet implemented 
     - Literals 
     - ordering of inter-dependent classes in the same module
+    - add superclasses ( must be based on a external list as this is currently not documented as part of the class)
+            - WLAN(AbstractNIC)
+            - WLANWiPy(AbstractNIC)
+            
+            - Signal(Pin)
 """
 
 import json
