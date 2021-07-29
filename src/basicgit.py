@@ -1,10 +1,10 @@
 "simple Git module, where needed via powershell "
 import subprocess
 import os
-from typing import Union
+from typing import Union, List
 
 
-def _run_git(cmd: str, repo: str = None, expect_stderr=False):
+def _run_git(cmd: List[str], repo: str = None, expect_stderr=False):
     "run a external (git) command in the repo's folder and deal with some of the errors"
     try:
         if repo:
@@ -59,6 +59,38 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     returns the tag or None
     """
     cmd = ["git", "checkout", "tags/" + tag, "--quiet", "--force"]
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        return False
+    # actually a good result
+    print(result.stderr.decode("utf-8"))
+    return True
+
+
+def switch_tag(tag: str, repo: str = None) -> bool:
+    """
+    get the most recent git version tag of a local repo"
+    repo should be in the form of : path/.git
+        ../micropython/.git
+    returns the tag or None
+    """
+    cmd = ["git", "switch", "--detach", tag, "--quiet", "--force"]
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        return False
+    # actually a good result
+    print(result.stderr.decode("utf-8"))
+    return True
+
+
+def switch_branch(branch: str, repo: str = None) -> bool:
+    """
+    get the most recent git version tag of a local repo"
+    repo should be in the form of : path/.git
+        ../micropython/.git
+    returns the tag or None
+    """
+    cmd = ["git", "switch", branch, "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return False
