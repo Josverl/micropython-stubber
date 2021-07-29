@@ -2,14 +2,13 @@ project.pymakr
 *.zip
 
 # no python virtual environment
-
 .env
-
 .venv
 
 # no compiled python 
-.py_cache
 **/__pycache__/**
+.py_cache
+.pytest_cache/*
 
 #ignore the scratchpad 
 scratch/*
@@ -19,13 +18,17 @@ scratch/*
 board/stubs
 minified/stubs
 all-stubs
+
 stubs/*
-dev-stubs/*
+dev-stubs
+# generated stubs
+generated
 
 
-# ignore test coverage report
+# ignore test coverage reports
 .coverage*
-coverage
+coverage/*
+cov.xml
 
 
 # and tests results
@@ -34,11 +37,3 @@ junit/*
 
 # OS specific stuff
 desktop.ini
-.pytest_cache/*
-
-dev-stubs
-
-.py_cache
-
-# generated stubs
-generated

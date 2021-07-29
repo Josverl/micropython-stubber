@@ -17,7 +17,23 @@ exclude = '''
 
 [tool.pytest.ini_options]
 junit_family = "xunit1"
-addopts = "-v -sv --cov --cov-report xml:cov.xml --cov-report html"
+# verbose
+# super verbose 
+# --cov coverage with json report and html report
+# Skip 'basicgit' test to avoid changing the cheked-out repo branch
+#addopts = "-v -sv --cov json --cov-report html -m 'not basicgit'"
+#addopts = "-v --cov --cov-report html -m 'not basicgit'"
+addopts = "-v -sv --cov --cov-report html"
+
+testpaths = [
+    "tests",
+    "src",
+]
+
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "basicgit: marks tests in the basicgit module that manipulate the checkout",
+]
 
 # coverage reports
 [tool.coverage.run]
@@ -25,6 +41,7 @@ parallel = false
 branch = true
 source = [
         "board",
+        "minified",
         "src"
         ]
 omit = [
@@ -42,6 +59,9 @@ directory = "coverage"
 
 [tool.coverage.xml]
 output = "cov.xml"
+
+[tool.coverage.json]
+output = "coverage.json"
 
 [tool.coverage.report]
 show_missing = true

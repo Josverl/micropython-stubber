@@ -96,5 +96,5 @@
     "python.linting.mypyEnabled": true,
     "restructuredtext.confPath": "${workspaceFolder}\\.venv\\Lib\\site-packages\\mypyc\\doc",
     "python.terminal.activateEnvInCurrentTerminal": true,
-    //"python.terminal.activateEnvInCurrentTerminal": true
+    "git-graph.dialog.addTag.pushToRemote": true,
 }
