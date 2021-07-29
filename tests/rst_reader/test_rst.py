@@ -2,9 +2,14 @@
 from typing import Dict, List
 import pytest
 from pathlib import Path
+import basicgit as git
 
 # SOT
 from readfrom_rst import RSTReader, generate_from_rst
+
+
+MICROPYTHON_FOLDER = "micropython"
+
 
 ###################################################################################################
 # Fixtures for re-use by different test methods
@@ -27,14 +32,26 @@ def pyright(rst_stubs):
     # cleanup code here
 
 
+@pytest.fixture(scope="module")
+def micropython_repo():
+    "make sure a recent repo is checked out"
+    if True:
+        # Make sure the correct micropython branch is checked out
+        git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
+    else:
+        git.switch_branch("master", MICROPYTHON_FOLDER)
+    v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
+    yield v_tag
+
+
 # TODO: Source version and tag
 @pytest.fixture(scope="module")
-def rst_stubs(tmp_path_factory: pytest.TempPathFactory):
+def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
     "Generate stubs from RST files - once for this module"
-    v_tag = "v1_16"
+    v_tag = micropython_repo
     # setup our on folder for testing
     dst_folder = tmp_path_factory.mktemp("stubs") / v_tag
-    rst_folder = Path("micropython/docs/library")
+    rst_folder = Path(MICROPYTHON_FOLDER) / "docs/library"
     x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
     yield dst_folder
     # cleanup code here
@@ -60,9 +77,10 @@ def read_stub(folder, stubname):
 ###################################################################################################
 
 
-def test_rst_all(tmp_path):
-    v_tag = "v1_16"
-    rst_folder = Path("micropython/docs/library")
+def test_rst_all(tmp_path, micropython_repo):
+    v_tag = micropython_repo
+
+    rst_folder = Path(MICROPYTHON_FOLDER) / "docs/library"
     dst_folder = tmp_path / "noblack"
     x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=False)
     assert type(x) == int, "returns a number"
