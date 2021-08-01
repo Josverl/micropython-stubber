@@ -3,10 +3,12 @@ Tries to determine the return type by parsing the docstring
  - use re to find phrases such as:
     - 'Returns ..... '
     - 'Gets  ..... '
- - then parses the resulting sentences to find references to known types and gives then a rating 
+ - docstring is joined withouth newlines to simplify parsing
+ - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
  - builds a list return type candidates 
  - selects the highest ranking candidate 
  - the default Type is 'Any'
+ 
 
 todo: 
 
@@ -19,6 +21,8 @@ todo:
         - add regex for 'Query' ` Otherwise, query current state if no argument is provided. `
 
     - build test and  % report 
+    - try if an Azure Machine Learning works as well 
+        https://docs.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources
     - 
 """
 # ref: https://regex101.com/codegen?language=python
@@ -90,6 +94,7 @@ def distill_return(return_text: str) -> List[Dict]:
             "index",
             "**signed** value",
             "0 or 1",
+            "nanoseconds",
         )
     ):
         # Assume numbers are signed int
@@ -137,6 +142,12 @@ def distill_return(return_text: str) -> List[Dict]:
         result = base.copy()
         result["type"] = "str"
         result["confidence"] = 0.8  # OK
+        candidates.append(result)
+
+    if any(t in my_type for t in ("name", "names")):
+        result = base.copy()
+        result["type"] = "str"
+        result["confidence"] = 0.3  # name could be a string
         candidates.append(result)
 
     if any(t in my_type for t in ("``None``", "None")):
@@ -196,15 +207,22 @@ def distill_return(return_text: str) -> List[Dict]:
     return candidates
 
 
-def type_from_docstring(docstring: Union[str, List[str]]):
+def type_from_docstring(docstring: Union[str, List[str]], signature: str):
 
     if isinstance(docstring, list):
-        docstring = "\n".join(docstring)
-    return_regex = r"Return(?:s?|(?:ing)?)\s(?!information)(?P<return>.*)[.|$|\s]"
+        # join with space to avoid ending at a newline
+        docstring = " ".join(docstring)
+
+    return_regex = r"Return(?:s?|(?:ing)?)\s(?!information)(?P<return>.*)[.|$|!|?]"
     gets_regex = r"Gets?\s(?P<return>.*)[.|$|\s]"
 
     matches: List[re.Match] = []
     candidates: List[Dict] = []
+
+    # if the signature contains a return type , then use that and do nothing else.
+    if "->" in signature:
+        sig_type = signature.split("->")[-1].strip(": ")
+        return {"type": sig_type, "confidence": 1, "match": signature}
 
     for regex in (return_regex, gets_regex):
         match_iter = re.finditer(regex, docstring, re.MULTILINE | re.IGNORECASE)
@@ -237,14 +255,16 @@ def process(pattern: str):
             # read docstrings from json
             docstrings: List[Tuple] = json.load(fp)
             for item in docstrings:
-                if item[3] != []:
-                    r = type_from_docstring(item[3])
+                # module, class, function/method , line, docstring
+                if item[4] != []:
+                    signature = str(item[3]).split("::")[-1].strip()
+                    docstring = item[4]
+                    r = type_from_docstring(docstring, signature)
 
                     isGood = r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
                     isBad = r["confidence"] <= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
                     if isBad:
-
-                        context = ".".join((item[0], item[1], item[2]))
+                        context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
                             print(
                                 f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}"

@@ -44,6 +44,7 @@
 """
 
 import json
+from os import link
 import re
 import subprocess
 from typing import Dict, List, Tuple
@@ -78,6 +79,7 @@ class RSTReader:
         self.sep = "::"
         self.filename = ""
 
+        self.line = "" # class / method/ function line being parsed
         self.current_module = ""
         self.current_class = ""
         self.current_function = ""  # function & method
@@ -90,6 +92,7 @@ class RSTReader:
         self.target = ".py"  # py/pyi
         self.classes: List[str] = []  # is this used ?
         self.return_info: List[Tuple] = []  # development aid only
+    
 
         self.writeln("from typing import Any, Optional, Union, Tuple\n")
 
@@ -111,7 +114,7 @@ class RSTReader:
     def leave_class(self):
         if self.current_class != "":
             if self.verbose or self.__debug:
-                self.writeln(f"{self.indent}# End of class: {self.current_class}")
+                self.writeln(f"{self.indent}# End of previous class:")
                 self.writeln(f"{self.indent}# ..................................")
             self.dedent()
             self.current_class = ""
@@ -166,7 +169,7 @@ class RSTReader:
                 .lstrip()
                 .startswith(
                     ".."
-                )  # stop at anchor ( however .. note: could be considered tp be added)
+                )  # stop at anchor ( however .. note: could be considered to be added)
                 and not self.rst_text[min(n + 1, self.max_line)].startswith("--")  # Heading --
                 and not self.rst_text[min(n + 1, self.max_line)].startswith("==")  # Heading ==
                 and not self.rst_text[min(n + 1, self.max_line)].startswith("~~")  # Heading ~~
@@ -181,10 +184,6 @@ class RSTReader:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
-        if GATHER_DOC and len(block) > 0:
-            self.return_info.append(
-                (self.current_module, self.current_class, self.current_function, block)
-            )
         return (n, block)
 
     def fix_parameters(self, params: str):
@@ -281,9 +280,13 @@ class RSTReader:
         for l in docstr:
             self.writeln(f"{self.indent}{l}")
         self.writeln(f'{self.indent}"""')
+        if GATHER_DOC and len(docstr) > 0:
+            self.return_info.append(
+                (self.current_module, self.current_class, self.current_function, self.line,  docstr)
+            )
 
     def output_class_hdr(self, name: str, params: str, docstr: List[str]):
-        # hack assume no classes in classes  or functions in functions
+        # hack assume no classes in classes  or functions in function
         self.leave_class()
 
         # write a class header
@@ -320,7 +323,7 @@ class RSTReader:
         # for n in range(0, len(self.rst_text)):
         n = 0
         while n < len(self.rst_text):
-            line = self.rst_text[n]
+            self.line = line = self.rst_text[n]
             #    self.writeln(">"+line)
 
             if re.search(r"\.\. module::", line):
@@ -358,7 +361,7 @@ class RSTReader:
                     # todo: parse return type from docstring
                     # fixup optional [] variables
                     params = self.fix_parameters(params)
-                    # assume functions in classes
+                    # assume no functions in classes
                     self.leave_class()
                     # if function name is the same as the module
                     # then this is probably documenting a class ()
