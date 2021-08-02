@@ -1,23 +1,4 @@
 """ Work in Progress  
-Tries to determine the return type by parsing the docstring and the function signature
- - if the signature contains a return type --> <something> then that is returned
- - use re to find phrases such as:
-    - 'Returns ..... '
-    - 'Gets  ..... '
- - docstring is joined without newlines to simplify parsing
- - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
- - builds a list return type candidates 
- - selects the highest ranking candidate 
- - the default Type is 'Any'
- 
-
-todo: 
-
-    - filter out obvious wrong types ( deny-list) 
-    - regex :
-        - 'With no arguments the frequency in Hz is returned.'
-        - 'Get or set' --> indicates overloaded/optional return Union[None|...]
-        - add regex for 'Query' ` Otherwise, query current state if no argument is provided. `
 
     - build test and  % report 
     - try if an Azure Machine Learning works as well 

@@ -193,7 +193,7 @@
             "",
             "   The meaning of the ``subseconds`` field is hardware dependent."
         ],
-        "type": "tuple",
+        "type": "Tuple",
         "confidence": 0.8,
         "module": "machine",
         "class": "RTC",
@@ -367,9 +367,80 @@
         ],
         "type": "boolean",
         "confidence": 0,
-        "match": "None",
         "module": "math",
         "class": "",
         "function/method": "isnan"
+    },
+    {
+        "signature": "WLAN.isconnected()",
+        "docstring": [
+            "    In case of STA mode, returns ``True`` if connected to a WiFi access",
+            "    point and has a valid IP address.  In AP mode returns ``True`` when a",
+            "    station is connected. Returns ``False`` otherwise."
+        ],
+        "type": "boolean",
+        "confidence": 0.8,
+        "module": "network",
+        "class": "WLAN",
+        "function/method": "WLAN.isconnected"
+    },
+    {
+        "signature": "Pin.name()",
+        "docstring": [
+            "   Get the pin name."
+        ],
+        "type": "str",
+        "confidence": 0.3,
+        "module": "pyb",
+        "class": "Pin",
+        "function/method": "Pin.name"
+    },
+    {
+        "signature": "socket.makefile(mode='rb', buffering=0, /)",
+        "docstring": [
+            "   Return a file object associated with the socket. The exact returned type depends on the arguments",
+            "   given to makefile(). The support is limited to binary modes only ('rb', 'wb', and 'rwb').",
+            "   CPython's arguments: *encoding*, *errors* and *newline* are not supported."
+        ],
+        "type": "stream",
+        "confidence": 0.3,
+        "module": "usocket",
+        "class": "socket",
+        "function/method": "socket.makefile"
+    },
+    {
+        "signature": "repl_uart(uart)",
+        "docstring": [
+            "   Get or set the UART object where the REPL is repeated on."
+        ],
+        "type": "UART",
+        "confidence": 0.8,
+        "module": "pyb",
+        "class": "",
+        "function/method": "repl_uart"
+    },
+    {
+        "signature": "BLE()",
+        "docstring": [
+            "    Returns the singleton BLE object."
+        ],
+        "type": "BLE",
+        "confidence": 0.8,
+        "module": "ubluetooth",
+        "class": "",
+        "function/method": ""
+    },
+    {
+        "signature": "addressof(obj)",
+        "docstring": [
+            "   Return address of an object. Argument should be bytes, bytearray or",
+            "   other object supporting buffer protocol (and address of this buffer",
+            "   is what actually returned)."
+        ],
+        "type": "int",
+        "confidence": 0.5,
+        "module": "uctypes",
+        "class": "",
+        "function/method": "addressof"
     }
 ]

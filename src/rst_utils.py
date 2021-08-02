@@ -1,27 +1,44 @@
 """ Work in Progress  
+
 Tries to determine the return type by parsing the docstring and the function signature
+ - if the signature contains a return type --> <something> then that is returned
+ - check a lookup dictionary of type overrides, 
+    if the functionnae is listed, then use the override
+ - use re to find phrases such as:
+    - 'Returns ..... '
+    - 'Gets  ..... '
+ - docstring is joined without newlines to simplify parsing
+ - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
+ - builds a list return type candidates 
+ - selects the highest ranking candidate 
+ - the default Type is 'Any'
+ 
 
- todo: 
+todo: 
 
-    - filter out obvious wrong types ( deny-list) 
     - regex :
         - 'With no arguments the frequency in Hz is returned.'
         - 'Get or set' --> indicates overloaded/optional return Union[None|...]
         - add regex for 'Query' ` Otherwise, query current state if no argument is provided. `
 
-    - build test and  % report 
+    - regex :
+        - 'With no arguments the frequency in Hz is returned.'
+        - 'Get or set' --> indicates overloaded/optional return Union[None|...]
+        - add regex for 'Query' ` Otherwise, query current state if no argument is provided. `
+
     - try if an Azure Machine Learning works as well 
         https://docs.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources
     - 
 """
 # ref: https://regex101.com/codegen?language=python
-# https://regex101.com/r/D5ddB2/1
+# https://regex101.com/r/Ni8g2z/1
 
 
 import json
 from pathlib import Path
 import re
 from typing import Dict, List, Tuple, Union
+from rst_lookup import LOOKUP_LIST
 
 
 def distill_return(return_text: str) -> List[Dict]:
@@ -72,7 +89,7 @@ def distill_return(return_text: str) -> List[Dict]:
 
     if any(t in my_type for t in ("tuple", "a pair")):
         result = base.copy()
-        result["type"] = "tuple"
+        result["type"] = "Tuple"
         result["confidence"] = 0.8  # OK
         candidates.append(result)
 
@@ -103,16 +120,22 @@ def distill_return(return_text: str) -> List[Dict]:
         result["confidence"] = 0.7  # OK
         candidates.append(result)
 
+    if any(t in my_type for t in (" number of ", "address of")):
+        result = base.copy()
+        result["type"] = "int"
+        result["confidence"] = 0.85  # better match than bytes and bytearray
+        candidates.append(result)
+
     if any(t in my_type for t in ("bytearray",)):
         result = base.copy()
         result["type"] = "bytearray"
-        result["confidence"] = 0.85  # better match than bytes
+        result["confidence"] = 0.83  # better match than bytes
         candidates.append(result)
 
-    if any(t in my_type for t in ("bytes",)):
+    if any(t in my_type for t in ("bytes", "byte string")):
         result = base.copy()
         result["type"] = "bytes"
-        result["confidence"] = 0.8  # OK
+        result["confidence"] = 0.81  # OK, better than just string
         candidates.append(result)
 
     if any(t in my_type for t in ("boolean", "True", "False")):
@@ -228,8 +251,12 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str):
         # join with space to avoid ending at a newline
         docstring = " ".join(docstring)
 
-    return_regex = r"Return(?:s?|(?:ing)?)\s(?!information)(?P<return>.*)[.|$|!|?]"
+    return_regex = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>.*)[.|$|!|?]"
     gets_regex = r"Gets?\s(?P<return>.*)[.|$|\s]"
+
+    #    function_regex = r"\w+(?=\()"
+    # only the function name without the leading module
+    function_re = re.compile(r"\w+(?=\()")
 
     matches: List[re.Match] = []
     candidates: List[Dict] = []
@@ -238,6 +265,20 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str):
     if "->" in signature:
         sig_type = signature.split("->")[-1].strip(": ")
         return {"type": sig_type, "confidence": 1, "match": signature}
+
+    try:
+        function_name = function_re.findall(signature)[0]
+    except IndexError:
+        function_name = signature
+
+    # lookup a few in the lookup list
+    if function_name in LOOKUP_LIST.keys():
+        sig_type = LOOKUP_LIST[function_name][0]
+        return {
+            "type": LOOKUP_LIST[function_name][0],
+            "confidence": LOOKUP_LIST[function_name][1],
+            "match": function_name,
+        }
 
     for regex in (return_regex, gets_regex):
         match_iter = re.finditer(regex, docstring, re.MULTILINE | re.IGNORECASE)
