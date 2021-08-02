@@ -25,6 +25,7 @@
             "   of methods), and some additional methods described below."
         ],
         "type": "Dict[Any]",
+        "module": "btree",
         "confidence": 0.8
     },
     {
@@ -37,6 +38,7 @@
             "   data flushed from buffer to the underlying storage)."
         ],
         "type": "Any",
+        "module": "btree",
         "confidence": 0
     },
     {
@@ -45,6 +47,7 @@
             "   Flush any data in cache to the underlying stream."
         ],
         "type": "Any",
+        "module": "btree",
         "confidence": 0
     },
     {
@@ -58,6 +61,7 @@
             "   Standard dictionary methods."
         ],
         "type": "Any",
+        "module": "btree",
         "confidence": 0
     },
     {
@@ -67,6 +71,7 @@
             "   to get access to all keys in order."
         ],
         "type": "Any",
+        "module": "btree",
         "confidence": 0.2
     },
     {
@@ -89,14 +94,7 @@
             "   together."
         ],
         "type": "Any",
-        "confidence": 0
-    },
-    {
-        "signature": "bytes()",
-        "docstring": [
-            "    |see_cpython| `python:bytes`."
-        ],
-        "type": "Any",
+        "module": "btree",
         "confidence": 0
     },
     {
@@ -106,6 +104,7 @@
             "   attribute from the object given by *obj*."
         ],
         "type": "Any",
+        "module": "builtins",
         "confidence": 0
     },
     {
@@ -302,8 +301,8 @@
         "docstring": [
             "    |see_cpython| `python:bytes`."
         ],
-        "type": "Any",
-        "confidence": 0,
+        "type": "bytes",
+        "confidence": 0.5,
         "match": "bytes",
         "module": "builtins",
         "class": "",
@@ -318,7 +317,7 @@
             "   at the given memory address."
         ],
         "type": "bytearray",
-        "confidence": 0,
+        "confidence": 0.5,
         "module": "uctypes",
         "class": "",
         "function/method": "bytearray_at"
@@ -330,7 +329,7 @@
             "      compatible with CPython)."
         ],
         "type": "bytes",
-        "confidence": 0,
+        "confidence": 0.5,
         "module": "builtins",
         "class": "int",
         "function/method": "to_bytes"
@@ -344,7 +343,7 @@
             "   retains original value."
         ],
         "type": "bytes",
-        "confidence": 0,
+        "confidence": 0.5,
         "module": "uctypes",
         "class": "",
         "function/method": "bytes_at"
@@ -355,7 +354,7 @@
             "   Returns, as a tuple, the polar form of ``z``."
         ],
         "type": "Tuple",
-        "confidence": 0,
+        "confidence": 0.5,
         "module": "cmath",
         "class": "",
         "function/method": "polar"
@@ -366,7 +365,7 @@
             "   Return ``True`` if ``x`` is not-a-number"
         ],
         "type": "boolean",
-        "confidence": 0,
+        "confidence": 0.5,
         "module": "math",
         "class": "",
         "function/method": "isnan"
@@ -442,5 +441,17 @@
         "module": "uctypes",
         "class": "",
         "function/method": "addressof"
+    },
+    {
+        "signature": "LCD160CR.set_power(on)",
+        "docstring": [
+            "    Turn the display on or off, depending on the given value of *on*: 0 or ``False``",
+            "    will turn the display off, and 1 or ``True`` will turn it on."
+        ],
+        "type": "None",
+        "confidence": 0.5,
+        "module": "lcd160cr",
+        "class": "LCD160CR",
+        "function/method": "LCD160CR.set_power"
     }
 ]
