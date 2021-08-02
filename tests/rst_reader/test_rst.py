@@ -5,7 +5,7 @@ from pathlib import Path
 import basicgit as git
 
 # SOT
-from readfrom_rst import RSTReader, generate_from_rst
+from readfrom_rst import generate_from_rst, RSTReader
 
 
 MICROPYTHON_FOLDER = "micropython"
@@ -116,7 +116,7 @@ EXP_10 = ["def wake_on_ext0(pin, level) -> Any:", "def wake_on_ext0(pin, level) 
 def test_rst_parse_function(filename, expected):
     # testcase = FN_1
     r = RSTReader()
-    r.read_file(filename)
+    r.read_file(Path(filename))
     # process
     r.parse()
     # check
@@ -150,7 +150,7 @@ CLASS_10 = [
 def test_rst_parse_class(filename, expected):
     # testcase = FN_1
     r = RSTReader()
-    r.read_file(filename)
+    r.read_file(Path(filename))
     # process
     r.parse()
     # check

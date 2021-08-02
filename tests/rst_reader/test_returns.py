@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 
 # SOT
-from rst_return import type_from_docstring
+from rst_utils import type_from_docstring
 
 
 @pytest.mark.parametrize(
