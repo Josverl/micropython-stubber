@@ -79,7 +79,7 @@ class RSTReader:
         self.sep = "::"
         self.filename = ""
 
-        self.line = "" # class / method/ function line being parsed
+        self.line = ""  # class / method/ function line being parsed
         self.current_module = ""
         self.current_class = ""
         self.current_function = ""  # function & method
@@ -92,7 +92,6 @@ class RSTReader:
         self.target = ".py"  # py/pyi
         self.classes: List[str] = []  # is this used ?
         self.return_info: List[Tuple] = []  # development aid only
-    
 
         self.writeln("from typing import Any, Optional, Union, Tuple\n")
 
@@ -119,13 +118,14 @@ class RSTReader:
             self.dedent()
             self.current_class = ""
 
-    def read_file(self, filename):
+    def read_file(self, filename: Path):
         print(f" - Reading from: {filename}")
         # ingore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
         self.filename = filename
         self.max_line = len(self.rst_text) - 1
+        self.current_module = filename.stem  # just to be sure
 
     def writeln(self, *arg):
         "store transformed output in a buffer"
@@ -282,7 +282,7 @@ class RSTReader:
         self.writeln(f'{self.indent}"""')
         if GATHER_DOC and len(docstr) > 0:
             self.return_info.append(
-                (self.current_module, self.current_class, self.current_function, self.line,  docstr)
+                (self.current_module, self.current_class, self.current_function, self.line, docstr)
             )
 
     def output_class_hdr(self, name: str, params: str, docstr: List[str]):
@@ -313,7 +313,7 @@ class RSTReader:
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
 
         for file in toctree:
-            self.read_file(f"micropython/docs/library/{file.strip()}")
+            self.read_file(Path("micropython/docs/library") / file.strip())
             self.parse()
 
     def parse(self, depth: int = 0):
@@ -512,11 +512,13 @@ class RSTReader:
                 n += 1
 
 
-def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True) -> int:
+def generate_from_rst(
+    rst_folder: Path, dst_folder: Path, v_tag: str, black=True, pattern: str = "*.rst"
+) -> int:
     if not dst_folder.exists():
         dst_folder.mkdir(parents=True)
     # no index, and module.xxx.rst is included in module.py
-    files = [f for f in rst_folder.glob("*.rst") if f.stem != "index" and "." not in f.stem]
+    files = [f for f in rst_folder.glob(pattern) if f.stem != "index" and "." not in f.stem]
     for file in files:
         reader = RSTReader(v_tag)
         reader.read_file(file)
