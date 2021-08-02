@@ -1,0 +1,375 @@
+[
+    {
+        "signature": "open(stream, *, flags=0, pagesize=0, cachesize=0, minkeypage=0)",
+        "docstring": [
+            "   Open a database from a random-access `stream` (like an open file). All",
+            "   other parameters are optional and keyword-only, and allow to tweak advanced",
+            "   parameters of the database operation (most users will not need them):",
+            "",
+            "   * *flags* - Currently unused.",
+            "   * *pagesize* - Page size used for the nodes in BTree. Acceptable range",
+            "     is 512-65536. If 0, a port-specific default will be used, optimized for",
+            "     port's memory usage and/or performance.",
+            "   * *cachesize* - Suggested memory cache size in bytes. For a",
+            "     board with enough memory using larger values may improve performance.",
+            "     Cache policy is as follows: entire cache is not allocated at once;",
+            "     instead, accessing a new page in database will allocate a memory buffer",
+            "     for it, until value specified by *cachesize* is reached. Then, these",
+            "     buffers will be managed using LRU (least recently used) policy. More",
+            "     buffers may still be allocated if needed (e.g., if a database contains",
+            "     big keys and/or values). Allocated cache buffers aren't reclaimed.",
+            "   * *minkeypage* - Minimum number of keys to store per page. Default value",
+            "     of 0 equivalent to 2.",
+            "",
+            "   Returns a BTree object, which implements a dictionary protocol (set",
+            "   of methods), and some additional methods described below."
+        ],
+        "type": "Dict[Any]",
+        "confidence": 0.8
+    },
+    {
+        "signature": "btree.close()",
+        "docstring": [
+            "   Close the database. It's mandatory to close the database at the end of",
+            "   processing, as some unwritten data may be still in the cache. Note that",
+            "   this does not close underlying stream with which the database was opened,",
+            "   it should be closed separately (which is also mandatory to make sure that",
+            "   data flushed from buffer to the underlying storage)."
+        ],
+        "type": "Any",
+        "confidence": 0
+    },
+    {
+        "signature": "btree.flush()",
+        "docstring": [
+            "   Flush any data in cache to the underlying stream."
+        ],
+        "type": "Any",
+        "confidence": 0
+    },
+    {
+        "signature": "btree.__getitem__(key)",
+        "docstring": [
+            "            btree.get(key, default=None, /)",
+            "            btree.__setitem__(key, val)",
+            "            btree.__delitem__(key)",
+            "            btree.__contains__(key)",
+            "",
+            "   Standard dictionary methods."
+        ],
+        "type": "Any",
+        "confidence": 0
+    },
+    {
+        "signature": "btree.__iter__()",
+        "docstring": [
+            "   A BTree object can be iterated over directly (similar to a dictionary)",
+            "   to get access to all keys in order."
+        ],
+        "type": "Any",
+        "confidence": 0.2
+    },
+    {
+        "signature": "btree.keys([start_key, [end_key, [flags]]])",
+        "docstring": [
+            "            btree.values([start_key, [end_key, [flags]]])",
+            "            btree.items([start_key, [end_key, [flags]]])",
+            "",
+            "   These methods are similar to standard dictionary methods, but also can",
+            "   take optional parameters to iterate over a key sub-range, instead of",
+            "   the entire database. Note that for all 3 methods, *start_key* and",
+            "   *end_key* arguments represent key values. For example, `values()`",
+            "   method will iterate over values corresponding to they key range",
+            "   given. None values for *start_key* means \"from the first key\", no",
+            "   *end_key* or its value of None means \"until the end of database\".",
+            "   By default, range is inclusive of *start_key* and exclusive of",
+            "   *end_key*, you can include *end_key* in iteration by passing *flags*",
+            "   of `btree.INCL`. You can iterate in descending key direction",
+            "   by passing *flags* of `btree.DESC`. The flags values can be ORed",
+            "   together."
+        ],
+        "type": "Any",
+        "confidence": 0
+    },
+    {
+        "signature": "bytes()",
+        "docstring": [
+            "    |see_cpython| `python:bytes`."
+        ],
+        "type": "Any",
+        "confidence": 0
+    },
+    {
+        "signature": "delattr(obj, name)",
+        "docstring": [
+            "   The argument *name* should be a string, and this function deletes the named",
+            "   attribute from the object given by *obj*."
+        ],
+        "type": "Any",
+        "confidence": 0
+    },
+    {
+        "signature": "WLAN.scan()",
+        "docstring": [
+            "    Scan for the available wireless networks.",
+            "",
+            "    Scanning is only possible on STA interface. Returns list of tuples with",
+            "    the information about WiFi access points:",
+            "",
+            "        (ssid, bssid, channel, RSSI, authmode, hidden)",
+            "",
+            "    *bssid* is hardware address of an access point, in binary form, returned as",
+            "    bytes object. You can use `ubinascii.hexlify()` to convert it to ASCII form.",
+            "",
+            "    There are five values for authmode:",
+            "",
+            "        * 0 -- open",
+            "        * 1 -- WEP",
+            "        * 2 -- WPA-PSK",
+            "        * 3 -- WPA2-PSK",
+            "        * 4 -- WPA/WPA2-PSK",
+            "",
+            "    and two for hidden:",
+            "",
+            "        * 0 -- visible",
+            "        * 1 -- hidden"
+        ],
+        "type": "List[int]",
+        "confidence": 0.9,
+        "module": "network",
+        "class": "WLAN",
+        "function/method": "WLAN.scan"
+    },
+    {
+        "signature": "poll.poll(timeout=-1, /)",
+        "docstring": [
+            "   Wait for at least one of the registered objects to become ready or have an",
+            "   exceptional condition, with optional timeout in milliseconds (if *timeout*",
+            "   arg is not specified or -1, there is no timeout).",
+            "",
+            "   Returns list of (``obj``, ``event``, ...) tuples. There may be other elements in",
+            "   tuple, depending on a platform and version, so don't assume that its size is 2.",
+            "   The ``event`` element specifies which events happened with a stream and",
+            "   is a combination of ``uselect.POLL*`` constants described above. Note that",
+            "   flags ``uselect.POLLHUP`` and ``uselect.POLLERR`` can be returned at any time",
+            "   (even if were not asked for), and must be acted on accordingly (the",
+            "   corresponding stream unregistered from poll and likely closed), because",
+            "   otherwise all further invocations of `poll()` may return immediately with",
+            "   these flags set for this stream again.",
+            "",
+            "   In case of timeout, an empty list is returned."
+        ],
+        "type": "List[tuple]",
+        "confidence": 0.9,
+        "module": "uselect",
+        "class": "poll",
+        "function/method": "poll.poll"
+    },
+    {
+        "signature": "regex.split(string, max_split=-1, /)",
+        "docstring": [
+            "   Split a *string* using regex. If *max_split* is given, it specifies",
+            "   maximum number of splits to perform. Returns list of strings (there",
+            "   may be up to *max_split+1* elements if it's specified)."
+        ],
+        "type": "List[str]",
+        "confidence": 0.9,
+        "module": "ure",
+        "class": "regex",
+        "function/method": "regex.split"
+    },
+    {
+        "signature": "RTC.datetime([datetimetuple])",
+        "docstring": [
+            "   Get or set the date and time of the RTC.",
+            "",
+            "   With no arguments, this method returns an 8-tuple with the current",
+            "   date and time.  With 1 argument (being an 8-tuple) it sets the date",
+            "   and time.",
+            "",
+            "   The 8-tuple has the following format:",
+            "",
+            "       (year, month, day, weekday, hours, minutes, seconds, subseconds)",
+            "",
+            "   The meaning of the ``subseconds`` field is hardware dependent."
+        ],
+        "type": "tuple",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "RTC",
+        "function/method": "RTC.datetime"
+    },
+    {
+        "signature": "PWM.duty_u16([value])",
+        "docstring": [
+            "   Get or set the current duty cycle of the PWM output, as an unsigned 16-bit",
+            "   value in the range 0 to 65535 inclusive.",
+            "",
+            "   With no arguments the duty cycle is returned.",
+            "",
+            "   With a single *value* argument the duty cycle is set to that value, measured",
+            "   as the ratio ``value / 65535``."
+        ],
+        "type": "uint",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "PWM",
+        "function/method": "PWM.duty_u16"
+    },
+    {
+        "signature": "PWM.duty_ns([value])",
+        "docstring": [
+            "   Get or set the current pulse width of the PWM output, as a value in nanoseconds.",
+            "",
+            "   With no arguments the pulse width in nanoseconds is returned.",
+            "",
+            "   With a single *value* argument the pulse width is set to that value."
+        ],
+        "type": "int",
+        "confidence": 0.7,
+        "match": "<re.Match object; span=(3, 222), match='Get or set the current pulse width of the PWM out>",
+        "module": "machine",
+        "class": "PWM",
+        "function/method": "PWM.duty_ns"
+    },
+    {
+        "signature": "cos(z)",
+        "docstring": [
+            "   Return the cosine of ``z``."
+        ],
+        "type": "float",
+        "confidence": 0.8,
+        "module": "cmath",
+        "class": "",
+        "function/method": "cos"
+    },
+    {
+        "signature": "unique_id()",
+        "docstring": [
+            "   Returns a byte string with a unique identifier of a board/SoC. It will vary",
+            "   from a board/SoC instance to another, if underlying hardware allows. Length",
+            "   varies by hardware (so use substring of a full value if you expect a short",
+            "   ID). In some MicroPython ports, ID corresponds to the network MAC address."
+        ],
+        "type": "bytes",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "",
+        "function/method": "unique_id"
+    },
+    {
+        "signature": "Pin.init(mode=-1, pull=-1, *, value, drive, alt)",
+        "docstring": [
+            "   Re-initialise the pin using the given parameters.  Only those arguments that",
+            "   are specified will be set.  The rest of the pin peripheral state will remain",
+            "   unchanged.  See the constructor documentation for details of the arguments.",
+            "",
+            "   Returns ``None``."
+        ],
+        "type": "None",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "Pin",
+        "function/method": "Pin.init"
+    },
+    {
+        "signature": "mem_free()",
+        "docstring": [
+            "   Return the number of bytes of available heap RAM, or -1 if this amount",
+            "   is not known."
+        ],
+        "type": "int",
+        "confidence": 0.5,
+        "module": "gc",
+        "class": "",
+        "function/method": "mem_free"
+    },
+    {
+        "signature": "SPI.read(nbytes, write=0x00)",
+        "docstring": [
+            "    Read a number of bytes specified by ``nbytes`` while continuously writing",
+            "    the single byte given by ``write``.",
+            "    Returns a ``bytes`` object with the data that was read."
+        ],
+        "type": "bytes",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "SoftSPI",
+        "function/method": "SPI.read"
+    },
+    {
+        "signature": "bytes()",
+        "docstring": [
+            "    |see_cpython| `python:bytes`."
+        ],
+        "type": "Any",
+        "confidence": 0,
+        "match": "bytes",
+        "module": "builtins",
+        "class": "",
+        "function/method": ""
+    },
+    {
+        "signature": "bytearray_at(addr, size)",
+        "docstring": [
+            "   Capture memory at the given address and size as bytearray object.",
+            "   Unlike bytes_at() function above, memory is captured by reference,",
+            "   so it can be both written too, and you will access current value",
+            "   at the given memory address."
+        ],
+        "type": "bytearray",
+        "confidence": 0,
+        "module": "uctypes",
+        "class": "",
+        "function/method": "bytearray_at"
+    },
+    {
+        "signature": "to_bytes(size, byteorder)",
+        "docstring": [
+            "      In MicroPython, `byteorder` parameter must be positional (this is",
+            "      compatible with CPython)."
+        ],
+        "type": "bytes",
+        "confidence": 0,
+        "module": "builtins",
+        "class": "int",
+        "function/method": "to_bytes"
+    },
+    {
+        "signature": "bytes_at(addr, size)",
+        "docstring": [
+            "   Capture memory at the given address and size as bytes object. As bytes",
+            "   object is immutable, memory is actually duplicated and copied into",
+            "   bytes object, so if memory contents change later, created object",
+            "   retains original value."
+        ],
+        "type": "bytes",
+        "confidence": 0,
+        "module": "uctypes",
+        "class": "",
+        "function/method": "bytes_at"
+    },
+    {
+        "signature": "polar(z)",
+        "docstring": [
+            "   Returns, as a tuple, the polar form of ``z``."
+        ],
+        "type": "Tuple",
+        "confidence": 0,
+        "module": "cmath",
+        "class": "",
+        "function/method": "polar"
+    },
+    {
+        "signature": "isnan(x)",
+        "docstring": [
+            "   Return ``True`` if ``x`` is not-a-number"
+        ],
+        "type": "boolean",
+        "confidence": 0,
+        "match": "None",
+        "module": "math",
+        "class": "",
+        "function/method": "isnan"
+    }
+]
