@@ -230,7 +230,7 @@ def distill_return(return_text: str) -> List[Dict]:
     return candidates
 
 
-def type_from_docstring(docstring: Union[str, List[str]], signature: str):
+def type_from_docstring(docstring: Union[str, List[str]], signature: str, module: str):
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -256,7 +256,7 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str):
 
     #    function_regex = r"\w+(?=\()"
     # only the function name without the leading module
-    function_re = re.compile(r"\w+(?=\()")
+    function_re = re.compile(r"[\w|.]+(?=\()")
 
     matches: List[re.Match] = []
     candidates: List[Dict] = []
@@ -269,8 +269,9 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str):
     try:
         function_name = function_re.findall(signature)[0]
     except IndexError:
-        function_name = signature
+        function_name = signature.strip().strip(":()")
 
+    function_name = ".".join((module, function_name))
     # lookup a few in the lookup list
     if function_name in LOOKUP_LIST.keys():
         sig_type = LOOKUP_LIST[function_name][0]

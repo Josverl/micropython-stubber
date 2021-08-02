@@ -24,13 +24,16 @@ def process(folder: Path, pattern: str):
             continue  # just skip the report to avoid errors
         with open(file, errors="ignore", encoding="utf8") as fp:
             # read docstrings from json ( unsafe , assumes much )
+            module_name = file.stem
             docstrings: List[Tuple] = json.load(fp)
             for item in docstrings:
                 # module, class, function/method , line, docstring
                 if item[4] != []:
+
                     signature = str(item[3]).split("::")[-1].strip()
                     docstring = item[4]
-                    r = rst.type_from_docstring(docstring, signature)
+
+                    r = rst.type_from_docstring(docstring, signature, module_name)
                     report.append(
                         {
                             "signature": signature,

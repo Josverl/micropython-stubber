@@ -37,4 +37,6 @@ junit/*
 
 # OS specific stuff
 desktop.ini
+
+# no temp office files
 docs/~$*
