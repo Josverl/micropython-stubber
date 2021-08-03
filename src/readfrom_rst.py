@@ -21,31 +21,49 @@
 
     WIP 
     - tries to determine the return type by parsing the docstring 
-    FIX Needed 
-        - improve docstring extraction 
-            - move report out of docstring to fix name skew 
-            - add class/function signature to export 
-        - End of debug Class marker is now broken , reports new class
-                # .. toctree::
-                # .. currentmodule:: network
-                # currentmodule:: network
-                # .. class:: WLAN(interface_id)
-                # class:: WLAN
-                # End of class: WLAN
 
     Not yet implemented 
     - Literals 
+    - repeats of definitions in the rst file for similar functions or literals
+        '''
+        .. function:: gmtime([secs])
+                      localtime([secs])
+        ....
+    - parse subclass / superclass from class docstring  : 
+        - A namedtuple is a subclass of tuple 
+        - ``dict`` type subclass which ...
+    - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
     - ordering of inter-dependent classes in the same module
-    - add superclasses ( must be based on a external list as this is currently not documented as part of the class)
+    - add superclasses 
+        likely based on a external list as this is currently not documented as part of the class
+        not quite sure how th handle the __init__ method for this , 
+            should include a call to super() ?
+        short list of 
             - WLAN(AbstractNIC)
             - WLANWiPy(AbstractNIC)
+            uio
+            - class xxxxIO(IO)  # unclear regarding deprecation in python 3.12
+                FileIO, textIOWrapper, StringIO, BytesIO
+            uzlib
+            - class DecompIO(IO) # https://docs.python.org/3/library/typing.html#other-concrete-types
+
+            uhashlib
+                class md5(hash):
+                class sha1(hash):
+                class sha265(hash):    
+                class md5(hash):
             
             - Signal(Pin)
+    - manual tweaks for uasync 
+        https://docs.python.org/3/library/typing.html#asynchronous-programming
+    - generators 
+
 """
 
 import json
 from os import link
 import re
+from rst_utils import return_type_from_context, TYPING_IMPORT
 import subprocess
 from typing import Dict, List, Tuple
 from pathlib import Path
@@ -93,7 +111,7 @@ class RSTReader:
         self.classes: List[str] = []  # is this used ?
         self.return_info: List[Tuple] = []  # development aid only
 
-        self.writeln("from typing import Any, Optional, Union, Tuple\n")
+        self.writeln(TYPING_IMPORT)
 
     def log(self, *arg):
         if self.verbose or 1:
@@ -349,9 +367,11 @@ class RSTReader:
             elif re.search(r"\.\. function::", line):
                 self.log(f"# {line.rstrip()}")
                 this_function = line.split(self.sep)[-1].strip()
-                ret_type = "Any"
                 n, docstr = self.read_textblock(n)
                 name, params = this_function.split("(", maxsplit=1)
+                ret_type = return_type_from_context(
+                    docstring=docstr, signature=name, module=self.current_module
+                )
                 self.current_function = name
                 if name not in ("classmethod", "staticmethod"):
                     # ussl docstring uses a prefix
@@ -416,7 +436,6 @@ class RSTReader:
                 # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
                 self.log(f"# {line.rstrip()}")
                 this_method = line.split(self.sep)[1].strip()
-                ret_type = "Any"
                 try:
                     name, params = this_method.split("(", 1)  # split methodname from params
                 except ValueError:
@@ -446,8 +465,11 @@ class RSTReader:
                     ):
                         self.output_class_hdr(class_name, "", [])
                     n, docstr = self.read_textblock(n)
+                    # parse return type from docstring
+                    ret_type = return_type_from_context(
+                        docstring=docstr, signature=name, module=self.current_module
+                    )
 
-                    # todo: parse return type from docstring
                     if name == "__init__":
                         # explicitly documented __init__ ( only a few classes)
                         self.writeln(f"{self.indent}def {name}(self, {params} -> None:")

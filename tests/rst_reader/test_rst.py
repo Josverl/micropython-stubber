@@ -5,7 +5,7 @@ from pathlib import Path
 import basicgit as git
 
 # SOT
-from readfrom_rst import generate_from_rst, RSTReader
+from readfrom_rst import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
 MICROPYTHON_FOLDER = "micropython"
@@ -129,7 +129,7 @@ CLASS_10 = [
     "class Partition:",
     "    def __init__(self, id) -> None:",
     "    @classmethod",
-    "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> Any:",
+    "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List[Any]:",
     #    "    def info(self, ) -> Any:",
     # "    def readblocks(self, block_num, buf) -> Any:",
     # "    def writeblocks(self, block_num, buf) -> Any:",
@@ -140,7 +140,7 @@ CLASS_10 = [
     "filename, expected",
     [
         ("tests/rst_reader/data/class_10.rst", CLASS_10),
-        ("tests/rst_reader/data/class_10.rst", ["    def info(self, ) -> Any:"]),
+        ("tests/rst_reader/data/class_10.rst", ["    def info(self, ) -> Tuple:"]),
         (
             "tests/rst_reader/data/class_10.rst",
             ["    def readblocks(self, block_num, buf) -> Any:"],
@@ -153,10 +153,13 @@ def test_rst_parse_class(filename, expected):
     r.read_file(Path(filename))
     # process
     r.parse()
-    # check
+    # check if each expected line appears in the output
+    # there can be more
+
     assert len(r.output) > 1
     for line in expected:
         assert line in [l.rstrip() for l in r.output], f"did not generate : '{line}'"
+        # todo: also check order
 
 
 @pytest.mark.parametrize(
@@ -192,8 +195,7 @@ def test_fix_param(param_in, param_out):
 def test_import_typing():
     "always include typing"
     r = RSTReader()
-    line = "from typing import Any, Optional, Union, Tuple"
-    assert line in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
+    assert TYPING_IMPORT in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
 
 
 def test_fix_param_dynamic():

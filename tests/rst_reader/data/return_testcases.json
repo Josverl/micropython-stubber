@@ -24,7 +24,7 @@
             "   Returns a BTree object, which implements a dictionary protocol (set",
             "   of methods), and some additional methods described below."
         ],
-        "type": "Dict[Any]",
+        "type": "Dict",
         "module": "btree",
         "confidence": 0.8
     },
@@ -158,7 +158,7 @@
             "",
             "   In case of timeout, an empty list is returned."
         ],
-        "type": "List[tuple]",
+        "type": "List[Tuple]",
         "confidence": 0.9,
         "module": "uselect",
         "class": "poll",
@@ -364,7 +364,7 @@
         "docstring": [
             "   Return ``True`` if ``x`` is not-a-number"
         ],
-        "type": "boolean",
+        "type": "bool",
         "confidence": 0.5,
         "module": "math",
         "class": "",
@@ -377,7 +377,7 @@
             "    point and has a valid IP address.  In AP mode returns ``True`` when a",
             "    station is connected. Returns ``False`` otherwise."
         ],
-        "type": "boolean",
+        "type": "bool",
         "confidence": 0.8,
         "module": "network",
         "class": "WLAN",
@@ -453,5 +453,355 @@
         "module": "lcd160cr",
         "class": "LCD160CR",
         "function/method": "LCD160CR.set_power"
-    }
+    },
+    {
+        "signature": "Pin.value([x])",
+        "docstring": [
+            "   This method allows to set and get the value of the pin, depending on whether",
+            "   the argument ``x`` is supplied or not.",
+            "",
+            "   If the argument is omitted then this method gets the digital logic level of",
+            "   the pin, returning 0 or 1 corresponding to low and high voltage signals",
+            "   respectively.  The behaviour of this method depends on the mode of the pin:",
+            "",
+            "     - ``Pin.IN`` - The method returns the actual input value currently present",
+            "       on the pin.",
+            "     - ``Pin.OUT`` - The behaviour and return value of the method is undefined.",
+            "     - ``Pin.OPEN_DRAIN`` - If the pin is in state '0' then the behaviour and",
+            "       return value of the method is undefined.  Otherwise, if the pin is in",
+            "       state '1', the method returns the actual input value currently present",
+            "       on the pin.",
+            "",
+            "   If the argument is supplied then this method sets the digital logic level of",
+            "   the pin.  The argument ``x`` can be anything that converts to a boolean.",
+            "   If it converts to ``True``, the pin is set to state '1', otherwise it is set",
+            "   to state '0'.  The behaviour of this method depends on the mode of the pin:",
+            "",
+            "     - ``Pin.IN`` - The value is stored in the output buffer for the pin.  The",
+            "       pin state does not change, it remains in the high-impedance state.  The",
+            "       stored value will become active on the pin as soon as it is changed to",
+            "       ``Pin.OUT`` or ``Pin.OPEN_DRAIN`` mode.",
+            "     - ``Pin.OUT`` - The output buffer is set to the given value immediately.",
+            "     - ``Pin.OPEN_DRAIN`` - If the value is '0' the pin is set to a low voltage",
+            "       state.  Otherwise the pin is set to high-impedance state.",
+            "",
+            "   When setting the value this method returns ``None``."
+        ],
+        "type": "int",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(214, 1667), match=\"returning 0 or 1 corresponding to low and high vo>",
+        "module": "machine",
+        "class": "Pin",
+        "function/method": "Pin.value"
+    },
+    {
+        "signature": "WLAN.scan()",
+        "docstring": [
+            "    Scan for the available wireless networks.",
+            "",
+            "    Scanning is only possible on STA interface. Returns list of tuples with",
+            "    the information about WiFi access points:",
+            "",
+            "        (ssid, bssid, channel, RSSI, authmode, hidden)",
+            "",
+            "    *bssid* is hardware address of an access point, in binary form, returned as",
+            "    bytes object. You can use `ubinascii.hexlify()` to convert it to ASCII form.",
+            "",
+            "    There are five values for authmode:",
+            "",
+            "        * 0 -- open",
+            "        * 1 -- WEP",
+            "        * 2 -- WPA-PSK",
+            "        * 3 -- WPA2-PSK",
+            "        * 4 -- WPA/WPA2-PSK",
+            "",
+            "    and two for hidden:",
+            "",
+            "        * 0 -- visible",
+            "        * 1 -- hidden"
+        ],
+        "type": "List[Tuple]",
+        "confidence": 0.5,
+        "module": "network",
+        "class": "WLAN",
+        "function/method": "WLAN.scan"
+    },
+    {
+        "signature": "sizeof(struct, layout_type=NATIVE, /)",
+        "docstring": [
+            "   Return size of data structure in bytes. The *struct* argument can be",
+            "   either a structure class or a specific instantiated structure object",
+            "   (or its aggregate field)."
+        ],
+        "type": "int",
+        "confidence": 0.81,
+        "match": "<re.Match object; span=(3, 172), match='Return size of data structure in bytes. The *stru>",
+        "module": "uctypes",
+        "class": "",
+        "function/method": "sizeof"
+    },
+    {
+        "signature": "loads(str)",
+        "docstring": [
+            "   Parse the JSON *str* and return an object.  Raises :exc:`ValueError` if the",
+            "   string is not correctly formed."
+        ],
+        "type": "Any",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(28, 113), match='return an object.  Raises :exc:`ValueError` if th>",
+        "module": "ujson",
+        "class": "",
+        "function/method": "loads"
+    },
+    {
+        "signature": "urandom(n)",
+        "docstring": [
+            "   Return a bytes object with *n* random bytes. Whenever possible, it is",
+            "   generated by the hardware random number generator."
+        ],
+        "type": "bytes",
+        "confidence": 0.81,
+        "match": "<re.Match object; span=(3, 126), match='Return a bytes object with *n* random bytes. When>",
+        "module": "uos",
+        "class": "",
+        "function/method": "urandom"
+    },
+    {
+        "signature": "ilistdir([dir])",
+        "docstring": [
+            "   This function returns an iterator which then yields tuples corresponding to",
+            "   the entries in the directory that it is listing.  With no argument it lists the",
+            "   current directory, otherwise it lists the directory given by *dir*.",
+            "",
+            "   The tuples have the form *(name, type, inode[, size])*:",
+            "",
+            "    - *name* is a string (or bytes if *dir* is a bytes object) and is the name of",
+            "      the entry;",
+            "    - *type* is an integer that specifies the type of the entry, with 0x4000 for",
+            "      directories and 0x8000 for regular files;",
+            "    - *inode* is an integer corresponding to the inode of the file, and may be 0",
+            "      for filesystems that don't have such a notion.",
+            "    - Some platforms may return a 4-tuple that includes the entry's *size*.  For",
+            "      file entries, *size* is an integer representing the size of the file",
+            "      or -1 if unknown.  Its meaning is currently undefined for directory",
+            "      entries."
+        ],
+        "type": "Iterator[Tuple]",
+        "import": "from collections.abc import Iterator, Iterable",
+        "confidence": 0.81,
+        "match": "<re.Match object; span=(17, 900), match=\"returns an iterator which then yields tuples corr>",
+        "module": "uos",
+        "class": "",
+        "function/method": "ilistdir"
+    },
+    {
+        "signature": "statvfs(path)",
+        "docstring": [
+            "   Get the status of a fileystem.",
+            "",
+            "   Returns a tuple with the filesystem information in the following order:",
+            "",
+            "        * ``f_bsize`` -- file system block size",
+            "        * ``f_frsize`` -- fragment size",
+            "        * ``f_blocks`` -- size of fs in f_frsize units",
+            "        * ``f_bfree`` -- number of free blocks",
+            "        * ``f_bavail`` -- number of free blocks for unprivileged users",
+            "        * ``f_files`` -- number of inodes",
+            "        * ``f_ffree`` -- number of free inodes",
+            "        * ``f_favail`` -- number of free inodes for unprivileged users",
+            "        * ``f_flag`` -- mount flags",
+            "        * ``f_namemax`` -- maximum filename length",
+            "",
+            "   Parameters related to inodes: ``f_files``, ``f_ffree``, ``f_avail``",
+            "   and the ``f_flags`` parameter may return ``0`` as they can be unavailable",
+            "   in a port-specific implementation."
+        ],
+        "type": "tuple",
+        "confidence": 0.85,
+        "match": "<re.Match object; span=(38, 805), match='Returns a tuple with the filesystem information i>",
+        "module": "uos",
+        "class": "",
+        "function/method": "statvfs"
+    },
+    {
+        "signature": "dupterm(stream_object, index=0, /)",
+        "docstring": [
+            "   Duplicate or switch the MicroPython terminal (the REPL) on the given `stream`-like",
+            "   object. The *stream_object* argument must be a native stream object, or derive",
+            "   from ``uio.IOBase`` and implement the ``readinto()`` and",
+            "   ``write()`` methods.  The stream should be in non-blocking mode and",
+            "   ``readinto()`` should return ``None`` if there is no data available for reading.",
+            "",
+            "   After calling this function all terminal output is repeated on this stream,",
+            "   and any input that is available on the stream is passed on to the terminal input.",
+            "",
+            "   The *index* parameter should be a non-negative integer and specifies which",
+            "   duplication slot is set.  A given port may implement more than one slot (slot 0",
+            "   will always be available) and in that case terminal input and output is",
+            "   duplicated on all the slots that are set.",
+            "",
+            "   If ``None`` is passed as the *stream_object* then duplication is cancelled on",
+            "   the slot given by *index*.",
+            "",
+            "   The function returns the previous stream-like object in the given slot."
+        ],
+        "type": "Any",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(324, 1017), match='return ``None`` if there is no data available for>",
+        "module": "uos",
+        "class": "",
+        "function/method": "dupterm"
+    },
+    {
+        "signature": "readblocks(block_num, buf)",
+        "docstring": [
+            "                readblocks(block_num, buf, offset)",
+            "",
+            "        The first form reads aligned, multiples of blocks.",
+            "        Starting at the block given by the index *block_num*, read blocks from",
+            "        the device into *buf* (an array of bytes).",
+            "        The number of blocks to read is given by the length of *buf*,",
+            "        which will be a multiple of the block size.",
+            "",
+            "        The second form allows reading at arbitrary locations within a block,",
+            "        and arbitrary lengths.",
+            "        Starting at block index *block_num*, and byte offset within that block",
+            "        of *offset*, read bytes from the device into *buf* (an array of bytes).",
+            "        The number of bytes to read is given by the length of *buf*."
+        ],
+        "type": "Any",
+        "confidence": 0,
+        "match": "None",
+        "module": "uos",
+        "class": "AbstractBlockDev",
+        "function/method": "readblocks"
+    },
+    {
+        "signature": "socket.recvfrom(bufsize)",
+        "docstring": [
+            "  Receive data from the socket. The return value is a pair *(bytes, address)* where *bytes* is a",
+            "  bytes object representing the data received and *address* is the address of the socket sending",
+            "  the data."
+        ],
+        "type": "Tuple",
+        "confidence": 0.85,
+        "match": "<re.Match object; span=(36, 205), match='return value is a pair *(bytes, address)* where *>",
+        "module": "usocket",
+        "class": "socket",
+        "function/method": "socket.recvfrom"
+    },
+    {
+        "signature": "ussl.wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)",
+        "docstring": [
+            "   Takes a `stream` *sock* (usually usocket.socket instance of ``SOCK_STREAM`` type),",
+            "   and returns an instance of ssl.SSLSocket, which wraps the underlying stream in",
+            "   an SSL context. Returned object has the usual `stream` interface methods like",
+            "   ``read()``, ``write()``, etc.",
+            "   A server-side SSL socket should be created from a normal socket returned from",
+            "   :meth:`~usocket.socket.accept()` on a non-SSL listening server socket.",
+            "",
+            "   - *do_handshake* determines whether the handshake is done as part of the ``wrap_socket``",
+            "     or whether it is deferred to be done as part of the initial reads or writes",
+            "     (there is no ``do_handshake`` method as in CPython).",
+            "     For blocking sockets doing the handshake immediately is standard. For non-blocking",
+            "     sockets (i.e. when the *sock* passed into ``wrap_socket`` is in non-blocking mode)",
+            "     the handshake should generally be deferred because otherwise ``wrap_socket`` blocks",
+            "     until it completes. Note that in AXTLS the handshake can be deferred until the first",
+            "     read or write but it then blocks until completion.",
+            "",
+            "   Depending on the underlying module implementation in a particular",
+            "   :term:`MicroPython port`, some or all keyword arguments above may be not supported."
+        ],
+        "type": "stream",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(93, 1236), match='returns an instance of ssl.SSLSocket, which wraps>",
+        "module": "ussl",
+        "class": "",
+        "function/method": "ussl.wrap_socket"
+    },
+    {
+        "signature": "exit(retval=0, /)",
+        "docstring": [
+            "   Terminate current program with a given exit code. Underlyingly, this",
+            "   function raise as `SystemExit` exception. If an argument is given, its",
+            "   value given as an argument to `SystemExit`."
+        ],
+        "type": "NoReturn",
+        "confidence": 0,
+        "match": "None",
+        "module": "usys",
+        "class": "",
+        "function/method": "exit"
+    },
+    {
+        "signature": "atexit(func)",
+        "docstring": [
+            "   Register *func* to be called upon termination.  *func* must be a callable",
+            "   that takes no arguments, or ``None`` to disable the call.  The ``atexit``",
+            "   function will return the previous value set by this function, which is",
+            "   initially ``None``."
+        ],
+        "type": "Any",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(171, 250), match='return the previous value set by this function, w>",
+        "module": "usys",
+        "class": "",
+        "function/method": "atexit"
+    },
+    {
+        "signature": "open(name, mode='r', **kwargs)",
+        "docstring": [
+            "    Open a file. Builtin ``open()`` function is aliased to this function.",
+            "    All ports (which provide access to file system) are required to support",
+            "    *mode* parameter, but support for other arguments vary by port."
+        ],
+        "type": "IO",
+        "confidence": 0,
+        "match": "None",
+        "module": "uio",
+        "class": "",
+        "function/method": "open"
+    },
+    {
+        "signature": "sub(regex_str, replace, string, count=0, flags=0, /)",
+        "docstring": [
+            "   Compile *regex_str* and search for it in *string*, replacing all matches",
+            "   with *replace*, and returning the new string.",
+            "",
+            "   *replace* can be a string or a function.  If it is a string then escape",
+            "   sequences of the form ``\\<number>`` and ``\\g<number>`` can be used to",
+            "   expand to the corresponding group (or an empty string for unmatched groups).",
+            "   If *replace* is a function then it must take a single argument (the match)",
+            "   and should return a replacement string.",
+            "",
+            "   If *count* is specified and non-zero then substitution will stop after",
+            "   this many substitutions are made.  The *flags* argument is ignored.",
+            "",
+            "   Note: availability of this function depends on :term:`MicroPython port`."
+        ],
+        "type": "str",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(99, 697), match='returning the new string.     *replace* can be a >",
+        "module": "ure",
+        "class": "",
+        "function/method": "sub"
+    },
+    {
+        "signature": "match.start([index])",
+        "docstring": [
+            "            match.end([index])",
+            "",
+            "   Return the index in the original string of the start or end of the",
+            "   substring group that was matched.  *index* defaults to the entire",
+            "   group, otherwise it will select a group.",
+            "",
+            "   Note: availability of these methods depends on :term:`MicroPython port`."
+        ],
+        "type": "int",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(35, 291), match='Return the index in the original string of the st>",
+        "module": "ure",
+        "class": "match",
+        "function/method": "match.start"
+    },
 ]

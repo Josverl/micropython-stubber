@@ -33,12 +33,13 @@ todo:
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/Ni8g2z/1
 
-
 import json
 from pathlib import Path
 import re
 from typing import Dict, List, Tuple, Union
 from rst_lookup import LOOKUP_LIST
+
+TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn\n"
 
 
 def distill_return(return_text: str) -> List[Dict]:
@@ -67,6 +68,8 @@ def distill_return(return_text: str) -> List[Dict]:
             if element in my_type:
                 if element == "string":
                     lt = "str"
+                elif element == "tuple":
+                    lt = "Tuple"
                 else:
                     lt = element
                 result["confidence"] = 0.9  # GOOD
@@ -76,15 +79,10 @@ def distill_return(return_text: str) -> List[Dict]:
         candidates.append(result)
 
     if any(t in my_type for t in ("a dictionary", "dict")):
-        # Lists of Any / Tuple
-        lt = "Any"
+        # a dictionary
         result = base.copy()
         result["confidence"] = 0.8  # OK
-        if "tuple" in my_type:
-            lt = "Tuple"
-            result["confidence"] = 0.9  # GOOD
-        my_type = f"Dict[{lt}]"
-        result["type"] = my_type
+        result["type"] = "Dict"
         candidates.append(result)
 
     if any(t in my_type for t in ("tuple", "a pair")):
@@ -97,9 +95,10 @@ def distill_return(return_text: str) -> List[Dict]:
         # Assume unsigned are uint
         result = base.copy()
         result["type"] = "uint"
-        result["confidence"] = 0.8  # OK
+        result["confidence"] = 0.84  # OK
         candidates.append(result)
 
+    # Strong indicators of integers
     if any(
         num in my_type
         for num in (
@@ -107,11 +106,24 @@ def distill_return(return_text: str) -> List[Dict]:
             "integer",
             "count",
             " int ",
+            "0 or 1",
+        )
+    ):
+        # Assume numbers are signed int
+        result = base.copy()
+        result["type"] = "int"
+        result["confidence"] = 0.83  # OK
+        candidates.append(result)
+    # good but nor perfect indicatoers of integers
+    if any(
+        num in my_type
+        for num in (
             "length",
             "index",
             "**signed** value",
-            "0 or 1",
             "nanoseconds",
+            "total size",
+            "offset",
         )
     ):
         # Assume numbers are signed int
@@ -138,9 +150,9 @@ def distill_return(return_text: str) -> List[Dict]:
         result["confidence"] = 0.81  # OK, better than just string
         candidates.append(result)
 
-    if any(t in my_type for t in ("boolean", "True", "False")):
+    if any(t in my_type for t in ("boolean", "bool", "True", "False")):
         result = base.copy()
-        result["type"] = "boolean"
+        result["type"] = "bool"
         result["confidence"] = 0.8  # OK
         candidates.append(result)
 
@@ -193,7 +205,7 @@ def distill_return(return_text: str) -> List[Dict]:
         if i > 0:
             object = words[i - 1]
             if object in ("stream-like", "file"):
-                object = "stream"
+                object = "IO"  # needs from typing import IO
             elif object == "callback":
                 object = "Callable[..., Any]"
                 # todo: requires additional 'from typing import Callable'
@@ -230,7 +242,14 @@ def distill_return(return_text: str) -> List[Dict]:
     return candidates
 
 
-def type_from_docstring(docstring: Union[str, List[str]], signature: str, module: str):
+def return_type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str):
+    try:
+        return _type_from_context(module=module, signature=signature, docstring=docstring)["type"]
+    except Exception:
+        return "Any"
+
+
+def _type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str):
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -240,6 +259,7 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str, module
         - use re to find phrases such as:
             - 'Returns ..... '
             - 'Gets  ..... '
+            - 'Reads .....
         - docstring is joined without newlines to simplify parsing
         - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
         - builds a list return type candidates
@@ -253,6 +273,10 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str, module
 
     return_regex = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>.*)[.|$|!|?]"
     gets_regex = r"Gets?\s(?P<return>.*)[.|$|\s]"
+    reads_regex = r"Read(?:s?,?)\s(?P<return>.*)[.|$|\s]"
+
+    # give the regex that searces for returns a 0.2 boost as that is bound to be more relevant
+    weighted_regex = ((return_regex, 0.2), (gets_regex, 0.1), (reads_regex, 0.0))
 
     #    function_regex = r"\w+(?=\()"
     # only the function name without the leading module
@@ -280,9 +304,9 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str, module
             "confidence": LOOKUP_LIST[function_name][1],
             "match": function_name,
         }
+    for weighted in weighted_regex:
 
-    for regex in (return_regex, gets_regex):
-        match_iter = re.finditer(regex, docstring, re.MULTILINE | re.IGNORECASE)
+        match_iter = re.finditer(weighted[0], docstring, re.MULTILINE | re.IGNORECASE)
         for match in match_iter:
             # matches.append(match)
             distilled = distill_return(match.group("return"))
@@ -290,7 +314,7 @@ def type_from_docstring(docstring: Union[str, List[str]], signature: str, module
                 candidate = {
                     "match": match,
                     "type": item["type"],
-                    "confidence": item["confidence"],
+                    "confidence": item["confidence"] + weighted[1],  # add search boost
                 }
                 candidates.append(candidate)
     # Sort
