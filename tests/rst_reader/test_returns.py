@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 # SOT
-from rst_utils import type_from_docstring
+from rst_utils import _type_from_context, return_type_from_context
 
 
 ### Test setup
@@ -23,9 +23,11 @@ from rst_utils import type_from_docstring
 def test_signatures(signature, docstring, expected_type, confidence):
     # return type should be included in the signature
     # except for classes
-    r = type_from_docstring(docstring, signature, "builtins")
+    r = _type_from_context(docstring=docstring, signature=signature, module="builtins")
     assert r["type"] == expected_type
     assert r["confidence"] >= confidence
+    t = return_type_from_context(docstring=docstring, signature=signature, module="builtins")
+    assert t == expected_type
 
 
 # read the tests cases from a json file to avoid needing to code all the different tests
@@ -51,6 +53,8 @@ def return_type_testcases() -> List[Tuple[str, str, str, str, int]]:
 def test_returns(module, signature, docstring, expected_type, confidence):
     # return type should be included in the signature
     # except for classes
-    r = type_from_docstring(docstring, signature, module)
+    r = _type_from_context(docstring=docstring, signature=signature, module=module)
     assert r["type"] == expected_type
     assert r["confidence"] >= confidence
+    t = return_type_from_context(docstring=docstring, signature=signature, module=module)
+    assert t == expected_type

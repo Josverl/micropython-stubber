@@ -33,7 +33,9 @@ def process(folder: Path, pattern: str):
                     signature = str(item[3]).split("::")[-1].strip()
                     docstring = item[4]
 
-                    r = rst.type_from_docstring(docstring, signature, module_name)
+                    r = rst._type_from_context(
+                        docstring=docstring, signature=signature, module=module_name
+                    )
                     report.append(
                         {
                             "signature": signature,
