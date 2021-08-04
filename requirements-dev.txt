@@ -1,6 +1,8 @@
 # Production + dev requirements
+requests        >= 2.26.0
 esptool         >= 3.1
 pyminifier      >= 2.1                  #python-minifier
+libcst          >= 0.3.19
 
 # dev requirements
 pytest          >= 6.2.4 
