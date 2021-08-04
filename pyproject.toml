@@ -23,7 +23,7 @@ junit_family = "xunit1"
 # Skip 'basicgit' test to avoid changing the cheked-out repo branch
 #addopts = "-v -sv --cov json --cov-report html -m 'not basicgit'"
 #addopts = "-v --cov --cov-report html -m 'not basicgit'"
-addopts = "-v -sv --cov --cov-report html"
+addopts = "-v -sv --cov --cov-report html --json-report --json-report-file .pytest.report.json"
 
 testpaths = [
     "tests",
