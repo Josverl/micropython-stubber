@@ -1,4 +1,5 @@
 # Production + dev requirements
+requests
 esptool
 pyminifier
 #python-minifier
