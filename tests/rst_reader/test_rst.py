@@ -195,7 +195,8 @@ def test_fix_param(param_in, param_out):
 def test_import_typing():
     "always include typing"
     r = RSTReader()
-    assert TYPING_IMPORT in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
+    line = TYPING_IMPORT.strip()
+    assert line in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
 
 
 def test_fix_param_dynamic():
