@@ -275,9 +275,9 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     gets_regex = r"Gets?\s(?P<return>.*)[.|$|\s]"
     reads_regex = r"Read(?:s?,?)\s(?P<return>.*)[.|$|\s]"
 
-    # give the regex that searces for returns a 0.2 boost as that is bound to be more relevant
-    weighted_regex = ((return_regex, 0.2), (gets_regex, 0.1), (reads_regex, 0.0))
-
+    # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
+    weighted_regex = ((return_regex, 1.8), (gets_regex, 1.5), (reads_regex, 1.0))
+    LIST_WEIGHT = 2.0
     #    function_regex = r"\w+(?=\()"
     # only the function name without the leading module
     function_re = re.compile(r"[\w|.]+(?=\()")
@@ -288,7 +288,7 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     # if the signature contains a return type , then use that and do nothing else.
     if "->" in signature:
         sig_type = signature.split("->")[-1].strip(": ")
-        return {"type": sig_type, "confidence": 1, "match": signature}
+        return {"type": sig_type, "confidence": LIST_WEIGHT, "match": signature}
 
     try:
         function_name = function_re.findall(signature)[0]
@@ -301,7 +301,7 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
         sig_type = LOOKUP_LIST[function_name][0]
         return {
             "type": LOOKUP_LIST[function_name][0],
-            "confidence": LOOKUP_LIST[function_name][1],
+            "confidence": LOOKUP_LIST[function_name][1] * LIST_WEIGHT,
             "match": function_name,
         }
     for weighted in weighted_regex:
@@ -314,7 +314,7 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
                 candidate = {
                     "match": match,
                     "type": item["type"],
-                    "confidence": item["confidence"] + weighted[1],  # add search boost
+                    "confidence": item["confidence"] * weighted[1],  # add search boost
                 }
                 candidates.append(candidate)
     # Sort
