@@ -8,6 +8,7 @@ libcst          >= 0.3.19
 pytest          >= 6.2.4 
 pytest-cov      >= 2.12.1
 pytest-mock     >= 1.13.0
+pytest-json-report >= 1.4.0
 mock            >= 4.0.3
 
 mypy            >= 0.910
