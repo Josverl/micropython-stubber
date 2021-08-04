@@ -1,5 +1,7 @@
 # documentation 
 	Add link to 
+	https://docs.python.org/3/library/typing.html
+	
 	https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html
 
 	add details on what version of types used ( 3.4/3.5 )
