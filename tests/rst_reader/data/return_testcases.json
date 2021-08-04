@@ -803,5 +803,5 @@
         "module": "ure",
         "class": "match",
         "function/method": "match.start"
-    },
+    }
 ]
