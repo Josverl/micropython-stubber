@@ -202,7 +202,8 @@ def distill_return(return_text: str) -> List[Dict]:
         result["confidence"] = 0.3  # name could be a string
         candidates.append(result)
 
-    if any(t in my_type for t in ("``None``", "None")):
+    if any(t in my_type for t in ("``None``", "None")) and not "previous value" in my_type:
+        # avoid phrases such as 'None or previous value'
         result = base.copy()
         result["type"] = "None"
         result["confidence"] = 0.8  # OK
