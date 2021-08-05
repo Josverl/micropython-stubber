@@ -64,15 +64,20 @@ def distill_return(return_text: str) -> List[Dict]:
         lt = "Any"
         result = base.copy()
         result["confidence"] = 0.8  # OK
-        for element in ("tuple", "string", "int"):
+        for element in ("tuple", "string", "unsigned", "int"):
             if element in my_type:
-                if element == "string":
-                    lt = "str"
-                elif element == "tuple":
+                result["confidence"] = 0.9  # GOOD
+                if element == "tuple":
                     lt = "Tuple"
+                    break
+                elif element == "string":
+                    lt = "str"
+                    break
+                elif element == "unsigned":
+                    lt = "uint"
+                    break
                 else:
                     lt = element
-                result["confidence"] = 0.9  # GOOD
 
         my_type = f"List[{lt}]"
         result["type"] = my_type
