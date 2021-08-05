@@ -11,6 +11,21 @@
     - detect if running on MicroPython or CPython
     - improve report formatting to list each module on a separate line to allow for better comparison
 
+- create stubs from micropython documentation
+    - Read the micropython library documentation files 
+    - Extract 
+        modules
+            functions
+            classes  (some classes are described as functions and need to be hoisted up to a class)
+                methods
+                class methods
+                static methods
+            exceptions
+    - extract the relevant docstrings
+    - determine the return type of a function or method based on the docstring 
+        this is about 60% accurate 
+
+
 - workflows
     - move to ubuntu 20.04 
         - move to test/tools/ubuntu_20_04/micropython_v1.xx
@@ -26,13 +41,23 @@
     - publish test results to GH
 
 
+
 - develop / repo setup
     - updated dev requirements (requirements-dev.txt)
-    - enable developing on [GitHub codespaces](https://github.com/codespaces)
     - switched to using submodules to remove  external dependencies
         how to clone : 
         `git submodule init`
         `git submodule update`
+    - enable developing on [GitHub codespaces](https://github.com/codespaces)
+        - add configuration for codespaces 
+        - devcontainer
+            - installs pyright ( via npm)
+            - starts .devcontainer/setup.h
+        - setup.sh 
+            - initializes the submodules 
+            - installs python requirements-dev.txt 
+            - installs python requirements-dev.txt 
+
     - added black configuration file to avoid running black on minified version
     - switched to using .venv on all platforms
     - added and improved tests
@@ -44,5 +69,6 @@
         - allows pytest, and debugging of tests
     - add tasks to :
         - run createstubs in linux version
-        
+
+
 
