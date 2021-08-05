@@ -3,6 +3,7 @@
         "ms-python.vscode-pylance",
         "ms-python.python",
         "pycom.pymakr",
-        "ms-vscode.test-adapter-converter"
+        "ms-vscode.test-adapter-converter",
+        "mhutchie.git-graph"
     ]
 }
