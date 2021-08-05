@@ -39,7 +39,8 @@ import re
 from typing import Dict, List, Tuple, Union
 from rst_lookup import LOOKUP_LIST
 
-TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn\n"
+# all possibles
+TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn, Generator, Iterator\n"
 
 
 def distill_return(return_text: str) -> List[Dict]:
@@ -59,6 +60,51 @@ def distill_return(return_text: str) -> List[Dict]:
     my_type = my_type.replace("`", "")
 
     # print(my_type)
+    if any(t in my_type.casefold() for t in ("generator",)):
+        # generator of Any / Tuple
+        lt = "Any"
+        result = base.copy()
+        result["confidence"] = 0.85  # OK
+        for element in ("tuple", "string", "unsigned", "int"):
+            if element in my_type:
+                result["confidence"] = 0.95  # Very GOOD
+                if element == "tuple":
+                    lt = "Tuple"
+                    break
+                elif element == "string":
+                    lt = "str"
+                    break
+                elif element == "unsigned":
+                    lt = "uint"
+                    break
+                else:
+                    lt = element
+        my_type = f"Generator[{lt}]"
+        result["type"] = my_type
+        candidates.append(result)
+
+    if any(t in my_type.casefold() for t in ("iterator",)):
+        # generator of Any / Tuple
+        lt = "Any"
+        result = base.copy()
+        result["confidence"] = 0.85  # OK
+        for element in ("tuple", "string", "unsigned", "int"):
+            if element in my_type:
+                result["confidence"] = 0.95  # Very GOOD
+                if element == "tuple":
+                    lt = "Tuple"
+                    break
+                elif element == "string":
+                    lt = "str"
+                    break
+                elif element == "unsigned":
+                    lt = "uint"
+                    break
+                else:
+                    lt = element
+        my_type = f"Iterator[{lt}]"
+        result["type"] = my_type
+        candidates.append(result)
     if any(t in my_type for t in ("a list of", "list of", "an array")):
         # Lists of Any / Tuple
         lt = "Any"
@@ -78,7 +124,6 @@ def distill_return(return_text: str) -> List[Dict]:
                     break
                 else:
                     lt = element
-
         my_type = f"List[{lt}]"
         result["type"] = my_type
         candidates.append(result)
@@ -236,7 +281,7 @@ def distill_return(return_text: str) -> List[Dict]:
                 result["type"] = "Any"
                 result["confidence"] = 0.9  # abstract , but very good
             elif object[0].isupper():
-                result["confidence"] = 0.8  # Good
+                result["confidence"] = 0.81  # Good  > better than Match None
             else:
                 result["confidence"] = 0.5  # not so good
 
