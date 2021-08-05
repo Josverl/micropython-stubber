@@ -31,7 +31,7 @@ todo:
     - 
 """
 # ref: https://regex101.com/codegen?language=python
-# https://regex101.com/r/Ni8g2z/1
+# https://regex101.com/r/Ni8g2z/2
 
 import json
 from pathlib import Path
@@ -124,10 +124,22 @@ def distill_return(return_text: str) -> List[Dict]:
         num in my_type
         for num in (
             "length",
+            "total size",
+            "size of",
+        )
+    ):
+        # Assume sizes  are int
+        result = base.copy()
+        result["type"] = "int"
+        result["confidence"] = 0.95  # GOOD
+        candidates.append(result)
+
+    if any(
+        num in my_type
+        for num in (
             "index",
             "**signed** value",
             "nanoseconds",
-            "total size",
             "offset",
         )
     ):
@@ -137,10 +149,10 @@ def distill_return(return_text: str) -> List[Dict]:
         result["confidence"] = 0.7  # OK
         candidates.append(result)
 
-    if any(t in my_type for t in (" number of ", "address of")):
+    if any(t in my_type for t in ("number of", "address of")):
         result = base.copy()
         result["type"] = "int"
-        result["confidence"] = 0.85  # better match than bytes and bytearray
+        result["confidence"] = 0.95  # better match than bytes and bytearray or object
         candidates.append(result)
 
     if any(t in my_type for t in ("bytearray",)):
@@ -197,6 +209,7 @@ def distill_return(return_text: str) -> List[Dict]:
         candidates.append(result)
 
     if any(t in my_type for t in ("Object", "object")):
+        # Return <multiple words object>
         words = my_type.split(" ")
         try:
             i = words.index("Object")
@@ -205,9 +218,8 @@ def distill_return(return_text: str) -> List[Dict]:
                 i = words.index("object")
             except ValueError:
                 # object is not a word, but is a part of a word
-                i = 0
-
-        if i > 0:
+                i = -1
+        if i >= 0:
             object = words[i - 1]
             if object in ("stream-like", "file"):
                 object = "IO"  # needs from typing import IO
@@ -219,10 +231,13 @@ def distill_return(return_text: str) -> List[Dict]:
             object = re.sub(r"[^a-z.A-Z0-9]", "", object)
             result = base.copy()
             result["type"] = object
-            if object[0].isupper():
+            if object == "an":  # "Return an object"
+                result["type"] = "Any"
+                result["confidence"] = 0.9  # abstract , but very good
+            elif object[0].isupper():
                 result["confidence"] = 0.8  # Good
             else:
-                result["confidence"] = 0.3  # not so good
+                result["confidence"] = 0.5  # not so good
 
             candidates.append(result)
 
@@ -275,15 +290,14 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     if isinstance(docstring, list):
         # join with space to avoid ending at a newline
         docstring = " ".join(docstring)
-
-    return_regex = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>.*)[.|$|!|?]"
-    gets_regex = r"Gets?\s(?P<return>.*)[.|$|\s]"
-    reads_regex = r"Read(?:s?,?)\s(?P<return>.*)[.|$|\s]"
+    # regex match stops at end of sentence:: . ! ? : ;
+    return_regex = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>[^.!?:;]*)"
+    gets_regex = r"Gets?\s(?P<return>[^.!?:;]*)"
+    reads_regex = r"Read(?:s?,?)\s(?P<return>[^.!?:;]*)"
 
     # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
     weighted_regex = ((return_regex, 1.8), (gets_regex, 1.5), (reads_regex, 1.0))
     LIST_WEIGHT = 2.0
-    #    function_regex = r"\w+(?=\()"
     # only the function name without the leading module
     function_re = re.compile(r"[\w|.]+(?=\()")
 
