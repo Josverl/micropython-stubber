@@ -133,7 +133,7 @@
             "        * 0 -- visible",
             "        * 1 -- hidden"
         ],
-        "type": "List[int]",
+        "type": "List[Tuple]",
         "confidence": 0.9,
         "module": "network",
         "class": "WLAN",
@@ -158,7 +158,7 @@
             "",
             "   In case of timeout, an empty list is returned."
         ],
-        "type": "List[Tuple]",
+        "type": "List[Any]",
         "confidence": 0.9,
         "module": "uselect",
         "class": "poll",
@@ -401,7 +401,7 @@
             "   given to makefile(). The support is limited to binary modes only ('rb', 'wb', and 'rwb').",
             "   CPython's arguments: *encoding*, *errors* and *newline* are not supported."
         ],
-        "type": "stream",
+        "type": "IO",
         "confidence": 0.3,
         "module": "usocket",
         "class": "socket",
@@ -547,7 +547,7 @@
             "   string is not correctly formed."
         ],
         "type": "Any",
-        "confidence": 0.8,
+        "confidence": 0.1,
         "match": "<re.Match object; span=(28, 113), match='return an object.  Raises :exc:`ValueError` if th>",
         "module": "ujson",
         "class": "",
@@ -742,8 +742,7 @@
             "   initially ``None``."
         ],
         "type": "Any",
-        "confidence": 0.8,
-        "match": "<re.Match object; span=(171, 250), match='return the previous value set by this function, w>",
+        "confidence": 0.3,
         "module": "usys",
         "class": "",
         "function/method": "atexit"
@@ -757,7 +756,6 @@
         ],
         "type": "IO",
         "confidence": 0,
-        "match": "None",
         "module": "uio",
         "class": "",
         "function/method": "open"
