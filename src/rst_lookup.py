@@ -23,12 +23,14 @@ LOOKUP_LIST = {
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
     "machine.reset_cause": ("int", 0.95),
-    "ussl.wrap_socket": ("stream", 0.95),  # undocumented class ssl.SSLSocket
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "usys.exit": ("NoReturn", 0.95),  # never returns
     "lcd160cr.LCD160CR.set_power": ("None", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
-    # "": ("None", 0.95),
+    "uos.readblocks": ("Any", 0.95),  # no return type specified in the documentation
+    "uos.writeblocks": ("Any", 0.95),  # no return type specified in the documentation
+    # "ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
+    "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     # "": ("None", 0.95),
     # "": ("None", 0.95),
 }

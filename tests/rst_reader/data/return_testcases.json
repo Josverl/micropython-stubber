@@ -616,7 +616,7 @@
             "   and the ``f_flags`` parameter may return ``0`` as they can be unavailable",
             "   in a port-specific implementation."
         ],
-        "type": "tuple",
+        "type": "Tuple",
         "confidence": 0.85,
         "match": "<re.Match object; span=(38, 805), match='Returns a tuple with the filesystem information i>",
         "module": "uos",
@@ -645,7 +645,7 @@
             "",
             "   The function returns the previous stream-like object in the given slot."
         ],
-        "type": "Any",
+        "type": "IO",
         "confidence": 0.8,
         "match": "<re.Match object; span=(324, 1017), match='return ``None`` if there is no data available for>",
         "module": "uos",
@@ -684,7 +684,7 @@
             "  the data."
         ],
         "type": "Tuple",
-        "confidence": 0.85,
+        "confidence": 0.1,
         "match": "<re.Match object; span=(36, 205), match='return value is a pair *(bytes, address)* where *>",
         "module": "usocket",
         "class": "socket",
@@ -712,7 +712,7 @@
             "   Depending on the underlying module implementation in a particular",
             "   :term:`MicroPython port`, some or all keyword arguments above may be not supported."
         ],
-        "type": "stream",
+        "type": "IO",
         "confidence": 0.8,
         "match": "<re.Match object; span=(93, 1236), match='returns an instance of ssl.SSLSocket, which wraps>",
         "module": "ussl",

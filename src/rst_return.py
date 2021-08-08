@@ -40,6 +40,7 @@ def process(folder: Path, pattern: str):
                         {
                             "signature": signature,
                             "docstring": docstring,
+                            "docstring_len": len(" ".join(docstring).strip()),
                             "type": r["type"],
                             "confidence": r["confidence"],
                             "match": str(r["match"]),
