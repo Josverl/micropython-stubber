@@ -112,18 +112,18 @@ def _red(*args) -> str:
     return _color(91, *args)
 
 
-
 # self.gather_docs = True
 SEPERATOR = "::"
+
 
 class RSTReader:
     __debug = True  # a
     verbose = False
     no_explicit_init = False  # True to avoid overloading __init__
-    gather_docs = True # used only during Development
+    gather_docs = True  # used only during Development
 
     def __init__(self, v_tag="v1.xx"):
-        
+        self.line_no = 0  # current Linenumber used during parsing.
         self.filename = ""
 
         self.line = ""  # class / method/ function line being parsed
@@ -182,9 +182,9 @@ class RSTReader:
 
     def _cleanup(self):
         "clean up some trailing spaces and commas"
-        for n in range(0, len(self.output)):
-            if "(self, ) ->" in self.output[n]:
-                self.output[n] = self.output[n].replace("(self, ) ->", "(self) ->")
+        for i in range(0, len(self.output)):
+            if "(self, ) ->" in self.output[i]:
+                self.output[i] = self.output[i].replace("(self, ) ->", "(self) ->")
 
     def write_file(self, filename: Path) -> bool:
         self._cleanup()
@@ -356,9 +356,9 @@ class RSTReader:
 
     def parse(self, depth: int = 0):
         self.depth = depth
-        n = 0
-        while n < len(self.rst_text):
-            self.line = line = self.rst_text[n]
+        self.line_no = 0
+        while self.line_no < len(self.rst_text):
+            self.line = line = self.rst_text[self.line_no]
             #    self.writeln(">"+line)
 
             if re.search(r"\.\. module::", line):
@@ -368,11 +368,11 @@ class RSTReader:
                 # get module docstring
                 self.current_module = this_module
                 self.current_function = self.current_class = ""
-                n, docstr = self.read_textblock(n)
+                self.line_no, docstr = self.read_textblock(self.line_no)
                 self.output_docstring(docstr)
 
             elif re.search(r"\.\. currentmodule::", line):
-                n += 1
+                self.line_no += 1
                 self.log(f"# {line.rstrip()}")
                 this_module = line.split(SEPERATOR)[-1].strip()
                 self.log(f"# currentmodule:: {this_module}")
@@ -384,7 +384,7 @@ class RSTReader:
             elif re.search(r"\.\. function::", line):
                 self.log(f"# {line.rstrip()}")
                 this_function = line.split(SEPERATOR)[-1].strip()
-                n, docstr = self.read_textblock(n)
+                self.line_no, docstr = self.read_textblock(self.line_no)
                 name, params = this_function.split("(", maxsplit=1)
                 # Parse return type from docstring
                 ret_type = return_type_from_context(
@@ -432,7 +432,7 @@ class RSTReader:
                 self.log(f"# class:: {name}")
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
-                n, docstr = self.read_textblock(n)
+                self.line_no, docstr = self.read_textblock(self.line_no)
                 if any(":noindex:" in line for line in docstr):
                     # if the class docstring contains ':noindex:' on any line then skip
                     self.log(f"# Skip :noindex: class {name}")
@@ -470,7 +470,7 @@ class RSTReader:
 
                 if name == "__init__" and self.no_explicit_init:
                     # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
-                    n += 1
+                    self.line_no += 1
                 else:
                     # check: check if the class statement has already been started
                     if (
@@ -478,7 +478,7 @@ class RSTReader:
                         and not class_name.lower() in self.current_class.lower()
                     ):
                         self.output_class_hdr(class_name, "", [])
-                    n, docstr = self.read_textblock(n)
+                    self.line_no, docstr = self.read_textblock(self.line_no)
                     # parse return type from docstring
                     ret_type = return_type_from_context(
                         docstring=docstr, signature=name, module=self.current_module
@@ -505,7 +505,7 @@ class RSTReader:
 
             elif re.search(r"\.\. exception::", line):
                 self.log(f"# {line.rstrip()}")
-                n += 1
+                self.line_no += 1
                 name = line.split(SEPERATOR)[1].strip()
                 if "." in name:
                     name = name.split(".")[-1]  # Take only the last part from Pin.toggle
@@ -515,7 +515,7 @@ class RSTReader:
 
             elif re.search(r"\.\. data::", line):
                 self.log(f"# {line.rstrip()}")
-                n += 1
+                self.line_no += 1
                 # todo: find a way to reliably add Constants at the correct level
                 # Note : makestubs has no issue with this
 
@@ -534,18 +534,18 @@ class RSTReader:
 
             elif re.search(r"\.\. toctree::", line):
                 self.log(f"# {line.rstrip()}")
-                self.parse_toc(n)
+                self.parse_toc(self.line_no)
                 # reset to done
                 self.rst_text = []
-                n = 1
+                self.line_no = 1
             elif re.search(r"\.\. \w+::", line):
                 #
                 self.log(f"# {line.rstrip()}")
                 print(_red(line.rstrip()))
-                n += 1
+                self.line_no += 1
             else:
                 # NOTHING TO SEE HERE , MOVE ON
-                n += 1
+                self.line_no += 1
 
 
 def generate_from_rst(
