@@ -16,24 +16,32 @@
                 - parameters based on documentation for the method
                 - docstrings
         exceptions
+    - tries to determine the return type by parsing the docstring.
+        - if no type can be detected the type `Any` is used
+        - a Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring (yet). 
+        - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
+        - Cenerators, Iterators
+        - Callable
 
     The generated stub files are formatted using `black` and checked for validity using `pyright`
-
-    WIP 
-    - tries to determine the return type by parsing the docstring 
-
+   
     Not yet implemented 
-    - Literals 
+    - Literals / constants
+        -   documentation contains  repeated vars with the same indentation
+        -  .. data:: IPPROTO_UDP
+        -            IPPROTO_TCP
+
     - repeats of definitions in the rst file for similar functions or literals
         '''
         .. function:: gmtime([secs])
                       localtime([secs])
         ....
+    
+    - ordering of inter-dependent classes in the same module
+
     - parse subclass / superclass from class docstring  : 
         - A namedtuple is a subclass of tuple 
         - ``dict`` type subclass which ...
-    - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
-    - ordering of inter-dependent classes in the same module
     - add superclasses 
         likely based on a external list as this is currently not documented as part of the class
         not quite sure how th handle the __init__ method for this , 
@@ -54,10 +62,30 @@
                 class md5(hash):
             
             - Signal(Pin)
+
+
     - manual tweaks for uasync 
         https://docs.python.org/3/library/typing.html#asynchronous-programming
-    - generators 
 
+
+    -  usocket : class is defined twice - discontinuous documentation
+
+    -  .. exception:: IndexError
+
+    -  Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
+    -  ucollection   : docs incorrectly states classes as functions --> upstream
+
+    # todo: change or remove value hints (...|....)
+    # params = params.replace("pins=(SCK, MOSI, MISO)", "")  # Q&D
+    # param default to module constant
+    #   def foo(x =module.CONST): ...
+    # param default to class constant
+    #   def __init__(self, x =class.CONST): ...
+
+    # FIXME: usocket socket
+    # if self.current_module in (name, f"u{name}"):
+
+    # todo: Docbug # .. _class: Poll micropython\\docs\\library\\uselect.rst
 """
 
 import json
@@ -84,17 +112,18 @@ def _red(*args) -> str:
     return _color(91, *args)
 
 
-# Development
-GATHER_DOC = True
 
+# self.gather_docs = True
+SEPERATOR = "::"
 
 class RSTReader:
     __debug = True  # a
     verbose = False
     no_explicit_init = False  # True to avoid overloading __init__
+    gather_docs = True # used only during Development
 
     def __init__(self, v_tag="v1.xx"):
-        self.sep = "::"
+        
         self.filename = ""
 
         self.line = ""  # class / method/ function line being parsed
@@ -108,7 +137,6 @@ class RSTReader:
         self.output: List[str] = []
         self.source_tag = v_tag
         self.target = ".py"  # py/pyi
-        self.classes: List[str] = []  # is this used ?
         self.return_info: List[Tuple] = []  # development aid only
 
         self.writeln(TYPING_IMPORT)
@@ -167,7 +195,7 @@ class RSTReader:
         except OSError as e:
             print(e)
             return False
-        if GATHER_DOC:
+        if self.gather_docs:
             print(f" - Writing to: {filename}")
             with open(filename.with_suffix(".json"), mode="w", encoding="utf8") as file:
                 json.dump(self.return_info, file, ensure_ascii=False, indent=4)
@@ -217,7 +245,7 @@ class RSTReader:
         # .. method:: Servo.speed([speed, time=0])
         elif "[speed, time=0]" in params:
             params = params.replace("[speed, time=0]", "[speed], time=0")
-
+        # spell:disable
         # sublist parameters are not supported in python 3
         elif "(adcx, adcy, ...)" in params:
             # method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
@@ -225,7 +253,7 @@ class RSTReader:
         elif "(ip, subnet, gateway, dns)" in params:
             # network: # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
             params = params.replace("(ip, subnet, gateway, dns)", "configtuple")
-
+        # spell:enable
         # pyb  .. function:: hid((buttons, x, y, z))
         params = params.replace("(buttons, x, y, z)", "hidtuple")
 
@@ -246,17 +274,11 @@ class RSTReader:
         for pair in wilds:
             if pair[0] in params:
                 params = params.replace(pair[0], pair[1])
-        # ... not allowed in .py
+        # fixme: ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args")
             params = params.replace("...", "*args")
-        # todo: change or remove value hints (...|....)
-        # params = params.replace("pins=(SCK, MOSI, MISO)", "")  # Q&D
 
-        # param default to module constant
-        #   def foo(x =module.CONST): ...
-        # param default to class constant
-        #   def __init__(self, x =class.CONST): ...
         for prefix in (f"{self.current_module}.", f"{self.current_class}."):
             if len(prefix) > 1 and prefix in params:
                 params = params.replace(prefix, "")  # dynamic
@@ -298,7 +320,7 @@ class RSTReader:
         for l in docstr:
             self.writeln(f"{self.indent}{l}")
         self.writeln(f'{self.indent}"""')
-        if GATHER_DOC and len(docstr) > 0:
+        if self.gather_docs and len(docstr) > 0:
             self.return_info.append(
                 (self.current_module, self.current_class, self.current_function, self.line, docstr)
             )
@@ -320,8 +342,6 @@ class RSTReader:
             self.writeln(f"{self.indent}...\n")
             self.dedent()
         self.current_class = name
-        # helper to keep track of indentation
-        self.classes.append(name.lower())
 
     def parse_toc(self, n: int):
         "process table of content with additional rst files, and add / include them in the current module"
@@ -336,9 +356,6 @@ class RSTReader:
 
     def parse(self, depth: int = 0):
         self.depth = depth
-        # todo : replace by while and n+=1
-        # or stop using self.to store state
-        # for n in range(0, len(self.rst_text)):
         n = 0
         while n < len(self.rst_text):
             self.line = line = self.rst_text[n]
@@ -346,7 +363,7 @@ class RSTReader:
 
             if re.search(r"\.\. module::", line):
                 self.log(f"# {line.rstrip()}")
-                this_module = line.split(self.sep)[-1].strip()
+                this_module = line.split(SEPERATOR)[-1].strip()
                 self.writeln(f"# origin: {self.filename}\n# {self.source_tag}")
                 # get module docstring
                 self.current_module = this_module
@@ -357,18 +374,19 @@ class RSTReader:
             elif re.search(r"\.\. currentmodule::", line):
                 n += 1
                 self.log(f"# {line.rstrip()}")
-                this_module = line.split(self.sep)[-1].strip()
+                this_module = line.split(SEPERATOR)[-1].strip()
                 self.log(f"# currentmodule:: {this_module}")
                 self.current_module = this_module
                 self.current_function = self.current_class = ""
-                # todo: check if same module
-                # todo: read first block and do something with it
+                # maybe: check if same module
+                # maybe: read first block and do something with it
 
             elif re.search(r"\.\. function::", line):
                 self.log(f"# {line.rstrip()}")
-                this_function = line.split(self.sep)[-1].strip()
+                this_function = line.split(SEPERATOR)[-1].strip()
                 n, docstr = self.read_textblock(n)
                 name, params = this_function.split("(", maxsplit=1)
+                # Parse return type from docstring
                 ret_type = return_type_from_context(
                     docstring=docstr, signature=name, module=self.current_module
                 )
@@ -378,15 +396,13 @@ class RSTReader:
                     # remove module name from the start of the function name
                     if name.startswith(f"{self.current_module}."):
                         name = name[len(f"{self.current_module}.") :]
-                    # todo: parse return type from docstring
                     # fixup optional [] variables
                     params = self.fix_parameters(params)
                     # assume no functions in classes
                     self.leave_class()
                     # if function name is the same as the module
                     # then this is probably documenting a class ()
-                    # FIXME: usocket socket
-                    # if self.current_module in (name, f"u{name}"):
+
                     if name in (self.current_module, f"u{self.current_module}"):
                         if self.verbose or self.__debug:
                             self.writeln(f"{self.indent}# ..................................")
@@ -401,9 +417,9 @@ class RSTReader:
                         self.dedent()
 
             elif re.search(r"\.\. class::?", line):
-                # todo: Docbug # .. _class: Poll micropython\docs\library\uselect.rst
+
                 self.log(f"# {line.rstrip()}")
-                this_class = line.split(self.sep)[-1].strip()
+                this_class = line.split(SEPERATOR)[-1].strip()
                 name = this_class
                 params = ""
                 if "(" in this_class:
@@ -435,7 +451,7 @@ class RSTReader:
                 ## py:staticmethod  - py:classmethod - py:decorator
                 # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
                 self.log(f"# {line.rstrip()}")
-                this_method = line.split(self.sep)[1].strip()
+                this_method = line.split(SEPERATOR)[1].strip()
                 try:
                     name, params = this_method.split("(", 1)  # split methodname from params
                 except ValueError:
@@ -445,7 +461,7 @@ class RSTReader:
                 # fixup optional [] parameters and other notations
                 params = self.fix_parameters(params)
                 if "." in name:
-                    # todo: deal with longer / deeper classes
+                    # todo deal with longer / deeper classes
                     class_name = name.split(".")[0]
                 else:
                     # if nothing specified lets assume part of current class
@@ -454,11 +470,9 @@ class RSTReader:
 
                 if name == "__init__" and self.no_explicit_init:
                     # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
-                    # FIXME: ucryptolib aes.__init__(key, mode, [IV])
                     n += 1
                 else:
-                    # todo: check if the class statement has already been started
-
+                    # check: check if the class statement has already been started
                     if (
                         not class_name in self.current_class
                         and not class_name.lower() in self.current_class.lower()
@@ -492,7 +506,7 @@ class RSTReader:
             elif re.search(r"\.\. exception::", line):
                 self.log(f"# {line.rstrip()}")
                 n += 1
-                name = line.split(self.sep)[1].strip()
+                name = line.split(SEPERATOR)[1].strip()
                 if "." in name:
                     name = name.split(".")[-1]  # Take only the last part from Pin.toggle
                 self.writeln(f"{self.indent}class {name}(BaseException) : ...")
@@ -506,8 +520,8 @@ class RSTReader:
                 # Note : makestubs has no issue with this
 
                 # self.updent()
-                # # BUG: check if this is the correct identation for root level ?
-                # this_const = line.split(self.sep)[-1].strip()
+                # # BUG: check if this is the correct indentation for root level ?
+                # this_const = line.split(SEPERATOR)[-1].strip()
                 # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
                 # type = "Any"
                 # # deal with documentation wildcards
@@ -570,24 +584,3 @@ if __name__ == "__main__":
     rst_folder = Path(base_path) / "docs" / "library"
     dst_folder = Path("generated/micropython") / flat_version(v_tag)
     generate_from_rst(rst_folder, dst_folder, v_tag)
-
-# todo
-# constants
-# usocket : class is defined twice - discontinuous documentation
-
-# todo: .. exception:: IndexError
-
-# todo: documentation contains  repeated vars with the same identation
-# .. data:: IPPROTO_UDP
-#           IPPROTO_TCP
-
-# todo: cleanup '(self, ) -> Any:' -> (self) -> Any:'
-
-# Done
-
-# Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
-
-# ucollection   : docs incorrectly states classes as functions --> upstream
-
-# cmd = 'black generated/micropython/v1.5.2'
-# subprocess.run(cmd, capture_output=False, check=True)
