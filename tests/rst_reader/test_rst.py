@@ -129,7 +129,7 @@ CLASS_10 = [
     "class Partition:",
     "    def __init__(self, id) -> None:",
     "    @classmethod",
-    "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List[Any]:",
+    "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
     #    "    def info(self, ) -> Any:",
     # "    def readblocks(self, block_num, buf) -> Any:",
     # "    def writeblocks(self, block_num, buf) -> Any:",
