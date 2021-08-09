@@ -1,0 +1,17 @@
+{
+    "dictionaryDefinitions": [
+        {
+            "name": "micropython",
+            "path": "./.vscode/micropython-dict.txt"
+        }
+    ],
+    "languageSettings": [
+        {
+            "languageId": "python",
+            "dictionaries": [
+                "python",
+                "micropython"
+            ]
+        }
+    ]
+}
