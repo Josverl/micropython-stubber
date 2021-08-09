@@ -123,7 +123,7 @@ class RSTReader:
     gather_docs = True  # used only during Development
 
     def __init__(self, v_tag="v1.xx"):
-        self.line_no = 0  # current Linenumber used during parsing.
+        self.line_no: int = 0  # current Linenumber used during parsing.
         self.filename = ""
 
         self.line = ""  # class / method/ function line being parsed
@@ -203,26 +203,42 @@ class RSTReader:
 
         return True
 
-    def read_textblock(self, n: int) -> Tuple[int, List[str]]:
-        if n >= len(self.rst_text):
+    # def read_textblock(self, n: int) -> Tuple[int, List[str]]:
+    def read_textblock(self) -> List[str]:
+        """Read a textblock that will be used as a docstring
+        The textblock is terminated at the following RST line structures/tags
+            .. <anchor>
+            -- Heading
+            == Heading
+            ~~ Heading
+
+        The blank lines at the start and end are removed to limit the space the docstring takes up.
+        """
+        if self.line_no >= len(self.rst_text):
             raise IndexError
         block: List[str] = []
-        n += 1  # advance over current line
+        self.line_no += 1  # advance over current line
         try:
             while (
-                n < len(self.rst_text)
-                and not self.rst_text[n]
+                self.line_no < len(self.rst_text)
+                and not self.rst_text[self.line_no]
                 .lstrip()
                 .startswith(
                     ".."
                 )  # stop at anchor ( however .. note: could be considered to be added)
-                and not self.rst_text[min(n + 1, self.max_line)].startswith("--")  # Heading --
-                and not self.rst_text[min(n + 1, self.max_line)].startswith("==")  # Heading ==
-                and not self.rst_text[min(n + 1, self.max_line)].startswith("~~")  # Heading ~~
+                and not self.rst_text[min(self.line_no + 1, self.max_line)].startswith(
+                    "--"
+                )  # Heading --
+                and not self.rst_text[min(self.line_no + 1, self.max_line)].startswith(
+                    "=="
+                )  # Heading ==
+                and not self.rst_text[min(self.line_no + 1, self.max_line)].startswith(
+                    "~~"
+                )  # Heading ~~
             ):
-                line = self.rst_text[n]
+                line = self.rst_text[self.line_no]
                 block.append(line.rstrip())
-                n += 1  # advance line
+                self.line_no += 1  # advance line
         except IndexError:
             pass
         # remove empty lines at beginning/end of block
@@ -230,7 +246,7 @@ class RSTReader:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
-        return (n, block)
+        return block
 
     def fix_parameters(self, params: str):
         "change parameter notation issues into a supported version"
@@ -346,7 +362,7 @@ class RSTReader:
     def parse_toc(self, n: int):
         "process table of content with additional rst files, and add / include them in the current module"
         n += 1  # skip one line
-        n, toctree = self.read_textblock(n)
+        toctree = self.read_textblock()
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
 
@@ -368,7 +384,7 @@ class RSTReader:
                 # get module docstring
                 self.current_module = this_module
                 self.current_function = self.current_class = ""
-                self.line_no, docstr = self.read_textblock(self.line_no)
+                docstr = self.read_textblock()
                 self.output_docstring(docstr)
 
             elif re.search(r"\.\. currentmodule::", line):
@@ -384,7 +400,7 @@ class RSTReader:
             elif re.search(r"\.\. function::", line):
                 self.log(f"# {line.rstrip()}")
                 this_function = line.split(SEPERATOR)[-1].strip()
-                self.line_no, docstr = self.read_textblock(self.line_no)
+                docstr = self.read_textblock()
                 name, params = this_function.split("(", maxsplit=1)
                 # Parse return type from docstring
                 ret_type = return_type_from_context(
@@ -432,7 +448,8 @@ class RSTReader:
                 self.log(f"# class:: {name}")
                 # fixup optional [] variables
                 params = self.fix_parameters(params)
-                self.line_no, docstr = self.read_textblock(self.line_no)
+                docstr = self.read_textblock()
+
                 if any(":noindex:" in line for line in docstr):
                     # if the class docstring contains ':noindex:' on any line then skip
                     self.log(f"# Skip :noindex: class {name}")
@@ -478,7 +495,7 @@ class RSTReader:
                         and not class_name.lower() in self.current_class.lower()
                     ):
                         self.output_class_hdr(class_name, "", [])
-                    self.line_no, docstr = self.read_textblock(self.line_no)
+                    docstr = self.read_textblock()
                     # parse return type from docstring
                     ret_type = return_type_from_context(
                         docstring=docstr, signature=name, module=self.current_module
