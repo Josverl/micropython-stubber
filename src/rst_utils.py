@@ -33,28 +33,31 @@ todo:
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/Ni8g2z/2
 
-import json
-from pathlib import Path
+import logging
 import re
 from typing import Dict, List, Tuple, Union
 from rst_lookup import LOOKUP_LIST
 
-# all possibles
-TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn, Generator, Iterator\n"
+# logging
+log = logging.getLogger(__name__)
 
+# all possibles
+TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn, Generator, Iterator, Callable\n"
 BASE = {"type": "Any", "confidence": 0, "match": None}
 
 
 def dist_rate(i) -> float:
-    liniair = max((100 - 1), 1) / 100
-    kwardratisch = max(100 - (i / 18) ** 4, 0) / 100
-    return liniair
+    """"""
+    max_len = 150  # must occur in the first 150 chars
+    linear = max((max_len - i), 1) / max_len
+    # quadratic = max(max_len - (i / 18) ** 4, 1) / max_len
+    return linear
 
 
-def simple_return(
+def simple_candidates(
+    type: str,
     my_type: str,
     keywords: List[str],
-    type: str,
     rate: float = 0.5,
     exclude: List[str] = [],
 ):
@@ -65,30 +68,29 @@ def simple_return(
     candidates = []
     if not any(t in my_type for t in keywords) or any(t in my_type for t in exclude):
         # quick bailout , there are no matches, or there is an exclude
-        return
+        return []
     for kw in keywords:
         i = my_type.find(kw)
         if i < 0:
             continue
-        print(i)
         # Assume unsigned are uint
         result = BASE.copy()
         result["type"] = type
         result["confidence"] = rate * dist_rate(i)  # OK
-        print(result)
+        log.info(f" - found '{kw}' at position {i} with rating {dist_rate(i)}")
         candidates.append(result)
     return candidates
 
 
-def compound_return(
+def compound_candidates(
+    type: str,
     my_type: str,
     keywords: List[str],
-    type: str,
     rate: float = 0.85,
     exclude: List[str] = [],
 ):
     """
-    find and rate possible types and confidence weighting for compund types that can have a subscription.
+    find and rate possible types and confidence weighting for compound types that can have a subscription.
     Case sensitive
     """
     candidates = []
@@ -102,14 +104,14 @@ def compound_return(
         # List / Dict / Generator of Any / Tuple /
         sub = None
         result = BASE.copy()
-        result["confidence"] = rate
+        confidence = rate
         for element in ("tuple", "string", "unsigned", "int"):
             if element in my_type.casefold():
                 j = my_type.find(element)
                 if i == j:
                     # do not match on the same main and sub
                     continue
-                result["confidence"] += 0.10  # boost as we have a subtype
+                confidence += 0.10  # boost as we have a subtype
                 if element == "tuple":
                     sub = "Tuple"
                     break
@@ -124,9 +126,70 @@ def compound_return(
         if sub:
             result["type"] = f"{type}[{sub}]"
         else:
-            result["type"] = f"{type}]"
-        result["confidence"] *= dist_rate(i)  # distance weigthing
+            result["type"] = f"{type}"
+        confidence = confidence * dist_rate(i)  # distance weighting
+        result["confidence"] = confidence
+        log.info(
+            f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}"
+        )
+
         candidates.append(result)
+    return candidates
+
+
+def object_candidates(
+    my_type: str,
+    rate: float = 0.81,
+    exclude: List[str] = [],
+):
+    """
+    find and rate possible types and confidence weighting for Object types.
+    Case sensitive
+    """
+
+    candidates = []
+    keywords = [
+        "Object",
+        "object",
+    ]  # Q&D
+
+    if not any(t in my_type for t in keywords) or any(t in my_type for t in exclude):
+        # quick bailout , there are no matches, or there is an exclude
+        return []
+    for kw in keywords:
+        i = my_type.find(kw)
+        if i < 0:
+            continue
+        # List / Dict / Generator of Any / Tuple /
+        sub = None
+        result = BASE.copy()
+        confidence = rate
+
+        # did the word actually occur, or is it just a partial
+        words = my_type.split(" ")  # Return <multiple words object>
+        if kw in words:
+            pos = words.index(kw)
+            if pos == 0:
+                object = "Any"
+            else:
+                object = words[pos - 1]
+            if object in ("stream-like", "file"):
+                object = "IO"  # needs from typing import IO
+            elif object == "callback":
+                object = "Callable[..., Any]"
+                # todo: requires additional 'from typing import Callable'
+            else:
+                # clean
+                object = re.sub(r"[^a-z.A-Z0-9]", "", object)
+            result = BASE.copy()
+            result["type"] = object
+            if object == "an":  # "Return an object"
+                result["type"] = "Any"
+                confidence += 0.10  # abstract , but very good
+            elif object[0].islower():
+                confidence -= 0.20  # not so good
+            result["confidence"] = confidence * dist_rate(i)
+            candidates.append(result)
     return candidates
 
 
@@ -140,259 +203,88 @@ def distill_return(return_text: str) -> List[Dict]:
           }
 
     """
-    candidates = []
+    candidates = [BASE]  # Default to the base , which is 'Any'
 
     # clean up my_type
     my_type = return_text.strip().rstrip(".")
     my_type = my_type.replace("`", "")
 
-    # print(my_type)
-    if any(t in my_type.casefold() for t in ("generator",)):
-        # generator of Any / Tuple
-        lt = "Any"
-        result = BASE.copy()
-        result["confidence"] = 0.85  # OK
-        for element in ("tuple", "string", "unsigned", "int"):
-            if element in my_type:
-                result["confidence"] = 0.95  # Very GOOD
-                if element == "tuple":
-                    lt = "Tuple"
-                    break
-                elif element == "string":
-                    lt = "str"
-                    break
-                elif element == "unsigned":
-                    lt = "uint"
-                    break
-                else:
-                    lt = element
-        my_type = f"Generator[{lt}]"
-        result["type"] = my_type
-        candidates.append(result)
+    candidates += compound_candidates("Generator", my_type, ["generator"], 0.85)
+    candidates += compound_candidates("Iterator", my_type, ["iterator"], 0.85)
+    candidates += compound_candidates("List", my_type, ["a list of", "list of", "an array"], 0.80)
 
-    if any(t in my_type.casefold() for t in ("iterator",)):
-        # generator of Any / Tuple
-        lt = "Any"
-        result = BASE.copy()
-        result["confidence"] = 0.85  # OK
-        for element in ("tuple", "string", "unsigned", "int"):
-            if element in my_type:
-                result["confidence"] = 0.95  # Very GOOD
-                if element == "tuple":
-                    lt = "Tuple"
-                    break
-                elif element == "string":
-                    lt = "str"
-                    break
-                elif element == "unsigned":
-                    lt = "uint"
-                    break
-                else:
-                    lt = element
-        my_type = f"Iterator[{lt}]"
-        result["type"] = my_type
-        candidates.append(result)
-    if any(t in my_type for t in ("a list of", "list of", "an array")):
-        # Lists of Any / Tuple
-        lt = "Any"
-        result = BASE.copy()
-        result["confidence"] = 0.8  # OK
-        for element in ("tuple", "string", "unsigned", "int"):
-            if element in my_type:
-                result["confidence"] = 0.9  # GOOD
-                if element == "tuple":
-                    lt = "Tuple"
-                    break
-                elif element == "string":
-                    lt = "str"
-                    break
-                elif element == "unsigned":
-                    lt = "uint"
-                    break
-                else:
-                    lt = element
-        my_type = f"List[{lt}]"
-        result["type"] = my_type
-        candidates.append(result)
+    candidates += simple_candidates("Dict", my_type, ["a dictionary", "dict"], 0.80)
+    candidates += simple_candidates("Tuple", my_type, ["tuple", "a pair"], 0.80)
 
-    if any(t in my_type for t in ("a dictionary", "dict")):
-        # a dictionary
-        result = BASE.copy()
-        result["confidence"] = 0.8  # OK
-        result["type"] = "Dict"
-        candidates.append(result)
+    candidates += simple_candidates(
+        "uint", my_type, ["unsigned integer", "unsigned int", "unsigned"], 0.84
+    )
 
-    if any(t in my_type for t in ("tuple", "a pair")):
-        result = BASE.copy()
-        result["type"] = "Tuple"
-        result["confidence"] = 0.8  # OK
-        candidates.append(result)
-
-    if any(num in my_type for num in ("unsigned integer", "unsigned int", "unsigned")):
-        # Assume unsigned are uint
-        result = BASE.copy()
-        result["type"] = "uint"
-        result["confidence"] = 0.84  # OK
-        candidates.append(result)
-
-    # Strong indicators of integers
-    if any(
-        num in my_type
-        for num in (
+    candidates += simple_candidates(
+        "int",
+        my_type,
+        [
             "number",
             "integer",
             "count",
             " int ",
             "0 or 1",
-        )
-    ):
-        # Assume numbers are signed int
-        result = BASE.copy()
-        result["type"] = "int"
-        result["confidence"] = 0.83  # OK
-        candidates.append(result)
-    # good but nor perfect indicatoers of integers
-    if any(
-        num in my_type
-        for num in (
+        ],
+        0.83,
+    )
+
+    # good but nor perfect indicators of integers
+    candidates += simple_candidates(
+        "int",
+        my_type,
+        [
             "length",
             "total size",
             "size of",
             "the index",
-        )
-    ):
-        # Assume sizes  are int
-        result = BASE.copy()
-        result["type"] = "int"
-        result["confidence"] = 0.95  # GOOD
-        candidates.append(result)
+        ],
+        0.95,
+    )
 
-    if any(
-        num in my_type
-        for num in (
+    # Assume numbers are signed int
+    candidates += simple_candidates(
+        "int",
+        my_type,
+        [
             "index",
             "**signed** value",
             "nanoseconds",
             "offset",
-        )
-    ):
-        # Assume numbers are signed int
-        result = BASE.copy()
-        result["type"] = "int"
-        result["confidence"] = 0.7  # OK
-        candidates.append(result)
+        ],
+        0.84,
+    )
 
-    if any(t in my_type for t in ("number of", "address of")):
-        result = BASE.copy()
-        result["type"] = "int"
-        result["confidence"] = 0.95  # better match than bytes and bytearray or object
-        candidates.append(result)
+    # better match than bytes and bytearray or object
+    candidates += simple_candidates("int", my_type, ["number of", "address of"], 0.95)
+    # better match than bytes
+    candidates += simple_candidates("bytearray", my_type, ["bytearray"], 0.83)
 
-    if any(t in my_type for t in ("bytearray",)):
-        result = BASE.copy()
-        result["type"] = "bytearray"
-        result["confidence"] = 0.83  # better match than bytes
-        candidates.append(result)
+    # OK, better than just string
+    candidates += simple_candidates("bytes", my_type, ["bytes", "byte string"], 0.81)
 
-    if any(t in my_type for t in ("bytes", "byte string")):
-        result = BASE.copy()
-        result["type"] = "bytes"
-        result["confidence"] = 0.81  # OK, better than just string
-        candidates.append(result)
+    candidates += simple_candidates("bool", my_type, ["boolean", "bool", "True", "False"], 0.8)
+    candidates += simple_candidates(
+        "float",
+        my_type,
+        ["float", "logarithm", "sine", "tangent", "exponential", "complex number", "phase"],
+        0.8,
+    )
 
-    if any(t in my_type for t in ("boolean", "bool", "True", "False")):
-        result = BASE.copy()
-        result["type"] = "bool"
-        result["confidence"] = 0.8  # OK
-        candidates.append(result)
+    candidates += simple_candidates("str", my_type, ["string"], 0.8)
 
-    if any(
-        t in my_type
-        for t in (
-            "float",
-            "logarithm",
-            "sine",
-            "tangent",
-            "exponential",
-            "complex number",
-            "phase",
-        )
-    ):
-        result = BASE.copy()
-        result["type"] = "float"
-        result["confidence"] = 0.8  # OK
-        candidates.append(result)
+    candidates += simple_candidates("str", my_type, ["name", "names"], 0.3)
+    ## TODO: "? contains 'None if there is no'  --> Union[Null, xxx]"
+    candidates += simple_candidates(
+        "None", my_type, ["``None``", "None"], 0.8, exclude=["previous value", "if there is no"]
+    )
 
-    if any(t in my_type for t in ("string",)):
-        result = BASE.copy()
-        result["type"] = "str"
-        result["confidence"] = 0.8  # OK
-        candidates.append(result)
+    candidates += object_candidates(my_type, 0.81)
 
-    if any(t in my_type for t in ("name", "names")):
-        result = BASE.copy()
-        result["type"] = "str"
-        result["confidence"] = 0.3  # name could be a string
-        candidates.append(result)
-
-    if any(t in my_type for t in ("``None``", "None")) and not "previous value" in my_type:
-        # avoid phrases such as 'None or previous value'
-        result = BASE.copy()
-        result["type"] = "None"
-        result["confidence"] = 0.8  # OK
-        candidates.append(result)
-
-    if any(t in my_type for t in ("Object", "object")):
-        # Return <multiple words object>
-        words = my_type.split(" ")
-        try:
-            i = words.index("Object")
-        except ValueError:
-            try:
-                i = words.index("object")
-            except ValueError:
-                # object is not a word, but is a part of a word
-                i = -1
-        if i >= 0:
-            object = words[i - 1]
-            if object in ("stream-like", "file"):
-                object = "IO"  # needs from typing import IO
-            elif object == "callback":
-                object = "Callable[..., Any]"
-                # todo: requires additional 'from typing import Callable'
-
-            # clean
-            object = re.sub(r"[^a-z.A-Z0-9]", "", object)
-            result = BASE.copy()
-            result["type"] = object
-            if object == "an":  # "Return an object"
-                result["type"] = "Any"
-                result["confidence"] = 0.9  # abstract , but very good
-            elif object[0].isupper():
-                result["confidence"] = 0.81  # Good  > better than Match None
-            else:
-                result["confidence"] = 0.5  # not so good
-            result["confidence"] = result["confidence"]
-            candidates.append(result)
-
-    if " " in my_type:
-        result = BASE.copy()
-        result = {"type": "Any", "confidence": 0.2}
-        candidates.append(result)
-    elif my_type[0].isdigit() or len(my_type) < 3 or my_type in ("them", "the", "immediately"):
-        # avoid short words, starts with digit, or a few detected
-        result = BASE.copy()
-        result = {"type": "Any", "confidence": 0.2}
-        candidates.append(result)
-
-    else:
-
-        assert not " " in my_type
-        assert not ":" in my_type
-        result = BASE.copy()
-        result["type"] = my_type
-        result["confidence"] = 0.1  # medium
-        candidates.append(result)
     return candidates
 
 
@@ -474,7 +366,7 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     # return the best candidate, or Any
     if len(candidates) > 0:
         candidates = sorted(candidates, key=lambda x: x["confidence"], reverse=True)
-        # print(candidates[0])
+        log.info(candidates[0])
         return candidates[0]  # best candidate
     else:
         return {"type": "Any", "confidence": 0, "match": None}
