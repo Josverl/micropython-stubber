@@ -86,6 +86,8 @@
     # if self.current_module in (name, f"u{name}"):
 
     # todo: Docbug # .. _class: Poll micropython\\docs\\library\\uselect.rst
+
+    # correct warnings for 'Unsupported escape sequence in string literal'
 """
 
 import json
@@ -203,9 +205,8 @@ class RSTReader:
 
         return True
 
-    # def read_textblock(self, n: int) -> Tuple[int, List[str]]:
-    def read_textblock(self) -> List[str]:
-        """Read a textblock that will be used as a docstring
+    def parse_docstring(self) -> List[str]:
+        """Read a textblock that will be used as a docstring, or used to process a toc tree
         The textblock is terminated at the following RST line structures/tags
             .. <anchor>
             -- Heading
@@ -359,16 +360,188 @@ class RSTReader:
             self.dedent()
         self.current_class = name
 
-    def parse_toc(self, n: int):
+    def parse_toc(self):
         "process table of content with additional rst files, and add / include them in the current module"
-        n += 1  # skip one line
-        toctree = self.read_textblock()
+        self.log(f"# {self.line.rstrip()}")
+        self.line_no += 1  # skip one line
+        toctree = self.parse_docstring()
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
-
+        # Now parse all files mentioned in the toc
         for file in toctree:
             self.read_file(Path("micropython/docs/library") / file.strip())
             self.parse()
+        # reset this file to done
+        self.rst_text = []
+        self.line_no = 1
+
+    def parse_module(self):
+        "parse a module tag and set the module's docstring"
+        self.log(f"# {self.line.rstrip()}")
+        self.current_module = self.line.split(SEPERATOR)[-1].strip()
+        self.current_function = self.current_class = ""
+        self.writeln(f"# origin: {self.filename}\n# {self.source_tag}")
+        # get module docstring
+        docstr = self.parse_docstring()
+        self.output_docstring(docstr)
+
+    def parse_current_module(self):
+        self.line_no += 1  # TODO: Why this line advance here ?
+        self.log(f"# {self.line.rstrip()}")
+        self.current_module = self.line.split(SEPERATOR)[-1].strip()
+        self.current_function = self.current_class = ""
+        self.log(f"# currentmodule:: {self.current_module}")
+        # maybe: check if same module
+        # maybe: read first block and do something with it
+
+    def parse_function(self):
+        self.log(f"# {self.line.rstrip()}")
+        this_function = self.line.split(SEPERATOR)[-1].strip()
+        docstr = self.parse_docstring()
+        name, params = this_function.split("(", maxsplit=1)
+        # Parse return type from docstring
+        ret_type = return_type_from_context(
+            docstring=docstr, signature=name, module=self.current_module
+        )
+        self.current_function = name
+        if name not in ("classmethod", "staticmethod"):
+            # ussl docstring uses a prefix
+            # remove module name from the start of the function name
+            if name.startswith(f"{self.current_module}."):
+                name = name[len(f"{self.current_module}.") :]
+            # fixup parameters
+            params = self.fix_parameters(params)
+            # assume no functions in classes
+            self.leave_class()
+            # if function name is the same as the module
+            # then this is probably documenting a class ()
+
+            if name in (self.current_module, f"u{self.current_module}"):
+                if self.verbose or self.__debug:
+                    self.writeln(f"{self.indent}# ..................................")
+                    self.writeln(f"{self.indent}# 'Promote' function to class: {name}")
+                # write a class header
+                self.output_class_hdr(name, params, docstr)
+            else:
+                self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
+                self.updent()
+                self.output_docstring(docstr)
+                self.writeln(f"{self.indent}...\n\n")
+                self.dedent()
+
+    def parse_class(self):
+        self.log(f"# {self.line.rstrip()}")
+        this_class = self.line.split(SEPERATOR)[-1].strip()
+        if "(" in this_class:
+            name, params = this_class.split("(", 2)
+        else:
+            name = this_class
+            params = ""
+        self.current_class = name
+        self.current_function = ""
+        # remove module name from the start of the class name
+        # TODO: utime / time U prefix in modules
+        if name.startswith(f"{self.current_module}."):
+            name = name[len(f"{self.current_module}.") :]
+        self.log(f"# class:: {name}")
+        # fixup parameters
+        params = self.fix_parameters(params)
+        docstr = self.parse_docstring()
+
+        if any(":noindex:" in line for line in docstr):
+            # if the class docstring contains ':noindex:' on any line then skip
+            self.log(f"# Skip :noindex: class {name}")
+        else:
+            # write a class header
+            self.output_class_hdr(name, params, docstr)
+
+    def parse_method(self):
+        name = ""
+        this_method = ""
+        params = ")"
+        ## py:staticmethod  - py:classmethod - py:decorator
+        # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
+        self.log(f"# {self.line.rstrip()}")
+        this_method = self.line.split(SEPERATOR)[1].strip()
+        try:
+            name, params = this_method.split("(", 1)  # split methodname from params
+        except ValueError:
+            name = this_method
+        self.current_function = name
+        # self.writeln(f"# method:: {name}")
+        # fixup optional [] parameters and other notations
+        params = self.fix_parameters(params)
+        if "." in name:
+            # todo deal with longer / deeper classes
+            class_name = name.split(".")[0]
+        else:
+            # if nothing specified lets assume part of current class
+            class_name = self.current_class
+        name = name.split(".")[-1]  # Take only the last part from Pin.toggle
+
+        # TODO: REFACTOR  __init__ logic
+        if name == "__init__" and self.no_explicit_init:
+            # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
+            self.line_no += 1
+        else:
+            # check: check if the class statement has already been started
+            if (
+                not class_name in self.current_class
+                and not class_name.lower() in self.current_class.lower()
+            ):
+                self.output_class_hdr(class_name, "", [])
+            docstr = self.parse_docstring()
+            # parse return type from docstring
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=name, module=self.current_module
+            )
+
+            if name == "__init__":
+                # explicitly documented __init__ ( only a few classes)
+                self.writeln(f"{self.indent}def {name}(self, {params} -> None:")
+                ...
+            elif re.search(r"\.\. classmethod::", self.line):
+                self.writeln(f"{self.indent}@classmethod")
+                self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
+                ...
+            elif re.search(r"\.\. staticmethod::", self.line):
+                self.writeln(f"{self.indent}@staticmethod")
+                self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
+                ...
+            else:
+                self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
+            self.updent()
+            self.output_docstring(docstr)
+            self.writeln(f"{self.indent}...\n")
+            self.dedent()
+
+    def parse_exception(self):
+        self.log(f"# {self.line.rstrip()}")
+        self.line_no += 1
+        name = self.line.split(SEPERATOR)[1].strip()
+        # TODO : check name scope : Module.class.<name>
+        if "." in name:
+            name = name.split(".")[-1]  # Take only the last part from Pin.toggle
+        self.writeln(f"{self.indent}class {name}(BaseException) : ...")
+
+        # class Exception(BaseException): ...
+
+    def parse_data(self):
+        self.log(f"# {self.line.rstrip()}")
+        self.line_no += 1
+        # todo: find a way to reliably add Constants at the correct level
+        # Note : makestubs has no issue with this
+
+        # this_const = line.split(SEPERATOR)[-1].strip()
+        # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
+        # type = "Any"
+        # # deal with documentation wildcards
+        # if "*" in name:
+        #     self.log(f"# fix constant {name}")
+        #     name = f"# {name}"
+
+        # self.writeln(f"{self.indent}{name} : {type} = None")
+        # self.dedent()
 
     def parse(self, depth: int = 0):
         self.depth = depth
@@ -376,187 +549,32 @@ class RSTReader:
         while self.line_no < len(self.rst_text):
             self.line = line = self.rst_text[self.line_no]
             #    self.writeln(">"+line)
+            if re.search(r"\.\. module::", self.line):
+                self.parse_module()
+            elif re.search(r"\.\. currentmodule::", self.line):
+                self.parse_current_module()
+            elif re.search(r"\.\. function::", self.line):
+                self.parse_function()
 
-            if re.search(r"\.\. module::", line):
-                self.log(f"# {line.rstrip()}")
-                this_module = line.split(SEPERATOR)[-1].strip()
-                self.writeln(f"# origin: {self.filename}\n# {self.source_tag}")
-                # get module docstring
-                self.current_module = this_module
-                self.current_function = self.current_class = ""
-                docstr = self.read_textblock()
-                self.output_docstring(docstr)
-
-            elif re.search(r"\.\. currentmodule::", line):
-                self.line_no += 1
-                self.log(f"# {line.rstrip()}")
-                this_module = line.split(SEPERATOR)[-1].strip()
-                self.log(f"# currentmodule:: {this_module}")
-                self.current_module = this_module
-                self.current_function = self.current_class = ""
-                # maybe: check if same module
-                # maybe: read first block and do something with it
-
-            elif re.search(r"\.\. function::", line):
-                self.log(f"# {line.rstrip()}")
-                this_function = line.split(SEPERATOR)[-1].strip()
-                docstr = self.read_textblock()
-                name, params = this_function.split("(", maxsplit=1)
-                # Parse return type from docstring
-                ret_type = return_type_from_context(
-                    docstring=docstr, signature=name, module=self.current_module
-                )
-                self.current_function = name
-                if name not in ("classmethod", "staticmethod"):
-                    # ussl docstring uses a prefix
-                    # remove module name from the start of the function name
-                    if name.startswith(f"{self.current_module}."):
-                        name = name[len(f"{self.current_module}.") :]
-                    # fixup optional [] variables
-                    params = self.fix_parameters(params)
-                    # assume no functions in classes
-                    self.leave_class()
-                    # if function name is the same as the module
-                    # then this is probably documenting a class ()
-
-                    if name in (self.current_module, f"u{self.current_module}"):
-                        if self.verbose or self.__debug:
-                            self.writeln(f"{self.indent}# ..................................")
-                            self.writeln(f"{self.indent}# 'Promote' function to class: {name}")
-                        # write a class header
-                        self.output_class_hdr(name, params, docstr)
-                    else:
-                        self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
-                        self.updent()
-                        self.output_docstring(docstr)
-                        self.writeln(f"{self.indent}...\n\n")
-                        self.dedent()
-
-            elif re.search(r"\.\. class::?", line):
-
-                self.log(f"# {line.rstrip()}")
-                this_class = line.split(SEPERATOR)[-1].strip()
-                name = this_class
-                params = ""
-                if "(" in this_class:
-                    name, params = this_class.split("(", 2)
-                self.current_class = name
-                self.current_function = ""
-                # remove module name from the start of the class name
-                if name.startswith(f"{self.current_module}."):
-                    name = name[len(f"{self.current_module}.") :]
-                self.log(f"# class:: {name}")
-                # fixup optional [] variables
-                params = self.fix_parameters(params)
-                docstr = self.read_textblock()
-
-                if any(":noindex:" in line for line in docstr):
-                    # if the class docstring contains ':noindex:' on any line then skip
-                    self.log(f"# Skip :noindex: class {name}")
-                else:
-                    # write a class header
-                    self.output_class_hdr(name, params, docstr)
-
+            elif re.search(r"\.\. class::?", self.line):
+                self.parse_class()
             elif (
                 re.search(r"\.\. method::", line)
                 or re.search(r"\.\. staticmethod::", line)
                 or re.search(r"\.\. classmethod::", line)
             ):
-                name = ""
-                this_method = ""
-                params = ")"
-                ## py:staticmethod  - py:classmethod - py:decorator
-                # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
-                self.log(f"# {line.rstrip()}")
-                this_method = line.split(SEPERATOR)[1].strip()
-                try:
-                    name, params = this_method.split("(", 1)  # split methodname from params
-                except ValueError:
-                    name = this_method
-                self.current_function = name
-                # self.writeln(f"# method:: {name}")
-                # fixup optional [] parameters and other notations
-                params = self.fix_parameters(params)
-                if "." in name:
-                    # todo deal with longer / deeper classes
-                    class_name = name.split(".")[0]
-                else:
-                    # if nothing specified lets assume part of current class
-                    class_name = self.current_class
-                name = name.split(".")[-1]  # Take only the last part from Pin.toggle
+                self.parse_method()
+            elif re.search(r"\.\. exception::", self.line):
+                self.parse_exception()
+            elif re.search(r"\.\. data::", self.line):
+                self.parse_data()
 
-                if name == "__init__" and self.no_explicit_init:
-                    # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
-                    self.line_no += 1
-                else:
-                    # check: check if the class statement has already been started
-                    if (
-                        not class_name in self.current_class
-                        and not class_name.lower() in self.current_class.lower()
-                    ):
-                        self.output_class_hdr(class_name, "", [])
-                    docstr = self.read_textblock()
-                    # parse return type from docstring
-                    ret_type = return_type_from_context(
-                        docstring=docstr, signature=name, module=self.current_module
-                    )
+            elif re.search(r"\.\. toctree::", self.line):
+                self.parse_toc()
+                # not this will be the end of this file processing.
 
-                    if name == "__init__":
-                        # explicitly documented __init__ ( only a few classes)
-                        self.writeln(f"{self.indent}def {name}(self, {params} -> None:")
-                        ...
-                    elif re.search(r"\.\. classmethod::", line):
-                        self.writeln(f"{self.indent}@classmethod")
-                        self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
-                        ...
-                    elif re.search(r"\.\. staticmethod::", line):
-                        self.writeln(f"{self.indent}@staticmethod")
-                        self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
-                        ...
-                    else:
-                        self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
-                    self.updent()
-                    self.output_docstring(docstr)
-                    self.writeln(f"{self.indent}...\n")
-                    self.dedent()
-
-            elif re.search(r"\.\. exception::", line):
-                self.log(f"# {line.rstrip()}")
-                self.line_no += 1
-                name = line.split(SEPERATOR)[1].strip()
-                if "." in name:
-                    name = name.split(".")[-1]  # Take only the last part from Pin.toggle
-                self.writeln(f"{self.indent}class {name}(BaseException) : ...")
-
-                # class Exception(BaseException): ...
-
-            elif re.search(r"\.\. data::", line):
-                self.log(f"# {line.rstrip()}")
-                self.line_no += 1
-                # todo: find a way to reliably add Constants at the correct level
-                # Note : makestubs has no issue with this
-
-                # self.updent()
-                # # BUG: check if this is the correct indentation for root level ?
-                # this_const = line.split(SEPERATOR)[-1].strip()
-                # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
-                # type = "Any"
-                # # deal with documentation wildcards
-                # if "*" in name:
-                #     self.log(f"# fix constant {name}")
-                #     name = f"# {name}"
-
-                # self.writeln(f"{self.indent}{name} : {type} = None")
-                # self.dedent()
-
-            elif re.search(r"\.\. toctree::", line):
-                self.log(f"# {line.rstrip()}")
-                self.parse_toc(self.line_no)
-                # reset to done
-                self.rst_text = []
-                self.line_no = 1
-            elif re.search(r"\.\. \w+::", line):
-                #
+            elif re.search(r"\.\. \w+::", self.line):
+                # something new / not yet parsed
                 self.log(f"# {line.rstrip()}")
                 print(_red(line.rstrip()))
                 self.line_no += 1
