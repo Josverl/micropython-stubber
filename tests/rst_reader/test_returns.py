@@ -31,7 +31,7 @@ def test_signatures(signature, docstring, expected_type, confidence):
 
 
 # read the tests cases from a json file to avoid needing to code all the different tests
-def return_type_testcases() -> List[Tuple[str, str, str, str, int]]:
+def return_type_testcases() -> List[Tuple[str, str, str, str]]:
     filename = Path("./tests/rst_reader/data/return_testcases.json")
     doc = []
     with open(filename, encoding="utf8") as fp:
@@ -40,19 +40,19 @@ def return_type_testcases() -> List[Tuple[str, str, str, str, int]]:
     for tc in doc:
         try:
             cases.append(
-                (tc["module"], tc["signature"], tc["docstring"], tc["type"], tc["confidence"])
+                # (tc["module"], tc["signature"], tc["docstring"], tc["type"], tc["confidence"])
+                (tc["type"], tc["module"], tc["signature"], tc["docstring"])
             )
         except KeyError:
             print("INVALID TEST DATA ERROR", tc)
     return cases
 
 
-@pytest.mark.parametrize(
-    "module, signature, docstring, expected_type, confidence", return_type_testcases()
-)
-def test_returns(module, signature, docstring, expected_type, confidence):
+@pytest.mark.parametrize("expected_type, module, signature, docstring", return_type_testcases())
+def test_returns(module, signature, docstring, expected_type):
     # return type should be included in the signature
     # except for classes
+    confidence = 0.1
     r = _type_from_context(docstring=docstring, signature=signature, module=module)
     assert r["type"] == expected_type
     # assert r["confidence"] >= confidence
