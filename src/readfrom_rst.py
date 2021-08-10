@@ -467,6 +467,7 @@ class RSTReader:
             name, params = this_method.split("(", 1)  # split methodname from params
         except ValueError:
             name = this_method
+            params = ""
         self.current_function = name
         # self.writeln(f"# method:: {name}")
         # fixup optional [] parameters and other notations
