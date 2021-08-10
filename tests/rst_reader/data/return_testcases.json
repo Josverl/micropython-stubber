@@ -855,33 +855,6 @@
         "function/method": "Pin.irq"
     },
     {
-        "signature": "Signal.value([x])",
-        "docstring": [
-            "   This method allows to set and get the value of the signal, depending on whether",
-            "   the argument ``x`` is supplied or not.",
-            "",
-            "   If the argument is omitted then this method gets the signal level, 1 meaning",
-            "   signal is asserted (active) and 0 - signal inactive.",
-            "",
-            "   If the argument is supplied then this method sets the signal level. The",
-            "   argument ``x`` can be anything that converts to a boolean. If it converts",
-            "   to ``True``, the signal is active, otherwise it is inactive.",
-            "",
-            "   Correspondence between signal being active and actual logic level on the",
-            "   underlying pin depends on whether signal is inverted (active-low) or not.",
-            "   For non-inverted signal, active status corresponds to logical 1, inactive -",
-            "   to logical 0. For inverted/active-low signal, active status corresponds",
-            "   to logical 0, while inactive - to logical 1."
-        ],
-        "docstring_len": 831,
-        "type": "bool",
-        "confidence": 0.30000000000000004,
-        "match": "<re.Match object; span=(33, 123), match='get the value of the signal, depending on whether>",
-        "module": "machine",
-        "class": "Signal",
-        "function/method": "Signal.value"
-    },
-    {
         "signature": "phase(z)",
         "docstring": [
             "   Returns the phase of the number ``z``, in the range (-pi, +pi]."
@@ -929,7 +902,7 @@
             "     from other resets."
         ],
         "docstring_len": 965,
-        "type": "NoReturn",
+        "type": "None",
         "confidence": 0.18000000000000002,
         "match": "<re.Match object; span=(865, 880), match='return `machine'>",
         "module": "machine",
@@ -970,7 +943,7 @@
             "   When setting the value this method returns ``None``."
         ],
         "docstring_len": 1664,
-        "type": "bool",
+        "type": "int",
         "confidence": 1.494,
         "match": "<re.Match object; span=(214, 292), match='returning 0 or 1 corresponding to low and high vo>",
         "module": "machine",
@@ -997,7 +970,7 @@
             "   to logical 0, while inactive - to logical 1."
         ],
         "docstring_len": 831,
-        "type": "bool",
+        "type": "int",
         "confidence": 0.30000000000000004,
         "match": "<re.Match object; span=(33, 123), match='get the value of the signal, depending on whether>",
         "module": "machine",
@@ -1090,7 +1063,7 @@
             "   The default optimisation level is usually level 0."
         ],
         "docstring_len": 839,
-        "type": "int",
+        "type": "Any",
         "confidence": 1.4400000000000002,
         "match": "<re.Match object; span=(116, 132), match='returns ``None``'>",
         "module": "micropython",
@@ -1106,7 +1079,7 @@
             "   the IRQ to its original state."
         ],
         "docstring_len": 216,
-        "type": "bool",
+        "type": "Any",
         "confidence": 0.36000000000000004,
         "match": "<re.Match object; span=(34, 64), match='Returns the previous IRQ state'>",
         "module": "pyb",

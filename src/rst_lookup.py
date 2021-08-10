@@ -7,30 +7,29 @@ Format: a dictionary with :
 
 """
 
-
 LOOKUP_LIST = {
-    "uctypes.bytearray_at": ("bytearray", 0.95),
-    "math.isnan": ("bool", 0.95),
-    "builtins.to_bytes": ("bytes", 0.95),
-    "builtins.from_bytes": ("int", 0.95),
     "builtins.bytes": ("bytes", 0.95),
-    "uctypes.bytes_at": ("bytes", 0.95),
+    "builtins.from_bytes": ("int", 0.95),
+    "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
-    "uos.listdir": ("List[Any]", 0.95),
-    "gc.enable": ("None", 0.95),
-    "gc.disable": ("None", 0.95),
     "gc.collect": ("None", 0.95),
-    "machine.reset": ("NoReturn", 0.95),  # never returns
-    "machine.soft_reset": ("NoReturn", 0.95),  # never returns
-    "machine.reset_cause": ("int", 0.95),
-    "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
-    "usys.exit": ("NoReturn", 0.95),  # never returns
+    "gc.disable": ("None", 0.95),
+    "gc.enable": ("None", 0.95),
     "lcd160cr.LCD160CR.set_power": ("None", 0.95),
+    "machine.deepsleep": ("None", 0.95),
+    "machine.reset_cause": ("int", 0.95),
+    "machine.reset": ("NoReturn", 0.95),  # never returns
+    "machine.Signal.value": ("int", 0.95),
+    "machine.soft_reset": ("NoReturn", 0.95),  # never returns
+    "math.isnan": ("bool", 0.95),
+    "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
+    "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
+    "uctypes.bytearray_at": ("bytearray", 0.95),
+    "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
+    "uos.listdir": ("List[Any]", 0.95),
     "uos.readblocks": ("Any", 0.95),  # no return type specified in the documentation
     "uos.writeblocks": ("Any", 0.95),  # no return type specified in the documentation
-    # "ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
-    # "": ("None", 0.95),
-    # "": ("None", 0.95),
+    "usys.exit": ("NoReturn", 0.95),  # never returns
 }
