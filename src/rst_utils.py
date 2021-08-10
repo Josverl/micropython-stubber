@@ -45,6 +45,16 @@ log = logging.getLogger(__name__)
 TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn, Generator, Iterator, Callable\n"
 BASE = {"type": "Any", "confidence": 0, "match": None}
 
+# Regexes
+
+# all regex matches stop at end of sentence:: . ! ? : ;
+# Look for "Return Value: xxxx"
+RE_RETURN_VALUE = r"Return value\s?:\s?(?P<return>[^.!?:;]*)"
+# Look for Returns , but no 'Information'
+RE_RETURN = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>[^.!?:;]*)"
+# Look for gets
+RE_GETS = r"Gets?\s(?P<return>[^.!?:;]*)"
+
 
 def dist_rate(i) -> float:
     """"""
@@ -176,8 +186,7 @@ def object_candidates(
             if object in ("stream-like", "file"):
                 object = "IO"  # needs from typing import IO
             elif object == "callback":
-                object = "Callable[..., Any]"
-                # todo: requires additional 'from typing import Callable'
+                object = "Callable[..., Any]"  # requires additional 'from typing import Callable'
             else:
                 # clean
                 object = re.sub(r"[^a-z.A-Z0-9]", "", object)
@@ -305,7 +314,6 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
         - use re to find phrases such as:
             - 'Returns ..... '
             - 'Gets  ..... '
-            - 'Reads .....
         - docstring is joined without newlines to simplify parsing
         - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
         - builds a list return type candidates
@@ -316,18 +324,13 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     if isinstance(docstring, list):
         # join with space to avoid ending at a newline
         docstring = " ".join(docstring)
-    # regex match stops at end of sentence:: . ! ? : ;
-    return_val_regex = r"Return value\s?:\s?(?P<return>[^.!?:;]*)"
-    return_regex = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>[^.!?:;]*)"
-    gets_regex = r"Gets?\s(?P<return>[^.!?:;]*)"
-    reads_regex = r"Read(?:s?,?)\s(?P<return>[^.!?:;]*)"
 
     # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
     weighted_regex = (
-        (return_val_regex, 3),
-        (return_regex, 1.8),
-        (gets_regex, 1.5),
-        (reads_regex, 1.0),
+        (RE_RETURN_VALUE, 3),
+        (RE_RETURN, 1.8),
+        (RE_GETS, 1.5),
+        #       (reads_regex, 1.0),
     )
     LIST_WEIGHT = 2.0
     # only the function name without the leading module
