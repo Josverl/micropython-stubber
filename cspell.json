@@ -1,4 +1,5 @@
 {
+    "version": "0.1",
     "dictionaryDefinitions": [
         {
             "name": "micropython",
@@ -13,5 +14,48 @@
                 "micropython"
             ]
         }
+    ],
+    "words": [
+        "adcs",
+        "adcx",
+        "adcy",
+        "aivar",
+        "braden",
+        "bufs",
+        "bufx",
+        "bufy",
+        "capsys",
+        "chdir",
+        "cpython",
+        "createstubs",
+        "dastultz",
+        "Decomp",
+        "fname",
+        "fwid",
+        "IPPROTO",
+        "josverl",
+        "loboris",
+        "markdownlint",
+        "mklink",
+        "mpls",
+        "mystubs",
+        "noindex",
+        "pfalcon",
+        "pybricks",
+        "pylintrc",
+        "pyright",
+        "pytest",
+        "pytests",
+        "reqs",
+        "stubfiles",
+        "stubgen",
+        "stuborder",
+        "testrepo",
+        "thonny",
+        "tinypico",
+        "toctree",
+        "typeshed",
+        "updent",
+        "writeln"
     ]
 }

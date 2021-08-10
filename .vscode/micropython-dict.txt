@@ -41,3 +41,5 @@ gzdict
 gmtime
 osdebug
 pybricks
+ucollection
+uhashlib
