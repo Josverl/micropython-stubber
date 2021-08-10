@@ -317,12 +317,18 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
         # join with space to avoid ending at a newline
         docstring = " ".join(docstring)
     # regex match stops at end of sentence:: . ! ? : ;
+    return_val_regex = r"Return value\s?:\s?(?P<return>[^.!?:;]*)"
     return_regex = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>[^.!?:;]*)"
     gets_regex = r"Gets?\s(?P<return>[^.!?:;]*)"
     reads_regex = r"Read(?:s?,?)\s(?P<return>[^.!?:;]*)"
 
     # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
-    weighted_regex = ((return_regex, 1.8), (gets_regex, 1.5), (reads_regex, 1.0))
+    weighted_regex = (
+        (return_val_regex, 3),
+        (return_regex, 1.8),
+        (gets_regex, 1.5),
+        (reads_regex, 1.0),
+    )
     LIST_WEIGHT = 2.0
     # only the function name without the leading module
     function_re = re.compile(r"[\w|.]+(?=\()")
