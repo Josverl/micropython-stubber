@@ -22,10 +22,14 @@
         - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
         - Cenerators, Iterators
         - Callable
+        - Imperative verbs used in docstrings have a strong correlation to return -> None
+        - Coroutines are identified based tag "This is a Coroutine". Then if the return type was Foo, it will be transformed to : Coroutine[Foo]
 
     The generated stub files are formatted using `black` and checked for validity using `pyright`
    
-    Not yet implemented 
+
+Not yet implemented 
+-------------------
     - Literals / constants
         -   documentation contains  repeated vars with the same indentation
         -  .. data:: IPPROTO_UDP
@@ -455,6 +459,12 @@ class RSTReader:
             # write a class header
             self.output_class_hdr(name, params, docstr)
 
+    def is_class_started(self, class_name: str) -> bool:
+        "Has the given class been started"
+        # a bit Q&D , only checks current class
+        # todo: deal with class-blocks
+        return class_name in self.current_class or class_name.lower() in self.current_class.lower()
+
     def parse_method(self):
         name = ""
         this_method = ""
@@ -480,41 +490,44 @@ class RSTReader:
             class_name = self.current_class
         name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-        # TODO: REFACTOR  __init__ logic
+        # quick bail out if explicit intis should not be considered
         if name == "__init__" and self.no_explicit_init:
-            # init is hardcoded , do not add it twice (? or dedent to add it as an overload ?)
+            # init is explicitly documented , do not add it twice (? or dedent to add it as an overload ?)
             self.line_no += 1
-        else:
-            # check: check if the class statement has already been started
-            if (
-                not class_name in self.current_class
-                and not class_name.lower() in self.current_class.lower()
-            ):
-                self.output_class_hdr(class_name, "", [])
-            docstr = self.parse_docstring()
-            # parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=name, module=self.current_module
-            )
+            return
 
-            if name == "__init__":
-                # explicitly documented __init__ ( only a few classes)
-                self.writeln(f"{self.indent}def {name}(self, {params} -> None:")
-                ...
-            elif re.search(r"\.\. classmethod::", self.line):
-                self.writeln(f"{self.indent}@classmethod")
-                self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
-                ...
-            elif re.search(r"\.\. staticmethod::", self.line):
-                self.writeln(f"{self.indent}@staticmethod")
-                self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
-                ...
-            else:
-                self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
-            self.updent()
-            self.output_docstring(docstr)
-            self.writeln(f"{self.indent}...\n")
-            self.dedent()
+        # check if the class statement has already been started
+        if not self.is_class_started(class_name):
+            self.output_class_hdr(class_name, "", [])
+
+        docstr = self.parse_docstring()
+        # parse return type from docstring
+        ret_type = return_type_from_context(
+            docstring=docstr, signature=name, module=self.current_module
+        )
+        # methods have 4 flavours
+        #   - __init__              (self,  <params>) -> None:
+        #   - classmethod           (cls,   <params>) -> <ret_type>:
+        #   - staticmethod          (       <params>) -> <ret_type>:
+        #   - all other methods     (self,  <params>) -> <ret_type>:
+        if name == "__init__":
+            self.writeln(f"{self.indent}def {name}(self, {params} -> None:")
+
+        elif re.search(r"\.\. classmethod::", self.line):
+            self.writeln(f"{self.indent}@classmethod")
+            self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
+
+        elif re.search(r"\.\. staticmethod::", self.line):
+            self.writeln(f"{self.indent}@staticmethod")
+            self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
+
+        else:
+            self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
+        # Now add the docstring
+        self.updent()
+        self.output_docstring(docstr)
+        self.writeln(f"{self.indent}...\n")
+        self.dedent()
 
     def parse_exception(self):
         self.log(f"# {self.line.rstrip()}")

@@ -36,14 +36,57 @@ todo:
 import logging
 import re
 from typing import Dict, List, Tuple, Union
-from rst_lookup import LOOKUP_LIST
+from rst_lookup import LOOKUP_LIST, NONE_VERBS
 
 # logging
 log = logging.getLogger(__name__)
 
-# all possibles
+# all possible Types needed
 TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn, Generator, Iterator, Callable\n"
-BASE = {"type": "Any", "confidence": 0, "match": None}
+
+# --------------------------------------
+# Confidence levels
+
+C_DEFAULT = 0  # Any , the default for all
+C_NONE = 0.1 + C_DEFAULT  # better than the default Any
+C_BASE = 0.1 + C_NONE  # the Base if a return type has been found
+
+C_STR_NAMES = 0.3
+
+C_GENERIC = 0.6
+C_DICT = C_GENERIC
+C_TUPLE = C_GENERIC
+C_LIST = C_GENERIC
+C_BOOL = C_GENERIC
+C_FLOAT = C_GENERIC
+C_STR = C_GENERIC
+
+C_NONE_RETURN = C_GENERIC
+C_OBJECTS = 0.01 + C_GENERIC
+
+C_BYTES = 0.01 + C_GENERIC
+C_BYTEARRAY = 0.03 + C_GENERIC
+C_INT = 0.03 + C_GENERIC
+C_UINT = 0.04 + C_GENERIC
+C_ITERATOR = 0.4 + C_GENERIC
+C_GENERATOR = 0.4 + C_GENERIC
+
+C_INT_SIZES = 0.5 + C_GENERIC  # better match than bytes and bytearray or object
+C_INT_LIKE = 0.5 + C_GENERIC
+
+C_LOOKUP = C_GENERIC + 1
+
+# --------------------------------------
+# Weights of the different Lookups
+WEIGHT_LOOPUPS = 3.0  # Lookup list weight factor
+WEIGHT_RETURN_VAL = 3.0  # Lookup list weight factor
+WEIGHT_RETURNS = 1.8  # for Docstring returns
+WEIGHT_GETS = 1.5  # For docstring Gets
+
+# --------------------------------------
+
+# base has a confidence that is
+BASE = {"type": "Any", "confidence": C_BASE, "match": None}
 
 # Regexes
 
@@ -202,6 +245,18 @@ def object_candidates(
     return candidates
 
 
+def has_none_verb(docstr: str) -> List:
+    "returns a None result if the docstring starts with a verb that indicates None"
+    docstr = docstr.strip().casefold()
+    if any(docstr.startswith(kw.casefold()) for kw in NONE_VERBS):
+        result = BASE.copy()
+        result["type"] = "None"
+        result["confidence"] = C_NONE  # better than the default Any
+        return [result]
+    else:
+        return []
+
+
 def distill_return(return_text: str) -> List[Dict]:
     """Find return type and confidence.
     Returns a list of possible types and confidence weighting.
@@ -218,15 +273,15 @@ def distill_return(return_text: str) -> List[Dict]:
     my_type = return_text.strip().rstrip(".")
     my_type = my_type.replace("`", "")
 
-    candidates += compound_candidates("Generator", my_type, ["generator"], 0.85)
-    candidates += compound_candidates("Iterator", my_type, ["iterator"], 0.85)
-    candidates += compound_candidates("List", my_type, ["a list of", "list of", "an array"], 0.80)
+    candidates += compound_candidates("Generator", my_type, ["generator"], C_GENERATOR)
+    candidates += compound_candidates("Iterator", my_type, ["iterator"], C_ITERATOR)
+    candidates += compound_candidates("List", my_type, ["a list of", "list of", "an array"], C_LIST)
 
-    candidates += simple_candidates("Dict", my_type, ["a dictionary", "dict"], 0.80)
-    candidates += simple_candidates("Tuple", my_type, ["tuple", "a pair"], 0.80)
+    candidates += simple_candidates("Dict", my_type, ["a dictionary", "dict"], C_DICT)
+    candidates += simple_candidates("Tuple", my_type, ["tuple", "a pair"], C_TUPLE)
 
     candidates += simple_candidates(
-        "uint", my_type, ["unsigned integer", "unsigned int", "unsigned"], 0.84
+        "uint", my_type, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
     )
 
     candidates += simple_candidates(
@@ -239,10 +294,11 @@ def distill_return(return_text: str) -> List[Dict]:
             " int ",
             "0 or 1",
         ],
-        0.83,
+        C_INT,
     )
 
     # good but nor perfect indicators of integers
+    # better match than bytes and bytearray or object
     candidates += simple_candidates(
         "int",
         my_type,
@@ -251,9 +307,13 @@ def distill_return(return_text: str) -> List[Dict]:
             "total size",
             "size of",
             "the index",
+            "number of",
+            "address of",
         ],
-        0.95,
+        C_INT_SIZES,
     )
+
+    candidates += simple_candidates("int", my_type, [], C_INT_SIZES)
 
     # Assume numbers are signed int
     candidates += simple_candidates(
@@ -265,34 +325,36 @@ def distill_return(return_text: str) -> List[Dict]:
             "nanoseconds",
             "offset",
         ],
-        0.84,
+        C_INT_LIKE,
     )
 
-    # better match than bytes and bytearray or object
-    candidates += simple_candidates("int", my_type, ["number of", "address of"], 0.95)
     # better match than bytes
-    candidates += simple_candidates("bytearray", my_type, ["bytearray"], 0.83)
+    candidates += simple_candidates("bytearray", my_type, ["bytearray"], C_BYTEARRAY)
 
     # OK, better than just string
-    candidates += simple_candidates("bytes", my_type, ["bytes", "byte string"], 0.81)
+    candidates += simple_candidates("bytes", my_type, ["bytes", "byte string"], C_BYTES)
 
-    candidates += simple_candidates("bool", my_type, ["boolean", "bool", "True", "False"], 0.8)
+    candidates += simple_candidates("bool", my_type, ["boolean", "bool", "True", "False"], C_BOOL)
     candidates += simple_candidates(
         "float",
         my_type,
         ["float", "logarithm", "sine", "tangent", "exponential", "complex number", "phase"],
-        0.8,
+        C_FLOAT,
     )
 
-    candidates += simple_candidates("str", my_type, ["string"], 0.8)
+    candidates += simple_candidates("str", my_type, ["string"], C_STR)
 
-    candidates += simple_candidates("str", my_type, ["name", "names"], 0.3)
+    candidates += simple_candidates("str", my_type, ["name", "names"], C_STR_NAMES)
     ## TODO: "? contains 'None if there is no'  --> Union[Null, xxx]"
     candidates += simple_candidates(
-        "None", my_type, ["``None``", "None"], 0.8, exclude=["previous value", "if there is no"]
+        "None",
+        my_type,
+        ["``None``", "None"],
+        C_NONE_RETURN,
+        exclude=["previous value", "if there is no"],
     )
 
-    candidates += object_candidates(my_type, 0.81)
+    candidates += object_candidates(my_type, C_OBJECTS)
 
     return candidates
 
@@ -326,38 +388,48 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
         docstring = " ".join(docstring)
 
     # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
+
     weighted_regex = (
-        (RE_RETURN_VALUE, 3),
-        (RE_RETURN, 1.8),
-        (RE_GETS, 1.5),
+        (RE_RETURN_VALUE, WEIGHT_RETURN_VAL),
+        (RE_RETURN, WEIGHT_RETURNS),
+        (RE_GETS, WEIGHT_GETS),
         #       (reads_regex, 1.0),
     )
-    LIST_WEIGHT = 2.0
+
     # only the function name without the leading module
     function_re = re.compile(r"[\w|.]+(?=\()")
 
-    matches: List[re.Match] = []
-    candidates: List[Dict] = []
+    # matches: List[re.Match] = []
+    candidates: List[Dict] = [{"match": "default", "type": "Any", "confidence": 0}]
 
     # if the signature contains a return type , then use that and do nothing else.
     if "->" in signature:
         sig_type = signature.split("->")[-1].strip(": ")
-        return {"type": sig_type, "confidence": LIST_WEIGHT, "match": signature}
+        return {"type": sig_type, "confidence": WEIGHT_LOOPUPS, "match": signature}
 
+    # ------------------------------------------------------
+    # lookup returns that cannot be found based on the docstring from the lookup list
     try:
         function_name = function_re.findall(signature)[0]
     except IndexError:
         function_name = signature.strip().strip(":()")
 
     function_name = ".".join((module, function_name))
-    # lookup a few in the lookup list
+
     if function_name in LOOKUP_LIST.keys():
         sig_type = LOOKUP_LIST[function_name][0]
         return {
             "type": LOOKUP_LIST[function_name][0],
-            "confidence": LOOKUP_LIST[function_name][1] * LIST_WEIGHT,
+            "confidence": C_LOOKUP * WEIGHT_LOOPUPS,
             "match": function_name,
         }
+    # ------------------------------------------------------
+    # parse the docstring for simple start verbs,
+    # and add them as a candidate
+    candidates += has_none_verb(docstring)
+
+    # ------------------------------------------------------
+    # parse the docstring for the regexes and weigh the results accordingly
     for weighted in weighted_regex:
 
         match_iter = re.finditer(weighted[0], docstring, re.MULTILINE | re.IGNORECASE)
@@ -372,10 +444,11 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
                 }
                 candidates.append(candidate)
     # Sort
+    candidates = sorted(candidates, key=lambda x: x["confidence"], reverse=True)
+    best = candidates[0]  # best candidate
+
+    if "This is a coroutine" in docstring and not "Coroutine" in best["type"]:
+        best["type"] = f"Coroutine[{best['type']}]"
+
     # return the best candidate, or Any
-    if len(candidates) > 0:
-        candidates = sorted(candidates, key=lambda x: x["confidence"], reverse=True)
-        log.info(candidates[0])
-        return candidates[0]  # best candidate
-    else:
-        return {"type": "Any", "confidence": 0, "match": None}
+    return best  # best candidate

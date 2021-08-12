@@ -6,16 +6,11 @@ Format: a dictionary with :
 - value : two-tuple with ( return type , priority )
 
 """
-
 LOOKUP_LIST = {
     "builtins.bytes": ("bytes", 0.95),
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
-    "gc.collect": ("None", 0.95),
-    "gc.disable": ("None", 0.95),
-    "gc.enable": ("None", 0.95),
-    "lcd160cr.LCD160CR.set_power": ("None", 0.95),
     "machine.deepsleep": ("None", 0.95),
     "machine.reset_cause": ("int", 0.95),
     "machine.reset": ("NoReturn", 0.95),  # never returns
@@ -24,12 +19,62 @@ LOOKUP_LIST = {
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
+    "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
+    "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
+    "ubluetooth.BLE.irq": ("Any", 0.95),  # never returns
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Any]", 0.95),
-    "uos.readblocks": ("Any", 0.95),  # no return type specified in the documentation
-    "uos.writeblocks": ("Any", 0.95),  # no return type specified in the documentation
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "usys.exit": ("NoReturn", 0.95),  # never returns
+    "utime.sleep_ms": ("Coroutine[None]", 0.95),  #
 }
+# if no type has been determined, and the docstring starts with one of these verbs, then assume the return type in None
+# - The starting word or words with a training space
+NONE_VERBS = [
+    "Activate ",
+    "Build a ",
+    "Cancel ",
+    "Clear ",
+    "Close ",
+    "cancel ",
+    "Configure ",
+    "Connect ",
+    "Deactivate ",
+    "De-initialises ",
+    "Deinitialises ",
+    "Delay ",
+    "Disable ",
+    "Display ",
+    "Disconnect ",
+    "Draw ",
+    "Enable ",
+    "Feed the ",
+    "Fill the ",
+    "Generate ",
+    "Initialise the ",
+    "Initialize ",  # US/UK spelling
+    "Issue a ",
+    "Load ",
+    "Modify ",
+    "Print ",
+    "Register ",
+    "Remove ",
+    "Rename ",
+    "Reset ",
+    "Resets ",
+    "Send ",
+    "Sends ",
+    "Set Pin ",
+    "Set the ",
+    "Sets",
+    "Show ",
+    "Stop ",
+    "Stops ",
+    "Sync ",
+    "Turn ",
+    "Wait ",
+    "Write ",
+    "Writes ",
+]
