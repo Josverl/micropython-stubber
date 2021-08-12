@@ -98,18 +98,34 @@ def test_rst_all(tmp_path, micropython_repo):
     assert x > 0, "should generate at least 1 file"
 
 
-EXP_10 = ["def wake_on_ext0(pin, level) -> Any:", "def wake_on_ext0(pin, level) -> Any:"]
+EXP_10 = [
+    "def wake_on_ext0(pin, level) -> Any:",
+    "def wake_on_ext0(pin, level) -> Any:",
+]
 
 
 @pytest.mark.parametrize(
     "filename, expected",
     [
-        ("tests/rst_reader/data/function_10.rst", EXP_10),
-        ("tests/rst_reader/data/function_11.rst", EXP_10),
-        ("tests/rst_reader/data/function_12.rst", EXP_10),
+        (
+            "tests/rst_reader/data/function_10.rst",
+            [
+                "def wake_on_ext0(pin, level) -> Any:",
+            ],
+        ),
+        (
+            "tests/rst_reader/data/function_11.rst",
+            [
+                "def wake_on_ext0(pin, level) -> Any:",
+            ],
+        ),
         (
             "tests/rst_reader/data/function_12.rst",
-            ["        Configure whether or not a touch will wake the device from sleep."],
+            [
+                "def wake_on_touch(wake) -> None:",
+                "        Configure whether or not a touch will wake the device from sleep.",
+                "def wake_on_ext0(pin, level) -> None:",
+            ],
         ),
     ],
 )
@@ -350,15 +366,39 @@ def test_find_return_type():
     ...
 
 
+@pytest.mark.skip(reason="test not yet built")
+def test_coroutine():
+    # {
+    #     "signature": "start_server(callback, host, port, backlog=5)",
+    #     "docstring": [
+    #         "    Start a TCP server on the given *host* and *port*.  The *callback* will be",
+    #         "    called with incoming, accepted connections, and be passed 2 arguments: reader",
+    #         "    and writer streams for the connection.",
+    #         "",
+    #         "    Returns a `Server` object.",
+    #         "",
+    #         "    This is a coroutine."
+    #     ],
+    #     "docstring_len": 257,
+    #     "type": "Server",
+    #     "confidence": 1.37052,
+    #     "match": "<re.Match object; span=(209, 234), match='Returns a `Server` object'>",
+    #     "module": "uasyncio",
+    #     "class": "",
+    #     "function/method": "start_server"
+    # }
+    # https://docs.python.org/3.5/library/typing.html#typing.Coroutine
+    ...
+
+
 def test_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
-    found = any("def deepsleep(time_ms: Optional[Any]) -> Any:" in line for line in content)
+    # return type omitted as this is tested seperately
+    found = any("def deepsleep(time_ms: Optional[Any]) -> " in line for line in content)
     assert found, "machine.deepsleep should be stubbed as a function"
-
     # # .. function:: deepsleep([time_ms])
-    # def deepsleep(time_ms: Optional[Any]) -> Any:
-    ...
+    # def deepsleep(time_ms: Optional[Any]) -> xxx:
 
 
 def test_usocket_class_def(rst_stubs: Path):

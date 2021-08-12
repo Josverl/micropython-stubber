@@ -37,7 +37,7 @@
             "   it should be closed separately (which is also mandatory to make sure that",
             "   data flushed from buffer to the underlying storage)."
         ],
-        "type": "Any",
+        "type": "None",
         "module": "btree",
         "confidence": 0
     },
@@ -1172,5 +1172,92 @@
         "module": "pyb",
         "class": "CAN",
         "function/method": "CAN.recv"
+    },
+    {
+        "signature": "SPI.recv(recv, *, timeout=5000)",
+        "docstring": [
+            "   Receive data on the bus:",
+            "",
+            "     - ``recv`` can be an integer, which is the number of bytes to receive,",
+            "       or a mutable buffer, which will be filled with received bytes.",
+            "     - ``timeout`` is the timeout in milliseconds to wait for the receive.",
+            "",
+            "   Return value: if ``recv`` is an integer then a new buffer of the bytes received,",
+            "   otherwise the same buffer that was passed in to ``recv``."
+        ],
+        "docstring_len": 392,
+        "type": "bytes",
+        "confidence": 2.2576,
+        "match": "<re.Match object; span=(254, 394), match='Return value: if ``recv`` is an integer then a ne>",
+        "module": "pyb",
+        "class": "SPI",
+        "function/method": "SPI.recv"
+    },
+    {
+        "signature": "Lock.acquire()",
+        "docstring": [
+            "    Wait for the lock to be in the unlocked state and then lock it in an atomic",
+            "    way.  Only one task can acquire the lock at any one time.",
+            "",
+            "    This is a coroutine."
+        ],
+        "docstring_len": 163,
+        "type": "Coroutine[None]",
+        "confidence": 0.1,
+        "match": "None",
+        "module": "uasyncio",
+        "class": "Lock",
+        "function/method": "Lock.acquire"
+    },
+    {
+        "signature": "open_connection(host, port)",
+        "docstring": [
+            "    Open a TCP connection to the given *host* and *port*.  The *host* address will be",
+            "    resolved using `socket.getaddrinfo`, which is currently a blocking call.",
+            "",
+            "    Returns a pair of streams: a reader and a writer stream.",
+            "    Will raise a socket-specific ``OSError`` if the host could not be resolved or if",
+            "    the connection could not be made.",
+            "",
+            "    This is a coroutine."
+        ],
+        "docstring_len": 369,
+        "type": "Coroutine[Tuple]",
+        "confidence": 1.4400000000000002,
+        "match": "<re.Match object; span=(168, 193), match='Returns a pair of streams'>",
+        "module": "uasyncio",
+        "class": "",
+        "function/method": "open_connection"
+    },
+    {
+        "signature": "writeblocks(block_num, buf)",
+        "docstring": [
+            "                writeblocks(block_num, buf, offset)",
+            "",
+            "        The first form writes aligned, multiples of blocks, and requires that the",
+            "        blocks that are written to be first erased (if necessary) by this method.",
+            "        Starting at the block given by the index *block_num*, write blocks from",
+            "        *buf* (an array of bytes) to the device.",
+            "        The number of blocks to write is given by the length of *buf*,",
+            "        which will be a multiple of the block size.",
+            "",
+            "        The second form allows writing at arbitrary locations within a block,",
+            "        and arbitrary lengths.  Only the bytes being written should be changed,",
+            "        and the caller of this method must ensure that the relevant blocks are",
+            "        erased via a prior ``ioctl`` call.",
+            "        Starting at block index *block_num*, and byte offset within that block",
+            "        of *offset*, write bytes from *buf* (an array of bytes) to the device.",
+            "        The number of bytes to write is given by the length of *buf*.",
+            "",
+            "        Note that implementations must never implicitly erase blocks if the offset",
+            "        argument is specified, even if it is zero."
+        ],
+        "docstring_len": 1096,
+        "type": "Any",
+        "confidence": 2.8499999999999996,
+        "match": "uos.writeblocks",
+        "module": "uos",
+        "class": "AbstractBlockDev",
+        "function/method": "writeblocks"
     }
 ]
