@@ -42,7 +42,7 @@ from rst_lookup import LOOKUP_LIST, NONE_VERBS
 log = logging.getLogger(__name__)
 
 # all possible Types needed
-TYPING_IMPORT = "from typing import Any, Dict, IO, List, Optional, Tuple, Union, NoReturn, Generator, Iterator, Callable\n"
+TYPING_IMPORT = "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union\n"
 
 # --------------------------------------
 # Confidence levels
@@ -447,8 +447,11 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     candidates = sorted(candidates, key=lambda x: x["confidence"], reverse=True)
     best = candidates[0]  # best candidate
 
-    if "This is a coroutine" in docstring and not "Coroutine" in best["type"]:
-        best["type"] = f"Coroutine[{best['type']}]"
+    # ref: https://docs.python.org/3/library/typing.html#typing.Coroutine
+    # Coroutine[YieldType, SendType, ReturnType]
+    # todo: sanity check against actual code .....
+    if "This is a coroutine" in docstring and not "Coroutine" in str(best["type"]):  # type: ignore
+        best["type"] = f"Coroutine[{best['type']}, Any, Any]"
 
     # return the best candidate, or Any
     return best  # best candidate
