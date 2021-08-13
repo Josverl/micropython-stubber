@@ -88,7 +88,9 @@ WEIGHT_GETS = 1.5  # For docstring Gets
 # base has a confidence that is
 BASE = {"type": "Any", "confidence": C_BASE, "match": None}
 
+# --------------------------------------
 # Regexes
+# --------------------------------------
 
 # all regex matches stop at end of sentence:: . ! ? : ;
 # Look for "Return Value: xxxx"
@@ -97,6 +99,12 @@ RE_RETURN_VALUE = r"Return value\s?:\s?(?P<return>[^.!?:;]*)"
 RE_RETURN = r"Return(?:s?,?|(?:ing)?)\s(?!information)(?P<return>[^.!?:;]*)"
 # Look for gets
 RE_GETS = r"Gets?\s(?P<return>[^.!?:;]*)"
+
+# --------------------------------------
+# Regex for Literals
+# --------------------------------------
+RE_LIT_AS_A = r"as a\s?(?P<return>[^.!?:;]*)"
+RE_LIT_SENTENCE = r"\s?(?P<return>[^.!?:;]*)"
 
 
 def dist_rate(i) -> float:
@@ -107,9 +115,12 @@ def dist_rate(i) -> float:
     return linear
 
 
+WORD_TERMINATORS = ".,!;:?"
+
+
 def simple_candidates(
     type: str,
-    my_type: str,
+    match_string: str,
     keywords: List[str],
     rate: float = 0.5,
     exclude: List[str] = [],
@@ -119,13 +130,23 @@ def simple_candidates(
     Case sensitive
     """
     candidates = []
-    if not any(t in my_type for t in keywords) or any(t in my_type for t in exclude):
+    if not any(t in match_string for t in keywords) or any(t in match_string for t in exclude):
         # quick bailout , there are no matches, or there is an exclude
         return []
+
+    #  word matching
+    match_words = [w.strip(WORD_TERMINATORS) for w in match_string.split()]
+    #  kw =  single word -
     for kw in keywords:
-        i = my_type.find(kw)
-        if i < 0:
-            continue
+        i = match_string.find(kw)
+        if not " " in kw:
+            # single keyword
+            if not kw in match_words:
+                continue
+        else:
+            # key phrase
+            if i < 0:
+                continue
         # Assume unsigned are uint
         result = BASE.copy()
         result["type"] = type
@@ -137,7 +158,7 @@ def simple_candidates(
 
 def compound_candidates(
     type: str,
-    my_type: str,
+    match_string: str,
     keywords: List[str],
     rate: float = 0.85,
     exclude: List[str] = [],
@@ -147,20 +168,30 @@ def compound_candidates(
     Case sensitive
     """
     candidates = []
-    if not any(t in my_type for t in keywords) or any(t in my_type for t in exclude):
+    if not any(t in match_string for t in keywords) or any(t in match_string for t in exclude):
         # quick bailout , there are no matches, or there is an exclude
         return []
+
+    #  word matching
+    match_words = [w.strip(WORD_TERMINATORS) for w in match_string.split()]
+    #  kw =  single word -
     for kw in keywords:
-        i = my_type.find(kw)
-        if i < 0:
-            continue
+        i = match_string.find(kw)
+        if not " " in kw:
+            # single keyword
+            if not kw in match_words:
+                continue
+        else:
+            # key phrase
+            if i < 0:
+                continue
         # List / Dict / Generator of Any / Tuple /
         sub = None
         result = BASE.copy()
         confidence = rate
         for element in ("tuple", "string", "unsigned", "int"):
-            if element in my_type.casefold():
-                j = my_type.find(element)
+            if element in match_string.casefold():
+                j = match_string.find(element)
                 if i == j:
                     # do not match on the same main and sub
                     continue
@@ -191,7 +222,7 @@ def compound_candidates(
 
 
 def object_candidates(
-    my_type: str,
+    match_string: str,
     rate: float = 0.81,
     exclude: List[str] = [],
 ):
@@ -206,11 +237,11 @@ def object_candidates(
         "object",
     ]  # Q&D
 
-    if not any(t in my_type for t in keywords) or any(t in my_type for t in exclude):
+    if not any(t in match_string for t in keywords) or any(t in match_string for t in exclude):
         # quick bailout , there are no matches, or there is an exclude
         return []
     for kw in keywords:
-        i = my_type.find(kw)
+        i = match_string.find(kw)
         if i < 0:
             continue
         # List / Dict / Generator of Any / Tuple /
@@ -219,7 +250,7 @@ def object_candidates(
         confidence = rate
 
         # did the word actually occur, or is it just a partial
-        words = my_type.split(" ")  # Return <multiple words object>
+        words = match_string.split(" ")  # Return <multiple words object>
         if kw in words:
             pos = words.index(kw)
             if pos == 0:
@@ -269,29 +300,50 @@ def distill_return(return_text: str) -> List[Dict]:
     """
     candidates = [BASE]  # Default to the base , which is 'Any'
 
-    # clean up my_type
-    my_type = return_text.strip().rstrip(".")
-    my_type = my_type.replace("`", "")
+    # clean up match_string
+    match_string = return_text.strip().rstrip(".")
+    match_string = match_string.replace("`", "")
 
-    candidates += compound_candidates("Generator", my_type, ["generator"], C_GENERATOR)
-    candidates += compound_candidates("Iterator", my_type, ["iterator"], C_ITERATOR)
-    candidates += compound_candidates("List", my_type, ["a list of", "list of", "an array"], C_LIST)
-
-    candidates += simple_candidates("Dict", my_type, ["a dictionary", "dict"], C_DICT)
-    candidates += simple_candidates("Tuple", my_type, ["tuple", "a pair"], C_TUPLE)
+    candidates += compound_candidates("Generator", match_string, ["generator"], C_GENERATOR)
+    candidates += compound_candidates("Iterator", match_string, ["iterator"], C_ITERATOR)
+    candidates += compound_candidates(
+        "List", match_string, ["a list of", "list of", "an array"], C_LIST
+    )
 
     candidates += simple_candidates(
-        "uint", my_type, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
+        "Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT
+    )
+    candidates += simple_candidates(
+        "Tuple",
+        match_string,
+        [
+            "tuple",
+            "a pair",
+            "1-tuple",
+            "2-tuple",
+            "3-tuple",
+            "4-tuple",
+            "5-tuple",
+            "6-tuple",
+            "7-tuple",
+            "8-tuple",
+            "9-tuple",
+        ],
+        C_TUPLE,
+    )
+
+    candidates += simple_candidates(
+        "uint", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
     )
 
     candidates += simple_candidates(
         "int",
-        my_type,
+        match_string,
         [
             "number",
             "integer",
             "count",
-            " int ",
+            "int",
             "0 or 1",
         ],
         C_INT,
@@ -301,7 +353,7 @@ def distill_return(return_text: str) -> List[Dict]:
     # better match than bytes and bytearray or object
     candidates += simple_candidates(
         "int",
-        my_type,
+        match_string,
         [
             "length",
             "total size",
@@ -309,64 +361,87 @@ def distill_return(return_text: str) -> List[Dict]:
             "the index",
             "number of",
             "address of",
+            "the duration",
         ],
         C_INT_SIZES,
     )
 
-    candidates += simple_candidates("int", my_type, [], C_INT_SIZES)
+    candidates += simple_candidates("int", match_string, [], C_INT_SIZES)
 
     # Assume numbers are signed int
     candidates += simple_candidates(
         "int",
-        my_type,
+        match_string,
         [
             "index",
             "**signed** value",
+            "seconds",
             "nanoseconds",
+            "millisecond",
             "offset",
         ],
         C_INT_LIKE,
     )
 
     # better match than bytes
-    candidates += simple_candidates("bytearray", my_type, ["bytearray"], C_BYTEARRAY)
+    candidates += simple_candidates("bytearray", match_string, ["bytearray"], C_BYTEARRAY)
 
     # OK, better than just string
-    candidates += simple_candidates("bytes", my_type, ["bytes", "byte string"], C_BYTES)
+    candidates += simple_candidates("bytes", match_string, ["bytes", "byte string"], C_BYTES)
 
-    candidates += simple_candidates("bool", my_type, ["boolean", "bool", "True", "False"], C_BOOL)
+    candidates += simple_candidates(
+        "bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL
+    )
     candidates += simple_candidates(
         "float",
-        my_type,
-        ["float", "logarithm", "sine", "tangent", "exponential", "complex number", "phase"],
+        match_string,
+        [
+            "float",
+            "logarithm",
+            "sine",
+            "cosine",
+            "tangent",
+            "exponential",
+            "complex number",
+            "phase",
+            "ratio of",
+        ],
         C_FLOAT,
     )
 
-    candidates += simple_candidates("str", my_type, ["string"], C_STR)
+    candidates += simple_candidates(
+        "str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR
+    )
 
-    candidates += simple_candidates("str", my_type, ["name", "names"], C_STR_NAMES)
+    candidates += simple_candidates("str", match_string, ["name", "names"], C_STR_NAMES)
     ## TODO: "? contains 'None if there is no'  --> Union[Null, xxx]"
     candidates += simple_candidates(
         "None",
-        my_type,
+        match_string,
         ["``None``", "None"],
         C_NONE_RETURN,
         exclude=["previous value", "if there is no"],
     )
 
-    candidates += object_candidates(my_type, C_OBJECTS)
+    candidates += object_candidates(match_string, C_OBJECTS)
 
     return candidates
 
 
-def return_type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str):
+def return_type_from_context(
+    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+):
     try:
-        return _type_from_context(module=module, signature=signature, docstring=docstring)["type"]
+        return _type_from_context(
+            module=module, signature=signature, docstring=docstring, literal=literal
+        )["type"]
     except Exception:
         return "Any"
 
 
-def _type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str):
+def _type_from_context(
+    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+):
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -389,12 +464,18 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
 
     # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
 
-    weighted_regex = (
-        (RE_RETURN_VALUE, WEIGHT_RETURN_VAL),
-        (RE_RETURN, WEIGHT_RETURNS),
-        (RE_GETS, WEIGHT_GETS),
-        #       (reads_regex, 1.0),
-    )
+    if not literal:
+        weighted_regex = [
+            (RE_RETURN_VALUE, WEIGHT_RETURN_VAL),
+            (RE_RETURN, WEIGHT_RETURNS),
+            (RE_GETS, WEIGHT_GETS),
+            #       (reads_regex, 1.0),
+        ]
+    else:
+        weighted_regex = [
+            (RE_LIT_AS_A, 1.0),
+            (RE_LIT_SENTENCE, 2.0),
+        ]
 
     # only the function name without the leading module
     function_re = re.compile(r"[\w|.]+(?=\()")

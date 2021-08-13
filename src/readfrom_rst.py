@@ -118,7 +118,7 @@ def _red(*args) -> str:
     return _color(91, *args)
 
 
-# self.gather_docs = True
+#: self.gather_docs = True
 SEPERATOR = "::"
 
 
@@ -335,12 +335,17 @@ class RSTReader:
         # formatting
         return params
 
-    def output_docstring(self, docstr):
-        # if len(docstr) > 0:
-        self.writeln(f'{self.indent}"""')
-        for l in docstr:
-            self.writeln(f"{self.indent}{l}")
-        self.writeln(f'{self.indent}"""')
+    def output_docstring(self, docstr: List[str], as_comment: bool = False):
+        "output the docstring as a string or comment (for module constants and variables"
+        if as_comment:
+            for l in docstr:
+                self.writeln(f"{self.indent}#: {l}")
+        else:
+            self.writeln(f'{self.indent}"""')
+            for l in docstr:
+                self.writeln(f"{self.indent}{l}")
+            self.writeln(f'{self.indent}"""')
+        # below is only to gather docstrings for analysis during development
         if self.gather_docs and len(docstr) > 0:
             self.return_info.append(
                 (self.current_module, self.current_class, self.current_function, self.line, docstr)
@@ -540,22 +545,70 @@ class RSTReader:
 
         # class Exception(BaseException): ...
 
+    def parse_name(self, line: str = None):
+        "get the constant/function/class name from a line with an identifier"
+
+        # this_const = self.line.split(SEPERATOR)[-1].strip()
+        # name = this_const
+        # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
+
+        if line:
+            return line.split(SEPERATOR)[-1].strip()
+        else:
+            return self.line.split(SEPERATOR)[-1].strip()
+
+    def parse_names(self, id: str):
+        """get a list of constant/function/class names from and following a line with an identifier
+        advances the linecounter
+        """
+        names: List[str] = [] + self.parse_name().split(",")
+
+        col = self.line.index(id) + len(id) + 1  # get the col of the ID in the RST text
+        counter = 1
+        while (
+            self.line_no + counter <= self.max_line
+            and self.rst_text[self.line_no + counter].startswith(" " * col)
+            and not self.rst_text[self.line_no + counter][col + 1].isspace()
+        ):
+            # print("Sequence detected")
+            names.append(self.parse_name(self.rst_text[self.line_no + counter]))
+            counter += 1
+        # now advance the linecounter
+        self.line_no += counter - 1
+        # clean up before returning
+        return [n.strip() for n in names if n.strip() != "etc."]
+
     def parse_data(self):
-        self.log(f"# {self.line.rstrip()}")
-        self.line_no += 1
         # todo: find a way to reliably add Constants at the correct level
         # Note : makestubs has no issue with this
+        id = ".. data::"
+        self.log(f"# {self.line.rstrip()}")
 
-        # this_const = line.split(SEPERATOR)[-1].strip()
-        # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
-        # type = "Any"
-        # # deal with documentation wildcards
-        # if "*" in name:
-        #     self.log(f"# fix constant {name}")
-        #     name = f"# {name}"
+        # Get one or more names
+        names = self.parse_names(id)
 
-        # self.writeln(f"{self.indent}{name} : {type} = None")
-        # self.dedent()
+        # get module docstring
+        docstr = self.parse_docstring()
+
+        # use the docstring as a comment
+        # ref : https://stackoverflow.com/questions/8820276/docstring-for-variable
+
+        self.output_docstring(docstr, as_comment=True)
+        # deal with documentation wildcards
+        for name in names:
+            if "*" in name:
+                self.log(f"# fix constant {name}")
+                name = f"# {name}"
+            type = return_type_from_context(
+                docstring=docstr, signature=name, module=self.current_module, literal=True
+            )
+            if type in ["None"]:  # None does not make sense
+                type = "Any"  # perhaps default to Int ?
+            if not "." in name:
+                self.writeln(f"{name} : {type}")  # Note : explicitly not indented !
+            else:
+                print(_red(f"todo: class constant : {name}"))
+                self.writeln(f"# {self.indent}{name} : {type}")
 
     def parse(self, depth: int = 0):
         self.depth = depth
