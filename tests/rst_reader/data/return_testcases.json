@@ -1202,7 +1202,7 @@
             "    This is a coroutine."
         ],
         "docstring_len": 163,
-        "type": "Coroutine[None]",
+        "type": "Coroutine[None, Any, Any]",
         "confidence": 0.1,
         "match": "None",
         "module": "uasyncio",
@@ -1222,7 +1222,7 @@
             "    This is a coroutine."
         ],
         "docstring_len": 369,
-        "type": "Coroutine[Tuple]",
+        "type": "Coroutine[Tuple, Any, Any]",
         "confidence": 1.4400000000000002,
         "match": "<re.Match object; span=(168, 193), match='Returns a pair of streams'>",
         "module": "uasyncio",
@@ -1259,5 +1259,19 @@
         "module": "uos",
         "class": "AbstractBlockDev",
         "function/method": "writeblocks"
+    },
+    {
+        "signature": "match.group(index)",
+        "docstring": [
+            "   Return matching (sub)string. *index* is 0 for entire match,",
+            "   1 and above for each capturing group. Only numeric groups are supported."
+        ],
+        "docstring_len": 135,
+        "type": "str",
+        "confidence": 1.3056,
+        "match": "<re.Match object; span=(3, 30), match='Return matching (sub)string'>",
+        "module": "ure",
+        "class": "match",
+        "function/method": "match.group"
     }
 ]
