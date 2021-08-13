@@ -6,11 +6,13 @@ Format: a dictionary with :
 - value : two-tuple with ( return type , priority )
 
 """
+
 LOOKUP_LIST = {
     "builtins.bytes": ("bytes", 0.95),
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
+    "gc.collect": ("None", 0.95),
     "machine.deepsleep": ("None", 0.95),
     "machine.reset_cause": ("int", 0.95),
     "machine.reset": ("NoReturn", 0.95),  # never returns
@@ -28,8 +30,13 @@ LOOKUP_LIST = {
     "uos.listdir": ("List[Any]", 0.95),
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "usys.exit": ("NoReturn", 0.95),  # never returns
-    "utime.sleep_ms": ("Coroutine[None]", 0.95),  #
+    "utime.sleep_ms": (
+        "Coroutine[None, None, None]",  # Micropython V1.15+ ?
+        0.95,
+    ),  # class typing.Coroutine(Awaitable[V_co], Generic[T_co, T_contra, V_co])
 }
+
+
 # if no type has been determined, and the docstring starts with one of these verbs, then assume the return type in None
 # - The starting word or words with a training space
 NONE_VERBS = [
