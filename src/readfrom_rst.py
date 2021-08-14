@@ -557,13 +557,17 @@ class RSTReader:
         else:
             return self.line.split(SEPERATOR)[-1].strip()
 
-    def parse_names(self, id: str):
+    def parse_names(self):
         """get a list of constant/function/class names from and following a line with an identifier
         advances the linecounter
         """
         names: List[str] = [] + self.parse_name().split(",")
 
-        col = self.line.index(id) + len(id) + 1  # get the col of the ID in the RST text
+        m = re.search(r"..\s?\w+\s?::\s?", self.line)
+        if m:
+            col = m.end()
+        else:
+            raise KeyError
         counter = 1
         while (
             self.line_no + counter <= self.max_line
@@ -581,11 +585,9 @@ class RSTReader:
     def parse_data(self):
         # todo: find a way to reliably add Constants at the correct level
         # Note : makestubs has no issue with this
-        id = ".. data::"
         self.log(f"# {self.line.rstrip()}")
-
         # Get one or more names
-        names = self.parse_names(id)
+        names = self.parse_names()
 
         # get module docstring
         docstr = self.parse_docstring()
