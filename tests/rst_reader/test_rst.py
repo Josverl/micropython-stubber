@@ -1,8 +1,10 @@
 # others
-from typing import Dict, List
+from typing import Dict, List, Union
 import pytest
 from pathlib import Path
 import basicgit as git
+
+from helpers import load_rst, read_stub
 
 # SOT
 from readfrom_rst import generate_from_rst, RSTReader, TYPING_IMPORT
@@ -55,21 +57,6 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
     x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
     yield dst_folder
     # cleanup code here
-
-
-###################################################################################################
-# Helper
-####################################################################################################
-
-
-def read_stub(folder, stubname):
-    "Read the content of a generated stub"
-    file = list(folder.rglob(stubname))[0]
-    content = []
-    if file:
-        with open(file) as f:
-            content = f.readlines()
-    return content
 
 
 ###################################################################################################
@@ -153,29 +140,30 @@ CLASS_10 = [
 
 
 @pytest.mark.parametrize(
-    "filename, expected",
+    "line",
     [
-        ("tests/rst_reader/data/class_10.rst", CLASS_10),
-        ("tests/rst_reader/data/class_10.rst", ["    def info(self, ) -> Tuple:"]),
-        (
-            "tests/rst_reader/data/class_10.rst",
-            ["    def readblocks(self, block_num, buf) -> Any:"],
-        ),
+        "class Partition:",
+        "    def __init__(self, id) -> None:",
+        "    @classmethod",
+        "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
+        "    def info(self) -> Tuple:",
+        "    def readblocks(self, block_num, buf) -> Any:",
+        "    def writeblocks(self, block_num, buf) -> Any:",
     ],
 )
-def test_rst_parse_class(filename, expected):
+# def test_rst_parse_class_10(expected: List[str]):
+def test_rst_parse_class_10(line: str):
     # testcase = FN_1
     r = RSTReader()
-    r.read_file(Path(filename))
+    r.read_file(Path("tests/rst_reader/data/class_10.rst"))
     # process
     r.parse()
+    r._cleanup()  # cleanup output
     # check if each expected line appears in the output
     # there can be more
 
     assert len(r.output) > 1
-    for line in expected:
-        assert line in [l.rstrip() for l in r.output], f"did not generate : '{line}'"
-        # todo: also check order
+    assert line in [l.rstrip() for l in r.output], f"did not generate : '{line}'"
 
 
 @pytest.mark.parametrize(
@@ -277,7 +265,7 @@ def test_pyright_reportGeneralTypeIssues(pyright, capsys):
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     # TODO: 1 known issue
-    # 'Cannot access member "MSB" for type "Type[SPI]"\n\xa0\xa0Member "MSB" is unknown'
+    # 'Cannot access member "MSB" for type "Type[SPI]" 'Member "MSB" is unknown'
     assert len(issues) == 1, "there should be no type issues"
 
 
@@ -311,84 +299,6 @@ def test_pyright_obscured_definitions(pyright, capsys):
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     # TODO:  ure.py 'Function declaration "match" is obscured by a declaration of the same name'
     assert len(issues) == 1, "no redefinitions that obscure earlier defs"
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_dup_init():
-    #  classes with multiple __init__ methods
-    # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_Flash_init_overload():
-    # "pyb.Flash_init_overload is generated"
-    # class Flash:
-    #     """
-    #     :noindex:
-    #     Create and return a block device that accesses the flash at the specified offset. The length defaults to the remaining size of the device.
-    #     The *start* and *len* offsets are in bytes, and must be a multiple of the block size (typically 512 for internal flash).
-    #     """
-    #     def __init__(self, *, start=-1, len=-1) -> None:
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_data_module_level():
-    "all modules should have a docstring"
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_data_class_level():
-    "all classes should have a docstring"
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_exception():
-    # exception:: AssertionError
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_undocumented_class():
-    # percentage of classes with docstring
-    # list classes without a docstring
-    # >> similar for function / methods
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_find_return_type():
-    # check return types for a number of known functions / methods
-    # check % return type !=  Any ?
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_coroutine():
-    # {
-    #     "signature": "start_server(callback, host, port, backlog=5)",
-    #     "docstring": [
-    #         "    Start a TCP server on the given *host* and *port*.  The *callback* will be",
-    #         "    called with incoming, accepted connections, and be passed 2 arguments: reader",
-    #         "    and writer streams for the connection.",
-    #         "",
-    #         "    Returns a `Server` object.",
-    #         "",
-    #         "    This is a coroutine."
-    #     ],
-    #     "docstring_len": 257,
-    #     "type": "Server",
-    #     "confidence": 1.37052,
-    #     "match": "<re.Match object; span=(209, 234), match='Returns a `Server` object'>",
-    #     "module": "uasyncio",
-    #     "class": "",
-    #     "function/method": "start_server"
-    # }
-    # https://docs.python.org/3.5/library/typing.html#typing.Coroutine
-    ...
 
 
 def test_deepsleep_stub(rst_stubs):
