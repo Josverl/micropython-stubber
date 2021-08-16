@@ -132,7 +132,7 @@ class RSTReader:
         self.line_no: int = 0  # current Linenumber used during parsing.
         self.filename = ""
 
-        self.line = ""  # class / method/ function line being parsed
+        # self.line = ""  # class / method/ function line being parsed
         self.current_module = ""
         self.current_class = ""
         self.current_function = ""  # function & method
@@ -143,9 +143,20 @@ class RSTReader:
         self.output: List[str] = []
         self.source_tag = v_tag
         self.target = ".py"  # py/pyi
-        self.return_info: List[Tuple] = []  # development aid only
+        # development aid only
+        self.return_info: List[Tuple] = []
+        self.last_line = ""
 
         self.writeln(TYPING_IMPORT)
+
+    @property
+    def line(self) -> str:
+        "get the current line, also stores this as last_line to allow for inspection and dumping the json file"
+        if self.line_no >= 0 and self.line_no <= self.max_line:
+            self.last_line = self.rst_text[self.line_no]
+        else:
+            self.last_line = ""
+        return self.last_line
 
     def log(self, *arg):
         if self.verbose or 1:
@@ -346,9 +357,16 @@ class RSTReader:
                 self.writeln(f"{self.indent}{l}")
             self.writeln(f'{self.indent}"""')
         # below is only to gather docstrings for analysis during development
+        # TODO: Line is out of sync
         if self.gather_docs and len(docstr) > 0:
             self.return_info.append(
-                (self.current_module, self.current_class, self.current_function, self.line, docstr)
+                (
+                    self.current_module,
+                    self.current_class,
+                    self.current_function,
+                    self.last_line,
+                    docstr,
+                )
             )
 
     def output_class_hdr(self, name: str, params: str, docstr: List[str]):
@@ -395,25 +413,34 @@ class RSTReader:
         self.output_docstring(docstr)
 
     def parse_current_module(self):
-        self.line_no += 1  # TODO: Why this line advance here ?
         self.log(f"# {self.line.rstrip()}")
         self.current_module = self.line.split(SEPERATOR)[-1].strip()
         self.current_function = self.current_class = ""
         self.log(f"# currentmodule:: {self.current_module}")
-        # maybe: check if same module
-        # maybe: read first block and do something with it
+        self.line_no += 1  # advance as we did not read any docstring
+        # todo: read first block and do something with it ( for a submodule)
 
     def parse_function(self):
         self.log(f"# {self.line.rstrip()}")
         this_function = self.line.split(SEPERATOR)[-1].strip()
         docstr = self.parse_docstring()
-        name, params = this_function.split("(", maxsplit=1)
+        # defaults
+        name = this_function
+        params = ""
+        try:
+            name, params = this_function.split("(", maxsplit=1)
+        except ValueError:
+            print(_red(this_function))
         # Parse return type from docstring
         ret_type = return_type_from_context(
             docstring=docstr, signature=name, module=self.current_module
         )
         self.current_function = name
-        if name not in ("classmethod", "staticmethod"):
+        if name in ("classmethod", "staticmethod"):
+            # skip the classmethod and static method functions
+            # no use to create stubs for these
+            pass
+        else:
             # ussl docstring uses a prefix
             # remove module name from the start of the function name
             if name.startswith(f"{self.current_module}."):
@@ -449,9 +476,12 @@ class RSTReader:
         self.current_class = name
         self.current_function = ""
         # remove module name from the start of the class name
-        # TODO: utime / time U prefix in modules
         if name.startswith(f"{self.current_module}."):
             name = name[len(f"{self.current_module}.") :]
+        if self.current_module[0] == "u" and name.startswith(f"{self.current_module[1:]}."):
+            # utime
+            name = name[len(f"{self.current_module[1:]}.") :]
+
         self.log(f"# class:: {name}")
         # fixup parameters
         params = self.fix_parameters(params)
@@ -470,6 +500,14 @@ class RSTReader:
         # todo: deal with class-blocks
         return class_name in self.current_class or class_name.lower() in self.current_class.lower()
 
+    def get_rst_hint(self):
+        "parse the '.. <rst hint>:: ' from the current line"
+        m = re.search(r"\.\.\s?(\w+)\s?::\s?", self.line)
+        if m:
+            return m.group(1)
+        else:
+            return ""
+
     def parse_method(self):
         name = ""
         this_method = ""
@@ -478,6 +516,7 @@ class RSTReader:
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
         self.log(f"# {self.line.rstrip()}")
         this_method = self.line.split(SEPERATOR)[1].strip()
+        rst_hint = self.get_rst_hint()
         try:
             name, params = this_method.split("(", 1)  # split methodname from params
         except ValueError:
@@ -518,14 +557,13 @@ class RSTReader:
         if name == "__init__":
             self.writeln(f"{self.indent}def {name}(self, {params} -> None:")
 
-        elif re.search(r"\.\. classmethod::", self.line):
+        elif rst_hint == "classmethod":
             self.writeln(f"{self.indent}@classmethod")
             self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
 
-        elif re.search(r"\.\. staticmethod::", self.line):
+        elif rst_hint == "staticmethod":
             self.writeln(f"{self.indent}@staticmethod")
             self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
-
         else:
             self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
         # Now add the docstring
@@ -536,13 +574,14 @@ class RSTReader:
 
     def parse_exception(self):
         self.log(f"# {self.line.rstrip()}")
-        self.line_no += 1
         name = self.line.split(SEPERATOR)[1].strip()
         # TODO : check name scope : Module.class.<name>
         if "." in name:
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
         self.writeln(f"{self.indent}class {name}(BaseException) : ...")
 
+        # no docstream read (yet) , so need to advance to next line
+        self.line_no += 1
         # class Exception(BaseException): ...
 
     def parse_name(self, line: str = None):
@@ -616,33 +655,30 @@ class RSTReader:
         self.depth = depth
         self.line_no = 0
         while self.line_no < len(self.rst_text):
-            self.line = line = self.rst_text[self.line_no]
+            line = self.line
+            rst_hint = self.get_rst_hint()
             #    self.writeln(">"+line)
-            if re.search(r"\.\. module::", self.line):
+            if rst_hint == "module":
                 self.parse_module()
-            elif re.search(r"\.\. currentmodule::", self.line):
+            elif rst_hint == "currentmodule":
                 self.parse_current_module()
-            elif re.search(r"\.\. function::", self.line):
+            elif rst_hint == "function":
                 self.parse_function()
 
-            elif re.search(r"\.\. class::?", self.line):
+            elif rst_hint == "class":
                 self.parse_class()
-            elif (
-                re.search(r"\.\. method::", line)
-                or re.search(r"\.\. staticmethod::", line)
-                or re.search(r"\.\. classmethod::", line)
-            ):
+            elif rst_hint == "method" or rst_hint == "staticmethod" or rst_hint == "classmethod":
                 self.parse_method()
-            elif re.search(r"\.\. exception::", self.line):
+            elif rst_hint == "exception":
                 self.parse_exception()
-            elif re.search(r"\.\. data::", self.line):
+            elif rst_hint == "data":
                 self.parse_data()
 
-            elif re.search(r"\.\. toctree::", self.line):
+            elif rst_hint == "toctree":
                 self.parse_toc()
                 # not this will be the end of this file processing.
 
-            elif re.search(r"\.\. \w+::", self.line):
+            elif len(rst_hint) > 0:
                 # something new / not yet parsed
                 self.log(f"# {line.rstrip()}")
                 print(_red(line.rstrip()))
