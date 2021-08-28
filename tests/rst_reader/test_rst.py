@@ -282,6 +282,7 @@ def test_pyright_invalid_strings(pyright, capsys):
     assert len(issues) == 0, "all string should be valid"
 
 
+@pytest.mark.xfail(reason="upstream docfix needed")
 def test_pyright_obscured_definitions(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright["generalDiagnostics"]
@@ -301,16 +302,20 @@ def test_pyright_obscured_definitions(pyright, capsys):
     assert len(issues) == 1, f"There are {len(issues)} redefinitions that obscure earlier defs"
 
 
+@pytest.mark.xfail(reason="upstream docfix needed")
 def test_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
     # return type omitted as this is tested seperately
     found = any("def deepsleep(time_ms: Optional[Any]) -> " in line for line in content)
-    assert found, "machine.deepsleep should be stubbed as a function, not as a class"
+    assert (
+        found
+    ), "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
     # # .. function:: deepsleep([time_ms])
     # def deepsleep(time_ms: Optional[Any]) -> xxx:
 
 
+@pytest.mark.xfail(reason="upstream docfix needed")
 def test_socket_class_def(rst_stubs: Path):
     "make sense of `usocket.socket` class documented as a function - Upstream Docfix needed"
     content = read_stub(rst_stubs, "usocket.py")
@@ -331,6 +336,7 @@ def test_socket_class_def(rst_stubs: Path):
     assert found, "(u)socket.socket __init__ should be generated"
 
 
+@pytest.mark.xfail(reason="upstream docfix needed")
 def test_poll_class_def(rst_stubs: Path):
     "make sense of `uselect.socket` class documented as a function - Upstream Docfix pending"
     content = read_stub(rst_stubs, "uselect.py")
