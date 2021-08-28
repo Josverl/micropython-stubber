@@ -11,12 +11,15 @@ from readfrom_rst import RSTReader
 
 def read_stub(folder, stubname):
     "Read the content of a generated stub"
-    file = list(folder.rglob(stubname))[0]
-    content = []
-    if file:
-        with open(file) as f:
-            content = f.readlines()
+    content: List[str] = []
+    fl = list(folder.rglob(stubname))
+    if len(fl):
+        file = fl[0]
+        if file:
+            with open(file) as f:
+                content = f.readlines()
     return content
+
 
 ###################################################################################################
 # Helpers
