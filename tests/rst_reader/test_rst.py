@@ -37,10 +37,10 @@ def pyright(rst_stubs):
 @pytest.fixture(scope="module")
 def micropython_repo():
     "make sure a recent repo is checked out"
-    if True:
+    try:
         # Make sure the correct micropython branch is checked out
         git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
-    else:
+    except Exception:
         git.switch_branch("master", MICROPYTHON_FOLDER)
     v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
     yield v_tag
@@ -298,7 +298,7 @@ def test_pyright_obscured_definitions(pyright, capsys):
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     # TODO:  ure.py 'Function declaration "match" is obscured by a declaration of the same name'
-    assert len(issues) == 1, "no redefinitions that obscure earlier defs"
+    assert len(issues) == 1, f"There are {len(issues)} redefinitions that obscure earlier defs"
 
 
 def test_deepsleep_stub(rst_stubs):
@@ -306,26 +306,29 @@ def test_deepsleep_stub(rst_stubs):
     content = read_stub(rst_stubs, "machine.py")
     # return type omitted as this is tested seperately
     found = any("def deepsleep(time_ms: Optional[Any]) -> " in line for line in content)
-    assert found, "machine.deepsleep should be stubbed as a function"
+    assert found, "machine.deepsleep should be stubbed as a function, not as a class"
     # # .. function:: deepsleep([time_ms])
     # def deepsleep(time_ms: Optional[Any]) -> xxx:
 
 
-def test_usocket_class_def(rst_stubs: Path):
-    "make sense of `usocket.socket` class documented as a function - Upstream Docfix pending"
+def test_socket_class_def(rst_stubs: Path):
+    "make sense of `usocket.socket` class documented as a function - Upstream Docfix needed"
     content = read_stub(rst_stubs, "usocket.py")
+    if content == []:
+        # post version 1.16 documentation has been updated usocket.rst -->socket.rst
+        content = read_stub(rst_stubs, "socket.py")
 
     found = any("def socket(" in line for line in content)
-    assert not found, "usocket.socket should be stubbed as a class, not as a function"
+    assert not found, "(u)socket.socket should be stubbed as a class, not as a function"
 
     found = any("class socket:" in line for line in content)
-    assert found, "usocket.socket classdef should be generated"
+    assert found, "(u)socket.socket classdef should be generated"
 
     found = any(
         "def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> None:" in line
         for line in content
     )
-    assert found, "usocket.socket __init__ should be generated"
+    assert found, "(u)socket.socket __init__ should be generated"
 
 
 def test_poll_class_def(rst_stubs: Path):
