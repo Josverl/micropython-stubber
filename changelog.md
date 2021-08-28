@@ -44,6 +44,9 @@
 
 - develop / repo setup
     - updated dev requirements (requirements-dev.txt)
+    - seperate install needed for:
+        - git 2.23 .0 or newer (git switch)
+        - pyright via npm install (and thus npm)
     - switched to using submodules to remove  external dependencies
         how to clone : 
         `git submodule init`
@@ -51,7 +54,7 @@
     - enable developing on [GitHub codespaces](https://github.com/codespaces)
         - add configuration for codespaces 
         - devcontainer
-            - installs pyright ( via npm)
+            - installs pyright ( via `npm install -g pyright`)
             - starts .devcontainer/setup.h
         - setup.sh 
             - initializes the submodules 
@@ -69,6 +72,7 @@
         - allows pytest, and debugging of tests
     - add tasks to :
         - run createstubs in linux version
-
+`
+    - 
 
 
