@@ -6,7 +6,7 @@ import json
 # SOT
 from readfrom_rst import generate_from_rst, RSTReader, TYPING_IMPORT
 
-from rst_utils import _type_from_context, return_type_from_context
+from rst.utils import _type_from_context, return_type_from_context
 
 #: Use this content as input for moo to do bar
 # FOOBAR: Any = 1

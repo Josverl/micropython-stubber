@@ -36,7 +36,8 @@ todo:
 import logging
 import re
 from typing import Dict, List, Tuple, Union
-from rst_lookup import LOOKUP_LIST, NONE_VERBS
+
+from .lookup import LOOKUP_LIST, NONE_VERBS
 
 # logging
 log = logging.getLogger(__name__)

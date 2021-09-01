@@ -97,7 +97,7 @@ Not yet implemented
 import json
 from os import link
 import re
-from rst_utils import return_type_from_context, TYPING_IMPORT
+from  rst.utils import return_type_from_context, TYPING_IMPORT
 import subprocess
 from typing import Dict, List, Tuple
 from pathlib import Path
