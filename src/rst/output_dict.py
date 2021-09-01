@@ -2,7 +2,7 @@ from typing import OrderedDict, List, Union
 
 
 class SourceDict(OrderedDict):
-    "dict to store ordered source components toto be printed as one"
+    "dict to store ordered source components to be printed as one"
 
     def __init__(self, base: List, indent: int = 0):
         super().__init__(base)

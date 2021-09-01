@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Module rst.return",
+            "type": "python",
+            "request": "launch",
+            "module": "rst.return"
+        },
+        {
             "name": "PowerShell Launch Current File",
             "type": "PowerShell",
             "request": "launch",
