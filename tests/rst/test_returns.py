@@ -32,7 +32,7 @@ def test_signatures(signature, docstring, expected_type, confidence):
 
 # read the tests cases from a json file to avoid needing to code all the different tests
 def return_type_testcases() -> List[Tuple[str, str, str, str]]:
-    filename = Path("./tests/rst_reader/data/return_testcases.json")
+    filename = Path("./tests/rst/data/return_testcases.json")
     doc = []
     with open(filename, encoding="utf8") as fp:
         doc = json.load(fp)

@@ -95,19 +95,19 @@ EXP_10 = [
     "filename, expected",
     [
         (
-            "tests/rst_reader/data/function_10.rst",
+            "tests/rst/data/function_10.rst",
             [
                 "def wake_on_ext0(pin, level) -> Any:",
             ],
         ),
         (
-            "tests/rst_reader/data/function_11.rst",
+            "tests/rst/data/function_11.rst",
             [
                 "def wake_on_ext0(pin, level) -> Any:",
             ],
         ),
         (
-            "tests/rst_reader/data/function_12.rst",
+            "tests/rst/data/function_12.rst",
             [
                 "def wake_on_touch(wake) -> None:",
                 "        Configure whether or not a touch will wake the device from sleep.",
@@ -155,7 +155,7 @@ CLASS_10 = [
 def test_rst_parse_class_10(line: str):
     # testcase = FN_1
     r = RSTReader()
-    r.read_file(Path("tests/rst_reader/data/class_10.rst"))
+    r.read_file(Path("tests/rst/data/class_10.rst"))
     # process
     r.parse()
     r._cleanup()  # cleanup output
