@@ -1,6 +1,8 @@
 """
-sort list of classess in parent-child order
+Sort list of classess in parent-child order
+note that this does not take multiple inheritance into account
 ref : https://stackoverflow.com/questions/34964878/python-generate-a-dictionarytree-from-a-list-of-tuples/35049729#35049729
+with modification 
 """
 from typing import List
 import re
@@ -51,7 +53,7 @@ def sort_classes(classes: List[str]):
                 # ensure parent has a 'children' field
                 parent["children"] = []
             children = parent["children"]
-            children.append(node)
+            children.append(node)  # type:ignore
 
     # step 3: simple function to print
     def list_node(node, sorted: List[str]):

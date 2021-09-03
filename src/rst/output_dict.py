@@ -1,4 +1,3 @@
-import re
 from typing import OrderedDict, List, Union
 from .classsort import sort_classes
 
