@@ -1,12 +1,14 @@
+import re
 from typing import OrderedDict, List, Union
+from .classsort import sort_classes
 
 
 class SourceDict(OrderedDict):
-    "dict to store ordered source components to be printed as one"
+    "dict to store source components respecting parent child dependencies and proper definition order"
 
-    def __init__(self, base: List, indent: int = 0):
+    def __init__(self, base: List, indent: int = 0, lf: str = "\n"):
         super().__init__(base)
-        self.lf = "\n"  #  add linefeed
+        self.lf = lf  #  add linefeed
         self.indent = indent
         self.nr = 0  # generate incrementing line numbers
 
@@ -40,34 +42,60 @@ class SourceDict(OrderedDict):
         return id
 
     def index(self, key: str):
-        return list(out_dict.keys()).index(key)
+        return list(self.keys()).index(key)
 
 
 class ModuleSourceDict(SourceDict):
-    def __init__(self, name: str, indent=0):
+    def __init__(self, name: str, indent=0, lf: str = "\n"):
         "set correct order a module definition to allow adding class variables"
         super().__init__(
             [
                 ("docstr", '""'),
-                ("version", "# Version 0.3"),
+                ("version", ""),
                 ("comment", [f"# module {name} "]),
                 ("typing", "from typing import List"),
                 ("constants", []),
             ],
             indent,
+            lf,
         )
+        self.name = name
 
-    def order(self):
+    def sort(self):
         "make sure all classdefs are in order"
-        print(" -=-=- SUB /SUPER CLASS ORDERTING TO BE IMPLEMENTED _+_+_+")
-        ...
+        # new empty one
+        new = ModuleSourceDict(self.name, self.indent, self.lf)
+        # add the standard stuff using a dict comprehension
+        new.update(
+            {
+                k: v
+                for (k, v) in self.items()
+                if k
+                in [
+                    "docstr",
+                    "version",
+                    "comment",
+                    "typing",
+                    "constants",
+                ]
+            }
+        )
+        # then the classes ( if any)
+        # TODO: SubClass / Superclass
+        for classname in self.classes():
+            new.update({classname: self[classname]})
+        # then the functions and other
+        new.update({k: v for (k, v) in self.items() if k.isdecimal()})
+        # now clear and update with new order
+        self.clear()
+        self.update(new)
 
     def __str__(self):
-        self.order()
+        self.sort()
         return super().__str__()
 
     def find(self, name: str) -> Union[str, None]:
-        "find a classnode based on the classname optionally ignoring the superclass"
+        "find a classnode based on the name with or without the superclass"
         keys = list(self.keys())
         # try full match first
         if name in keys:
@@ -79,9 +107,15 @@ class ModuleSourceDict(SourceDict):
                 return k
         return None
 
+    def classes(self):
+        "get a list of the class names in parent-child order"
+        classes = [k for k in self.keys() if isinstance(self[k], ClassSourceDict)]
+        # return sorted list
+        return sort_classes(classes)
+
 
 class ClassSourceDict(SourceDict):
-    def __init__(self, name: str, indent: int = 4):
+    def __init__(self, name: str, indent: int = 4, lf="\n"):
         "set correct order for class definitions to allow adding class variables"
         super().__init__(
             [
@@ -92,30 +126,7 @@ class ClassSourceDict(SourceDict):
                 ("__init__", []),
             ],
             indent,
+            lf,
         )
-
+        self.name = name
         self.lf = "\n"
-
-
-out_dict = ModuleSourceDict("utest")
-
-out_dict.update({"class bar(foo)": ["class bar(foo):", "   ..."]})
-out_dict.update({"class foo": ["class foo:", "   ..."]})
-
-cd = ClassSourceDict("class bird()")
-cd.update({"docstr": '    "class docstring"'})
-cd.update({"__init__": ["    def __init__(self)->None:", "    ..."]})
-
-cd.add_constant("YELLOW : Any", True)
-cd.add_constant("BLUE : Any", indent=True)
-cd.add_line("    def fly():")
-cd.add_line("         ...")
-out_dict.update({"class bird": cd})
-
-for i in range(10, 20):
-    out_dict.add_constant(f"parrot_{i} : Any")
-
-if out_dict.index("class bar(foo)") < out_dict.index("class foo"):
-    out_dict.move_to_end("class bar(foo)")
-
-print(out_dict)
