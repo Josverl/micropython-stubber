@@ -5,7 +5,7 @@ ref : https://stackoverflow.com/questions/34964878/python-generate-a-dictionaryt
 from typing import List
 import re
 
-RE_CLASS = re.compile(r"class\s+(?P<class>\w+)\((?P<parent>\w*)\)")
+RE_CLASS = re.compile(r"class\s+(?P<class>\w+)(\((?P<parent>\w*)\))?")
 
 
 def sort_classes(classes: List[str]):
@@ -17,8 +17,8 @@ def sort_classes(classes: List[str]):
     for c in classes:
         m = RE_CLASS.match(c)
         if m:
-            parent_name = m.group("parent")
-            class_name = m.group("class")
+            # parent_name = m.group("parent")
+            class_name = m.group("class").strip()
             nodes[class_name] = {"id": class_name, "class": c, "children": []}
 
     # pass 2: create trees and parent-child relations
@@ -28,9 +28,12 @@ def sort_classes(classes: List[str]):
         m = RE_CLASS.match(c)
         if not m:
             continue
-        parent_name = m.group("parent").split(",")[0]
+        if m.group("parent"):  # parent specified
+            parent_name = m.group("parent").split(",")[0].strip()  # just use first parent
+        else:
+            parent_name = ""
 
-        class_name = m.group("class")
+        class_name = m.group("class").strip()
         node = nodes[class_name]
 
         # either make the node a new tree or link it to its parent
