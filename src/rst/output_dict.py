@@ -1,15 +1,50 @@
+"""
+ModuleSourceDict represents a source file with the following components 
+    - docstr
+    - version
+    - comment
+    - typing
+    - Optional: list of constants
+    - optional: ClassSourcedicts 
+    - optional: FunctionSourcedicts 
+    - optional: individual lines of code 
+
+ClassSourceDict represents a source file with the following components 
+    - comment
+    - class
+    - docstr
+    - Optional: list of constants
+    - __init__ : class signature 
+    - optional: FunctionSourcedicts 
+    - optional: individual lines of code 
+
+FunctionSourceDict represents a source file with the following components 
+    - # comments - todo
+    - optional: decorator
+    - def - function definition 
+    - docstr
+    - constants
+    - body - ...
+    - optional: individual lines of code 
+
+SourceDict is the 'base class' 
+it 
+"""
+from __future__ import annotations
 from typing import OrderedDict, List, Union
 from .classsort import sort_classes
 
 
 class SourceDict(OrderedDict):
-    "dict to store source components respecting parent child dependencies and proper definition order"
+    "(abstract) dict to store source components respecting parent child dependencies and proper definition order"
 
-    def __init__(self, base: List, indent: int = 0, lf: str = "\n"):
+    def __init__(self, base: List, indent: int = 0, body: int = 0, lf: str = "\n"):
         super().__init__(base)
         self.lf = lf  #  add linefeed
-        self.indent = indent
-        self.nr = 0  # generate incrementing line numbers
+        self._indent = indent  # current base indent
+        self._body = body  # for source body is level
+        self._nr = 0  # generate incrementing line numbers
+        self.name = ""
 
     def __str__(self) -> str:
         "convert the OD into a string"
@@ -25,17 +60,21 @@ class SourceDict(OrderedDict):
                 out += str(code)
         return out
 
-    def add_constant(self, line: str, indent: bool = False):
-        if indent:
-            line = " " * self.indent + line
+    def __add__(self, dict: SourceDict):
+        self.update({dict.name: dict})
+        return self
+
+    def add_constant(self, line: str, autoindent: bool = True):
         "add constant to the constant scope of this block"
+        if autoindent:
+            line = " " * (self._indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
-    def add_line(self, line: str, indent: bool = False):
-        self.nr += 1
-        if indent:
-            line = " " * self.indent + line
-        id = str(self.nr)
+    def add_line(self, line: str, autoindent: bool = True):
+        self._nr += 1
+        if autoindent:
+            line = " " * (self._indent + self._body) + line
+        id = str(self._nr)
         self.setdefault(id, [])
         self.update({id: self[id] + [line]})
         return id
@@ -56,14 +95,15 @@ class ModuleSourceDict(SourceDict):
                 ("constants", []),
             ],
             indent,
-            lf,
+            body=0,
+            lf=lf,
         )
         self.name = name
 
     def sort(self):
         "make sure all classdefs are in order"
         # new empty one
-        new = ModuleSourceDict(self.name, self.indent, self.lf)
+        new = ModuleSourceDict(self.name, self._indent, self.lf)
         # add the standard stuff using a dict comprehension
         new.update(
             {
@@ -79,8 +119,7 @@ class ModuleSourceDict(SourceDict):
                 ]
             }
         )
-        # then the classes ( if any)
-        # TODO: SubClass / Superclass
+        # then the classes, already sorted in parent-child order
         for classname in self.classes():
             new.update({classname: self[classname]})
         # then the functions and other
@@ -114,18 +153,66 @@ class ModuleSourceDict(SourceDict):
 
 
 class ClassSourceDict(SourceDict):
-    def __init__(self, name: str, indent: int = 4, lf="\n"):
+    def __init__(
+        self,
+        name: str,
+        *,
+        docstr: str = '""',
+        init: str = "def __init__(self)->None:",
+        indent: int = 0,
+        lf="\n",
+    ):
         "set correct order for class definitions to allow adding class variables"
+        # add indent
+        _docstr = " " * (indent + 4) + docstr
+        _init = [" " * (indent + 4) + init]
+        # add ...
+        _init.append(" " * (indent + 4 + 4) + "...")
         super().__init__(
             [
                 ("comment", []),
-                ("class", name),  # includes indentation
-                ("docstr", '""'),
+                ("class", " " * indent + name),  # includes indentation
+                ("docstr", _docstr),
                 ("constants", []),
-                ("__init__", []),
+                ("__init__", _init),
             ],
             indent,
-            lf,
+            body=4,  # class body  indent +4
+            lf=lf,
+        )
+        self.name = name
+        self.lf = "\n"
+
+
+class FunctionSourceDict(SourceDict):
+    def __init__(
+        self,
+        name: str,
+        *,
+        definition: List[str] = [],
+        docstr: str = '""',
+        indent: int = 0,
+        decorators=[],
+        lf="\n",
+    ):
+        "set correct order for function and method definitions"
+        # add indent
+        _def = [" " * indent + l for l in definition]
+        # indent +4
+        _docstr = " " * (indent + 4) + docstr
+        # add ...
+        super().__init__(
+            [
+                ("decorator", decorators),
+                ("def", _def),  # includes indentation
+                ("docstr", _docstr),
+                #                ("comments", []),
+                ("constants", []),
+                ("body", " " * (indent + 4) + "..."),
+            ],
+            indent,
+            body=4,  # function body indent +4
+            lf=lf,
         )
         self.name = name
         self.lf = "\n"
