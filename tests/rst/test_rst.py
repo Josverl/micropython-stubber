@@ -36,12 +36,16 @@ def pyright(rst_stubs):
 
 @pytest.fixture(scope="module")
 def micropython_repo():
-    "make sure a recent repo is checked out"
-    try:
-        # Make sure the correct micropython branch is checked out
-        git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
-    except Exception:
-        git.switch_branch("master", MICROPYTHON_FOLDER)
+    "make sure a recent branch is checked out"
+    git.switch_branch("master", MICROPYTHON_FOLDER)
+    TEST_DOCFIX = False
+    if TEST_DOCFIX:
+        # run test against the proposed documentation fixes
+        try:
+            git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
+        except Exception:
+            git.switch_branch("master", MICROPYTHON_FOLDER)
+
     v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
     yield v_tag
 
@@ -240,7 +244,7 @@ import subprocess
 import json
 
 
-@pytest.mark.skip(reason="not strictly needed (yet)")
+@pytest.mark.xfail(reason="code to be written")
 def test_pyright_undefined_variable(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright["generalDiagnostics"]
@@ -315,6 +319,7 @@ def test_deepsleep_stub(rst_stubs):
     # def deepsleep(time_ms: Optional[Any]) -> xxx:
 
 
+# post version 1.16 documentation has been updated usocket.rst -->socket.rst
 @pytest.mark.xfail(reason="upstream docfix needed")
 def test_socket_class_def(rst_stubs: Path):
     "make sense of `usocket.socket` class documented as a function - Upstream Docfix needed"
