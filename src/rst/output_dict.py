@@ -88,7 +88,7 @@ class ModuleSourceDict(SourceDict):
         "set correct order a module definition to allow adding class variables"
         super().__init__(
             [
-                ("docstr", '""'),
+                ("docstr", ['""']),
                 ("version", ""),
                 ("comment", [f"# module {name} "]),
                 ("typing", "from typing import List"),
@@ -157,14 +157,15 @@ class ClassSourceDict(SourceDict):
         self,
         name: str,
         *,
-        docstr: str = '""',
+        docstr: List[str] = ['""'],
         init: str = "def __init__(self)->None:",
         indent: int = 0,
         lf="\n",
     ):
         "set correct order for class definitions to allow adding class variables"
-        # add indent
-        _docstr = " " * (indent + 4) + docstr
+        # add indent to all docstring lines (perhaps not really needed)
+        _docstr = [" " * (indent + 4) + l for l in docstr]
+
         _init = [" " * (indent + 4) + init]
         # add ...
         _init.append(" " * (indent + 4 + 4) + "...")
@@ -190,7 +191,7 @@ class FunctionSourceDict(SourceDict):
         name: str,
         *,
         definition: List[str] = [],
-        docstr: str = '""',
+        docstr: List[str] = ['""'],
         indent: int = 0,
         decorators=[],
         lf="\n",
@@ -199,7 +200,8 @@ class FunctionSourceDict(SourceDict):
         # add indent
         _def = [" " * indent + l for l in definition]
         # indent +4
-        _docstr = " " * (indent + 4) + docstr
+        _docstr = [" " * (indent + 4) + l for l in docstr]
+
         # add ...
         super().__init__(
             [
