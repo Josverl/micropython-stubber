@@ -64,6 +64,16 @@ class SourceDict(OrderedDict):
         self.update({dict.name: dict})
         return self
 
+    def add_comment(self, line: Union[str, List[str]]):
+        "Add a comment, or list of comments, to this block."
+        _c = self["comment"] or []
+        if isinstance(line, str):
+            _c += [" " * (self._indent + self._body) + line]
+        elif isinstance(line, list):
+            for l in line:
+                _c += [" " * (self._indent + self._body) + l]
+        self.update({"comment": _c})
+
     def add_constant(self, line: str, autoindent: bool = True):
         "add constant to the constant scope of this block"
         if autoindent:
