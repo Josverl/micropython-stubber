@@ -8,7 +8,7 @@ def test_Module_SD():
 
     od = ModuleSourceDict("utest")
     assert isinstance(od, dict)
-    assert isinstance(od["docstr"], str)
+    assert isinstance(od["docstr"], list)
     assert isinstance(od["typing"], str)
     assert isinstance(od["version"], str)
     assert isinstance(od["comment"], list)
@@ -46,14 +46,14 @@ def test_Class_SD():
     NAME = "class bird()"
     cd = ClassSourceDict(NAME)
     assert isinstance(cd, dict)
-    assert isinstance(cd["docstr"], str)
+    assert isinstance(cd["docstr"], list)
     assert isinstance(cd["comment"], list)
     assert isinstance(cd["constants"], list)
     assert isinstance(cd["class"], str)
     assert isinstance(cd["__init__"], list)
 
     assert cd.name == NAME
-    assert cd["docstr"] == " " * 4 + '""'
+    assert cd["docstr"][0] == " " * 4 + '""'
 
 
 def test_CSD_class():
@@ -80,7 +80,7 @@ def test_CSD_class():
 
 def test_CSD_class_init():
     # start with init
-    DOCSTR = '"class docstring"'
+    DOCSTR = ['"class docstring"']
     INIT = "def __init__(self)->None:"
 
     cd = ClassSourceDict("class bird()", docstr=DOCSTR, init=INIT)
@@ -94,20 +94,20 @@ def test_CSD_class_init():
     # two constants
     assert len(cd["constants"]) == 2
     assert " " * 4 + "BLUE : Any" in lines
-    assert " " * 4 + DOCSTR in lines
+    assert " " * 4 + DOCSTR[0] in lines
     assert " " * 4 + INIT in lines
     assert " " * 8 + "..." in lines
 
 
 def test_FSD_class_init():
     # Function
-    DOCSTR = '"my docstring"'
+    DOCSTR = ['"my docstring"']
     DEFN = "def foo()->None:"
 
     fd = FunctionSourceDict("class bird()", definition=[DEFN], docstr=DOCSTR)
     lines = str(fd).splitlines()
     assert DEFN in lines
-    assert " " * 4 + DOCSTR in lines
+    assert " " * 4 + DOCSTR[0] in lines
     assert " " * 4 + "..." in lines
     assert "..." in lines[-1]
 
@@ -118,7 +118,7 @@ def test_FSD_class_init():
     lines = str(fd).splitlines()
     assert "@classmethod" == lines[0]
     assert DEFN in lines
-    assert " " * 4 + DOCSTR in lines
+    assert " " * 4 + DOCSTR[0] in lines
     assert " " * 4 + "..." in lines
     assert "..." in lines[-1]
 
@@ -175,7 +175,7 @@ def test_add_class_simple():
     # add child class first
     class_1 = ClassSourceDict(
         name="class Foo(Bar):",
-        docstr='"Foo docstring"',
+        docstr=['"Foo docstring"'],
         init="def __init__(self)->None:",
     )
 
@@ -183,7 +183,7 @@ def test_add_class_simple():
         name="def spam",
         indent=class_1._indent + 4,
         definition=["def spam(foo:int, bar:str)->None:"],
-        docstr='"Spam docstring"',
+        docstr=['"Spam docstring"'],
     )
     class_1 += method
 
@@ -191,7 +191,7 @@ def test_add_class_simple():
     # then add parent
     class_2 = ClassSourceDict(
         name="class Bar():",
-        docstr='"Bar docstring"',
+        docstr=['"Bar docstring"'],
         init="def __init__(self, parrot)->None:",
     )
 
@@ -199,7 +199,7 @@ def test_add_class_simple():
         name="def parrot",
         indent=class_1._indent + 4,
         definition=["def parrot(foo:int, bar:str)->None:"],
-        docstr='"Parrot docstring"',
+        docstr=['"Parrot docstring"'],
     )
 
     class_2 += method
