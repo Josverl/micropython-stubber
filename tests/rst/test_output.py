@@ -54,6 +54,9 @@ def test_Class_SD():
 
     assert cd.name == NAME
     assert cd["docstr"][0] == " " * 4 + '""'
+    COMMENT = "# additional comment"
+    cd.add_comment(COMMENT)
+    assert cd["comment"][0] == " " * 4 + COMMENT
 
 
 def test_CSD_class():
