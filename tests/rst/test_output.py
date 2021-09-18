@@ -8,11 +8,23 @@ def test_Module_SD():
 
     od = ModuleSourceDict("utest")
     assert isinstance(od, dict)
-    assert isinstance(od["docstr"], list)
+
     assert isinstance(od["typing"], str)
     assert isinstance(od["version"], str)
     assert isinstance(od["comment"], list)
     assert isinstance(od["constants"], list)
+
+
+def test_Module_SD_docstr():
+    doc = ["doc line 1", "doc line 2"]
+    od = ModuleSourceDict("utest")
+    od.add_docstr(doc)
+
+    assert isinstance(od["docstr"], list)
+    assert isinstance(od["docstr"][0], str)
+    assert od["docstr"][0] == '"""'
+    assert od["docstr"][1] == doc[0]
+    assert od["docstr"][2] == doc[1]
 
 
 def test_MSD_update():
@@ -53,7 +65,7 @@ def test_Class_SD():
     assert isinstance(cd["__init__"], list)
 
     assert cd.name == NAME
-    assert cd["docstr"][0] == " " * 4 + '""'
+    assert cd["docstr"][0] == " " * 4 + '""" """'
     COMMENT = "# additional comment"
     cd.add_comment(COMMENT)
     assert cd["comment"][0] == " " * 4 + COMMENT
@@ -104,7 +116,7 @@ def test_CSD_class_init():
 
 def test_FSD_class_init():
     # Function
-    DOCSTR = ['"my docstring"']
+    DOCSTR = ["my docstring"]
     DEFN = "def foo()->None:"
 
     fd = FunctionSourceDict("class bird()", definition=[DEFN], docstr=DOCSTR)

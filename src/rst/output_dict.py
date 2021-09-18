@@ -55,7 +55,10 @@ class SourceDict(OrderedDict):
                 out += code + self.lf
             elif isinstance(code, List):
                 for l in code:
-                    out += l + self.lf
+                    if isinstance(l, str):
+                        out += l + self.lf
+                    else:
+                        assert TypeError, f"Incorrect structure in Output dict: {l}"
             else:
                 out += str(code)
         return out
@@ -63,6 +66,23 @@ class SourceDict(OrderedDict):
     def __add__(self, dict: SourceDict):
         self.update({dict.name: dict})
         return self
+
+    def add_docstr(self, docstr: Union[str, List[str]], extra: int = 0):
+        # indent +4,  add triple " to  docstring
+        if isinstance(docstr, str):
+            _docstr = [docstr]
+        elif isinstance(docstr, List):
+            _docstr = docstr.copy()
+        else:
+            raise TypeError
+        if not _docstr[0].strip().startswith('"""'):
+            # add triple quotes before & after
+            quotes = '"""'
+            _docstr.insert(0, quotes)
+            _docstr.append(quotes)
+        # add indent + extra
+        _docstr = [" " * (self._indent + extra) + l for l in _docstr]
+        self.update({"docstr": _docstr})
 
     def add_comment(self, line: Union[str, List[str]]):
         "Add a comment, or list of comments, to this block."
@@ -98,7 +118,7 @@ class ModuleSourceDict(SourceDict):
         "set correct order a module definition to allow adding class variables"
         super().__init__(
             [
-                ("docstr", ['""']),
+                ("docstr", ['""" """']),
                 ("version", ""),
                 ("comment", [f"# module {name} "]),
                 ("typing", "from typing import List"),
@@ -167,14 +187,12 @@ class ClassSourceDict(SourceDict):
         self,
         name: str,
         *,
-        docstr: List[str] = ['""'],
+        docstr: List[str] = ['""" """'],
         init: str = "def __init__(self)->None:",
         indent: int = 0,
         lf="\n",
     ):
         "set correct order for class definitions to allow adding class variables"
-        # add indent to all docstring lines (perhaps not really needed)
-        _docstr = [" " * (indent + 4) + l for l in docstr]
 
         _init = [" " * (indent + 4) + init]
         # add ...
@@ -183,7 +201,7 @@ class ClassSourceDict(SourceDict):
             [
                 ("comment", []),
                 ("class", " " * indent + name),  # includes indentation
-                ("docstr", _docstr),
+                ("docstr", ['""" """']),
                 ("constants", []),
                 ("__init__", _init),
             ],
@@ -191,6 +209,7 @@ class ClassSourceDict(SourceDict):
             body=4,  # class body  indent +4
             lf=lf,
         )
+        self.add_docstr(docstr, extra=4)
         self.name = name
         self.lf = "\n"
 
@@ -201,7 +220,7 @@ class FunctionSourceDict(SourceDict):
         name: str,
         *,
         definition: List[str] = [],
-        docstr: List[str] = ['""'],
+        docstr: List[str] = ['""" """'],
         indent: int = 0,
         decorators=[],
         lf="\n",
@@ -209,15 +228,13 @@ class FunctionSourceDict(SourceDict):
         "set correct order for function and method definitions"
         # add indent
         _def = [" " * indent + l for l in definition]
-        # indent +4
-        _docstr = [" " * (indent + 4) + l for l in docstr]
 
         # add ...
         super().__init__(
             [
                 ("decorator", decorators),
                 ("def", _def),  # includes indentation
-                ("docstr", _docstr),
+                ("docstr", '""'),  # just a placeholder
                 #                ("comments", []),
                 ("constants", []),
                 ("body", " " * (indent + 4) + "..."),
@@ -227,4 +244,5 @@ class FunctionSourceDict(SourceDict):
             lf=lf,
         )
         self.name = name
+        self.add_docstr(docstr, extra=4)
         self.lf = "\n"
