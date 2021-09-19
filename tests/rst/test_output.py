@@ -34,9 +34,9 @@ def test_MSD_update():
     od.add_line("    def fly():")
     od.add_line("         ...")
     out = str(od)
-    assert "from typing import" in out
     lines = out.splitlines()
-    assert len(lines) >= 8
+    assert "from typing import Any" in lines
+    assert len(lines) >= 5
 
 
 def test_MSD_var_insert():
@@ -233,3 +233,38 @@ def test_add_class_simple():
     assert l_bar != 0
 
     assert l_foo > l_bar, "Subclass should not be before superclass"
+
+
+def test_method_decorator():
+    od = ModuleSourceDict("utest")
+    # add child class first
+    class_1 = ClassSourceDict(
+        name="class Foo(Bar):",
+        docstr=['Foo docstring'],
+        init="def __init__(self)->None:",
+    )
+
+    method_1 = FunctionSourceDict(
+        decorators=["@classmethod"],
+        name="def spam",
+        indent=class_1._indent + 4,
+        definition=["def spam()->None:"],
+        docstr=['Spam docstring'],
+    )
+    method_2 = FunctionSourceDict(
+        decorators=["@staticmethod", "@decorator"],
+        name="def bar",
+        indent=class_1._indent + 4,
+        definition=["def bar()->None:"],
+        docstr=['bar docstring'],
+    )
+
+    class_1 += method_1
+    class_1 += method_2
+    od += class_1
+
+    lines = str(od).splitlines()
+
+    assert " " * 4 + "@classmethod" in lines
+    assert " " * 4 + "@staticmethod" in lines
+    assert " " * 4 + "@decorator" in lines
