@@ -35,6 +35,9 @@ from typing import OrderedDict, List, Union
 from .classsort import sort_classes
 
 
+def spaces(n: int = 4) -> str:
+    return " " * n
+
 class SourceDict(OrderedDict):
     "(abstract) dict to store source components respecting parent child dependencies and proper definition order"
 
@@ -75,38 +78,37 @@ class SourceDict(OrderedDict):
             _docstr = docstr.copy()
         else:
             raise TypeError
-        if not _docstr[0].strip().startswith('"""'):
+        if len(_docstr) > 0 and not _docstr[0].strip().startswith('"""'):
             # add triple quotes before & after
             quotes = '"""'
             _docstr.insert(0, quotes)
             _docstr.append(quotes)
         # add indent + extra
-        _docstr = [" " * (self._indent + extra) + l for l in _docstr]
+        _docstr = [spaces(self._indent + extra) + l for l in _docstr]
         self.update({"docstr": _docstr})
 
     def add_comment(self, line: Union[str, List[str]]):
         "Add a comment, or list of comments, to this block."
         _c = self["comment"] or []
         if isinstance(line, str):
-            _c += [" " * (self._indent + self._body) + line]
+            _c += [spaces(self._indent + self._body) + line]
         elif isinstance(line, list):
             for l in line:
-                _c += [" " * (self._indent + self._body) + l]
+                _c += [spaces(self._indent + self._body) + l]
         self.update({"comment": _c})
 
     def add_constant(self, line: str, autoindent: bool = True):
         "add constant to the constant scope of this block"
         if autoindent:
-            line = " " * (self._indent + self._body) + line
+            line = spaces(self._indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
     def add_line(self, line: str, autoindent: bool = True):
         self._nr += 1
         if autoindent:
-            line = " " * (self._indent + self._body) + line
+            line = spaces(self._indent + self._body) + line
         id = str(self._nr)
-        self.setdefault(id, [])
-        self.update({id: self[id] + [line]})
+        self.update({id: line})
         return id
 
     def index(self, key: str):
@@ -120,8 +122,8 @@ class ModuleSourceDict(SourceDict):
             [
                 ("docstr", ['""" """']),
                 ("version", ""),
-                ("comment", [f"# module {name} "]),
-                ("typing", "from typing import List"),
+                ("comment", []),
+                ("typing", "from typing import Any"),
                 ("constants", []),
             ],
             indent,
@@ -194,13 +196,13 @@ class ClassSourceDict(SourceDict):
     ):
         "set correct order for class definitions to allow adding class variables"
 
-        _init = [" " * (indent + 4) + init]
+        _init = [spaces(indent + 4) + init]
         # add ...
-        _init.append(" " * (indent + 4 + 4) + "...")
+        _init.append(spaces(indent + 4 + 4) + "...")
         super().__init__(
             [
                 ("comment", []),
-                ("class", " " * indent + name),  # includes indentation
+                ("class", spaces(indent) + name),  # includes indentation
                 ("docstr", ['""" """']),
                 ("constants", []),
                 ("__init__", _init),
@@ -222,22 +224,22 @@ class FunctionSourceDict(SourceDict):
         definition: List[str] = [],
         docstr: List[str] = ['""" """'],
         indent: int = 0,
-        decorators=[],
+        decorators: List[str] = [],
         lf="\n",
     ):
         "set correct order for function and method definitions"
         # add indent
-        _def = [" " * indent + l for l in definition]
+        _def = [spaces(indent) + l for l in definition]
 
         # add ...
         super().__init__(
             [
-                ("decorator", decorators),
+                ("decorator", [spaces(indent) + d for d in decorators]),
                 ("def", _def),  # includes indentation
                 ("docstr", '""'),  # just a placeholder
                 #                ("comments", []),
                 ("constants", []),
-                ("body", " " * (indent + 4) + "..."),
+                ("body", spaces(indent + 4) + "..."),
             ],
             indent,
             body=4,  # function body indent +4
