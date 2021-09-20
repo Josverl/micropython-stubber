@@ -152,7 +152,8 @@ class RSTReader:
         self.return_info: List[Tuple] = []
         self.last_line = ""
         if OLD_OUTPUT:
-            self.writeln(TYPING_IMPORT)
+            for l in TYPING_IMPORT:
+                self.writeln(l)
         if NEW_OUTPUT:
             self.output_dict.update({"typing": TYPING_IMPORT})
 
@@ -496,46 +497,46 @@ class RSTReader:
         if name in ("classmethod", "staticmethod"):
             # skip the classmethod and static method functions
             # no use to create stubs for these
-            pass
+            return
+        # ussl docstring uses a prefix
+        # remove module name from the start of the function name
+        if name.startswith(f"{self.current_module}."):
+            name = name[len(f"{self.current_module}.") :]
+        # fixup parameters
+        params = self.fix_parameters(params)
+        # assume no functions in classes
+        self.leave_class()
+        # if function name is the same as the module
+        # then this is probably documenting a class ()
+        # list of module names [ name , uname]
+        if self.current_module[0] != "u":
+            mod_names = (self.current_module, f"u{self.current_module}")
         else:
-            # ussl docstring uses a prefix
-            # remove module name from the start of the function name
-            if name.startswith(f"{self.current_module}."):
-                name = name[len(f"{self.current_module}.") :]
-            # fixup parameters
-            params = self.fix_parameters(params)
-            # assume no functions in classes
-            self.leave_class()
-            # if function name is the same as the module
-            # then this is probably documenting a class ()
-            # list of module names [ name , uname]
-            if self.current_module[0] != "u":
-                mod_names = (self.current_module, f"u{self.current_module}")
-            else:
-                mod_names = (self.current_module, self.current_module[1:])
-            # if the function name matches the module name then threat this as a class.
-            if name in mod_names:
-                if self.verbose or self.__debug:
-                    self.writeln(f"{self.indent}# ..................................")
-                    self.writeln(f"{self.indent}# 'Promote' function to class: {name}")
-                # write a class header
-                self.output_class_hdr(name, params, docstr)
-            else:
-                fn_def = f"def {name}({params} -> {ret_type}:"
-                if OLD_OUTPUT:  # old output
-                    self.writeln(self.indent + fn_def)
-                    self.updent()
-                    self.output_docstring(docstr)
-                    self.writeln(f"{self.indent}...\n\n")
-                    self.dedent()
-                if NEW_OUTPUT:  # old output
-                    fd = FunctionSourceDict(
-                        "class bird()",
-                        definition=[fn_def],
-                        docstr=docstr,
-                        indent=self.depth,
-                    )
-                    self.output_dict += fd
+            mod_names = (self.current_module, self.current_module[1:])
+        # if the function name matches the module name then threat this as a class.
+        if name in mod_names:
+            if self.verbose or self.__debug:
+                self.writeln(f"{self.indent}# ..................................")
+                self.writeln(f"{self.indent}# 'Promote' function to class: {name}")
+            # write a class header
+            self.output_class_hdr(name, params, docstr)
+        else:
+            fn_def = f"def {name}({params} -> {ret_type}:"
+            if OLD_OUTPUT:  # old output
+                self.writeln(self.indent + fn_def)
+                self.updent()
+                self.output_docstring(docstr)
+                self.writeln(f"{self.indent}...\n\n")
+                self.dedent()
+            if NEW_OUTPUT:  # old output
+                fd = FunctionSourceDict(
+                    name=f"def {name}",
+                    definition=[fn_def],
+                    docstr=docstr,
+                    indent=self.depth,
+                )
+                self.output_dict += fd
+                ...
 
     def parse_class(self):
         self.log(f"# {self.line.rstrip()}")
@@ -848,4 +849,5 @@ if __name__ == "__main__":
 
     rst_folder = Path(base_path) / "docs" / "library"
     dst_folder = Path("generated/micropython") / flat_version(v_tag)
+    # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
     generate_from_rst(rst_folder, dst_folder, v_tag)
