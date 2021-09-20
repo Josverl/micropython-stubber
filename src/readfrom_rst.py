@@ -260,13 +260,13 @@ class RSTReader:
                 .startswith(
                     ".."
                 )  # stop at anchor ( however .. note: could be considered to be added)
-                and not self.rst_text[min(self.line_no + 1, self.max_line)].startswith(
+                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith(
                     "--"
                 )  # Heading --
-                and not self.rst_text[min(self.line_no + 1, self.max_line)].startswith(
+                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith(
                     "=="
                 )  # Heading ==
-                and not self.rst_text[min(self.line_no + 1, self.max_line)].startswith(
+                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith(
                     "~~"
                 )  # Heading ~~
             ):
