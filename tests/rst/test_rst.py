@@ -126,6 +126,7 @@ def test_rst_parse_function(filename, expected):
     r.read_file(Path(filename))
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     for fn in expected:
@@ -146,7 +147,7 @@ CLASS_10 = [
 @pytest.mark.parametrize(
     "line",
     [
-        "class Partition:",
+        "class Partition():",
         "    def __init__(self, id) -> None:",
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
@@ -162,7 +163,7 @@ def test_rst_parse_class_10(line: str):
     r.read_file(Path("tests/rst/data/class_10.rst"))
     # process
     r.parse()
-    r._cleanup()  # cleanup output
+    r.prepare_output()  # cleanup output
     # check if each expected line appears in the output
     # there can be more
 
@@ -203,8 +204,11 @@ def test_fix_param(param_in, param_out):
 def test_import_typing():
     "always include typing"
     r = RSTReader()
-    line = TYPING_IMPORT.strip()
-    assert line in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
+    r.prepare_output()
+    lines = r.output
+    #    lines =
+    for line in TYPING_IMPORT:
+        assert line.strip() in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
 
 
 def test_fix_param_dynamic():
