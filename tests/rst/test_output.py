@@ -240,7 +240,7 @@ def test_method_decorator():
     # add child class first
     class_1 = ClassSourceDict(
         name="class Foo(Bar):",
-        docstr=['Foo docstring'],
+        docstr=["Foo docstring"],
         init="def __init__(self)->None:",
     )
 
@@ -249,14 +249,14 @@ def test_method_decorator():
         name="def spam",
         indent=class_1._indent + 4,
         definition=["def spam()->None:"],
-        docstr=['Spam docstring'],
+        docstr=["Spam docstring"],
     )
     method_2 = FunctionSourceDict(
         decorators=["@staticmethod", "@decorator"],
         name="def bar",
         indent=class_1._indent + 4,
         definition=["def bar()->None:"],
-        docstr=['bar docstring'],
+        docstr=["bar docstring"],
     )
 
     class_1 += method_1
@@ -268,3 +268,20 @@ def test_method_decorator():
     assert " " * 4 + "@classmethod" in lines
     assert " " * 4 + "@staticmethod" in lines
     assert " " * 4 + "@decorator" in lines
+
+
+def test_exception_class():
+    od = ModuleSourceDict("utest")
+    # add child class first
+    e = ClassSourceDict(
+        name="class AssertionError(BaseException) : ...",
+        docstr=[],
+        init="",
+    )
+
+    od += e
+
+    lines = str(od).splitlines()
+
+    assert "class AssertionError(BaseException) : ..." in lines
+    assert od.find("class AssertionError") != None
