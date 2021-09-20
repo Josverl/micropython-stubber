@@ -38,6 +38,7 @@ from .classsort import sort_classes
 def spaces(n: int = 4) -> str:
     return " " * n
 
+
 class SourceDict(OrderedDict):
     "(abstract) dict to store source components respecting parent child dependencies and proper definition order"
 
@@ -194,11 +195,12 @@ class ClassSourceDict(SourceDict):
         indent: int = 0,
         lf="\n",
     ):
-        "set correct order for class definitions to allow adding class variables"
-
-        _init = [spaces(indent + 4) + init]
-        # add ...
-        _init.append(spaces(indent + 4 + 4) + "...")
+        "set correct order for class and exception definitions to allow adding class variables"
+        _init: List[str] = []
+        if len(init) > 0:
+            _init = [spaces(indent + 4) + init]
+            # add ...
+            _init.append(spaces(indent + 4 + 4) + "...")
         super().__init__(
             [
                 ("comment", []),
