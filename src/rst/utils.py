@@ -43,7 +43,10 @@ from .lookup import LOOKUP_LIST, NONE_VERBS
 log = logging.getLogger(__name__)
 
 # all possible Types needed
-TYPING_IMPORT = "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union\n"
+TYPING_IMPORT: List[str] = [
+    "from __future__ import annotations",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union",
+]
 
 # --------------------------------------
 # Confidence levels
