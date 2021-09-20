@@ -170,6 +170,14 @@ def test_add_class():
     cd.add_line("    def spam():")
     cd.add_line("         ...")
     od += cd
+
+    fn_1 = FunctionSourceDict(
+        name="def bar",
+        definition=["def bar()->None:"],
+        docstr=["bar docstring"],
+    )
+    od += fn_1
+
     l = len(od)
     od.sort()
     assert len(od) == l, "length of the output dictionary should not change by sorting"
