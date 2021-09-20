@@ -68,6 +68,8 @@ class SourceDict(OrderedDict):
         return out
 
     def __add__(self, dict: SourceDict):
+        # sd = sd + function
+        # sd += function
         self.update({dict.name: dict})
         return self
 
@@ -156,8 +158,10 @@ class ModuleSourceDict(SourceDict):
         for classname in self.classes():
             new.update({classname: self[classname]})
         # then the functions and other
-        new.update({k: v for (k, v) in self.items() if k.isdecimal()})
+        new.update({k: v for (k, v) in self.items() if k.isdecimal() or k.startswith("def ")})
         # now clear and update with new order
+        if len(self) != len(new):
+            raise ValueError("Sort() changed the length of the dictionary")
         self.clear()
         self.update(new)
 
