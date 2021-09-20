@@ -95,7 +95,7 @@ CD_HASHLIB = """
 @pytest.mark.parametrize(
     "line",
     [
-        "class Accel:",
+        "class Accel():",
         "    def __init__(self) -> None:",
         "    def filtered_xyz(self) -> Tuple:",
     ],
@@ -114,7 +114,6 @@ def test_parse_class_modulename(line, module):
     r.current_module = module
     # process
     r.parse()
-    r._cleanup()
     # check
     assert len(r.output) > 1
     expected = []
@@ -124,9 +123,9 @@ def test_parse_class_modulename(line, module):
 @pytest.mark.parametrize(
     "line",
     [
-        "class sha1:",
-        "class sha256:",
-        "class md5:",
+        "class sha1():",
+        "class sha256():",
+        "class md5():",
     ],
 )
 def test_parse_class_micro_modulename(line):
@@ -136,7 +135,6 @@ def test_parse_class_micro_modulename(line):
     # r.current_module = module # 'uhashlib'
     # process
     r.parse()
-    r._cleanup()
     # check
     assert len(r.output) > 1
     expected = []

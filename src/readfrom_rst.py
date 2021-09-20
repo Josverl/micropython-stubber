@@ -212,7 +212,7 @@ class RSTReader:
         if self.verbose:
             print(new)
 
-    def _cleanup(self):
+    def prepare_output(self):
         "clean up some trailing spaces and commas"
         if NEW_OUTPUT:
             lines = str(self.output_dict).splitlines(keepends=True)
@@ -222,7 +222,7 @@ class RSTReader:
                 self.output[i] = self.output[i].replace("(self, ) ->", "(self) ->")
 
     def write_file(self, filename: Path) -> bool:
-        self._cleanup()
+        self.prepare_output()
         try:
             print(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
@@ -812,6 +812,8 @@ class RSTReader:
             else:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
+        # now clean up
+        self.prepare_output()
 
 
 def generate_from_rst(
