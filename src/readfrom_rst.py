@@ -28,20 +28,32 @@
     The generated stub files are formatted using `black` and checked for validity using `pyright`
 
     - ordering of inter-dependent classes in the same module   
+    
+    - Literals / constants
+        -   documentation contains  repeated vars with the same indentation
+        - Module level:
+           .. data:: IPPROTO_UDP
+                     IPPROTO_TCP
+        - class level:
+            .. data:: Pin.IRQ_FALLING
+                    Pin.IRQ_RISING
+                    Pin.IRQ_LOW_LEVEL
+                    Pin.IRQ_HIGH_LEVEL
+
+                    Selects the IRQ trigger type.
+        - literals documented using a wildcard are added as comments only 
+
 
 Not yet implemented 
 -------------------
-    - Literals / constants
-        -   documentation contains  repeated vars with the same indentation
-        -  .. data:: IPPROTO_UDP
-        -            IPPROTO_TCP
 
     - repeats of definitions in the rst file for similar functions or literals
         '''
         .. function:: gmtime([secs])
                       localtime([secs])
         ....
-    
+
+
     - parse subclass / superclass from class docstring  : 
         - A namedtuple is a subclass of tuple 
         - ``dict`` type subclass which ...
@@ -361,6 +373,10 @@ class RSTReader:
         if "lambda" in params:
             params = params.replace("lambda", "lambda_fn")
 
+        # unresolvable parameter defaults
+        if "stride=width" in params:
+            # FrameBuffer: def __init__(self, buffer, width, height, format, stride=width, /) -> None:
+            params = params.replace("stride=width", "stride=-1")
         # formatting
         return params
 
@@ -548,12 +564,7 @@ class RSTReader:
             params = ""
         self.current_class = name
         self.current_function = ""
-        # remove module name from the start of the class name
-        if name.startswith(f"{self.current_module}."):
-            name = name[len(f"{self.current_module}.") :]
-        if self.current_module[0] == "u" and name.startswith(f"{self.current_module[1:]}."):
-            # utime
-            name = name[len(f"{self.current_module[1:]}.") :]
+        name = self.strip_module(name)
 
         self.log(f"# class:: {name}")
         # fixup parameters
@@ -566,6 +577,17 @@ class RSTReader:
         else:
             # write a class header
             self.output_class_hdr(name, params, docstr)
+
+    def strip_module(self, name):
+        "remove module name from the start of the class/constant name"
+        if len(self.current_module) == 0:
+            return name
+        if name.startswith(f"{self.current_module}."):
+            name = name[len(f"{self.current_module}.") :]
+        if self.current_module[0] == "u" and name.startswith(f"{self.current_module[1:]}."):
+            # utime
+            name = name[len(f"{self.current_module[1:]}.") :]
+        return name
 
     def is_class_started(self, class_name: str) -> bool:
         "Has the given class been started"
@@ -703,8 +725,10 @@ class RSTReader:
         if OLD_OUTPUT:
             self.writeln(f"{self.indent}class {name}(BaseException) : ...")
         if NEW_OUTPUT:
-            exept_1 = ClassSourceDict(name=f"class {name}(BaseException) : ...", docstr=[], init="")
-            self.output_dict += exept_1
+            except_1 = ClassSourceDict(
+                name=f"class {name}(BaseException) : ...", docstr=[], init=""
+            )
+            self.output_dict += except_1
             ...
         # no docstream read (yet) , so need to advance to next line
         self.line_no += 1
@@ -739,7 +763,7 @@ class RSTReader:
             and self.rst_text[self.line_no + counter].startswith(" " * col)
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
-            # print("Sequence detected")
+            print(_green("Sequence detected"))
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
         # now advance the linecounter
@@ -757,10 +781,6 @@ class RSTReader:
         # get module docstring
         docstr = self.parse_docstring()
 
-        # use the docstring as a comment
-        # ref : https://stackoverflow.com/questions/8820276/docstring-for-variable
-
-        self.output_docstring(docstr, as_comment=True)
         # deal with documentation wildcards
         for name in names:
             if "*" in name:
@@ -771,11 +791,18 @@ class RSTReader:
             )
             if type in ["None"]:  # None does not make sense
                 type = "Any"  # perhaps default to Int ?
-            if not "." in name:
-                self.writeln(f"{name} : {type}")  # Note : explicitly not indented !
-            else:
-                print(_red(f"todo: class constant : {name}"))
-                self.writeln(f"# {self.indent}{name} : {type}")
+            name = self.strip_module(name)
+            if OLD_OUTPUT:
+                if not "." in name:
+                    # use the docstring as a comment
+                    # ref : https://stackoverflow.com/questions/8820276/docstring-for-variable
+
+                    self.output_docstring(docstr, as_comment=True)
+                    self.writeln(f"{name} : {type}")  # Note : explicitly not indented !
+                else:
+                    print(_red(f"todo: class constant : {name}"))
+            if NEW_OUTPUT:
+                self.output_dict.add_constant_smart(name=name, type=type, docstr=docstr)
 
     def parse(self, depth: int = 0):
         self.depth = depth
