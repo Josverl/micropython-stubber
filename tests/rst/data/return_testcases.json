@@ -209,7 +209,7 @@
             "   With a single *value* argument the duty cycle is set to that value, measured",
             "   as the ratio ``value / 65535``."
         ],
-        "type": "uint",
+        "type": "int",
         "confidence": 0.8,
         "module": "machine",
         "class": "PWM",
