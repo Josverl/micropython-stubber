@@ -248,7 +248,7 @@ import subprocess
 import json
 
 
-@pytest.mark.xfail(reason="code to be written")
+# @pytest.mark.xfail(reason="code to be written")
 def test_pyright_undefined_variable(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright["generalDiagnostics"]

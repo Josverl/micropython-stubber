@@ -31,7 +31,8 @@ SourceDict is the 'base class'
 it 
 """
 from __future__ import annotations
-from typing import OrderedDict, List, Union
+
+from typing import Optional, OrderedDict, List, Union
 from .classsort import sort_classes
 
 
@@ -106,6 +107,38 @@ class SourceDict(OrderedDict):
             line = spaces(self._indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
+    def add_constant_smart(
+        self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True
+    ):
+        "add constant to the constant scope of this block, or a class in this block"
+        if "." in name and isinstance(self, ModuleSourceDict):
+            classname, const_name = name.split(".", 1)
+            classfullname = self.find(classname.replace("# ", ""))  # Wildcards are
+            if classfullname:
+                cls_dict: ClassSourceDict = self[classfullname]
+                cls_dict.add_constant_smart(const_name, type, docstr)
+            else:
+                raise KeyError(f"const {name} could not be added to Class {classname}")
+        else:
+            if "*" in name:
+                # * wildcard used in documentation
+                line = f"# {name} : {type}"
+            else:
+                line = f"{name} : {type}"
+            _docstr = docstr
+            if autoindent:
+                line = spaces(self._indent + self._body) + line
+                if len(_docstr):
+                    # add docstr as comment before constant
+                    _docstr = [spaces(self._indent + self._body) + "# " + l for l in _docstr]
+            if len(_docstr):
+                self.update({"constants": self["constants"] + _docstr + [line]})
+            else:
+                self.update({"constants": self["constants"] + [line]})
+
+    def find(self, name: str) -> Union[str, None]:
+        raise NotImplementedError("Please Implement this method")
+
     def add_line(self, line: str, autoindent: bool = True):
         self._nr += 1
         if autoindent:
@@ -172,6 +205,8 @@ class ModuleSourceDict(SourceDict):
     def find(self, name: str) -> Union[str, None]:
         "find a classnode based on the name with or without the superclass"
         keys = list(self.keys())
+        if not name.startswith("class "):
+            name = "class " + name
         # try full match first
         if name in keys:
             return name
