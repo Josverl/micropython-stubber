@@ -151,7 +151,7 @@ def simple_candidates(
             # key phrase
             if i < 0:
                 continue
-        # Assume unsigned are uint
+        # Assume unsigned are int
         result = BASE.copy()
         result["type"] = type
         result["confidence"] = rate * dist_rate(i)  # OK
@@ -207,7 +207,7 @@ def compound_candidates(
                     sub = "str"
                     break
                 elif element == "unsigned":
-                    sub = "uint"
+                    sub = "int"
                     break
                 else:
                     lt = element
@@ -337,7 +337,7 @@ def distill_return(return_text: str) -> List[Dict]:
     )
 
     candidates += simple_candidates(
-        "uint", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
+        "int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
     )
 
     candidates += simple_candidates(
@@ -436,9 +436,11 @@ def return_type_from_context(
     *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
 ):
     try:
-        return _type_from_context(
-            module=module, signature=signature, docstring=docstring, literal=literal
-        )["type"]
+        return str(
+            _type_from_context(
+                module=module, signature=signature, docstring=docstring, literal=literal
+            )["type"]
+        )
     except Exception:
         return "Any"
 
