@@ -188,33 +188,3 @@ def test_undocumented_class():
     ...
 
 
-@pytest.mark.skip(reason="test not yet built")
-def test_find_return_type():
-    # check return types for a number of known functions / methods
-    # check % return type !=  Any ?
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_coroutine():
-    # {
-    #     "signature": "start_server(callback, host, port, backlog=5)",
-    #     "docstring": [
-    #         "    Start a TCP server on the given *host* and *port*.  The *callback* will be",
-    #         "    called with incoming, accepted connections, and be passed 2 arguments: reader",
-    #         "    and writer streams for the connection.",
-    #         "",
-    #         "    Returns a `Server` object.",
-    #         "",
-    #         "    This is a coroutine."
-    #     ],
-    #     "docstring_len": 257,
-    #     "type": "Server",
-    #     "confidence": 1.37052,
-    #     "match": "<re.Match object; span=(209, 234), match='Returns a `Server` object'>",
-    #     "module": "uasyncio",
-    #     "class": "",
-    #     "function/method": "start_server"
-    # }
-    # https://docs.python.org/3.5/library/typing.html#typing.Coroutine
-    ...
