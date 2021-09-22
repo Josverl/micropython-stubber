@@ -1286,7 +1286,7 @@
             "    Returns an IRQ object."
         ],
         "docstring_len": 323,
-        "type": "object",
+        "type": "Any",
         "confidence": 1.0467600000000001,
         "match": "<re.Match object; span=(305, 326), match='Returns an IRQ object'>",
         "module": "network",

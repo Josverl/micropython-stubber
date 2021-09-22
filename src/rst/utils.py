@@ -228,7 +228,7 @@ def compound_candidates(
 def object_candidates(
     match_string: str,
     rate: float = 0.81,
-    exclude: List[str] = [],
+    exclude: List[str] = ["IRQ"],
 ):
     """
     find and rate possible types and confidence weighting for Object types.

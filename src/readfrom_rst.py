@@ -289,10 +289,10 @@ class RSTReader:
             pass
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
-        if len(block)>0 and block[0][0] != " ":
+        if len(block) > 0 and len(block[0]) > 0 and block[0][0] != " ":
             q_char = block[0][0]
-            if all( [l.startswith(q_char) for l in block] ):
-                # all lines start with the same character, so skip that character 
+            if all([l.startswith(q_char) for l in block]):
+                # all lines start with the same character, so skip that character
                 block = [l[1:] for l in block]
 
         # remove empty lines at beginning/end of block
@@ -350,8 +350,11 @@ class RSTReader:
             params = params.replace("...", "*args")
 
         # Remove Modulename. and Classname. from class constant
-        # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...) 
-        for prefix in (f"{self.current_module}.", f"{self.current_class}."):
+        # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...)
+        for prefix in (
+            f"{self.current_module}.",  # doc refers to module
+            f"{self.current_class}.",  # doc refers to class in method params
+        ):
             if len(prefix) > 1 and prefix in params:
                 params = params.replace(prefix, "")  # dynamic
 
@@ -639,15 +642,17 @@ class RSTReader:
             params = ""
         self.current_function = name
         # self.writeln(f"# method:: {name}")
-        # fixup optional [] parameters and other notations
-        params = self.fix_parameters(params)
         if "." in name:
             # todo deal with longer / deeper classes
             class_name = name.split(".")[0]
+            self.current_class = class_name  # update current for out-of sequence method processing
         else:
             # if nothing specified lets assume part of current class
             class_name = self.current_class
         name = name.split(".")[-1]  # Take only the last part from Pin.toggle
+
+        # fixup optional [] parameters and other notations
+        params = self.fix_parameters(params)
 
         # quick bail out if explicit intis should not be considered
         if name == "__init__" and self.no_explicit_init:
@@ -671,7 +676,7 @@ class RSTReader:
         docstr = self.parse_docstring()
         # parse return type from docstring
         ret_type = return_type_from_context(
-            docstring=docstr, signature=name, module=self.current_module
+            docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
         )
         # methods have 4 flavours
         #   - __init__              (self,  <params>) -> None:

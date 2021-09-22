@@ -34,7 +34,6 @@ LOOKUP_LIST = {
         "Coroutine[None, None, None]",  # Micropython V1.15+ ?
         0.95,
     ),  # class typing.Coroutine(Awaitable[V_co], Generic[T_co, T_contra, V_co])
-    "network.WLANWiPy.irq": ("object", 0.95),  # Documented as returning an undocumented IRQ object
 }
 
 
@@ -86,3 +85,9 @@ NONE_VERBS = [
     "Write ",
     "Writes ",
 ]
+
+# TODO: Add imports to some modules to resolve classes from others
+MODULE_GLUE = {
+    "lcd160cr": ["from machine import SPI"],  # module returns SPI objects
+    "pyb": ["from __future__ import annotations"],  # Class methods return Class
+}
