@@ -86,8 +86,8 @@ NONE_VERBS = [
     "Writes ",
 ]
 
-# TODO: Add imports to some modules to resolve classes from others
+# Add additional imports to generated modules to allow one module te refer to another
 MODULE_GLUE = {
     "lcd160cr": ["from machine import SPI"],  # module returns SPI objects
-    "pyb": ["from __future__ import annotations"],  # Class methods return Class
+    # "pyb": ["from __future__ import annotations"],  # Class methods return Class
 }

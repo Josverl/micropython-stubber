@@ -116,6 +116,7 @@ from utils import flat_version
 
 from rst.utils import return_type_from_context, TYPING_IMPORT
 from rst.output_dict import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
+from rst.lookup import MODULE_GLUE
 
 OLD_OUTPUT = False
 NEW_OUTPUT = True
@@ -167,7 +168,8 @@ class RSTReader:
             for l in TYPING_IMPORT:
                 self.writeln(l)
         if NEW_OUTPUT:
-            self.output_dict.update({"typing": TYPING_IMPORT})
+            self.output_dict.add_import(TYPING_IMPORT)
+
 
     @property
     def line(self) -> str:
@@ -502,6 +504,9 @@ class RSTReader:
             self.output_dict.add_comment(f"# source version: {self.source_tag}")
             self.output_dict.add_comment(f"# origin module:: {self.filename}")
             self.output_dict.add_docstr(docstr)
+            # Add additional imports to allow one module te refer to another 
+            if module_name in MODULE_GLUE.keys():
+                self.output_dict.add_import(MODULE_GLUE[module_name])
 
     def parse_current_module(self):
         self.log(f"# {self.line.rstrip()}")
