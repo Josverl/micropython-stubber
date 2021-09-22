@@ -43,6 +43,7 @@
                     Selects the IRQ trigger type.
         - literals documented using a wildcard are added as comments only 
 
+    - add GLUE imports to allow specific modules to import specific others. 
 
 Not yet implemented 
 -------------------
@@ -119,6 +120,7 @@ from rst import (
     return_type_from_context,
     TYPING_IMPORT,
     MODULE_GLUE,
+    PARAM_FIXES,
     ModuleSourceDict,
     ClassSourceDict,
     FunctionSourceDict,
@@ -315,6 +317,9 @@ class RSTReader:
         if not params.endswith(")"):
             # remove all after the closing bracket
             params = params[0 : params.rfind(")") + 1]
+
+        ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
+
         # multiple optionals
         # # .. method:: Servo.angle([angle, time=0])
         if "[angle, time=0]" in params:
@@ -322,39 +327,11 @@ class RSTReader:
         # .. method:: Servo.speed([speed, time=0])
         elif "[speed, time=0]" in params:
             params = params.replace("[speed, time=0]", "[speed], time=0")
-        # spell:disable
-        # sublist parameters are not supported in python 3
-        elif "(adcx, adcy, ...)" in params:
-            # method:: ADC.read_timed_multi((adcx, adcy, ...), (bufx, bufy, ...), timer)
-            params = params.replace("(adcx, adcy, ...), (bufx, bufy, ...)", "adcs, bufs")
-        elif "(ip, subnet, gateway, dns)" in params:
-            # network: # .. method:: AbstractNIC.ifconfig([(ip, subnet, gateway, dns)])
-            params = params.replace("(ip, subnet, gateway, dns)", "configtuple")
-        # spell:enable
-        # pyb  .. function:: hid((buttons, x, y, z))
-        params = params.replace("(buttons, x, y, z)", "hidtuple")
-
-        # esp v1.15.2 .. function:: getaddrinfo((hostname, port, lambda))
-        params = params.replace("(hostname, port, lambda)", "tuple")
 
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
         params = params.replace("]", ": Optional[Any]")
-
-        # # change weirdly written wildcards \* --> *
-        wilds = (
-            ("\\*", "*"),
-            (r"\**", "*"),
-            ("**", "*"),
-        )
-        for pair in wilds:
-            if pair[0] in params:
-                params = params.replace(pair[0], pair[1])
-        # fixme: ... not allowed in .py
-        if self.target == ".py":
-            params = params.replace("*, ...", "*args")
-            params = params.replace("...", "*args")
 
         # Remove Modulename. and Classname. from class constant
         # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...)
@@ -365,49 +342,16 @@ class RSTReader:
             if len(prefix) > 1 and prefix in params:
                 params = params.replace(prefix, "")  # dynamic
 
-        # loose documentation
-        if "'param'" in params:
-            params = params.replace("'param'", "param")  # Q&D
-
-        # .. function:: ussl.wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)
-        params = params.replace("cert_reqs=CERT_NONE", "cert_reqs=None")  # Q&D
-
-        if "dhcp" in params:
-            # network.rst method:: WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
-            params = params.replace(
-                "='dhcp' or configtuple: Optional[Any]", ": Union[str,Tuple]='dhcp'"
-            )
-        if "'pgm'" in params:
-            # network.rst .. method:: CC3K.patch_program('pgm')
-            params = params.replace("'pgm')", "cmd:str ,/)")
-
-        if "block_device" in params:
-            params = params.replace("block_device or path", "block_device_or_path")
-
-        # ifconfig
-        params = params.replace(
-            "(ip, subnet, gateway, dns):Optional[Any]", "config: Optional[Tuple]"
-        )  # Q&D
-
-        # illegal keywords
-        if "lambda" in params:
-            params = params.replace("lambda", "lambda_fn")
-
-        # unresolvable parameter defaults
-        if "stride=width" in params:
-            # FrameBuffer: def __init__(self, buffer, width, height, format, stride=width, /) -> None:
-            params = params.replace("stride=width", "stride=-1")
-
-        # fixes for machine.py class constants
-        if "trigger=(IRQ_FALLING | IRQ_RISING)" in params:
-            #
-            params = params.replace("trigger=(IRQ_FALLING | IRQ_RISING)", "trigger=IRQ_FALLING ")
-
-        if "pins=(SCK, MOSI, MISO)" in params:
-            #
-            params = params.replace("pins=(SCK, MOSI, MISO)", "pins:Optional[Tuple]")
+        for fix in PARAM_FIXES:
+            if fix[0] in params:
+                params = params.replace(fix[0], fix[1])
 
         # formatting
+        # fixme: ... not allowed in .py
+        if self.target == ".py":
+            params = params.replace("*, ...", "*args")
+            params = params.replace("...", "*args")
+
         return params
 
     def output_docstring(self, docstr: List[str], as_comment: bool = False):

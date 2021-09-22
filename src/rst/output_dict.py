@@ -159,7 +159,7 @@ class ModuleSourceDict(SourceDict):
                 ("docstr", ['""" """']),
                 ("version", ""),
                 ("comment", []),
-                ("imports", ["from typing import Any"]),
+                ("imports", []),
                 ("constants", []),
             ],
             indent,

@@ -33,6 +33,7 @@ def test_MSD_update():
     od.add_constant("BLUE : Any", autoindent=True)
     od.add_line("    def fly():")
     od.add_line("         ...")
+    od.add_import("from typing import Any")
     out = str(od)
     lines = out.splitlines()
     assert "from typing import Any" in lines
