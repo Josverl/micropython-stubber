@@ -642,7 +642,7 @@ class RSTReader:
                 self.writeln(f"{self.indent}def __init__(self, {params} -> None:")
             if NEW_OUTPUT:
                 method = FunctionSourceDict(
-                    name=name,
+                    name=f"def {name}",
                     indent=parent_class._indent + 4,
                     definition=[f"def __init__(self, {params} -> None:"],
                     docstr=docstr,
@@ -655,7 +655,7 @@ class RSTReader:
             if NEW_OUTPUT:
                 method = FunctionSourceDict(
                     decorators=["@classmethod"],
-                    name=name,
+                    name=f"def {name}",
                     indent=parent_class._indent + 4,
                     definition=[f"def {name}(cls, {params} -> {ret_type}:"],
                     docstr=docstr,
@@ -670,7 +670,7 @@ class RSTReader:
             if NEW_OUTPUT:
                 method = FunctionSourceDict(
                     decorators=["@staticmethod"],
-                    name=name,
+                    name=f"def {name}",
                     indent=parent_class._indent + 4,
                     definition=[f"def {name}({params} -> {ret_type}:"],
                     docstr=docstr,
@@ -682,7 +682,7 @@ class RSTReader:
                 self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
             if NEW_OUTPUT:
                 method = FunctionSourceDict(
-                    name=name,
+                    name=f"def {name}",
                     indent=parent_class._indent + 4,
                     definition=[f"def {name}(self, {params} -> {ret_type}:"],
                     docstr=docstr,

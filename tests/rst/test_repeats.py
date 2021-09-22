@@ -203,9 +203,12 @@ def test_sequence_functions():
 
     assert len(r.output) > 1
     # three function defs
-    assert r.output_dict["def compile"]
-    assert r.output_dict["def match"]  # 2nd in sequence
-    assert r.output_dict["def search"]
+    assert r.output_dict["def compile"], "first function in sequence not found"
+    assert r.output_dict["def match"], "2nd function in sequence not found"
+    assert r.output_dict["def search"], "1st function after sequence not found "
+
+    # check function signatures
+    # check docstrings ( the same)
 
 
 def test_sequence_methods():
@@ -225,7 +228,10 @@ def test_sequence_methods():
     # a class
     assert r.output_dict["class regex():"]
     # make sure all 4 methods are seen
-    assert r.output_dict["class regex():"]["match"]
-    assert r.output_dict["class regex():"]["search"]  # sequence
-    assert r.output_dict["class regex():"]["sub"]  # sequence
-    assert r.output_dict["class regex():"]["split"]
+    assert r.output_dict["class regex():"]["def match"], "first method in sequence not found"
+    assert r.output_dict["class regex():"]["def search"], "second method in sequence not found"
+    assert r.output_dict["class regex():"]["def sub"], "third method in sequence not found"
+    assert r.output_dict["class regex():"]["def split"], "1st method after sequence not found "
+
+    # check function signatures
+    # check docstrings ( the same)
