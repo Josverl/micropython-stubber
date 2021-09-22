@@ -290,7 +290,6 @@ def test_pyright_invalid_strings(pyright, capsys):
     assert len(issues) == 0, "all string should be valid"
 
 
-@pytest.mark.xfail(reason="upstream docfix needed")
 def test_doc_pyright_obscured_definitions(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright["generalDiagnostics"]
@@ -307,7 +306,9 @@ def test_doc_pyright_obscured_definitions(pyright, capsys):
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     # TODO:  ure.py 'Function declaration "match" is obscured by a declaration of the same name'
-    assert len(issues) == 1, f"There are {len(issues)} redefinitions that obscure earlier defs"
+    assert (
+        len(issues) == 0
+    ), f"There are {len(issues)} function or class defs that obscure earlier defs"
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
