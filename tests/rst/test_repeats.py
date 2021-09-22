@@ -1,6 +1,5 @@
-
 # SOT
-from readfrom_rst import  RSTReader
+from readfrom_rst import RSTReader
 
 
 #: Use this content as input for moo to do bar
@@ -142,3 +141,91 @@ def test_sequence_3():
     constants = len([l for l in c_list if not l.lstrip().startswith("# ")])
     assert constants == 7
 
+
+FUNCTION_SEQ = """
+:mod:`re` -- simple regular expressions
+=======================================
+
+.. module:: re
+   :synopsis: regular expressions
+
+Functions
+---------
+
+.. function:: compile(regex_str, [flags])
+              match(regex_str, string)
+
+   Compile *regex_str* and match against *string*. Match always happens
+   from starting position in a string.
+
+.. function:: search(regex_str, string)
+
+   Compile *regex_str* and search it in a *string*. Unlike `match`, this will search
+   string for first position which matches regex (which still may be
+   0 if regex is anchored).
+
+.. _regex:
+
+Regex objects
+-------------
+
+Compiled regular expression. Instances of this class are created using
+`re.compile()`.
+
+.. method:: regex.match(string)
+            regex.search(string)
+            regex.sub(replace, string, count=0, flags=0, /)
+
+   Similar to the module-level functions :meth:`match`, :meth:`search`
+   and :meth:`sub`.
+   Using methods is (much) more efficient if the same regex is applied to
+   multiple strings.
+
+.. method:: regex.split(string, max_split=-1, /)
+
+   Split a *string* using regex. If *max_split* is given, it specifies
+   maximum number of splits to perform. Returns list of strings (there
+   may be up to *max_split+1* elements if it's specified).
+"""
+
+
+def test_sequence_functions():
+
+    r = RSTReader()
+    # Plug in test data
+
+    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
+    r.filename = "re.py"
+    r.current_module = "re"
+    r.max_line = len(r.rst_text) - 1
+    # process
+    r.parse()
+
+    assert len(r.output) > 1
+    # three function defs
+    assert r.output_dict["def compile"]
+    assert r.output_dict["def match"]  # 2nd in sequence
+    assert r.output_dict["def search"]
+
+
+def test_sequence_methods():
+
+    r = RSTReader()
+    # Plug in test data
+
+    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
+    r.filename = "re.py"
+    r.current_module = "re"
+    r.max_line = len(r.rst_text) - 1
+    # process
+    r.parse()
+
+    assert len(r.output) > 1
+
+    # a class
+    assert r.output_dict["class regex():"]
+    # make sure all 4 methods are seen
+    assert r.output_dict["class regex():"]["match"]
+    assert r.output_dict["class regex():"]["search"]  # sequence
+    assert r.output_dict["class regex():"]["sub"]  # sequence
+    assert r.output_dict["class regex():"]["split"]
