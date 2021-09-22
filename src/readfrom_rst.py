@@ -287,6 +287,14 @@ class RSTReader:
                 self.line_no += 1  # advance line
         except IndexError:
             pass
+        # if a Quoted Literal Block , then remove the first character of each line
+        # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
+        if len(block)>0 and block[0][0] != " ":
+            q_char = block[0][0]
+            if all( [l.startswith(q_char) for l in block] ):
+                # all lines start with the same character, so skip that character 
+                block = [l[1:] for l in block]
+
         # remove empty lines at beginning/end of block
         if len(block) and len(block[0]) == 0:
             block = block[1:]
