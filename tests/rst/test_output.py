@@ -9,7 +9,7 @@ def test_Module_SD():
     od = ModuleSourceDict("utest")
     assert isinstance(od, dict)
 
-    assert isinstance(od["typing"], str)
+    assert isinstance(od["imports"], list)
     assert isinstance(od["version"], str)
     assert isinstance(od["comment"], list)
     assert isinstance(od["constants"], list)

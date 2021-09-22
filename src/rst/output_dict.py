@@ -159,7 +159,7 @@ class ModuleSourceDict(SourceDict):
                 ("docstr", ['""" """']),
                 ("version", ""),
                 ("comment", []),
-                ("typing", "from typing import Any"),
+                ("imports", ["from typing import Any"]),
                 ("constants", []),
             ],
             indent,
@@ -182,7 +182,7 @@ class ModuleSourceDict(SourceDict):
                     "docstr",
                     "version",
                     "comment",
-                    "typing",
+                    "imports",
                     "constants",
                 ]
             }
@@ -222,6 +222,15 @@ class ModuleSourceDict(SourceDict):
         classes = [k for k in self.keys() if isinstance(self[k], ClassSourceDict)]
         # return sorted list
         return sort_classes(classes)
+
+    def add_import(self, imports: Union[str, List[str]]):
+        "add a [list of] imports this module"
+        _imports = self["imports"] or []
+        if isinstance(imports, str):
+            _imports += [imports]
+        elif isinstance(imports, list):
+            _imports += imports
+        self.update({"imports": _imports})
 
 
 class ClassSourceDict(SourceDict):
