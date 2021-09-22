@@ -360,30 +360,33 @@ def test_doc_poll_class_def(rst_stubs: Path):
 # def socket(af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> Any:
 
 
-# "SPI" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-46\stubs0\v1.17-nightly\lcd160cr.py line 345
-# "SPI" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-46\stubs0\v1.17-nightly\machine.py line 626
-
-# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-46\stubs0\v1.17-nightly\network.py line 443
-# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-46\stubs0\v1.17-nightly\rp2.py line 157
-# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-46\stubs0\v1.17-nightly\rp2.py line 310
-
-# "MSB" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-46\stubs0\v1.17-nightly\machine.py line 714
+# "SPI" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\lcd160cr.py line 345
+# "SPI" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\machine.py line 626
+# "MSB" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\machine.py line 714
+# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\network.py line 443
+# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\rp2.py line 157
+# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\rp2.py line 310
 
 # @pytest.mark.xfail(reason="upstream docfix needed")
+
+
 @pytest.mark.parametrize(
-    "error",
+    "error, modulename",
     [
-        ('"NORMAL" is not defined'),  # ,"pyb"),
-        ('"UP" is not defined'),  # "pyb.Timer"),
-        ('"hid_mouse" is not defined'),  # "pyb.USB_HID"),
+        ('"NORMAL" is not defined', "pyb"),
+        ('"UP" is not defined', "pyb.Timer"),
+        ('"hid_mouse" is not defined', "pyb.USB_HID"),
+        ('"SPI" is not defined', "lcd160cr"),
     ],
 )
-def test_doc_CONSTANTS(pyright, capsys, error):
+def test_doc_CONSTANTS(error, modulename, pyright, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright["generalDiagnostics"]
     issues = list(
         filter(
-            lambda diag: diag["rule"] == "reportUndefinedVariable" and diag["message"] == error,
+            lambda issue: issue["rule"] == "reportUndefinedVariable"
+            and issue["message"] == error
+            and Path(issue["file"]).stem == modulename,
             issues,
         )
     )

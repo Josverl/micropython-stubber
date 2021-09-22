@@ -162,29 +162,23 @@ def test_Flash_init_overload():
     ...
 
 
-@pytest.mark.skip(reason="test not yet built")
-def test_data_module_level():
-    "all modules should have a docstring"
-    ...
+# Nice to haves
+
+# @pytest.mark.skip(reason="test not yet built")
+# def test_data_module_level():
+#     "all modules should have a docstring"
+#     ...
 
 
-@pytest.mark.skip(reason="test not yet built")
-def test_data_class_level():
-    "all classes should have a docstring"
-    ...
+# @pytest.mark.skip(reason="test not yet built")
+# def test_data_class_level():
+#     "all classes should have a docstring"
+#     ...
 
 
-@pytest.mark.skip(reason="test not yet built")
-def test_exception():
-    # exception:: AssertionError
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_undocumented_class():
-    # percentage of classes with docstring
-    # list classes without a docstring
-    # >> similar for function / methods
-    ...
-
-
+# @pytest.mark.skip(reason="test not yet built")
+# def test_undocumented_class():
+#     # percentage of classes with docstring
+#     # list classes without a docstring
+#     # >> similar for function / methods
+#     ...
