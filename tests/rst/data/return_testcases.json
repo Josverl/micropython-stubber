@@ -1273,5 +1273,24 @@
         "module": "ure",
         "class": "match",
         "function/method": "match.group"
+    },
+    {
+        "signature": "WLANWiPy.irq(*, handler, wake)",
+        "docstring": [
+            "    Create a callback to be triggered when a WLAN event occurs during ``machine.SLEEP``",
+            "    mode. Events are triggered by socket activity or by WLAN connection/disconnection.",
+            "",
+            "        - *handler* is the function that gets called when the IRQ is triggered.",
+            "        - *wake* must be ``machine.SLEEP``.",
+            "",
+            "    Returns an IRQ object."
+        ],
+        "docstring_len": 323,
+        "type": "object",
+        "confidence": 1.0467600000000001,
+        "match": "<re.Match object; span=(305, 326), match='Returns an IRQ object'>",
+        "module": "network",
+        "class": "WLANWiPy",
+        "function/method": "WLANWiPy.irq"
     }
 ]

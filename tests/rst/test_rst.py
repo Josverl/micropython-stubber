@@ -38,7 +38,7 @@ def pyright(rst_stubs):
 def micropython_repo():
     "make sure a recent branch is checked out"
     git.switch_branch("master", MICROPYTHON_FOLDER)
-    TEST_DOCFIX = False
+    TEST_DOCFIX = True
     if TEST_DOCFIX:
         # run test against the proposed documentation fixes
         try:
@@ -291,7 +291,7 @@ def test_pyright_invalid_strings(pyright, capsys):
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
-def test_pyright_obscured_definitions(pyright, capsys):
+def test_doc_pyright_obscured_definitions(pyright, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright["generalDiagnostics"]
     # Only look at errors
@@ -311,7 +311,7 @@ def test_pyright_obscured_definitions(pyright, capsys):
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
-def test_deepsleep_stub(rst_stubs):
+def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
     # return type omitted as this is tested seperately
@@ -325,7 +325,7 @@ def test_deepsleep_stub(rst_stubs):
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
 @pytest.mark.xfail(reason="upstream docfix needed")
-def test_socket_class_def(rst_stubs: Path):
+def test_doc_socket_class_def(rst_stubs: Path):
     "make sense of `usocket.socket` class documented as a function - Upstream Docfix needed"
     content = read_stub(rst_stubs, "usocket.py")
     if content == []:
@@ -346,7 +346,7 @@ def test_socket_class_def(rst_stubs: Path):
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
-def test_poll_class_def(rst_stubs: Path):
+def test_doc_poll_class_def(rst_stubs: Path):
     "make sense of `uselect.socket` class documented as a function - Upstream Docfix pending"
     content = read_stub(rst_stubs, "uselect.py")
 
