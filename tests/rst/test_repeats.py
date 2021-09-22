@@ -1,12 +1,7 @@
-from typing import Dict, List, Tuple, Any
-import pytest
-from pathlib import Path
-import json
 
 # SOT
-from readfrom_rst import generate_from_rst, RSTReader, TYPING_IMPORT
+from readfrom_rst import  RSTReader
 
-from rst.utils import _type_from_context, return_type_from_context
 
 #: Use this content as input for moo to do bar
 # FOOBAR: Any = 1

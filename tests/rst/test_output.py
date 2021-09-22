@@ -1,7 +1,7 @@
 # others
 
 # SOT
-from rst.output_dict import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
+from rst import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
 
 
 def test_Module_SD():

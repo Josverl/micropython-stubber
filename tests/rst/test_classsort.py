@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import pytest
 
 # SOT
-from rst.classsort import sort_classes
+from rst import sort_classes
 
 
 def test_sort_classes():
