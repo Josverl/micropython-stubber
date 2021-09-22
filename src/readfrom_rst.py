@@ -341,6 +341,8 @@ class RSTReader:
             params = params.replace("*, ...", "*args")
             params = params.replace("...", "*args")
 
+        # Remove Modulename. and Classname. from class constant
+        # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...) 
         for prefix in (f"{self.current_module}.", f"{self.current_class}."):
             if len(prefix) > 1 and prefix in params:
                 params = params.replace(prefix, "")  # dynamic
@@ -377,6 +379,16 @@ class RSTReader:
         if "stride=width" in params:
             # FrameBuffer: def __init__(self, buffer, width, height, format, stride=width, /) -> None:
             params = params.replace("stride=width", "stride=-1")
+
+        # fixes for machine.py class constants
+        if "trigger=(IRQ_FALLING | IRQ_RISING)" in params:
+            #
+            params = params.replace("trigger=(IRQ_FALLING | IRQ_RISING)", "trigger=IRQ_FALLING ")
+
+        if "pins=(SCK, MOSI, MISO)" in params:
+            #
+            params = params.replace("pins=(SCK, MOSI, MISO)", "pins:Optional[Tuple]")
+
         # formatting
         return params
 
@@ -466,24 +478,24 @@ class RSTReader:
         "parse a module tag and set the module's docstring"
         self.log(f"# {self.line.rstrip()}")
         module_name = self.line.split(SEPERATOR)[-1].strip()
-        mod_comment = f"# origin module:: {self.filename}\n# {self.source_tag}"
 
         self.current_module = module_name
         self.current_function = self.current_class = ""
         # get module docstring
         docstr = self.parse_docstring()
         if OLD_OUTPUT:  # old output
-            self.writeln(mod_comment)
+            self.writeln(f"# origin module:: {self.filename}\n# {self.source_tag}")
             self.output_docstring(docstr)
         if NEW_OUTPUT:  # new output
             self.output_dict.name = module_name
-            self.output_dict.add_comment(mod_comment)
+            self.output_dict.add_comment(f"# source version: {self.source_tag}")
+            self.output_dict.add_comment(f"# origin module:: {self.filename}")
             self.output_dict.add_docstr(docstr)
 
     def parse_current_module(self):
         self.log(f"# {self.line.rstrip()}")
         module_name = self.line.split(SEPERATOR)[-1].strip()
-        mod_comment = f"# currentmodule:: {self.current_module}"
+        mod_comment = f"# + module: {self.current_module}.rst"
         self.current_module = module_name
         self.current_function = self.current_class = ""
         self.log(mod_comment)
@@ -783,9 +795,7 @@ class RSTReader:
 
         # deal with documentation wildcards
         for name in names:
-            if "*" in name:
-                self.log(f"# fix constant {name}")
-                name = f"# {name}"
+
             type = return_type_from_context(
                 docstring=docstr, signature=name, module=self.current_module, literal=True
             )
@@ -793,6 +803,9 @@ class RSTReader:
                 type = "Any"  # perhaps default to Int ?
             name = self.strip_module(name)
             if OLD_OUTPUT:
+                if "*" in name:
+                    self.log(f"# fix constant {name}")
+                    name = f"# {name}"
                 if not "." in name:
                     # use the docstring as a comment
                     # ref : https://stackoverflow.com/questions/8820276/docstring-for-variable

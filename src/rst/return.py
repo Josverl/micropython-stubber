@@ -1,9 +1,7 @@
 """ Work in Progress  
 
     - build test and  % report 
-    - try if an Azure Machine Learning works as well 
-        https://docs.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources
-    - 
+   - 
 """
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/D5ddB2/1

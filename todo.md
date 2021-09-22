@@ -6,6 +6,38 @@
 
 	add details on what version of types used ( 3.4/3.5 )
 
+
+# Upstream documentaion 
+
+- Documentation bugs : 
+
+## pyb.rst 
+ 	missing class constants 
+### 	"NORMAL" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-32\stubs0\v1.17-nightly\pyb.py line 581
+	class DAC:
+			NORMAL : Any
+			CIRCULAR : Any 
+
+### "UP" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-32\stubs0\v1.17-nightly\pyb.py line 1421
+	class Timer:
+			UP
+			DOWN
+			CENTER
+
+	          - ``mode`` can be one of:
+            - ``Timer.UP`` - configures the timer to count from 0 to ARR (default)
+            - ``Timer.DOWN`` - configures the timer to count from ARR down to 0.
+            - ``Timer.CENTER`` - configures the timer to count from 0 to ARR and
+              then back down to 0.
+
+###	missing module constants in + module: pyb.USB_HID.rst
+	hid_keyboard = None
+	hid_mouse = None
+
+## network.rst 
+
+	"network.WLANWiPy.irq": ("object", 0.95),  # Documented as returning undocumented IRQ object
+
 # add reference to mypy.stubgen
 	https://mypy.readthedocs.io/en/stable/stubgen.html
 
@@ -31,6 +63,10 @@
 
 # Stub augmentation/ merging typeinfomration from copied / generated typerich info
 https://libcst.readthedocs.io/en/latest/tutorial.html
+
+
+
+
 
 
 # cpython

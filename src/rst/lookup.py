@@ -34,6 +34,7 @@ LOOKUP_LIST = {
         "Coroutine[None, None, None]",  # Micropython V1.15+ ?
         0.95,
     ),  # class typing.Coroutine(Awaitable[V_co], Generic[T_co, T_contra, V_co])
+    "network.WLANWiPy.irq": ("object", 0.95),  # Documented as returning an undocumented IRQ object
 }
 
 
