@@ -164,6 +164,37 @@ Functions
    string for first position which matches regex (which still may be
    0 if regex is anchored).
 
+"""
+
+
+def test_sequence_functions():
+
+    r = RSTReader()
+    # Plug in test data
+
+    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
+    r.filename = "re.py"
+    r.current_module = "re"
+    r.max_line = len(r.rst_text) - 1
+    # process
+    r.parse()
+
+    assert len(r.output) > 1
+    # three function defs
+    assert r.output_dict["def compile"], "first function in sequence not found"
+    assert r.output_dict["def match"], "2nd function in sequence not found"
+    assert r.output_dict["def search"], "1st function after sequence not found "
+
+    # check function signatures
+    # check docstrings ( the same)
+
+CLASS_METHOD_SEQ = """
+:mod:`re` -- simple regular expressions
+=======================================
+
+.. module:: re
+   :synopsis: regular expressions
+
 .. _regex:
 
 Regex objects
@@ -189,34 +220,13 @@ Compiled regular expression. Instances of this class are created using
 """
 
 
-def test_sequence_functions():
-
-    r = RSTReader()
-    # Plug in test data
-
-    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
-    r.filename = "re.py"
-    r.current_module = "re"
-    r.max_line = len(r.rst_text) - 1
-    # process
-    r.parse()
-
-    assert len(r.output) > 1
-    # three function defs
-    assert r.output_dict["def compile"], "first function in sequence not found"
-    assert r.output_dict["def match"], "2nd function in sequence not found"
-    assert r.output_dict["def search"], "1st function after sequence not found "
-
-    # check function signatures
-    # check docstrings ( the same)
-
 
 def test_sequence_methods():
 
     r = RSTReader()
     # Plug in test data
 
-    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
+    r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True)
     r.filename = "re.py"
     r.current_module = "re"
     r.max_line = len(r.rst_text) - 1

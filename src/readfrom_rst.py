@@ -132,7 +132,7 @@ SEPERATOR = "::"
 
 class RSTReader:
     __debug = False  # a
-    verbose = False
+    verbose = True
     gather_docs = False  # used only during Development
     target = ".py"  # py/pyi
 
@@ -144,11 +144,11 @@ class RSTReader:
         self.current_class = ""
         self.current_function = ""  # function & method
 
-        #input buffer
+        # input buffer
         self.rst_text: List[str] = []
         self.max_line = 0
 
-        #Output buffer
+        # Output buffer
         self.output: List[str] = []
         self.output_dict: ModuleSourceDict = ModuleSourceDict("")
         self.output_dict.add_import(TYPING_IMPORT)
@@ -285,6 +285,9 @@ class RSTReader:
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
         params = params.replace("]", ": Optional[Any]")
 
+        # deal with overloads for Flash and Partition .readblock/writeblocks
+        params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]")
+
         # Remove Modulename. and Classname. from class constant
         # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...)
         for prefix in (
@@ -379,50 +382,59 @@ class RSTReader:
 
     def parse_function(self):
         self.log(f"# {self.line.rstrip()}")
-        this_function = self.line.split(SEPERATOR)[-1].strip()
+        # this_function = self.line.split(SEPERATOR)[-1].strip()
+        # name = this_function
+
+        # Get one or more names
+        function_names = self.parse_names(oneliner=False)
         docstr = self.parse_docstring()
-        # defaults
-        name = this_function
-        params = ""
-        try:
-            name, params = this_function.split("(", maxsplit=1)
-        except ValueError:
-            print(_red(this_function))
-        # Parse return type from docstring
-        ret_type = return_type_from_context(
-            docstring=docstr, signature=name, module=self.current_module
-        )
-        self.current_function = name
-        if name in ("classmethod", "staticmethod"):
-            # skip the classmethod and static method functions
-            # no use to create stubs for these
-            return
-        # ussl docstring uses a prefix
-        # remove module name from the start of the function name
-        if name.startswith(f"{self.current_module}."):
-            name = name[len(f"{self.current_module}.") :]
-        # fixup parameters
-        params = self.fix_parameters(params)
-        # assume no functions in classes
-        self.leave_class()
-        # if function name is the same as the module
-        # then this is probably documenting a class ()
-        # list of module names [ name , uname]
-        if self.current_module[0] != "u":
-            mod_names = (self.current_module, f"u{self.current_module}")
-        else:
-            mod_names = (self.current_module, self.current_module[1:])
-        # if the function name matches the module name then threat this as a class.
-        if name in mod_names:
-            # 'Promote' function to class
-            self.create_update_class(name, params, docstr)
-        else:
-            fn_def = FunctionSourceDict(
-                name=f"def {name}",
-                definition=[f"def {name}({params} -> {ret_type}:"],
-                docstr=docstr,
+
+        for this_function in function_names:
+            # Parse return type from docstring
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=this_function, module=self.current_module
             )
-            self.output_dict += fn_def
+
+            ...
+            # defaults
+            params = ""
+            try:
+                name, params = this_function.split("(", maxsplit=1)
+            except ValueError:
+                print(_red(this_function))
+            self.current_function = name
+            if name in ("classmethod", "staticmethod"):
+                # skip the classmethod and static method functions
+                # no use to create stubs for these
+                return
+
+            # TODO: make more generic
+            # ussl docstring uses a prefix
+            # remove module name from the start of the function name
+            if name.startswith(f"{self.current_module}."):
+                name = name[len(f"{self.current_module}.") :]
+            # fixup parameters
+            params = self.fix_parameters(params)
+            # assume no functions in classes
+            self.leave_class()
+            # if function name is the same as the module
+            # then this is probably documenting a class ()
+            # list of module names [ name , uname]
+            if self.current_module[0] != "u":
+                mod_names = (self.current_module, f"u{self.current_module}")
+            else:
+                mod_names = (self.current_module, self.current_module[1:])
+            # if the function name matches the module name then threat this as a class.
+            if name in mod_names:
+                # 'Promote' function to class
+                self.create_update_class(name, params, docstr)
+            else:
+                fn_def = FunctionSourceDict(
+                    name=f"def {name}",
+                    definition=[f"def {name}({params} -> {ret_type}:"],
+                    docstr=docstr,
+                )
+                self.output_dict += fn_def
 
     def parse_class(self):
         self.log(f"# {self.line.rstrip()}")
@@ -474,80 +486,89 @@ class RSTReader:
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
         self.log(f"# {self.line.rstrip()}")
-        this_method = self.line.split(SEPERATOR)[1].strip()
+
+        ## rst_hint is used to access the method decorator ( method, staticmethod, staticmethod ... )
         rst_hint = self.get_rst_hint()
-        try:
-            name, params = this_method.split("(", 1)  # split methodname from params
-        except ValueError:
-            name = this_method
-            params = ""
-        self.current_function = name
-        # self.writeln(f"# method:: {name}")
-        if "." in name:
-            # todo deal with longer / deeper classes
-            class_name = name.split(".")[0]
-            self.current_class = class_name  # update current for out-of sequence method processing
-        else:
-            # if nothing specified lets assume part of current class
-            class_name = self.current_class
-        name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-        # fixup optional [] parameters and other notations
-        params = self.fix_parameters(params)
-
-        # get or create the parent class
-        full_name = self.output_dict.find(f"class {class_name}")
-        if full_name:
-            parent_class = self.output_dict[full_name]
-        else:
-            # not found, create and add new class to the output dict
-            parent_class = ClassSourceDict(f"class {class_name}():")
-            self.output_dict += parent_class
+        method_names = self.parse_names(oneliner=False)
+        # filter out overloads with 'param=value' description as these can't be output (currently)
+        method_names = [m for m in method_names if not "param=value" in m]
+            
         docstr = self.parse_docstring()
-        # parse return type from docstring
-        ret_type = return_type_from_context(
-            docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
-        )
-        # methods have 4 flavours
-        #   - __init__              (self,  <params>) -> None:
-        #   - classmethod           (cls,   <params>) -> <ret_type>:
-        #   - staticmethod          (       <params>) -> <ret_type>:
-        #   - all other methods     (self,  <params>) -> <ret_type>:
-        if name == "__init__":
-            method = FunctionSourceDict(
-                name=f"def {name}",
-                indent=parent_class._indent + 4,
-                definition=[f"def __init__(self, {params} -> None:"],
-                docstr=docstr,
-            )
-            parent_class += method
-        elif rst_hint == "classmethod":
-            method = FunctionSourceDict(
-                decorators=["@classmethod"],
-                name=f"def {name}",
-                indent=parent_class._indent + 4,
-                definition=[f"def {name}(cls, {params} -> {ret_type}:"],
-                docstr=docstr,
-            )
-            parent_class += method
+        for this_method in method_names:
+            try:
+                name, params = this_method.split("(", 1)  # split methodname from params
+            except ValueError:
+                name = this_method
+                params = ")"
+            self.current_function = name
+            # self.writeln(f"# method:: {name}")
+            if "." in name:
+                # todo deal with longer / deeper classes
+                class_name = name.split(".")[0]
+                # update current for out-of sequence method processing
+                self.current_class = class_name
+            else:
+                # if nothing specified lets assume part of current class
+                class_name = self.current_class
+            name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-        elif rst_hint == "staticmethod":
-            method = FunctionSourceDict(
-                decorators=["@staticmethod"],
-                name=f"def {name}",
-                indent=parent_class._indent + 4,
-                definition=[f"def {name}({params} -> {ret_type}:"],
-                docstr=docstr,
+            # fixup optional [] parameters and other notations
+            params = self.fix_parameters(params)
+
+            # get or create the parent class
+            full_name = self.output_dict.find(f"class {class_name}")
+            if full_name:
+                parent_class = self.output_dict[full_name]
+            else:
+                # not found, create and add new class to the output dict
+                parent_class = ClassSourceDict(f"class {class_name}():")
+                self.output_dict += parent_class
+
+            # parse return type from docstring
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
             )
-            parent_class += method
-        else:  # just plain method
-            method = FunctionSourceDict(
-                name=f"def {name}",
-                indent=parent_class._indent + 4,
-                definition=[f"def {name}(self, {params} -> {ret_type}:"],
-                docstr=docstr,
-            )
-            parent_class += method
+            # methods have 4 flavours
+            #   - __init__              (self,  <params>) -> None:
+            #   - classmethod           (cls,   <params>) -> <ret_type>:
+            #   - staticmethod          (       <params>) -> <ret_type>:
+            #   - all other methods     (self,  <params>) -> <ret_type>:
+            if name == "__init__":
+                method = FunctionSourceDict(
+                    name=f"def {name}",
+                    indent=parent_class._indent + 4,
+                    definition=[f"def __init__(self, {params} -> None:"],
+                    docstr=docstr,
+                )
+                parent_class += method
+            elif rst_hint == "classmethod":
+                method = FunctionSourceDict(
+                    decorators=["@classmethod"],
+                    name=f"def {name}",
+                    indent=parent_class._indent + 4,
+                    definition=[f"def {name}(cls, {params} -> {ret_type}:"],
+                    docstr=docstr,
+                )
+                parent_class += method
+
+            elif rst_hint == "staticmethod":
+                method = FunctionSourceDict(
+                    decorators=["@staticmethod"],
+                    name=f"def {name}",
+                    indent=parent_class._indent + 4,
+                    definition=[f"def {name}({params} -> {ret_type}:"],
+                    docstr=docstr,
+                )
+                parent_class += method
+            else:  # just plain method
+                method = FunctionSourceDict(
+                    name=f"def {name}",
+                    indent=parent_class._indent + 4,
+                    definition=[f"def {name}(self, {params} -> {ret_type}:"],
+                    docstr=docstr,
+                )
+                parent_class += method
 
     def parse_exception(self):
         self.log(f"# {self.line.rstrip()}")
@@ -572,11 +593,17 @@ class RSTReader:
         else:
             return self.line.split(SEPERATOR)[-1].strip()
 
-    def parse_names(self):
+    def parse_names(self, oneliner: bool = True):
         """get a list of constant/function/class names from and following a line with an identifier
         advances the linecounter
+
+        oneliner :  treat a line with commas as multiple names (used for constants)
         """
-        names: List[str] = [] + self.parse_name().split(",")
+        names: List[str] = []
+        if oneliner:
+            names += self.parse_name().split(",")
+        else:
+            names += [self.parse_name()]
 
         m = re.search(r"..\s?\w+\s?::\s?", self.line)
         if m:
