@@ -126,7 +126,6 @@ from rst import (
     FunctionSourceDict,
 )
 
-OLD_OUTPUT = False
 NEW_OUTPUT = True
 
 
@@ -148,35 +147,29 @@ SEPERATOR = "::"
 
 
 class RSTReader:
-    __debug = True  # a
+    __debug = False  # a
     verbose = False
-    no_explicit_init = False  # True to avoid overloading __init__
-    gather_docs = True  # used only during Development
+    gather_docs = False  # used only during Development
 
     def __init__(self, v_tag="v1.xx"):
         self.line_no: int = 0  # current Linenumber used during parsing.
         self.filename = ""
 
-        # self.line = ""  # class / method/ function line being parsed
         self.current_module = ""
         self.current_class = ""
         self.current_function = ""  # function & method
 
-        self.depth = 0
         self.rst_text: List[str] = []
         self.max_line = 0
         self.output: List[str] = []
-        self.output_dict: ModuleSourceDict = ModuleSourceDict("unnamed")
+        self.output_dict: ModuleSourceDict = ModuleSourceDict("")
         self.source_tag = v_tag
         self.target = ".py"  # py/pyi
-        # development aid only
+        # development aids only
         self.return_info: List[Tuple] = []
         self.last_line = ""
-        if OLD_OUTPUT:
-            for l in TYPING_IMPORT:
-                self.writeln(l)
-        if NEW_OUTPUT:
-            self.output_dict.add_import(TYPING_IMPORT)
+
+        self.output_dict.add_import(TYPING_IMPORT)
 
     @property
     def line(self) -> str:
@@ -188,30 +181,11 @@ class RSTReader:
         return self.last_line
 
     def log(self, *arg):
-        if self.verbose or 1:
+        if self.verbose:
             print(*arg)
-            if OLD_OUTPUT:
-                self.writeln(*arg)
-
-    @property
-    def indent(self):
-        return " " * self.depth
-
-    def updent(self, n=4):
-        self.depth += n
-
-    def dedent(self, n=4):
-        self.depth = max(0, self.depth - n)
 
     def leave_class(self):
         if self.current_class != "":
-            if self.verbose or self.__debug:
-                if OLD_OUTPUT:
-                    self.writeln(f"{self.indent}# End of previous class:")
-                    self.writeln(f"{self.indent}# ..................................")
-                # if NEW_OUTPUT:
-                #     ... # ToDo ?
-            self.dedent()
             self.current_class = ""
 
     def read_file(self, filename: Path):
@@ -226,10 +200,7 @@ class RSTReader:
     def writeln(self, *arg):
         "store transformed output in a buffer"
         new = str(*arg)
-        if OLD_OUTPUT:
-            self.output.append(new + "\n")  # old output
-        if NEW_OUTPUT:
-            self.output_dict.add_line(new)  # new output
+        self.output_dict.add_line(new)  # new output
         if self.verbose:
             print(new)
 
@@ -354,71 +325,33 @@ class RSTReader:
 
         return params
 
-    def output_docstring(self, docstr: List[str], as_comment: bool = False):
-        "output the docstring as a string or comment (for module constants and variables"
-        # this is OLD_OUTPUT only
-        if as_comment:
-            for l in docstr:
-                self.writeln(f"{self.indent}#: {l}")
-        else:
-            self.writeln(f'{self.indent}"""')
-            for l in docstr:
-                self.writeln(f"{self.indent}{l}")
-            self.writeln(f'{self.indent}"""')
-        # below is only to gather docstrings for analysis during development
-        # TODO: Line is out of sync
-        if self.gather_docs and len(docstr) > 0:
-            self.return_info.append(
-                (
-                    self.current_module,
-                    self.current_class,
-                    self.current_function,
-                    self.last_line,
-                    docstr,
-                )
-            )
-
     def output_class_hdr(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
         self.leave_class()
-        if OLD_OUTPUT:  # old output
-            # write a class header
-            self.writeln(f"{self.indent}class {name}:")
+        # TODO: Add / update information to existing class definition
+        full_name = self.output_dict.find(f"class {name}")
+        if full_name:
+            print(_red(f"TODO: UPDATE EXISTING CLASS : {name}"))
 
-            self.updent()
-            self.output_docstring(docstr)
-
-            if len(params) > 0:
-                # only output init when there is info
-                self.writeln(f"{self.indent}def __init__(self, {params} -> None:")
-                self.updent()
-                self.writeln(f"{self.indent}...\n")
-                self.dedent()
-        if NEW_OUTPUT:  # new output
-            # TODO: Add / update information to existing class defintition
-            full_name = self.output_dict.find(f"class {name}")
-            if full_name:
-                print(_red(f"TODO: UPDATE EXISTING CLASS : {name}"))
-
-            #     class_0 = self.output_dict[full_name]
-            # else:
-            #     # not found, create and add new class to the output dict
-            #     parent_class = ClassSourceDict(f"class {name}():")
-            class_1 = ClassSourceDict(
-                f"class {name}():",
-                docstr=docstr,
-                indent=self.depth,  # todo: consistent naming
+        #     class_0 = self.output_dict[full_name]
+        # else:
+        #     # not found, create and add new class to the output dict
+        #     parent_class = ClassSourceDict(f"class {name}():")
+        class_1 = ClassSourceDict(
+            f"class {name}():",
+            docstr=docstr,
+            indent=self.depth,  # todo: consistent naming
+        )
+        if len(params) > 0:
+            method = FunctionSourceDict(
+                name="__init__",
+                indent=class_1._indent + 4,
+                definition=[f"def __init__(self, {params} -> None:"],
+                docstr=[],  # todo: check if twice is needed
             )
-            if len(params) > 0:
-                method = FunctionSourceDict(
-                    name="__init__",
-                    indent=class_1._indent + 4,
-                    definition=[f"def __init__(self, {params} -> None:"],
-                    docstr=[],  # todo: check if twice is needed
-                )
-                class_1 += method
-            # Append class to output
-            self.output_dict += class_1
+            class_1 += method
+        # Append class to output
+        self.output_dict += class_1
         self.current_class = name
 
     def parse_toc(self):
@@ -445,17 +378,13 @@ class RSTReader:
         self.current_function = self.current_class = ""
         # get module docstring
         docstr = self.parse_docstring()
-        if OLD_OUTPUT:  # old output
-            self.writeln(f"# origin module:: {self.filename}\n# {self.source_tag}")
-            self.output_docstring(docstr)
-        if NEW_OUTPUT:  # new output
-            self.output_dict.name = module_name
-            self.output_dict.add_comment(f"# source version: {self.source_tag}")
-            self.output_dict.add_comment(f"# origin module:: {self.filename}")
-            self.output_dict.add_docstr(docstr)
-            # Add additional imports to allow one module te refer to another
-            if module_name in MODULE_GLUE.keys():
-                self.output_dict.add_import(MODULE_GLUE[module_name])
+        self.output_dict.name = module_name
+        self.output_dict.add_comment(f"# source version: {self.source_tag}")
+        self.output_dict.add_comment(f"# origin module:: {self.filename}")
+        self.output_dict.add_docstr(docstr)
+        # Add additional imports to allow one module te refer to another
+        if module_name in MODULE_GLUE.keys():
+            self.output_dict.add_import(MODULE_GLUE[module_name])
 
     def parse_current_module(self):
         self.log(f"# {self.line.rstrip()}")
@@ -509,27 +438,18 @@ class RSTReader:
         # if the function name matches the module name then threat this as a class.
         if name in mod_names:
             if self.verbose or self.__debug:
-                self.writeln(f"{self.indent}# ..................................")
-                self.writeln(f"{self.indent}# 'Promote' function to class: {name}")
+                self.writeln(f"# ..................................")
+                self.writeln(f"# 'Promote' function to class: {name}")
             # write a class header
             self.output_class_hdr(name, params, docstr)
         else:
-            fn_def = f"def {name}({params} -> {ret_type}:"
-            if OLD_OUTPUT:  # old output
-                self.writeln(self.indent + fn_def)
-                self.updent()
-                self.output_docstring(docstr)
-                self.writeln(f"{self.indent}...\n\n")
-                self.dedent()
-            if NEW_OUTPUT:  # old output
-                fd = FunctionSourceDict(
-                    name=f"def {name}",
-                    definition=[fn_def],
-                    docstr=docstr,
-                    indent=self.depth,
-                )
-                self.output_dict += fd
-                ...
+            fn_def = FunctionSourceDict(
+                name=f"def {name}",
+                definition=[f"def {name}({params} -> {ret_type}:"],
+                docstr=docstr,
+                indent=self.depth,
+            )
+            self.output_dict += fn_def
 
     def parse_class(self):
         self.log(f"# {self.line.rstrip()}")
@@ -609,15 +529,11 @@ class RSTReader:
         params = self.fix_parameters(params)
 
         # quick bail out if explicit intis should not be considered
-        if name == "__init__" and self.no_explicit_init:
-            # init is explicitly documented , do not add it twice (? or dedent to add it as an overload ?)
-            self.line_no += 1
-            return
+        # if name == "__init__" and self.no_explicit_init:
+        #     # init is explicitly documented , do not add it twice (? or dedent to add it as an overload ?)
+        #     self.line_no += 1
+        #     return
 
-        if OLD_OUTPUT:
-            # check if the class statement has already been started
-            if not self.is_class_started(class_name):
-                self.output_class_hdr(class_name, "", [])
         # if NEW_OUTPUT:
         # get or create the parent class
         full_name = self.output_dict.find(f"class {class_name}")
@@ -638,62 +554,40 @@ class RSTReader:
         #   - staticmethod          (       <params>) -> <ret_type>:
         #   - all other methods     (self,  <params>) -> <ret_type>:
         if name == "__init__":
-            if OLD_OUTPUT:
-                self.writeln(f"{self.indent}def __init__(self, {params} -> None:")
-            if NEW_OUTPUT:
-                method = FunctionSourceDict(
-                    name=f"def {name}",
-                    indent=parent_class._indent + 4,
-                    definition=[f"def __init__(self, {params} -> None:"],
-                    docstr=docstr,
-                )
-                parent_class += method
+            method = FunctionSourceDict(
+                name=f"def {name}",
+                indent=parent_class._indent + 4,
+                definition=[f"def __init__(self, {params} -> None:"],
+                docstr=docstr,
+            )
+            parent_class += method
         elif rst_hint == "classmethod":
-            if OLD_OUTPUT:
-                self.writeln(f"{self.indent}@classmethod")
-                self.writeln(f"{self.indent}def {name}(cls, {params} -> {ret_type}:")
-            if NEW_OUTPUT:
-                method = FunctionSourceDict(
-                    decorators=["@classmethod"],
-                    name=f"def {name}",
-                    indent=parent_class._indent + 4,
-                    definition=[f"def {name}(cls, {params} -> {ret_type}:"],
-                    docstr=docstr,
-                )
-                parent_class += method
-                ...
+            method = FunctionSourceDict(
+                decorators=["@classmethod"],
+                name=f"def {name}",
+                indent=parent_class._indent + 4,
+                definition=[f"def {name}(cls, {params} -> {ret_type}:"],
+                docstr=docstr,
+            )
+            parent_class += method
 
         elif rst_hint == "staticmethod":
-            if OLD_OUTPUT:
-                self.writeln(f"{self.indent}@staticmethod")
-                self.writeln(f"{self.indent}def {name}({params} -> {ret_type}:")
-            if NEW_OUTPUT:
-                method = FunctionSourceDict(
-                    decorators=["@staticmethod"],
-                    name=f"def {name}",
-                    indent=parent_class._indent + 4,
-                    definition=[f"def {name}({params} -> {ret_type}:"],
-                    docstr=docstr,
-                )
-                parent_class += method
-                ...
+            method = FunctionSourceDict(
+                decorators=["@staticmethod"],
+                name=f"def {name}",
+                indent=parent_class._indent + 4,
+                definition=[f"def {name}({params} -> {ret_type}:"],
+                docstr=docstr,
+            )
+            parent_class += method
         else:  # just plain method
-            if OLD_OUTPUT:
-                self.writeln(f"{self.indent}def {name}(self, {params} -> {ret_type}:")
-            if NEW_OUTPUT:
-                method = FunctionSourceDict(
-                    name=f"def {name}",
-                    indent=parent_class._indent + 4,
-                    definition=[f"def {name}(self, {params} -> {ret_type}:"],
-                    docstr=docstr,
-                )
-                parent_class += method
-        if OLD_OUTPUT:
-            # Now add the docstring
-            self.updent()
-            self.output_docstring(docstr)
-            self.writeln(f"{self.indent}...\n")
-            self.dedent()
+            method = FunctionSourceDict(
+                name=f"def {name}",
+                indent=parent_class._indent + 4,
+                definition=[f"def {name}(self, {params} -> {ret_type}:"],
+                docstr=docstr,
+            )
+            parent_class += method
 
     def parse_exception(self):
         self.log(f"# {self.line.rstrip()}")
@@ -701,21 +595,14 @@ class RSTReader:
         # TODO : check name scope : Module.class.<name>
         if "." in name:
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
-        if OLD_OUTPUT:
-            self.writeln(f"{self.indent}class {name}(BaseException) : ...")
-        if NEW_OUTPUT:
-            except_1 = ClassSourceDict(
-                name=f"class {name}(BaseException) : ...", docstr=[], init=""
-            )
-            self.output_dict += except_1
-            ...
+        except_1 = ClassSourceDict(name=f"class {name}(BaseException) : ...", docstr=[], init="")
+        self.output_dict += except_1
         # no docstream read (yet) , so need to advance to next line
         self.line_no += 1
         # class Exception(BaseException): ...
 
     def parse_name(self, line: str = None):
         "get the constant/function/class name from a line with an identifier"
-
         # this_const = self.line.split(SEPERATOR)[-1].strip()
         # name = this_const
         # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
@@ -742,7 +629,8 @@ class RSTReader:
             and self.rst_text[self.line_no + counter].startswith(" " * col)
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
-            print(_green("Sequence detected"))
+            if self.verbose:
+                print(_green("Sequence detected"))
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
         # now advance the linecounter
@@ -769,20 +657,7 @@ class RSTReader:
             if type in ["None"]:  # None does not make sense
                 type = "Any"  # perhaps default to Int ?
             name = self.strip_module(name)
-            if OLD_OUTPUT:
-                if "*" in name:
-                    self.log(f"# fix constant {name}")
-                    name = f"# {name}"
-                if not "." in name:
-                    # use the docstring as a comment
-                    # ref : https://stackoverflow.com/questions/8820276/docstring-for-variable
-
-                    self.output_docstring(docstr, as_comment=True)
-                    self.writeln(f"{name} : {type}")  # Note : explicitly not indented !
-                else:
-                    print(_red(f"todo: class constant : {name}"))
-            if NEW_OUTPUT:
-                self.output_dict.add_constant_smart(name=name, type=type, docstr=docstr)
+            self.output_dict.add_constant_smart(name=name, type=type, docstr=docstr)
 
     def parse(self, depth: int = 0):
         self.depth = depth
@@ -814,11 +689,24 @@ class RSTReader:
             elif len(rst_hint) > 0:
                 # something new / not yet parsed
                 self.log(f"# {line.rstrip()}")
-                print(_red(line.rstrip()))
+                if self.verbose:
+                    print(_red(line.rstrip()))
                 self.line_no += 1
             else:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
+            #  TODO: rebuild this into the NEW_OUTPUT way of working
+            #     if self.gather_docs and len(docstr) > 0:
+            #         self.return_info.append(
+            #             (
+            #                 self.current_module,
+            #                 self.current_class,
+            #                 self.current_function,
+            #                 self.last_line,
+            #                 docstr,
+            #             )
+            #         )
+
         # now clean up
         self.prepare_output()
 
@@ -858,5 +746,6 @@ if __name__ == "__main__":
 
     rst_folder = Path(base_path) / "docs" / "library"
     dst_folder = Path("generated/micropython") / flat_version(v_tag)
-    # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
+
     generate_from_rst(rst_folder, dst_folder, v_tag)
+    # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
