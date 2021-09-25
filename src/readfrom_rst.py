@@ -20,7 +20,7 @@
         - if no type can be detected the type `Any` is used
         - a Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring (yet). 
         - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
-        - Cenerators, Iterators
+        - Generators, Iterators
         - Callable
         - Imperative verbs used in docstrings have a strong correlation to return -> None
         - Coroutines are identified based tag "This is a Coroutine". Then if the return type was Foo, it will be transformed to : Coroutine[Foo]
@@ -54,10 +54,10 @@ Not yet implemented
                       localtime([secs])
         ....
 
-
     - parse subclass / superclass from class docstring  : 
         - A namedtuple is a subclass of tuple 
         - ``dict`` type subclass which ...
+
     - add superclasses 
         likely based on a external list as this is currently not documented as part of the class
         not quite sure how th handle the __init__ method for this , 
@@ -83,25 +83,9 @@ Not yet implemented
     - manual tweaks for uasync 
         https://docs.python.org/3/library/typing.html#asynchronous-programming
 
-
-    -  usocket : class is defined twice - discontinuous documentation
-
-    -  .. exception:: IndexError
-
-    -  Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
-    -  ucollection   : docs incorrectly states classes as functions --> upstream
-
-    # todo: change or remove value hints (...|....)
+    #  more elegant solution to change or remove value hints (...|....)
     # params = params.replace("pins=(SCK, MOSI, MISO)", "")  # Q&D
-    # param default to module constant
-    #   def foo(x =module.CONST): ...
-    # param default to class constant
-    #   def __init__(self, x =class.CONST): ...
 
-    # FIXME: usocket socket
-    # if self.current_module in (name, f"u{name}"):
-
-    # todo: Docbug # .. _class: Poll micropython\\docs\\library\\uselect.rst
 
     # correct warnings for 'Unsupported escape sequence in string literal'
 """
@@ -150,6 +134,7 @@ class RSTReader:
     __debug = False  # a
     verbose = False
     gather_docs = False  # used only during Development
+    target = ".py"  # py/pyi
 
     def __init__(self, v_tag="v1.xx"):
         self.line_no: int = 0  # current Linenumber used during parsing.
@@ -159,17 +144,20 @@ class RSTReader:
         self.current_class = ""
         self.current_function = ""  # function & method
 
+        #input buffer
         self.rst_text: List[str] = []
         self.max_line = 0
+
+        #Output buffer
         self.output: List[str] = []
         self.output_dict: ModuleSourceDict = ModuleSourceDict("")
+        self.output_dict.add_import(TYPING_IMPORT)
+
         self.source_tag = v_tag
-        self.target = ".py"  # py/pyi
+
         # development aids only
         self.return_info: List[Tuple] = []
         self.last_line = ""
-
-        self.output_dict.add_import(TYPING_IMPORT)
 
     @property
     def line(self) -> str:
@@ -196,13 +184,6 @@ class RSTReader:
         self.filename = filename
         self.max_line = len(self.rst_text) - 1
         self.current_module = filename.stem  # just to be sure
-
-    def writeln(self, *arg):
-        "store transformed output in a buffer"
-        new = str(*arg)
-        self.output_dict.add_line(new)  # new output
-        if self.verbose:
-            print(new)
 
     def prepare_output(self):
         "clean up some trailing spaces and commas"
@@ -283,7 +264,7 @@ class RSTReader:
         return block
 
     def fix_parameters(self, params: str):
-        "change parameter notation issues into a supported version"
+        "change documentation parameter notation to a supported format that works for linting"
         params = params.strip()
         if not params.endswith(")"):
             # remove all after the closing bracket
@@ -325,33 +306,29 @@ class RSTReader:
 
         return params
 
-    def output_class_hdr(self, name: str, params: str, docstr: List[str]):
+    def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
         self.leave_class()
         # TODO: Add / update information to existing class definition
         full_name = self.output_dict.find(f"class {name}")
         if full_name:
             print(_red(f"TODO: UPDATE EXISTING CLASS : {name}"))
-
-        #     class_0 = self.output_dict[full_name]
-        # else:
-        #     # not found, create and add new class to the output dict
-        #     parent_class = ClassSourceDict(f"class {name}():")
-        class_1 = ClassSourceDict(
-            f"class {name}():",
-            docstr=docstr,
-            indent=self.depth,  # todo: consistent naming
-        )
+            class_def = self.output_dict[full_name]
+        else:
+            class_def = ClassSourceDict(
+                f"class {name}():",
+                docstr=docstr,
+            )
         if len(params) > 0:
             method = FunctionSourceDict(
                 name="__init__",
-                indent=class_1._indent + 4,
+                indent=class_def._indent + 4,
                 definition=[f"def __init__(self, {params} -> None:"],
                 docstr=[],  # todo: check if twice is needed
             )
-            class_1 += method
+            class_def += method
         # Append class to output
-        self.output_dict += class_1
+        self.output_dict += class_def
         self.current_class = name
 
     def parse_toc(self):
@@ -437,17 +414,13 @@ class RSTReader:
             mod_names = (self.current_module, self.current_module[1:])
         # if the function name matches the module name then threat this as a class.
         if name in mod_names:
-            if self.verbose or self.__debug:
-                self.writeln(f"# ..................................")
-                self.writeln(f"# 'Promote' function to class: {name}")
-            # write a class header
-            self.output_class_hdr(name, params, docstr)
+            # 'Promote' function to class
+            self.create_update_class(name, params, docstr)
         else:
             fn_def = FunctionSourceDict(
                 name=f"def {name}",
                 definition=[f"def {name}({params} -> {ret_type}:"],
                 docstr=docstr,
-                indent=self.depth,
             )
             self.output_dict += fn_def
 
@@ -473,7 +446,7 @@ class RSTReader:
             self.log(f"# Skip :noindex: class {name}")
         else:
             # write a class header
-            self.output_class_hdr(name, params, docstr)
+            self.create_update_class(name, params, docstr)
 
     def strip_module(self, name):
         "remove module name from the start of the class/constant name"
@@ -485,12 +458,6 @@ class RSTReader:
             # utime
             name = name[len(f"{self.current_module[1:]}.") :]
         return name
-
-    def is_class_started(self, class_name: str) -> bool:
-        "Has the given class been started"
-        # a bit Q&D , only checks current class
-        # todo: deal with class-blocks
-        return class_name in self.current_class or class_name.lower() in self.current_class.lower()
 
     def get_rst_hint(self):
         "parse the '.. <rst hint>:: ' from the current line"
@@ -528,13 +495,6 @@ class RSTReader:
         # fixup optional [] parameters and other notations
         params = self.fix_parameters(params)
 
-        # quick bail out if explicit intis should not be considered
-        # if name == "__init__" and self.no_explicit_init:
-        #     # init is explicitly documented , do not add it twice (? or dedent to add it as an overload ?)
-        #     self.line_no += 1
-        #     return
-
-        # if NEW_OUTPUT:
         # get or create the parent class
         full_name = self.output_dict.find(f"class {class_name}")
         if full_name:
@@ -659,8 +619,7 @@ class RSTReader:
             name = self.strip_module(name)
             self.output_dict.add_constant_smart(name=name, type=type, docstr=docstr)
 
-    def parse(self, depth: int = 0):
-        self.depth = depth
+    def parse(self):
         self.line_no = 0
         while self.line_no < len(self.rst_text):
             line = self.line

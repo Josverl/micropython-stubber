@@ -14,7 +14,7 @@ project.pymakr
 scratch/*
 
 # ignore stubs 
-# stubs
+# stubs generated in testing
 board/stubs
 minified/stubs
 all-stubs
