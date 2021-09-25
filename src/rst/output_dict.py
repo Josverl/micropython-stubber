@@ -239,7 +239,7 @@ class ClassSourceDict(SourceDict):
         name: str,
         *,
         docstr: List[str] = ['""" """'],
-        init: str = "def __init__(self)->None:",
+        init: str = "",  # "def __init__(self)->None:",
         indent: int = 0,
         lf="\n",
     ):
