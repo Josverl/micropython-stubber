@@ -50,42 +50,15 @@
         - functions
         - methods
 
+    - Child/ Parent classes
+        are added based on a (manual) lookup table CHILD_PARENT_CLASS
+
+
 Not yet implemented 
 -------------------
 
-
-
-    - parse subclass / superclass from class docstring  : 
-        - A namedtuple is a subclass of tuple 
-        - ``dict`` type subclass which ...
-
-    - add superclasses 
-        likely based on a external list as this is currently not documented as part of the class
-        not quite sure how th handle the __init__ method for this , 
-            should include a call to super() ?
-        short list of 
-            - WLAN(AbstractNIC)
-            - WLANWiPy(AbstractNIC)
-            uio
-            - class xxxxIO(IO)  # unclear regarding deprecation in python 3.12
-                FileIO, textIOWrapper, StringIO, BytesIO
-            uzlib
-            - class DecompIO(IO) # https://docs.python.org/3/library/typing.html#other-concrete-types
-
-            uhashlib
-                class md5(hash):
-                class sha1(hash):
-                class sha265(hash):    
-                class md5(hash):
-            
-            - Signal(Pin)
-
-
     - manual tweaks for uasync 
         https://docs.python.org/3/library/typing.html#asynchronous-programming
-
-    #  more elegant solution to change or remove value hints (...|....)
-    # params = params.replace("pins=(SCK, MOSI, MISO)", "")  # Q&D
 
 
     # correct warnings for 'Unsupported escape sequence in string literal'
@@ -106,6 +79,7 @@ from rst import (
     TYPING_IMPORT,
     MODULE_GLUE,
     PARAM_FIXES,
+    CHILD_PARENT_CLASS,
     ModuleSourceDict,
     ClassSourceDict,
     FunctionSourceDict,
@@ -172,7 +146,7 @@ class RSTReader:
     @property
     def module_names(self) -> List[str]:
         "list of possible module names [uname , name] (longest first)"
-        namelist = []
+        namelist: List[str] = []
         if self.current_module == "":
             namelist
         # deal with module names "esp and esp.socket"
@@ -374,8 +348,13 @@ class RSTReader:
             print(_red(f"TODO: UPDATE EXISTING CLASS : {name}"))
             class_def = self.output_dict[full_name]
         else:
+            # TODO: add the parent class(es) to the formal documentation
+            parent = ""
+            if name in CHILD_PARENT_CLASS.keys():
+                parent = CHILD_PARENT_CLASS[name]
+
             class_def = ClassSourceDict(
-                f"class {name}():",
+                f"class {name}({parent}):",
                 docstr=docstr,
             )
         if len(params) > 0:
@@ -779,6 +758,7 @@ def generate_from_rst(
 
 if __name__ == "__main__":
     base_path = Path("micropython")
+    # base_path = Path("../pycopy")
     v_tag = git.get_tag(base_path.as_posix())
     if not v_tag:
         # if we can't find a tag , bail

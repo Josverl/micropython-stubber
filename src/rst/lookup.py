@@ -158,3 +158,27 @@ PARAM_FIXES = [
     ),  ## rp2.PIO.irq
     #            (), #
 ]
+
+# List of classes and their parent classes that should be added to the class definition
+CHILD_PARENT_CLASS = {
+    #machine
+    "SoftSPI" : "SPI",
+    "SoftI2C" : "I2C",
+    "Switch" : "Pin",
+    # uio # unclear regarding deprecation in python 3.12
+    "FileIO": "IO", 
+    "textIOWrapper": "IO", 
+    "StringIO": "IO", 
+    "BytesIO": "IO",
+    # uzlib
+    "DecompIO": "IO", # https://docs.python.org/3/library/typing.html#other-concrete-types
+    # network
+    "WLAN": "AbstractNIC",
+    "WLANWiPy": "AbstractNIC",
+    # uhashlib
+    "md5": "hash",
+    "sha1": "hash",
+    "sha265": "hash",
+    "md5": "hash",
+
+}
