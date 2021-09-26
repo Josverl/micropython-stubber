@@ -261,6 +261,7 @@ class RSTReader:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
+            if ":synopsis:" in block[0]:
         return block
 
     def fix_parameters(self, params: str):
