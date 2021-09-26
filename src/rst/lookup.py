@@ -97,6 +97,7 @@ MODULE_GLUE = {
 PARAM_FIXES = [
     ("\\*", "*"),  # change weirdly written wildcards \* --> *
     (r"\**", "*"),  # change weirdly written wildcards \* --> *
+    (r"/*", "*"),  # change weirdly written wildcards \* --> *
     ("**", "*"),  # change weirdly written wildcards \* --> *
     ("'param'", "param"),  # loose notation in documentation
     (

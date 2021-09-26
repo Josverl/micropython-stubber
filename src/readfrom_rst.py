@@ -45,14 +45,15 @@
 
     - add GLUE imports to allow specific modules to import specific others. 
 
+    - repeats of definitions in the rst file for similar functions or literals
+        - CONSTANTS ( module and Class level )
+        - functions
+        - methods
+
 Not yet implemented 
 -------------------
 
-    - repeats of definitions in the rst file for similar functions or literals
-        '''
-        .. function:: gmtime([secs])
-                      localtime([secs])
-        ....
+
 
     - parse subclass / superclass from class docstring  : 
         - A namedtuple is a subclass of tuple 
@@ -168,6 +169,16 @@ class RSTReader:
             self.last_line = ""
         return self.last_line
 
+    @property
+    def module_names(self) -> List[str]:
+        "list of possible module names [name , uname]"
+        if self.current_module == "":
+            return []
+        if self.current_module[0] != "u":
+            return [self.current_module, f"u{self.current_module}"]
+        else:
+            return [self.current_module[1:], self.current_module]
+
     def log(self, *arg):
         if self.verbose:
             print(*arg)
@@ -261,7 +272,35 @@ class RSTReader:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
+
+        # prettify
+        if len(block):
+            # Clean up Synopsis
             if ":synopsis:" in block[0]:
+                block[0] = re.sub(
+                    r"\s+:synopsis:\s+(?P<syn>[\w|\s]*)",
+                    r"\g<syn>",
+                    block[0],
+                )
+        # add clickable hyperlinks to CPython docpages
+        for i in range(0, len(block)):
+            # hyperlink to Cpython doc pages
+            # https://regex101.com/r/5RN8rj/1
+            # Optionally link to python 3.4 / 3.5 documentation
+            block[i] = re.sub(
+                r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|\s]*)`)[.]?",
+                r"\g<1> https://docs.python.org/3/library/\g<mod>.html .",
+                block[i],
+            )
+            # RST hyperlink format is not clickable in v
+            # https://regex101.com/r/5RN8rj/1
+            block[i] = re.sub(
+                r"(.*)(?P<url><https://docs\.python\.org/.*>)(`_)",
+                r"\g<1>`\g<url>",
+                block[i],
+            )
+
+        #
         return block
 
     def fix_parameters(self, params: str):
@@ -289,14 +328,11 @@ class RSTReader:
         # deal with overloads for Flash and Partition .readblock/writeblocks
         params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]")
 
-        # Remove Modulename. and Classname. from class constant
-        # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...)
-        for prefix in (
-            f"{self.current_module}.",  # doc refers to module
-            f"{self.current_class}.",  # doc refers to class in method params
-        ):
-            if len(prefix) > 1 and prefix in params:
-                params = params.replace(prefix, "")  # dynamic
+        # Remove modulename. and Classname. from class constant
+        for prefix in self.module_names + [self.current_class]:
+            if len(prefix) > 1 and prefix + "." in params:
+                # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...)
+                params = params.replace(prefix + ".", "")  # dynamic
 
         for fix in PARAM_FIXES:
             if fix[0] in params:
@@ -359,6 +395,19 @@ class RSTReader:
         self.current_function = self.current_class = ""
         # get module docstring
         docstr = self.parse_docstring()
+
+        if len(docstr) > 0:
+            # Add link to online documentation
+            # https://docs.micropython.org/en/v1.17/library/array.html
+            if "nightly" in self.source_tag:
+                version = "latest"
+            else:
+                version = self.source_tag.replace("_", ".")
+            docstr[0] = (
+                docstr[0]
+                + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            )
+
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
         self.output_dict.add_comment(f"# origin module:: {self.filename}")
@@ -409,24 +458,20 @@ class RSTReader:
                 # no use to create stubs for these
                 return
 
-            # TODO: make more generic
-            # ussl docstring uses a prefix
-            # remove module name from the start of the function name
-            if name.startswith(f"{self.current_module}."):
-                name = name[len(f"{self.current_module}.") :]
+            # ussl documentation uses a ssl.foobar prefix
+            for mod in self.module_names:
+                if name.startswith(f"{mod}."):
+                    # remove module name from the start of the function name
+                    name = name[len(f"{mod}.") :]
             # fixup parameters
             params = self.fix_parameters(params)
             # assume no functions in classes
             self.leave_class()
             # if function name is the same as the module
             # then this is probably documenting a class ()
-            # list of module names [ name , uname]
-            if self.current_module[0] != "u":
-                mod_names = (self.current_module, f"u{self.current_module}")
-            else:
-                mod_names = (self.current_module, self.current_module[1:])
+
             # if the function name matches the module name then threat this as a class.
-            if name in mod_names:
+            if name in self.module_names:
                 # 'Promote' function to class
                 self.create_update_class(name, params, docstr)
             else:
@@ -494,7 +539,7 @@ class RSTReader:
         method_names = self.parse_names(oneliner=False)
         # filter out overloads with 'param=value' description as these can't be output (currently)
         method_names = [m for m in method_names if not "param=value" in m]
-            
+
         docstr = self.parse_docstring()
         for this_method in method_names:
             try:
@@ -725,14 +770,14 @@ def generate_from_rst(
 
 
 if __name__ == "__main__":
-    base_path = "micropython"
-    v_tag = git.get_tag(base_path)
+    base_path = Path("micropython")
+    v_tag = git.get_tag(base_path.as_posix())
     if not v_tag:
         # if we can't find a tag , bail
         raise ValueError
 
-    rst_folder = Path(base_path) / "docs" / "library"
-    dst_folder = Path("generated/micropython") / flat_version(v_tag)
+    rst_folder = base_path / "docs" / "library"
+    dst_folder = Path("generated") / base_path.stem / flat_version(v_tag, keep_v=True)
 
     generate_from_rst(rst_folder, dst_folder, v_tag)
     # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
