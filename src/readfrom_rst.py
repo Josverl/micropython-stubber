@@ -171,13 +171,35 @@ class RSTReader:
 
     @property
     def module_names(self) -> List[str]:
-        "list of possible module names [name , uname]"
+        "list of possible module names [uname , name] (longest first)"
+        namelist = []
         if self.current_module == "":
-            return []
-        if self.current_module[0] != "u":
-            return [self.current_module, f"u{self.current_module}"]
+            namelist
+        # deal with module names "esp and esp.socket"
+        if "." in self.current_module:
+            names = [self.current_module, self.current_module.split(".")[0]]
         else:
-            return [self.current_module[1:], self.current_module]
+            names = [self.current_module]
+        # process
+        for c_mod in names:
+            if self.current_module[0] != "u":
+                namelist += [f"u{c_mod}", c_mod]
+            else:
+                namelist += [c_mod, c_mod[1:]]
+        return namelist
+
+    def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
+        "Remove the modulename. and or the classname. from the begining of a name"
+        if strip_mod:
+            prefixes = self.module_names
+        else:
+            prefixes = []
+        if strip_class and self.current_class != "":
+            prefixes += [self.current_class]
+        for prefix in prefixes:
+            if len(prefix) > 1 and prefix + "." in name:
+                name = name.replace(prefix + ".", "")
+        return name
 
     def log(self, *arg):
         if self.verbose:
@@ -329,10 +351,7 @@ class RSTReader:
         params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]")
 
         # Remove modulename. and Classname. from class constant
-        for prefix in self.module_names + [self.current_class]:
-            if len(prefix) > 1 and prefix + "." in params:
-                # todo: use regex to only work on Class.CONST ( CONST is not always in caps ...)
-                params = params.replace(prefix + ".", "")  # dynamic
+        params = self.strip_prefixes(params, strip_mod=True, strip_class=True)
 
         for fix in PARAM_FIXES:
             if fix[0] in params:
@@ -484,17 +503,17 @@ class RSTReader:
 
     def parse_class(self):
         self.log(f"# {self.line.rstrip()}")
-        this_class = self.line.split(SEPERATOR)[-1].strip()
+        this_class = self.line.split(SEPERATOR)[-1].strip()  # raw
         if "(" in this_class:
             name, params = this_class.split("(", 2)
         else:
             name = this_class
             params = ""
+        name = self.strip_prefixes(name)
         self.current_class = name
         self.current_function = ""
-        name = self.strip_module(name)
 
-        self.log(f"# class:: {name}")
+        self.log(f"# class:: {name} - {this_class}")
         # fixup parameters
         params = self.fix_parameters(params)
         docstr = self.parse_docstring()
@@ -505,17 +524,6 @@ class RSTReader:
         else:
             # write a class header
             self.create_update_class(name, params, docstr)
-
-    def strip_module(self, name):
-        "remove module name from the start of the class/constant name"
-        if len(self.current_module) == 0:
-            return name
-        if name.startswith(f"{self.current_module}."):
-            name = name[len(f"{self.current_module}.") :]
-        if self.current_module[0] == "u" and name.startswith(f"{self.current_module[1:]}."):
-            # utime
-            name = name[len(f"{self.current_module[1:]}.") :]
-        return name
 
     def get_rst_hint(self):
         "parse the '.. <rst hint>:: ' from the current line"
@@ -689,7 +697,7 @@ class RSTReader:
             )
             if type in ["None"]:  # None does not make sense
                 type = "Any"  # perhaps default to Int ?
-            name = self.strip_module(name)
+            name = self.strip_prefixes(name)
             self.output_dict.add_constant_smart(name=name, type=type, docstr=docstr)
 
     def parse(self):
