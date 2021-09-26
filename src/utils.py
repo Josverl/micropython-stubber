@@ -33,11 +33,11 @@ def stubfolder(path: str) -> str:
     return "{}/{}".format(STUB_FOLDER, path)
 
 
-def flat_version(version: str):
+def flat_version(version: str, keep_v: bool = False):
     "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
-
-    version = version.replace("v", "")
-    version = version.replace(".", "_")
+    version = version.strip().replace(".", "_")
+    if not keep_v:
+        version = version.lstrip("v")
     return version
 
 
@@ -239,7 +239,7 @@ def read_exclusion_file(path: Path = None) -> List[str]:
     if path == None:
         path = Path(".")
     try:
-        with open(path.joinpath(".exclusions")) as f:
+        with open(path.joinpath(".exclusions")) as f:  # type: ignore # silence MyPy
             content = f.readlines()
             return [line.rstrip() for line in content if line[0] != "#" and len(line.strip()) != 0]
     except OSError:
