@@ -148,7 +148,7 @@ class RSTReader:
         "list of possible module names [uname , name] (longest first)"
         namelist: List[str] = []
         if self.current_module == "":
-            namelist
+            return namelist
         # deal with module names "esp and esp.socket"
         if "." in self.current_module:
             names = [self.current_module, self.current_module.split(".")[0]]
