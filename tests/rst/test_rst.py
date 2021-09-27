@@ -152,8 +152,8 @@ CLASS_10 = [
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
         "    def info(self) -> Tuple:",
-        "    def readblocks(self, block_num, buf) -> Any:",
-        "    def writeblocks(self, block_num, buf) -> Any:",
+        "    def readblocks(self, block_num, buf, offset: Optional[int]) -> Any:",
+        "    def writeblocks(self, block_num, buf, offset: Optional[int]) -> Any:",
     ],
 )
 # def test_rst_parse_class_10(expected: List[str]):
@@ -305,10 +305,10 @@ def test_doc_pyright_obscured_definitions(pyright, capsys):
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
-    # TODO:  
+    # TODO:
 
-# Method declaration "__init__" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\cryptolib.py line 23
-# Class declaration "match" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\re.py line 156
+    # Method declaration "__init__" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\cryptolib.py line 23
+    # Class declaration "match" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\re.py line 156
 
     assert (
         len(issues) <= 1
@@ -350,10 +350,12 @@ def test_doc_socket_class_def(rst_stubs: Path):
     assert found, "(u)socket.socket __init__ should be generated"
 
 
-@pytest.mark.xfail(reason="upstream docfix needed")
 def test_doc_poll_class_def(rst_stubs: Path):
     "make sense of `uselect.socket` class documented as a function - Upstream Docfix pending"
     content = read_stub(rst_stubs, "uselect.py")
+    if content == []:
+        # module name change to select.py in v1.17+
+        content = read_stub(rst_stubs, "select.py")
 
     found = any("def poll()" in line for line in content)
     assert not found, "uselect.poll class should not be stubbed as a function"
@@ -362,19 +364,7 @@ def test_doc_poll_class_def(rst_stubs: Path):
     assert found, "uselect.poll should be stubbed as a class"
 
 
-# def socket(af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> Any:
-
-
-# "SPI" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\lcd160cr.py line 345
-# "SPI" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\machine.py line 626
-# "MSB" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\machine.py line 714
-# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\network.py line 443
-# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\rp2.py line 157
-# "IRQ" is not defined in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-58\stubs0\v1.17-nightly\rp2.py line 310
-
 # @pytest.mark.xfail(reason="upstream docfix needed")
-
-
 @pytest.mark.parametrize(
     "error, modulename",
     [

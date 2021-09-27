@@ -123,9 +123,9 @@ def test_parse_class_modulename(line, module):
 @pytest.mark.parametrize(
     "line",
     [
-        "class sha1():",
-        "class sha256():",
-        "class md5():",
+        "class sha1(",
+        "class sha256(",
+        "class md5(",
     ],
 )
 def test_parse_class_micro_modulename(line):
@@ -138,28 +138,9 @@ def test_parse_class_micro_modulename(line):
     # check
     assert len(r.output) > 1
     expected = []
-    # don't care about indentation
-    assert line.strip() in [l.strip() for l in r.output]
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_dup_init():
-    #  classes with multiple __init__ methods
-    # Duplicate __init__ FIXME: ucryptolib aes.__init__(key, mode, [IV])
-    ...
-
-
-@pytest.mark.skip(reason="test not yet built")
-def test_Flash_init_overload():
-    # "pyb.Flash_init_overload is generated"
-    # class Flash:
-    #     """
-    #     :noindex:
-    #     Create and return a block device that accesses the flash at the specified offset. The length defaults to the remaining size of the device.
-    #     The *start* and *len* offsets are in bytes, and must be a multiple of the block size (typically 512 for internal flash).
-    #     """
-    #     def __init__(self, *, start=-1, len=-1) -> None:
-    ...
+    # don't care about indentation,
+    # but one of the lines must start with the class def
+    assert any([l.strip().startswith(line) for l in r.output])
 
 
 # Nice to haves
