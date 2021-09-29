@@ -48,6 +48,7 @@
         "pyright",
         "pytest",
         "pytests",
+        "Stubber",
         "stubfiles",
         "stubgen",
         "stuborder",
@@ -58,7 +59,8 @@
         "typeshed",
         "ulab",
         "unstubbables",
-        "upysh"
+        "upysh",
+        "webrepl"
     ],
     "python.formatting.provider": "black",
     // "python.formatting.blackArgs": [
