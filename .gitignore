@@ -36,3 +36,5 @@ desktop.ini
 
 dev-stubs
 
+#no coverage
+coverage
