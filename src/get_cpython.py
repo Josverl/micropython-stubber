@@ -51,7 +51,7 @@ def get_core(requirements, stub_path=None):
         if mod_manifest:
             #write the the module manifest
             with open(stub_path+"/modules.json", "w") as outfile:
-                json.dump(mod_manifest, outfile)
+                json.dump(mod_manifest, outfile, indent=4, sort_keys=True)
 
 if __name__ == "__main__":
     # just run a quick test
