@@ -25,11 +25,11 @@ dev-stubs/*
 htmlcov
 coverage_html_report
 coverage_report
+coverage
 
 # OS specific stuff
 desktop.ini
 .pytest_cache/*
-
-
 .py_cache
 
+# no coverage
