@@ -8,13 +8,14 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version="1.3.16"
+stubber_version="1.4.0.beta"
 try:
  from machine import resetWDT 
 except ImportError:
  def resetWDT():
   pass
 class Stubber:
+ MAX_CLASS_LEVEL=2 
  def __init__(self,path:str=None,firmware_id:str=None):
   try:
    if os.uname().release=="1.13.0" and os.uname().version<"v1.13-103":
@@ -40,7 +41,7 @@ class Stubber:
    pass
   self.problematic=["upysh","webrepl_setup","http_client","http_client_ssl","http_server","http_server_ssl",]
   self.excluded=["webrepl","_webrepl","port_diag","example_sub_led.py","example_pub_button.py",]
-  self.modules=["_onewire","_thread","_uasyncio","ak8963","apa102","apa106","array","binascii","btree","builtins","cmath","collections","crypto","curl","dht","display","ds18x20","errno","esp","esp32","flashbdev","framebuf","freesans20","functools","gc","gsm","hashlib","heapq","inisetup","io","json","lcd160cr","lcd160cr_test","logging","lwip","machine","math","microWebSocket","microWebSrv","microWebTemplate","micropython","mpu6500","mpu9250","neopixel","network","ntptime","onewire","os","pyb","pycom","pye","queue","random","re","requests","select","socket","ssd1306","ssh","ssl","stm","struct","sys","time","tpcalib","uarray","uasyncio/__init__","uasyncio/core","uasyncio/event","uasyncio/funcs","uasyncio/lock","uasyncio/stream","ubinascii","ubluetooth","ucollections","ucrypto","ucryptolib","uctypes","uerrno","uhashlib","uheapq","uio","ujson","ulab","ulab/approx","ulab/compare","ulab/fft","ulab/filter","ulab/linalg","ulab/numerical","ulab/poly","ulab/user","ulab/vector","umachine","umqtt/robust","umqtt/simple","uos","upip","upip_utarfile","uqueue","urandom","ure","urequests","urllib/urequest","uselect","usocket","ussl","ustruct","usys","utime","utimeq","uwebsocket","uzlib","websocket","websocket_helper","writer","ymodem","zlib",]
+  self.modules=["_onewire","_thread","_uasyncio","ak8963","apa102","apa106","array","binascii","btree","builtins","cmath","collections","crypto","curl","dht","display","display_driver_utils","ds18x20","errno","esp","esp32","espidf","flashbdev","framebuf","freesans20","fs_driver","functools","gc","gsm","hashlib","heapq","ili9XXX","imagetools","inisetup","io","json","lcd160cr","lodepng","logging","lv_colors","lv_utils","lvgl","lwip","machine","math","microWebSocket","microWebSrv","microWebTemplate","micropython","mpu6500","mpu9250","neopixel","network","ntptime","onewire","os","pyb","pycom","pye","queue","random","re","requests","rtch","select","socket","ssd1306","ssh","ssl","stm","struct","sys","time","tpcalib","uarray","uasyncio/__init__","uasyncio/core","uasyncio/event","uasyncio/funcs","uasyncio/lock","uasyncio/stream","ubinascii","ubluetooth","ucollections","ucrypto","ucryptolib","uctypes","uerrno","uftpd","uhashlib","uheapq","uio","ujson","ulab","ulab/approx","ulab/compare","ulab/fft","ulab/filter","ulab/linalg","ulab/numerical","ulab/poly","ulab/user","ulab/vector","umachine","umqtt/robust","umqtt/simple","uos","upip","upip_utarfile","uqueue","urandom","ure","urequests","urllib/urequest","uselect","usocket","ussl","ustruct","usys","utelnetserver","utime","utimeq","uwebsocket","uzlib","websocket","websocket_helper","writer","xpt2046","ymodem","zlib",] 
   self.include_nested=gc.mem_free()>3200 
  @staticmethod
  def _info():
@@ -89,7 +90,7 @@ class Stubber:
   if info["release"]:
    info["ver"]="v"+info["release"]
   if info["family"]!="loboris":
-   if(info["release"]and info["release"]>="1.10.0" and info["release"].endswith(".0")):
+   if info["release"]and info["release"]>="1.10.0" and info["release"].endswith(".0"):
     info["ver"]=info["release"][:-2]
    else:
     info["ver"]=info["release"]
@@ -134,6 +135,7 @@ class Stubber:
    file_name="{}/{}.py".format(self.path,module_name.replace(".","/"))
    gc.collect()
    m1=gc.mem_free() 
+   print("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name,file_name,m1))
    try:
     self.create_module_stub(module_name,file_name)
    except OSError:
@@ -145,7 +147,7 @@ class Stubber:
   if module_name in self.problematic:
    return
   if file_name is None:
-   file_name=self.path+'/'+module_name.replace(".","_")+".py"
+   file_name=self.path+"/"+module_name.replace(".","_")+".py"
   if "/" in module_name:
    module_name=module_name.replace("/",".")
    if not self.include_nested:
@@ -171,7 +173,7 @@ class Stubber:
     new_module=__import__(module_name,None,None,("*"))
    except ImportError: 
     return
-  self.ensure_folder(file_name) 
+  self.ensure_folder(file_name)
   with open(file_name,"w")as fp:
    s='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name,self._fwid,self.info,stubber_version)
    fp.write(s)
@@ -196,35 +198,41 @@ class Stubber:
    resetWDT()
    sleep_us(1)
    cls_mtd_tps=["<class 'function'>","<class 'bound_method'>"]
-   if typ=="<class 'type'>" and indent=="":
+   if typ=="<class 'type'>" and len(indent)<=self.MAX_CLASS_LEVEL*4:
     s="\n"+indent+"class "+name+":\n" 
     s+=indent+"    ''\n"
     fp.write(s)
     self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1,)
    elif typ in cls_mtd_tps:
     ret="Any"
-    slf=""
+    first=""
     if typ==cls_mtd_tps[0]:
-     slf="self, "
+     first="self, "
      if name=="__init__":
       ret="None"
     if typ==cls_mtd_tps[1]:
      s="{}@classmethod\n".format(indent)
      s+="{}def {}(cls) -> {}:\n".format(indent,name,ret)
     else:
-     s="{}def {}({}*args) -> {}:\n".format(indent,name,slf,ret)
-    s+=indent+"    ''\n"
+     s="{}def {}({}*args) -> {}:\n".format(indent,name,first,ret)
     s+=indent+"    ...\n\n"
     fp.write(s)
    elif typ.startswith("<class '"):
     t=typ[8:-2]
     s=""
-    if t in["str","int","float","bool","bytearray"]:
+    if t in["str","int","float","bool","bytearray","bytes"]:
      s="{0}{1} = {2} # type: {3}\n".format(indent,name,rep,t)
-    if t in["dict","list","tuple"]:
+    elif t in["dict","list","tuple"]:
      ev={"dict":"{}","list":"[]","tuple":"()"}
      s="{0}{1} = {2} # type: {3}\n".format(indent,name,ev[t],t)
+    else:
+     if not t in["object","set","frozenset"]:
+      t="Any"
+     s="{0}{1}: {2}\n".format(indent,name,t)
     fp.write(s)
+   else:
+    fp.write("# all other, type = '{0}'\n".format(typ))
+    fp.write(indent+name+" = Any\n")
   del items
   del errors
   try:
@@ -335,10 +343,12 @@ def isMicroPython()->bool:
 def main():
  try:
   logging.basicConfig(level=logging.INFO)
+  logging.basicConfig(level=logging.DEBUG)
  except NameError:
   pass
- stubber=Stubber(path=read_path())
+ stubber=Stubber(path="/sd")
  stubber.clean()
+ stubber.modules=["lvgl"]
  stubber.create_all_stubs()
  stubber.report()
 if __name__=="__main__" or isMicroPython():
