@@ -19,7 +19,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "CPYTHON-Core : Current File",
+            "name": "Micro-CPython: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
