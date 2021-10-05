@@ -8,10 +8,13 @@ def countdown():
         time.sleep(1)
     import createstubs
 
+    # import stub_lvgl
+
 
 try:
     # only run import if no stubs yet
     os.listdir("stubs")
     print("stub folder was found, stubbing is not automatically started")
+
 except OSError:
     countdown()
