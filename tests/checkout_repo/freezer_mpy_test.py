@@ -11,8 +11,9 @@ import get_mpy
 
 if not sys.warnoptions:
     import os, warnings
-    warnings.simplefilter('default' ) # Change the filter in this process
-    os.environ["PYTHONWARNINGS"] = "default" # Also affect subprocesses
+
+    warnings.simplefilter("default")  # Change the filter in this process
+    os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
 
 # No Mocks, does actual extraction from repro
 
@@ -70,20 +71,14 @@ def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropyth
     if version < mpy_version:
         git.checkout_tag(mpy_version, mpy_path)
         version = git.get_tag(mpy_path)
-        assert (
-            version == mpy_version
-        ), "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
+        assert version == mpy_version, "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
 
     stub_path = Path(tmp_path)
-    get_mpy.get_frozen(
-        str(stub_path), version=mpy_version, mpy_path=mpy_path, lib_path=mpy_lib
-    )
+    get_mpy.get_frozen(str(stub_path), version=mpy_version, mpy_path=mpy_path, lib_path=mpy_lib)
     scripts = list(stub_path.rglob("*.py"))
 
     assert scripts is not None, "can freeze scripts from manifest"
-    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(
-        len(scripts)
-    )
+    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
 
 
 @pytest.mark.basicgit
@@ -93,17 +88,15 @@ def test_freezer_mpy_folders(tmp_path, testrepo_micropython, testrepo_micropytho
 
     # mpy version must not be older than 1.12 ( so use 1.10)
     mpy_version = "v1.10"
-    version = git.get_tag(mpy_path)
+    version_x = version = git.get_tag(mpy_path)
     if version != mpy_version:
         git.checkout_tag(mpy_version, mpy_path)
         version = git.get_tag(mpy_path)
-        assert (
-            version == mpy_version
-        ), "prep: could not checkout version {} of ./micropython".format(mpy_version)
+        assert version == mpy_version, "prep: could not checkout version {} of ./micropython".format(mpy_version)
 
     stub_path = tmp_path
     # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='./micropython-lib')
-    get_mpy.get_frozen_folders(
-        stub_path, mpy_path, lib_path=str(testrepo_micropython_lib), version=mpy_version
-    )
+    get_mpy.get_frozen_folders(stub_path, mpy_path, lib_path=str(testrepo_micropython_lib), version=mpy_version)
+    # restore original version
+    git.checkout_tag(version_x, mpy_path)
     assert True
