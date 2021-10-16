@@ -112,9 +112,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         cleanup(modules_folder)
 
         print("running stubgen on {0}".format(modules_folder))
-        cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(
-            modules_folder
-        )
+        cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
         result = os.system(cmd)
         # Check on error
         if result != 0:
@@ -253,11 +251,7 @@ def read_exclusion_file(path: Path = None) -> List[str]:
     try:
         with open(path.joinpath(".exclusions")) as f:
             content = f.readlines()
-            return [
-                line.rstrip()
-                for line in content
-                if line[0] != "#" and len(line.strip()) != 0
-            ]
+            return [line.rstrip() for line in content if line[0] != "#" and len(line.strip()) != 0]
     except OSError:
         return []
     # exclusions = read_exclusion_file()
