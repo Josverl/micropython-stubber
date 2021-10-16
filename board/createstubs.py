@@ -614,7 +614,7 @@ class Stubber:
             if e.args[0] == ENOENT:
                 try:
                     r = os.getcwd()
-                except OSError:
+                except (OSError, AttributeError):
                     # unix port
                     r = "."
             else:
