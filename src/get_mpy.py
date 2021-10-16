@@ -17,18 +17,14 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.13 - using manifests.py, and support for variant
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
-import sys
 import os
 import glob
 import re
 import shutil
 import warnings
 import logging
-
 import basicgit as git
-
 import utils
-
 from pathlib import Path  # start moving from os & glob to pathlib
 
 log = logging.getLogger(__name__)
@@ -259,29 +255,6 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
         utils.make_manifest(Path(dest_path), family=FAMILY, port=port, version=version)
     return targets
 
-# def get_target_path(path:str)-> tuple:
-#     "get path to port and board folder(s) from a path"
-
-#     # https://regexr.com/4rh39
-#     # but with an extra P for Python named groups...
-#     regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
-#     regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
-#     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
-#     # print( matches.group('port'), matches.group('board'))
-
-#     mpy_port = mpy_board = ""
-#     matches = re.search(regex_2, path)
-#     if matches:
-#         # port and board
-#         mpy_port = matches.group('port') or ""
-#         mpy_board = matches.group('board') or ""
-#     else:
-#         #just port
-#         matches = re.search(regex_1, path)
-#         if matches:
-#             mpy_port = matches.group('port') or ""
-#     return mpy_port, mpy_board
-
 
 def get_target_names(path: str) -> tuple:
     "get path to port and board names from a path"
@@ -327,10 +300,12 @@ def get_frozen_manifest(
 
     # https://regexr.com/4rh39
     # but with an extra P for Python named groups...
-    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"  # port
-    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"  # port & board
+    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
+    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
+
     # todo: variants
-    regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)"  # port & variant
+    # regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)"  # port & variant
+
     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
     # print( matches.group('port'), matches.group('board'))
 
