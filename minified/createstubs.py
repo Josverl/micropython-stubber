@@ -8,7 +8,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version="1.3.14"
+stubber_version="1.3.15"
 try:
  from machine import resetWDT 
 except ImportError:
@@ -191,26 +191,28 @@ class Stubber:
   if object_expr in self.problematic:
    return
   items,errors=self.get_obj_attributes(object_expr)
-  for name,rep,typ,obj in sorted(items,key=lambda x:x[0]):
-   if name.startswith("__"):
+  for name,rep,typ,obj in items:
+   if name.startswith("__")and name not in("__new__","__init__","__call__"):
     continue
    resetWDT()
    sleep_us(1)
    if typ in["<class 'function'>","<class 'bound_method'>"]:
+    ret="Any"
+    slf=""
     if in_class>0:
-     s=indent+"def "+name+"(self, *args) -> Any:\n"
-    else:
-     s=indent+"def "+name+"(*args) -> Any:\n"
-    s+=indent+"    pass\n\n"
+     slf="self, "
+     if name=="__init__":
+      ret="None"
+    s="{}def {}({}*args) -> {}:\n".format(indent,name,slf,ret)
+    s+=indent+"    ''\n"
+    s+=indent+"    ...\n\n"
     fp.write(s)
    elif typ in["<class 'str'>","<class 'int'>","<class 'float'>"]:
     s=indent+name+" = "+rep+"\n"
     fp.write(s)
    elif typ=="<class 'type'>" and indent=="":
     s="\n"+indent+"class "+name+":\n" 
-    s+=indent+"    def __init__(self, *args):\n"
-    s+=indent+"        ''\n"
-    s+=indent+"        pass\n"
+    s+=indent+"    ''\n"
     fp.write(s)
     self.write_object_stub(fp,obj,"{0}.{1}".format(obj_name,name),indent+"    ",in_class+1,)
    else:
