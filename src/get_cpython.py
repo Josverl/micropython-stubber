@@ -71,9 +71,9 @@ def get_core(requirements, stub_path=None):
         # remove build folder
         shutil.rmtree(build_path, ignore_errors=True)
         if mod_manifest:
-            # write the the module manifest for che cpython core modules
-            with open(stub_path + "/modules.json", "w") as outfile:
-                json.dump(mod_manifest, outfile)
+            #write the the module manifest
+            with open(stub_path+"/modules.json", "w") as outfile:
+                json.dump(mod_manifest, outfile, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
