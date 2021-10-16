@@ -64,17 +64,42 @@ jobs:
       - name: Test with pytest
         run: pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}.xml
 
-      # https://github.com/marketplace/actions/publish-unit-test-results
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+      - name: Upload Unit Test Results
         if: always()
-        with:
-          files: junit/test-results*.xml
-
-      - name: Upload pytest test results
         uses: actions/upload-artifact@v2
         with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-        if: always()
+          name: Unit Test Results (Python ${{ matrix.python-version }})
+          path: junit/test-results*.xml
+
+      # # https://github.com/marketplace/actions/publish-unit-test-results
+      # - name: Publish Unit Test Results
+      #   uses: EnricoMi/publish-unit-test-result-action@v1
+      #   if: always()
+      #   with:
+      #     files: junit/test-results*.xml
+
+      # - name: Upload pytest test results
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: pytest-results-${{ matrix.python-version }}
+      #     path: junit/test-results-${{ matrix.python-version }}.xml
+      #   # Use always() to always run this step to publish test results when there are test failures
+      #   if: always()
+
+  publish-test-results:
+    name: "Publish Unit Tests Results"
+    needs: run_tests
+    runs-on: ubuntu-latest
+    # the run_tests job might be skipped, we don't need to run this job then
+    if: success() || failure()
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: artifacts/**/*.xml
