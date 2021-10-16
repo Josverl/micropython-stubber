@@ -5,6 +5,7 @@
 import os
 import requests
 
+
 def download_file(url: str, module: str, folder: str = "./"):
     "dowload a file from a public github repo"
     local_filename = os.path.abspath(os.path.join(folder, module))
@@ -12,12 +13,13 @@ def download_file(url: str, module: str, folder: str = "./"):
     # NOTE the stream=True parameter below
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(local_filename, 'wb') as f:
+        with open(local_filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
-                if chunk: # filter out keep-alive new chunks
+                if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
                     # f.flush()
     return local_filename
+
 
 def download_files(repo, frozen_modules, savepath):
     "dowload multiple files from a public github repo"

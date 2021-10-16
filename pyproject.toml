@@ -1,0 +1,109 @@
+[tool.black]
+line-length = 100
+target_version = ['py34']
+include = '\.pyi?$'
+exclude = '''
+(
+    /(
+        | \..*
+        | minified
+        | micropython
+        | micropython-lib
+        | tests[\\/]mocks
+        | stubs
+        | dev-stubs
+        | scratch
+    )/
+)
+'''
+
+
+[tool.pytest.ini_options]
+junit_family = "xunit1"
+# verbose
+# super verbose 
+# --cov coverage with json report and html report
+# Skip 'basicgit' test to avoid changing the cheked-out repo branch
+#addopts = "-v -sv --cov json --cov-report html -m 'not basicgit'"
+#addopts = "-v --cov --cov-report html -m 'not basicgit'"
+addopts = "-v -sv --cov --cov-report html --json-report --json-report-file coverage/report.json --json-report-indent=4 --ignore=micropython --ignore=micropython-lib  --ignore=all-stubs"
+
+testpaths = [
+    "tests",
+    "src",
+]
+
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "basicgit: marks tests in the basicgit module that manipulate the checkout",
+]
+
+# coverage reports
+[tool.coverage.run]
+parallel = false
+branch = true
+source = [
+        "board",
+        "minified",
+        "src"
+        ]
+omit = [
+        "*/commands/__init__.py",
+        "*/boot.py",
+        "*/main.py",
+        "*/logging.py",
+        "*/make_stub_files.py",
+        "*/micropip.py"
+        ]
+
+
+[tool.coverage.html]
+directory = "coverage"
+
+[tool.coverage.xml]
+output = "cov.xml"
+
+[tool.coverage.json]
+output = "coverage.json"
+
+[tool.coverage.report]
+show_missing = true
+# Regexes for lines to exclude from consideration
+exclude_lines = [ 
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self.debug",         # <-- Fix this 
+    "self._log.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # mind the quotes 
+    'if __name__ == "__main__" or isMicroPython():', 
+    "main()",
+    
+    # utility functions
+    "show_help()",
+    "isMicroPython()",
+    "read_path()",
+
+    #unreachable
+    # mind the quotes 
+    'info["release"] = "2.0.0" ',
+    "if arch",
+
+    # Micropython detection
+    "except (NotImplementedError, SyntaxError):",
+    # catch error
+    "except (OSError, KeyError):",
+    "except (OSError, AttributeError):",
+
+]
