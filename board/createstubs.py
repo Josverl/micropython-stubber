@@ -678,19 +678,16 @@ def main():
     print("stubber version :", stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)
-        logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
-    # stubber = Stubber(path=read_path())
-    stubber = Stubber(path="/sd")
+    stubber = Stubber(path=read_path())
+    # stubber = Stubber(path="/sd")
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
     # # Option: Add your own modules
     # # stubber.add_modules(['bluetooth','GPS'])
-
-    stubber.modules = ["lvgl"]
-    # stubber.modules = []
     stubber.create_all_stubs()
     stubber.report()
 
