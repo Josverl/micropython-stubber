@@ -67,37 +67,39 @@ def cleanup(modules_folder: Path):
                 pass
 
 
-def generate_pyi_from_file(file:Path) -> bool:
+def generate_pyi_from_file(file: Path) -> bool:
     """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
-    # if 0: 
+    # if 0:
     #     cmd = "stubgen {0} --output {1} --include-private --ignore-errors".format(file, file.parent)
     #     print(" >stubgen on {0}".format(file))
     #     result = os.system(cmd)
     #     return result == 0
     sg_opt = stubgen.Options(
-                pyversion=(3,5), 
-                no_import=False, 
-                include_private= True, 
-                doc_dir= "", 
-                search_path=[], 
-                interpreter=sys.executable,
-                parse_only=False,
-                ignore_errors=True,
-                modules=[],
-                packages=[],
-                files=[],
-                output_dir="",
-                verbose=True,
-                quiet=False,
-                export_less=False)
+        pyversion=(3, 5),
+        no_import=False,
+        include_private=True,
+        doc_dir="",
+        search_path=[],
+        interpreter=sys.executable,
+        parse_only=False,
+        ignore_errors=True,
+        modules=[],
+        packages=[],
+        files=[],
+        output_dir="",
+        verbose=True,
+        quiet=False,
+        export_less=False,
+    )
 
-    sg_opt.files=[str(file)]
-    sg_opt.output_dir=str(file.parent)
+    sg_opt.files = [str(file)]
+    sg_opt.output_dir = str(file.parent)
     try:
         stubgen.generate_stubs(sg_opt)
         return True
     except BaseException:
         return False
+
 
 def generate_pyi_files(modules_folder: Path) -> bool:
     """generate typeshed files for all scripts in a folder using mypy/stubgen"""
@@ -105,7 +107,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 
     modlist = list(modules_folder.glob("**/modules.json"))
     if len(modlist) <= 1:
-        ## generate fyi files for folder 
+        ## generate fyi files for folder
         # clean before to clean any old stuff
         cleanup(modules_folder)
 
@@ -117,16 +119,16 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # Check on error
         if result != 0:
             # in case of failure then Plan B
-            # - run stubgen on each *.py 
+            # - run stubgen on each *.py
             print("Failure on folder, attempt to stub per file.py")
             py_files = modules_folder.glob("**/*.py")
             for py in py_files:
                 generate_pyi_from_file(py)
-                #todo: report failures 
+                # todo: report failures
 
         # for py missing pyi:
-        py_files = list(modules_folder.rglob('*.py'))
-        pyi_files = list(modules_folder.rglob('*.pyi'))
+        py_files = list(modules_folder.rglob("*.py"))
+        pyi_files = list(modules_folder.rglob("*.pyi"))
 
         for pyi in pyi_files:
             # remove all py files that have been stubbed successfully
@@ -137,19 +139,19 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # now stub the rest
         for py in py_files:
             generate_pyi_from_file(py)
-            #todo: report failures 
+            # todo: report failures
 
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
-         
+
         return True
         ##
     for mod_manifest in modlist:
-        ## generate fyi files for folder 
+        ## generate fyi files for folder
         generate_pyi_files(mod_manifest.parent)
 
+        # todo: collect and report results
 
-        #todo: collect and report results
 
 # def make_stub_files_old(stub_path, levels: int = 1):
 #     "generate typeshed files for all scripts in a folder using make_sub_files.py"
