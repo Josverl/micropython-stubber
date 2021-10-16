@@ -1,3 +1,5 @@
 how to clone : 
-    `git submodule init`
-    `git submodule update`
+``` bash
+git submodule init
+git submodule update
+```
