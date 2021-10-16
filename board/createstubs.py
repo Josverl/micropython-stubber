@@ -344,21 +344,15 @@ class Stubber:
             # re-evaluate
             if self.include_nested:
                 self.include_nested = gc.mem_free() > 3200  # type: ignore
-
+            # use training comma to overide black formatting to avoid minify chocking on this
             if module_name.startswith("_") and module_name != "_thread":
-                self._log.warning(
-                    "Skip module: {:<20}        : Internal ".format(module_name)
-                )
+                self._log.warning("Skip module: {:<20}        : Internal ".format(module_name),) 
                 continue
             if module_name in self.problematic:
-                self._log.warning(
-                    "Skip module: {:<20}        : Known problematic".format(module_name)
-                )
+                self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name),)
                 continue
             if module_name in self.excluded:
-                self._log.warning(
-                    "Skip module: {:<20}        : Excluded".format(module_name)
-                )
+                self._log.warning("Skip module: {:<20}        : Excluded".format(module_name),)
                 continue
 
             file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))

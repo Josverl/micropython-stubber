@@ -127,10 +127,10 @@ class Stubber:
    if module_name.startswith("_")and module_name!="_thread":
     continue
    if module_name in self.problematic:
-    self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
+    #self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
     continue
    if module_name in self.excluded:
-    self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
+    #self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
     continue
    file_name="{}/{}.py".format(self.path,module_name.replace(".","/"))
    gc.collect()
@@ -249,7 +249,7 @@ class Stubber:
     except OSError:
      pass
  def report(self,filename:str="modules.json"):
-  self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report),self._fwid,self.path))
+  #self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report),self._fwid,self.path))
   f_name="{}/{}".format(self.path,filename)
   gc.collect()
   try:
