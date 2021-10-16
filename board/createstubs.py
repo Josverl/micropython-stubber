@@ -520,7 +520,7 @@ class Stubber:
         del errors
         try:
             del name, rep, typ, obj  # pylint: disable=undefined-loop-variable
-        except (OSError, KeyError):  # lgtm [py/unreachable-statement]
+        except (OSError, KeyError, NameError):  # lgtm [py/unreachable-statement]
             pass
 
     @property
