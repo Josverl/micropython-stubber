@@ -1,5 +1,5 @@
 param(
-    $path = "./all_stubs"
+    $path = "./all-stubs"
 )
 
 #Run 
