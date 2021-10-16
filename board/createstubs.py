@@ -646,7 +646,7 @@ def read_path() -> str:
             path = sys.argv[2]
         else:
             show_help()
-    elif len(sys.argv) >= 2:
+    elif len(sys.argv) == 2:
         show_help()
     return path
 
