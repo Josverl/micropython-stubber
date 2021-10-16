@@ -8,9 +8,9 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version="1.3.13"
+stubber_version="1.3.14"
 try:
- from machine import resetWDT
+ from machine import resetWDT 
 except ImportError:
  def resetWDT():
   pass
@@ -147,8 +147,8 @@ class Stubber:
    return
   if file_name is None:
    file_name=module_name.replace(".","_")+".py"
+  self.ensure_folder(file_name)
   if "/" in module_name:
-   self.ensure_folder(file_name)
    module_name=module_name.replace("/",".")
    if not self.include_nested:
     return
@@ -328,6 +328,7 @@ def isMicroPython()->bool:
 def main():
  try:
   logging.basicConfig(level=logging.INFO)
+  logging.basicConfig(level=logging.DEBUG)
  except NameError:
   pass
  stubber=Stubber(path=read_path())
