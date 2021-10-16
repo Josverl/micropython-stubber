@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = "1.3.16"
+stubber_version = "1.4.0.beta"
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -23,6 +23,7 @@ except ImportError:
 
 class Stubber:
     "Generate stubs for modules in firmware"
+    MAX_CLASS_LEVEL = 2  # Max class nesting
 
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
@@ -317,15 +318,10 @@ class Stubber:
                     val = getattr(obj, name)
                     # name , value , type
                     result.append((name, repr(val), repr(type(val)), val))
-                    # self._log.info( result[-1])
                 except AttributeError as e:
-                    errors.append(
-                        "Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e)
-                    )
+                    errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
         except AttributeError as e:
-            errors.append(
-                "Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e)
-            )
+            errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
         # remove internal __
         result = [i for i in result if not (i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
@@ -339,9 +335,7 @@ class Stubber:
         "Create stubs for all configured modules"
         self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self._fwid))
         # start with the (more complex) modules with a / first to reduce memory problems
-        self.modules = [m for m in self.modules if "/" in m] + [
-            m for m in self.modules if "/" not in m
-        ]
+        self.modules = [m for m in self.modules if "/" in m] + [m for m in self.modules if "/" not in m]
         gc.collect()
         for module_name in self.modules:
             # re-evaluate
@@ -354,30 +348,22 @@ class Stubber:
                 )
                 continue
             if module_name in self.problematic:
-                self._log.warning(
-                    "Skip module: {:<20}        : Known problematic".format(module_name),
-                )
+                self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
                 continue
             if module_name in self.excluded:
-                self._log.warning(
-                    "Skip module: {:<20}        : Excluded".format(module_name),
-                )
+                self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
                 continue
 
             file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
             gc.collect()
             m1 = gc.mem_free()  # type: ignore
-            self._log.info(
-                "Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1)
-            )
+            self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
             try:
                 self.create_module_stub(module_name, file_name)
             except OSError:
                 pass
             gc.collect()
-            self._log.debug(
-                "Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free())  # type: ignore
-            )
+            self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         self._log.info("Finally done")
 
     def create_module_stub(self, module_name: str, file_name: str = None):
@@ -453,19 +439,13 @@ class Stubber:
                 self._log.debug("could not del sys.modules[{}]".format(module_name))
             gc.collect()
 
-    def write_object_stub(
-        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
-    ):
+    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
-        print("obj_name:", obj_name)
-        # @@ debug \
-        if obj_name not in ["lvgl", "btn"]:
-            return
-        # @@ debug /
-        self._log.debug("DUMP    : {}".format(object_expr))
+
+        # self._log.debug("DUMP    : {}".format(object_expr))
         items, errors = self.get_obj_attributes(object_expr)
 
         if errors:
@@ -476,19 +456,19 @@ class Stubber:
             resetWDT()
             sleep_us(1)
 
-            self._log.debug("DUMPING {}{}|{}:{}".format(indent, object_expr, name, typ))
             cls_mtd_tps = ["<class 'function'>", "<class 'bound_method'>"]
 
-            # Class expansion only on toplevel (bit of a hack)
-            if typ == "<class 'type'>" and indent == "":
+            # Class expansion only on first 3 levels (bit of a hack)
+            if typ == "<class 'type'>" and len(indent) <= self.MAX_CLASS_LEVEL * 4:
+                self._log.debug("{0}class {1}:".format(indent, name))
                 # stub style : generic __init__ with Empty comment and pass
                 s = "\n" + indent + "class " + name + ":\n"  #
                 s += indent + "    ''\n"
 
                 fp.write(s)
-                self._log.debug("\n" + s)
+                # self._log.debug("\n" + s)
 
-                self._log.debug("# recursion.. iterate over this class")
+                self._log.debug("# recursion over class {0}".format(name))
                 self.write_object_stub(
                     fp,
                     obj,
@@ -498,14 +478,15 @@ class Stubber:
                 )
             # Class Methods
             elif typ in cls_mtd_tps:
+                self._log.debug("# def {1} function or method, type = '{0}'".format(typ, name))
                 # module Function or class method
                 # will accept any number of params
                 # return type Any
                 ret = "Any"
-                slf = ""
+                first = ""
                 # Self parameter only on class functions
                 if typ == cls_mtd_tps[0]:
-                    slf = "self, "
+                    first = "self, "
                     # __init__ returns None
                     if name == "__init__":
                         ret = "None"
@@ -514,34 +495,39 @@ class Stubber:
                     s = "{}@classmethod\n".format(indent)
                     s += "{}def {}(cls) -> {}:\n".format(indent, name, ret)
                 else:
-                    s = "{}def {}({}*args) -> {}:\n".format(indent, name, slf, ret)
-                s += indent + "    ''\n"
+                    s = "{}def {}({}*args) -> {}:\n".format(indent, name, first, ret)
+                # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
             # constants of known types & values
             elif typ.startswith("<class '"):
+
                 t = typ[8:-2]
                 s = ""
-                if t in ["str", "int", "float", "bool", "bytearray"]:
-                    # use actual value
+
+                if t in ["str", "int", "float", "bool", "bytearray", "bytes"]:
+                    # known type: use actual value
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, name, rep, t)
                 elif t in ["dict", "list", "tuple"]:
-                    # use empty value
+                    # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, name, ev[t], t)
                 else:
-                    if "_" != t[0]:
-                        s = "{0}{1}: {2}\n".format(indent, name, t)
-                        # @@ DEBUG \
-                        print("~" * 20)
-                        print("typ=", typ)
-                        print("t=", t)
-                        # assert False, "Stop here"
-                        # @@ DEBUG /
+                    # something else
+                    if not t in ["object", "set", "frozenset"]:
+                        # Possibly default others to instance object ?
+                        # https://docs.python.org/3/tutorial/classes.html#instance-objects
+                        t = "Any"
+                    s = "{0}{1}: {2}\n".format(indent, name, t)
                 fp.write(s)
-                print("\n" + s)  # @@ DEBUG
                 self._log.debug("\n" + s)
+            else:
+                # keep only the name
+                self._log.debug("# all other, type = '{0}'".format(typ))
+                fp.write("# all other, type = '{0}'\n".format(typ))
+
+                fp.write(indent + name + " = Any\n")
 
         del items
         del errors
@@ -584,9 +570,7 @@ class Stubber:
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
         self._log.info(
-            "Created stubs for {} modules on board {}\nPath: {}".format(
-                len(self._report), self._fwid, self.path
-            )
+            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
         )
         f_name = "{}/{}".format(self.path, filename)
         gc.collect()
@@ -704,12 +688,11 @@ def main():
     stubber.clean()
     # # Option: Add your own modules
     # # stubber.add_modules(['bluetooth','GPS'])
-    # @@\
-    # stubber.modules = ["lvgl"]
+
+    stubber.modules = ["lvgl"]
     # stubber.modules = []
-    # stubber.create_all_stubs()
-    # stubber.report()
-    # @@/
+    stubber.create_all_stubs()
+    stubber.report()
 
 
 if __name__ == "__main__" or isMicroPython():
