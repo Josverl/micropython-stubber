@@ -8,16 +8,16 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 ENOENT=2
-stubber_version="1.3.12"
+stubber_version="1.3.13"
 try:
- from machine import resetWDT 
+ from machine import resetWDT
 except ImportError:
  def resetWDT():
   pass
 class Stubber:
  def __init__(self,path:str=None,firmware_id:str=None):
   try:
-   if os.uname().release=="1.13.0" and os.uname().version<"v1.13-103": 
+   if os.uname().release=="1.13.0" and os.uname().version<"v1.13-103":
     raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
   except AttributeError:
    pass
@@ -27,7 +27,7 @@ class Stubber:
    self._fwid=str(firmware_id).lower()
   else:
    self._fwid="{family}-{port}-{ver}".format(**self.info).lower()
-  self._start_free=gc.mem_free()
+  self._start_free=gc.mem_free() 
   if path:
    if path.endswith("/"):
     path=path[:-1]
@@ -48,21 +48,21 @@ class Stubber:
   _p=sys.platform
   info={"name":_n,"release":"0.0.0","version":"0.0.0","build":"","sysname":"unknown","nodename":"unknown","machine":"unknown","family":_n,"platform":_p,"port":_p,"ver":"",}
   try:
-   info["release"]=".".join([str(i)for i in sys.implementation.version]) 
+   info["release"]=".".join([str(n)for n in sys.implementation.version])
    info["version"]=info["release"]
-   info["name"]=sys.implementation.name 
+   info["name"]=sys.implementation.name
    info["mpy"]=sys.implementation.mpy 
   except AttributeError:
    pass
   if sys.platform not in("unix","win32"):
    try:
     u=os.uname()
-    info["sysname"]=u.sysname 
-    info["nodename"]=u.nodename 
-    info["release"]=u.release 
-    info["machine"]=u.machine 
-    if " on " in u.version: 
-     s=u.version.split("on ")[0] 
+    info["sysname"]=u.sysname
+    info["nodename"]=u.nodename
+    info["release"]=u.release
+    info["machine"]=u.machine
+    if " on " in u.version:
+     s=u.version.split("on ")[0]
      try:
       info["build"]=s.split("-")[1]
      except IndexError:
@@ -96,7 +96,7 @@ class Stubber:
    if info["build"]!="":
     info["ver"]+="-"+info["build"]
   if "mpy" in info: 
-   sys_mpy=info["mpy"]
+   sys_mpy=int(info["mpy"])
    arch=[None,"x86","x64","armv6","armv6m","armv7m","armv7em","armv7emsp","armv7emdp","xtensa","xtensawin",][sys_mpy>>10]
    if arch:
     info["arch"]=arch
@@ -200,9 +200,9 @@ class Stubber:
    sleep_us(1)
    if typ in["<class 'function'>","<class 'bound_method'>"]:
     if in_class>0:
-     s=indent+"def "+name+"(self) -> Any:\n"
+     s=indent+"def "+name+"(self, *args) -> Any:\n"
     else:
-     s=indent+"def "+name+"() -> Any:\n"
+     s=indent+"def "+name+"(*args) -> Any:\n"
     s+=indent+"    pass\n\n"
     fp.write(s)
    elif typ in["<class 'str'>","<class 'int'>","<class 'float'>"]:
@@ -308,7 +308,7 @@ class Stubber:
 def show_help():
  sys.exit(1)
 def read_path()->str:
- path=None
+ path=""
  if len(sys.argv)==3:
   cmd=(sys.argv[1]).lower()
   if cmd in("--path","-p"):
