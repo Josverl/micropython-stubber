@@ -5,18 +5,17 @@ directory = coverage_report
 
 [run]
 branch = True
+source = 
+    src
+    board
+    minified
 omit =
-    
-    # no stubs in coverage
-    stubs
-    # exclude tests from cov 
-    src/test_*.py
-    src/*_test.py
-    # exclude external files 
-    src/make_stub_files.py
-    src/micropip.py
-    
-    src/firmwares.py
+    */boot.py
+    */main.py
+    */logging.py
+    */make_stub_files.py
+    */micropip.py
+
 
 [report]
 # Regexes for lines to exclude from consideration
