@@ -564,18 +564,18 @@ class Stubber:
             with open(f_name, "w") as f:
                 f.write("{")
                 f.write(dumps({"firmware": self.info})[1:-1])
-                f.write(",")
+                f.write(",\n")
                 f.write(dumps({"stubber": {"version": stubber_version}})[1:-1])
-                f.write(",")
-                f.write('"modules" :[')
+                f.write(",\n")
+                f.write('"modules" :[\n')
                 start = True
                 for n in self._report:
                     if start:
                         start = False
                     else:
-                        f.write(",")
+                        f.write(",\n")
                     f.write(dumps(n))
-                f.write("]}")
+                f.write("\n]}")
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
         except OSError:
