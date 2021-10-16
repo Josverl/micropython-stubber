@@ -5,8 +5,8 @@
     //     "--rcfile", "${workspaceFolder}/.pylintrc-cpython"
     // ],
     "python.autoComplete.extraPaths": [
-        "board/lib", 
-        "all-stubs/cpython-core", 
+        "board/lib",
+        "all-stubs/cpython-core",
         "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
         "all-stubs/micropython-esp32-1_15"
     ],
@@ -16,7 +16,6 @@
         "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
         "all-stubs/micropython-esp32-1_15"
     ],
-
     "python.testing.pytestArgs": [
         "tests"
     ],
@@ -42,5 +41,4 @@
         "titleBar.inactiveBackground": "#61320699",
         "titleBar.inactiveForeground": "#e7e7e799"
     }
-
 }

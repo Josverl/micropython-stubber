@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = '1.3.9'
+stubber_version = '1.3.10'
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -266,8 +266,10 @@ class Stubber():
             s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(
                 module_name, self._fwid, self.info, stubber_version)
             fp.write(s)
+            fp.write("from typing import Any\n")
             self.write_object_stub(fp, new_module, module_name, "")
             self._report.append({"module":module_name, "file": file_name})
+
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             #try to unload the module unless we use it
@@ -305,7 +307,9 @@ class Stubber():
             self._log.debug("DUMPING {}{}{}:{}".format(indent, object_expr, name, typ))
 
             if typ in ["<class 'function'>", "<class 'bound_method'>"]:
-                s = indent + "def " + name + "():\n"    #todo: add self, and optional params
+                # return type Any
+                # Todo:Unknown params,
+                s = indent + "def " + name + "() -> Any:\n" 
                 s += indent + "    pass\n\n"
                 fp.write(s)
                 self._log.debug('\n'+s)
@@ -328,7 +332,7 @@ class Stubber():
                 self.write_object_stub(fp, obj, "{0}.{1}".format(obj_name, name), indent + "    ")
             else:
                 # keep only the name
-                fp.write(indent + name + " = None\n")
+                fp.write(indent + name + " = Any\n")
         del items
         del errors
         try:
