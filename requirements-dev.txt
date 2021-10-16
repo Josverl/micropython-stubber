@@ -1,7 +1,5 @@
 # Production + dev requirements
-requests
-esptool             >= 3.1
-pyminifier          >= 2.1                  #python-minifier
+--requirement requirements.txt
 
 # dev requirements
 pytest              >= 6.2.4 
