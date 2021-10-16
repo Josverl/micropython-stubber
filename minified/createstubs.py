@@ -127,10 +127,8 @@ class Stubber:
    if module_name.startswith("_")and module_name!="_thread":
     continue
    if module_name in self.problematic:
-    #self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
     continue
    if module_name in self.excluded:
-    #self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
     continue
    file_name="{}/{}.py".format(self.path,module_name.replace(".","/"))
    gc.collect()
@@ -146,8 +144,7 @@ class Stubber:
   if module_name in self.problematic:
    return
   if file_name is None:
-   file_name=module_name.replace(".","_")+".py"
-  self.ensure_folder(file_name)
+   file_name=self.path+'/'+module_name.replace(".","_")+".py"
   if "/" in module_name:
    module_name=module_name.replace("/",".")
    if not self.include_nested:
@@ -173,6 +170,7 @@ class Stubber:
     new_module=__import__(module_name,None,None,("*"))
    except ImportError: 
     return
+  self.ensure_folder(file_name) 
   with open(file_name,"w")as fp:
    s='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name,self._fwid,self.info,stubber_version)
    fp.write(s)
@@ -249,7 +247,7 @@ class Stubber:
     except OSError:
      pass
  def report(self,filename:str="modules.json"):
-  #self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report),self._fwid,self.path))
+  self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report),self._fwid,self.path))
   f_name="{}/{}".format(self.path,filename)
   gc.collect()
   try:
