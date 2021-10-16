@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = "1.3.11"
+stubber_version = "1.3.12"
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -498,9 +498,9 @@ class Stubber:
             # new class
             elif typ == "<class 'type'>" and indent == "":
                 # full expansion only on toplevel
-                # stub style : Empty comment ... + hardcoded 4 spaces
-                s = "\n" + indent + "class " + name + ":\n"  # What about superclass?
-                s += indent + "    def __init__(self):\n"
+                # stub style : generic __init__ with Empty comment and pass
+                s = "\n" + indent + "class " + name + ":\n"  #
+                s += indent + "    def __init__(self, *args):\n"
                 s += indent + "        ''\n"
                 s += indent + "        pass\n"
 
