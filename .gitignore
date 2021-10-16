@@ -6,6 +6,7 @@ project.pymakr
 .venv
 
 # no compiled python 
+.py_cache
 **/__pycache__/**
 
 #ignore the scratchpad 
