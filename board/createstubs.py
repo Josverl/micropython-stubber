@@ -659,7 +659,7 @@ def main():
     print("stubber version :", stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)
-        logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
     stubber = Stubber(path=read_path())
