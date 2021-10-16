@@ -343,12 +343,10 @@ def isMicroPython()->bool:
 def main():
  try:
   logging.basicConfig(level=logging.INFO)
-  logging.basicConfig(level=logging.DEBUG)
  except NameError:
   pass
- stubber=Stubber(path="/sd")
+ stubber=Stubber(path=read_path())
  stubber.clean()
- stubber.modules=["lvgl"]
  stubber.create_all_stubs()
  stubber.report()
 if __name__=="__main__" or isMicroPython():
