@@ -1,16 +1,17 @@
-# Module Under Test
 import sys
-import get_mpy
-from utils import clean_version, flat_version
-
+import pytest
 if not sys.warnoptions:
     import os, warnings
     warnings.simplefilter('default' ) # Change the filter in this process
     os.environ["PYTHONWARNINGS"] = "default" # Also affect subprocesses
 
 
-# No Mocks, does actual download from github
+# Dependencies
 import basicgit as git
+from utils import clean_version, flat_version
+
+# Module Under Test
+import get_mpy
 
 @pytest.mark.basicgit
 def test_get_mpy(tmp_path):
