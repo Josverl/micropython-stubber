@@ -73,8 +73,7 @@
     ],
     "python.formatting.provider": "black",
     "python.formatting.blackArgs": [
-        "--extend-exclude",
-        "minified"
+        "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
     ],
     "editor.formatOnSave": true,
 }
