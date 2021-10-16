@@ -12,9 +12,10 @@ import pytest
 @pytest.mark.parametrize("script_folder", ["./board", "./minified"])
 @pytest.mark.parametrize(
     # Ubuntu 18.04
-    # "firmware", [("micropython_1_12"), ("micropython_1_13"), ("pycopy_3_3_2-25")] 
+    # "firmware", [("micropython_1_12"), ("micropython_1_13"), ("pycopy_3_3_2-25")]
     # Ubuntu 20.04
-    "firmware", ["micropython_v1_11","micropython_v1_12","micropython_v1_14","micropython_v1_15","micropython_v1_16"] 
+    "firmware",
+    ["micropython_v1_11", "micropython_v1_12", "micropython_v1_14", "micropython_v1_15", "micropython_v1_16"],
 )
 
 # only run createsubs in the unix version of micropython
@@ -50,10 +51,6 @@ def test_createstubs(firmware, tmp_path, script_folder):
     with open(jsons[0], "r") as file:
         manifest = json.load(file)
 
-    assert (
-        len(manifest) == 3
-    ), "module manifest should contain firmware, stubber , modules"
+    assert len(manifest) == 3, "module manifest should contain firmware, stubber , modules"
 
-    assert len(manifest["modules"]) == len(
-        stubfiles
-    ), "number of modules must match count of stubfiles"
+    assert len(manifest["modules"]) == len(stubfiles), "number of modules must match count of stubfiles"

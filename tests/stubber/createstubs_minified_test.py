@@ -3,6 +3,7 @@ from collections import namedtuple
 import pytest
 
 from pathlib import Path
+
 # pyright: reportMissingImports=false
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
@@ -14,7 +15,7 @@ if sys.path[1] != core_mocks:
     sys.path[1:1] = [core_mocks]
 
 # ----------------------------------------------------------------------------------------
-# Specify wether to load the normal or minified version of the test 
+# Specify wether to load the normal or minified version of the test
 # ----------------------------------------------------------------------------------------
 prefix = "minified."
 from minified.createstubs import Stubber, read_path
@@ -27,7 +28,7 @@ from minified.createstubs import Stubber, read_path
 
 
 def test_stubber_info_basic():
-    stubber = Stubber() # type: ignore
+    stubber = Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
     info = stubber._info()
@@ -41,6 +42,7 @@ def test_stubber_info_basic():
 
     assert " " not in stubber.flat_fwid, "flat_fwid must not contain any spaces"
     assert "." not in stubber.flat_fwid, "flat_fwid must not contain any dots"
+
 
 def test_stubber_info_custom():
     myid = "MyCustomID"
@@ -148,9 +150,7 @@ pyb1_113 = UName(
             "ev3-pybricks-linux-1.0.0",
             "",
             "linux",
-            UName(
-                machine="ev3", nodename="ev3", release=None, sysname="ev3", version=None
-            ),
+            UName(machine="ev3", nodename="ev3", release=None, sysname="ev3", version=None),
         ),
     ],
 )
@@ -192,41 +192,43 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
     for c in chars:
         assert c not in stubber.flat_fwid, "flat_fwid must not contain '{}'".format(c)
 
+
 # throws an error on the commandline
 @pytest.mark.skip(reason="test not working")
 def test_read_path():
-    assert read_path() == ''
+    assert read_path() == ""
 
 
 def test_get_obj_attributes():
-    stubber = Stubber() # type: ignore
+    stubber = Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     items, errors = stubber.get_obj_attributes(sys)
     assert items != []
     assert errors == []
     assert len(items) > 50
     for attr in items:
-        assert type(attr) == tuple 
+        assert type(attr) == tuple
 
 
-def test_create_all_stubs(tmp_path:Path):
+def test_create_all_stubs(tmp_path: Path):
     myid = "MyCustomID"
 
-    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
-    stubber.modules = ["json","_thread","array"]
-    stubber.add_modules(["http_client","webrepl","_internal"])
+    stubber.modules = ["json", "_thread", "array"]
+    stubber.add_modules(["http_client", "webrepl", "_internal"])
     stubber.create_all_stubs()
-    
-    stublist = list(tmp_path.glob('**/*.py'))
+
+    stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 3
-    stubber.report() 
-    stublist = list(tmp_path.glob('**/modules.json'))
+    stubber.report()
+    stublist = list(tmp_path.glob("**/modules.json"))
     assert len(stublist) == 1
 
     stubber.clean()
-    stublist = list(tmp_path.glob('**/*.*'))
+    stublist = list(tmp_path.glob("**/*.*"))
     assert len(stublist) == 0
+
 
 def test_get_root():
     stubber = Stubber()
@@ -235,69 +237,69 @@ def test_get_root():
     assert type(x) == str
     assert len(x) > 0
 
-    
-def test_create_module_stub(tmp_path:Path):
+
+def test_create_module_stub(tmp_path: Path):
     myid = "MyCustomID"
-    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # just in the test folder , no structure
-    stubber.create_module_stub("json", str( tmp_path / "json.py" ))
-    stubber.create_module_stub("_thread", str(tmp_path / "_thread.py" ))
-   
-    stublist = list(tmp_path.glob('**/*.py'))
+    stubber.create_module_stub("json", str(tmp_path / "json.py"))
+    stubber.create_module_stub("_thread", str(tmp_path / "_thread.py"))
+
+    stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 2
 
 
-def test_create_module_stub_folder(tmp_path:Path):
+def test_create_module_stub_folder(tmp_path: Path):
     myid = "MyCustomID"
-    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
-    
-    stubber.create_module_stub("json" )
-    stublist = list((tmp_path / "stubs" / myid.lower()).glob('**/*.py'))
-    assert len(stublist) == 1 , "should create stub in stub folder if no folder specified"    
+
+    stubber.create_module_stub("json")
+    stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.py"))
+    assert len(stublist) == 1, "should create stub in stub folder if no folder specified"
 
 
-def test_create_module_stub_ignored(tmp_path:Path):
+def test_create_module_stub_ignored(tmp_path: Path):
     myid = "MyCustomID"
-    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
-    #should not generate
-    stubber.create_module_stub("_internal", str(tmp_path / "_internal.py" ))
-    stubber.create_module_stub("http_client", str(tmp_path / "http_client.py" ))
-    stubber.create_module_stub("webrepl", str(tmp_path / "webrepl.py" ))
-    
-    stublist = list(tmp_path.glob('**/*.py'))
+    # should not generate
+    stubber.create_module_stub("_internal", str(tmp_path / "_internal.py"))
+    stubber.create_module_stub("http_client", str(tmp_path / "http_client.py"))
+    stubber.create_module_stub("webrepl", str(tmp_path / "webrepl.py"))
+
+    stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 0
 
 
-
-
-def test_nested_modules(tmp_path:Path):
+def test_nested_modules(tmp_path: Path):
     myid = "MyCustomID"
-    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # just in the test folder , no structure
-    stubber.create_module_stub("urllib/request", str( tmp_path / "request.py" ))
-    stublist = list(tmp_path.glob('**/*.py'))
+    stubber.create_module_stub("urllib/request", str(tmp_path / "request.py"))
+    stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 1
 
-def test_unavailable_modules(tmp_path:Path):
+
+def test_unavailable_modules(tmp_path: Path):
     myid = "MyCustomID"
-    stubber = Stubber(path = str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # this should not generate a module , but also should not th
-    stubber.create_module_stub("notamodule1", str( tmp_path / "notamodule1.py" ))
-    stubber.create_module_stub("not/amodule2", str( tmp_path / "notamodule2.py" ))
-    stublist = list(tmp_path.glob('**/*.py'))
+    stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.py"))
+    stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.py"))
+    stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 0
+
 
 # def test_clean(tmp_path):
 
 #     myid = "MyCustomID"
 #     test_path = str(tmp_path)
-#     stub_path =  Path(test_path) /"stubs"/ myid.lower() 
-#     stubber = Stubber(path = test_path, firmware_id=myid)  
+#     stub_path =  Path(test_path) /"stubs"/ myid.lower()
+#     stubber = Stubber(path = test_path, firmware_id=myid)
 #     stubber.clean()
 
 #     #Create a file
@@ -305,7 +307,7 @@ def test_unavailable_modules(tmp_path:Path):
 #     stublist = list(Path(test_path).glob('**/*.py'))
 #     assert len(stublist) == 1
 #     stubber.clean()
-# Error 
+# Error
 # # tests\stubber\createstubs_info_mpy_test.py:244:
 # # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 # # board\createstubs.py:435: in create_module_stub
@@ -320,4 +322,3 @@ def test_unavailable_modules(tmp_path:Path):
 # # E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\/Users/josverl/AppData/Local/Temp/pytest-of-josverl/pytest-39/test_clean0/stubs/mycustomid/json.py'
 
 # # tests\mocks\micropython-cpython_core\uio.py:44: FileNotFoundError
-

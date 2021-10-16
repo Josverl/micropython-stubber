@@ -1,9 +1,11 @@
 import sys
 import pytest
+
 if not sys.warnoptions:
     import os, warnings
-    warnings.simplefilter('default' ) # Change the filter in this process
-    os.environ["PYTHONWARNINGS"] = "default" # Also affect subprocesses
+
+    warnings.simplefilter("default")  # Change the filter in this process
+    os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
 
 
 # Dependencies
@@ -13,18 +15,17 @@ from utils import clean_version, flat_version
 # Module Under Test
 import get_mpy
 
+
 @pytest.mark.basicgit
 def test_get_mpy(tmp_path):
 
-    # Use Submodules 
+    # Use Submodules
     mpy_path = "./micropython"
     lib_path = "./micropython-lib"
-    try: 
+    try:
         version = clean_version(git.get_tag(mpy_path))
     except:
-        warnings.warn(
-            "Could not find the micropython version Tag - assuming v1.x"
-        )
+        warnings.warn("Could not find the micropython version Tag - assuming v1.x")
         version = "v1.x"
 
     assert version, "could not find micropython version"
@@ -32,10 +33,8 @@ def test_get_mpy(tmp_path):
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, flat_version(version))
-    get_mpy.get_frozen(
-        str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path
-    )
-    
+    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
+
     modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
     stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
     if version == "v1.x":
@@ -45,5 +44,3 @@ def test_get_mpy(tmp_path):
     elif version >= "v1.15":
         assert modules_count >= 7, "there should at least 7 module manifests"
         assert stub_count >= 100, "there should > 100 frozen modules"
-
-
