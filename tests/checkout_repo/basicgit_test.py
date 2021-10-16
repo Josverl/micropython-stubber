@@ -39,9 +39,9 @@ def test_pull_master(testrepo_micropython):
     assert x
 
 
-def test_get_tag_sibling():
-    # get version of sibling repro
-    for testcase in ["../micropython", "..\\micropython"]:
+def test_get_tag_submodule(testrepo_micropython):
+    # get version of submodule repro
+    for testcase in [testrepo_micropython, ".\\micropython"]:
         tag = git.get_tag(testcase)
         common_tst(tag)
 

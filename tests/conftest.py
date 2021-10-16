@@ -7,8 +7,9 @@ import pytest
 # make sure that the source can be found
 sys.path.insert(1, "./src")
 
-TESTREPO = "../TESTREPO-micropython"
-TESTLIB = "../TESTREPO-micropython-lib"
+# Test repos are submodules of this repo
+TESTREPO = "./micropython"
+TESTLIB = "./micropython-lib"
 
 
 @pytest.fixture(scope="session")
