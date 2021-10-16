@@ -17,8 +17,8 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.13 - using manifests.py, and support for variant
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
-import glob
 import os
+import glob
 import re
 import shutil
 import logging
@@ -26,7 +26,8 @@ import logging
 import basicgit as git
 
 import utils
-from utils import clean_version, stubfolder, flat_version
+
+from pathlib import Path    # start moving from os & glob to pathlib
 
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -161,13 +162,13 @@ def convert_path(path):
     for name, value in path_vars.items():
         path = path.replace('$({})'.format(name), value)
     # Convert to absolute path (so that future operations don't rely on
-    # still being chdir'ed).
+    # still being chdir 'ed).
     return os.path.abspath(path)
 
 
 def get_frozen(stub_path:str, version:str, mpy_path:str=None, lib_path:str=None,):
     """
-    get and parse the to-be-fozen .py modules for micropython to extract the static type information
+    get and parse the to-be-frozen .py modules for micropython to extract the static type information
     - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
       repos should be cloned side-by-side as some of the manifests refer to micropython-lib scripts using a relative path
     """
@@ -204,7 +205,7 @@ def get_frozen(stub_path:str, version:str, mpy_path:str=None, lib_path:str=None,
 
 def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version:str):
     """
-    get and parse the to-be-fozen .py modules for micropython to extract the static type information
+    get and parse the to-be-frozen .py modules for micropython to extract the static type information
     - locates the to-be-frozen files in modules folders
         ports/<port>/modules/*.py
         ports/<port>/boards/<board>/modules/*.py
@@ -218,18 +219,18 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version:str
 
         dest_path = os.path.join(stub_path, mpy_port, mpy_board)
         log.info("freezedry : {:<30} to {}".format(script, dest_path))
-        # ensure folder, including possible path prefix for script todo:
+        # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
         shutil.copy2(script, dest_path)
         if not dest_path in targets:
             targets.append(dest_path)
-        
+
     for dest_path in targets:
         # make a module manifest
         port = dest_path.split(os.path.sep)[-2]
         #todo: add board / variant into manifest files ?
-        utils.make_manifest(dest_path, family=FAMILY, port=port, version=version )
+        utils.make_manifest(Path(dest_path), family=FAMILY, port=port, version=version )
 
 
 
@@ -237,7 +238,7 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version:str
 #     "get path to port and board folder(s) from a path"
 
 #     # https://regexr.com/4rh39
-#     # but with an extry P for Python named groups...
+#     # but with an extra P for Python named groups...
 #     regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
 #     regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
 #     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
@@ -259,7 +260,7 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version:str
 def get_target_names(path: str)-> tuple:
     "get path to port and board names from a path"
     # https://regexr.com/4sram
-    # but with an extry P for Python named groups...
+    # but with an extra P for Python named groups...
     #regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
     re_portboard = r".*[\\/]+ports[\\/]+(?P<port>\w+)[\\/]+boards[\\/]+(?P<board>\w+)"   # port & board
     re_port      = r".*[\\/]+ports[\\/]+(?P<port>\w+)[\\/]+"   # port
@@ -282,7 +283,7 @@ def get_target_names(path: str)-> tuple:
 
 def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str, version: str):
     """
-    get and parse the to-be-fozen .py modules for micropython to extract the static type information
+    get and parse the to-be-frozen .py modules for micropython to extract the static type information
     - locates the to-be-frozen files through the manifest.py introduced in MicroPython 1.12
         manifest.py is used for board specific and daily builds
         manifest_release.py is used for the release builds
@@ -297,7 +298,7 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str,
     path_vars['MPY_LIB_DIR'] = lib_path
 
     # https://regexr.com/4rh39
-    # but with an extry P for Python named groups...
+    # but with an extra P for Python named groups...
     regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
     regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
     # todo: variants
@@ -350,7 +351,7 @@ def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str,
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # make a module manifest 
-        utils.make_manifest(stub_dir, FAMILY, "frozen", version)
+        utils.make_manifest(Path(stub_dir), FAMILY, "frozen", version)
 
 # def quicktest():
 #     # just run a quick test       
@@ -365,12 +366,12 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)-8s:%(message)s', level=logging.INFO)
     mpy_path = '../micropython'
     lib_path = '../micropython-lib'
-    version = clean_version(git.get_tag(mpy_path))
+    version = utils.clean_version(git.get_tag(mpy_path))
 
     if version:
         log.info("found micropython version : {}".format(version))
         # folder/{family}_{version}_frozen
-        stub_path = stubfolder('{}-{}-frozen'.format(FAMILY, flat_version(version)))
+        stub_path = utils.stubfolder('{}-{}-frozen'.format(FAMILY, utils.flat_version(version)))
         get_frozen(stub_path, version=version, mpy_path=mpy_path, lib_path=lib_path)
         exit(0)
     else:

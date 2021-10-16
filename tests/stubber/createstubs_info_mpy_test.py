@@ -10,7 +10,7 @@ UName = namedtuple('UName', ['sysname', 'nodename', 'release', 'version', 'machi
 if sys.path[0] != './board':
     sys.path[0:0] = ['./board']
 
-# allow loading of the cpython mock-alikes
+# allow loading of the cpython mock-a-likes
 core_mocks = './tests/mocks/micropython-cpython_core'
 if sys.path[1] != core_mocks:
     sys.path[1:1] = [core_mocks]
@@ -58,7 +58,7 @@ pyb1_113        = UName(sysname='pyboard', nodename='pyboard', release='1.13.0',
 
 @pytest.mark.parametrize(
     "fwid,  sys_imp_name, sys_platform, os_uname",
-    [   
+    [
         # mpy esp32 
         ('micropython-esp32-1.9.4', 'micropython', 'esp32', mpy_194),
         ('micropython-esp32-1.10', 'micropython', 'esp32', mpy_110),
@@ -70,7 +70,7 @@ pyb1_113        = UName(sysname='pyboard', nodename='pyboard', release='1.13.0',
         # mpy pyb1
         ('micropython-pyb1-1.13-95', 'micropython', 'pyb1', pyb1_113),
 
-        # lobo 
+        # lobo
         ('loboris-esp32-v3.2.24', 'micropython', 'esp32_LoBo', lobo),
         ('loboris-esp32-v3.2.24', 'micropython', 'esp32_LoBo', lobo_bt_ram),
 
