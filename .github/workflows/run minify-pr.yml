@@ -15,7 +15,7 @@ on:
 
 jobs:
   minify:
-    runs-on: ubuntu-18.04 # ubuntu-latest = 20.04 does not work with the current micropython binaries
+    runs-on: ubuntu-20.04 # ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
