@@ -463,7 +463,7 @@ class Stubber:
             self._log.error(errors)
 
         for name, rep, typ, obj in sorted(items, key=lambda x: x[0]):
-            if name.startswith("__"):
+            if name.startswith("__") and name not in ("__new__", "__init__", "__call__") :
                 # skip internals
                 continue
 
