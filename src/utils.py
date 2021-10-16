@@ -64,12 +64,14 @@ def cleanup(modules_folder: Path):
                 pass
 
 
-def make_stub_files(stub_path: str, levels: int = 0):
+def make_stub_files(stub_path: str, levels: int = 0) -> bool:
     "generate typeshed files for all scripts in a folder using mypy/stubgen"
     # levels is ignored for backward compat with make_stub_files_old
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
 
     modlist = list(Path(stub_path).glob("**/modules.json"))
+    if len(modlist) == 0:
+        return False
     for file in modlist:
         modules_folder = file.parent
         # clean before to clean any old stuff
@@ -97,6 +99,7 @@ def make_stub_files(stub_path: str, levels: int = 0):
 
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
+        return True
 
 
 def make_stub_files_old(stub_path, levels: int = 1):
@@ -209,12 +212,12 @@ def read_exclusion_file(path: Path = None) -> List[str]:
     # exclusions = read_exclusion_file()
 
 
-def should_ignore(file: Path, exclusions: List[str]) -> bool:
+def should_ignore(file: str, exclusions: List[str]) -> bool:
     """Check if  a file matches a line in the exclusion list."""
     for excl in exclusions:
-        if fnmatch(str(file), excl):
+        if fnmatch(file, excl):
             return True
     return False
     # for file in Path(".").glob("**/*.py*"):
-    #     if should_ignore(file, exclusions):
+    #     if should_ignore(str(file), exclusions):
     #         print(file)
