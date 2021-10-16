@@ -32,4 +32,4 @@ desktop.ini
 .pytest_cache/*
 .py_cache
 
-# no coverage
+dev-stubs
