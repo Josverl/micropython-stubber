@@ -1,10 +1,10 @@
-# SOT
-import utils
-
 # others
 import pytest
 from pathlib import Path
 import shutil
+
+# SOT
+import utils
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,7 @@ def test_clean_version(commit, build, clean):
 # make stub file
 def test_make_stub_files(tmp_path):
     dest = tmp_path / "stubs"
-    shutil.copytree("scratch/stubs", dest)
+    shutil.copytree("./tests/data/stubs", dest)
     result = utils.generate_pyi_files(dest)
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
