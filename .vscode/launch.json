@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PowerShell Launch Current File",
+            "name": "PS1: Current File",
             "type": "PowerShell",
             "request": "launch",
             "script": "${file}",
@@ -17,6 +17,17 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "CPYTHON-Core : Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                // patch python path with CPYTHON replacements
+                "PYTHONPATH": "all-stubs/cpython_core"
+            }
         },
         {
             "name": "Python: Debug process --path",
