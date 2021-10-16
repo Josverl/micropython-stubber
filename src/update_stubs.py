@@ -11,14 +11,16 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 import logging
 import utils
 import sys
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     # generate typeshed files for all scripts
-    stub_path = utils.STUB_FOLDER
     if len(sys.argv) == 2:
         stub_path = sys.argv[1]
+    else:
+        stub_path = utils.STUB_FOLDER
 
     log.info("Generate type hint files (pyi) in folder: {}".format(stub_path))
-    utils.make_stub_files(stub_path, levels=7)
+    utils.generate_pyi_files(Path(stub_path))
