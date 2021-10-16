@@ -35,7 +35,7 @@ def flat_version(version: str):
 
 def cleanup(modules_folder:Path):
     " Q&D cleanup "
-    # for some reason the umqtt simple.pyi and robust.pyi are created twice 
+    # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice 
     #  - modules_root folder ( simple.pyi and robust.pyi) - NOT OK 
     #       - umqtt folder (simple.py & pyi and robust.py & pyi) OK
     #  similar for mpy 1.9x - 1.11
@@ -74,7 +74,8 @@ def make_stub_files(stub_path:str, levels: int = 0):
         result = os.system(cmd)
         # Check on error
         if result != 0:
-            # in clase of falure then Plan B 
+            # in case of failure then Plan B 
+            # - run stubgen on each *.py 
             print('Failure on folder, attempt to stub per file.py')
             py_files = modules_folder.glob('**/*.py')
             for py in py_files:
@@ -82,12 +83,9 @@ def make_stub_files(stub_path:str, levels: int = 0):
                 print(" >stubgen on {0}".format(py))
                 result = os.system(cmd)
 
-        # TODO: if general failure try to run stubgen on each *.py 
-
-        # and clean after to only checkin good stuff
+        # and clean after to only check-in good stuff
         cleanup(modules_folder)
-
-
+    
 
 def make_stub_files_old(stub_path, levels: int = 1):
     "generate typeshed files for all scripts in a folder using make_sub_files.py"
