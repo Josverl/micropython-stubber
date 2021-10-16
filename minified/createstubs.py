@@ -247,7 +247,6 @@ class Stubber:
     except OSError:
      pass
  def report(self,filename:str="modules.json"):
-  self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report),self._fwid,self.path))
   f_name="{}/{}".format(self.path,filename)
   gc.collect()
   try:
