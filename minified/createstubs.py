@@ -1,6 +1,6 @@
 """
 Create stubs for (all) modules on a MicroPython board
-Copyright (c) 2019-2020 Jos Verlinde
+Copyright (c) 2019-2021 Jos Verlinde
 """
 import sys
 import gc
