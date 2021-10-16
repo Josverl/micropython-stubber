@@ -22,7 +22,7 @@ import pytest
 def test_createstubs(firmware, tmp_path, script_folder):
     # Use temp_path to generate stubs
     scriptfolder = os.path.abspath(script_folder)
-    cmd = [os.path.abspath("test_tools/ubuntu_20_04/" + firmware), "createstubs.py", "--path", tmp_path]
+    cmd = [os.path.abspath("tests/tools/ubuntu_20_04/" + firmware), "createstubs.py", "--path", tmp_path]
     try:
         subproc = subprocess.run(cmd, cwd=scriptfolder, timeout=100000)
         assert subproc.returncode == 0, "createstubs ran with an error"
