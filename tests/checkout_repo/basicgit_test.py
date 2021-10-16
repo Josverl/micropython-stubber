@@ -17,6 +17,7 @@ def common_tst(tag):
     assert len(tag) >= 2, "tags are longer than 2 chars"
 
 
+@pytest.mark.basicgit
 def test_get_tag_current():
     if not os.path.exists(".git"):
         pytest.skip("no git repo in current folder")
@@ -26,11 +27,13 @@ def test_get_tag_current():
         common_tst(tag)
 
 
+@pytest.mark.basicgit
 def test_get_failure_throws():
     with pytest.raises(Exception):
         git.get_tag(".not")
 
 
+@pytest.mark.basicgit
 def test_pull_master(testrepo_micropython):
     "test and force update to most recent"
     repo_path = testrepo_micropython
@@ -39,6 +42,7 @@ def test_pull_master(testrepo_micropython):
     assert x
 
 
+@pytest.mark.basicgit
 def test_get_tag_submodule(testrepo_micropython):
     # get version of submodule repro
     for testcase in [testrepo_micropython, ".\\micropython"]:
@@ -46,6 +50,7 @@ def test_get_tag_submodule(testrepo_micropython):
         common_tst(tag)
 
 
+@pytest.mark.basicgit
 def test_checkout_sibling(testrepo_micropython):
     repo_path = testrepo_micropython
     x = git.get_tag(repo_path)
