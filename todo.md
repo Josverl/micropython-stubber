@@ -1,3 +1,13 @@
+
+
+
+
+
+- how to run post-processing
+- how the debug setup works 
+
+
+
 # stubber : 
 <!-- spell-checker: disable -->
 -  improve generation of class methods to include (self,...) 
