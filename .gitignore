@@ -27,9 +27,14 @@ coverage_html_report
 coverage_report
 coverage
 
+# and tests results
+junit/*
+
+
 # OS specific stuff
 desktop.ini
 .pytest_cache/*
 .py_cache
 
 dev-stubs
+
