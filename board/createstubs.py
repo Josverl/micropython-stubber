@@ -16,7 +16,7 @@ stubber_version = "1.3.16"
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
 except ImportError:
-
+    # machine.WDT.feed()
     def resetWDT():
         pass
 
@@ -68,9 +68,9 @@ class Stubber:
             "example_pub_button.py",
         ]
         # there is no option to discover modules from micropython, need to hardcode
-        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
+        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
         # spell-checker: disable
-        # modules to stub : 118
+        # modules to stub : 131
         self.modules = [
             "_onewire",
             "_thread",
@@ -88,24 +88,33 @@ class Stubber:
             "curl",
             "dht",
             "display",
+            "display_driver_utils",
             "ds18x20",
             "errno",
             "esp",
             "esp32",
+            "espidf",
             "flashbdev",
             "framebuf",
             "freesans20",
+            "fs_driver",
             "functools",
             "gc",
             "gsm",
             "hashlib",
             "heapq",
+            #            "ili9341",
+            "ili9XXX",
+            "imagetools",
             "inisetup",
             "io",
             "json",
             "lcd160cr",
-            "lcd160cr_test",
+            "lodepng",
             "logging",
+            "lv_colors",
+            "lv_utils",
+            "lvgl",
             "lwip",
             "machine",
             "math",
@@ -127,6 +136,7 @@ class Stubber:
             "random",
             "re",
             "requests",
+            "rtch",
             "select",
             "socket",
             "ssd1306",
@@ -151,6 +161,7 @@ class Stubber:
             "ucryptolib",
             "uctypes",
             "uerrno",
+            "uftpd",
             "uhashlib",
             "uheapq",
             "uio",
@@ -181,6 +192,7 @@ class Stubber:
             "ussl",
             "ustruct",
             "usys",
+            "utelnetserver",
             "utime",
             "utimeq",
             "uwebsocket",
@@ -188,12 +200,12 @@ class Stubber:
             "websocket",
             "websocket_helper",
             "writer",
+            "xpt2046",
             "ymodem",
             "zlib",
-        ]
-        # spell-checker: enable
+        ]  # spell-checker: enable
         # try to avoid running out of memory with nested mods
-        self.include_nested = gc.mem_free() > 3200    # type: ignore
+        self.include_nested = gc.mem_free() > 3200  # type: ignore
 
     @staticmethod
     def _info():
@@ -201,23 +213,23 @@ class Stubber:
         _n = sys.implementation.name  # type: ignore
         _p = sys.platform
         info = {
-            "name": _n,             # - micropython
-            "release": "0.0.0",     # mpy semver from sys.implementation or os.uname()release
-            "version": "0.0.0",     # major.minor.0
-            "build": "",            # parsed from version
-            "sysname": "unknown",   # esp32
+            "name": _n,  # - micropython
+            "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
+            "version": "0.0.0",  # major.minor.0
+            "build": "",  # parsed from version
+            "sysname": "unknown",  # esp32
             "nodename": "unknown",  # ! not on all builds
-            "machine": "unknown",   # ! not on all builds
-            "family": _n,           # fw families, micropython , pycopy , lobo , pycom
-            "platform": _p,         # port: esp32 / win32 / linux
-            "port": _p,             # port: esp32 / win32 / linux
-            "ver": "",              # short version
+            "machine": "unknown",  # ! not on all builds
+            "family": _n,  # fw families, micropython , pycopy , lobo , pycom
+            "platform": _p,  # port: esp32 / win32 / linux
+            "port": _p,  # port: esp32 / win32 / linux
+            "ver": "",  # short version
         }
         try:
-            info["release"] = ".".join([str(n) for n in sys.implementation.version]) 
+            info["release"] = ".".join([str(n) for n in sys.implementation.version])
             info["version"] = info["release"]
             info["name"] = sys.implementation.name
-            info["mpy"] = sys.implementation.mpy # type: ignore
+            info["mpy"] = sys.implementation.mpy  # type: ignore
         except AttributeError:
             pass
 
@@ -264,11 +276,7 @@ class Stubber:
         if info["release"]:
             info["ver"] = "v" + info["release"]
         if info["family"] != "loboris":
-            if (
-                info["release"]
-                and info["release"] >= "1.10.0"
-                and info["release"].endswith(".0")
-            ):
+            if info["release"] and info["release"] >= "1.10.0" and info["release"].endswith(".0"):
                 # drop the .0 for newer releases
                 info["ver"] = info["release"][:-2]
             else:
@@ -312,18 +320,14 @@ class Stubber:
                     # self._log.info( result[-1])
                 except AttributeError as e:
                     errors.append(
-                        "Couldn't get attribute '{}' from object '{}', Err: {}".format(
-                            name, obj, e
-                        )
+                        "Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e)
                     )
         except AttributeError as e:
             errors.append(
-                "Couldn't get attribute '{}' from object '{}', Err: {}".format(
-                    name, obj, e
-                )
+                "Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e)
             )
-        #remove internal __ 
-        result = [i for i in result if not ( i[0].startswith("_") and i[0] != "__init__")]
+        # remove internal __
+        result = [i for i in result if not (i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
         return result, errors
 
@@ -333,9 +337,7 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self._log.info(
-            "Start micropython-stubber v{} on {}".format(stubber_version, self._fwid)
-        )
+        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self._fwid))
         # start with the (more complex) modules with a / first to reduce memory problems
         self.modules = [m for m in self.modules if "/" in m] + [
             m for m in self.modules if "/" not in m
@@ -347,22 +349,26 @@ class Stubber:
                 self.include_nested = gc.mem_free() > 3200  # type: ignore
             # use training comma to overide black formatting to avoid minify chocking on this
             if module_name.startswith("_") and module_name != "_thread":
-                self._log.warning("Skip module: {:<20}        : Internal ".format(module_name),) 
+                self._log.warning(
+                    "Skip module: {:<20}        : Internal ".format(module_name),
+                )
                 continue
             if module_name in self.problematic:
-                self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name),)
+                self._log.warning(
+                    "Skip module: {:<20}        : Known problematic".format(module_name),
+                )
                 continue
             if module_name in self.excluded:
-                self._log.warning("Skip module: {:<20}        : Excluded".format(module_name),)
+                self._log.warning(
+                    "Skip module: {:<20}        : Excluded".format(module_name),
+                )
                 continue
 
             file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
             gc.collect()
             m1 = gc.mem_free()  # type: ignore
             self._log.info(
-                "Stub module: {:<20} to file: {:<55} mem:{:>5}".format(
-                    module_name, file_name, m1
-                )
+                "Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1)
             )
             try:
                 self.create_module_stub(module_name, file_name)
@@ -370,8 +376,8 @@ class Stubber:
                 pass
             gc.collect()
             self._log.debug(
-                "Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()) # type: ignore
-            )  
+                "Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free())  # type: ignore
+            )
         self._log.info("Finally done")
 
     def create_module_stub(self, module_name: str, file_name: str = None):
@@ -385,7 +391,7 @@ class Stubber:
             return
 
         if file_name is None:
-            file_name = self.path + '/' + module_name.replace(".", "_") + ".py"
+            file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
 
         if "/" in module_name:
             # for nested modules
@@ -401,9 +407,7 @@ class Stubber:
             new_module = __import__(module_name, None, None, ("*"))
         except ImportError:
             failed = True
-            self._log.warning(
-                "Skip module: {:<20}        : Failed to import".format(module_name)
-            )
+            self._log.warning("Skip module: {:<20}        : Failed to import".format(module_name))
             if not "." in module_name:
                 return
 
@@ -426,7 +430,7 @@ class Stubber:
                 return
 
         # Start a new file
-        self.ensure_folder(file_name)        
+        self.ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
@@ -446,7 +450,7 @@ class Stubber:
             try:
                 del sys.modules[module_name]
             except KeyError:
-                self._log.debug("could not del modules[{}]".format(module_name))
+                self._log.debug("could not del sys.modules[{}]".format(module_name))
             gc.collect()
 
     def write_object_stub(
@@ -456,7 +460,11 @@ class Stubber:
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
-
+        print("obj_name:", obj_name)
+        # @@ debug \
+        if obj_name not in ["lvgl", "btn"]:
+            return
+        # @@ debug /
         self._log.debug("DUMP    : {}".format(object_expr))
         items, errors = self.get_obj_attributes(object_expr)
 
@@ -468,11 +476,11 @@ class Stubber:
             resetWDT()
             sleep_us(1)
 
-            self._log.debug("DUMPING {}{}{}:{}".format(indent, object_expr, name, typ))
+            self._log.debug("DUMPING {}{}|{}:{}".format(indent, object_expr, name, typ))
             cls_mtd_tps = ["<class 'function'>", "<class 'bound_method'>"]
 
+            # Class expansion only on toplevel (bit of a hack)
             if typ == "<class 'type'>" and indent == "":
-                # full expansion only on toplevel
                 # stub style : generic __init__ with Empty comment and pass
                 s = "\n" + indent + "class " + name + ":\n"  #
                 s += indent + "    ''\n"
@@ -488,7 +496,7 @@ class Stubber:
                     indent + "    ",
                     in_class + 1,
                 )
-            # Class Methods 
+            # Class Methods
             elif typ in cls_mtd_tps:
                 # module Function or class method
                 # will accept any number of params
@@ -504,13 +512,9 @@ class Stubber:
                 # class method - add function decoration
                 if typ == cls_mtd_tps[1]:
                     s = "{}@classmethod\n".format(indent)
-                    s += "{}def {}(cls) -> {}:\n".format(
-                        indent, name, ret
-                    )
+                    s += "{}def {}(cls) -> {}:\n".format(indent, name, ret)
                 else:
-                    s = "{}def {}({}*args) -> {}:\n".format(
-                        indent, name, slf, ret
-                    )
+                    s = "{}def {}({}*args) -> {}:\n".format(indent, name, slf, ret)
                 s += indent + "    ''\n"
                 s += indent + "    ...\n\n"
                 fp.write(s)
@@ -520,15 +524,24 @@ class Stubber:
                 t = typ[8:-2]
                 s = ""
                 if t in ["str", "int", "float", "bool", "bytearray"]:
-                    #use actual value 
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name,  rep, t)
-                if t in ["dict", "list","tuple"]:
+                    # use actual value
+                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name, rep, t)
+                elif t in ["dict", "list", "tuple"]:
                     # use empty value
-                    ev = {"dict":"{}", "list":"[]","tuple":"()"}
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name,  ev[t], t)
+                    ev = {"dict": "{}", "list": "[]", "tuple": "()"}
+                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name, ev[t], t)
+                else:
+                    if "_" != t[0]:
+                        s = "{0}{1}: {2}\n".format(indent, name, t)
+                        # @@ DEBUG \
+                        print("~" * 20)
+                        print("typ=", typ)
+                        print("t=", t)
+                        # assert False, "Stop here"
+                        # @@ DEBUG /
                 fp.write(s)
+                print("\n" + s)  # @@ DEBUG
                 self._log.debug("\n" + s)
-
 
         del items
         del errors
@@ -570,7 +583,11 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
+        self._log.info(
+            "Created stubs for {} modules on board {}\nPath: {}".format(
+                len(self._report), self._fwid, self.path
+            )
+        )
         f_name = "{}/{}".format(self.path, filename)
         gc.collect()
         try:
@@ -666,8 +683,8 @@ def isMicroPython() -> bool:
         # either test should fail on micropython
         # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
-        a = eval("1and 0")                      # lgtm [py/unused-local-variable] 
-        b = bytes("abc", encoding="utf8")       # lgtm [py/unused-local-variable]
+        a = eval("1and 0")  # lgtm [py/unused-local-variable]
+        b = bytes("abc", encoding="utf8")  # lgtm [py/unused-local-variable]
         return False
     except (NotImplementedError, SyntaxError):
         return True
@@ -677,18 +694,22 @@ def main():
     print("stubber version :", stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)
-        # logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
-    stubber = Stubber(path=read_path())
+    # stubber = Stubber(path=read_path())
+    stubber = Stubber(path="/sd")
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
     # # Option: Add your own modules
     # # stubber.add_modules(['bluetooth','GPS'])
-
-    stubber.create_all_stubs()
-    stubber.report()
+    # @@\
+    # stubber.modules = ["lvgl"]
+    # stubber.modules = []
+    # stubber.create_all_stubs()
+    # stubber.report()
+    # @@/
 
 
 if __name__ == "__main__" or isMicroPython():
