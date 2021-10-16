@@ -3,6 +3,7 @@ import glob
 import json
 import logging
 from version import VERSION
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -31,8 +32,65 @@ def flat_version(version: str):
     return version.replace("v", "").replace(".", "_")
 
 
-def make_stub_files(stub_path, levels: int = 1):
-    "generate typeshed files for all scripts in a folder"
+
+def cleanup(modules_folder:Path):
+    " Q&D cleanup "
+    # for some reason the umqtt simple.pyi and robust.pyi are created twice 
+    #  - modules_root folder ( simple.pyi and robust.pyi) - NOT OK 
+    #       - umqtt folder (simple.py & pyi and robust.py & pyi) OK
+    #  similar for mpy 1.9x - 1.11
+    #       - core.pyi          - uasyncio\core.py'
+    #       - urequests.pyi     - urllib\urequest.py'
+    # Mpy 1.13+
+    #       - uasyncio.pyi      -uasyncio\__init__.py
+
+
+    #todo - Add check for source folder 
+    for file_name in 'simple.pyi','robust.pyi','core.pyi','urequest.pyi','uasyncio.pyi':
+        f = Path.joinpath(modules_folder, file_name)
+        if f.exists():
+            try:
+                print(' - removing {}'.format(f))
+                f.unlink()
+            except OSError:
+                log.error(' * Unable to remove extranous stub {}'.format(f) )
+                pass
+
+
+
+def make_stub_files(stub_path:str, levels: int = 0):
+    "generate typeshed files for all scripts in a folder using mypy/stubgen"
+    # levels is ignored for backward compat with make_stub_files_old
+    # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
+
+    modlist = list(Path(stub_path).glob('**/modules.json'))
+    for file in modlist:
+        modules_folder = file.parent
+        # clean before to clean any old stuff
+        cleanup(modules_folder)
+
+        print("running stubgen on {0}".format(modules_folder))
+        cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
+        result = os.system(cmd)
+        # Check on error
+        if result != 0:
+            # in clase of falure then Plan B 
+            print('Failure on folder, attempt to stub per file.py')
+            py_files = modules_folder.glob('**/*.py')
+            for py in py_files:
+                cmd = "stubgen {0} --output {1} --include-private --ignore-errors".format(py, py.parent)
+                print(" >stubgen on {0}".format(py))
+                result = os.system(cmd)
+
+        # TODO: if general failure try to run stubgen on each *.py 
+
+        # and clean after to only checkin good stuff
+        cleanup(modules_folder)
+
+
+
+def make_stub_files_old(stub_path, levels: int = 1):
+    "generate typeshed files for all scripts in a folder using make_sub_files.py"
     level = ""
     # make_sub_files.py only does one folder level at a time
     # so lets try 7 levels /** ,  /**/** , etc
