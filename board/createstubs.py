@@ -14,7 +14,7 @@ ENOENT = 2
 stubber_version = '1.3.11'
 # deal with ESP32 firmware specific implementations.
 try:
-    from machine import resetWDT #LoBo
+    from machine import resetWDT  # type: ignore  - LoBo specific function
 except ImportError:
     def resetWDT():
         pass
@@ -23,7 +23,7 @@ class Stubber():
     "Generate stubs for modules in firmware"
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
-            if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':
+            if os.uname().release == '1.13.0' and os.uname().version < 'v1.13-103':     # type: ignore  
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
@@ -53,6 +53,7 @@ class Stubber():
         self.excluded = ["webrepl", "_webrepl", "port_diag", "example_sub_led.py", "example_pub_button.py"]
         # there is no option to discover modules from upython, need to hardcode
         # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, pycom and ulab
+        # spell-checker: disable 
         # modules to stub : 118
         self.modules = ['_onewire', '_thread', '_uasyncio', 'ak8963', 'apa102', 'apa106', 'array', 'binascii', 'btree', 'builtins', 
 'cmath', 'collections', 'crypto',
@@ -66,42 +67,45 @@ class Stubber():
                         'ulab/poly', 'ulab/user', 'ulab/vector', 'umachine', 'umqtt/robust', 'umqtt/simple', 'uos', 'upip', 'upip_utarfile', 'uqueue', 'urandom',
                         'ure', 'urequests', 'urllib/urequest', 'uselect', 'usocket', 'ussl', 'ustruct', 'usys', 'utime', 'utimeq', 'uwebsocket', 'uzlib', 'websocket',
                         'websocket_helper', 'writer', 'ymodem', 'zlib']
+        # spell-checker: enable 
         # try to avoid running out of memory with nested mods
         self.include_nested = gc.mem_free() > 3200 # pylint: disable=no-member
 
     @staticmethod
     def _info():
         "collect base information on this runtime"
-        info = {'name': sys.implementation.name,    # - micropython
-                'release': '0.0.0',                 # mpy semver from sys.implementation or os.uname()release
-                'version': '0.0.0',                 # major.minor.0
-                'build': '',                        # parsed from version
-                'sysname': 'unknown',               # esp32
-                'nodename': 'unknown',              # ! not on all builds
-                'machine': 'unknown',               # ! not on all builds
-                'family': sys.implementation.name,  # fw families, micropython , pycopy , lobo , pycomm
-                'platform': sys.platform,               # port: esp32 / win32 / linux
-                'port': sys.platform,               # port: esp32 / win32 / linux
-                'ver': ''                           # short version
+        _n = sys.implementation.name    # type: ignore
+        _p =  sys.platform
+        info = {'name': _n,             # - micropython
+                'release': '0.0.0',     # mpy semver from sys.implementation or os.uname()release
+                'version': '0.0.0',     # major.minor.0
+                'build': '',            # parsed from version
+                'sysname': 'unknown',   # esp32
+                'nodename': 'unknown',  # ! not on all builds
+                'machine': 'unknown',   # ! not on all builds
+                'family': _n,           # fw families, micropython , pycopy , lobo , pycom
+                'platform': _p,         # port: esp32 / win32 / linux
+                'port': _p,             # port: esp32 / win32 / linux
+                'ver': ''               # short version
                 }
         try:
-            info['release'] = ".".join([str(i) for i in sys.implementation.version])
+            info['release'] = ".".join([str(i) for i in sys.implementation.version])# type: ignore
             info['version'] = info['release']
-            info['name'] = sys.implementation.name
-            info['mpy'] = sys.implementation.mpy
+            info['name'] = sys.implementation.name  # type: ignore
+            info['mpy'] = sys.implementation.mpy    # type: ignore
         except AttributeError:
             pass
 
         if sys.platform not in ('unix', 'win32'):
             try:
                 u = os.uname()
-                info['sysname'] = u.sysname
-                info['nodename'] = u.nodename
-                info['release'] = u.release
-                info['machine'] = u.machine
+                info['sysname'] = u.sysname         # type: ignore
+                info['nodename'] = u.nodename       # type: ignore
+                info['release'] = u.release         # type: ignore
+                info['machine'] = u.machine         # type: ignore
                 # parse micropython build info
-                if ' on ' in u.version:
-                    s = u.version.split('on ')[0]
+                if ' on ' in u.version:             # type: ignore
+                    s = u.version.split('on ')[0]   # type: ignore
                     try:
                         info['build'] = s.split('-')[1]
                     except IndexError:
@@ -110,7 +114,7 @@ class Stubber():
                 pass
 
         try: # families
-            from pycopy import const
+            from pycopy import const    # type: ignore
             info['family'] = 'pycopy'
             del const
         except (ImportError, KeyError):
@@ -124,7 +128,7 @@ class Stubber():
             info['release'] = "1.0.0"
             try:
                 # Version 2.0 introduces the EV3Brick() class. 
-                from pybricks.hubs import EV3Brick
+                from pybricks.hubs import EV3Brick  # type: ignore
                 info['release'] = "2.0.0"
             except ImportError:
                 pass
@@ -141,6 +145,7 @@ class Stubber():
             # add the build nr
             if info['build'] != '':
                 info['ver'] += '-'+info['build']
+        # spell-checker: disable
         if 'mpy' in info:          # mpy on some v1.11+ builds
             sys_mpy = info['mpy']
             arch = [None, 'x86', 'x64', 'armv6', 'armv6m',
@@ -149,6 +154,7 @@ class Stubber():
             if arch:
                 info['arch'] = arch
         return info
+        # spell-checker: enable
 
     def get_obj_attributes(self, obj: object):
         "extract information of the objects members and attributes"
@@ -328,7 +334,9 @@ class Stubber():
                 # full expansion only on toplevel
                 # stub style : Empty comment ... + hardcoded 4 spaces
                 s = "\n" + indent + "class " + name + ":\n"  # What about superclass?
-                s += indent + "    ''\n"
+                s += indent + "    def __init__(self):\n"
+                s += indent + "        ''\n"
+                s += indent + "        pass\n"
 
                 fp.write(s)
                 self._log.debug('\n'+s)
@@ -366,8 +374,8 @@ class Stubber():
             # os.listdir fails on unix
             return
         for fn in items:
+            item = "{}/{}".format(path, fn)
             try:
-                item = "{}/{}".format(path, fn)
                 os.remove(item)
             except OSError:
                 try: #folder
@@ -495,11 +503,6 @@ def main():
     stubber.clean()
     # # Option: Add your own modules
     # # stubber.add_modules(['bluetooth','GPS'])
-
-    # ###########################################
-    # #### DELETE ME
-    # stubber.modules = ['dht','esp32']
-    # ###########################################
 
     stubber.create_all_stubs()
     stubber.report()
