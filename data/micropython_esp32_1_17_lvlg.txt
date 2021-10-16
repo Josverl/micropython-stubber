@@ -1,0 +1,22 @@
+# MicroPython v1.17-564-gf936e4a6b on 2021-09-14; ESP32 module (spiram) with ESP32
+# LVLG version 8.1 - dev
+
+__main__          gc                uasyncio/core     urandom
+_boot             ili9341           uasyncio/event    ure
+_onewire          ili9XXX           uasyncio/funcs    uselect
+_thread           imagetools        uasyncio/lock     usocket
+_uasyncio         inisetup          uasyncio/stream   ussl
+_webrepl          lodepng           ubinascii         ustruct
+apa106            lv_colors         ubluetooth        usys
+btree             lv_utils          ucollections      utelnetserver
+builtins          lvgl              ucryptolib        utime
+cmath             machine           uctypes           utimeq
+dht               math              uerrno            uwebsocket
+display_driver_utils                micropython       uftpd             uzlib
+ds18x20           neopixel          uhashlib          webrepl
+esp               network           uheapq            webrepl_setup
+esp32             ntptime           uio               websocket_helper
+espidf            onewire           ujson             xpt2046
+flashbdev         rtch              uos
+framebuf          uarray            upip
+fs_driver         uasyncio/__init__ upip_utarfile
