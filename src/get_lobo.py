@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def get_frozen(stub_path=None, *, repo=None, version='3.2.24'):
     "Loboris frozen modules"
-    if not stub_path:
+    if stub_path is None:
         stub_path = Path('./all-stubs')  / "{}-{}-frozen".format(FAMILY, utils.flat_version(version) )
     else:
         stub_path = Path(stub_path)
