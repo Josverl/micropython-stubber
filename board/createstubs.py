@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 
 ENOENT = 2
-stubber_version = '1.3.10'
+stubber_version = '1.3.11'
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT #LoBo
@@ -220,6 +220,10 @@ class Stubber():
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
             return
+
+        if file_name is None:
+            file_name = module_name.replace('.', '_') + ".py"
+
         if '/' in module_name:
             #for nested modules
             self.ensure_folder(file_name)
@@ -227,9 +231,6 @@ class Stubber():
             if not self.include_nested:
                 self._log.warning("SKIPPING nested module:{}".format(module_name))
                 return
-
-        if file_name is None:
-            file_name = module_name.replace('.', '_') + ".py"
 
         #import the module (as new_module) to examine it
         failed = False
@@ -266,7 +267,7 @@ class Stubber():
             s = "\"\"\"\nModule: '{0}' on {1}\n\"\"\"\n# MCU: {2}\n# Stubber: {3}\n".format(
                 module_name, self._fwid, self.info, stubber_version)
             fp.write(s)
-            fp.write("from typing import Any\n")
+            fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
             self._report.append({"module":module_name, "file": file_name})
 
@@ -283,7 +284,7 @@ class Stubber():
                 self._log.debug("could not del modules[{}]".format(module_name))
             gc.collect()
 
-    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str):
+    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class:int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
         if object_expr in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(object_expr))
@@ -307,9 +308,13 @@ class Stubber():
             self._log.debug("DUMPING {}{}{}:{}".format(indent, object_expr, name, typ))
 
             if typ in ["<class 'function'>", "<class 'bound_method'>"]:
+                # module Function or class method 
                 # return type Any
                 # Todo:Unknown params,
-                s = indent + "def " + name + "() -> Any:\n" 
+                if in_class > 0:
+                    s = indent + "def " + name + "(self) -> Any:\n"
+                else:
+                    s = indent + "def " + name + "() -> Any:\n"
                 s += indent + "    pass\n\n"
                 fp.write(s)
                 self._log.debug('\n'+s)
@@ -328,8 +333,8 @@ class Stubber():
                 fp.write(s)
                 self._log.debug('\n'+s)
 
-                self._log.debug("# recursion..")
-                self.write_object_stub(fp, obj, "{0}.{1}".format(obj_name, name), indent + "    ")
+                self._log.debug("# recursion.. iterate over this class")
+                self.write_object_stub(fp, obj, "{0}.{1}".format(obj_name, name), indent + "    ", in_class +1)
             else:
                 # keep only the name
                 fp.write(indent + name + " = Any\n")
@@ -481,6 +486,7 @@ def main():
     print('stubber version :', stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)
+#        logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
     stubber = Stubber(path=read_path())
@@ -489,6 +495,12 @@ def main():
     stubber.clean()
     # # Option: Add your own modules
     # # stubber.add_modules(['bluetooth','GPS'])
+
+    # ###########################################
+    # #### DELETE ME
+    # stubber.modules = ['dht','esp32']
+    # ###########################################
+
     stubber.create_all_stubs()
     stubber.report()
 
