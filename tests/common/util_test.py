@@ -30,9 +30,9 @@ def test_clean_version(commit, build, clean):
 
 
 # make stub file
-def test_make_stub_files(tmp_path):
+def test_make_stub_files_OK(tmp_path):
     dest = tmp_path / "stubs"
-    shutil.copytree("./tests/data/stubs", dest)
+    shutil.copytree("./tests/data/stubs-ok", dest)
     result = utils.generate_pyi_files(dest)
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
@@ -50,7 +50,7 @@ def test_make_stub_files(tmp_path):
 
 
 # make stub file
-def test_make_stub_issues_files(tmp_path):
+def test_make_stub_files_issues(tmp_path):
     # Deal with some files having issues
     dest = tmp_path / "stubs"
     shutil.copytree("./tests/data/stubs-issues", dest)
