@@ -1,5 +1,4 @@
 import os
-import glob
 import json
 import logging
 from fnmatch import fnmatch
@@ -102,7 +101,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
 
     modlist = list(modules_folder.glob("**/modules.json"))
-    if len(modlist) <= 1:
+    if len(modlist) >= 1:
         ## generate fyi files for folder
         # clean before to clean any old stuff
         cleanup(modules_folder)
@@ -112,28 +111,29 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         result = os.system(cmd)
         # Check on error
         if result != 0:
-            # in case of failure then Plan B
+            # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
             print("Failure on folder, attempt to stub per file.py")
             py_files = modules_folder.glob("**/*.py")
             for py in py_files:
                 generate_pyi_from_file(py)
-                # todo: report failures
+                # todo: report failures by adding to module manifest
 
         # for py missing pyi:
         py_files = list(modules_folder.rglob("*.py"))
         pyi_files = list(modules_folder.rglob("*.pyi"))
 
         for pyi in pyi_files:
-            # remove all py files that have been stubbed successfully
+            # remove all py files that have been stubbed successfully from the list
             try:
                 py_files.remove(pyi.with_suffix(".py"))
             except ValueError:
                 pass
         # now stub the rest
+        # note in some cases this will try a file twice
         for py in py_files:
             generate_pyi_from_file(py)
-            # todo: report failures
+            # todo: report failures by adding to module manifest
 
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
