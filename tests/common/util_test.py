@@ -28,16 +28,11 @@ def test_clean_version(commit, build, clean):
     assert utils.clean_version(commit, build) == clean
 
 
-# test manifest()
-
-
-# make manifest
-
-
 # make stub file
-def test_make_stub_files_OK(tmp_path):
+def test_make_stub_files_OK(tmp_path, pytestconfig):
+    source = pytestconfig.rootpath / "tests/data/stubs-ok"
     dest = tmp_path / "stubs"
-    shutil.copytree("./tests/data/stubs-ok", dest)
+    shutil.copytree(source, dest)
     result = utils.generate_pyi_files(dest)
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
@@ -55,10 +50,11 @@ def test_make_stub_files_OK(tmp_path):
 
 
 # make stub file
-def test_make_stub_files_issues(tmp_path):
+def test_make_stub_files_issues(tmp_path, pytestconfig):
     # Deal with some files having issues
+    source = pytestconfig.rootpath / "tests/data/stubs-issues"
     dest = tmp_path / "stubs"
-    shutil.copytree("./tests/data/stubs-issues", dest)
+    shutil.copytree(source, dest)
     PROBLEMATIC = 1  # number of files with issues
 
     if do_profiling:

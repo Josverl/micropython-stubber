@@ -92,7 +92,8 @@ def generate_pyi_from_file(file: Path) -> bool:
     try:
         stubgen.generate_stubs(sg_opt)
         return True
-    except BaseException:
+    except BaseException as e:
+        print(e)
         return False
 
 
@@ -101,7 +102,14 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
 
     modlist = list(modules_folder.glob("**/modules.json"))
-    if len(modlist) >= 1:
+    if len(modlist) > 1:
+        # try to process each module seperatlely
+        r = True
+        for mod_manifest in modlist:
+            ## generate fyi files for folder
+            r = r and generate_pyi_files(mod_manifest.parent)
+        return r
+    else:  # one or less module manifests
         ## generate fyi files for folder
         # clean before to clean any old stuff
         cleanup(modules_folder)
@@ -138,7 +146,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
         return True
-    return False
 
 
 def manifest(
