@@ -1,4 +1,4 @@
-# run createsubs in the unix version of micropython
+# run createstubs in the unix version of micropython
 import os
 import json
 import sys
