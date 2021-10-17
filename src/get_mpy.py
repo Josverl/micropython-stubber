@@ -52,11 +52,7 @@ def freeze_as_mpy(path, script=None, opt=0):
 # TODO: see if/how `freeze_as_str` should be handled, may need re-implementing based on the v1.13 code
 def freeze_as_str(path):
     log.debug(" - freeze_as_str({})".format(path))
-    log.warning(
-        "WARNING: Currently freeze_as_string({:s}) is not supported/processed".format(
-            path
-        )
-    )
+    log.warning("WARNING: Currently freeze_as_string({:s}) is not supported/processed".format(path))
 
 
 # def freeze_as_str(path):
@@ -191,9 +187,7 @@ def get_frozen(
     if not lib_path:
         lib_path = "./micropython-lib"
     if not stub_path:
-        stub_path = "{}/{}_{}_frozen".format(
-            utils.STUB_FOLDER, FAMILY, utils.flat_version(version)
-        )
+        stub_path = "{}/{}_{}_frozen".format(utils.STUB_FOLDER, FAMILY, utils.flat_version(version))
     # get the manifests of the different ports and boards
     mpy_path = os.path.abspath(mpy_path)
     lib_path = os.path.abspath(lib_path)
@@ -201,9 +195,9 @@ def get_frozen(
 
     # manifest.py is used for board specific and daily builds
     # manifest_release.py is used for the release builds
-    manifests = glob.glob(
-        mpy_path + "\\ports\\**\\manifest.py", recursive=True
-    ) + glob.glob(mpy_path + "\\ports\\**\\manifest_release.py", recursive=True)
+    manifests = glob.glob(mpy_path + "/ports/**/manifest.py", recursive=True) + glob.glob(
+        mpy_path + "/ports/**/manifest_release.py", recursive=True
+    )
 
     # remove any manifests  that are below one of the virtual environments (venv) \
     # 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\build-venv\\lib64\\python3.6\\site-packages\\pip\\_vendor\\distlib\\manifest.py'
@@ -243,10 +237,8 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
                 targets.append(dest_path)
         except OSError as e:
             ## Ignore errors that are caused by reorganisation of Micropython-lib
-            #print(e)
+            # print(e)
             warnings.warn("unable to freeze {} due to error {}".format(e.filename, str(e)))
-
-
 
     for dest_path in targets:
         # make a module manifest
@@ -280,9 +272,7 @@ def get_target_names(path: str) -> tuple:
     return mpy_port, mpy_board
 
 
-def get_frozen_manifest(
-    manifests, stub_path: str, mpy_path: str, lib_path: str, version: str
-):
+def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str, version: str):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
     - locates the to-be-frozen files through the manifest.py introduced in MicroPython 1.12
@@ -300,8 +290,8 @@ def get_frozen_manifest(
 
     # https://regexr.com/4rh39
     # but with an extra P for Python named groups...
-    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
-    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"   # port & board
+    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"  # port
+    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"  # port & board
 
     # todo: variants
     # regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)"  # port & variant
@@ -367,13 +357,9 @@ if __name__ == "__main__":
     if version:
         log.info("found micropython version : {}".format(version))
         # folder/{family}_{version}_frozen
-        stub_path = utils.stubfolder(
-            "{}-{}-frozen".format(FAMILY, utils.flat_version(version))
-        )
+        stub_path = utils.stubfolder("{}-{}-frozen".format(FAMILY, utils.flat_version(version)))
         get_frozen(stub_path, version=version, mpy_path=mpy_path, lib_path=lib_path)
         exit(0)
     else:
-        log.warning(
-            "Unable to find the micropython repo in folder : {}".format(mpy_path)
-        )
+        log.warning("Unable to find the micropython repo in folder : {}".format(mpy_path))
         exit(1)
