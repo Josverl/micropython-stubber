@@ -69,11 +69,7 @@ def cleanup(modules_folder: Path):
 
 def generate_pyi_from_file(file: Path) -> bool:
     """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
-    # if 0:
-    #     cmd = "stubgen {0} --output {1} --include-private --ignore-errors".format(file, file.parent)
-    #     print(" >stubgen on {0}".format(file))
-    #     result = os.system(cmd)
-    #     return result == 0
+
     sg_opt = stubgen.Options(
         pyversion=(3, 5),
         no_import=False,
@@ -141,29 +137,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
-
         return True
-        ##
-    for mod_manifest in modlist:
-        ## generate fyi files for folder
-        generate_pyi_files(mod_manifest.parent)
-
-        # todo: collect and report results
-
-
-# def make_stub_files_old(stub_path, levels: int = 1):
-#     "generate typeshed files for all scripts in a folder using make_sub_files.py"
-#     level = ""
-#     # make_sub_files.py only does one folder level at a time
-#     # so lets try 7 levels /** ,  /**/** , etc
-#     # and does not work well if loaded as a module
-#     for i in range(levels):
-#         cmd = "python ./src/make_stub_files.py -c ./src/make_stub_files.cfg -u {}{}/*.py".format(
-#             stub_path, level
-#         )
-#         log.debug("level {} : {}".format(i + 1, cmd))
-#         os.system(cmd)
-#         level = level + "/**"
+    return False
 
 
 def manifest(
@@ -223,9 +198,7 @@ def make_manifest(folder: Path, family: str, port: str, version: str) -> bool:
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
         for file in folder.glob("**/*.py"):
-            mod_manifest["modules"].append(
-                {"file": str(file.relative_to(folder)), "module": file.stem}
-            )
+            mod_manifest["modules"].append({"file": str(file.relative_to(folder)), "module": file.stem})
         # write the the module manifest
         with open(os.path.join(folder, "modules.json"), "w") as outfile:
             json.dump(mod_manifest, outfile, indent=4, sort_keys=True)
