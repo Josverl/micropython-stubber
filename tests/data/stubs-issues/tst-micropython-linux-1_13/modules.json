@@ -1,0 +1,187 @@
+
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/array.py",
+            "module": "array"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/binascii.py",
+            "module": "binascii"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/btree.py",
+            "module": "btree"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/builtins.py",
+            "module": "builtins"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/cmath.py",
+            "module": "cmath"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/collections.py",
+            "module": "collections"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/errno.py",
+            "module": "errno"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/gc.py",
+            "module": "gc"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/hashlib.py",
+            "module": "hashlib"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/heapq.py",
+            "module": "heapq"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/io.py",
+            "module": "io"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/json.py",
+            "module": "json"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/machine.py",
+            "module": "machine"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/math.py",
+            "module": "math"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/micropython.py",
+            "module": "micropython"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/os.py",
+            "module": "os"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/random.py",
+            "module": "random"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/re.py",
+            "module": "re"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/select.py",
+            "module": "select"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/socket.py",
+            "module": "socket"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ssl.py",
+            "module": "ssl"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/struct.py",
+            "module": "struct"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/sys.py",
+            "module": "sys"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/time.py",
+            "module": "time"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ubinascii.py",
+            "module": "ubinascii"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ucollections.py",
+            "module": "ucollections"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ucryptolib.py",
+            "module": "ucryptolib"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uctypes.py",
+            "module": "uctypes"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uerrno.py",
+            "module": "uerrno"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uhashlib.py",
+            "module": "uhashlib"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uheapq.py",
+            "module": "uheapq"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uio.py",
+            "module": "uio"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ujson.py",
+            "module": "ujson"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uos.py",
+            "module": "uos"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/urandom.py",
+            "module": "urandom"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ure.py",
+            "module": "ure"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uselect.py",
+            "module": "uselect"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/usocket.py",
+            "module": "usocket"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ussl.py",
+            "module": "ussl"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/ustruct.py",
+            "module": "ustruct"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/utime.py",
+            "module": "utime"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/utimeq.py",
+            "module": "utimeq"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uwebsocket.py",
+            "module": "uwebsocket"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/uzlib.py",
+            "module": "uzlib"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/websocket.py",
+            "module": "websocket"
+        },
+        {
+            "file": "scratch/stubs/micropython-linux-1_13/zlib.py",
+            "module": "zlib"
+        }
+    ]
+}
