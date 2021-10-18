@@ -3,20 +3,34 @@
 % You can adapt this file completely to your liking, but it should at least
 % contain the root `toctree` directive.
 
-# Welcome to the markdown documentation!
+# Welcome to the MicroPython Stubber!
 
 ```{toctree}
 :caption: 'Contents:'
 :maxdepth: 1
 
-00_intro.md
+intro.md
 01_.md
 02_.md
 03_.md
 04_.md
 05_.md
+```
+
+```{toctree}
+:caption: 'versions and changes'
+:maxdepth: 2
+
 changelog.md
 todo.md
+
+```
+
+```{toctree}
+:caption: 'development:'
+:maxdepth: 1
+developing.md
+testing.md
 api/index.rst
 ```
 

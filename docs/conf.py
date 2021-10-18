@@ -58,18 +58,22 @@ exclude_patterns = [
     ".DS_Store",
 ]
 
+html_logo = "img/stubber-XS.jpg"
+
 autodoc_typehints = "both"
 
 # --- Myst ------
 
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html#auto-generated-header-anchors
-myst_heading_anchors = 2 
+myst_heading_anchors = 2
 
+suppress_warnings = ["myst.header"]
 # --- AutoAPI ------
+# Generate documentation for the source code in
+autoapi_dirs = ["../board", "../src"]
+
 # https://sphinx-autoapi.readthedocs.io/en/latest/tutorials.html#setting-up-automatic-api-documentation-generation
 
-
-autoapi_dirs = ["../board", "../src"]
 autoapi_root = "api"
 autoapi_file_patterns = ["*.py"]
 
