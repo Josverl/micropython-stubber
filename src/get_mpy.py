@@ -137,7 +137,8 @@ def freezedry(path, script):
 
 # do not change method name
 def include(manifest):
-    """Include another manifest.
+    """
+    Include another manifest.
 
     The manifest argument can be a string (filename) or an iterable of
     strings.
@@ -178,8 +179,8 @@ def get_frozen(
 ):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
-    - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
-      repos should be cloned side-by-side as some of the manifests refer to micropython-lib scripts using a relative path
+     - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
+     - repos should be cloned side-by-side as some of the manifests refer to micropython-lib scripts using a relative path
     """
 
     if not mpy_path:
@@ -215,9 +216,9 @@ def get_frozen(
 def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: str):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
-    - locates the to-be-frozen files in modules folders
-        ports/<port>/modules/*.py
-        ports/<port>/boards/<board>/modules/*.py
+    locates the to-be-frozen files in modules folders
+    - 'ports/<port>/modules/\*.py'
+    - 'ports/<port>/boards/<board>/modules/\*.py'
     """
     targets = []
     scripts = glob.glob(mpy_path + "/ports/**/modules/*.py", recursive=True)
@@ -275,9 +276,9 @@ def get_target_names(path: str) -> tuple:
 def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str, version: str):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
-    - locates the to-be-frozen files through the manifest.py introduced in MicroPython 1.12
-        manifest.py is used for board specific and daily builds
-        manifest_release.py is used for the release builds
+    locates the to-be-frozen files through the manifest.py introduced in MicroPython 1.12
+    - manifest.py is used for board specific and daily builds
+    - manifest_release.py is used for the release builds
     """
 
     global path_vars  # pylint: disable=global-statement
