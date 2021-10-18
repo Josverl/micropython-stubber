@@ -1,3 +1,8 @@
+"""
+Helper module to create stubs for the lvgl modules.
+Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
+"""
+
 try:
     import lvgl
 except:
@@ -9,6 +14,7 @@ from createstubs import *
 
 
 def main():
+    "Create stubs for the lvgl modules using the lvlg version number."
     print("stubber version :", stubber_version)
     try:
         logging.basicConfig(level=logging.INFO)

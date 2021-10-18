@@ -570,7 +570,7 @@ if you develop on other platform, it is quite likely that you may need to change
 * setup sister repos
 * run test to verify setup 
 
-# 7.1 - Wresting with two pythons 
+# 7.1 - Wrestling with two pythons 
 
 This project combines CPython and MicroPython in one project.  As a result you may/will need to switch the configuration of pylint and VSCode to match the section of code that you are working on.  This is caused by the fact that pylint does not support per-folder configuration 
 
