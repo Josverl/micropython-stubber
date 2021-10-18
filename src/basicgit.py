@@ -1,4 +1,7 @@
-"simple Git module, where needed via powershell "
+"""
+simple Git module, where needed via powershell
+"""
+from typing import Union
 import subprocess
 import os
 
@@ -8,9 +11,7 @@ def _run_git(cmd: str, repo: str = None, expect_stderr=False):
     try:
         if repo:
             repo = repo.replace("\\", "/")
-            result = subprocess.run(
-                cmd, capture_output=True, check=True, cwd=os.path.abspath(repo)
-            )
+            result = subprocess.run(cmd, capture_output=True, check=True, cwd=os.path.abspath(repo))
         else:
             result = subprocess.run(cmd, capture_output=True, check=True)
         if result.stderr != b"":
@@ -26,11 +27,11 @@ def _run_git(cmd: str, repo: str = None, expect_stderr=False):
     return result
 
 
-def get_tag(repo: str = None) -> str:
+def get_tag(repo: str = None) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo"
-    repo should be in the form of : path
-        ./micropython
+    repo should be in the form of : repo = "./micropython"
+
     returns the tag or None
     """
     if not repo:
@@ -48,8 +49,8 @@ def get_tag(repo: str = None) -> str:
 def checkout_tag(tag: str, repo: str = None) -> bool:
     """
     get the most recent git version tag of a local repo"
-    repo should be in the form of : path/.git
-        ../micropython/.git
+    repo should be in the form of : repo = "../micropython/.git"
+
     returns the tag or None
     """
     cmd = ["git", "checkout", "tags/" + tag, "--quiet", "--force"]
@@ -64,8 +65,8 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
 def fetch(repo: str) -> bool:
     """
     fetches a repo
-    repo should be in the form of : path/.git
-        ./micropython/.git
+    repo should be in the form of :  repo = "../micropython/.git"
+
     returns True on success
     """
     if not repo:
@@ -81,8 +82,8 @@ def fetch(repo: str) -> bool:
 def pull(repo: str, branch="master") -> bool:
     """
     pull a repo origin into master
-    repo should be in the form of : path/.git
-        ./micropython/.git
+    repo should be in the form of : repo = "../micropython/.git"
+
     returns True on success
     """
     if not repo:
