@@ -32,4 +32,5 @@ junit/*
 desktop.ini
 
 
-
+# do not include the generated HTML documentaion in the repro 
+docs/_build
