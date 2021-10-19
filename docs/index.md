@@ -7,7 +7,7 @@
 
 ```{toctree}
 :caption: 'Contents:'
-:maxdepth: 1
+:maxdepth: 2
 
 intro.md
 01_.md
@@ -19,7 +19,7 @@ intro.md
 
 ```{toctree}
 :caption: 'versions and changes'
-:maxdepth: 2
+:maxdepth: 1
 
 changelog.md
 todo.md
