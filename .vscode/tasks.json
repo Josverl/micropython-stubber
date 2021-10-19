@@ -55,6 +55,16 @@
             "group": "build"
         },
         {
+            "label": "Sphinx: build documentation",
+            "detail": "make clean html",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/docs"
+            },
+            "command": "${workspaceFolder}/.venv/Scripts/Activate.ps1;&./make.bat clean;&./make.bat html",
+            "linux": "make clean html"
+        },
+        {
             "label": "pylint all",
             "detail": "py -m pylint: whole project",
             "type": "shell",
