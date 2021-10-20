@@ -1,5 +1,6 @@
 # Production + dev requirements
 --requirement requirements.txt
+--requirement docs/requirements-docs.txt
 
 # dev requirements
 pytest              >= 6.2.4 
