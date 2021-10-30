@@ -23,9 +23,7 @@ log = logging.getLogger(__name__)
 def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
     "Loboris frozen modules"
     if stub_path is None:
-        stub_path = Path("./all-stubs") / "{}-{}-frozen".format(
-            FAMILY, utils.flat_version(version)
-        )
+        stub_path = Path("./all-stubs") / "{}-{}-frozen".format(FAMILY, utils.flat_version(version))
     else:
         stub_path = Path(stub_path)
 
@@ -55,7 +53,7 @@ def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
     # download
     downloader.download_files(repo, frozen_modules, stub_path)
     # make a manifest
-    utils.make_manifest(stub_path, FAMILY, "frozen", version=version)
+    utils.make_manifest(stub_path, FAMILY, port="esp32", version=version)
 
 
 if __name__ == "__main__":
