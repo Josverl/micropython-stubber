@@ -38,5 +38,6 @@ junit/*
 # OS specific stuff
 desktop.ini
 
-# no temp office files
+# no documentation artefacts
 docs/~$*
+docs/_build/
