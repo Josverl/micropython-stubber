@@ -36,6 +36,7 @@ testpaths = [
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
+    "minified: marks test of the minified version of createstubs",
 ]
 
 # coverage reports

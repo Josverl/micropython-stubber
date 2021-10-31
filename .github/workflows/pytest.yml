@@ -55,11 +55,21 @@ jobs:
         run: |
           python process.py minify
 
+      - name: run test on minified/createstubs.by
+        run: |
+          pytest -m minified
+
       - name: verify minified using pylint
         run: |
-          pylint minified/createstubs.py -E -d E0401,E1101
-          # ignore Unable to import '<upythonmodule>' (import-error)
-          # ignore Module 'gc' has no 'mem_free' member (no-member)
+          pylint minified/createstubs.py -E -d E0401,E1101,E0213,E0602,E1121,E0211
+          # CPython/Micropython Errors 
+          # E0401: Unable to import '<upythonmodule>' (import-error)
+          # E1101: Module 'gc' has no 'mem_free' member (no-member)
+          # errors by minification 
+          # E0211: Method has no argument (no-method-argument)
+          # E1121: Too many positional arguments for method call (too-many-function-args)
+          # E0213: Method should have "self" as first argument (no-self-argument)
+          # E0602: Undefined variable (undefined-variable)
 
       - name: Test with pytest
         run: pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}.xml
