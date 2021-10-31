@@ -30,13 +30,16 @@ path_classifiers:
   # The default behavior is to tag library code as `library`. Results are hidden 
   # for library code. You can tag further files as being library code by adding them
   # to the `library` section.
-  library:
-    - exclude: "path/to/library/code/**/*.py"
+
+  # library:
+  #   - exclude: "path/to/library/code/**/*.py"
+
   # The default behavior is to tag template files as `template`. Results are hidden 
   # for template files. You can tag further files as being template files by adding 
   # them to the `template` section.
-  template:
-    - exclude: path/to/template/code/**/*.c
+  # template:
+  #   - exclude: path/to/template/code/**/*.c
+
   # Define your own category, for example: 'some_custom_category'.
   some_custom_category:
     # Classify all files in the top-level directory tools/ (or the top-level file 
@@ -52,16 +55,16 @@ queries:
   - exclude: "*"
   # Then include all queries tagged 'security' and 'correctness', and with a severity of
   # 'error'.
-  - include:           
+  - include:
       tags:
         - "security"
         - "correctness"           
       severity: "error"
-  # Specifically hide the results of two queries.
-  - exclude: cpp/use-of-goto
-  - exclude: java/equals-on-unrelated-types
-  # Refine by including the `java/command-line-injection` query.
-  - include: java/command-line-injection
+  # # Specifically hide the results of two queries.
+  # - exclude: cpp/use-of-goto
+  # - exclude: java/equals-on-unrelated-types
+  # # Refine by including the `java/command-line-injection` query.
+  # - include: java/command-line-injection
 
 #########################################################################################
 # Define changes to the default code extraction process.                                #
@@ -75,6 +78,20 @@ queries:
 # before_index                                                                          #
 # index                                                                                 #
 ##########################################################################################
+
+# The `index` step extracts information from the files in the codebase.
+index:
+  # Specify a list of files and folders to exclude from extraction.
+  # Default: Git submodules and Subversion externals.
+  exclude:
+    - micropython
+    - micropython-lib
+  filters:
+    - exclude: "**/documentation/examples/snippets/*.py"
+    - include: "**/documentation/examples/test_application/*"
+  include:
+    - example/to/include
+
 
 #########################################################################################
 # Environment variables available to the steps:                                         #
