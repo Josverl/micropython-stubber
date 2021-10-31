@@ -211,18 +211,24 @@ def minify_script(keep_report=True, show_diff=False):
 
         source = python_minifier.minify(
             content,
-            filename=f.name,
+            filename=SCRIPT.name,
             combine_imports=True,
-            remove_pass=True,  # no dead code
             remove_literal_statements=True,  # no Docstrings
             remove_annotations=True,  # not used runtime anyways
             hoist_literals=True,  # remove redundant strings
             rename_locals=True,  # short names save memory
-            rename_globals=True,  # short names save memory
-            remove_object_base=False,  # not used
-            convert_posargs_to_args=True,
             preserve_locals=["stubber"],  # names to keep
-            preserve_globals=["main"],
+            rename_globals=True,  # short names save memory
+            # keep these globals to allow testing/mocking to work agains the minified version
+            preserve_globals=[
+                "main",
+                "Stubber",
+                "read_path",
+                "os",
+                "sys",
+            ],
+            # remove_pass=True,  # no dead code
+            # convert_posargs_to_args=True, # Does not save any space
         )
     print(f"Original length : {len(content)}")
     print(f"Minified length : {len(source)}")
