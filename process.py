@@ -20,49 +20,6 @@ except ImportError:
 ROOT = Path(__file__).parent
 SCRIPT = ROOT / "board" / "createstubs.py"
 DEST = ROOT / "minified" / "createstubs.py"
-PATCHES = ROOT / "patches"
-
-
-def apply_patch(s, patch, revert=False):
-    """
-    Apply patch to string s to recover newer string.
-    If revert is True, treat s as the newer string, recover older string.
-
-    Credits:
-    Isaac Turner 2016/12/05
-    https://gist.github.com/noporpoise/16e731849eb1231e86d78f9dfeca3abc
-    """
-    _hdr_pat = re.compile(r"@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@")
-    s = s.splitlines(True)
-    p = patch.splitlines(True)
-    t = ""
-    i = sl = 0
-    (midx, sign) = (1, "+") if not revert else (3, "-")
-    while i < len(p) and not p[i].startswith("@@"):
-        i += 1  # skip header lines
-    while i < len(p):
-        m = _hdr_pat.match(p[i])
-        if not m:
-            raise Exception("Bad patch -- regex mismatch [line " + str(i) + "]")
-        l = int(m.group(midx)) - 1 + (m.group(midx + 1) == "0")  # noqa
-        if sl > l or l > len(s):
-            raise Exception("Bad patch -- bad line num [line " + str(i) + "]")
-        t += "".join(s[sl:l])
-        sl = l
-        i += 1
-        while i < len(p) and p[i][0] != "@":
-            if i + 1 < len(p) and p[i + 1][0] == "\\":
-                line = p[i][:-1]
-                i += 2
-            else:
-                line = p[i]
-                i += 1
-            if len(line) > 0:
-                if line[0] == sign or line[0] == " ":
-                    t += line[1:]
-                sl += line[0] != sign
-    t += "".join(s[sl:])
-    return t
 
 
 def edit_lines(content, edits, show_diff=False):
@@ -205,12 +162,10 @@ def edit_lines(content, edits, show_diff=False):
     return stripped
 
 
-def minify_script(patches=None, keep_report=True, show_diff=False):
+def minify_script(keep_report=True, show_diff=False):
     """minifies createstubs.py
 
     Args:
-        patches ([PathLike], optional): List of paths to patches to apply.
-            Defaults to None.
         keep_report (bool, optional): Keeps single report line in createstubs
             Defautls to True.
         show_diff (bool, optional): Print diff from edits. Defaults to False.
@@ -218,7 +173,7 @@ def minify_script(patches=None, keep_report=True, show_diff=False):
     Returns:
         str: minified source text
     """
-    patches = patches or []
+
     edits = [
         ("comment", "print"),
         ("comment", "import logging"),
@@ -247,78 +202,32 @@ def minify_script(patches=None, keep_report=True, show_diff=False):
     minopts = Values({"tabs": False})
     with SCRIPT.open("r") as f:
         content = f.read()
-        for path in patches:
-            path = Path(path)
-            content = apply_patch(content, path.read_text())
+
         content = edit_lines(content, edits, show_diff=show_diff)
         tokens = token_utils.listified_tokenizer(content)
         source = minification.minify(tokens, minopts)
     return source
 
 
-def get_patches():
-    """Iterate patch files"""
-    for f in PATCHES.iterdir():
-        yield (f.stem, f.resolve())
-
-
-def resolve_patches(patch_names):
-    """Validates/Provides help for patches"""
-    patch_files = list(get_patches())
-    patches = [
-        next((p for p in patch_files if p[0] == n), (n, None)) for n in patch_names
-    ]
-    paths = []
-    for name, path in patches:
-        if path is None:
-            print(f"Cannot find patch: {name}")
-            print("\nAvailable Patches:")
-            print("\n".join(p[0] for p in get_patches()))
-            sys.exit(0)
-        print(f"Applying Patch: {name}")
-        paths.append(path)
-    return paths
-
-
-def cli_patch(**kwargs):
-    """apply patch cli handler"""
-    print("Patching createstubs.py...")
-    out = kwargs.get("output")
-    patch_names = kwargs.pop("patches")
-    paths = resolve_patches(patch_names)
-    with SCRIPT.open("r") as f:
-        source = f.read()
-        for p in paths:
-            content = apply_patch(source, p.read_text())
-    with out.open("w+") as o:
-        o.write(content)
-    print("\nDone!")
-    print("Patched file written to:", out)
-
-
 def cli_minify(**kwargs):
     """minify cli handler"""
     print("\nMinifying createstubs.py...")
     out = kwargs.pop("output")
-    patches = kwargs.pop("patch")
     if not minification:
         print("pyminifier is required to minify createstubs.py\n")
         print("Please install via:\n  pip install pyminifier")
         sys.exit(1)
-    patch_paths = resolve_patches(patches)
     with out.open("w+") as f:
         report = kwargs.pop("no_report")
         diff = kwargs.pop("diff")
-        source = minify_script(patches=patch_paths, keep_report=report, show_diff=diff)
+        source = minify_script(keep_report=report, show_diff=diff)
         f.write(source)
     print("\nDone!")
     print("Minified file written to:", out)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Pre/Post Processing for createstubs.py"
-    )
+    parser = argparse.ArgumentParser(description="Pre/Post Processing for createstubs.py")
     parser.set_defaults(func=None)
     parser.add_argument(
         "-o",
@@ -329,39 +238,15 @@ if __name__ == "__main__":
     )
     subparsers = parser.add_subparsers(help="Command to execute")
 
-    minify_parser = subparsers.add_parser(
-        "minify", help=("Create minified version of" " createstubs.py")
-    )
-    minify_parser.add_argument(
-        "-p",
-        "--patch",
-        action="append",
-        help="Apply patch before minification",
-        default=[],
-    )
-    minify_parser.add_argument(
-        "-d", "--diff", help="Print diff report from minify", action="store_true"
-    )
+    minify_parser = subparsers.add_parser("minify", help=("Create minified version of" " createstubs.py"))
+    minify_parser.add_argument("-d", "--diff", help="Print diff report from minify", action="store_true")
     minify_parser.add_argument(
         "-n",
         "--no-report",
-        help=(
-            "Disables all output from createstubs.py."
-            " Use if your having memory related issues."
-        ),
+        help=("Disables all output from createstubs.py." " Use if your having memory related issues."),
         action="store_false",
     )
     minify_parser.set_defaults(func=cli_minify)
-
-    patch_parser = subparsers.add_parser(
-        "patch", help=("Apply a patch to createstubs.py")
-    )
-    patch_parser.add_argument(
-        "patches",
-        help="List of patches to apply, seperated by a space.",
-        action="append",
-    )
-    patch_parser.set_defaults(func=cli_patch)
 
     args = parser.parse_args()
     if not args.func:
