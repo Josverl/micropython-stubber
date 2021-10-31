@@ -213,14 +213,14 @@ def minify_script(keep_report=True, show_diff=False):
             content,
             filename=f.name,
             combine_imports=True,
-            # remove_pass=True,  # no dead code
-            # remove_literal_statements=True,  # no Docstrings
-            # remove_annotations=True,  # not used runtime anyways
-            # hoist_literals=True,  # remove redundant strings
-            # rename_locals=True,  # short names save memory
-            # rename_globals=True,  # short names save memory
-            # remove_object_base=False,  # not used
-            # convert_posargs_to_args=True,
+            remove_pass=True,  # no dead code
+            remove_literal_statements=True,  # no Docstrings
+            remove_annotations=True,  # not used runtime anyways
+            hoist_literals=True,  # remove redundant strings
+            rename_locals=True,  # short names save memory
+            rename_globals=True,  # short names save memory
+            remove_object_base=False,  # not used
+            convert_posargs_to_args=True,
             preserve_locals=["stubber"],  # names to keep
             preserve_globals=["main"],
         )
