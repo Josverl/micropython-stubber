@@ -12,6 +12,7 @@ from ujson import dumps
 
 ENOENT = 2
 stubber_version = "1.4.0.beta"
+MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -23,7 +24,6 @@ except ImportError:
 
 class Stubber:
     "Generate stubs for modules in firmware"
-    MAX_CLASS_LEVEL = 2  # Max class nesting
 
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
@@ -459,7 +459,7 @@ class Stubber:
             cls_mtd_tps = ["<class 'function'>", "<class 'bound_method'>"]
 
             # Class expansion only on first 3 levels (bit of a hack)
-            if typ == "<class 'type'>" and len(indent) <= self.MAX_CLASS_LEVEL * 4:
+            if typ == "<class 'type'>" and len(indent) <= MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, name))
                 # stub style : generic __init__ with Empty comment and pass
                 s = "\n" + indent + "class " + name + ":\n"  #
@@ -666,9 +666,12 @@ def isMicroPython() -> bool:
     try:
         # either test should fail on micropython
         # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
+        # a = eval("1and 0")  # lgtm [py/unused-local-variable]
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
-        a = eval("1and 0")  # lgtm [py/unused-local-variable]
         b = bytes("abc", encoding="utf8")  # lgtm [py/unused-local-variable]
+        # c) https://docs.micropython.org/en/latest/genrst/core_language.html#f-strings-don-t-support-concatenation-with-adjacent-literals-if-the-adjacent-literals-contain-braces
+        x = 1
+        r = "aa" f"{x}"  # lgtm [py/unused-local-variable]
         return False
     except (NotImplementedError, SyntaxError):
         return True
