@@ -10,8 +10,8 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
+stubber_version = "1.4.1"
 ENOENT = 2
-stubber_version = "1.4.0.beta"
 MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
 try:
@@ -666,14 +666,19 @@ def isMicroPython() -> bool:
     try:
         # either test should fail on micropython
         # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
+        # Micropython : SyntaxError
         # a = eval("1and 0")  # lgtm [py/unused-local-variable]
+        # Eval blocks some minification aspects
+
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
+        # Micropython: NotImplementedError
         b = bytes("abc", encoding="utf8")  # lgtm [py/unused-local-variable]
-        # c) https://docs.micropython.org/en/latest/genrst/core_language.html#f-strings-don-t-support-concatenation-with-adjacent-literals-if-the-adjacent-literals-contain-braces
-        x = 1
-        r = "aa" f"{x}"  # lgtm [py/unused-local-variable]
+
+        # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
+        # Micropython: AttributeError
+        c = isMicroPython.__module__  # lgtm [py/unused-local-variable]
         return False
-    except (NotImplementedError, SyntaxError):
+    except (NotImplementedError, AttributeError):
         return True
 
 
