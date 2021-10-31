@@ -1,0 +1,10 @@
+path_classifiers:
+  test:
+    - "tests"
+  docs:
+    - docs
+  # library:
+  #   - src/libs
+
+extraction:
+  python:
