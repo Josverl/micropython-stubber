@@ -1,10 +1,16 @@
 #production requirements
 esptool >= 2.8
 
-pyminifier >= 2.1
+python-minifier >= 2.5.0
+
 requests >= 2.25.1
 
 mypy >= 0.812
 
+# Cross compilation 
+mpy-cross >= 1.16
+
 # stub refactoring
-libcst >= 0.3.19
+# libcst >= 0.3.19
+
+

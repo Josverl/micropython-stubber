@@ -10,4 +10,4 @@ pytest-json-report  >= 1.4.1
 pytest-metadata     >= 1.11.0
 mock                >= 4.0.3
 
-black               >= 21.2
+black               >= 21
