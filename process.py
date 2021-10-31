@@ -9,13 +9,17 @@ import sys
 from optparse import Values
 from pathlib import Path
 
-# Pyminifier Dep
-token_utils = None
-minification = None
-try:
-    from pyminifier import token_utils, minification
-except ImportError:
-    pass
+# # Pyminifier Dep
+# token_utils = None
+# minification = None
+
+# try:
+#     from pyminifier import token_utils, minification
+# except ImportError:
+#     pass
+
+import python_minifier
+
 
 ROOT = Path(__file__).parent
 SCRIPT = ROOT / "board" / "createstubs.py"
@@ -204,8 +208,25 @@ def minify_script(keep_report=True, show_diff=False):
         content = f.read()
 
         content = edit_lines(content, edits, show_diff=show_diff)
-        tokens = token_utils.listified_tokenizer(content)
-        source = minification.minify(tokens, minopts)
+
+        source = python_minifier.minify(
+            content,
+            filename=f.name,
+            combine_imports=True,
+            # remove_pass=True,  # no dead code
+            # remove_literal_statements=True,  # no Docstrings
+            # remove_annotations=True,  # not used runtime anyways
+            # hoist_literals=True,  # remove redundant strings
+            # rename_locals=True,  # short names save memory
+            # rename_globals=True,  # short names save memory
+            # remove_object_base=False,  # not used
+            # convert_posargs_to_args=True,
+            preserve_locals=["stubber"],  # names to keep
+            preserve_globals=["main"],
+        )
+    print(f"Original length : {len(content)}")
+    print(f"Minified length : {len(source)}")
+    print(f"Reduced by      : {len(content)-len(source)} ")
     return source
 
 
@@ -213,9 +234,9 @@ def cli_minify(**kwargs):
     """minify cli handler"""
     print("\nMinifying createstubs.py...")
     out = kwargs.pop("output")
-    if not minification:
-        print("pyminifier is required to minify createstubs.py\n")
-        print("Please install via:\n  pip install pyminifier")
+    if not python_minifier:
+        print("python_minifier is required to minify createstubs.py\n")
+        print("Please install via:\n  pip install python_minifier")
         sys.exit(1)
     with out.open("w+") as f:
         report = kwargs.pop("no_report")
