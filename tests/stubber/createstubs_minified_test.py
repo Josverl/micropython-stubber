@@ -26,7 +26,7 @@ from minified.createstubs import Stubber, read_path
 # - createstubs_minified.test.py
 # ----------------------------------------------------------------------------------------
 
-
+@pytest.mark.minified
 def test_stubber_info_basic():
     stubber = Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
@@ -43,7 +43,7 @@ def test_stubber_info_basic():
     assert " " not in stubber.flat_fwid, "flat_fwid must not contain any spaces"
     assert "." not in stubber.flat_fwid, "flat_fwid must not contain any dots"
 
-
+@pytest.mark.minified
 def test_stubber_info_custom():
     myid = "MyCustomID"
     stubber = Stubber(firmware_id=myid)  # type: ignore
@@ -158,7 +158,7 @@ pyb1_113 = UName(
 #        # TODO: add support for -Latest
 #        #('micropython-esp32-1.13-latest', 'micropython', 'esp32', mpy_113_build),
 
-
+@pytest.mark.minified
 def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
     # class.property : just pass a value
     mocker.patch(prefix + "createstubs.sys.platform", sys_platform)
@@ -194,11 +194,12 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
 
 
 # throws an error on the commandline
+@pytest.mark.minified
 @pytest.mark.skip(reason="test not working")
 def test_read_path():
     assert read_path() == ""
 
-
+@pytest.mark.minified
 def test_get_obj_attributes():
     stubber = Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
@@ -209,7 +210,7 @@ def test_get_obj_attributes():
     for attr in items:
         assert type(attr) == tuple
 
-
+@pytest.mark.minified
 def test_create_all_stubs(tmp_path: Path):
     myid = "MyCustomID"
 
@@ -229,7 +230,7 @@ def test_create_all_stubs(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.*"))
     assert len(stublist) == 0
 
-
+@pytest.mark.minified
 def test_get_root():
     stubber = Stubber()
     assert stubber is not None, "Can't create Stubber instance"
@@ -237,7 +238,7 @@ def test_get_root():
     assert type(x) == str
     assert len(x) > 0
 
-
+@pytest.mark.minified
 def test_create_module_stub(tmp_path: Path):
     myid = "MyCustomID"
     stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -249,7 +250,7 @@ def test_create_module_stub(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 2
 
-
+@pytest.mark.minified
 def test_create_module_stub_folder(tmp_path: Path):
     myid = "MyCustomID"
     stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -259,7 +260,7 @@ def test_create_module_stub_folder(tmp_path: Path):
     stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.py"))
     assert len(stublist) == 1, "should create stub in stub folder if no folder specified"
 
-
+@pytest.mark.minified
 def test_create_module_stub_ignored(tmp_path: Path):
     myid = "MyCustomID"
     stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -272,7 +273,7 @@ def test_create_module_stub_ignored(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 0
 
-
+@pytest.mark.minified
 def test_nested_modules(tmp_path: Path):
     myid = "MyCustomID"
     stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -282,7 +283,7 @@ def test_nested_modules(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 1
 
-
+@pytest.mark.minified
 def test_unavailable_modules(tmp_path: Path):
     myid = "MyCustomID"
     stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
