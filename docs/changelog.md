@@ -1,8 +1,14 @@
 
 # Changelog 
 
-## documentation 
+## createstubs - Minified- v1.4.1 
+- Switched to use [python-minifier](https://github.com/dflook/python-minifier) for the minification due to the end-of-life of the previous minification tool 
+  The new minification tool produces more compact code, although that is still not sufficient for some memory constrained devices.
+  - there are no functional changes, 
+  - the detection of Micropython was adjusted to avoid the use of eval which blocked a minification rule
+  - several tests were adjusted
 
+## documentation 
 - Add Sphinxs documentaion 
     - changelog 
     - automatic API documentation for 
@@ -10,7 +16,7 @@
         * scripts to run on PC / Github actions
 - Publish documentation to readthedocs
     
-## createstubs - version 1.4
+## createstubs - v1.4-beta
 
 - createstubs.py
     - improvements to handle nested classes to be able to create stubs for lvgl.
@@ -18,7 +24,7 @@
 
 - added `stub_lvgl.py` helper script
 
-## createstubs.py  - version 1.3.16
+## createstubs.py  - v1.3.16
 
 - createstubs.py
     - fix for micropython v1.16 
