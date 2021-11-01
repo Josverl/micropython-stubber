@@ -50,7 +50,7 @@
             "label": "mpy-cross",
             "detail": "mpy-cross compile current file",
             "type": "shell",
-            "command": " ${file} -O 3",
+            "command": "python -m mpy_cross ${file} -O3",
             "problemMatcher": [],
             "group": "build"
         },
