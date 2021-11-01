@@ -9,10 +9,11 @@ import logging
 import uos as os
 from utime import sleep_us
 from ujson import dumps
+from micropython import const
 
 stubber_version = "1.4.1"
-ENOENT = 2
-MAX_CLASS_LEVEL = 2  # Max class nesting
+ENOENT = const(2)
+_MAX_CLASS_LEVEL = const(2)  # Max class nesting
 # deal with ESP32 firmware specific implementations.
 try:
     from machine import resetWDT  # type: ignore  - LoBo specific function
@@ -459,7 +460,7 @@ class Stubber:
             cls_mtd_tps = ["<class 'function'>", "<class 'bound_method'>"]
 
             # Class expansion only on first 3 levels (bit of a hack)
-            if typ == "<class 'type'>" and len(indent) <= MAX_CLASS_LEVEL * 4:
+            if typ == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, name))
                 # stub style : generic __init__ with Empty comment and pass
                 s = "\n" + indent + "class " + name + ":\n"  #
