@@ -63,7 +63,6 @@ def cleanup(modules_folder: Path):
                 f.unlink()
             except OSError:
                 log.error(" * Unable to remove extranous stub {}".format(f))
-                pass
 
 
 def generate_pyi_from_file(file: Path) -> bool:
@@ -92,7 +91,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     try:
         stubgen.generate_stubs(sg_opt)
         return True
-    except BaseException as e:
+    except Exception as e:
         print(e)
         return False
 
@@ -226,7 +225,7 @@ def read_exclusion_file(path: Path = None) -> List[str]:
     in .GitIgnore format
 
     """
-    if path == None:
+    if path is None:
         path = Path(".")
     try:
         with open(path.joinpath(".exclusions")) as f:
