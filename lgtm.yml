@@ -2,11 +2,20 @@
 # https://lgtm.com/projects/g/Josverl/micropython-stubber/history/
 
 path_classifiers:
-  test: "tests"
-  docs: "docs"
-  libraries:
+  test: 
+    - "tests"
+  docs: 
+    - "docs"
+  library:
   - "micropython"
   - "micropython-lib"
+  generated:
+  - minified
 
 queries:
   exclude: "py/unreachable-statement"
+
+extraction: 
+  python:
+    python_setup:
+      version: 3

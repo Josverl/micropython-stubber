@@ -4,22 +4,14 @@
 """Pre/Post Processing for createstubs.py"""
 import argparse
 import itertools
-import re
 import sys
 from optparse import Values
 from pathlib import Path
 
-# # Pyminifier Dep
-# token_utils = None
-# minification = None
-
-# try:
-#     from pyminifier import token_utils, minification
-# except ImportError:
-#     pass
-
-import python_minifier
-
+try:
+    import python_minifier
+except ImportError:
+    pass
 
 ROOT = Path(__file__).parent
 SCRIPT = ROOT / "board" / "createstubs.py"
@@ -203,7 +195,6 @@ def minify_script(keep_report=True, show_diff=False):
         edits.insert(0, report)
         edits.insert(1, clean)
 
-    minopts = Values({"tabs": False})
     with SCRIPT.open("r") as f:
         content = f.read()
 

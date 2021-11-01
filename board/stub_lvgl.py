@@ -5,7 +5,7 @@ Note that the stubs can be very large, and it may be best to directly store them
 
 try:
     import lvgl
-except:
+except Exception:
     # raise ImportError("The `lvgl` module could not be found on this firmware")
     pass
 
@@ -30,7 +30,7 @@ def main():
             lvgl.version_info(),
             sys.platform,
         )
-    except:
+    except Exception:
         fw_id = "lvgl-{0}_{1}_{2}_{3}-{4}".format(8, 1, 0, "dev", sys.platform)
     stubber = Stubber(firmware_id=fw_id, path="/sd")
     stubber.clean()
