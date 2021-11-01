@@ -1,0 +1,12 @@
+# Basic config for lgtm 
+# https://lgtm.com/projects/g/Josverl/micropython-stubber/history/
+
+path_classifiers:
+  test: "tests"
+  docs: "docs"
+  libraries:
+  - "micropython"
+  - "micropython-lib"
+
+queries:
+  exclude: "py/unreachable-statement"
