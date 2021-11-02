@@ -11,3 +11,5 @@ pytest-metadata     >= 1.11.0
 mock                >= 4.0.3
 
 black
+
+pyright

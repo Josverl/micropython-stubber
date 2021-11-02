@@ -1,0 +1,1296 @@
+[
+    {
+        "signature": "open(stream, *, flags=0, pagesize=0, cachesize=0, minkeypage=0)",
+        "docstring": [
+            "   Open a database from a random-access `stream` (like an open file). All",
+            "   other parameters are optional and keyword-only, and allow to tweak advanced",
+            "   parameters of the database operation (most users will not need them):",
+            "",
+            "   * *flags* - Currently unused.",
+            "   * *pagesize* - Page size used for the nodes in BTree. Acceptable range",
+            "     is 512-65536. If 0, a port-specific default will be used, optimized for",
+            "     port's memory usage and/or performance.",
+            "   * *cachesize* - Suggested memory cache size in bytes. For a",
+            "     board with enough memory using larger values may improve performance.",
+            "     Cache policy is as follows: entire cache is not allocated at once;",
+            "     instead, accessing a new page in database will allocate a memory buffer",
+            "     for it, until value specified by *cachesize* is reached. Then, these",
+            "     buffers will be managed using LRU (least recently used) policy. More",
+            "     buffers may still be allocated if needed (e.g., if a database contains",
+            "     big keys and/or values). Allocated cache buffers aren't reclaimed.",
+            "   * *minkeypage* - Minimum number of keys to store per page. Default value",
+            "     of 0 equivalent to 2.",
+            "",
+            "   Returns a BTree object, which implements a dictionary protocol (set",
+            "   of methods), and some additional methods described below."
+        ],
+        "type": "Dict",
+        "module": "btree",
+        "confidence": 0.8
+    },
+    {
+        "signature": "btree.close()",
+        "docstring": [
+            "   Close the database. It's mandatory to close the database at the end of",
+            "   processing, as some unwritten data may be still in the cache. Note that",
+            "   this does not close underlying stream with which the database was opened,",
+            "   it should be closed separately (which is also mandatory to make sure that",
+            "   data flushed from buffer to the underlying storage)."
+        ],
+        "type": "None",
+        "module": "btree",
+        "confidence": 0
+    },
+    {
+        "signature": "btree.flush()",
+        "docstring": [
+            "   Flush any data in cache to the underlying stream."
+        ],
+        "type": "Any",
+        "module": "btree",
+        "confidence": 0
+    },
+    {
+        "signature": "btree.__getitem__(key)",
+        "docstring": [
+            "            btree.get(key, default=None, /)",
+            "            btree.__setitem__(key, val)",
+            "            btree.__delitem__(key)",
+            "            btree.__contains__(key)",
+            "",
+            "   Standard dictionary methods."
+        ],
+        "type": "Any",
+        "module": "btree",
+        "confidence": 0
+    },
+    {
+        "signature": "btree.__iter__()",
+        "docstring": [
+            "   A BTree object can be iterated over directly (similar to a dictionary)",
+            "   to get access to all keys in order."
+        ],
+        "type": "Any",
+        "module": "btree",
+        "confidence": 0.2
+    },
+    {
+        "signature": "btree.keys([start_key, [end_key, [flags]]])",
+        "docstring": [
+            "            btree.values([start_key, [end_key, [flags]]])",
+            "            btree.items([start_key, [end_key, [flags]]])",
+            "",
+            "   These methods are similar to standard dictionary methods, but also can",
+            "   take optional parameters to iterate over a key sub-range, instead of",
+            "   the entire database. Note that for all 3 methods, *start_key* and",
+            "   *end_key* arguments represent key values. For example, `values()`",
+            "   method will iterate over values corresponding to they key range",
+            "   given. None values for *start_key* means \"from the first key\", no",
+            "   *end_key* or its value of None means \"until the end of database\".",
+            "   By default, range is inclusive of *start_key* and exclusive of",
+            "   *end_key*, you can include *end_key* in iteration by passing *flags*",
+            "   of `btree.INCL`. You can iterate in descending key direction",
+            "   by passing *flags* of `btree.DESC`. The flags values can be ORed",
+            "   together."
+        ],
+        "type": "Any",
+        "module": "btree",
+        "confidence": 0
+    },
+    {
+        "signature": "delattr(obj, name)",
+        "docstring": [
+            "   The argument *name* should be a string, and this function deletes the named",
+            "   attribute from the object given by *obj*."
+        ],
+        "type": "Any",
+        "module": "builtins",
+        "confidence": 0
+    },
+    {
+        "signature": "WLAN.scan()",
+        "docstring": [
+            "    Scan for the available wireless networks.",
+            "",
+            "    Scanning is only possible on STA interface. Returns list of tuples with",
+            "    the information about WiFi access points:",
+            "",
+            "        (ssid, bssid, channel, RSSI, authmode, hidden)",
+            "",
+            "    *bssid* is hardware address of an access point, in binary form, returned as",
+            "    bytes object. You can use `ubinascii.hexlify()` to convert it to ASCII form.",
+            "",
+            "    There are five values for authmode:",
+            "",
+            "        * 0 -- open",
+            "        * 1 -- WEP",
+            "        * 2 -- WPA-PSK",
+            "        * 3 -- WPA2-PSK",
+            "        * 4 -- WPA/WPA2-PSK",
+            "",
+            "    and two for hidden:",
+            "",
+            "        * 0 -- visible",
+            "        * 1 -- hidden"
+        ],
+        "type": "List[Tuple]",
+        "confidence": 0.9,
+        "module": "network",
+        "class": "WLAN",
+        "function/method": "WLAN.scan"
+    },
+    {
+        "signature": "poll.poll(timeout=-1, /)",
+        "docstring": [
+            "   Wait for at least one of the registered objects to become ready or have an",
+            "   exceptional condition, with optional timeout in milliseconds (if *timeout*",
+            "   arg is not specified or -1, there is no timeout).",
+            "",
+            "   Returns list of (``obj``, ``event``, ...) tuples. There may be other elements in",
+            "   tuple, depending on a platform and version, so don't assume that its size is 2.",
+            "   The ``event`` element specifies which events happened with a stream and",
+            "   is a combination of ``uselect.POLL*`` constants described above. Note that",
+            "   flags ``uselect.POLLHUP`` and ``uselect.POLLERR`` can be returned at any time",
+            "   (even if were not asked for), and must be acted on accordingly (the",
+            "   corresponding stream unregistered from poll and likely closed), because",
+            "   otherwise all further invocations of `poll()` may return immediately with",
+            "   these flags set for this stream again.",
+            "",
+            "   In case of timeout, an empty list is returned."
+        ],
+        "type": "List",
+        "confidence": 0.9,
+        "module": "uselect",
+        "class": "poll",
+        "function/method": "poll.poll"
+    },
+    {
+        "signature": "regex.split(string, max_split=-1, /)",
+        "docstring": [
+            "   Split a *string* using regex. If *max_split* is given, it specifies",
+            "   maximum number of splits to perform. Returns list of strings (there",
+            "   may be up to *max_split+1* elements if it's specified)."
+        ],
+        "type": "List[str]",
+        "confidence": 0.9,
+        "module": "ure",
+        "class": "regex",
+        "function/method": "regex.split"
+    },
+    {
+        "signature": "RTC.datetime([datetimetuple])",
+        "docstring": [
+            "   Get or set the date and time of the RTC.",
+            "",
+            "   With no arguments, this method returns an 8-tuple with the current",
+            "   date and time.  With 1 argument (being an 8-tuple) it sets the date",
+            "   and time.",
+            "",
+            "   The 8-tuple has the following format:",
+            "",
+            "       (year, month, day, weekday, hours, minutes, seconds, subseconds)",
+            "",
+            "   The meaning of the ``subseconds`` field is hardware dependent."
+        ],
+        "type": "Tuple",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "RTC",
+        "function/method": "RTC.datetime"
+    },
+    {
+        "signature": "PWM.duty_u16([value])",
+        "docstring": [
+            "   Get or set the current duty cycle of the PWM output, as an unsigned 16-bit",
+            "   value in the range 0 to 65535 inclusive.",
+            "",
+            "   With no arguments the duty cycle is returned.",
+            "",
+            "   With a single *value* argument the duty cycle is set to that value, measured",
+            "   as the ratio ``value / 65535``."
+        ],
+        "type": "int",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "PWM",
+        "function/method": "PWM.duty_u16"
+    },
+    {
+        "signature": "PWM.duty_ns([value])",
+        "docstring": [
+            "   Get or set the current pulse width of the PWM output, as a value in nanoseconds.",
+            "",
+            "   With no arguments the pulse width in nanoseconds is returned.",
+            "",
+            "   With a single *value* argument the pulse width is set to that value."
+        ],
+        "type": "int",
+        "confidence": 0.7,
+        "match": "<re.Match object; span=(3, 222), match='Get or set the current pulse width of the PWM out>",
+        "module": "machine",
+        "class": "PWM",
+        "function/method": "PWM.duty_ns"
+    },
+    {
+        "signature": "cos(z)",
+        "docstring": [
+            "   Return the cosine of ``z``."
+        ],
+        "type": "float",
+        "confidence": 0.8,
+        "module": "cmath",
+        "class": "",
+        "function/method": "cos"
+    },
+    {
+        "signature": "unique_id()",
+        "docstring": [
+            "   Returns a byte string with a unique identifier of a board/SoC. It will vary",
+            "   from a board/SoC instance to another, if underlying hardware allows. Length",
+            "   varies by hardware (so use substring of a full value if you expect a short",
+            "   ID). In some MicroPython ports, ID corresponds to the network MAC address."
+        ],
+        "type": "bytes",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "",
+        "function/method": "unique_id"
+    },
+    {
+        "signature": "Pin.init(mode=-1, pull=-1, *, value, drive, alt)",
+        "docstring": [
+            "   Re-initialise the pin using the given parameters.  Only those arguments that",
+            "   are specified will be set.  The rest of the pin peripheral state will remain",
+            "   unchanged.  See the constructor documentation for details of the arguments.",
+            "",
+            "   Returns ``None``."
+        ],
+        "type": "None",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "Pin",
+        "function/method": "Pin.init"
+    },
+    {
+        "signature": "mem_free()",
+        "docstring": [
+            "   Return the number of bytes of available heap RAM, or -1 if this amount",
+            "   is not known."
+        ],
+        "type": "int",
+        "confidence": 0.5,
+        "module": "gc",
+        "class": "",
+        "function/method": "mem_free"
+    },
+    {
+        "signature": "SPI.read(nbytes, write=0x00)",
+        "docstring": [
+            "    Read a number of bytes specified by ``nbytes`` while continuously writing",
+            "    the single byte given by ``write``.",
+            "    Returns a ``bytes`` object with the data that was read."
+        ],
+        "type": "bytes",
+        "confidence": 0.8,
+        "module": "machine",
+        "class": "SoftSPI",
+        "function/method": "SPI.read"
+    },
+    {
+        "signature": "bytes()",
+        "docstring": [
+            "    |see_cpython| `python:bytes`."
+        ],
+        "type": "bytes",
+        "confidence": 0.5,
+        "match": "bytes",
+        "module": "builtins",
+        "class": "",
+        "function/method": ""
+    },
+    {
+        "signature": "bytearray_at(addr, size)",
+        "docstring": [
+            "   Capture memory at the given address and size as bytearray object.",
+            "   Unlike bytes_at() function above, memory is captured by reference,",
+            "   so it can be both written too, and you will access current value",
+            "   at the given memory address."
+        ],
+        "type": "bytearray",
+        "confidence": 0.5,
+        "module": "uctypes",
+        "class": "",
+        "function/method": "bytearray_at"
+    },
+    {
+        "signature": "to_bytes(size, byteorder)",
+        "docstring": [
+            "      In MicroPython, `byteorder` parameter must be positional (this is",
+            "      compatible with CPython)."
+        ],
+        "type": "bytes",
+        "confidence": 0.5,
+        "module": "builtins",
+        "class": "int",
+        "function/method": "to_bytes"
+    },
+    {
+        "signature": "bytes_at(addr, size)",
+        "docstring": [
+            "   Capture memory at the given address and size as bytes object. As bytes",
+            "   object is immutable, memory is actually duplicated and copied into",
+            "   bytes object, so if memory contents change later, created object",
+            "   retains original value."
+        ],
+        "type": "bytes",
+        "confidence": 0.5,
+        "module": "uctypes",
+        "class": "",
+        "function/method": "bytes_at"
+    },
+    {
+        "signature": "polar(z)",
+        "docstring": [
+            "   Returns, as a tuple, the polar form of ``z``."
+        ],
+        "type": "Tuple",
+        "confidence": 0.5,
+        "module": "cmath",
+        "class": "",
+        "function/method": "polar"
+    },
+    {
+        "signature": "isnan(x)",
+        "docstring": [
+            "   Return ``True`` if ``x`` is not-a-number"
+        ],
+        "type": "bool",
+        "confidence": 0.5,
+        "module": "math",
+        "class": "",
+        "function/method": "isnan"
+    },
+    {
+        "signature": "WLAN.isconnected()",
+        "docstring": [
+            "    In case of STA mode, returns ``True`` if connected to a WiFi access",
+            "    point and has a valid IP address.  In AP mode returns ``True`` when a",
+            "    station is connected. Returns ``False`` otherwise."
+        ],
+        "type": "bool",
+        "confidence": 0.8,
+        "module": "network",
+        "class": "WLAN",
+        "function/method": "WLAN.isconnected"
+    },
+    {
+        "signature": "Pin.name()",
+        "docstring": [
+            "   Get the pin name."
+        ],
+        "type": "str",
+        "confidence": 0.3,
+        "module": "pyb",
+        "class": "Pin",
+        "function/method": "Pin.name"
+    },
+    {
+        "signature": "socket.makefile(mode='rb', buffering=0, /)",
+        "docstring": [
+            "   Return a file object associated with the socket. The exact returned type depends on the arguments",
+            "   given to makefile(). The support is limited to binary modes only ('rb', 'wb', and 'rwb').",
+            "   CPython's arguments: *encoding*, *errors* and *newline* are not supported."
+        ],
+        "type": "IO",
+        "confidence": 0.3,
+        "module": "usocket",
+        "class": "socket",
+        "function/method": "socket.makefile"
+    },
+    {
+        "signature": "repl_uart(uart)",
+        "docstring": [
+            "   Get or set the UART object where the REPL is repeated on."
+        ],
+        "type": "UART",
+        "confidence": 0.8,
+        "module": "pyb",
+        "class": "",
+        "function/method": "repl_uart"
+    },
+    {
+        "signature": "BLE()",
+        "docstring": [
+            "    Returns the singleton BLE object."
+        ],
+        "type": "BLE",
+        "confidence": 0.8,
+        "module": "ubluetooth",
+        "class": "",
+        "function/method": ""
+    },
+    {
+        "signature": "addressof(obj)",
+        "docstring": [
+            "   Return address of an object. Argument should be bytes, bytearray or",
+            "   other object supporting buffer protocol (and address of this buffer",
+            "   is what actually returned)."
+        ],
+        "type": "int",
+        "confidence": 0.5,
+        "module": "uctypes",
+        "class": "",
+        "function/method": "addressof"
+    },
+    {
+        "signature": "LCD160CR.set_power(on)",
+        "docstring": [
+            "    Turn the display on or off, depending on the given value of *on*: 0 or ``False``",
+            "    will turn the display off, and 1 or ``True`` will turn it on."
+        ],
+        "type": "None",
+        "confidence": 0.5,
+        "module": "lcd160cr",
+        "class": "LCD160CR",
+        "function/method": "LCD160CR.set_power"
+    },
+    {
+        "signature": "Pin.value([x])",
+        "docstring": [
+            "   This method allows to set and get the value of the pin, depending on whether",
+            "   the argument ``x`` is supplied or not.",
+            "",
+            "   If the argument is omitted then this method gets the digital logic level of",
+            "   the pin, returning 0 or 1 corresponding to low and high voltage signals",
+            "   respectively.  The behaviour of this method depends on the mode of the pin:",
+            "",
+            "     - ``Pin.IN`` - The method returns the actual input value currently present",
+            "       on the pin.",
+            "     - ``Pin.OUT`` - The behaviour and return value of the method is undefined.",
+            "     - ``Pin.OPEN_DRAIN`` - If the pin is in state '0' then the behaviour and",
+            "       return value of the method is undefined.  Otherwise, if the pin is in",
+            "       state '1', the method returns the actual input value currently present",
+            "       on the pin.",
+            "",
+            "   If the argument is supplied then this method sets the digital logic level of",
+            "   the pin.  The argument ``x`` can be anything that converts to a boolean.",
+            "   If it converts to ``True``, the pin is set to state '1', otherwise it is set",
+            "   to state '0'.  The behaviour of this method depends on the mode of the pin:",
+            "",
+            "     - ``Pin.IN`` - The value is stored in the output buffer for the pin.  The",
+            "       pin state does not change, it remains in the high-impedance state.  The",
+            "       stored value will become active on the pin as soon as it is changed to",
+            "       ``Pin.OUT`` or ``Pin.OPEN_DRAIN`` mode.",
+            "     - ``Pin.OUT`` - The output buffer is set to the given value immediately.",
+            "     - ``Pin.OPEN_DRAIN`` - If the value is '0' the pin is set to a low voltage",
+            "       state.  Otherwise the pin is set to high-impedance state.",
+            "",
+            "   When setting the value this method returns ``None``."
+        ],
+        "type": "int",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(214, 1667), match=\"returning 0 or 1 corresponding to low and high vo>",
+        "module": "machine",
+        "class": "Pin",
+        "function/method": "Pin.value"
+    },
+    {
+        "signature": "WLAN.scan()",
+        "docstring": [
+            "    Scan for the available wireless networks.",
+            "",
+            "    Scanning is only possible on STA interface. Returns list of tuples with",
+            "    the information about WiFi access points:",
+            "",
+            "        (ssid, bssid, channel, RSSI, authmode, hidden)",
+            "",
+            "    *bssid* is hardware address of an access point, in binary form, returned as",
+            "    bytes object. You can use `ubinascii.hexlify()` to convert it to ASCII form.",
+            "",
+            "    There are five values for authmode:",
+            "",
+            "        * 0 -- open",
+            "        * 1 -- WEP",
+            "        * 2 -- WPA-PSK",
+            "        * 3 -- WPA2-PSK",
+            "        * 4 -- WPA/WPA2-PSK",
+            "",
+            "    and two for hidden:",
+            "",
+            "        * 0 -- visible",
+            "        * 1 -- hidden"
+        ],
+        "type": "List[Tuple]",
+        "confidence": 0.5,
+        "module": "network",
+        "class": "WLAN",
+        "function/method": "WLAN.scan"
+    },
+    {
+        "signature": "sizeof(struct, layout_type=NATIVE, /)",
+        "docstring": [
+            "   Return size of data structure in bytes. The *struct* argument can be",
+            "   either a structure class or a specific instantiated structure object",
+            "   (or its aggregate field)."
+        ],
+        "type": "int",
+        "confidence": 0.81,
+        "match": "<re.Match object; span=(3, 172), match='Return size of data structure in bytes. The *stru>",
+        "module": "uctypes",
+        "class": "",
+        "function/method": "sizeof"
+    },
+    {
+        "signature": "loads(str)",
+        "docstring": [
+            "   Parse the JSON *str* and return an object.  Raises :exc:`ValueError` if the",
+            "   string is not correctly formed."
+        ],
+        "type": "Any",
+        "confidence": 0.1,
+        "match": "<re.Match object; span=(28, 113), match='return an object.  Raises :exc:`ValueError` if th>",
+        "module": "ujson",
+        "class": "",
+        "function/method": "loads"
+    },
+    {
+        "signature": "urandom(n)",
+        "docstring": [
+            "   Return a bytes object with *n* random bytes. Whenever possible, it is",
+            "   generated by the hardware random number generator."
+        ],
+        "type": "bytes",
+        "confidence": 0.81,
+        "match": "<re.Match object; span=(3, 126), match='Return a bytes object with *n* random bytes. When>",
+        "module": "uos",
+        "class": "",
+        "function/method": "urandom"
+    },
+    {
+        "signature": "ilistdir([dir])",
+        "docstring": [
+            "   This function returns an iterator which then yields tuples corresponding to",
+            "   the entries in the directory that it is listing.  With no argument it lists the",
+            "   current directory, otherwise it lists the directory given by *dir*.",
+            "",
+            "   The tuples have the form *(name, type, inode[, size])*:",
+            "",
+            "    - *name* is a string (or bytes if *dir* is a bytes object) and is the name of",
+            "      the entry;",
+            "    - *type* is an integer that specifies the type of the entry, with 0x4000 for",
+            "      directories and 0x8000 for regular files;",
+            "    - *inode* is an integer corresponding to the inode of the file, and may be 0",
+            "      for filesystems that don't have such a notion.",
+            "    - Some platforms may return a 4-tuple that includes the entry's *size*.  For",
+            "      file entries, *size* is an integer representing the size of the file",
+            "      or -1 if unknown.  Its meaning is currently undefined for directory",
+            "      entries."
+        ],
+        "type": "Iterator[Tuple]",
+        "import": "from collections.abc import Iterator, Iterable",
+        "confidence": 0.81,
+        "match": "<re.Match object; span=(17, 900), match=\"returns an iterator which then yields tuples corr>",
+        "module": "uos",
+        "class": "",
+        "function/method": "ilistdir"
+    },
+    {
+        "signature": "statvfs(path)",
+        "docstring": [
+            "   Get the status of a fileystem.",
+            "",
+            "   Returns a tuple with the filesystem information in the following order:",
+            "",
+            "        * ``f_bsize`` -- file system block size",
+            "        * ``f_frsize`` -- fragment size",
+            "        * ``f_blocks`` -- size of fs in f_frsize units",
+            "        * ``f_bfree`` -- number of free blocks",
+            "        * ``f_bavail`` -- number of free blocks for unprivileged users",
+            "        * ``f_files`` -- number of inodes",
+            "        * ``f_ffree`` -- number of free inodes",
+            "        * ``f_favail`` -- number of free inodes for unprivileged users",
+            "        * ``f_flag`` -- mount flags",
+            "        * ``f_namemax`` -- maximum filename length",
+            "",
+            "   Parameters related to inodes: ``f_files``, ``f_ffree``, ``f_avail``",
+            "   and the ``f_flags`` parameter may return ``0`` as they can be unavailable",
+            "   in a port-specific implementation."
+        ],
+        "type": "Tuple",
+        "confidence": 0.85,
+        "match": "<re.Match object; span=(38, 805), match='Returns a tuple with the filesystem information i>",
+        "module": "uos",
+        "class": "",
+        "function/method": "statvfs"
+    },
+    {
+        "signature": "dupterm(stream_object, index=0, /)",
+        "docstring": [
+            "   Duplicate or switch the MicroPython terminal (the REPL) on the given `stream`-like",
+            "   object. The *stream_object* argument must be a native stream object, or derive",
+            "   from ``uio.IOBase`` and implement the ``readinto()`` and",
+            "   ``write()`` methods.  The stream should be in non-blocking mode and",
+            "   ``readinto()`` should return ``None`` if there is no data available for reading.",
+            "",
+            "   After calling this function all terminal output is repeated on this stream,",
+            "   and any input that is available on the stream is passed on to the terminal input.",
+            "",
+            "   The *index* parameter should be a non-negative integer and specifies which",
+            "   duplication slot is set.  A given port may implement more than one slot (slot 0",
+            "   will always be available) and in that case terminal input and output is",
+            "   duplicated on all the slots that are set.",
+            "",
+            "   If ``None`` is passed as the *stream_object* then duplication is cancelled on",
+            "   the slot given by *index*.",
+            "",
+            "   The function returns the previous stream-like object in the given slot."
+        ],
+        "type": "IO",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(324, 1017), match='return ``None`` if there is no data available for>",
+        "module": "uos",
+        "class": "",
+        "function/method": "dupterm"
+    },
+    {
+        "signature": "readblocks(block_num, buf)",
+        "docstring": [
+            "                readblocks(block_num, buf, offset)",
+            "",
+            "        The first form reads aligned, multiples of blocks.",
+            "        Starting at the block given by the index *block_num*, read blocks from",
+            "        the device into *buf* (an array of bytes).",
+            "        The number of blocks to read is given by the length of *buf*,",
+            "        which will be a multiple of the block size.",
+            "",
+            "        The second form allows reading at arbitrary locations within a block,",
+            "        and arbitrary lengths.",
+            "        Starting at block index *block_num*, and byte offset within that block",
+            "        of *offset*, read bytes from the device into *buf* (an array of bytes).",
+            "        The number of bytes to read is given by the length of *buf*."
+        ],
+        "type": "Any",
+        "confidence": 0,
+        "match": "None",
+        "module": "uos",
+        "class": "AbstractBlockDev",
+        "function/method": "readblocks"
+    },
+    {
+        "signature": "socket.recvfrom(bufsize)",
+        "docstring": [
+            "  Receive data from the socket. The return value is a pair *(bytes, address)* where *bytes* is a",
+            "  bytes object representing the data received and *address* is the address of the socket sending",
+            "  the data."
+        ],
+        "type": "Tuple",
+        "confidence": 0.1,
+        "match": "<re.Match object; span=(36, 205), match='return value is a pair *(bytes, address)* where *>",
+        "module": "usocket",
+        "class": "socket",
+        "function/method": "socket.recvfrom"
+    },
+    {
+        "signature": "ussl.wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)",
+        "docstring": [
+            "   Takes a `stream` *sock* (usually usocket.socket instance of ``SOCK_STREAM`` type),",
+            "   and returns an instance of ssl.SSLSocket, which wraps the underlying stream in",
+            "   an SSL context. Returned object has the usual `stream` interface methods like",
+            "   ``read()``, ``write()``, etc.",
+            "   A server-side SSL socket should be created from a normal socket returned from",
+            "   :meth:`~usocket.socket.accept()` on a non-SSL listening server socket.",
+            "",
+            "   - *do_handshake* determines whether the handshake is done as part of the ``wrap_socket``",
+            "     or whether it is deferred to be done as part of the initial reads or writes",
+            "     (there is no ``do_handshake`` method as in CPython).",
+            "     For blocking sockets doing the handshake immediately is standard. For non-blocking",
+            "     sockets (i.e. when the *sock* passed into ``wrap_socket`` is in non-blocking mode)",
+            "     the handshake should generally be deferred because otherwise ``wrap_socket`` blocks",
+            "     until it completes. Note that in AXTLS the handshake can be deferred until the first",
+            "     read or write but it then blocks until completion.",
+            "",
+            "   Depending on the underlying module implementation in a particular",
+            "   :term:`MicroPython port`, some or all keyword arguments above may be not supported."
+        ],
+        "type": "IO",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(93, 1236), match='returns an instance of ssl.SSLSocket, which wraps>",
+        "module": "ussl",
+        "class": "",
+        "function/method": "ussl.wrap_socket"
+    },
+    {
+        "signature": "exit(retval=0, /)",
+        "docstring": [
+            "   Terminate current program with a given exit code. Underlyingly, this",
+            "   function raise as `SystemExit` exception. If an argument is given, its",
+            "   value given as an argument to `SystemExit`."
+        ],
+        "type": "NoReturn",
+        "confidence": 0,
+        "match": "None",
+        "module": "usys",
+        "class": "",
+        "function/method": "exit"
+    },
+    {
+        "signature": "atexit(func)",
+        "docstring": [
+            "   Register *func* to be called upon termination.  *func* must be a callable",
+            "   that takes no arguments, or ``None`` to disable the call.  The ``atexit``",
+            "   function will return the previous value set by this function, which is",
+            "   initially ``None``."
+        ],
+        "type": "Any",
+        "confidence": 0.3,
+        "module": "usys",
+        "class": "",
+        "function/method": "atexit"
+    },
+    {
+        "signature": "open(name, mode='r', **kwargs)",
+        "docstring": [
+            "    Open a file. Builtin ``open()`` function is aliased to this function.",
+            "    All ports (which provide access to file system) are required to support",
+            "    *mode* parameter, but support for other arguments vary by port."
+        ],
+        "type": "IO",
+        "confidence": 0,
+        "module": "uio",
+        "class": "",
+        "function/method": "open"
+    },
+    {
+        "signature": "sub(regex_str, replace, string, count=0, flags=0, /)",
+        "docstring": [
+            "   Compile *regex_str* and search for it in *string*, replacing all matches",
+            "   with *replace*, and returning the new string.",
+            "",
+            "   *replace* can be a string or a function.  If it is a string then escape",
+            "   sequences of the form ``\\<number>`` and ``\\g<number>`` can be used to",
+            "   expand to the corresponding group (or an empty string for unmatched groups).",
+            "   If *replace* is a function then it must take a single argument (the match)",
+            "   and should return a replacement string.",
+            "",
+            "   If *count* is specified and non-zero then substitution will stop after",
+            "   this many substitutions are made.  The *flags* argument is ignored.",
+            "",
+            "   Note: availability of this function depends on :term:`MicroPython port`."
+        ],
+        "type": "str",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(99, 697), match='returning the new string.     *replace* can be a >",
+        "module": "ure",
+        "class": "",
+        "function/method": "sub"
+    },
+    {
+        "signature": "match.start([index])",
+        "docstring": [
+            "            match.end([index])",
+            "",
+            "   Return the index in the original string of the start or end of the",
+            "   substring group that was matched.  *index* defaults to the entire",
+            "   group, otherwise it will select a group.",
+            "",
+            "   Note: availability of these methods depends on :term:`MicroPython port`."
+        ],
+        "type": "int",
+        "confidence": 0.8,
+        "match": "<re.Match object; span=(35, 291), match='Return the index in the original string of the st>",
+        "module": "ure",
+        "class": "match",
+        "function/method": "match.start"
+    },
+    {
+        "signature": "Pin.irq(handler=None, trigger=(Pin.IRQ_FALLING | Pin.IRQ_RISING), *, priority=1, wake=None, hard=False)",
+        "docstring": [
+            "   Configure an interrupt handler to be called when the trigger source of the",
+            "   pin is active.  If the pin mode is ``Pin.IN`` then the trigger source is",
+            "   the external value on the pin.  If the pin mode is ``Pin.OUT`` then the",
+            "   trigger source is the output buffer of the pin.  Otherwise, if the pin mode",
+            "   is ``Pin.OPEN_DRAIN`` then the trigger source is the output buffer for",
+            "   state '0' and the external pin value for state '1'.",
+            "",
+            "   The arguments are:",
+            "",
+            "     - ``handler`` is an optional function to be called when the interrupt",
+            "       triggers. The handler must take exactly one argument which is the",
+            "       ``Pin`` instance.",
+            "",
+            "     - ``trigger`` configures the event which can generate an interrupt.",
+            "       Possible values are:",
+            "",
+            "       - ``Pin.IRQ_FALLING`` interrupt on falling edge.",
+            "       - ``Pin.IRQ_RISING`` interrupt on rising edge.",
+            "       - ``Pin.IRQ_LOW_LEVEL`` interrupt on low level.",
+            "       - ``Pin.IRQ_HIGH_LEVEL`` interrupt on high level.",
+            "",
+            "       These values can be OR'ed together to trigger on multiple events.",
+            "",
+            "     - ``priority`` sets the priority level of the interrupt.  The values it",
+            "       can take are port-specific, but higher values always represent higher",
+            "       priorities.",
+            "",
+            "     - ``wake`` selects the power mode in which this interrupt can wake up the",
+            "       system.  It can be ``machine.IDLE``, ``machine.SLEEP`` or ``machine.DEEPSLEEP``.",
+            "       These values can also be OR'ed together to make a pin generate interrupts in",
+            "       more than one power mode.",
+            "",
+            "     - ``hard`` if true a hardware interrupt is used. This reduces the delay",
+            "       between the pin change and the handler being called. Hard interrupt",
+            "       handlers may not allocate memory; see :ref:`isr_rules`.",
+            "       Not all ports support this argument.",
+            "",
+            "   This method returns a callback object.",
+            "",
+            "The following methods are not part of the core Pin API and only implemented on certain ports."
+        ],
+        "docstring_len": 1886,
+        "type": "Callable[..., Any]",
+        "confidence": 1.4400000000000002,
+        "match": "<re.Match object; span=(1768, 1793), match='returns a callback object'>",
+        "module": "machine",
+        "class": "Pin",
+        "function/method": "Pin.irq"
+    },
+    {
+        "signature": "phase(z)",
+        "docstring": [
+            "   Returns the phase of the number ``z``, in the range (-pi, +pi]."
+        ],
+        "docstring_len": 63,
+        "type": "float",
+        "confidence": 1.494,
+        "match": "<re.Match object; span=(3, 65), match='Returns the phase of the number ``z``, in the ran>",
+        "module": "cmath",
+        "class": "",
+        "function/method": "phase"
+    },
+    {
+        "signature": "rect(r, phi)",
+        "docstring": [
+            "   Returns the complex number with modulus ``r`` and phase ``phi``."
+        ],
+        "docstring_len": 64,
+        "type": "float",
+        "confidence": 1.494,
+        "match": "<re.Match object; span=(3, 66), match='Returns the complex number with modulus ``r`` and>",
+        "module": "cmath",
+        "class": "",
+        "function/method": "rect"
+    },
+    {
+        "signature": "deepsleep([time_ms])",
+        "docstring": [
+            "   Stops execution in an attempt to enter a low power state.",
+            "",
+            "   If *time_ms* is specified then this will be the maximum time in milliseconds that",
+            "   the sleep will last for.  Otherwise the sleep can last indefinitely.",
+            "",
+            "   With or without a timeout, execution may resume at any time if there are events",
+            "   that require processing.  Such events, or wake sources, should be configured before",
+            "   sleeping, like `Pin` change or `RTC` timeout.",
+            "",
+            "   The precise behaviour and power-saving capabilities of lightsleep and deepsleep is",
+            "   highly dependent on the underlying hardware, but the general properties are:",
+            "",
+            "   * A deepsleep may not retain RAM or any other state of the system (for example",
+            "     peripherals or network interfaces).  Upon wake execution is resumed from the main",
+            "     script, similar to a hard or power-on reset. The `reset_cause()` function will",
+            "     return `machine.DEEPSLEEP` and this can be used to distinguish a deepsleep wake",
+            "     from other resets."
+        ],
+        "docstring_len": 965,
+        "type": "None",
+        "confidence": 0.18000000000000002,
+        "match": "<re.Match object; span=(865, 880), match='return `machine'>",
+        "module": "machine",
+        "class": "",
+        "function/method": "deepsleep"
+    },
+    {
+        "signature": "Pin.value([x])",
+        "docstring": [
+            "   This method allows to set and get the value of the pin, depending on whether",
+            "   the argument ``x`` is supplied or not.",
+            "",
+            "   If the argument is omitted then this method gets the digital logic level of",
+            "   the pin, returning 0 or 1 corresponding to low and high voltage signals",
+            "   respectively.  The behaviour of this method depends on the mode of the pin:",
+            "",
+            "     - ``Pin.IN`` - The method returns the actual input value currently present",
+            "       on the pin.",
+            "     - ``Pin.OUT`` - The behaviour and return value of the method is undefined.",
+            "     - ``Pin.OPEN_DRAIN`` - If the pin is in state '0' then the behaviour and",
+            "       return value of the method is undefined.  Otherwise, if the pin is in",
+            "       state '1', the method returns the actual input value currently present",
+            "       on the pin.",
+            "",
+            "   If the argument is supplied then this method sets the digital logic level of",
+            "   the pin.  The argument ``x`` can be anything that converts to a boolean.",
+            "   If it converts to ``True``, the pin is set to state '1', otherwise it is set",
+            "   to state '0'.  The behaviour of this method depends on the mode of the pin:",
+            "",
+            "     - ``Pin.IN`` - The value is stored in the output buffer for the pin.  The",
+            "       pin state does not change, it remains in the high-impedance state.  The",
+            "       stored value will become active on the pin as soon as it is changed to",
+            "       ``Pin.OUT`` or ``Pin.OPEN_DRAIN`` mode.",
+            "     - ``Pin.OUT`` - The output buffer is set to the given value immediately.",
+            "     - ``Pin.OPEN_DRAIN`` - If the value is '0' the pin is set to a low voltage",
+            "       state.  Otherwise the pin is set to high-impedance state.",
+            "",
+            "   When setting the value this method returns ``None``."
+        ],
+        "docstring_len": 1664,
+        "type": "int",
+        "confidence": 1.494,
+        "match": "<re.Match object; span=(214, 292), match='returning 0 or 1 corresponding to low and high vo>",
+        "module": "machine",
+        "class": "Pin",
+        "function/method": "Pin.value"
+    },
+    {
+        "signature": "Signal.value([x])",
+        "docstring": [
+            "   This method allows to set and get the value of the signal, depending on whether",
+            "   the argument ``x`` is supplied or not.",
+            "",
+            "   If the argument is omitted then this method gets the signal level, 1 meaning",
+            "   signal is asserted (active) and 0 - signal inactive.",
+            "",
+            "   If the argument is supplied then this method sets the signal level. The",
+            "   argument ``x`` can be anything that converts to a boolean. If it converts",
+            "   to ``True``, the signal is active, otherwise it is inactive.",
+            "",
+            "   Correspondence between signal being active and actual logic level on the",
+            "   underlying pin depends on whether signal is inverted (active-low) or not.",
+            "   For non-inverted signal, active status corresponds to logical 1, inactive -",
+            "   to logical 0. For inverted/active-low signal, active status corresponds",
+            "   to logical 0, while inactive - to logical 1."
+        ],
+        "docstring_len": 831,
+        "type": "int",
+        "confidence": 0.30000000000000004,
+        "match": "<re.Match object; span=(33, 123), match='get the value of the signal, depending on whether>",
+        "module": "machine",
+        "class": "Signal",
+        "function/method": "Signal.value"
+    },
+    {
+        "signature": "UART.read([nbytes])",
+        "docstring": [
+            "   Read characters.  If ``nbytes`` is specified then read at most that many bytes,",
+            "   otherwise read as much data as possible. It may return sooner if a timeout",
+            "   is reached. The timeout is configurable in the constructor.",
+            "",
+            "   Return value: a bytes object containing the bytes read in.  Returns ``None``",
+            "   on timeout."
+        ],
+        "docstring_len": 316,
+        "type": "bytes",
+        "confidence": 1.4400000000000002,
+        "match": "<re.Match object; span=(288, 318), match='Returns ``None``    on timeout'>",
+        "module": "machine",
+        "class": "UART",
+        "function/method": "UART.read"
+    },
+    {
+        "signature": "UART.write(buf)",
+        "docstring": [
+            "   Write the buffer of bytes to the bus.",
+            "",
+            "   Return value: number of bytes written or ``None`` on timeout."
+        ],
+        "docstring_len": 103,
+        "type": "int",
+        "confidence": 0.18000000000000002,
+        "match": "<re.Match object; span=(45, 57), match='Return value'>",
+        "module": "machine",
+        "class": "UART",
+        "function/method": "UART.write"
+    },
+    {
+        "signature": "I2C.readinto(buf, nack=True, /)",
+        "docstring": [
+            "   Reads bytes from the bus and stores them into *buf*.  The number of bytes",
+            "   read is the length of *buf*.  An ACK will be sent on the bus after",
+            "   receiving all but the last byte.  After the last byte is received, if *nack*",
+            "   is true then a NACK will be sent, otherwise an ACK will be sent (and in this",
+            "   case the peripheral assumes more bytes are going to be read in a later call)."
+        ],
+        "docstring_len": 384,
+        "type": "Any",
+        "confidence": 0.95,
+        "match": "<re.Match object; span=(80, 107), match='read is the length of *buf*'>",
+        "module": "machine",
+        "class": "SoftI2C",
+        "function/method": "I2C.readinto"
+    },
+    {
+        "signature": "I2S.readinto(buf)",
+        "docstring": [
+            "  Read audio samples into the buffer specified by ``buf``.  ``buf`` must support the buffer protocol, such as bytearray or array.",
+            "  \"buf\" byte ordering is little-endian.  For Stereo format, left channel sample precedes right channel sample. For Mono format,",
+            "  the left channel sample data is used.",
+            "  Returns number of bytes read"
+        ],
+        "docstring_len": 326,
+        "type": "int",
+        "confidence": 1.71,
+        "match": "<re.Match object; span=(300, 328), match='Returns number of bytes read'>",
+        "module": "machine",
+        "class": "I2S",
+        "function/method": "I2S.readinto"
+    },
+    {
+        "signature": "opt_level([level])",
+        "docstring": [
+            "   If *level* is given then this function sets the optimisation level for subsequent",
+            "   compilation of scripts, and returns ``None``.  Otherwise it returns the current",
+            "   optimisation level.",
+            "",
+            "   The optimisation level controls the following compilation features:",
+            "",
+            "   - Assertions: at level 0 assertion statements are enabled and compiled into the",
+            "     bytecode; at levels 1 and higher assertions are not compiled.",
+            "   - Built-in ``__debug__`` variable: at level 0 this variable expands to ``True``;",
+            "     at levels 1 and higher it expands to ``False``.",
+            "   - Source-code line numbers: at levels 0, 1 and 2 source-code line number are",
+            "     stored along with the bytecode so that exceptions can report the line number",
+            "     they occurred at; at levels 3 and higher line numbers are not stored.",
+            "",
+            "   The default optimisation level is usually level 0."
+        ],
+        "docstring_len": 839,
+        "type": "Any",
+        "confidence": 1.4400000000000002,
+        "match": "<re.Match object; span=(116, 132), match='returns ``None``'>",
+        "module": "micropython",
+        "class": "",
+        "function/method": "opt_level"
+    },
+    {
+        "signature": "disable_irq()",
+        "docstring": [
+            "   Disable interrupt requests.",
+            "   Returns the previous IRQ state: ``False``/``True`` for disabled/enabled IRQs",
+            "   respectively.  This return value can be passed to enable_irq to restore",
+            "   the IRQ to its original state."
+        ],
+        "docstring_len": 216,
+        "type": "Any",
+        "confidence": 0.36000000000000004,
+        "match": "<re.Match object; span=(34, 64), match='Returns the previous IRQ state'>",
+        "module": "pyb",
+        "class": "",
+        "function/method": "disable_irq"
+    },
+    {
+        "signature": "ADC.read_timed(buf, timer)",
+        "docstring": [
+            "   Read analog values into ``buf`` at a rate set by the ``timer`` object.",
+            "",
+            "   ``buf`` can be bytearray or array.array for example.  The ADC values have",
+            "   12-bit resolution and are stored directly into ``buf`` if its element size is",
+            "   16 bits or greater.  If ``buf`` has only 8-bit elements (eg a bytearray) then",
+            "   the sample resolution will be reduced to 8 bits.",
+            "",
+            "   ``timer`` should be a Timer object, and a sample is read each time the timer",
+            "   triggers.  The timer must already be initialised and running at the desired",
+            "   sampling frequency.",
+            "",
+            "   To support previous behaviour of this function, ``timer`` can also be an",
+            "   integer which specifies the frequency (in Hz) to sample at.  In this case",
+            "   Timer(6) will be automatically configured to run at the given frequency.",
+            "",
+            "   Example using a Timer object (preferred way)::",
+            "",
+            "       adc = pyb.ADC(pyb.Pin.board.X19)    # create an ADC on pin X19",
+            "       tim = pyb.Timer(6, freq=10)         # create a timer running at 10Hz",
+            "       buf = bytearray(100)                # creat a buffer to store the samples",
+            "       adc.read_timed(buf, tim)            # sample 100 values, taking 10s",
+            "",
+            "   Example using an integer for the frequency::",
+            "",
+            "       adc = pyb.ADC(pyb.Pin.board.X19)    # create an ADC on pin X19",
+            "       buf = bytearray(100)                # create a buffer of 100 bytes",
+            "       adc.read_timed(buf, 10)             # read analog values into buf at 10Hz",
+            "                                           #   this will take 10 seconds to finish",
+            "       for val in buf:                     # loop over all values",
+            "           print(val)                      # print the value out",
+            "",
+            "   This function does not allocate any heap memory. It has blocking behaviour:",
+            "   it does not return to the calling program until the buffer is full."
+        ],
+        "docstring_len": 1769,
+        "type": "Any",
+        "confidence": 0.5,
+        "match": "<re.Match object; span=(3, 72), match='Read analog values into ``buf`` at a rate set by >",
+        "module": "pyb",
+        "class": "ADC",
+        "function/method": "ADC.read_timed"
+    },
+    {
+        "signature": "CAN.recv(fifo, list=None, *, timeout=5000)",
+        "docstring": [
+            "   Receive data on the bus:",
+            "",
+            "     - *fifo* is an integer, which is the FIFO to receive on",
+            "     - *list* is an optional list object to be used as the return value",
+            "     - *timeout* is the timeout in milliseconds to wait for the receive.",
+            "",
+            "   Return value: A tuple containing four values.",
+            "",
+            "     - The id of the message.",
+            "     - A boolean that indicates if the message is an RTR message.",
+            "     - The FMI (Filter Match Index) value.",
+            "     - An array containing the data.",
+            "",
+            "   If *list* is ``None`` then a new tuple will be allocated, as well as a new",
+            "   bytes object to contain the data (as the fourth element in the tuple).",
+            "",
+            "   If *list* is not ``None`` then it should be a list object with a least four",
+            "   elements.  The fourth element should be a memoryview object which is created",
+            "   from either a bytearray or an array of type 'B' or 'b', and this array must",
+            "   have enough room for at least 8 bytes.  The list object will then be",
+            "   populated with the first three return values above, and the memoryview object",
+            "   will be resized inplace to the size of the data and filled in with that data.",
+            "   The same list and memoryview objects can be reused in subsequent calls to",
+            "   this method, providing a way of receiving data without using the heap.",
+            "   For example::",
+            "",
+            "        buf = bytearray(8)",
+            "        lst = [0, 0, 0, memoryview(buf)]",
+            "        # No heap memory is allocated in the following call",
+            "        can.recv(0, lst)"
+        ],
+        "docstring_len": 1406,
+        "type": "Tuple",
+        "confidence": 1.71,
+        "match": "<re.Match object; span=(960, 1086), match='return values above, and the memoryview object   >",
+        "module": "pyb",
+        "class": "CAN",
+        "function/method": "CAN.recv"
+    },
+    {
+        "signature": "SPI.recv(recv, *, timeout=5000)",
+        "docstring": [
+            "   Receive data on the bus:",
+            "",
+            "     - ``recv`` can be an integer, which is the number of bytes to receive,",
+            "       or a mutable buffer, which will be filled with received bytes.",
+            "     - ``timeout`` is the timeout in milliseconds to wait for the receive.",
+            "",
+            "   Return value: if ``recv`` is an integer then a new buffer of the bytes received,",
+            "   otherwise the same buffer that was passed in to ``recv``."
+        ],
+        "docstring_len": 392,
+        "type": "bytes",
+        "confidence": 2.2576,
+        "match": "<re.Match object; span=(254, 394), match='Return value: if ``recv`` is an integer then a ne>",
+        "module": "pyb",
+        "class": "SPI",
+        "function/method": "SPI.recv"
+    },
+    {
+        "signature": "Lock.acquire()",
+        "docstring": [
+            "    Wait for the lock to be in the unlocked state and then lock it in an atomic",
+            "    way.  Only one task can acquire the lock at any one time.",
+            "",
+            "    This is a coroutine."
+        ],
+        "docstring_len": 163,
+        "type": "Coroutine[None, Any, Any]",
+        "confidence": 0.1,
+        "match": "None",
+        "module": "uasyncio",
+        "class": "Lock",
+        "function/method": "Lock.acquire"
+    },
+    {
+        "signature": "open_connection(host, port)",
+        "docstring": [
+            "    Open a TCP connection to the given *host* and *port*.  The *host* address will be",
+            "    resolved using `socket.getaddrinfo`, which is currently a blocking call.",
+            "",
+            "    Returns a pair of streams: a reader and a writer stream.",
+            "    Will raise a socket-specific ``OSError`` if the host could not be resolved or if",
+            "    the connection could not be made.",
+            "",
+            "    This is a coroutine."
+        ],
+        "docstring_len": 369,
+        "type": "Coroutine[Tuple, Any, Any]",
+        "confidence": 1.4400000000000002,
+        "match": "<re.Match object; span=(168, 193), match='Returns a pair of streams'>",
+        "module": "uasyncio",
+        "class": "",
+        "function/method": "open_connection"
+    },
+    {
+        "signature": "writeblocks(block_num, buf)",
+        "docstring": [
+            "                writeblocks(block_num, buf, offset)",
+            "",
+            "        The first form writes aligned, multiples of blocks, and requires that the",
+            "        blocks that are written to be first erased (if necessary) by this method.",
+            "        Starting at the block given by the index *block_num*, write blocks from",
+            "        *buf* (an array of bytes) to the device.",
+            "        The number of blocks to write is given by the length of *buf*,",
+            "        which will be a multiple of the block size.",
+            "",
+            "        The second form allows writing at arbitrary locations within a block,",
+            "        and arbitrary lengths.  Only the bytes being written should be changed,",
+            "        and the caller of this method must ensure that the relevant blocks are",
+            "        erased via a prior ``ioctl`` call.",
+            "        Starting at block index *block_num*, and byte offset within that block",
+            "        of *offset*, write bytes from *buf* (an array of bytes) to the device.",
+            "        The number of bytes to write is given by the length of *buf*.",
+            "",
+            "        Note that implementations must never implicitly erase blocks if the offset",
+            "        argument is specified, even if it is zero."
+        ],
+        "docstring_len": 1096,
+        "type": "Any",
+        "confidence": 2.8499999999999996,
+        "match": "uos.writeblocks",
+        "module": "uos",
+        "class": "AbstractBlockDev",
+        "function/method": "writeblocks"
+    },
+    {
+        "signature": "match.group(index)",
+        "docstring": [
+            "   Return matching (sub)string. *index* is 0 for entire match,",
+            "   1 and above for each capturing group. Only numeric groups are supported."
+        ],
+        "docstring_len": 135,
+        "type": "str",
+        "confidence": 1.3056,
+        "match": "<re.Match object; span=(3, 30), match='Return matching (sub)string'>",
+        "module": "ure",
+        "class": "match",
+        "function/method": "match.group"
+    },
+    {
+        "signature": "WLANWiPy.irq(*, handler, wake)",
+        "docstring": [
+            "    Create a callback to be triggered when a WLAN event occurs during ``machine.SLEEP``",
+            "    mode. Events are triggered by socket activity or by WLAN connection/disconnection.",
+            "",
+            "        - *handler* is the function that gets called when the IRQ is triggered.",
+            "        - *wake* must be ``machine.SLEEP``.",
+            "",
+            "    Returns an IRQ object."
+        ],
+        "docstring_len": 323,
+        "type": "Any",
+        "confidence": 1.0467600000000001,
+        "match": "<re.Match object; span=(305, 326), match='Returns an IRQ object'>",
+        "module": "network",
+        "class": "WLANWiPy",
+        "function/method": "WLANWiPy.irq"
+    }
+]

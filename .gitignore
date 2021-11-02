@@ -7,22 +7,29 @@ project.pymakr
 
 # no compiled python 
 **/__pycache__/**
-.pytest_cache/*
 .py_cache
+.pytest_cache/*
 
 #ignore the scratchpad 
 scratch/*
 
 # ignore stubs 
-# stubs
+# stubs generated in testing
 board/stubs
 minified/stubs
 all-stubs
 
-# ignore test coverage report
-coverage
-.coverage
-.coverage.**
+stubs/*
+dev-stubs
+# generated stubs
+generated
+
+
+# ignore test coverage reports
+.coverage*
+coverage/*
+cov.xml
+
 
 # and tests results
 junit/*
@@ -31,6 +38,6 @@ junit/*
 # OS specific stuff
 desktop.ini
 
-
-# do not include the generated HTML documentaion in the repro 
-docs/_build
+# no documentation artefacts
+docs/~$*
+docs/_build/

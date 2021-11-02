@@ -163,7 +163,7 @@ def minify_script(keep_report=True, show_diff=False):
 
     Args:
         keep_report (bool, optional): Keeps single report line in createstubs
-            Defautls to True.
+            Defaults to True.
         show_diff (bool, optional): Print diff from edits. Defaults to False.
 
     Returns:
@@ -174,6 +174,7 @@ def minify_script(keep_report=True, show_diff=False):
         ("comment", "print"),
         ("comment", "import logging"),
         ("comment", "self._log ="),
+        ("comment", "self._log("),
         ("comment", "self._log.debug"),
         ("comment", "self._log.warning"),
         ("comment", "self._log.info"),

@@ -40,7 +40,6 @@ def read_modules(path: Path = None) -> Set:
                 line = f.readline()
 
     #     print("-" * 40)
-
     # print(">" * 40)
 
     return all_modules

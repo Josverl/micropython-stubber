@@ -4,9 +4,10 @@ simple Git module, where needed via powershell
 from typing import Union
 import subprocess
 import os
+from typing import Union, List
 
 
-def _run_git(cmd: str, repo: str = None, expect_stderr=False):
+def _run_git(cmd: List[str], repo: str = None, expect_stderr=False):
     "run a external (git) command in the repo's folder and deal with some of the errors"
     try:
         if repo:
@@ -29,7 +30,7 @@ def _run_git(cmd: str, repo: str = None, expect_stderr=False):
 
 def get_tag(repo: str = None) -> Union[str, None]:
     """
-    get the most recent git version tag of a local repo"
+    get the most recent git version tag of a local repo
     repo should be in the form of : repo = "./micropython"
 
     returns the tag or None
@@ -62,11 +63,43 @@ def checkout_tag(tag: str, repo: str = None) -> bool:
     return True
 
 
+def switch_tag(tag: str, repo: str = None) -> bool:
+    """
+    get the most recent git version tag of a local repo"
+    repo should be in the form of : path/.git
+        ../micropython/.git
+    returns the tag or None
+    """
+    cmd = ["git", "switch", "--detach", tag, "--quiet", "--force"]
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        return False
+    # actually a good result
+    print(result.stderr.decode("utf-8"))
+    return True
+
+
+def switch_branch(branch: str, repo: str = None) -> bool:
+    """
+    get the most recent git version tag of a local repo"
+    repo should be in the form of : path/.git
+        ../micropython/.git
+    returns the tag or None
+    """
+    cmd = ["git", "switch", branch, "--quiet", "--force"]
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        return False
+    # actually a good result
+    print(result.stderr.decode("utf-8"))
+    return True
+
+
 def fetch(repo: str) -> bool:
     """
     fetches a repo
-    repo should be in the form of :  repo = "../micropython/.git"
-
+    repo should be in the form of : path/.git
+        ./micropython/.git
     returns True on success
     """
     if not repo:
@@ -82,8 +115,8 @@ def fetch(repo: str) -> bool:
 def pull(repo: str, branch="master") -> bool:
     """
     pull a repo origin into master
-    repo should be in the form of : repo = "../micropython/.git"
-
+    repo should be in the form of : path/.git
+        ./micropython/.git
     returns True on success
     """
     if not repo:

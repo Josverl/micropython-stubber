@@ -11,6 +11,11 @@ mypy >= 0.812
 mpy-cross >= 1.16
 
 # stub refactoring
-# libcst >= 0.3.19
+libcst >= 0.3.19
 
+requests >= 2.25.1
 
+mypy >= 0.812
+
+# stub refactoring
+libcst >= 0.3.19

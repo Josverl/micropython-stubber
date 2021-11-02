@@ -420,9 +420,7 @@ class Stubber:
         self.ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
-                module_name, self._fwid, self.info, stubber_version
-            )
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, stubber_version)
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -570,9 +568,7 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info(
-            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
-        )
+        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
         gc.collect()
         try:
@@ -697,6 +693,7 @@ def main():
     stubber.clean()
     # # Option: Add your own modules
     # # stubber.add_modules(['bluetooth','GPS'])
+
     stubber.create_all_stubs()
     stubber.report()
 

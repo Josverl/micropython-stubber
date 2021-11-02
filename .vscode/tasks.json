@@ -26,11 +26,19 @@
                 "command": "python3 process.py minify --diff"
             },
             "problemMatcher": [],
+        },
+        {
+            "label": "minify",
+            "detail": "minify for esp8622",
+            "type": "shell",
+            "command": " python process.py minify",
+            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
+
         {
             "label": "run minified",
             "detail": "run minified createstubs in linux port",

@@ -18,6 +18,14 @@
     "python.testing.nosetestsEnabled": false,
     "peacock.color": "#613206",
     "restructuredtext.languageServer.disabled": true,
+    "python.analysis.extraPaths": [
+        "board/lib",
+        "all-stubs/cpython-core",
+        "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
+        "all-stubs/micropython-esp32-1_15"
+    ],
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true,
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#914b09",
         "activityBar.activeBorder": "#0bb45d",
