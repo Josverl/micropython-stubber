@@ -3,7 +3,7 @@ import subprocess
 
 
 def test_minifier(tmp_path):
-    "test creation of minified  version"
+    "test creation of minified version"
     # load process.py in the same python environment
     # TODO: Use temp_path to generate stubs
     cmd = [sys.executable, "process.py", "minify"]

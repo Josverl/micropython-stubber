@@ -32,10 +32,100 @@ def stubfolder(path: str) -> str:
     return "{}/{}".format(STUB_FOLDER, path)
 
 
-def flat_version(version: str):
+def flat_version(version: str, keep_v: bool = False):
     "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
-    return version.replace("v", "").replace(".", "_")
+    version = version.strip().replace(".", "_")
+    if not keep_v:
+        version = version.lstrip("v")
+    return version
 
+
+def cleanup(modules_folder: Path):
+    "Q&D cleanup"
+    # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice
+    #  - modules_root folder ( simple.pyi and robust.pyi) - NOT OK
+    #       - umqtt folder (simple.py & pyi and robust.py & pyi) OK
+    #  similar for mpy 1.9x - 1.11
+    #       - core.pyi          - uasyncio\core.py'
+    #       - urequests.pyi     - urllib\urequest.py'
+    # Mpy 1.13+
+    #       - uasyncio.pyi      -uasyncio\__init__.py
+
+    # todo - Add check for source folder
+    for file_name in (
+        "simple.pyi",
+        "robust.pyi",
+        "core.pyi",
+        "urequest.pyi",
+        "uasyncio.pyi",
+    ):
+        f = Path.joinpath(modules_folder, file_name)
+        if f.exists():
+            try:
+                print(" - removing {}".format(f))
+                f.unlink()
+            except OSError:
+                log.error(" * Unable to remove extranous stub {}".format(f))
+                pass
+
+
+def generate_pyi_from_file(file: Path) -> bool:
+    """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
+    # if 0:
+    #     cmd = "stubgen {0} --output {1} --include-private --ignore-errors".format(file, file.parent)
+    #     print(" >stubgen on {0}".format(file))
+    #     result = os.system(cmd)
+    #     return result == 0
+    sg_opt = stubgen.Options(
+        pyversion=(3, 5),
+        no_import=False,
+        include_private=True,
+        doc_dir="",
+        search_path=[],
+        interpreter=sys.executable,
+        parse_only=False,
+        ignore_errors=True,
+        modules=[],
+        packages=[],
+        files=[],
+        output_dir="",
+        verbose=True,
+        quiet=False,
+        export_less=False,
+    )
+
+    sg_opt.files = [str(file)]
+    sg_opt.output_dir = str(file.parent)
+    try:
+        stubgen.generate_stubs(sg_opt)
+        return True
+    except BaseException:
+        return False
+
+
+def generate_pyi_files(modules_folder: Path) -> bool:
+    """generate typeshed files for all scripts in a folder using mypy/stubgen"""
+    # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
+    py_files: List[Path]
+    pyi_files: List[Path]
+    modlist = list(modules_folder.glob("**/modules.json"))
+    if len(modlist) <= 1:
+        ## generate fyi files for folder
+        # clean before to clean any old stuff
+        cleanup(modules_folder)
+
+        print("running stubgen on {0}".format(modules_folder))
+        cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
+        result = os.system(cmd)
+        # Check on error
+        if result != 0:
+            # in case of failure then Plan B
+            # - run stubgen on each *.py
+            print("Failure on folder, attempt to stub per file.py")
+            py_files = List(modules_folder.glob("**/*.py"))
+            for py in py_files:
+                generate_pyi_from_file(py)
+                # todo: report failures
 
 def cleanup(modules_folder: Path):
     "Q&D cleanup"
@@ -145,6 +235,13 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # and clean after to only check-in good stuff
         cleanup(modules_folder)
         return True
+    #     ##
+    # for mod_manifest in modlist:
+    #     ## generate fyi files for folder
+    #     generate_pyi_files(mod_manifest.parent)
+
+    #     # todo: collect and report results
+    # return True
 
 
 def manifest(
@@ -158,6 +255,7 @@ def manifest(
     release=None,
     firmware=None,
 ) -> dict:
+
     "create a new empty manifest dict"
     if family is None:
         family = "micropython"  # family

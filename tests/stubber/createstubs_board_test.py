@@ -25,6 +25,8 @@ from board.createstubs import Stubber, read_path
 # - createstubs_board.test.py
 # - createstubs_minified.test.py
 # ----------------------------------------------------------------------------------------
+def test_stubber_Class_available():
+    assert Stubber is not None, "Stubber Class not imported"
 
 
 def test_stubber_info_basic():
@@ -194,6 +196,13 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
 
 
 # throws an error on the commandline
+@pytest.mark.skip(reason="test not yet written")
+def test_class_method():
+    "detect if @classmethod is written"
+    pass
+
+
+# throws an error on the commandline
 @pytest.mark.skip(reason="test not working")
 def test_read_path():
     assert read_path() == ""
@@ -294,19 +303,24 @@ def test_unavailable_modules(tmp_path: Path):
     assert len(stublist) == 0
 
 
-# def test_clean(tmp_path):
+def test_clean(tmp_path: Path):
+    myid = "MyCustomID"
+    test_path = tmp_path.as_posix()
+    stub_path = tmp_path / "stubs" / myid.lower()
+    stubber = Stubber(path=test_path, firmware_id=myid)
+    stubber.clean()
 
-#     myid = "MyCustomID"
-#     test_path = str(tmp_path)
-#     stub_path =  Path(test_path) /"stubs"/ myid.lower()
-#     stubber = Stubber(path = test_path, firmware_id=myid)
-#     stubber.clean()
+    # Create a file
+    stubber.create_module_stub("json", (stub_path / "json.py").as_posix())
+    stublist = list(Path(test_path).glob("**/*.py"))
+    assert len(stublist) == 1
 
-#     #Create a file
-#     stubber.create_module_stub("json", PurePosixPath( stub_path / "json.py") )
-#     stublist = list(Path(test_path).glob('**/*.py'))
-#     assert len(stublist) == 1
-#     stubber.clean()
+    # see if that gets cleared
+    stubber.clean()
+    stublist = list(Path(test_path).glob("**/*.py"))
+    assert len(stublist) == 0
+
+
 # Error
 # # tests\stubber\createstubs_info_mpy_test.py:244:
 # # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _

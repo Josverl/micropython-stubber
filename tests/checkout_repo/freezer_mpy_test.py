@@ -71,14 +71,18 @@ def test_freezer_mpy_manifest(tmp_path, testrepo_micropython, testrepo_micropyth
     if version < mpy_version:
         git.checkout_tag(mpy_version, mpy_path)
         version = git.get_tag(mpy_path)
-        assert version == mpy_version, "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
+        assert (
+            version == mpy_version
+        ), "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
 
     stub_path = Path(tmp_path)
     get_mpy.get_frozen(str(stub_path), version=mpy_version, mpy_path=mpy_path, lib_path=mpy_lib)
     scripts = list(stub_path.rglob("*.py"))
 
     assert scripts is not None, "can freeze scripts from manifest"
-    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
+    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(
+        len(scripts)
+    )
 
 
 @pytest.mark.basicgit

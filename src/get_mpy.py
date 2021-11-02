@@ -273,7 +273,9 @@ def get_target_names(path: str) -> tuple:
     return mpy_port, mpy_board
 
 
-def get_frozen_manifest(manifests, stub_path: str, mpy_path: str, lib_path: str, version: str):
+def get_frozen_manifest(
+    manifests, stub_path: str, mpy_path: str, lib_path: str, version: str
+):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
     locates the to-be-frozen files through the manifest.py introduced in MicroPython 1.12

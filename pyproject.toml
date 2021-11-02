@@ -1,5 +1,6 @@
 [tool.black]
-line-length = 120
+# use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
+line-length = 140
 target_version = ['py34']
 include = '\.pyi?$'
 exclude = '''
@@ -16,7 +17,6 @@ exclude = '''
     )/
 )
 '''
-
 
 [tool.pytest.ini_options]
 junit_family = "xunit1"
