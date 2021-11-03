@@ -1,5 +1,5 @@
 # SOT
-from readfrom_rst import RSTReader
+from stubs_from_docs import RSTReader
 
 
 #: Use this content as input for moo to do bar
@@ -188,6 +188,7 @@ def test_sequence_functions():
     # check function signatures
     # check docstrings ( the same)
 
+
 CLASS_METHOD_SEQ = """
 :mod:`re` -- simple regular expressions
 =======================================
@@ -218,7 +219,6 @@ Compiled regular expression. Instances of this class are created using
    maximum number of splits to perform. Returns list of strings (there
    may be up to *max_split+1* elements if it's specified).
 """
-
 
 
 def test_sequence_methods():

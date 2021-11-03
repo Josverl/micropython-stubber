@@ -1,39 +1,44 @@
 """ Work in Progress
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking 
 
-    - uses a custom build parser to read the RST files 
-    - generates 
-        modules 
+    - uses a custom-built parser to read the RST files
+    - generates:
+        - modules 
             - docstrings
-        function definitions 
+
+        - function definitions 
             - function parameters based on documentation
             - docstrings
+
         classes
             - docstrings
-            __init__ method
+            - __init__ method
             - parameters based on documentation for class 
-            methods
+            - methods
                 - parameters based on documentation for the method
                 - docstrings
-        exceptions
+
+        - exceptions
+
     - tries to determine the return type by parsing the docstring.
-        - if no type can be detected the type `Any` is used
-        - a Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring (yet). 
-        - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
-        - Generators, Iterators
-        - Callable
         - Imperative verbs used in docstrings have a strong correlation to return -> None
+        - recognizes documented Generators, Iterators, Callable
         - Coroutines are identified based tag "This is a Coroutine". Then if the return type was Foo, it will be transformed to : Coroutine[Foo]
+        - a static Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring. 
+        - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
+        - if no type can be detected the type `Any` is used
 
     The generated stub files are formatted using `black` and checked for validity using `pyright`
 
     - ordering of inter-dependent classes in the same module   
     
     - Literals / constants
-        -   documentation contains  repeated vars with the same indentation
+        - documentation contains repeated vars with the same indentation
         - Module level:
+
            .. data:: IPPROTO_UDP
                      IPPROTO_TCP
+
         - class level:
             .. data:: Pin.IRQ_FALLING
                     Pin.IRQ_RISING
@@ -41,6 +46,7 @@
                     Pin.IRQ_HIGH_LEVEL
 
                     Selects the IRQ trigger type.
+
         - literals documented using a wildcard are added as comments only 
 
     - add GLUE imports to allow specific modules to import specific others. 
@@ -62,6 +68,8 @@ Not yet implemented
 
 
     # correct warnings for 'Unsupported escape sequence in string literal'
+
+
 """
 
 import json
@@ -221,6 +229,7 @@ class RSTReader:
     def parse_docstring(self) -> List[str]:
         """Read a textblock that will be used as a docstring, or used to process a toc tree
         The textblock is terminated at the following RST line structures/tags
+
             .. <anchor>
             -- Heading
             == Heading
@@ -237,18 +246,10 @@ class RSTReader:
                 self.line_no < len(self.rst_text)
                 and not self.rst_text[self.line_no]
                 .lstrip()
-                .startswith(
-                    ".."
-                )  # stop at anchor ( however .. note: could be considered to be added)
-                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith(
-                    "--"
-                )  # Heading --
-                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith(
-                    "=="
-                )  # Heading ==
-                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith(
-                    "~~"
-                )  # Heading ~~
+                .startswith("..")  # stop at anchor ( however .. note: could be considered to be added)
+                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith("--")  # Heading --
+                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith("==")  # Heading ==
+                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith("~~")  # Heading ~~
             ):
                 line = self.rst_text[self.line_no]
                 block.append(line.rstrip())
@@ -401,10 +402,7 @@ class RSTReader:
                 version = "latest"
             else:
                 version = self.source_tag.replace("_", ".")
-            docstr[0] = (
-                docstr[0]
-                + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
-            )
+            docstr[0] = docstr[0] + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -439,9 +437,7 @@ class RSTReader:
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=this_function, module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
 
             ...
             # defaults
@@ -559,9 +555,7 @@ class RSTReader:
                 self.output_dict += parent_class
 
             # parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -671,9 +665,7 @@ class RSTReader:
         # deal with documentation wildcards
         for name in names:
 
-            type = return_type_from_context(
-                docstring=docstr, signature=name, module=self.current_module, literal=True
-            )
+            type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
             if type in ["None"]:  # None does not make sense
                 type = "Any"  # perhaps default to Int ?
             name = self.strip_prefixes(name)
@@ -730,9 +722,7 @@ class RSTReader:
         self.prepare_output()
 
 
-def generate_from_rst(
-    rst_folder: Path, dst_folder: Path, v_tag: str, black=True, pattern: str = "*.rst"
-) -> int:
+def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True, pattern: str = "*.rst") -> int:
     if not dst_folder.exists():
         dst_folder.mkdir(parents=True)
     # no index, and module.xxx.rst is included in module.py
