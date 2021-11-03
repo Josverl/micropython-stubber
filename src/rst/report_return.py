@@ -9,9 +9,7 @@ build test and  % report
 
 import json
 from pathlib import Path
-import re
-from typing import Dict, List, Tuple, Union
-
+from typing import List, Tuple
 from . import utils
 
 
@@ -46,13 +44,13 @@ def process(folder: Path, pattern: str):
                             "function/method": item[2],
                         }
                     )
-                    isGood = r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
-                    isBad = r["confidence"] <= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
+                    # isGood = r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
+                    isBad = float(r["confidence"]) <= 0.5 and float(r["confidence"]) <= 0.8 and item[2] != ""
                     if isBad:
                         context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
                             print(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
-                        except:
+                        except Exception:
                             print(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 
                         # print(r)
