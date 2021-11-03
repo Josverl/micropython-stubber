@@ -1,4 +1,6 @@
-""" Work in Progress  
+"""
+Work in Progress
+----------------
 
 Tries to determine the return type by parsing the docstring and the function signature
  - if the signature contains a return type --> <something> then that is returned
@@ -14,7 +16,7 @@ Tries to determine the return type by parsing the docstring and the function sig
  - the default Type is 'Any'
  
 
-todo: 
+to do:
 
     - regex :
         - 'With no arguments the frequency in Hz is returned.'
@@ -436,7 +438,7 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     Logic:
     - if the signature contains a return type --> <something> then that is returned
     - use re to find phrases such as:
-    
+
         - 'Returns ..... '
         - 'Gets  ..... '
 

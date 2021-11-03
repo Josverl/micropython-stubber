@@ -35,11 +35,14 @@
     - Literals / constants
         - documentation contains repeated vars with the same indentation
         - Module level:
+        .. code-block:: 
 
-           .. data:: IPPROTO_UDP
+            .. data:: IPPROTO_UDP
                      IPPROTO_TCP
 
-        - class level:
+        - class level: 
+        .. code-block:: 
+        
             .. data:: Pin.IRQ_FALLING
                     Pin.IRQ_RISING
                     Pin.IRQ_LOW_LEVEL
@@ -755,7 +758,7 @@ if __name__ == "__main__":
         raise ValueError
 
     rst_folder = base_path / "docs" / "library"
-    dst_folder = Path("generated") / base_path.stem / flat_version(v_tag, keep_v=True)
+    dst_folder = Path("all-stubs") / base_path.stem / (flat_version(v_tag, keep_v=True ) + "-docs")
 
     generate_from_rst(rst_folder, dst_folder, v_tag)
     # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
