@@ -6,13 +6,16 @@
   [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
   [![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#Contributions)
   [![Star on GitHub](https://img.shields.io/github/stars/josverl/micropython-stubber.svg?style=social)](https://github.com/josverl/micropython-stubber/stargazers)
+  [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Josverl/micropython-stubber.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Josverl/micropython-stubber/context:python)
+  
 
 The intellisense and code linting that is so prevalent in modern editors, does not work out-of-the-gate for MicroPython projects.
 While the language is Python, the modules used are different from CPython , and also different ports have different modules and classes , or the same class with different parameters.
 
 Writing MicroPython code in a modern editor should not need to involve keeping a browser open to check for the exact parameters to read a sensor, light-up a led or send a network request.
 
-Fortunately with some additional configuration and data, it is possible to make the editors understand your flavor of MicroPython. even if you run a on-off custom firmware version.
+Fortunately with some additional configuration and data, it is possible to make the editors understand your flavor of MicroPython, wether you use one of the pre-compiled firmwares, but also if you run a one-off custom firmware version.
+
 
 ![demo][]]
 

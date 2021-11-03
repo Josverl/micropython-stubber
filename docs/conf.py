@@ -41,6 +41,7 @@ extensions = [
     "sphinx.ext.autosummary",  # Generate autodoc summaries
     "sphinx.ext.autodoc",  # Support for NumPy and Google style docstrings
     "sphinx.ext.coverage",  # Collect doc coverage stats
+    "sphinx.ext.napoleon",
     # 'sphinx.ext.doctest', # use Test snippets in the documentation
     "sphinx.ext.intersphinx",  # Link to other projects’ documentation
     # 'sphinx.ext.todo', # Support for todo items
