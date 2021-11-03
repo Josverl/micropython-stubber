@@ -67,7 +67,7 @@ def switch_tag(tag: str, repo: str = None) -> bool:
     """
     get the most recent git version tag of a local repo"
     repo should be in the form of : path/.git
-        ../micropython/.git
+    repo = '../micropython/.git'
     returns the tag or None
     """
     cmd = ["git", "switch", "--detach", tag, "--quiet", "--force"]
@@ -83,7 +83,7 @@ def switch_branch(branch: str, repo: str = None) -> bool:
     """
     get the most recent git version tag of a local repo"
     repo should be in the form of : path/.git
-        ../micropython/.git
+    repo = '../micropython/.git'
     returns the tag or None
     """
     cmd = ["git", "switch", branch, "--quiet", "--force"]
@@ -99,7 +99,7 @@ def fetch(repo: str) -> bool:
     """
     fetches a repo
     repo should be in the form of : path/.git
-        ./micropython/.git
+    repo = '../micropython/.git'
     returns True on success
     """
     if not repo:
@@ -116,7 +116,7 @@ def pull(repo: str, branch="master") -> bool:
     """
     pull a repo origin into master
     repo should be in the form of : path/.git
-        ./micropython/.git
+    repo = '../micropython/.git'
     returns True on success
     """
     if not repo:

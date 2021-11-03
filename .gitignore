@@ -41,3 +41,6 @@ desktop.ini
 # no documentation artefacts
 docs/~$*
 docs/_build/
+
+# Do not check in the autodoc generated API documentaion files 
+docs/api

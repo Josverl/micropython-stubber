@@ -1,7 +1,7 @@
 """ Work in Progress  
 
-    - build test and  % report 
-   - 
+build test and  % report 
+
 """
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/D5ddB2/1
@@ -13,6 +13,7 @@ import re
 from typing import Dict, List, Tuple, Union
 
 from . import utils
+
 
 def process(folder: Path, pattern: str):
     # read all .json files in the folder
@@ -31,9 +32,7 @@ def process(folder: Path, pattern: str):
                     signature = str(item[3]).split("::")[-1].strip()
                     docstring = item[4]
 
-                    r = utils._type_from_context(
-                        docstring=docstring, signature=signature, module=module_name
-                    )
+                    r = utils._type_from_context(docstring=docstring, signature=signature, module=module_name)
                     report.append(
                         {
                             "signature": signature,
@@ -52,9 +51,7 @@ def process(folder: Path, pattern: str):
                     if isBad:
                         context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
-                            print(
-                                f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}"
-                            )
+                            print(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
                         except:
                             print(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 
