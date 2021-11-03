@@ -2,7 +2,7 @@
 from typing import Dict, List, Union
 
 # SOT
-from readfrom_rst import RSTReader
+from stubs_from_docs import RSTReader
 
 ###################################################################################################
 # Helpers
