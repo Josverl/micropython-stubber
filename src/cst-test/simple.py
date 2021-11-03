@@ -3,13 +3,13 @@
 from libcst._nodes.module import Module
 from typing import Sequence
 import libcst as cst
-from libcst import (
-    SimpleStatementLine,
-    BaseSuite,
-    Expr,
-    SimpleString,
-    ConcatenatedString,
-)
+# from libcst import (
+#     # SimpleStatementLine,
+#     # BaseSuite,
+#     Expr,
+#     # SimpleString,
+#     # ConcatenatedString,
+# )
 
 from libcst.helpers import parse_template_expression, ensure_type
 
@@ -150,7 +150,7 @@ while isinstance(expr, (cst.BaseSuite, cst.SimpleStatementLine)):
         assert 1, "body does not start with block or docstring"
     expr = expr.body[0]
 
-if not isinstance(expr, Expr):
+if not isinstance(expr, cst.Expr):
     # fixme: what to do if there is no initial docstr Expression in the body
     assert 1, "there is no Expression in the body"
 

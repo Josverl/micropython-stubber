@@ -5,7 +5,7 @@ from typing import Union
 import libcst as cst
 
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
-from libcst.codemod.visitors import AddImportsVisitor
+# from libcst.codemod.visitors import AddImportsVisitor
 
 
 # Tutorial https://libcst.readthedocs.io/en/latest/codemods_tutorial.html

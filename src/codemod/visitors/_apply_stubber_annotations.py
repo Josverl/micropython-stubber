@@ -70,9 +70,7 @@ class TypeCollector(cst.CSTVisitor):
     def visit_FunctionDef(self, node: cst.FunctionDef) -> bool:
         self.qualifier.append(node.name.value)
         returns = node.returns
-        return_annotation = (
-            self._create_import_from_annotation(returns) if returns is not None else None
-        )
+        return_annotation = self._create_import_from_annotation(returns) if returns is not None else None
         parameter_annotations = self._import_parameter_annotations(node.params)
         self.function_annotations[".".join(self.qualifier)] = FunctionAnnotation(
             parameters=parameter_annotations, returns=return_annotation
@@ -108,9 +106,7 @@ class TypeCollector(cst.CSTVisitor):
             for import_name in _get_import_alias_names(names):
                 AddImportsVisitor.add_needed_import(self.context, module_name, import_name)
 
-    def _add_annotation_to_imports(
-        self, annotation: cst.Attribute
-    ) -> Union[cst.Name, cst.Attribute]:
+    def _add_annotation_to_imports(self, annotation: cst.Attribute) -> Union[cst.Name, cst.Attribute]:
         key = get_full_name_for_node(annotation.value)
         if key is not None:
             # Don't attempt to re-import existing imports.
@@ -145,12 +141,8 @@ class TypeCollector(cst.CSTVisitor):
                     new_index = item.slice.with_changes(value=name)
                     new_slice.append(item.with_changes(slice=new_index))
                 else:
-                    if isinstance(item.slice, cst.Index) and not isinstance(
-                        item.slice.value, cst.Name
-                    ):
-                        new_index = item.slice.with_changes(
-                            value=self._handle_Index(item.slice, item)
-                        )
+                    if isinstance(item.slice, cst.Index) and not isinstance(item.slice.value, cst.Name):
+                        new_index = item.slice.with_changes(value=self._handle_Index(item.slice, item))
                         item = item.with_changes(slice=new_index, comma=None)
                     new_slice.append(item)
             return node.with_changes(slice=new_slice)
@@ -179,9 +171,7 @@ class TypeCollector(cst.CSTVisitor):
                 annotation = parameter.annotation
                 # @@ change to all params ?
                 if annotation is not None:
-                    parameter = parameter.with_changes(
-                        annotation=self._create_import_from_annotation(annotation)
-                    )
+                    parameter = parameter.with_changes(annotation=self._create_import_from_annotation(annotation))
                 updated_parameters.append(parameter)
             return updated_parameters
 
@@ -297,9 +287,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
         context_contents = self.context.scratch.get(ApplyStubberAnnotationsVisitor.CONTEXT_KEY)
         if context_contents is not None:
             stub, overwrite_existing_annotations = context_contents
-            self.overwrite_existing_annotations = (
-                self.overwrite_existing_annotations or overwrite_existing_annotations
-            )
+            self.overwrite_existing_annotations = self.overwrite_existing_annotations or overwrite_existing_annotations
             visitor = TypeCollector(existing_import_names, self.context)
             stub.visit(visitor)
             self.annotations.function_annotations.update(visitor.function_annotations)
@@ -312,9 +300,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
     def _qualifier_name(self) -> str:
         return ".".join(self.qualifier)
 
-    def _annotate_single_target(
-        self, node: cst.Assign, updated_node: cst.Assign
-    ) -> Union[cst.Assign, cst.AnnAssign]:
+    def _annotate_single_target(self, node: cst.Assign, updated_node: cst.Assign) -> Union[cst.Assign, cst.AnnAssign]:
         only_target = node.targets[0].target
         if isinstance(only_target, (cst.Tuple, cst.List)):
             for element in only_target.elements:
@@ -328,10 +314,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
             name = get_full_name_for_node(only_target)
             if name is not None:
                 self.qualifier.append(name)
-                if (
-                    self._qualifier_name() in self.annotations.attribute_annotations
-                    and not isinstance(only_target, cst.Subscript)
-                ):
+                if self._qualifier_name() in self.annotations.attribute_annotations and not isinstance(only_target, cst.Subscript):
                     annotation = self.annotations.attribute_annotations[self._qualifier_name()]
                     self.qualifier.pop()
                     return cst.AnnAssign(cst.Name(name), annotation, node.value)
@@ -370,15 +353,11 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
             self.toplevel_annotations[name] = annotation
         self.qualifier.pop()
 
-    def _update_parameters(
-        self, annotations: FunctionAnnotation, updated_node: cst.FunctionDef
-    ) -> cst.Parameters:
+    def _update_parameters(self, annotations: FunctionAnnotation, updated_node: cst.FunctionDef) -> cst.Parameters:
         # Update params and default params with annotations
         # Don't override existing annotations or default values unless asked
         # to overwrite existing annotations.
-        def update_annotation(
-            parameters: Sequence[cst.Param], annotations: Sequence[cst.Param]
-        ) -> List[cst.Param]:
+        def update_annotation(parameters: Sequence[cst.Param], annotations: Sequence[cst.Param]) -> List[cst.Param]:
             parameter_annotations = {}
             annotated_parameters = []
             if self.force and self.overwrite_existing_annotations:
@@ -390,9 +369,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
                         parameter_annotations[parameter.name.value] = parameter.annotation
                 for parameter in parameters:
                     key = parameter.name.value
-                    if key in parameter_annotations and (
-                        self.overwrite_existing_annotations or not parameter.annotation
-                    ):
+                    if key in parameter_annotations and (self.overwrite_existing_annotations or not parameter.annotation):
                         parameter = parameter.with_changes(annotation=parameter_annotations[key])
                     annotated_parameters.append(parameter)
                 return annotated_parameters
@@ -400,9 +377,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
         # TODO: perhaps force is better implemented here ?
         return annotations.parameters.with_changes(
             params=update_annotation(updated_node.params.params, annotations.parameters.params),
-            kwonly_params=update_annotation(
-                updated_node.params.kwonly_params, annotations.parameters.kwonly_params
-            ),
+            kwonly_params=update_annotation(updated_node.params.kwonly_params, annotations.parameters.kwonly_params),
             posonly_params=update_annotation(
                 updated_node.params.posonly_params,
                 annotations.parameters.posonly_params,
@@ -427,9 +402,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
             return statements
         # Statement has a comment first line, so lets add one more empty line
         return [
-            statements[0].with_changes(
-                leading_lines=(cst.EmptyLine(), *statements[0].leading_lines)
-            ),
+            statements[0].with_changes(leading_lines=(cst.EmptyLine(), *statements[0].leading_lines)),
             *statements[1:],
         ]
 
@@ -437,9 +410,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
         self.qualifier.append(node.name.value)
         self.visited_classes.add(node.name.value)
 
-    def leave_ClassDef(
-        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
-    ) -> cst.ClassDef:
+    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         self.qualifier.pop()
         return updated_node
 
@@ -448,9 +419,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
         # pyi files don't support inner functions, return False to stop the traversal.
         return False
 
-    def leave_FunctionDef(
-        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
-    ) -> cst.FunctionDef:
+    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
         key = self._qualifier_name()
         self.qualifier.pop()
         if key in self.annotations.function_annotations:
@@ -464,9 +433,7 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
             return updated_node.with_changes(params=new_parameters)
         return updated_node
 
-    def leave_Assign(
-        self, original_node: cst.Assign, updated_node: cst.Assign
-    ) -> Union[cst.Assign, cst.AnnAssign]:
+    def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> Union[cst.Assign, cst.AnnAssign]:
 
         if len(original_node.targets) > 1:
             for assign in original_node.targets:
@@ -481,25 +448,19 @@ class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
         else:
             return self._annotate_single_target(original_node, updated_node)
 
-    def leave_ImportFrom(
-        self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-    ) -> cst.ImportFrom:
+    def leave_ImportFrom(self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom) -> cst.ImportFrom:
         self.import_statements.append(original_node)
         return updated_node
 
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
         fresh_class_definitions = [
-            definition
-            for name, definition in self.annotations.class_definitions.items()
-            if name not in self.visited_classes
+            definition for name, definition in self.annotations.class_definitions.items() if name not in self.visited_classes
         ]
         if not self.toplevel_annotations and not fresh_class_definitions:
             return updated_node
         toplevel_statements = []
         # First, find the insertion point for imports
-        statements_before_imports, statements_after_imports = self._split_module(
-            original_node, updated_node
-        )
+        statements_before_imports, statements_after_imports = self._split_module(original_node, updated_node)
 
         # Make sure there's at least one empty line before the first non-import
         statements_after_imports = self._insert_empty_line(statements_after_imports)

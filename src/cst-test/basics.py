@@ -5,16 +5,17 @@
 # import sys
 # sys.path.append("../../")
 
-from typing import List, Tuple, Dict, Optional, Pattern, Sequence, Union
+from typing import List, Tuple, Dict, Optional, Sequence
 import libcst as cst
-from libcst import (
-    SimpleStatementLine,
-    BaseCompoundStatement,
-    BaseSuite,
-    Expr,
-    SimpleString,
-    ConcatenatedString,
-)
+
+# from libcst import (
+#     SimpleStatementLine,
+#     BaseCompoundStatement,
+#     BaseSuite,
+#     Expr,
+#     SimpleString,
+#     ConcatenatedString,
+# )
 
 from samples import rich_source, simple_stub
 
@@ -83,9 +84,7 @@ class TypingTransformer(cst.CSTTransformer):
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(
-        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
-    ) -> cst.CSTNode:
+    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.CSTNode:
         key = tuple(self.stack)
         self.stack.pop()
         if key in self.annotations:
@@ -106,9 +105,7 @@ class TypingTransformer(cst.CSTTransformer):
         return False  # pyi files don't support inner functions, return False to stop the traversal.
         # jv: dit kan/mag geloof ik niet in een codemod
 
-    def leave_FunctionDef(
-        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
-    ) -> cst.CSTNode:
+    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.CSTNode:
         key = tuple(self.stack)
         self.stack.pop()
 
@@ -160,9 +157,7 @@ print(modified_tree.code)
 # Use difflib to show the changes to verify type annotations were added as expected.
 import difflib
 
-print(
-    "".join(difflib.unified_diff(simple_stub.splitlines(True), modified_tree.code.splitlines(True)))
-)
+print("".join(difflib.unified_diff(simple_stub.splitlines(True), modified_tree.code.splitlines(True))))
 
 
 # %%
