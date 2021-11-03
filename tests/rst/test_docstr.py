@@ -5,7 +5,7 @@ from pathlib import Path
 import basicgit as git
 
 # SOT
-from readfrom_rst import generate_from_rst, RSTReader, TYPING_IMPORT
+from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
 from helpers import load_rst, read_stub
@@ -92,9 +92,5 @@ def test_parse_docstr_quoted():
     assert len(r.output) > 1
     assert len(r.output_dict["constants"]) > 2
 
-    assert not any(
-        [l.startswith("# :") for l in r.output_dict["constants"]]
-    ), "Some lines were not unquoted"
-    assert not any(
-        [l.startswith("# +") for l in r.output_dict["constants"]]
-    ), "Some lines were not unquoted"
+    assert not any([l.startswith("# :") for l in r.output_dict["constants"]]), "Some lines were not unquoted"
+    assert not any([l.startswith("# +") for l in r.output_dict["constants"]]), "Some lines were not unquoted"

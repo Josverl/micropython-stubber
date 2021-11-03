@@ -5,7 +5,7 @@ from pathlib import Path
 import basicgit as git
 
 # SOT
-from readfrom_rst import generate_from_rst, RSTReader, TYPING_IMPORT
+from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
 from helpers import load_rst, read_stub
