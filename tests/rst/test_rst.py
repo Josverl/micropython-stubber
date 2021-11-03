@@ -16,15 +16,16 @@ MICROPYTHON_FOLDER = "micropython"
 
 
 def test_pyright():
-    "Check if Pyright can be run and v >"
+    "Check if Pyright is installed and can be run"
     # cmd = ["pyright", "generated/micropython/1_16-nightly", "--outputjson"]
     cmd = ["pyright", "--version"]
+
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True)
+        result = subprocess.getoutput(" ".join(cmd))
     except OSError as e:
         raise e
-    assert "pyright" in result.stdout.decode()
-    ver = result.stdout.decode().split()[-1]
+    assert "pyright" in result
+    ver = result.split()[-1]
     assert version.parse(ver) > version.parse("1.1")
 
 
@@ -40,10 +41,11 @@ def pyright(rst_stubs):
     cmd = ["pyright", rst_stubs.as_posix(), "--outputjson"]
     try:
         # result = subprocess.run(cmd, capture_output=False)
-        result = subprocess.run(cmd, shell=True, capture_output=True)
+        # result = subprocess.run(cmd, shell=True, capture_output=True)
+        result = subprocess.getoutput(" ".join(cmd))
     except OSError as e:
         raise e
-    results = json.loads(result.stdout)
+    results = json.loads(result)
     assert results["summary"]["filesAnalyzed"] >= 40, ">= 40 files checked"
     yield results
     # cleanup code here
