@@ -3,6 +3,7 @@
 from libcst._nodes.module import Module
 from typing import Sequence
 import libcst as cst
+
 # from libcst import (
 #     # SimpleStatementLine,
 #     # BaseSuite,
@@ -38,7 +39,7 @@ print(source_tree.get_docstring())
 
 source_tree.code_for_node(source_tree.children[3])
 
-##  select a class defenition - Q&D
+##  select a class definition - Q&D
 classdef = source_tree.children[2]
 assert isinstance(classdef, cst.ClassDef), "Not a classdef"
 
@@ -159,9 +160,7 @@ print(source_tree.code_for_node(expr))
 
 
 # new_docstr = parse_template_expression("'new docs string'", config=config)
-new_docstr = expr.with_changes(
-    value=parse_template_expression("new \ndoc\nstring", config=config)
-)
+new_docstr = expr.with_changes(value=parse_template_expression("new \ndoc\nstring", config=config))
 
 print(source_tree.code_for_node(new_docstr))
 newtree = ensure_type(source_tree.deep_replace(expr, new_docstr), Module)
