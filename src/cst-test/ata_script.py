@@ -22,8 +22,8 @@ visitor = ApplyStubberAnnotationsVisitor(context)
 # Stubs := Rich
 # Sources: to be enriched
 
-stubs_dir = "data/annotations/micropython-v1_16/"
-sources_dir = "dev-stubs/micropython-esp32-1_15/"
+stubs_dir = "all-stubs/micropython-v1_16-documentation/"
+sources_dir = "dev-stubs/micropython-v1_16-esp32/"
 
 stubs_dict = {}
 sources_dict = {}
@@ -54,7 +54,7 @@ for key in stubs_dict:
     try:
         with open(sources_dict[key]) as file:
             source = file.read()
-    except:
+    except Exception:
         prRed("No corresponding file for stub: " + stubs_dict[key])
         continue
     source_module: Module
@@ -79,7 +79,7 @@ for key in stubs_dict:
         # file = open(sources_dict[key], "w")
         # file.write(result.code)
         # file.close()
-    except:
+    except Exception:
         prRed("Error saving file: " + sources_dict[key])
 
     # Also look at

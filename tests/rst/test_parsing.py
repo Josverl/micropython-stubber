@@ -1,14 +1,11 @@
 # others
-from typing import Dict, List, Union
 import pytest
-from pathlib import Path
-import basicgit as git
 
 # SOT
-from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
+from stubs_from_docs import RSTReader
 
 
-from helpers import load_rst, read_stub
+from helpers import load_rst
 
 ####################################################################################################
 
@@ -116,7 +113,6 @@ def test_parse_class_modulename(line, module):
     r.parse()
     # check
     assert len(r.output) > 1
-    expected = []
     assert line in [l.rstrip() for l in r.output]
 
 
@@ -137,7 +133,6 @@ def test_parse_class_micro_modulename(line):
     r.parse()
     # check
     assert len(r.output) > 1
-    expected = []
     # don't care about indentation,
     # but one of the lines must start with the class def
     assert any([l.strip().startswith(line) for l in r.output])
