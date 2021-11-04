@@ -5,6 +5,7 @@ from typing import Union
 import libcst as cst
 
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
+
 # from libcst.codemod.visitors import AddImportsVisitor
 
 
@@ -45,11 +46,7 @@ class ConvertConstantCommand(VisitorBasedCodemodCommand):
         self.string = string
         self.constant = constant
 
-    def leave_SimpleString(
-        self, 
-        original_node: cst.SimpleString, 
-        updated_node: cst.SimpleString
-    ) -> Union[cst.SimpleString, cst.Name]:
+    def leave_SimpleString(self, original_node: cst.SimpleString, updated_node: cst.SimpleString) -> Union[cst.SimpleString, cst.Name]:
         if literal_eval(updated_node.value) == self.string:
 
             return cst.Name(self.constant)

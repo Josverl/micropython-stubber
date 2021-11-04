@@ -66,7 +66,6 @@ def cleanup(modules_folder: Path):
                 f.unlink()
             except OSError:
                 log.error(" * Unable to remove extranous stub {}".format(f))
-                pass
 
 
 def generate_pyi_from_file(file: Path) -> bool:
@@ -99,7 +98,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     try:
         stubgen.generate_stubs(sg_opt)
         return True
-    except BaseException:
+    except Exception:
         return False
 
 
@@ -126,6 +125,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             for py in py_files:
                 generate_pyi_from_file(py)
                 # todo: report failures
+
 
 def cleanup(modules_folder: Path):
     "Q&D cleanup"
