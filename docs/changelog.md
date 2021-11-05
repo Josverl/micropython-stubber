@@ -1,7 +1,10 @@
 
 # Changelog 
 
-## createstubs - Minified- v1.4.1 
+## createstubs.py - v1.4.2
+- Fixes a regression introduced in 1.4-beta where function definitions would include a self parameter. 
+
+## minified createstubs.py - v1.4.1
 - Switched to use [python-minifier](https://github.com/dflook/python-minifier) for the minification due to the end-of-life of the previous minification tool 
   The new minification tool produces more compact code, although that is still not sufficient for some memory constrained devices.
   - there are no functional changes, 
@@ -9,10 +12,10 @@
   - several tests were adjusted
 
 ## documentation 
-- Add Sphinxs documentaion 
+- Add Sphinxs documentation 
     - changelog 
     - automatic API documentation for 
-        * createsubs.py (board) 
+        * createstubs.py (board) 
         * scripts to run on PC / Github actions
 - Publish documentation to readthedocs
     
