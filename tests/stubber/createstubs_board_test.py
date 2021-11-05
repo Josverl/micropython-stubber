@@ -24,6 +24,7 @@ from board.createstubs import Stubber, read_path
 # Below this the tests are identical between
 # - createstubs_board.test.py
 # - createstubs_minified.test.py
+# > Minified veersions are marked
 # ----------------------------------------------------------------------------------------
 
 
@@ -292,6 +293,55 @@ def test_unavailable_modules(tmp_path: Path):
     stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.py"))
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 0
+
+
+#################################################################
+#
+#################################################################
+
+
+@pytest.mark.parametrize(
+    "mod_name, expected, should_not",
+    [
+        # functions should not have self
+        ("micropython", "def const(*args) -> Any:", "def const():"),
+        ("_thread", "def allocate_lock(*args) -> Any:", "def allocate_lock():"),
+        ("_thread", "", "allocate_lock: Any:"),
+        # imported modules should not be output
+        ("micropython", "", "builtins: Any"),
+        ("micropython", "# import builtins", ""),
+    ],
+)
+def test_stub_functions(tmp_path: Path, mod_name: str, expected: str, should_not: str):
+    stubber = Stubber(path=str(tmp_path))  # type: ignore
+    stubber.create_module_stub(mod_name, str(tmp_path / "test_function.py"))
+
+    with open(tmp_path / "test_function.py", "r") as tf:
+        lines = tf.read().split("\n")
+    if expected:
+        assert expected in lines
+    if should_not:
+        assert should_not not in lines
+
+
+@pytest.mark.parametrize(
+    "mod_name, expected, should_not",
+    [
+        ("_thread", "class LockType:", None),
+        ("_thread", "    def acquire(self, *args) -> Any:", None),
+        ("_thread", "    def __init__(self, *args) -> None:", None),
+    ],
+)
+def test_stub_class(tmp_path: Path, mod_name: str, expected: str, should_not: str):
+    stubber = Stubber(path=str(tmp_path))  # type: ignore
+    stubber.create_module_stub(mod_name, str(tmp_path / "test_function.py"))
+
+    with open(tmp_path / "test_function.py", "r") as tf:
+        lines = tf.read().split("\n")
+    if expected:
+        assert expected in lines
+    if should_not:
+        assert should_not not in lines
 
 
 # def test_clean(tmp_path):
