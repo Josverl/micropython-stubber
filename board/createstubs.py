@@ -11,7 +11,7 @@ from utime import sleep_us
 from ujson import dumps
 from micropython import const
 
-stubber_version = "1.4.1"
+stubber_version = "1.4.2"
 ENOENT = const(2)
 _MAX_CLASS_LEVEL = const(2)  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -307,22 +307,24 @@ class Stubber:
         return info
         # spell-checker: enable
 
-    def get_obj_attributes(self, obj: object):
+    def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
         result = []
         errors = []
         name = None
-        self._log.debug("get attributes {} {}".format(repr(obj), obj))
+        self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         try:
-            for name in dir(obj):
+            for name in dir(item_instance):
                 try:
-                    val = getattr(obj, name)
-                    # name , value , type
+                    val = getattr(item_instance, name)
+                    # name , item_repr(value) , type as text, item_instance
                     result.append((name, repr(val), repr(type(val)), val))
                 except AttributeError as e:
-                    errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
+                    errors.append(
+                        "Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e)
+                    )
         except AttributeError as e:
-            errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, obj, e))
+            errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
         # remove internal __
         result = [i for i in result if not (i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
@@ -368,7 +370,12 @@ class Stubber:
         self._log.info("Finally done")
 
     def create_module_stub(self, module_name: str, file_name: str = None):
-        "Create a Stub of a single python module"
+        """Create a Stub of a single python module
+
+        Args:
+        - module_name (str): name of the module to document. This module will be imported.
+        - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
+        """
         if module_name.startswith("_") and module_name != "_thread":
             self._log.warning("SKIPPING internal module:{}".format(module_name))
             return
@@ -452,88 +459,95 @@ class Stubber:
         if errors:
             self._log.error(errors)
 
-        for name, rep, typ, obj in items:
+        for item_name, item_repr, item_type_txt, item_instance in items:
+            # # name_, repr_(value) , type as text, item_instance
             # allow the scheduler to run on LoBo based FW
+            if item_name in ["classmethod", "staticmethod"]:
+                continue
+
             resetWDT()
             sleep_us(1)
 
-            cls_mtd_tps = ["<class 'function'>", "<class 'bound_method'>"]
-
             # Class expansion only on first 3 levels (bit of a hack)
-            if typ == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
-                self._log.debug("{0}class {1}:".format(indent, name))
+            if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
+                self._log.debug("{0}class {1}:".format(indent, item_name))
                 # stub style : generic __init__ with Empty comment and pass
-                s = "\n" + indent + "class " + name + ":\n"  #
+                s = "\n" + indent + "class " + item_name + ":\n"  #
                 s += indent + "    ''\n"
 
                 fp.write(s)
                 # self._log.debug("\n" + s)
 
-                self._log.debug("# recursion over class {0}".format(name))
+                self._log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
                     fp,
-                    obj,
-                    "{0}.{1}".format(obj_name, name),
+                    item_instance,
+                    "{0}.{1}".format(obj_name, item_name),
                     indent + "    ",
                     in_class + 1,
                 )
-            # Class Methods
-            elif typ in cls_mtd_tps:
-                self._log.debug("# def {1} function or method, type = '{0}'".format(typ, name))
+            # Class Methods and functions
+            elif "method" in item_type_txt or "function" in item_type_txt or item_name == "__init__":
+                self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
                 # will accept any number of params
                 # return type Any
                 ret = "Any"
                 first = ""
-                # Self parameter only on class functions
-                if typ == cls_mtd_tps[0]:
+                # Self parameter only on class methods/functions
+                if in_class > 0:
                     first = "self, "
                     # __init__ returns None
-                    if name == "__init__":
+                    if item_name == "__init__":
                         ret = "None"
                 # class method - add function decoration
-                if typ == cls_mtd_tps[1]:
+                if "bound_method" in item_type_txt or "bound_method" in item_repr:
                     s = "{}@classmethod\n".format(indent)
-                    s += "{}def {}(cls) -> {}:\n".format(indent, name, ret)
+                    s += "{}def {}(cls, *args) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args) -> {}:\n".format(indent, name, first, ret)
+                    s = "{}def {}({}*args) -> {}:\n".format(indent, item_name, first, ret)
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
             # constants of known types & values
-            elif typ.startswith("<class '"):
+            elif item_type_txt == "<class 'module'>":
+                # Skip imported modules
+                fp.write("# import {}\n".format(item_name))
 
-                t = typ[8:-2]
+            elif item_type_txt.startswith("<class '"):
+
+                t = item_type_txt[8:-2]
                 s = ""
 
                 if t in ["str", "int", "float", "bool", "bytearray", "bytes"]:
                     # known type: use actual value
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name, rep, t)
+                    s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
                 elif t in ["dict", "list", "tuple"]:
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, name, ev[t], t)
+                    s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
                     if not t in ["object", "set", "frozenset"]:
-                        # Possibly default others to instance object ?
-                        # https://docs.python.org/3/tutorial/classes.html#instance-objects
+                        # Possibly default others to item_instance object ?
+                        # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         t = "Any"
-                    s = "{0}{1}: {2}\n".format(indent, name, t)
+                    # Requires Python 3.6 syntax, which is OK for the stubs/pyi
+                    s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 self._log.debug("\n" + s)
             else:
                 # keep only the name
-                self._log.debug("# all other, type = '{0}'".format(typ))
-                fp.write("# all other, type = '{0}'\n".format(typ))
+                self._log.debug("# all other, type = '{0}'".format(item_type_txt))
+                fp.write("# all other, type = '{0}'\n".format(item_type_txt))
 
-                fp.write(indent + name + " = Any\n")
+                fp.write(indent + item_name + " # type: Any\n")
 
         del items
         del errors
         try:
-            del name, rep, typ, obj  # pylint: disable=undefined-loop-variable
+            del item_name, item_repr, item_type_txt, item_instance  # pylint: disable=undefined-loop-variable
         except (OSError, KeyError, NameError):  # lgtm [py/unreachable-statement]
             pass
 
@@ -695,8 +709,8 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
-    # # Option: Add your own modules
-    # # stubber.add_modules(['bluetooth','GPS'])
+    # Option: Add your own modules
+    # stubber.add_modules(['bluetooth','GPS'])
     stubber.create_all_stubs()
     stubber.report()
 
