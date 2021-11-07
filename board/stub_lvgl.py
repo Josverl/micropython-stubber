@@ -6,11 +6,13 @@ Note that the stubs can be very large, and it may be best to directly store them
 try:
     import lvgl
 except Exception:
-    # raise ImportError("The `lvgl` module could not be found on this firmware")
+    print("\n\nNOTE: The `lvgl` module could not be found on this firmware\n\n")
     pass
 
 import sys
-from createstubs import *
+
+## Note that on MicroPython this will still cause the full stubbing to be automatically started due to the IsMicroPython()
+from createstubs import Stubber, stubber_version, isMicroPython, logging
 
 
 def main():
