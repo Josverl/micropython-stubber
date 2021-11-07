@@ -11,6 +11,7 @@ intro.md
 03_.md
 04_.md
 05_.md
+scripts.md
 ```
 
 ```{toctree}
