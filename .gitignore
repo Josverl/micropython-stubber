@@ -31,10 +31,10 @@ junit/*
 # OS specific stuff
 desktop.ini
 
-
 # do not include the generated HTML documentaion in the repro 
 docs/_build
 docs/api
+docs/~$*
 
 # need to find a better location for the automated machine stubs
 stubs/machine-stubs
