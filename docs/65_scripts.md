@@ -25,8 +25,9 @@ high level operation:
     ```
 
     ```{note}
-    This is quite sensitive to timing / and requires some delays to allow the device to restart 
-    as well as for the the handling of the RTS and DTR signals
+    This is quite sensitive to timing and requires some delays to allow the device to restart before the script continues.
+    
+    Also a bit of automated manipulation of the RTS (and DTR) signals is needed to avoid needing to press a device's reset button.
     ```
   - Starts the minified version of createstubs.py 
     ``` powershell 
@@ -42,7 +43,7 @@ high level operation:
     rshell -p $serialport --buffer-size 512 rsync $source $subfolder  | write-host
     ```
 
-## Requirements & dependencies
+### Requirements & dependencies
 
 **Python**
 - esptool 
@@ -55,10 +56,9 @@ high level operation:
  - get-serialport.ps1
  - flash_MPY.ps1
 
-## Hardware 
+### Hardware 
 - ESP32 board + SPIRAM on USB + Serial drivers 
 - ESP8266 board on USB + Serial drivers 
-
 
 ```{Note}
 Multiple  boards can be connected at the same time. 

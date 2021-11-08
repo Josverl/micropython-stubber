@@ -2,15 +2,6 @@
 ## Manual configuration
 
 
-<!-- 
-```{admonition} Here's my title
-:class: warning
-
-Here's my admonition content
-``` 
--->
-
-
 The manual configuration, including sample configuration files is described in detail in the sister-repo [micropython-stubs][] section [using-the-stubs][]
 
 

@@ -6,12 +6,16 @@
 :maxdepth: 2
 
 intro.md
-01_.md
-02_.md
-03_.md
-04_.md
-05_.md
-scripts.md
+10_approach.md
+20_using.md
+30_vscode.md
+40_firmware_stubs.md
+50_frozen_stubs.md
+60_repos.md
+65_scripts.md
+70_stub_overview.md
+80_references.md
+90_documentation.md
 ```
 
 ```{toctree}
