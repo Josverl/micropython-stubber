@@ -42,7 +42,7 @@ extensions = [
     "sphinx.ext.autodoc",  # Support for NumPy and Google style docstrings
     "sphinx.ext.coverage",  # Collect doc coverage stats
     # 'sphinx.ext.doctest', # use Test snippets in the documentation
-    # 'sphinx.ext.intersphinx', # Link to other projects’ documentation
+    "sphinx.ext.intersphinx",  # Link to other projects’ documentation
     # 'sphinx.ext.todo', # Support for todo items
 ]
 
@@ -62,6 +62,13 @@ html_logo = "img/stubber-XS.jpg"
 
 autodoc_typehints = "both"
 
+intersphinx_mapping = {
+    "stubs": ("https://micropython-stubs.readthedocs.io/en/latest/", None),
+    "micropython": ("http://docs.micropython.org/en/latest", None),
+    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "python": ("https://docs.python.org/3/", None),
+}
+
 # --- Myst ------
 
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html#auto-generated-header-anchors
@@ -70,14 +77,14 @@ myst_heading_anchors = 2
 suppress_warnings = ["myst.header"]
 # --- AutoAPI ------
 # Generate documentation for the source code in
-autoapi_dirs = ["../board", "../src"]
-
 # https://sphinx-autoapi.readthedocs.io/en/latest/tutorials.html#setting-up-automatic-api-documentation-generation
 
+autoapi_dirs = ["../board", "../src"]
 autoapi_root = "api"
 autoapi_file_patterns = ["*.py"]
+autoapi_keep_files = True
 
-# only genrate documentation for the useful parts
+# only generate documentation for the useful parts
 autoapi_ignore = [
     "*migrations*",
     "*/version.py",  # not relevant
