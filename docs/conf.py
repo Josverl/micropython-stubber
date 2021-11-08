@@ -82,7 +82,6 @@ suppress_warnings = ["myst.header"]
 autoapi_dirs = ["../board", "../src"]
 autoapi_root = "api"
 autoapi_file_patterns = ["*.py"]
-
 autoapi_keep_files = False
 
 # only generate documentation for the useful parts
