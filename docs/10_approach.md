@@ -3,8 +3,8 @@
 The stubs are used by 3 components.
 
   2. pylint
-   3. the VSCode Pylance Language Server
-   4. the VSCode Python add-in
+  3. the VSCode Pylance Language Server
+  4. the VSCode Python add-in
 
 These 3 tools work together to provide code completion/prediction, type checking and all the other good things.
 For this the order in which these tools use, the stub folders is significant, and best results are when all use the same order. 
