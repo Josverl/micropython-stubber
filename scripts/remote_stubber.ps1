@@ -18,29 +18,59 @@ Import-Module ..\..\FIRMWARE\get-serialport.ps1
 
 function run_stubber {
     param( 
-        $type = "minified",
+        $type = "compiled",
         $serialport = "COM5"
     )
-    
+    # use the local pyboard script , not the old version from PyPi 
+    $pyboard_py = join-path $WSRoot "micropython/tools/pyboard.py" 
+    $modulelist_txt = join-path $WSRoot "board/modulelist.txt" 
+
     switch ($type) {
-        #condition {  }
+
         "minified" {
             $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
-            pyboard --device $serialport $createstubs_py | write-host
+
+            # copy modulelist.txt to the board
+            python $pyboard_py --device $serialport -f cp $modulelist_txt :modulelist.txt | Write-Host
+            python $pyboard_py --device $serialport -f cp $createstubs_py :createstubs.py | Write-Host
+            # run the minified & compiled version 
+            python $pyboard_py --device $serialport -c  "import createstubs" | write-host
+            # python $pyboard_py --device $serialport $createstubs_py | write-host
+            # 0 = Success
+            return $LASTEXITCODE -eq 0
+        }
+        "compiled" {
+            $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
+            $createstubs_mpy = join-path $WSRoot "minified/createstubs.mpy" 
+
+            # cross compile the minified version - squaze out all bits
+            # https://docs.micropython.org/en/latest/library/micropython.html#micropython.opt_level
+            # &mpy-cross ../minified/createstubs.py -O3
+            # Set to 0O2 for a bit more error info
+            &mpy-cross ../minified/createstubs.py -O2
+
+            # copy modulelist.txt to the board
+            python $pyboard_py --device $serialport -f cp $modulelist_txt :modulelist.txt | Write-Host
+            python $pyboard_py --device $serialport -f cp $createstubs_mpy :createstubs.mpy | Write-Host
+            # run the minified & compiled version 
+            python $pyboard_py --device $serialport -c  "import createstubs" | write-host
+            # python $pyboard_py --device $serialport $createstubs_py | write-host
             # 0 = Success
             return $LASTEXITCODE -eq 0
         }
         Default {
-            Write-Host "Sorry only minified is implemented"
-            return $false
-            # mpremote cp createstubs.py logging.py :
-            # pyboard --device $serialport -f cp createstubs.py logging.py  :
-            # rshell  -p $serialport --buffer-size 512 cp createstubs.py /pyboard 
-            # rshell -p $serialport --buffer-size 512 cp logging.py /pyboard 
+            $createstubs_py = join-path $WSRoot "board/createstubs.py" 
 
-            # mpremote exec "import createstubs"
-            # pyboard --device $serialport -c "import createstubs"
-            # cd $PSScriptRoot
+            
+            # copy modulelist.txt to the board
+            python $pyboard_py --device $serialport -f cp $modulelist_txt :modulelist.txt | Write-Host
+            python $pyboard_py --device $serialport -f cp $createstubs_py :createstubs.py | Write-Host
+            # run the minified & compiled version 
+            python $pyboard_py --device $serialport -c  "import createstubs" | write-host
+            # python $pyboard_py --device $serialport $createstubs_py | write-host
+            # 0 = Success
+            return $LASTEXITCODE -eq 0
+
         }
     }
 } 
@@ -65,7 +95,7 @@ function download_stubs {
     # $dest = path relative to current directory
     # $source = path on board ( all boards are called pyboard) 
     $source = "/pyboard/stubs"
-    $n= 1
+    $n = 1
     do {
         rshell -p $serialport --buffer-size 512 rsync $source $subfolder  | write-host
         $n += 1
@@ -130,15 +160,21 @@ else {
 
 
 $all_versions = @( 
-    @{version = "v1.10"; chip = "esp8266"; },
-    @{version = "v1.10"; chip = "esp32"; },
-    @{version = "v1.11"; chip = "esp32"; },
-    @{version = "v1.12"; chip = "esp32"; },
-    @{version = "v1.13"; chip = "esp32"; nightly = $true },
-    @{version = "v1.14"; chip = "esp32"; },
-    @{version = "v1.15"; chip = "esp32"; },
-    @{version = "v1.16"; chip = "esp32"; },
-    @{version = "v1.17"; chip = "esp32"; }
+    @{version = "v1.17"; chip = "esp8266"; } ,
+    @{version = "v1.16"; chip = "esp8266"; } ,
+    @{version = "v1.15"; chip = "esp8266"; } ,
+    @{version = "v1.14"; chip = "esp8266"; } ,
+    @{version = "v1.13"; chip = "esp8266"; nightly = $true }
+    # @{version = "v1.16"; chip = "esp8266"; },
+    # @{version = "v1.10"; chip = "esp8266"; },
+    # @{version = "v1.10"; chip = "esp32"; },
+    # @{version = "v1.11"; chip = "esp32"; },
+    # @{version = "v1.12"; chip = "esp32"; },
+    # @{version = "v1.13"; chip = "esp32"; nightly = $true },
+    # @{version = "v1.14"; chip = "esp32"; },
+    # @{version = "v1.15"; chip = "esp32"; },
+    # @{version = "v1.16"; chip = "esp32"; },
+    # @{version = "v1.17"; chip = "esp32"; }
 )
 
 $done = @()
