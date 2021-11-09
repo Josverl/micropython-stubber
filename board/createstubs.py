@@ -107,8 +107,6 @@ class Stubber:
     def create_all_stubs(self):
         "Create stubs for all configured modules"
         self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self._fwid))
-        # start with the (more complex) modules with a / first to reduce memory problems
-        self.modules = [m for m in self.modules if "/" in m] + [m for m in self.modules if "/" not in m]
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)
@@ -137,8 +135,8 @@ class Stubber:
         except OSError:
             return False
         gc.collect()
-        return True
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
+        return True
 
     def create_module_stub(self, module_name: str, file_name: str = None):
         """Create a Stub of a single python module
@@ -202,7 +200,9 @@ class Stubber:
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
-            self._report.append({"module": module_name, "file": file_name})
+
+        self._report.append({"module": module_name, "file": file_name})
+        print({"module": module_name, "file": file_name})
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
@@ -214,7 +214,7 @@ class Stubber:
                 del sys.modules[module_name]
             except KeyError:
                 self._log.debug("could not del sys.modules[{}]".format(module_name))
-            gc.collect()
+        gc.collect()
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
@@ -584,23 +584,22 @@ def main():
     stubber.report()
 
 
-_log = logging.getLogger("stubber")
 was_running = False
 
 
 def del_db():
-    os.remove("modulelist.db")
+    os.remove("modulelist" + ".db")
 
 
 def esp8266():
     import btree
 
     try:
-        f = open("modulelist.db", "r+b")
+        f = open("modulelist" + ".db", "r+b")
         was_running = True
         _log.info("Opened existing db")
     except OSError:
-        f = open("modulelist.db", "w+b")
+        f = open("modulelist" + ".db", "w+b")
         _log.info("created new db")
         was_running = False
     #
@@ -618,7 +617,7 @@ def esp8266():
     if not was_running or len(list(db.keys())) == 0:
         # load modulelist into database
         _log.info("load modulelist into db")
-        for line in open("modulelist.txt"):
+        for line in open("modulelist" + ".txt"):
             key = line.strip()
             if len(key) and key[0] != "#":
                 db[key] = b"todo"
@@ -631,6 +630,7 @@ def esp8266():
         # ------------------------------------
         # do epic shit
         # but sometimes things fail
+        OK = False
         try:
             OK = stubber.create_one_stub(key.decode("utf8"))
         except MemoryError:
@@ -641,7 +641,10 @@ def esp8266():
 
         # save the (last) result back to the database
         if OK:
-            result = bytearray(stubber._report[-1])
+            # try:
+            #     result = bytearray(stubber._report[-1])
+            # except KeyError:
+            result = "good, I guess"
         else:
             result = b"skipped"
         # -------------------------------------
@@ -657,9 +660,10 @@ def esp8266():
 
 if __name__ == "__main__" or isMicroPython():
     try:
+        _log = logging.getLogger("stubber")
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
-    # main()
-    esp8266()
+    main()
+    # esp8266()
