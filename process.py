@@ -173,11 +173,18 @@ def minify_script(keep_report=True, show_diff=False):
     edits = [
         ("comment", "print"),
         ("comment", "import logging"),
+        # first full
         ("comment", "self._log ="),
         ("comment", "self._log.debug"),
         ("comment", "self._log.warning"),
         ("comment", "self._log.info"),
         ("comment", "self._log.error"),
+        # then short versions
+        ("comment", "_log ="),
+        ("comment", "_log.debug"),
+        ("comment", "_log.warning"),
+        ("comment", "_log.info"),
+        ("comment", "_log.error"),
     ]
     if keep_report:
         report = (
