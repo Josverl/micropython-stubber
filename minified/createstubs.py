@@ -25,7 +25,7 @@ A=OSError
 import sys,gc as C,machine as g,uos as os
 from utime import sleep_us as h
 from ujson import dumps as P
-T='1.4.2'
+T='1.4.3'
 U=2
 i=2
 try:from machine import resetWDT as V
@@ -47,7 +47,7 @@ class Stubber:
 		B.path='{}/stubs/{}'.format(D,B.flat_fwid).replace('//',E)
 		try:W(D+E)
 		except A:pass
-		B.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];B.excluded=[];B.modules=[]
+		B.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];B.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];B.modules=[]
 	def get_obj_attributes(L,item_instance):
 		K="Couldn't get attribute '{}' from object '{}', Err: {}";A=item_instance;B=[];G=[];M=D
 		try:

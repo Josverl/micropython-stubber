@@ -18,28 +18,6 @@
     "python.testing.nosetestsEnabled": false,
     "peacock.color": "#613206",
     "restructuredtext.languageServer.disabled": true,
-    "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#914b09",
-        "activityBar.activeBorder": "#0bb45d",
-        "activityBar.background": "#914b09",
-        "activityBar.foreground": "#e7e7e7",
-        "activityBar.inactiveForeground": "#e7e7e799",
-        "activityBarBadge.background": "#0bb45d",
-        "activityBarBadge.foreground": "#e7e7e7",
-        "statusBar.background": "#613206",
-        "statusBar.foreground": "#e7e7e7",
-        "statusBarItem.hoverBackground": "#914b09",
-        "titleBar.activeBackground": "#613206",
-        "titleBar.activeForeground": "#e7e7e7",
-        "titleBar.inactiveBackground": "#61320699",
-        "titleBar.inactiveForeground": "#e7e7e799",
-        "editorGroup.border": "#914b09",
-        "panel.border": "#914b09",
-        "sash.hoverBorder": "#914b09",
-        "sideBar.border": "#914b09",
-        "statusBarItem.remoteBackground": "#613206",
-        "statusBarItem.remoteForeground": "#e7e7e7"
-    },
     "cSpell.words": [
         "aivar",
         "annamaa",
@@ -97,7 +75,13 @@
         "titleBar.activeBackground": "#613206",
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#61320699",
-        "titleBar.inactiveForeground": "#e7e7e799"
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "editorGroup.border": "#914b09",
+        "panel.border": "#914b09",
+        "sash.hoverBorder": "#914b09",
+        "sideBar.border": "#914b09",
+        "statusBarItem.remoteBackground": "#613206",
+        "statusBarItem.remoteForeground": "#e7e7e7"
     },
     "python.analysis.extraPaths": [
         "board/lib",
