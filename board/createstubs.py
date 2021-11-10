@@ -11,7 +11,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = "1.4.2"
+stubber_version = "1.4.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -65,16 +65,13 @@ class Stubber:
             "http_server_ssl",
         ]
         self.excluded = [
-            # "webrepl",
-            # "_webrepl",
-            # "port_diag",
-            # "example_sub_led.py",
-            # "example_pub_button.py",
+            "webrepl",
+            "_webrepl",
+            "port_diag",
+            "example_sub_led.py",
+            "example_pub_button.py",
         ]
-        # there is no option to discover modules from micropython, need to hardcode
-        # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
-        # spell-checker: disable
-        # modules to stub : 131
+        # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []
 
     def get_obj_attributes(self, item_instance: object):
@@ -161,7 +158,6 @@ class Stubber:
             module_name = module_name.replace("/", ".")
 
         # import the module (as new_module) to examine it
-        #        failed = False
         new_module = None
         try:
             new_module = __import__(module_name, None, None, ("*"))
@@ -169,26 +165,6 @@ class Stubber:
             #            failed = True
             self._log.warning("Skip module: {:<20}        : Failed to import".format(module_name))
             return
-            # if not "." in module_name:
-            #     return
-
-        # # re-try import after importing parents
-        # if failed and "." in module_name:
-        #     self._log.debug("re-try import with parents")
-        #     levels = module_name.split(".")
-        #     for n in range(1, len(levels)):
-        #         parent_name = ".".join(levels[0:n])
-        #         try:
-        #             parent = __import__(parent_name)
-        #             del parent
-        #         except (ImportError, KeyError):
-        #             pass
-        #     try:
-        #         new_module = __import__(module_name, None, None, ("*"))
-        #         self._log.debug("OK , imported module: {} ".format(module_name))
-        #     except ImportError:  # now bail out
-        #         self._log.debug("Failed to import module: {}".format(module_name))
-        #         return
 
         # Start a new file
         ensure_folder(file_name)
