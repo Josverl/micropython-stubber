@@ -6,12 +6,11 @@ Copyright (c) 2019-2021 Jos Verlinde
 import sys
 import gc
 import logging
-import machine
 import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-stubber_version = "1.4.3"
+__version__ = "1.4.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -103,7 +102,7 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self._log.info("Start micropython-stubber v{} on {}".format(stubber_version, self._fwid))
+        self._log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)
@@ -171,7 +170,7 @@ class Stubber:
         with open(file_name, "w") as fp:
             # todo: improve header
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
-                module_name, self._fwid, self.info, stubber_version
+                module_name, self._fwid, self.info, __version__
             )
             fp.write(s)
             fp.write("from typing import Any\n\n")
@@ -342,7 +341,7 @@ class Stubber:
                 f.write("{")
                 f.write(dumps({"firmware": self.info})[1:-1])
                 f.write(",\n")
-                f.write(dumps({"stubber": {"version": stubber_version}})[1:-1])
+                f.write(dumps({"stubber": {"version": __version__}})[1:-1])
                 f.write(",\n")
                 f.write('"modules" :[\n')
                 start = True
@@ -613,6 +612,8 @@ def esp8266():
             # RESET AND HOPE THAT IN THE CYCLE WE PROGRESS
             db.close()
             f.close()
+            import machine
+
             machine.reset()
 
         # save the (last) result back to the database
