@@ -160,52 +160,76 @@ else {
 
 
 $all_versions = @( 
+    @{version = "v1.10"; chip = "esp8266"; } ,
     @{version = "v1.17"; chip = "esp8266"; } ,
+    
+    @{version = "v1.11"; chip = "esp8266"; } ,
+    @{version = "v1.12"; chip = "esp8266"; } ,
     @{version = "v1.16"; chip = "esp8266"; } ,
     @{version = "v1.15"; chip = "esp8266"; } ,
     @{version = "v1.14"; chip = "esp8266"; } ,
     @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-    # @{version = "v1.16"; chip = "esp8266"; },
-    # @{version = "v1.10"; chip = "esp8266"; },
-    # @{version = "v1.10"; chip = "esp32"; },
-    # @{version = "v1.11"; chip = "esp32"; },
-    # @{version = "v1.12"; chip = "esp32"; },
-    # @{version = "v1.13"; chip = "esp32"; nightly = $true },
-    # @{version = "v1.14"; chip = "esp32"; },
-    # @{version = "v1.15"; chip = "esp32"; },
-    # @{version = "v1.16"; chip = "esp32"; },
-    # @{version = "v1.17"; chip = "esp32"; }
+
+    @{version = "v1.16"; chip = "esp8266"; },
+    @{version = "v1.10"; chip = "esp8266"; },
+    @{version = "v1.10"; chip = "esp32"; },
+    @{version = "v1.11"; chip = "esp32"; },
+    @{version = "v1.12"; chip = "esp32"; },
+    @{version = "v1.13"; chip = "esp32"; nightly = $true },
+    @{version = "v1.14"; chip = "esp32"; },
+    @{version = "v1.15"; chip = "esp32"; },
+    @{version = "v1.16"; chip = "esp32"; },
+    @{version = "v1.17"; chip = "esp32"; }
 )
 
-$done = @()
+$results = @()
     
 foreach ($fw in $all_versions) {
-        
+    $result = $fw
+    $result.Flash = "-"
+    $result.Reset = "-"
+    $result.Stub = "-"
+    $result.Download = "-"
+    $result.Error = "-"
     $device = $devices | Where-Object { $_.chip -and $_.chip.ToLower() -eq $fw.chip } | Select-Object -First 1
     if (-not $device) {
-        Write-Warning "No '$($fw.chip)' device connected , skipping Flashing firmware $($fw.chip) $($fw.version) "
+
+        $result.Error = "No '$($fw.chip)' device connected , skipping Flashing firmware $($fw.chip) $($fw.version)"
+        Write-Warning $fw.$result
+        $results += $result
         continue
             
     }
     $serialport = $device.port
     Write-Host -ForegroundColor Cyan "Found an $($device.chip) device connected to $serialport"
-    # 1) Flash a firmware 
+    # 1) Flash a firmware
+
     Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Flashing firmware on the device"
-    
     ..\..\FIRMWARE\flash_MPY.ps1 -serialport $serialport -KeepFlash:$false  @fw
+    $result.Flash = "OK"
     
     # 2) restart MCU
     Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Restart device after flashing ..."
     $OK = restart-MCU -serialport $serialport
     if (-not $OK) {
         Write-Warning "$($serialport, $fw.chip, $fw.version) -Problem restarting the MCU "
+        $result.Reset = "?"
     }
+    else {
+        $result.Reset = "OK"
+    }
+
     # 3) upload & run stubber
     Write-Host -ForegroundColor Cyan "Starting createstubs.py"
     $OK = run_stubber -serialport $serialport
     if (-not $OK) {
         Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem running Stubber"
+        $result.Stub = "Error"
+        $results += $result
         continue
+    }
+    else {
+        $result.Stub = "OK"
     }
 
     # 4) download the stubs 
@@ -214,14 +238,19 @@ foreach ($fw in $all_versions) {
     $OK = download_stubs -serialport $serialport -path $download_path
     if (-not $OK) {
         Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem downloading the machine stubs"
+        $result.Download = "Error"
+        $results += $result
         continue
     } 
+    $result.Download = "OK"
     # Add to done
-    $done += $fw
-
+    $results += $result
 }
 
 Pop-Location  -StackName "start-remote-stubber"
 
-Write-host -ForegroundColor Cyan "Finished processing, and succeded generatign and downloading :"
-$done | FL | Out-Host
+Write-host -ForegroundColor Cyan "Finished processing: flash, reset, stubbing  and download :"
+# Array of Dict --> Array of objects with props
+$results = $results | ForEach-Object { new-object psobject -property $_ }  
+# basic output
+$results | FL | Out-Host
