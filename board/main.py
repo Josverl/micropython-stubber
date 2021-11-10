@@ -11,12 +11,10 @@ def countdown():
     # import stub_lvgl
 
 
-import mini
+try:
+    # only run import if no stubs yet
+    os.listdir("stubs")
+    print("stub folder was found, stubbing is not automatically started")
 
-# try:
-#     # only run import if no stubs yet
-#     os.listdir("stubs")
-#     print("stub folder was found, stubbing is not automatically started")
-
-# except OSError:
-#     countdown()
+except OSError:
+    countdown()
