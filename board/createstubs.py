@@ -550,89 +550,20 @@ def main():
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
     # Read stubs from modulelist
-    stubber.modules = [line.strip() for line in open("modulelist.txt") if len(line.strip())]
+    try:
+        stubber.modules = [
+            line.strip() for line in open("modulelist" + ".txt") if len(line.strip()) and line.strip()[0] != "#"
+        ]
+    except OSError:
+        # fall back gracefully
+        stubber.modules = ["micropython"]
+        _log.warning("Warning: ./modulelist.txt could not be found.")
     # Option: Add your own modules
     # stubber.add_modules(['bluetooth','GPS'])
     gc.collect()
 
     stubber.create_all_stubs()
     stubber.report()
-
-
-was_running = False
-
-
-def del_db():
-    os.remove("modulelist" + ".db")
-
-
-def esp8266():
-    import btree
-
-    try:
-        f = open("modulelist" + ".db", "r+b")
-        was_running = True
-        _log.info("Opened existing db")
-    except OSError:
-        f = open("modulelist" + ".db", "w+b")
-        _log.info("created new db")
-        was_running = False
-    #
-    stubber = Stubber(path=read_path())
-    # stubber = Stubber(path="/sd")
-    # Option: Specify a firmware name & version
-    # stubber = Stubber(firmware_id='HoverBot v1.2.1')
-    if not was_running:
-        # Only clean folder if this is a first run
-        stubber.clean()
-
-    # Now open a database
-    db = btree.open(f)
-    # if started with no or empty database
-    if not was_running or len(list(db.keys())) == 0:
-        # load modulelist into database
-        _log.info("load modulelist into db")
-        for line in open("modulelist" + ".txt"):
-            key = line.strip()
-            if len(key) and key[0] != "#":
-                db[key] = b"todo"
-        db.flush()
-
-    for key in db.keys():
-        print("{0:<32} {1}".format(key, db[key]))
-        if db[key] != b"todo":
-            continue
-        # ------------------------------------
-        # do epic shit
-        # but sometimes things fail
-        OK = False
-        try:
-            OK = stubber.create_one_stub(key.decode("utf8"))
-        except MemoryError:
-            # RESET AND HOPE THAT IN THE CYCLE WE PROGRESS
-            db.close()
-            f.close()
-            import machine
-
-            machine.reset()
-
-        # save the (last) result back to the database
-        if OK:
-            # try:
-            #     result = bytearray(stubber._report[-1])
-            # except KeyError:
-            result = "good, I guess"
-        else:
-            result = b"skipped"
-        # -------------------------------------
-        db[key] = result
-        db.flush()
-        _log.info(result)
-    # Finished processing
-    print(list(db))
-    #     print("{0:<32} {1}".format(key, db[key]))
-    db.close()
-    f.close()
 
 
 if __name__ == "__main__" or isMicroPython():
@@ -643,4 +574,3 @@ if __name__ == "__main__" or isMicroPython():
     except NameError:
         pass
     main()
-    # esp8266()
