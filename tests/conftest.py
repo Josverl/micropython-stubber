@@ -75,3 +75,15 @@ def testrepo_micropython(pytestconfig: Config):
 def testrepo_micropython_lib(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
     return pytestconfig.rootpath / "micropython-lib"
+
+
+# --------------------------------------
+# https://docs.pytest.org/en/stable/example/markers.html#marking-platform-specific-tests-with-pytest
+ALL = set("win32 linux darwin".split())
+
+
+def pytest_runtest_setup(item):
+    supported_platforms = ALL.intersection(mark.name for mark in item.iter_markers())
+    plat = sys.platform
+    if supported_platforms and plat not in supported_platforms:
+        pytest.skip("cannot run on platform {}".format(plat))

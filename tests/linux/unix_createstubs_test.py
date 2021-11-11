@@ -31,23 +31,26 @@ elif ubuntu_version == "20.04":
         "micropython_v1_16",
     ]
 else:
-    fw_list = []
+    fw_list = [
+        "micropython_dummy_1",
+        "micropython_dummy_2",
+    ]
 
 
+# more cmplex config to specify the minified tests
 @pytest.mark.parametrize(
     "script_folder",
     [
-        "./board",
-        "./minified",
+        pytest.param("./board"),
+        pytest.param("./minified", marks=pytest.mark.minified),
     ],
 )
 @pytest.mark.parametrize(
     "firmware",
     fw_list,
 )
-
 # only run createsubs in the unix version of micropython
-@pytest.mark.skipif(sys.platform == "win32", reason="requires linux")
+@pytest.mark.linux
 def test_createstubs(firmware, tmp_path: Path, script_folder):
     # Use temp_path to generate stubs
     scriptfolder = os.path.abspath(script_folder)
