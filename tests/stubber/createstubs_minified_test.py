@@ -147,7 +147,8 @@ pyb1_113 = UName(
         # mpy esp8622
         # FIXME: Use version over release
         (
-            "micropython-esp8622-1.11",
+            # "micropython-esp8622-1.11",
+            "micropython-esp8622-2.2.0-dev(9422289)-8",
             "micropython",
             "esp8622",
             mpy_v1_11_esp8622,
