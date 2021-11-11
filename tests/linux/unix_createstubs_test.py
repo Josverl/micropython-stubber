@@ -13,16 +13,14 @@ try:
     import lsb_release
 
     ubuntu_version = lsb_release.get_os_release()["RELEASE"]
+    ubuntu_name = lsb_release.get_os_release()["CODENAME"]
 except Exception:
+    ubuntu_name = "focal"
     ubuntu_version = ""
 
-if ubuntu_version == "18.04":
-    fw_list = [
-        "micropython_1_12",
-        "micropython_1_13",
-        "pycopy_3_3_2-25",
-    ]
-elif ubuntu_version == "20.04":
+
+if ubuntu_name == "focal":
+    # 20.04
     fw_list = [
         "micropython_v1_11",
         "micropython_v1_12",
@@ -30,10 +28,12 @@ elif ubuntu_version == "20.04":
         "micropython_v1_15",
         "micropython_v1_16",
     ]
-else:
+elif ubuntu_name == "bionic":
+    # 18.04 ?:
     fw_list = [
-        "micropython_dummy_1",
-        "micropython_dummy_2",
+        "micropython_1_12",
+        "micropython_1_13",
+        "pycopy_3_3_2-25",
     ]
 
 
