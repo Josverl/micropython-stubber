@@ -222,6 +222,8 @@ def minify_script(keep_report=True, show_diff=False):
                 "main",
                 "Stubber",
                 "read_path",
+                "get_root",
+                "_info",
                 "os",
                 "sys",
                 "__version__",
