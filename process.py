@@ -11,7 +11,7 @@ from pathlib import Path
 try:
     import python_minifier
 except ImportError:
-    pass
+    python_minifier = None
 
 ROOT = Path(__file__).parent
 SCRIPT = ROOT / "board" / "createstubs.py"
@@ -224,6 +224,7 @@ def minify_script(keep_report=True, show_diff=False):
                 "read_path",
                 "os",
                 "sys",
+                "__version__",
             ],
             # remove_pass=True,  # no dead code
             # convert_posargs_to_args=True, # Does not save any space
