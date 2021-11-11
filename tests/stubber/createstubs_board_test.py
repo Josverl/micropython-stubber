@@ -4,21 +4,34 @@ import pytest
 
 from pathlib import Path
 
-# pyright: reportMissingImports=false
+
+core_mocks = "./tests/mocks/micropython-cpython_core"
+
+
+# def setup_module(module):
+#     print("\nsetup_module()")
+
+
+def teardown_module(module):
+    print("teardown_module()")
+    # remove mocks from path
+    if core_mocks in sys.path:
+        sys.path.remove(core_mocks)
+
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
 
 # allow loading of the cpython mock-a-likes
-core_mocks = "./tests/mocks/micropython-cpython_core"
-if sys.path[1] != core_mocks:
+if not core_mocks in sys.path:
     sys.path[1:1] = [core_mocks]
 
 # ----------------------------------------------------------------------------------------
 # Specify wether to load the normal or minified version of the test
 # ----------------------------------------------------------------------------------------
-
 prefix = "board."
-from board.createstubs import Stubber, read_path
+from board.createstubs import Stubber, read_path  # type: ignore
+import board.createstubs as createstubs  # type: ignore
+
 
 # ----------------------------------------------------------------------------------------
 # Below this the tests are identical between
@@ -32,7 +45,7 @@ def test_stubber_info_basic():
     stubber = Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
-    info = stubber._info()
+    info = createstubs._info()
     print(info)
     assert info["family"] != "", "stubber.info() - No Family detected"
     assert info["port"] != "", "stubber.info() - No port detected"
@@ -175,7 +188,7 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
     stubber = Stubber()
     assert stubber is not None, "Can't create Stubber instance"
 
-    info = stubber._info()
+    info = createstubs._info()
     print("\nvalidating: " + fwid)
     print(info)
 
@@ -232,9 +245,7 @@ def test_create_all_stubs(tmp_path: Path):
 
 
 def test_get_root():
-    stubber = Stubber()
-    assert stubber is not None, "Can't create Stubber instance"
-    x = stubber.get_root()
+    x = createstubs.get_root()
     assert type(x) == str
     assert len(x) > 0
 
@@ -309,7 +320,6 @@ def test_unavailable_modules(tmp_path: Path):
         ("_thread", "", "allocate_lock: Any:"),
         # imported modules should not be output
         ("micropython", "", "builtins: Any"),
-        ("micropython", "# import builtins", ""),
     ],
 )
 def test_stub_functions(tmp_path: Path, mod_name: str, expected: str, should_not: str):

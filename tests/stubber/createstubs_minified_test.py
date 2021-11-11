@@ -4,21 +4,31 @@ import pytest
 
 from pathlib import Path
 
-# pyright: reportMissingImports=false
+core_mocks = "./tests/mocks/micropython-cpython_core"
+
+# def setup_module(module):
+#     print("\nsetup_module()")
+
+
+def teardown_module(module):
+    print("teardown_module()")
+    # remove mocks from path
+    if core_mocks in sys.path:
+        sys.path.remove(core_mocks)
+
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
 
-
 # allow loading of the cpython mock-a-likes
-core_mocks = "./tests/mocks/micropython-cpython_core"
-if sys.path[1] != core_mocks:
+if not core_mocks in sys.path:
     sys.path[1:1] = [core_mocks]
 
 # ----------------------------------------------------------------------------------------
 # Specify wether to load the normal or minified version of the test
 # ----------------------------------------------------------------------------------------
 prefix = "minified."
-from minified.createstubs import Stubber, read_path
+from minified.createstubs import Stubber, read_path  # type:ignore
+import minified.createstubs as createstubs  # type:ignore
 
 # ----------------------------------------------------------------------------------------
 # Below this the tests are identical between :
@@ -26,12 +36,13 @@ from minified.createstubs import Stubber, read_path
 # - createstubs_minified.test.py
 # ----------------------------------------------------------------------------------------
 
+
 @pytest.mark.minified
 def test_stubber_info_basic():
     stubber = Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
-    info = stubber._info()
+    info = createstubs._info()
     print(info)
     assert info["family"] != "", "stubber.info() - No Family detected"
     assert info["port"] != "", "stubber.info() - No port detected"
@@ -42,6 +53,7 @@ def test_stubber_info_basic():
 
     assert " " not in stubber.flat_fwid, "flat_fwid must not contain any spaces"
     assert "." not in stubber.flat_fwid, "flat_fwid must not contain any dots"
+
 
 @pytest.mark.minified
 def test_stubber_info_custom():
@@ -108,7 +120,7 @@ mpy_194 = UName(
     machine="ESP32 module with ESP32",
 )
 
-mpy_esp8622 = UName(
+mpy_v1_11_esp8622 = UName(
     sysname="esp8266",
     nodename="esp8266",
     release="2.2.0-dev(9422289)",
@@ -135,10 +147,10 @@ pyb1_113 = UName(
         # mpy esp8622
         # FIXME: Use version over release
         (
-            "micropython-esp8622-2.2.0-dev(9422289)-8",
+            "micropython-esp8622-1.11",
             "micropython",
             "esp8622",
-            mpy_esp8622,
+            mpy_v1_11_esp8622,
         ),
         # mpy pyb1
         ("micropython-pyb1-1.13-95", "micropython", "pyb1", pyb1_113),
@@ -158,6 +170,7 @@ pyb1_113 = UName(
 #        # TODO: add support for -Latest
 #        #('micropython-esp32-1.13-latest', 'micropython', 'esp32', mpy_113_build),
 
+
 @pytest.mark.minified
 def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
     # class.property : just pass a value
@@ -174,7 +187,7 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
     stubber = Stubber()
     assert stubber is not None, "Can't create Stubber instance"
 
-    info = stubber._info()
+    info = createstubs._info()
     print("\nvalidating: " + fwid)
     print(info)
 
@@ -199,6 +212,7 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
 def test_read_path():
     assert read_path() == ""
 
+
 @pytest.mark.minified
 def test_get_obj_attributes():
     stubber = Stubber()  # type: ignore
@@ -209,6 +223,7 @@ def test_get_obj_attributes():
     assert len(items) > 50
     for attr in items:
         assert type(attr) == tuple
+
 
 @pytest.mark.minified
 def test_create_all_stubs(tmp_path: Path):
@@ -230,13 +245,13 @@ def test_create_all_stubs(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.*"))
     assert len(stublist) == 0
 
+
 @pytest.mark.minified
 def test_get_root():
-    stubber = Stubber()
-    assert stubber is not None, "Can't create Stubber instance"
-    x = stubber.get_root()
+    x = createstubs.get_root()
     assert type(x) == str
     assert len(x) > 0
+
 
 @pytest.mark.minified
 def test_create_module_stub(tmp_path: Path):
@@ -250,6 +265,7 @@ def test_create_module_stub(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 2
 
+
 @pytest.mark.minified
 def test_create_module_stub_folder(tmp_path: Path):
     myid = "MyCustomID"
@@ -259,6 +275,7 @@ def test_create_module_stub_folder(tmp_path: Path):
     stubber.create_module_stub("json")
     stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.py"))
     assert len(stublist) == 1, "should create stub in stub folder if no folder specified"
+
 
 @pytest.mark.minified
 def test_create_module_stub_ignored(tmp_path: Path):
@@ -273,6 +290,7 @@ def test_create_module_stub_ignored(tmp_path: Path):
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 0
 
+
 @pytest.mark.minified
 def test_nested_modules(tmp_path: Path):
     myid = "MyCustomID"
@@ -282,6 +300,7 @@ def test_nested_modules(tmp_path: Path):
     stubber.create_module_stub("urllib/request", str(tmp_path / "request.py"))
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 1
+
 
 @pytest.mark.minified
 def test_unavailable_modules(tmp_path: Path):
