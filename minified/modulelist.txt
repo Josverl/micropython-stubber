@@ -75,12 +75,12 @@ sys
 time
 tpcalib
 uarray
-# uasyncio/__init__
-# uasyncio/core
-# uasyncio/event
-# uasyncio/funcs
-# uasyncio/lock
-# uasyncio/stream
+uasyncio/__init__
+uasyncio/core
+uasyncio/event
+uasyncio/funcs
+uasyncio/lock
+uasyncio/stream
 ubinascii
 ubluetooth
 ucollections
