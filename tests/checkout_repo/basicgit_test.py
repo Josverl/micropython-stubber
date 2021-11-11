@@ -1,6 +1,7 @@
 import sys
 import os
 import pytest
+from pathlib import Path
 
 # make sure that the source can be found
 sys.path.insert(1, "./src")
@@ -18,7 +19,7 @@ def common_tst(tag):
 
 
 @pytest.mark.basicgit
-@pytest.mark.skip(reason="test discards uncomitted changes in top repo")
+# @pytest.mark.skip(reason="test discards uncomitted changes in top repo")
 def test_get_tag_current():
     if not os.path.exists(".git"):
         pytest.skip("no git repo in current folder")
@@ -45,9 +46,13 @@ def test_pull_master(testrepo_micropython):
 
 
 @pytest.mark.basicgit
-def test_get_tag_submodule(testrepo_micropython):
+def test_get_tag_submodule(testrepo_micropython: Path):
     # get version of submodule repro
-    for testcase in [testrepo_micropython, ".\\micropython"]:
+    for testcase in [
+        testrepo_micropython.as_posix(),
+        str(testrepo_micropython),
+        ".\\micropython",
+    ]:
         tag = git.get_tag(testcase)
         common_tst(tag)
 
