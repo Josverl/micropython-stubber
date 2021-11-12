@@ -90,12 +90,4 @@ def test_createstubs(firmware, tmp_path: Path, script_folder):
 
     assert len(manifest) == 3, "module manifest should contain firmware, stubber , modules"
 
-    assert len(manifest["modules"]) - len(stubfiles) <= 1, "WORKAROUND number of modules must match count of stubfiles."
-
-    # # BUG: buildins appears twice in the manifest.json
-    # assert len(manifest["modules"]) == len(stubfiles), (
-    #     "number of modules must match count of stubfiles."
-    #     + repr(stubfiles)
-    #     + "++++++++++______++++++++++"
-    #     + repr(manifest["modules"])
-    # )
+    assert len(manifest["modules"]) - len(stubfiles) == 0, "number of modules must match count of stubfiles."

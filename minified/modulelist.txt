@@ -8,7 +8,6 @@ apa106
 array
 binascii
 btree
-builtins
 cmath
 collections
 crypto
