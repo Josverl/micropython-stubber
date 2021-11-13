@@ -7,7 +7,7 @@ Possibly these scripts could be ported to python , at the cost of more complex h
 
 
 (remote_stubber)=
-## remote_stubber.ps1
+## bulk_stubber.ps1
 
 The goal of this script is to run create_stubs on a set of boards connected to my machine in order to generate new stubs for multiple micropython versions 
 
@@ -20,10 +20,9 @@ high level operation:
   - Selects the corresponding device and serialport
   - Flashes the micropython version to the device 
     using `flash_MPY.ps1`
-  - Resets the device
+  - waits for the device to finish processing any initial tasks ( file system creation etc) 
     ``` powershell
     rshell -p $serialport  --rts 1 repl "~ print('connected') ~" 
-    rshell -p $serialport  --rts 1 repl "~ import machine ~ machine.reset() ~" 
     ```
 
     ```{note}
