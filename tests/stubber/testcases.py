@@ -2,10 +2,13 @@
 # test the fwid naming on the different platforms
 #################################################
 
+
 from collections import namedtuple
 
-UName = namedtuple("uname", "sysname nodename release version machine")
+## os.uname()
+# import os; print(os.uname())
 
+UName = namedtuple("uname", "sysname nodename release version machine")
 # Lobo
 lobo = UName(
     sysname="esp32_LoBo",
@@ -53,13 +56,28 @@ mpy_v1_9_4 = UName(
     machine="ESP32 module with ESP32",
 )
 
-mpy_v1_11_esp8622 = UName(
+mpy_v1_11_8_esp8622 = UName(
     sysname="esp8266",
     nodename="esp8266",
     release="2.2.0-dev(9422289)",
     version="v1.11-8-g48dcbbe60 on 2019-05-29",
     machine="ESP module with ESP8266",
 )
+mpy_v1_11_esp8622 = UName(
+    sysname="esp8266",
+    nodename="esp8266",
+    release="2.2.0-dev(9422289)",
+    version="v1.11 on 2019-05-29",
+    machine="ESP module with ESP8266",
+)
+mpy_v1_17_esp8622 = UName(
+    sysname="esp8266",
+    nodename="esp8266",
+    release="2.0.0(5a875ba)",
+    version="v1.17 on 2021-09-02",
+    machine="ESP module with ESP8266",
+)
+
 
 pyb1_v1_13 = UName(
     sysname="pyboard",
@@ -78,8 +96,8 @@ fwid_test_cases = [
     ("micropython-esp32-1.13-103", "micropython", "esp32", mpy_v1_13_build),
     # mpy esp8622
     ("micropython-esp8622-1.11", "micropython", "esp8622", mpy_v1_11_esp8622),
-    # # FIXME: Use version over release
-    # ("micropython-esp8622-2.2.0-dev(9422289)-8", "micropython", "esp8622", mpy_v1_11_esp8622),
+    ("micropython-esp8622-1.11-8", "micropython", "esp8622", mpy_v1_11_8_esp8622),
+    ("micropython-esp8622-1.17", "micropython", "esp8622", mpy_v1_17_esp8622),
     # mpy pyb1
     ("micropython-pyb1-1.13-95", "micropython", "pyb1", pyb1_v1_13),
     # lobo

@@ -420,7 +420,14 @@ def _info():
             info["machine"] = u.machine
             # parse micropython build info
             if " on " in u.version:
-                s = u.version.split("on ")[0]
+                s = u.version.split(" on ")[0]
+                if info["sysname"] == "esp8266":
+                    # esp8266 has no usable info on the release
+                    if "-" in s:
+                        v = s.split("-")[0]
+                    else:
+                        v = s
+                    info["version"] = info["release"] = v.lstrip("v")
                 try:
                     info["build"] = s.split("-")[1]
                 except IndexError:
@@ -452,34 +459,34 @@ def _info():
 
     # version info
     if info["release"]:
-        info["ver"] = "v" + info["release"]
+        info["ver"] = "v" + info["release"].lstrip("v")
     if info["family"] != "loboris":
         if info["release"] and info["release"] >= "1.10.0" and info["release"].endswith(".0"):
             # drop the .0 for newer releases
             info["ver"] = info["release"][:-2]
         else:
             info["ver"] = info["release"]
-        # add the build nr
-        if info["build"] != "":
+        # add the build nr, but avoid a git commit-id
+        if info["build"] != "" and len(info["build"]) < 4:
             info["ver"] += "-" + info["build"]
     # spell-checker: disable
-    # if "mpy" in info:  # mpy on some v1.11+ builds
-    #     sys_mpy = int(info["mpy"])
-    #     arch = [
-    #         None,
-    #         "x86",
-    #         "x64",
-    #         "armv6",
-    #         "armv6m",
-    #         "armv7m",
-    #         "armv7em",
-    #         "armv7emsp",
-    #         "armv7emdp",
-    #         "xtensa",
-    #         "xtensawin",
-    #     ][sys_mpy >> 10]
-    #     if arch:
-    #         info["arch"] = arch
+    if "mpy" in info:  # mpy on some v1.11+ builds
+        sys_mpy = int(info["mpy"])
+        arch = [
+            None,
+            "x86",
+            "x64",
+            "armv6",
+            "armv6m",
+            "armv7m",
+            "armv7em",
+            "armv7emsp",
+            "armv7emdp",
+            "xtensa",
+            "xtensawin",
+        ][sys_mpy >> 10]
+        if arch:
+            info["arch"] = arch
     return info
     # spell-checker: enable
 
