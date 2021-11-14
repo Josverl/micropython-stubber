@@ -3,4 +3,4 @@ param(
 )
 
 #Run 
-&python ./src/update_stubs.py $path
+&python ./src/update_pyi.py $path
