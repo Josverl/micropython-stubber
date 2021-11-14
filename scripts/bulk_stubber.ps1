@@ -16,10 +16,6 @@
 
 Import-Module ..\..\FIRMWARE\get-serialport.ps1 -Force
 
-# use the local pyboard script , not the old version from PyPi 
-$pyboard_py = join-path $WSRoot "micropython/tools/pyboard.py" 
-
-# pyboard is install as part of rshell 
 
 function restart-MCU {
     [CmdletBinding()]
@@ -82,16 +78,38 @@ function restart-MCU {
 
 function run_stubber {
     param( 
-        $type = "compiled",
+        $chip = "esp32",
         $serialport 
     )
+    switch ($chip) {
+        "esp8622" { 
+            $type = "compiled" 
+            $createstubs_py = join-path $WSRoot "minified/createstubs_mem.py" 
+            $createstubs_mpy = join-path $WSRoot "minified/createstubs_mem.mpy" 
+        }
+        "esp32" { 
+            $type = "run"
+            # need to have a verson with no logging
+            $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
+        }
+        "needs_reset" { 
+            $type = "compiled" 
+            $createstubs_py = join-path $WSRoot "minified/createstubs_mem_db.py" 
+            $createstubs_mpy = join-path $WSRoot "minified/createstubs_mem_db.mpy" 
+        }
 
+        Default { 
+            $type = "Default"
+            $createstubs_py = join-path $WSRoot "board/createstubs.py" 
+        }
+    }
+    
     $modulelist_txt = join-path $WSRoot "board/modulelist.txt" 
 
     switch ($type) {
 
         "minified" {
-            $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
+            
 
             # copy modulelist.txt to the board
             python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
@@ -102,9 +120,6 @@ function run_stubber {
             return $LASTEXITCODE -eq 0
         }
         "compiled" {
-            $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
-            $createstubs_mpy = join-path $WSRoot "minified/createstubs.mpy" 
-
             # ref : https://docs.micropython.org/en/latest/reference/mpyfiles.html
             # MicroPython release  .mpy version
             # v1.12 and up          5
@@ -129,10 +144,18 @@ function run_stubber {
             # 0 = Success
             return $LASTEXITCODE -eq 0
         }
-        Default {
-            $createstubs_py = join-path $WSRoot "board/createstubs.py" 
+        "run" {
+            #python $pyboard_py --device $serialport $createstubs_py | write-host
+            # MISTERY:  needs some magic introduction by rshell to make rshells pyboard work 
+            rshell -p $serialport  --rts 1 repl "~ print('connected') ~"  | write-host
+            start-sleep 2
+            # use RSHELL's pyboard 
+            pyboard --device $serialport $createstubs_py | write-host
+            # 0 = Success
+            return $LASTEXITCODE -eq 0
 
-            
+        }
+        Default {
             # copy modulelist.txt to the board
             python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
             python $pyboard_py --device $serialport --no-soft-reset -f cp $createstubs_py :createstubs.py | Write-Host
@@ -186,6 +209,16 @@ Push-Location -StackName "start-remote-stubber"
 $WSRoot = "C:\develop\MyPython\micropython-stubber"
 $download_path = (join-path -Path $WSRoot -ChildPath "stubs/machine-stubs")
 
+# use the local microython pyboard script , not the old version from PyPi 
+# note multiple versions of pyboard are present 
+#  - micropython/tools/pyboard.py - has simple file transfer options 
+#  - rshell can copy folders 
+#  - pyboard is install as part of rshell but cannot copy files 
+
+$pyboard_py = join-path $WSRoot "micropython/tools/pyboard.py" 
+$update_pyi_py = join-path $WSRoot "src/update_pyi.py" 
+
+
 Clear-Host 
 Write-Host -ForegroundColor Cyan "Detecting devices...."
 
@@ -204,7 +237,7 @@ $all_versions = @(
     @{version = "v1.15"; chip = "esp8266"; } ,
     @{version = "v1.14"; chip = "esp8266"; } ,
     @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-    @{version = "v1.12"; chip = "esp8266"; } ,
+    @{version = "v1.12"; chip = "esp8266"; } 
     # Older versions need a different version of mpy-cross cross compiler
     # @{version = "v1.11"; chip = "esp8266"; } ,
     # @{version = "v1.10"; chip = "esp8266"; } ,    
@@ -212,22 +245,15 @@ $all_versions = @(
     # @{version = "v1.10"; chip = "esp32"; },
     # @{version = "v1.11"; chip = "esp32"; },
 
-    # @{version = "v1.17"; chip = "esp32"; },
-    # @{version = "v1.16"; chip = "esp32"; },
-    # @{version = "v1.15"; chip = "esp32"; },
-    # @{version = "v1.14"; chip = "esp32"; },
-    # @{version = "v1.13"; chip = "esp32"; nightly = $true },
-    # @{version = "v1.12"; chip = "esp32"; }
+    @{version = "v1.17"; chip = "esp32"; },
+    @{version = "v1.16"; chip = "esp32"; },
+    @{version = "v1.15"; chip = "esp32"; },
+    @{version = "v1.14"; chip = "esp32"; },
+    @{version = "v1.13"; chip = "esp32"; nightly = $true },
+    @{version = "v1.12"; chip = "esp32"; }
 )
 
 
-$all_versions = (
-    @{version = "v1.17"; chip = "esp8266"; },
-    @{version = "v1.17"; chip = "esp32"; }
-)
-    
-    
-$fw = @{version = "v1.17"; chip = "esp32"; }
 
 $results = @()
     
@@ -268,7 +294,7 @@ foreach ($fw in $all_versions) {
 
     # 3) upload & run stubber
     Write-Host -ForegroundColor Cyan "Starting createstubs.py"
-    $OK = run_stubber -serialport $serialport
+    $OK = run_stubber -serialport $serialport -chip $fw.chip
     if (-not $OK) {
         Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem running Stubber"
         $result.Stub = "Error"
@@ -293,6 +319,9 @@ foreach ($fw in $all_versions) {
     # Add to done
     $results += $result
 }
+
+# now generate .pyi files 
+python $update_pyi_py $download_path
 
 Pop-Location  -StackName "start-remote-stubber"
 
