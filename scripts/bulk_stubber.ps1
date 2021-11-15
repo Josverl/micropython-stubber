@@ -82,7 +82,7 @@ function run_stubber {
         $serialport 
     )
     switch ($chip) {
-        "esp8622" { 
+        "esp8266" { 
             $type = "compiled" 
             $createstubs_py = join-path $WSRoot "minified/createstubs_mem.py" 
             $createstubs_mpy = join-path $WSRoot "minified/createstubs_mem.mpy" 
@@ -127,16 +127,19 @@ function run_stubber {
             # v1.9.3 - v1.10        3
             # v1.9 - v1.9.2         2
             # v1.5.1 - v1.8.7       0
+            if ($False) {
 
-            # cross compile the minified version - squeeze out all bits
-            # https://docs.micropython.org/en/latest/library/micropython.html#micropython.opt_level
-            # &mpy-cross ../minified/createstubs.py -O3
-            # Set to 0O2 for a bit more error info
-            &mpy-cross ../minified/createstubs.py -O2
+                # # cross compile the minified version - squeeze out all bits
+                # # https://docs.micropython.org/en/latest/library/micropython.html#micropython.opt_level
+                # # &mpy-cross ../minified/createstubs.py -O3
+                # # Set to 0O2 for a bit more error info
+                write-host "mpy-cross compile : $createstubs_py --> $createstubs_mpy"
+                &mpy-cross $createstubs_py -O2 -o $createstubs_mpy
+            }
 
+            write-host "Using compiled versions: $createstubs_mpy"
             # copy modulelist.txt to the board
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt
-            | Write-Host
+            python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
             python $pyboard_py --device $serialport --no-soft-reset -f cp $createstubs_mpy :createstubs.mpy | Write-Host
             # run the minified & compiled version 
             python $pyboard_py --device $serialport --no-soft-reset -c  "import createstubs" | write-host
@@ -237,13 +240,15 @@ $all_versions = @(
     @{version = "v1.15"; chip = "esp8266"; } ,
     @{version = "v1.14"; chip = "esp8266"; } ,
     @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-    @{version = "v1.12"; chip = "esp8266"; } 
+    # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
     # Older versions need a different version of mpy-cross cross compiler
     # @{version = "v1.11"; chip = "esp8266"; } ,
     # @{version = "v1.10"; chip = "esp8266"; } ,    
     # @{version = "v1.10"; chip = "esp8266"; },
-    # @{version = "v1.10"; chip = "esp32"; },
-    # @{version = "v1.11"; chip = "esp32"; },
+
+    @{version = "v1.9.4"; chip = "esp32"; },
+    @{version = "v1.10"; chip = "esp32"; },
+    @{version = "v1.11"; chip = "esp32"; },
 
     @{version = "v1.17"; chip = "esp32"; },
     @{version = "v1.16"; chip = "esp32"; },
@@ -322,6 +327,8 @@ foreach ($fw in $all_versions) {
 
 # now generate .pyi files 
 python $update_pyi_py $download_path
+# and run black formatting across all 
+black $download_path
 
 Pop-Location  -StackName "start-remote-stubber"
 

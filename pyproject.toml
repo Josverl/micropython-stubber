@@ -10,8 +10,6 @@ exclude = '''
         | micropython
         | micropython-lib
         | tests[\\/]mocks
-        | stubs
-        | dev-stubs
         | scratch
     )/
 )
