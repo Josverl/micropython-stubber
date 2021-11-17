@@ -31,8 +31,9 @@ if not core_mocks in sys.path:
 try:
     prefix = "minified."
     from minified.createstubs import Stubber, read_path
+    import minified.createstubs as createstubs
 except Exception:
-    Stubber = read_path = None
+    createstubs = Stubber = read_path = None
 
 
 # ----------------------------------------------------------------------------------------
@@ -45,6 +46,7 @@ except Exception:
 @pytest.mark.minified
 def test_stubber_Class_available():
     assert Stubber is not None, "Stubber Class not imported"
+
 
 @pytest.mark.minified
 def test_stubber_info_basic():
