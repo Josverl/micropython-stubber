@@ -1,4 +1,5 @@
 # run createstubs in the unix version of micropython
+from logging import captureWarnings
 import os
 import json
 import sys
@@ -7,67 +8,71 @@ from pathlib import Path
 from typing import List
 import pytest
 
-#  ROOT = Path(__file__).parent
 
-import platform
+# Figure out ubuntu version
+try:
+    import lsb_release
 
-
-@pytest.fixture(scope="module")
-def ubuntu_ver_sion():
-    "find the version of ubuntu we are running on"
-    version = ""
-    for v in ("18.04", "20.04"):
-        if v in platform.version() and "Ubuntu" in platform.version():
-            version = v
-    if version != "":
-        folder = f"ubuntu_{version}".replace(".", "_")
-        return folder
-        print("ubuntu :", version)
-    return ""
+    ubuntu_version = lsb_release.get_os_release()["RELEASE"]
+    ubuntu_name = lsb_release.get_os_release()["CODENAME"]
+except Exception:
+    ubuntu_name = "focal"
+    ubuntu_version = ""
 
 
-def firmwares() -> List[str]:
-    if "18.04" in platform.version() and "Ubuntu" in platform.version():
-        return [
-            "micropython_1_12",
-            "micropython_1_13",
-            "pycopy_3_3_2-25",
-        ]
-    if "20.04" in platform.version() and "Ubuntu" in platform.version():
-        return [
-            "micropython_v1_11",
-            "micropython_v1_12",
-            "micropython_v1_14",
-            "micropython_v1_15",
-            "micropython_v1_16",
-        ]
-    return []
+if ubuntu_name == "focal":
+    # 20.04
+    fw_list = [
+        "micropython_v1_11",
+        "micropython_v1_12",
+        "micropython_v1_14",
+        "micropython_v1_15",
+        "micropython_v1_16",
+    ]
+elif ubuntu_name == "bionic":
+    # 18.04 ?:
+    fw_list = [
+        "micropython_1_12",
+        "micropython_1_13",
+        "pycopy_3_3_2-25",
+    ]
 
 
-@pytest.mark.parametrize("script_folder", ["./board", "./minified"])
-@pytest.mark.parametrize("firmware", firmwares())
-
+# more cmplex config to specify the minified tests
+@pytest.mark.parametrize(
+    "script_folder",
+    [
+        pytest.param("./board"),
+        pytest.param("./minified", marks=pytest.mark.minified),
+    ],
+)
+@pytest.mark.parametrize(
+    "firmware",
+    fw_list,
+)
 # only run createsubs in the unix version of micropython
-@pytest.mark.skipif(sys.platform == "win32", reason="requires linux")
-def test_createstubs(firmware, tmp_path, script_folder, ubuntu_ver_sion):
+@pytest.mark.linux
+def test_createstubs(firmware, tmp_path: Path, script_folder):
     # Use temp_path to generate stubs
     scriptfolder = os.path.abspath(script_folder)
-    cmd = [
-        os.path.abspath("tests/tools/" + ubuntu_ver_sion + "/" + firmware),
-        "createstubs.py",
-        "--path",
-        tmp_path,
-    ]
+    cmd = [os.path.abspath("tests/tools/ubuntu_20_04/" + firmware), "createstubs.py", "--path", str(tmp_path)]
+
     try:
-        subproc = subprocess.run(cmd, cwd=scriptfolder, timeout=100000)
-        assert subproc.returncode == 0, "createstubs ran with an error"
+        subproc = subprocess.run(
+            cmd,
+            cwd=scriptfolder,
+            timeout=100000,
+            capture_output=True,
+        )
+        print(subproc.stdout)
+        assert subproc.returncode == 0, "createstubs ran with an error :" + str(subproc.stdout)
         # assert (subproc.returncode <= 0 ), "createstubs ran with an error"
     except ImportError as e:
         print(e)
         pass
     # did it run without error ?
 
-    stubfolder = Path(tmp_path) / "stubs"
+    stubfolder = tmp_path / "stubs"
     stubfiles = list(stubfolder.rglob("*.py"))
     # filecount
     if "micropython" in script_folder:
@@ -87,4 +92,4 @@ def test_createstubs(firmware, tmp_path, script_folder, ubuntu_ver_sion):
 
     assert len(manifest) == 3, "module manifest should contain firmware, stubber , modules"
 
-    assert len(manifest["modules"]) == len(stubfiles), "number of modules must match count of stubfiles"
+    assert len(manifest["modules"]) - len(stubfiles) == 0, "number of modules must match count of stubfiles."

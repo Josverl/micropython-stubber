@@ -2,8 +2,9 @@
 {
     "include": [
         "src",
+        "tests",
         "board",
-        "data"
+        "minified",
     ],
     "exclude": [
         "**/node_modules",
@@ -15,7 +16,7 @@
         "data",
         "all_stubs",
     ],
-    "stubPath": "src/stubs",
+    "stubPath": "./typings",
     "reportMissingImports": true,
     "reportMissingTypeStubs": false,
     "pythonVersion": "3.8",
@@ -23,13 +24,14 @@
     "executionEnvironments": [
         {
             "root": "board",
-            "pythonVersion": "3.5",
+            "pythonVersion": "3.6",
             "pythonPlatform": "Linux",
             "extraPaths": [
                 "board/lib",
-                "all-stubs/cpython-core",
-                "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
-                "all-stubs/micropython-esp32-1_15"
+                "generated/micropython/v1_17-nightly",
+                // "all-stubs/cpython-core",
+                // "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
+                // "all-stubs/micropython-esp32-1_15"
             ],
             "verboseOutput": true
         },

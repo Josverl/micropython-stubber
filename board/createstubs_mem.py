@@ -1,5 +1,17 @@
 """
-Create stubs for (all) modules on a MicroPython board
+Create stubs for (all) modules on a MicroPython board.
+
+    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file 
+    `./modulelist.txt` that should be uploaded to the device.
+    If that cannot be found then only a single module (micropython) is stubbed.
+    In order to run this on low-memory devices two additioanl steps are recommended: 
+    - minifification, using python-minifier
+      to reduce overall size, and remove logging overhead.
+    - cross compilation, using mpy-cross, 
+      to avoid the compilation step on the micropython device 
+
+    you can find a cross-compiled version located here: `.\minified\createstubs_mem.mpy
+
 Copyright (c) 2019-2021 Jos Verlinde
 """
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -171,7 +183,6 @@ class Stubber:
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
                 module_name, self._fwid, self.info, __version__
             )
-
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -330,7 +341,9 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
+        self._log.info(
+            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
+        )
         f_name = "{}/{}".format(self.path, filename)
         gc.collect()
         try:
@@ -554,143 +567,17 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
-    # there is no option to discover modules from micropython, need to hardcode
-    # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
-    # spell-checker: disable
-    # modules to stub : 131
-    stubber.modules = [
-        "_onewire",
-        "_thread",
-        "_uasyncio",
-        "ak8963",
-        "apa102",
-        "apa106",
-        "array",
-        "binascii",
-        "btree",
-        "builtins",
-        "cmath",
-        "collections",
-        "crypto",
-        "curl",
-        "dht",
-        "display",
-        "display_driver_utils",
-        "ds18x20",
-        "errno",
-        "esp",
-        "esp32",
-        "espidf",
-        "flashbdev",
-        "framebuf",
-        "freesans20",
-        "fs_driver",
-        "functools",
-        "gc",
-        "gsm",
-        "hashlib",
-        "heapq",
-        "ili9XXX",
-        "imagetools",
-        "inisetup",
-        "io",
-        "json",
-        "lcd160cr",
-        "lodepng",
-        "logging",
-        "lv_colors",
-        "lv_utils",
-        "lvgl",
-        "lwip",
-        "machine",
-        "math",
-        "microWebSocket",
-        "microWebSrv",
-        "microWebTemplate",
-        "micropython",
-        "mpu6500",
-        "mpu9250",
-        "neopixel",
-        "network",
-        "ntptime",
-        "onewire",
-        "os",
-        "pyb",
-        "pycom",
-        "pye",
-        "queue",
-        "random",
-        "re",
-        "requests",
-        "rtch",
-        "select",
-        "socket",
-        "ssd1306",
-        "ssh",
-        "ssl",
-        "stm",
-        "struct",
-        "sys",
-        "time",
-        "tpcalib",
-        "uarray",
-        "uasyncio/__init__",
-        "uasyncio/core",
-        "uasyncio/event",
-        "uasyncio/funcs",
-        "uasyncio/lock",
-        "uasyncio/stream",
-        "ubinascii",
-        "ubluetooth",
-        "ucollections",
-        "ucrypto",
-        "ucryptolib",
-        "uctypes",
-        "uerrno",
-        "uftpd",
-        "uhashlib",
-        "uheapq",
-        "uio",
-        "ujson",
-        "ulab",
-        "ulab/approx",
-        "ulab/compare",
-        "ulab/fft",
-        "ulab/filter",
-        "ulab/linalg",
-        "ulab/numerical",
-        "ulab/poly",
-        "ulab/user",
-        "ulab/vector",
-        "umachine",
-        "umqtt/robust",
-        "umqtt/simple",
-        "uos",
-        "upip",
-        "upip_utarfile",
-        "uqueue",
-        "urandom",
-        "ure",
-        "urequests",
-        "urllib/urequest",
-        "uselect",
-        "usocket",
-        "ussl",
-        "ustruct",
-        "usys",
-        "utelnetserver",
-        "utime",
-        "utimeq",
-        "uwebsocket",
-        "uzlib",
-        "websocket",
-        "websocket_helper",
-        "writer",
-        "xpt2046",
-        "ymodem",
-        "zlib",
-    ]  # spell-checker: enable
-
+    # Read stubs from modulelist
+    try:
+        stubber.modules = [
+            line.strip() for line in open("modulelist" + ".txt") if len(line.strip()) and line.strip()[0] != "#"
+        ]
+    except OSError:
+        # fall back gracefully
+        stubber.modules = ["micropython"]
+        _log.warning("Warning: ./modulelist.txt could not be found.")
+    # Option: Add your own modules
+    # stubber.add_modules(['bluetooth','GPS'])
     gc.collect()
 
     stubber.create_all_stubs()

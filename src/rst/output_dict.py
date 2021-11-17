@@ -32,7 +32,7 @@ it
 """
 from __future__ import annotations
 
-from typing import Optional, OrderedDict, List, Union
+from typing import OrderedDict, List, Union
 from .classsort import sort_classes
 
 
@@ -107,9 +107,7 @@ class SourceDict(OrderedDict):
             line = spaces(self._indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
-    def add_constant_smart(
-        self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True
-    ):
+    def add_constant_smart(self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True):
         "add constant to the constant scope of this block, or a class in this block"
         if "." in name and isinstance(self, ModuleSourceDict):
             classname, const_name = name.split(".", 1)

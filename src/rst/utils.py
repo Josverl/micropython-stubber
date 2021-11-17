@@ -37,7 +37,7 @@ to do:
 
 import logging
 import re
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 
 from .lookup import LOOKUP_LIST, NONE_VERBS
 
@@ -211,7 +211,7 @@ def compound_candidates(
                     sub = "int"
                     break
                 else:
-                    lt = element
+                    sub = element
         if sub:
             result["type"] = f"{type}[{sub}]"
         else:
@@ -248,8 +248,6 @@ def object_candidates(
         if i < 0:
             continue
         # List / Dict / Generator of Any / Tuple /
-        sub = None
-        result = BASE.copy()
         confidence = rate
 
         # did the word actually occur, or is it just a partial
@@ -429,7 +427,8 @@ def return_type_from_context(*, docstring: Union[str, List[str]], signature: str
     except Exception:
         return "Any"
 
-def _type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False) :
+
+def _type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False):
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -490,7 +489,7 @@ def _type_from_context(*, docstring: Union[str, List[str]], signature: str, modu
     if function_name in LOOKUP_LIST.keys():
         sig_type = LOOKUP_LIST[function_name][0]
         return {
-            "type": LOOKUP_LIST[function_name][0],
+            "type": sig_type,
             "confidence": C_LOOKUP * WEIGHT_LOOPUPS,
             "match": function_name,
         }

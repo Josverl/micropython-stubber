@@ -134,7 +134,7 @@ body = classdef.body
 
 if isinstance(body, Sequence):
     if body:
-        expr = body[0]
+        expr = body[0]  # lgtm [py/multiple-definition]
     else:
         # fixme: what to do if there is no body
         assert False, "there is no body"

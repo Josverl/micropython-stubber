@@ -1,5 +1,27 @@
 """
-Create stubs for (all) modules on a MicroPython board
+Create stubs for (all) modules on a MicroPython board.
+
+    This variant of the createstubs.py script is optimized for use on very-low-memory devices.
+    Note: this version has undergone limited testing.
+    
+    1) reads the list of modules from a text file `./modulelist.txt` that should be uploaded to the device.
+    2) creates a btree database of the files that should be stubbed
+        - todo:
+        - add a main.py that starts stubbing
+    3) process the modules in the database:
+        - stub the module
+        - reboots the device if it runs out of memory
+    4) creates the modules.json
+
+    If that cannot be found then only a single module (micropython) is stubbed.
+    In order to run this on low-memory devices two additional steps are recommended: 
+    - minification, using python-minifier
+      to reduce overall size, and remove logging overhead.
+    - cross compilation, using mpy-cross, 
+      to avoid the compilation step on the micropython device 
+
+You should find a cross-compiled version located here: `./minified/createstubs_db.mpy
+
 Copyright (c) 2019-2021 Jos Verlinde
 """
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -171,7 +193,6 @@ class Stubber:
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
                 module_name, self._fwid, self.info, __version__
             )
-
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -330,7 +351,9 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
+        self._log.info(
+            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
+        )
         f_name = "{}/{}".format(self.path, filename)
         gc.collect()
         try:
@@ -547,154 +570,72 @@ def isMicroPython() -> bool:
         return True
 
 
-def main():
+def main_esp8266():
+    import machine
+    import btree
 
+    try:
+        f = open("modulelist" + ".db", "r+b")
+        was_running = True
+        _log.info("Opened existing db")
+    except OSError:
+        f = open("modulelist" + ".db", "w+b")
+        _log.info("created new db")
+        was_running = False
+    #
     stubber = Stubber(path=read_path())
     # stubber = Stubber(path="/sd")
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
-    stubber.clean()
-    # there is no option to discover modules from micropython, need to hardcode
-    # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
-    # spell-checker: disable
-    # modules to stub : 131
-    stubber.modules = [
-        "_onewire",
-        "_thread",
-        "_uasyncio",
-        "ak8963",
-        "apa102",
-        "apa106",
-        "array",
-        "binascii",
-        "btree",
-        "builtins",
-        "cmath",
-        "collections",
-        "crypto",
-        "curl",
-        "dht",
-        "display",
-        "display_driver_utils",
-        "ds18x20",
-        "errno",
-        "esp",
-        "esp32",
-        "espidf",
-        "flashbdev",
-        "framebuf",
-        "freesans20",
-        "fs_driver",
-        "functools",
-        "gc",
-        "gsm",
-        "hashlib",
-        "heapq",
-        "ili9XXX",
-        "imagetools",
-        "inisetup",
-        "io",
-        "json",
-        "lcd160cr",
-        "lodepng",
-        "logging",
-        "lv_colors",
-        "lv_utils",
-        "lvgl",
-        "lwip",
-        "machine",
-        "math",
-        "microWebSocket",
-        "microWebSrv",
-        "microWebTemplate",
-        "micropython",
-        "mpu6500",
-        "mpu9250",
-        "neopixel",
-        "network",
-        "ntptime",
-        "onewire",
-        "os",
-        "pyb",
-        "pycom",
-        "pye",
-        "queue",
-        "random",
-        "re",
-        "requests",
-        "rtch",
-        "select",
-        "socket",
-        "ssd1306",
-        "ssh",
-        "ssl",
-        "stm",
-        "struct",
-        "sys",
-        "time",
-        "tpcalib",
-        "uarray",
-        "uasyncio/__init__",
-        "uasyncio/core",
-        "uasyncio/event",
-        "uasyncio/funcs",
-        "uasyncio/lock",
-        "uasyncio/stream",
-        "ubinascii",
-        "ubluetooth",
-        "ucollections",
-        "ucrypto",
-        "ucryptolib",
-        "uctypes",
-        "uerrno",
-        "uftpd",
-        "uhashlib",
-        "uheapq",
-        "uio",
-        "ujson",
-        "ulab",
-        "ulab/approx",
-        "ulab/compare",
-        "ulab/fft",
-        "ulab/filter",
-        "ulab/linalg",
-        "ulab/numerical",
-        "ulab/poly",
-        "ulab/user",
-        "ulab/vector",
-        "umachine",
-        "umqtt/robust",
-        "umqtt/simple",
-        "uos",
-        "upip",
-        "upip_utarfile",
-        "uqueue",
-        "urandom",
-        "ure",
-        "urequests",
-        "urllib/urequest",
-        "uselect",
-        "usocket",
-        "ussl",
-        "ustruct",
-        "usys",
-        "utelnetserver",
-        "utime",
-        "utimeq",
-        "uwebsocket",
-        "uzlib",
-        "websocket",
-        "websocket_helper",
-        "writer",
-        "xpt2046",
-        "ymodem",
-        "zlib",
-    ]  # spell-checker: enable
+    if not was_running:
+        # Only clean folder if this is a first run
+        stubber.clean()
 
-    gc.collect()
+    # Now open a database
+    db = btree.open(f)
+    # if started with no or empty database
+    if not was_running or len(list(db.keys())) == 0:
+        # load modulelist into database
+        _log.info("load modulelist into db")
+        for line in open("modulelist" + ".txt"):
+            key = line.strip()
+            if len(key) and key[0] != "#":
+                db[key] = b"todo"
+        db.flush()
 
-    stubber.create_all_stubs()
-    stubber.report()
+    for key in db.keys():
+        print("{0:<32} {1}".format(key, db[key]))
+        if db[key] != b"todo":
+            continue
+        # ------------------------------------
+        # do epic shit
+        # but sometimes things fail
+        OK = False
+        try:
+            OK = stubber.create_one_stub(key.decode("utf8"))
+        except MemoryError:
+            # RESET AND HOPE THAT IN THE CYCLE WE PROGRESS
+            db.close()
+            f.close()
+            machine.reset()
+
+        # save the (last) result back to the database
+        if OK:
+            # try:
+            #     result = bytearray(stubber._report[-1])
+            # except KeyError:
+            result = "good, I guess"
+        else:
+            result = b"skipped"
+        # -------------------------------------
+        db[key] = result
+        db.flush()
+        _log.info(result)
+    # Finished processing
+    print(list(db))
+    #     print("{0:<32} {1}".format(key, db[key]))
+    db.close()
+    f.close()
 
 
 if __name__ == "__main__" or isMicroPython():
@@ -704,4 +645,4 @@ if __name__ == "__main__" or isMicroPython():
         # logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
-    main()
+    main_esp8266()

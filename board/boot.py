@@ -5,7 +5,7 @@ import uos as os
 
 esp.osdebug(None)
 
-SD = True
+SD = False
 if SD:
     # Mount SD to /sd
     try:
@@ -14,9 +14,7 @@ if SD:
         # os.mount(machine.SDCard(slot=1, width=4), "/sd")  # SD mode 4 bit
 
         # # SPI 1 bit M5Stack Core
-        os.mount(
-            machine.SDCard(slot=2, width=1, sck=18, miso=19, mosi=23, cs=4), "/sd"
-        )  # SPI 1 bit M5Stack Core
+        os.mount(machine.SDCard(slot=2, width=1, sck=18, miso=19, mosi=23, cs=4), "/sd")  # SPI 1 bit M5Stack Core
         print("SD Card mounted")
     except OSError as e:
         if e.args[0] == 16:
