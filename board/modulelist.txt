@@ -1,3 +1,5 @@
+# list of modules to stub.
+# used by the memory optimised createstubs_mem.py
 _onewire
 _thread
 _uasyncio
@@ -29,7 +31,6 @@ gc
 gsm
 hashlib
 heapq
-# ili9341
 ili9XXX
 imagetools
 inisetup
@@ -129,4 +130,3 @@ writer
 xpt2046
 ymodem
 zlib
-
