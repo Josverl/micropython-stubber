@@ -267,7 +267,7 @@ def object_candidates(
                 object = re.sub(r"[^a-z.A-Z0-9]", "", object)
             result = BASE.copy()
             result["type"] = object
-            if object == "an":  # "Return an object"
+            if object in ["an", "any"]:  # "Return an / any object"
                 result["type"] = "Any"
                 confidence += 0.10  # abstract , but very good
             elif object[0].islower():
