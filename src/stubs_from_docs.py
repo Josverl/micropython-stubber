@@ -738,7 +738,7 @@ def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True
 
     if black:
         try:
-            cmd = f"black {dst_folder.as_posix()}"
+            cmd = ["black", dst_folder.as_posix()]
             result = subprocess.run(cmd, capture_output=False, check=True)
             if result.returncode != 0:
                 raise Exception(result.stderr.decode("utf-8"))
