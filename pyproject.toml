@@ -35,6 +35,8 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "minified: marks test of the minified version of createstubs",
+    "docfix: upstream documentation fix needed",
+    # os versions
     "win32: run test only on Windows",
     "linux: run test only on linux",
     "darwin: run test only on Mac",

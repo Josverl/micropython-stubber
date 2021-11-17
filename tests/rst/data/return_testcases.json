@@ -1292,5 +1292,18 @@
         "module": "network",
         "class": "WLANWiPy",
         "function/method": "WLANWiPy.irq"
+    },
+    {
+        "signature": "random.choice()",
+        "docstring": [
+            "    Chooses and returns one item at random from *sequence* (tuple, list or any object that supports the subscript operation)."
+        ],
+        "docstring_len": 0,
+        "type": "Any",
+        "confidence": 1,
+        "match": "",
+        "module": "random",
+        "class": "",
+        "function/method": "random.choice"
     }
 ]

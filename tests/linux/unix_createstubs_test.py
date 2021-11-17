@@ -7,36 +7,32 @@ import subprocess
 from pathlib import Path
 from typing import List
 import pytest
+import distro
 
 
+ubuntu_version = "?"
+fw_list = []
 # Figure out ubuntu version
-try:
-    import lsb_release
-
-    ubuntu_version = lsb_release.get_os_release()["RELEASE"]
-    ubuntu_name = lsb_release.get_os_release()["CODENAME"]
-except Exception:
-    ubuntu_name = "focal"
-    ubuntu_version = ""
+if sys.platform == "linux":
+    if distro.id() == "ubuntu":
+        ubuntu_version = distro.version()
 
 
-if ubuntu_name == "focal":
-    # 20.04
+# Default = 20.04 - focal
+fw_list = [
+    "ubuntu_20_04/micropython_v1_11",
+    "ubuntu_20_04/micropython_v1_12",
+    "ubuntu_20_04/micropython_v1_14",
+    "ubuntu_20_04/micropython_v1_15",
+    "ubuntu_20_04/micropython_v1_16",
+]
+if ubuntu_version == "18.04":
+    # 18.04 - bionic
     fw_list = [
-        "micropython_v1_11",
-        "micropython_v1_12",
-        "micropython_v1_14",
-        "micropython_v1_15",
-        "micropython_v1_16",
+        "ubuntu_18_04/micropython_1_12",
+        "ubuntu_18_04/micropython_1_13",
+        "ubuntu_18_04/pycopy_3_3_2-25",
     ]
-elif ubuntu_name == "bionic":
-    # 18.04 ?:
-    fw_list = [
-        "micropython_1_12",
-        "micropython_1_13",
-        "pycopy_3_3_2-25",
-    ]
-
 
 # more cmplex config to specify the minified tests
 @pytest.mark.parametrize(

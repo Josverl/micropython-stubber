@@ -48,7 +48,15 @@ def return_type_testcases() -> List[Tuple[str, str, str, str]]:
     return cases
 
 
-@pytest.mark.parametrize("expected_type, module, signature, docstring", return_type_testcases())
+# help generate test ids that do not throw bash into a fit
+def make_ids(val):
+    if isinstance(val, str):
+        for c in "()":
+            val = val.replace(c, "_")
+    return val
+
+
+@pytest.mark.parametrize("expected_type, module, signature, docstring", return_type_testcases(), ids=make_ids)
 def test_returns(module, signature, docstring, expected_type):
     # return type should be included in the signature
     # except for classes

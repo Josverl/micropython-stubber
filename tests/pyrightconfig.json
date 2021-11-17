@@ -1,0 +1,17 @@
+// https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+{
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__"
+    ],
+    "ignore": [
+        "data",
+        "tools",
+        "all_stubs",
+    ],
+    //"stubPath": "./typings",
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.8",
+    "pythonPlatform": "Linux",
+}
