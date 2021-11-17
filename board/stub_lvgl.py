@@ -7,7 +7,6 @@ try:
     import lvgl
 except Exception:
     print("\n\nNOTE: The `lvgl` module could not be found on this firmware\n\n")
-    pass
 
 import sys
 

@@ -77,7 +77,6 @@ class Stubber:
         "extract information of the objects members and attributes"
         _result = []
         _errors = []
-        _name = None
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         try:
             for name in dir(item_instance):
