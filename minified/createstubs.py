@@ -49,14 +49,14 @@ class Stubber:
 		try:V(D+E)
 		except C:pass
 		A.problematic=[b,'upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.modules=[]
-	def get_obj_attributes(L,item_instance):
-		K="Couldn't get attribute '{}' from object '{}', Err: {}";A=item_instance;C=[];G=[];M=D
+	def get_obj_attributes(K,item_instance):
+		J="Couldn't get attribute '{}' from object '{}', Err: {}";A=item_instance;C=[];E=[]
 		try:
-			for E in dir(A):
-				try:H=getattr(A,E);C.append((E,repr(H),repr(type(H)),H))
-				except F as J:G.append(K.format(E,A,J))
-		except F as J:G.append(K.format(E,A,J))
-		C=[A for A in C if not(A[0].startswith(I)and A[0]!=P)];B.collect();return C,G
+			for D in dir(A):
+				try:G=getattr(A,D);C.append((D,repr(G),repr(type(G)),G))
+				except F as H:E.append(J.format(D,A,H))
+		except F as H:E.append(J.format(D,A,H))
+		C=[A for A in C if not(A[0].startswith(I)and A[0]!=P)];B.collect();return C,E
 	def add_modules(A,modules):A.modules=sorted(set(A.modules)|set(modules))
 	def create_all_stubs(A):
 		B.collect()
