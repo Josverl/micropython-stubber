@@ -18,6 +18,9 @@ scratch/*
 board/stubs
 minified/stubs
 all-stubs
+# need to find a better location for the automated machine stubs
+stubs/machine-stubs
+stubs/extmod
 
 stubs/*
 dev-stubs
@@ -38,9 +41,8 @@ junit/*
 # OS specific stuff
 desktop.ini
 
-# no documentation artefacts
-docs/~$*
-docs/_build/
 
 # Do not check in the autodoc generated API documentaion files 
+docs/_build
 docs/api
+docs/~$*
