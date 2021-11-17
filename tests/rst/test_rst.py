@@ -47,18 +47,16 @@ def test_pyright_installed():
 def pyright_results(rst_stubs):
     "Run pyright over folder with rst generated stubs, and return the results"
 
-    # cmd = ["pyright", "generated/micropython/1_16-nightly", "--outputjson"]
-    cmd = f'pyright "{rst_stubs.as_posix()}" --outputjson'
+    cmd = ["pyright", "--project", "tests/pyrightconfig.json", "--outputjson", rst_stubs.as_posix()]
     try:
-        # result = subprocess.run(cmd, capture_output=False)
-        # result = subprocess.run(cmd, shell=True, capture_output=True)
-        result = subprocess.getoutput(cmd)
+        result = subprocess.run(cmd, shell=False, capture_output=True)
     except OSError as e:
         raise e
-    # mind the order
-    json_result = result[result.find("{") :]
-
-    results = json.loads(json_result)
+    results = {}
+    try:
+        results = json.loads(result.stdout)
+    except Exception:
+        assert 0, "Could not load pyright's JSON output :-("
     # assert results["summary"]["filesAnalyzed"] >= 40, ">= 40 files checked"
     return results
     # cleanup code here
@@ -88,8 +86,9 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
     # setup our on folder for testing
     dst_folder = tmp_path_factory.mktemp("stubs") / v_tag
     rst_folder = Path(MICROPYTHON_FOLDER) / "docs/library"
-    x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
+    generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=True)
     yield dst_folder
+
     # cleanup code here
 
 
@@ -97,7 +96,8 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
 #
 ###################################################################################################
 
-
+# @pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_rst_all(tmp_path, micropython_repo):
     v_tag = micropython_repo
 
@@ -278,7 +278,8 @@ import subprocess
 import json
 
 
-# @pytest.mark.xfail(reason="code to be written")
+# @pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_pyright_undefined_variable(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -289,6 +290,8 @@ def test_pyright_undefined_variable(pyright_results, capsys):
     assert len(issues) == 0, "there should be no `Undefined Variables`"
 
 
+# @pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs - reportGeneralTypeIssues"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -306,6 +309,8 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     assert len(issues) == 1, "there should be no type issues"
 
 
+@pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_pyright_invalid_strings(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -319,6 +324,8 @@ def test_pyright_invalid_strings(pyright_results, capsys):
     assert len(issues) == 0, "all string should be valid"
 
 
+@pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_doc_pyright_obscured_definitions(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -371,6 +378,8 @@ def test_doc_socket_class_def(rst_stubs: Path):
     assert found, "(u)socket.socket __init__ should be generated"
 
 
+# @pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_doc_poll_class_def(rst_stubs: Path):
     "make sense of `uselect.socket` class documented as a function - Upstream Docfix pending"
     content = read_stub(rst_stubs, "uselect.py")
@@ -385,7 +394,6 @@ def test_doc_poll_class_def(rst_stubs: Path):
     assert found, "uselect.poll should be stubbed as a class"
 
 
-# @pytest.mark.xfail(reason="upstream docfix needed")
 @pytest.mark.parametrize(
     "error, modulename",
     [
@@ -395,6 +403,8 @@ def test_doc_poll_class_def(rst_stubs: Path):
         ('"SPI" is not defined', "lcd160cr"),
     ],
 )
+@pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.docfix
 def test_doc_CONSTANTS(error, modulename, pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
