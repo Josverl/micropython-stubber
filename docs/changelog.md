@@ -1,7 +1,18 @@
 
 # Changelog 
+## createstubs.py - v1.4.3
+- significant memory optimisation for use on low-memory devices such as the esp8266 family
+  - load the list of modules to be stubbed from a text file rather than as part of the source 
+  - use both minification and the `mpy-cross` compiler to reduce the claim on memory (RAM) 
 
-## createstubs - Minified- v1.4.1 
+```{warning}
+This is a potential breaking change for external tools that expect to either directly execute the script or upload only a single file to an MCU in order to stub.
+```
+- the current process is automated in [`remote_stubber.ps1'][remote_stubber]
+## createstubs.py - v1.4.2
+- Fixes a regression introduced in 1.4-beta where function definitions would include a self parameter. 
+
+## minified createstubs.py - v1.4.1
 - Switched to use [python-minifier](https://github.com/dflook/python-minifier) for the minification due to the end-of-life of the previous minification tool 
   The new minification tool produces more compact code, although that is still not sufficient for some memory constrained devices.
   - there are no functional changes, 
@@ -9,10 +20,10 @@
   - several tests were adjusted
 
 ## documentation 
-- Add Sphinxs documentaion 
+- Add Sphinxs documentation 
     - changelog 
     - automatic API documentation for 
-        * createsubs.py (board) 
+        * createstubs.py (board) 
         * scripts to run on PC / Github actions
 - Publish documentation to readthedocs
     
@@ -70,3 +81,4 @@
         - run createstubs in linux version
         
 
+[remote_stubber]: ./65_scripts.md#remote_stubber.ps1

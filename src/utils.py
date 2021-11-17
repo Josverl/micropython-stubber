@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import shutil
+
 from fnmatch import fnmatch
 from pathlib import Path
 from version import VERSION
@@ -11,6 +13,7 @@ import sys
 
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 STUB_FOLDER = "./all-stubs"
 
@@ -66,7 +69,6 @@ def cleanup(modules_folder: Path):
                 f.unlink()
             except OSError:
                 log.error(" * Unable to remove extranous stub {}".format(f))
-                pass
 
 
 def generate_pyi_from_file(file: Path) -> bool:
@@ -99,7 +101,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     try:
         stubgen.generate_stubs(sg_opt)
         return True
-    except BaseException:
+    except Exception:
         return False
 
 
@@ -127,7 +129,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
                 generate_pyi_from_file(py)
                 # todo: report failures
 
-def cleanup(modules_folder: Path):
+
+def cleanup(modules_folder: Path, all_pyi: bool = False):
     "Q&D cleanup"
     # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice
     #  - modules_root folder ( simple.pyi and robust.pyi) - NOT OK
@@ -138,7 +141,12 @@ def cleanup(modules_folder: Path):
     # Mpy 1.13+
     #       - uasyncio.pyi      -uasyncio\__init__.py
 
-    # todo - Add check for source folder
+    if all_pyi:
+        for file in modules_folder.rglob("*.pyi"):
+            file.unlink()
+        # no need to remove anything else
+        return
+
     for file_name in (
         "simple.pyi",
         "robust.pyi",
@@ -201,7 +209,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     else:  # one or less module manifests
         ## generate fyi files for folder
         # clean before to clean any old stuff
-        cleanup(modules_folder)
+        # TODO: CLean out the old pyi files
+        cleanup(modules_folder, all_pyi=True)
 
         print("running stubgen on {0}".format(modules_folder))
         cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
@@ -220,12 +229,32 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         py_files = list(modules_folder.rglob("*.py"))
         pyi_files = list(modules_folder.rglob("*.pyi"))
 
-        for pyi in pyi_files:
+        worklist = pyi_files.copy()
+        for pyi in worklist:
             # remove all py files that have been stubbed successfully from the list
             try:
                 py_files.remove(pyi.with_suffix(".py"))
+                pyi_files.remove(pyi)
             except ValueError:
-                pass
+                log.info(f"no matching py for : {str(pyi)}")
+
+        # if there are any pyi files remaining,
+        # try to match them to py files and move them to the correct location
+        worklist = pyi_files.copy()
+        for pyi in worklist:
+            match = [py for py in py_files if py.stem == pyi.stem]
+            if match:
+                # move the .pyi next to the corresponding .py
+                log.info(f"moving : {str(pyi)}")
+                src = str(pyi)
+                dst = str(match[0].with_suffix(".pyi"))
+                shutil.move(src, dst)
+                try:
+                    py_files.remove(match[0])
+                    pyi_files.remove(pyi)
+                except ValueError:
+                    pass
+
         # now stub the rest
         # note in some cases this will try a file twice
         for py in py_files:
@@ -233,7 +262,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             # todo: report failures by adding to module manifest
 
         # and clean after to only check-in good stuff
-        cleanup(modules_folder)
+        # cleanup(modules_folder)
         return True
     #     ##
     # for mod_manifest in modlist:

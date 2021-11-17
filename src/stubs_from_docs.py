@@ -76,10 +76,9 @@ Not yet implemented
 """
 
 import json
-from os import link
 import re
 import subprocess
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 from pathlib import Path
 import basicgit as git
 from utils import flat_version
@@ -514,7 +513,7 @@ class RSTReader:
     def parse_method(self):
         name = ""
         this_method = ""
-        params = ")"
+        # params = ")"
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
         self.log(f"# {self.line.rstrip()}")
@@ -758,7 +757,7 @@ if __name__ == "__main__":
         raise ValueError
 
     rst_folder = base_path / "docs" / "library"
-    dst_folder = Path("all-stubs") / base_path.stem / (flat_version(v_tag, keep_v=True ) + "-docs")
+    dst_folder = Path("all-stubs") / base_path.stem / (flat_version(v_tag, keep_v=True) + "-docs")
 
     generate_from_rst(rst_folder, dst_folder, v_tag)
     # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
