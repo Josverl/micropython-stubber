@@ -11,12 +11,12 @@ except Exception:
 import sys
 
 ## Note that on MicroPython this will still cause the full stubbing to be automatically started due to the IsMicroPython()
-from createstubs import Stubber, stubber_version, isMicroPython, logging
+from createstubs import Stubber, __version__, isMicroPython, logging
 
 
 def main():
     "Create stubs for the lvgl modules using the lvlg version number."
-    print("stubber version :", stubber_version)
+    print("stubber version :", __version__)
     try:
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.DEBUG)
