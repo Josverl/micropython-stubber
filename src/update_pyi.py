@@ -21,6 +21,6 @@ if __name__ == "__main__":
         stub_path = sys.argv[1]
     else:
         stub_path = utils.STUB_FOLDER
-
+    stub_path = Path(stub_path).absolute()
     log.info("Generate type hint files (pyi) in folder: {}".format(stub_path))
-    utils.generate_pyi_files(Path(stub_path))
+    utils.generate_pyi_files(stub_path)
