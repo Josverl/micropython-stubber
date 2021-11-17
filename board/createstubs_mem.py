@@ -1,5 +1,17 @@
 """
-Create stubs for (all) modules on a MicroPython board
+Create stubs for (all) modules on a MicroPython board.
+
+    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file 
+    `./modulelist.txt` that should be uploaded to the device.
+    If that cannot be found then only a single module (micropython) is stubbed.
+    In order to run this on low-memory devices two additioanl steps are recommended: 
+    - minifification, using python-minifier
+      to reduce overall size, and remove logging overhead.
+    - cross compilation, using mpy-cross, 
+      to avoid the compilation step on the micropython device 
+
+    you can find a cross-compiled version located here: `.\minified\createstubs_mem.mpy
+
 Copyright (c) 2019-2021 Jos Verlinde
 """
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
