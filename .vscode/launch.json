@@ -66,6 +66,20 @@
             ]
         },
         {
+            "name": "Python: Debug process minify mem",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "program": "process.py",
+            "args": [
+                "-s",
+                "board/createstubs_mem.py",
+                "-o",
+                "minified/createstubs_mem.py",
+                "minify"
+            ]
+        },
+        {
             // disable pytest coverage report as it conflicts with debugging tests
             "name": "Debug pytest tests",
             "type": "python",
