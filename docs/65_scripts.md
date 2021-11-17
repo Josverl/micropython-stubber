@@ -5,7 +5,9 @@ Possibly these scripts could be ported to python , at the cost of more complex h
 
 (a PR with a port to Python would be appreciated)
 
-## remote_stubber.ps1
+
+(remote_stubber)=
+## bulk_stubber.ps1
 
 The goal of this script is to run create_stubs on a set of boards connected to my machine in order to generate new stubs for multiple micropython versions 
 
@@ -18,10 +20,9 @@ high level operation:
   - Selects the corresponding device and serialport
   - Flashes the micropython version to the device 
     using `flash_MPY.ps1`
-  - Resets the device
+  - waits for the device to finish processing any initial tasks ( file system creation etc) 
     ``` powershell
     rshell -p $serialport  --rts 1 repl "~ print('connected') ~" 
-    rshell -p $serialport  --rts 1 repl "~ import machine ~ machine.reset() ~" 
     ```
 
     ```{note}
@@ -43,12 +44,30 @@ high level operation:
     rshell -p $serialport --buffer-size 512 rsync $source $subfolder  | write-host
     ```
 
+### Minificantion and compilation 
+
+in order to allow createstubs to be run on low-memory devices there are a few steps needed to allow for sufficient memory 
+
+```{mermaid}
+graph TD
+    M[board\modulelist.txt]
+    A[board\createstubs.py] -->|process.py minify| B(minified\createstubs.py)
+    
+    B --> |mpy-cross -O3|C[[minified\createstubs.mpy]]
+
+    C -->|remote_stubber.ps1| D[esp32]
+    C -->|remote_stubber.ps1| E[esp8622]
+    M --> D[esp32]
+    M --> E[esp8622]
+```
+
+
 ### Requirements & dependencies
 
 **Python**
-- esptool 
-- pyboard 
-- rshell
+- esptool  - to flash new firmware to the esp32 and esp8266
+- pyboard.py - to upload files and run commands (not the old version on PyPi) 
+- rshell - to download the folder with stubs 
 
 
 **PowerShell**

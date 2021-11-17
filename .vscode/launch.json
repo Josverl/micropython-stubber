@@ -16,6 +16,18 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            "cwd": "${fileDirname}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: debug update pyi",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/update_pyi.py ",
+            "args": [
+                "./stubs/machine-stubs"
+            ],
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },
         {
@@ -50,6 +62,20 @@
             "console": "integratedTerminal",
             "program": "process.py",
             "args": [
+                "minify"
+            ]
+        },
+        {
+            "name": "Python: Debug process minify mem",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "program": "process.py",
+            "args": [
+                "-s",
+                "board/createstubs_mem.py",
+                "-o",
+                "minified/createstubs_mem.py",
                 "minify"
             ]
         },

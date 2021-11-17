@@ -10,6 +10,7 @@ mypy >= 0.812
 # Cross compilation 
 mpy-cross >= 1.16
 
+rshell  == 0.0.30
 # stub refactoring
 # libcst >= 0.3.19
 

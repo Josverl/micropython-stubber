@@ -5,17 +5,17 @@
 import argparse
 import itertools
 import sys
-from optparse import Values
 from pathlib import Path
+import subprocess
 
 try:
     import python_minifier
 except ImportError:
-    pass
+    python_minifier = None
 
 ROOT = Path(__file__).parent
-SCRIPT = ROOT / "board" / "createstubs.py"
-DEST = ROOT / "minified" / "createstubs.py"
+source_script = ROOT / "board" / "createstubs.py"
+destination_script = ROOT / "minified" / "createstubs.py"
 
 
 def edit_lines(content, edits, show_diff=False):
@@ -158,7 +158,7 @@ def edit_lines(content, edits, show_diff=False):
     return stripped
 
 
-def minify_script(keep_report=True, show_diff=False):
+def minify_script(source_script: Path, keep_report=True, show_diff=False):
     """minifies createstubs.py
 
     Args:
@@ -173,11 +173,18 @@ def minify_script(keep_report=True, show_diff=False):
     edits = [
         ("comment", "print"),
         ("comment", "import logging"),
+        # first full
         ("comment", "self._log ="),
         ("comment", "self._log.debug"),
         ("comment", "self._log.warning"),
         ("comment", "self._log.info"),
         ("comment", "self._log.error"),
+        # then short versions
+        ("comment", "_log ="),
+        ("comment", "_log.debug"),
+        ("comment", "_log.warning"),
+        ("comment", "_log.info"),
+        ("comment", "_log.error"),
     ]
     if keep_report:
         report = (
@@ -195,14 +202,17 @@ def minify_script(keep_report=True, show_diff=False):
         edits.insert(0, report)
         edits.insert(1, clean)
 
-    with SCRIPT.open("r") as f:
+    with source_script.open("r") as f:
+        if not python_minifier:
+            raise Exception("python_minifier not available")
+
         content = f.read()
 
         content = edit_lines(content, edits, show_diff=show_diff)
 
         source = python_minifier.minify(
             content,
-            filename=SCRIPT.name,
+            filename=source_script.name,
             combine_imports=True,
             remove_literal_statements=True,  # no Docstrings
             remove_annotations=True,  # not used runtime anyways
@@ -215,8 +225,11 @@ def minify_script(keep_report=True, show_diff=False):
                 "main",
                 "Stubber",
                 "read_path",
+                "get_root",
+                "_info",
                 "os",
                 "sys",
+                "__version__",
             ],
             # remove_pass=True,  # no dead code
             # convert_posargs_to_args=True, # Does not save any space
@@ -229,8 +242,9 @@ def minify_script(keep_report=True, show_diff=False):
 
 def cli_minify(**kwargs):
     """minify cli handler"""
-    print("\nMinifying createstubs.py...")
-    out = kwargs.pop("output")
+    source_path: Path = kwargs.pop("source")
+    print(f"\nMinifying {source_path}...")
+    out: Path = kwargs.pop("output")
     if not python_minifier:
         print("python_minifier is required to minify createstubs.py\n")
         print("Please install via:\n  pip install python_minifier")
@@ -238,25 +252,39 @@ def cli_minify(**kwargs):
     with out.open("w+") as f:
         report = kwargs.pop("no_report")
         diff = kwargs.pop("diff")
-        source = minify_script(keep_report=report, show_diff=diff)
+
+        source = minify_script(source_script=source_path, keep_report=report, show_diff=diff)
         f.write(source)
+
+    print("Minified file written to :", out)
+    result = subprocess.run(["mpy-cross", "-O2", out])
+    if result.returncode == 0:
+        print("mpy-cross compiled to    :", out.with_suffix(".mpy"))
+
     print("\nDone!")
-    print("Minified file written to:", out)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pre/Post Processing for createstubs.py")
+
     parser.set_defaults(func=None)
+    parser.add_argument(
+        "-s",
+        "--source",
+        help="Specify source file to read from. Defaults to {}".format(source_script),
+        type=Path,
+        default=source_script,
+    )
     parser.add_argument(
         "-o",
         "--output",
-        help="Specify file to output to. Defaults to ./minified/createstubs.py",
+        help="Specify file to output to. Defaults to {}".format(destination_script),
         type=Path,
-        default=DEST,
+        default=destination_script,
     )
     subparsers = parser.add_subparsers(help="Command to execute")
 
-    minify_parser = subparsers.add_parser("minify", help=("Create minified version of" " createstubs.py"))
+    minify_parser = subparsers.add_parser("minify", help=("Create minified version of createstubs.py"))
     minify_parser.add_argument("-d", "--diff", help="Print diff report from minify", action="store_true")
     minify_parser.add_argument(
         "-n",
