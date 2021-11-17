@@ -46,6 +46,7 @@ jobs:
         run: |
           python process.py minify
           python process.py -s board/createstubs_mem.py -o minified/createstubs_mem.py minify
+          python process.py -s board/createstubs_db.py -o minified/createstubs_db.py minify
 
 
       - name: run test on minified/createstubs.by
