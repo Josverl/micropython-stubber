@@ -190,11 +190,7 @@ def minify_script(source_script: Path, keep_report=True, show_diff=False):
     if keep_report:
         report = (
             "rprint",
-            (
-                'self._log.info("Stub module: {:<20} to file:'
-                ' {:<55} mem:{:>5}".'
-                "format(module_name, file_name, m1))"
-            ),
+            ('self._log.info("Stub module: {:<20} to file:' ' {:<55} mem:{:>5}".' "format(module_name, file_name, m1))"),
         )
         clean = (
             "rprint",
@@ -258,7 +254,7 @@ def cli_minify(**kwargs):
         f.write(source)
 
     print("Minified file written to :", out)
-    result = subprocess.run(["mpy-cross", "-O2", out])
+    result = subprocess.run(["mpy-cross", "-O2", str(out)])
     if result.returncode == 0:
         print("mpy-cross compiled to    :", out.with_suffix(".mpy"))
 
