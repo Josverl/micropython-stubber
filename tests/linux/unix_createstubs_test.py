@@ -1,6 +1,4 @@
 # run createstubs in the unix version of micropython
-from logging import captureWarnings
-import os
 import json
 import sys
 import subprocess
@@ -9,14 +7,12 @@ from typing import List
 import pytest
 import distro
 
-
 ubuntu_version = "?"
 fw_list = []
 # Figure out ubuntu version
 if sys.platform == "linux":
     if distro.id() == "ubuntu":
         ubuntu_version = distro.version()
-
 
 # Default = 20.04 - focal
 fw_list = [
@@ -34,7 +30,7 @@ if ubuntu_version == "18.04":
         "ubuntu_18_04/pycopy_3_3_2-25",
     ]
 
-# more cmplex config to specify the minified tests
+# specify the minified tests using a marker
 @pytest.mark.parametrize(
     "script_folder",
     [
@@ -48,15 +44,16 @@ if ubuntu_version == "18.04":
 )
 # only run createsubs in the unix version of micropython
 @pytest.mark.linux
-def test_createstubs(firmware, tmp_path: Path, script_folder):
+def test_createstubs(firmware: str, tmp_path: Path, script_folder: str):
     # Use temp_path to generate stubs
-    scriptfolder = os.path.abspath(script_folder)
-    cmd = [os.path.abspath("tests/tools/ubuntu_20_04/" + firmware), "createstubs.py", "--path", str(tmp_path)]
+    script_path = Path(script_folder).absolute()
+    fw_filename = (Path("./tests/tools") / firmware).absolute().as_posix()
+    cmd = [fw_filename, "createstubs.py", "--path", str(tmp_path)]
 
     try:
         subproc = subprocess.run(
             cmd,
-            cwd=scriptfolder,
+            cwd=script_path,
             timeout=100000,
             capture_output=True,
         )
@@ -68,8 +65,8 @@ def test_createstubs(firmware, tmp_path: Path, script_folder):
         pass
     # did it run without error ?
 
-    stubfolder = tmp_path / "stubs"
-    stubfiles = list(stubfolder.rglob("*.py"))
+    stub_path = tmp_path / "stubs"
+    stubfiles = list(stub_path.rglob("*.py"))
     # filecount
     if "micropython" in script_folder:
         assert len(stubfiles) >= 45, "micropython: there should be 45 stubs or more"
@@ -77,7 +74,7 @@ def test_createstubs(firmware, tmp_path: Path, script_folder):
         assert len(stubfiles) >= 30, "pycopy: there should be 30 stubs or more"
 
     # manifest exists
-    jsons = list(stubfolder.rglob("modules.json"))
+    jsons = list(stub_path.rglob("modules.json"))
     assert len(jsons) == 1, "there should be 1 manifest"
 
     # manifest is valid json
