@@ -4,5 +4,5 @@
 	branch = master
 [submodule "micropython"]
 	path = micropython
-	url = https://github.com/micropython/micropython.git
+	url = https://github.com/josverl/micropython.git
 	branch = master
