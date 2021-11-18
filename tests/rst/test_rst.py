@@ -390,7 +390,7 @@ def test_doc_poll_class_def(rst_stubs: Path):
     found = any("def poll()" in line for line in content)
     assert not found, "uselect.poll class should not be stubbed as a function"
 
-    found = any("class poll:" in line for line in content)
+    found = any("class poll" in line for line in content)
     assert found, "uselect.poll should be stubbed as a class"
 
 
