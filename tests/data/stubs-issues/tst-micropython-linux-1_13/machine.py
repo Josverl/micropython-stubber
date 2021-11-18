@@ -5,22 +5,23 @@ Module: 'machine' on micropython-linux-1.13
 # Stubber: 1.3.7
 from typing import Any
 
-print( 'Hello bowler')
+print("Hello bowler")
+
 
 def on():
-    i = 1 
+    i = 1
     pass
+
 
 class PinBase:
     def __init__(self):
-        ''
+        """"""
         pass
-
 
 
 class Foo:
     def __init__(self):
-        ''
+        """"""
         pass
 
     def off():
@@ -35,24 +36,28 @@ class Foo:
 
 class Signal:
     def __init__(self):
-        ''
+        """"""
         pass
 
     def off():
         pass
 
-    def on(self, twee, twee, twee, twee):
+    # This is an intentional error
+    def on(self, intentional_error, intentional_error, foo, foo):
         pass
 
     def value():
         pass
 
+
 def idle():
     pass
+
 
 mem16 = None
 mem32 = None
 mem8 = None
+
+
 def time_pulse_us():
     pass
-
