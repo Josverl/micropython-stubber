@@ -9,3 +9,9 @@ how to clone :
 git submodule init
 git submodule update
 ```
+
+```
+git submodule status --recursive
+
+
+```
