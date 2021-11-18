@@ -1,7 +1,6 @@
-""" Work in Progress
+""" 
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking 
-
-    - uses a custom-built parser to read the RST files
+    using a custom-built parser to read and process the micropython RST files
     - generates:
         - modules 
             - docstrings
@@ -29,6 +28,8 @@
         - if no type can be detected the type `Any` is used
 
     The generated stub files are formatted using `black` and checked for validity using `pyright`
+    Note: black on python 3.7 does not like some function defs 
+    `def sizeof(struct, layout_type=NATIVE, /) -> int:` 
 
     - ordering of inter-dependent classes in the same module   
     
@@ -63,6 +64,7 @@
         are added based on a (manual) lookup table CHILD_PARENT_CLASS
 
 
+
 Not yet implemented 
 -------------------
 
@@ -82,7 +84,7 @@ from typing import List, Tuple
 from pathlib import Path
 import basicgit as git
 from utils import flat_version
-
+import sys
 
 from rst import (
     return_type_from_context,
@@ -738,8 +740,13 @@ def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True
 
     if black:
         try:
-            cmd = ["black", dst_folder.as_posix()]
-            result = subprocess.run(cmd, capture_output=False, check=True)
+
+            cmd = ["black", str(dst_folder)]
+            if sys.version_info.major == 3 and sys.version_info.minor == 7:
+                # black on python 3.7 does not like some function defs
+                # def sizeof(struct, layout_type=NATIVE, /) -> int:
+                cmd += ["--fast"]
+            result = subprocess.run(cmd, capture_output=False, check=True, shell=True)
             if result.returncode != 0:
                 raise Exception(result.stderr.decode("utf-8"))
         except subprocess.SubprocessError:
