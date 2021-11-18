@@ -27,7 +27,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: "true"
-          # token: ${{ secrets.PAT_TOKEN }}  PAT token needed for Private Repo
+          fetch-depth: 0
+          # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
       # - name: Extract branch name
       #   id: extract_branch
