@@ -1,6 +1,22 @@
 
 # Developing
 
+## Cloning the repo 
+The repo uses two submodules in order to generate the MicroPython frozen stubs.
+in order to fully check-out the repo you need to run additional commands 
+how to clone : 
+``` bash
+git submodule init
+git submodule update --recursive
+```
+
+how to add : 
+``` bash
+git submodule add --force -b master https://github.com/micropython/micropython.git 
+git submodule add --force -b master https://github.com/micropython/micropython-lib.git 
+```
+
+
 ## Windows 10 
 I use Windows 10  and use WSL2 to run the linux based parts. 
 if you develop on other platform, it is quite likely that you may need to change some details. if that is needed , please update/add to the documentation and send a documentation PR.
