@@ -7,6 +7,7 @@ from typing import List
 import pytest
 import distro
 
+
 ubuntu_version = "?"
 fw_list = []
 # Figure out ubuntu version
@@ -30,6 +31,7 @@ if ubuntu_version == "18.04":
         "ubuntu_18_04/pycopy_3_3_2-25",
     ]
 
+
 # specify the minified tests using a marker
 @pytest.mark.parametrize(
     "script_folder",
@@ -49,7 +51,6 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str):
     script_path = Path(script_folder).absolute()
     fw_filename = (Path("./tests/tools") / firmware).absolute().as_posix()
     cmd = [fw_filename, "createstubs.py", "--path", str(tmp_path)]
-
     try:
         subproc = subprocess.run(
             cmd,
