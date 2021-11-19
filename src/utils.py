@@ -9,6 +9,7 @@ from version import VERSION
 from typing import List
 
 import mypy.stubgen as stubgen
+from mypy.errors import CompileError
 import sys
 
 
@@ -96,14 +97,16 @@ def generate_pyi_from_file(file: Path) -> bool:
         quiet=False,
         export_less=False,
     )
-
+    # Deal with generator passed in
+    if not isinstance(file, Path):
+        raise TypeError
     sg_opt.files = [str(file)]
     sg_opt.output_dir = str(file.parent)
     try:
         print(f"Calling stubgen on {str(file)}")
         stubgen.generate_stubs(sg_opt)
         return True
-    except Exception as e:
+    except (Exception, CompileError, SystemExit) as e:
         print(e)
         return False
 
