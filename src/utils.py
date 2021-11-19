@@ -100,6 +100,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     sg_opt.files = [str(file)]
     sg_opt.output_dir = str(file.parent)
     try:
+        print(f"Calling stubgen on {str(file)}")
         stubgen.generate_stubs(sg_opt)
         return True
     except Exception as e:
@@ -132,7 +133,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         if result != 0:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
-            print("Failure on folder, attempt to stub per file.py")
+            print("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
             py_files = list(modules_folder.rglob("*.py"))
             for py in py_files:
                 generate_pyi_from_file(py)
