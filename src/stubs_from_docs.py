@@ -77,14 +77,14 @@ Not yet implemented
 
 """
 
+import sys
 import json
 import re
 import subprocess
+import basicgit as git
 from typing import List, Tuple
 from pathlib import Path
-import basicgit as git
 from utils import flat_version
-import sys
 
 from rst import (
     return_type_from_context,
@@ -98,6 +98,8 @@ from rst import (
 )
 
 NEW_OUTPUT = True
+#: self.gather_docs = True
+SEPERATOR = "::"
 
 
 def _color(c, *args) -> str:
@@ -111,10 +113,6 @@ def _green(*args) -> str:
 
 def _red(*args) -> str:
     return _color(91, *args)
-
-
-#: self.gather_docs = True
-SEPERATOR = "::"
 
 
 class RSTReader:
@@ -196,7 +194,7 @@ class RSTReader:
             self.current_class = ""
 
     def read_file(self, filename: Path):
-        print(f" - Reading from: {filename}")
+        print(f"::group::[Reading RST] {filename}")
         # ingore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
