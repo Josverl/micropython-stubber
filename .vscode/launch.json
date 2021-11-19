@@ -61,6 +61,7 @@
             "request": "launch",
             "console": "integratedTerminal",
             "program": "process.py",
+            "subProcess": false, // Avoid debugpy trying to debug micropython
             "args": [
                 "minify"
             ]
@@ -71,6 +72,7 @@
             "request": "launch",
             "console": "integratedTerminal",
             "program": "process.py",
+            "subProcess": false, // Avoid debugpy trying to debug micropython
             "args": [
                 "-s",
                 "board/createstubs_mem.py",
@@ -89,7 +91,7 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false,
-            "subProcess": false,
+            "subProcess": false, // Avoid debugpy trying to debug micropython
             "env": {
                 "PYTEST_ADDOPTS": "--no-cov"
             }
