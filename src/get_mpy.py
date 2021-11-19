@@ -217,8 +217,8 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
     locates the to-be-frozen files in modules folders
-    - 'ports/<port>/modules/\*.py'
-    - 'ports/<port>/boards/<board>/modules/\*.py'
+    - 'ports/<port>/modules/*.py'
+    - 'ports/<port>/boards/<board>/modules/*.py'
     """
     targets = []
     scripts = glob.glob(mpy_path + "/ports/**/modules/*.py", recursive=True)
@@ -274,7 +274,11 @@ def get_target_names(path: str) -> tuple:
 
 
 def get_frozen_manifest(
-    manifests, stub_path: str, mpy_path: str, lib_path: str, version: str
+    manifests,
+    stub_path: str,
+    mpy_path: str,
+    lib_path: str,
+    version: str,
 ):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
@@ -355,7 +359,7 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
     mpy_path = "./micropython"
     lib_path = "./micropython-lib"
-    version = utils.clean_version(git.get_tag(mpy_path))
+    version = utils.clean_version(git.get_tag(mpy_path) or "x.x")
 
     if version:
         log.info("found micropython version : {}".format(version))

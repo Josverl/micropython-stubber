@@ -43,93 +43,6 @@ def flat_version(version: str, keep_v: bool = False):
     return version
 
 
-def cleanup(modules_folder: Path):
-    "Q&D cleanup"
-    # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice
-    #  - modules_root folder ( simple.pyi and robust.pyi) - NOT OK
-    #       - umqtt folder (simple.py & pyi and robust.py & pyi) OK
-    #  similar for mpy 1.9x - 1.11
-    #       - core.pyi          - uasyncio\core.py'
-    #       - urequests.pyi     - urllib\urequest.py'
-    # Mpy 1.13+
-    #       - uasyncio.pyi      -uasyncio\__init__.py
-
-    # todo - Add check for source folder
-    for file_name in (
-        "simple.pyi",
-        "robust.pyi",
-        "core.pyi",
-        "urequest.pyi",
-        "uasyncio.pyi",
-    ):
-        f = Path.joinpath(modules_folder, file_name)
-        if f.exists():
-            try:
-                print(" - removing {}".format(f))
-                f.unlink()
-            except OSError:
-                log.error(" * Unable to remove extranous stub {}".format(f))
-
-
-def generate_pyi_from_file(file: Path) -> bool:
-    """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
-    # if 0:
-    #     cmd = "stubgen {0} --output {1} --include-private --ignore-errors".format(file, file.parent)
-    #     print(" >stubgen on {0}".format(file))
-    #     result = os.system(cmd)
-    #     return result == 0
-    sg_opt = stubgen.Options(
-        pyversion=(3, 5),
-        no_import=False,
-        include_private=True,
-        doc_dir="",
-        search_path=[],
-        interpreter=sys.executable,
-        parse_only=False,
-        ignore_errors=True,
-        modules=[],
-        packages=[],
-        files=[],
-        output_dir="",
-        verbose=True,
-        quiet=False,
-        export_less=False,
-    )
-
-    sg_opt.files = [str(file)]
-    sg_opt.output_dir = str(file.parent)
-    try:
-        stubgen.generate_stubs(sg_opt)
-        return True
-    except Exception:
-        return False
-
-
-def generate_pyi_files(modules_folder: Path) -> bool:
-    """generate typeshed files for all scripts in a folder using mypy/stubgen"""
-    # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
-    py_files: List[Path]
-    pyi_files: List[Path]
-    modlist = list(modules_folder.glob("**/modules.json"))
-    if len(modlist) <= 1:
-        ## generate fyi files for folder
-        # clean before to clean any old stuff
-        cleanup(modules_folder)
-
-        print("running stubgen on {0}".format(modules_folder))
-        cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
-        result = os.system(cmd)
-        # Check on error
-        if result != 0:
-            # in case of failure then Plan B
-            # - run stubgen on each *.py
-            print("Failure on folder, attempt to stub per file.py")
-            py_files = List(modules_folder.glob("**/*.py"))
-            for py in py_files:
-                generate_pyi_from_file(py)
-                # todo: report failures
-
-
 def cleanup(modules_folder: Path, all_pyi: bool = False):
     "Q&D cleanup"
     # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice
@@ -220,7 +133,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
             print("Failure on folder, attempt to stub per file.py")
-            py_files = modules_folder.glob("**/*.py")
+            py_files = list(modules_folder.rglob("*.py"))
             for py in py_files:
                 generate_pyi_from_file(py)
                 # todo: report failures by adding to module manifest

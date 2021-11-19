@@ -443,7 +443,7 @@ class RSTReader:
 
             ...
             # defaults
-            params = ""
+            name = params = ""
             try:
                 name, params = this_function.split("(", maxsplit=1)
             except ValueError:
