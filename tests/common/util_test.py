@@ -49,8 +49,26 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
     assert len(py_files) == 0, "py and pyi files should match 1:1 and stored in the same folder"
 
 
+def test_stub_one_file(tmp_path, pytestconfig):
+    source = pytestconfig.rootpath / "tests/data/stubs-issues"
+    dest = tmp_path / "stubs"
+    shutil.copytree(source, dest)
+    file = list(dest.rglob("micropython.py"))[0]
+    r = utils.generate_pyi_from_file(file=file)
+    assert r
+
+
+def test_stub_one_bad_file(tmp_path, pytestconfig):
+    source = pytestconfig.rootpath / "tests/data/stubs-issues"
+    dest = tmp_path / "stubs"
+    shutil.copytree(source, dest)
+    file = list(dest.rglob("machine.py"))[0]
+    r = utils.generate_pyi_from_file(file=file)
+    # Should not have been processed
+    assert r == False
+
+
 # make stub file
-@pytest.mark.xfail(reason="Sometimes fails depending on the processing order")
 def test_make_stub_files_issues(tmp_path, pytestconfig):
     # Deal with some files having issues
     source = pytestconfig.rootpath / "tests/data/stubs-issues"
