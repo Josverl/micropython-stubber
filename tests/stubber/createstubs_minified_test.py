@@ -1,56 +1,40 @@
 import sys
 from collections import namedtuple
 import pytest
-
+from importlib import import_module
 from pathlib import Path
-
-core_mocks = "./tests/mocks/micropython-cpython_core"
-
-# def setup_module(module):
-#     print("\nsetup_module()")
-
-
-def teardown_module(module):
-    print("teardown_module()")
-    # remove mocks from path
-    if core_mocks in sys.path:
-        sys.path.remove(core_mocks)
 
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
 
-# allow loading of the cpython mock-a-likes
-if not core_mocks in sys.path:
-    sys.path[1:1] = [core_mocks]
 
 # ----------------------------------------------------------------------------------------
-# Specify wether to load the normal or minified version of the test
-# ----------------------------------------------------------------------------------------
-
-# Allow test discovery even if the minified version does not exist or has errors
-try:
-    prefix = "minified."
-    from minified.createstubs import Stubber, read_path
-    import minified.createstubs as createstubs
-except Exception:
-    createstubs = Stubber = read_path = None
-
-
-# ----------------------------------------------------------------------------------------
-# Below this the tests are identical between :
+# Conceptually the tests are identical between :
 # - createstubs_board.test.py
 # - createstubs_minified.test.py
+# with a difference in the fixture used : fx_add_minified_path versus fx_add_board_path
 # ----------------------------------------------------------------------------------------
 
 
+@pytest.mark.parametrize("variant", ["createstubs", "createstubs_mem", "createstubs_db"])
+@pytest.mark.parametrize("location", ["board", "minified"])
 @pytest.mark.minified
-def test_stubber_Class_available():
-    assert Stubber is not None, "Stubber Class not imported"
+def test_stubber_Class_available(
+    location,
+    variant,
+    mock_micropython_path,
+):
+    # import minified.createstubs as createstubs  # type: ignore
+    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    assert createstubs.Stubber is not None, "Stubber Class not imported"
 
 
 @pytest.mark.minified
-def test_stubber_info_basic():
-    stubber = Stubber()  # type: ignore
+def test_stubber_info_basic(mock_micropython_path):
+    # import createstubs  # type: ignore
+    # import createstubs as createstubs  # type: ignore
+    createstubs = import_module("minified.createstubs")  # type: ignore
+    stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
 
     info = createstubs._info()
@@ -67,9 +51,11 @@ def test_stubber_info_basic():
 
 
 @pytest.mark.minified
-def test_stubber_info_custom():
+def test_stubber_info_custom(fx_add_minified_path, mock_micropython_path):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
-    stubber = Stubber(firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
     assert stubber._fwid != "none"
@@ -84,19 +70,29 @@ from testcases import fwid_test_cases
 
 @pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname", fwid_test_cases)
 @pytest.mark.minified
-def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
+def test_stubber_fwid(
+    mocker,
+    fwid,
+    sys_imp_name,
+    sys_platform,
+    os_uname,
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     # class.property : just pass a value
-    mocker.patch(prefix + "createstubs.sys.platform", sys_platform)
-    mocker.patch(prefix + "createstubs.sys.implementation.name", sys_imp_name)
+    mocker.patch("createstubs.sys.platform", sys_platform)
+    mocker.patch("createstubs.sys.implementation.name", sys_imp_name)
     # class.method--> mock using function
     fake_uname = os_uname
 
     def mock_uname():
         return fake_uname
 
-    mocker.patch(prefix + "createstubs.os.uname", mock_uname, create=True)
+    mocker.patch("createstubs.os.uname", mock_uname, create=True)
     # now run the tests
-    stubber = Stubber()
+    stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
 
     info = createstubs._info()
@@ -121,13 +117,23 @@ def test_stubber_fwid(mocker, fwid, sys_imp_name, sys_platform, os_uname):
 # throws an error on the commandline
 @pytest.mark.minified
 @pytest.mark.skip(reason="test not working")
-def test_read_path():
-    assert read_path() == ""
+def test_read_path(
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
+    assert createstubs.read_path() == ""
 
 
 @pytest.mark.minified
-def test_get_obj_attributes():
-    stubber = Stubber()  # type: ignore
+def test_get_obj_attributes(
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
+    stubber = createstubs.Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     items, errors = stubber.get_obj_attributes(sys)
     assert items != []
@@ -138,10 +144,16 @@ def test_get_obj_attributes():
 
 
 @pytest.mark.minified
-def test_create_all_stubs(tmp_path: Path):
+def test_create_all_stubs(
+    tmp_path: Path,
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
 
-    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     stubber.modules = ["json", "_thread", "array"]
     stubber.add_modules(["http_client", "webrepl", "_internal"])
@@ -159,16 +171,27 @@ def test_create_all_stubs(tmp_path: Path):
 
 
 @pytest.mark.minified
-def test_get_root():
+def test_get_root(
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     x = createstubs.get_root()
     assert type(x) == str
     assert len(x) > 0
 
 
 @pytest.mark.minified
-def test_create_module_stub(tmp_path: Path):
+def test_create_module_stub(
+    tmp_path: Path,
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
-    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # just in the test folder , no structure
     stubber.create_module_stub("json", str(tmp_path / "json.py"))
@@ -179,9 +202,15 @@ def test_create_module_stub(tmp_path: Path):
 
 
 @pytest.mark.minified
-def test_create_module_stub_folder(tmp_path: Path):
+def test_create_module_stub_folder(
+    fx_add_minified_path,
+    mock_micropython_path,
+    tmp_path: Path,
+):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
-    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
 
     stubber.create_module_stub("json")
@@ -190,9 +219,15 @@ def test_create_module_stub_folder(tmp_path: Path):
 
 
 @pytest.mark.minified
-def test_create_module_stub_ignored(tmp_path: Path):
+def test_create_module_stub_ignored(
+    tmp_path: Path,
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
-    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # should not generate
     stubber.create_module_stub("_internal", str(tmp_path / "_internal.py"))
@@ -204,9 +239,15 @@ def test_create_module_stub_ignored(tmp_path: Path):
 
 
 @pytest.mark.minified
-def test_nested_modules(tmp_path: Path):
+def test_nested_modules(
+    tmp_path: Path,
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
-    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # just in the test folder , no structure
     stubber.create_module_stub("urllib/request", str(tmp_path / "request.py"))
@@ -215,9 +256,15 @@ def test_nested_modules(tmp_path: Path):
 
 
 @pytest.mark.minified
-def test_unavailable_modules(tmp_path: Path):
+def test_unavailable_modules(
+    tmp_path: Path,
+    fx_add_minified_path,
+    mock_micropython_path,
+):
+    import createstubs  # type: ignore
+
     myid = "MyCustomID"
-    stubber = Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
+    stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # this should not generate a module , but also should not th
     stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.py"))

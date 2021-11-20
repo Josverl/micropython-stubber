@@ -8,7 +8,7 @@ import pytest
 from _pytest.config import Config
 
 
-# make sure that the source can be found, but not twice 
+# make sure that the source can be found, but not twice
 RootPath = Path(os.getcwd())
 src_path = str(RootPath / "src")
 if not src_path in sys.path:
@@ -16,7 +16,7 @@ if not src_path in sys.path:
 
 
 @pytest.fixture()
-def add_board_path(pytestconfig: Config):
+def fx_add_board_path(pytestconfig: Config):
     "add ./board path temporarily"
     source_path = str(pytestconfig.rootpath / "board")
     if not source_path in sys.path:
@@ -27,8 +27,8 @@ def add_board_path(pytestconfig: Config):
 
 
 @pytest.fixture()
-def add_minified_path(pytestconfig: Config):
-    "add ./board path temporarily"
+def fx_add_minified_path(pytestconfig: Config):
+    "add ./minified path temporarily"
     source_path = str(pytestconfig.rootpath / "minified")
     if not source_path in sys.path:
         sys.path[1:1] = [source_path]
@@ -39,7 +39,7 @@ def add_minified_path(pytestconfig: Config):
 
 @pytest.fixture()
 def mock_pycopy_path(pytestconfig: Config):
-    "pycopy-CPython to path  temporarily"
+    "Add pycopy-CPython, and machine to path  temporarily"
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "pycopy-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
     if not source_path in sys.path:
@@ -52,7 +52,7 @@ def mock_pycopy_path(pytestconfig: Config):
 
 @pytest.fixture()
 def mock_micropython_path(pytestconfig: Config):
-    "micropython-CPython to path  temporarily"
+    "Add micropython-CPython and machine to path  temporarily"
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "micropython-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
     if not source_path in sys.path:

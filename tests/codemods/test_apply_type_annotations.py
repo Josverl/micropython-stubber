@@ -674,7 +674,8 @@ class TestApplyAnnotationsVisitor(CodemodTest):
     def test_annotate_functions(self, stub: str, before: str, after: str) -> None:
         context = CodemodContext()
         ApplyTypeAnnotationsVisitor.store_stub_in_context(
-            context, parse_module(textwrap.dedent(stub.rstrip()))
+            context,
+            parse_module(textwrap.dedent(stub.rstrip())),
         )
         self.assertCodemod(before, after, context_override=context)
 
@@ -724,7 +725,8 @@ class TestApplyAnnotationsVisitor(CodemodTest):
     def test_annotate_functions_py38(self, stub: str, before: str, after: str) -> None:
         context = CodemodContext()
         ApplyTypeAnnotationsVisitor.store_stub_in_context(
-            context, parse_module(textwrap.dedent(stub.rstrip()))
+            context,
+            parse_module(textwrap.dedent(stub.rstrip())),
         )
         self.assertCodemod(before, after, context_override=context)
 
@@ -746,16 +748,18 @@ class TestApplyAnnotationsVisitor(CodemodTest):
         )
     )
     def test_annotate_functions_with_existing_annotations(
-        self, stub: str, before: str, after: str
+        self,
+        stub: str,
+        before: str,
+        after: str,
     ) -> None:
         context = CodemodContext()
         ApplyTypeAnnotationsVisitor.store_stub_in_context(
-            context, parse_module(textwrap.dedent(stub.rstrip()))
+            context,
+            parse_module(textwrap.dedent(stub.rstrip())),
         )
         # Test setting the overwrite flag on the codemod instance.
-        self.assertCodemod(
-            before, after, context_override=context, overwrite_existing_annotations=True
-        )
+        self.assertCodemod(before, after, context_override=context, overwrite_existing_annotations=True)
 
         # Test setting the flag when storing the stub in the context.
         context = CodemodContext()

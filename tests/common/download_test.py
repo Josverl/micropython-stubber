@@ -1,8 +1,10 @@
 import os
+import pytest
 
 # SOT
 import downloader
 
+# 2 pytest.skip("---===*** DEBUGGING ***===---", allow_module_level=True)
 
 # No Mocks , does actual download from github
 def test_download_files(tmp_path):

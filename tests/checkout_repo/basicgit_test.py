@@ -3,8 +3,14 @@ import os
 import pytest
 from pathlib import Path
 
+
+
+
 # make sure that the source can be found
-sys.path.insert(1, "./src")
+RootPath = Path(os.getcwd())
+src_path = str(RootPath / "src")
+if not src_path in sys.path:
+    sys.path.append(src_path)
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
@@ -62,7 +68,8 @@ def test_get_tag_submodule(testrepo_micropython: Path):
 def test_checkout_sibling(testrepo_micropython):
     repo_path = testrepo_micropython
     x = git.get_tag(repo_path)
-
+    assert x
+    
     for ver in ["v1.11", "v1.9.4", "v1.12"]:
         git.checkout_tag(ver, repo=repo_path)
         assert git.get_tag(repo_path) == ver
