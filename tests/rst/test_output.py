@@ -129,7 +129,10 @@ def test_FSD_class_init():
 
     # init with decorator
     fd = FunctionSourceDict(
-        "class bird()", definition=[DEFN], docstr=DOCSTR, decorators=["@classmethod"]
+        "class bird()",
+        definition=[DEFN],
+        docstr=DOCSTR,
+        decorators=["@classmethod"],
     )
     lines = str(fd).splitlines()
     assert "@classmethod" == lines[0]

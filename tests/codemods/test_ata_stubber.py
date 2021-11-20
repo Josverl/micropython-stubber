@@ -154,12 +154,11 @@ class TestApplyAnnotationsVisitor(CodemodTest):
             ),
         )
     )
-    def test_annotate_functions_with_existing_annotations(
-        self, stub: str, before: str, after: str
-    ) -> None:
+    def test_annotate_functions_with_existing_annotations(self, stub: str, before: str, after: str) -> None:
         context = CodemodContext()
         ApplyStubberAnnotationsVisitor.store_stub_in_context(
-            context, parse_module(textwrap.dedent(stub.rstrip()))
+            context,
+            parse_module(textwrap.dedent(stub.rstrip())),
         )
         # Test setting the overwrite flag on the codemod instance.
         self.assertCodemod(

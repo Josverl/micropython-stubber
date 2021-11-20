@@ -2,6 +2,8 @@
 from typing import Dict, List, Union
 import pytest
 
+# pytest.skip("---===*** DEBUGGING ***===---", allow_module_level=True)
+
 # SOT
 from rst import sort_classes
 

@@ -54,8 +54,9 @@ def test_stub_one_file(tmp_path, pytestconfig):
     dest = tmp_path / "stubs"
     shutil.copytree(source, dest)
     file = list(dest.rglob("micropython.py"))[0]
-    r = utils.generate_pyi_from_file(file=file)
-    assert r
+    result = utils.generate_pyi_from_file(file=file)
+    print(f"result : {result}")
+    assert result != False
 
 
 def test_stub_one_bad_file(tmp_path, pytestconfig):
