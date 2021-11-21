@@ -12,9 +12,12 @@
 #
 import os
 import sys
+from pathlib import Path
 
-# sys.path.insert(0, os.path.abspath("../src"))
-sys.path[1:1] = [os.path.abspath("../src")]
+
+src_path = str(Path("..") / "src")
+if not src_path in sys.path:
+    sys.path.append(src_path)
 
 from version import VERSION as MODULE_VERSION
 
