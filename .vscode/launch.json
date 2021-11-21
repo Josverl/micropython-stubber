@@ -85,7 +85,9 @@
             // disable pytest coverage report as it conflicts with debugging tests
             "name": "Debug pytest tests",
             "type": "python",
-            "request": "test",
+            "purpose": [
+                "debug-test"
+            ],
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false,

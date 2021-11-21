@@ -47,7 +47,14 @@ If you try to create stubs on this defective version, the stubber will raise *No
 ## Generating Stubs for a specific Firmware 
 
 The stub files are generated on a MicroPython board by running the script `createstubs.py`, this will generate the stubs on the board and store them, either on flash or on the SD card.
+If your firmware does not include the `logging` module, you will need to upload this to your board, or use the minified version.
 
+``` python
+import createstubs
+```
+The generation will take a few minutes ( 2-5 minutes) depending on the speed of the board and the number of included modules.
+
+As the stubs are generated on the board, and as MicroPython is highly optimized to deal with the scarce resources, this unfortunately does mean that the stubs lacks parameters details. So for these you must still use the documentation provided for that firmware.
 
 ## Downloading the files
 

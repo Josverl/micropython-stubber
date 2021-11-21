@@ -1,11 +1,21 @@
 # Boost MicroPython productivity in VSCode
+ 
+  [![pytest tests/common](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml)
+  [![minify-RP](https://github.com/Josverl/micropython-stubber/actions/workflows/run%20minify-pr.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/run%20minify-pr.yml)
+  [![Documentation Status](https://readthedocs.org/projects/micropython-stubber/badge/?version=latest)](https://micropython-stubber.readthedocs.io/en/latest/?badge=latest "Document build status badge")
+  [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
+  [![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#Contributions)
+  [![Star on GitHub](https://img.shields.io/github/stars/josverl/micropython-stubber.svg?style=social)](https://github.com/josverl/micropython-stubber/stargazers)
+  [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Josverl/micropython-stubber.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Josverl/micropython-stubber/context:python)
+  
 
 The intellisense and code linting that is so prevalent in modern editors, does not work out-of-the-gate for MicroPython projects.
 While the language is Python, the modules used are different from CPython , and also different ports have different modules and classes , or the same class with different parameters.
 
 Writing MicroPython code in a modern editor should not need to involve keeping a browser open to check for the exact parameters to read a sensor, light-up a led or send a network request.
 
-Fortunately with some additional configuration and data, it is possible to make the editors understand your flavor of MicroPython. even if you run a on-off custom firmware version.
+Fortunately with some additional configuration and data, it is possible to make the editors understand your flavor of MicroPython, wether you use one of the pre-compiled firmwares, but also if you run a one-off custom firmware version.
+
 
 ![demo][]]
 
@@ -16,7 +26,6 @@ In order to achieve this a few things are needed:
 4) Suppression of warnings that collide with the MicroPython principals or code optimization.
 
 Please review the documentation on [https://micropython-stubber.readthedocs.io]  
-- [![Documentation Status](https://readthedocs.org/projects/micropython-stubber/badge/?version=latest)](https://micropython-stubber.readthedocs.io/en/latest/?badge=latest)
 
 With that in place, VSCode will understand MicroPython for the most part, and help you to write code, and catch more errors before deploying it to your board. 
 
@@ -38,11 +47,6 @@ The (stretch) goal is to create a VSCode add-in to simplify the configuration, a
 
 MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
 
-
-## Contributions
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#11---contributions)
-<!-- ALL-CONTRIBUTORS-BADGE:END --> 
 
 # Contributions
 <!-- spell-checker: disable -->

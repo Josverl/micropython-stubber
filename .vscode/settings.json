@@ -17,6 +17,7 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "peacock.color": "#613206",
+    "editor.formatOnSave": true,
     "restructuredtext.languageServer.disabled": true,
     "cSpell.words": [
         "aivar",

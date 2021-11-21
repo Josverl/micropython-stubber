@@ -12,9 +12,12 @@
 #
 import os
 import sys
+from pathlib import Path
 
-# sys.path.insert(0, os.path.abspath("../src"))
-sys.path[1:1] = [os.path.abspath("../src")]
+
+src_path = str(Path("..") / "src")
+if not src_path in sys.path:
+    sys.path.append(src_path)
 
 from version import VERSION as MODULE_VERSION
 
@@ -41,6 +44,7 @@ extensions = [
     "sphinx.ext.autosummary",  # Generate autodoc summaries
     "sphinx.ext.autodoc",  # Support for NumPy and Google style docstrings
     "sphinx.ext.coverage",  # Collect doc coverage stats
+    "sphinx.ext.napoleon",
     # 'sphinx.ext.doctest', # use Test snippets in the documentation
     "sphinx.ext.intersphinx",  # Link to other projects’ documentation
     # 'sphinx.ext.todo', # Support for todo items

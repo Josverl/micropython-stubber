@@ -51,12 +51,8 @@ def get_core(requirements, stub_path=None):
         # copy *.py files in build folder to stub_path
         for filename in glob.glob(os.path.join(build_path, "*.py")):
             log.info("pipped : {}".format(filename))
-            f_name, f_ext = os.path.splitext(
-                os.path.basename(filename)
-            )  # pylint: disable=unused-variable
-            mod_manifest["modules"].append(
-                {"file": os.path.basename(filename), "module": f_name}
-            )
+            f_name, f_ext = os.path.splitext(os.path.basename(filename))  # pylint: disable=unused-variable
+            mod_manifest["modules"].append({"file": os.path.basename(filename), "module": f_name})
             try:
                 shutil.copy2(filename, stub_path)
             except OSError as err:
@@ -71,14 +67,12 @@ def get_core(requirements, stub_path=None):
         # remove build folder
         shutil.rmtree(build_path, ignore_errors=True)
         if mod_manifest:
-            #write the the module manifest
-            with open(stub_path+"/modules.json", "w") as outfile:
+            # write the the module manifest for the cpython core modules
+            with open(stub_path + "/modules.json", "w") as outfile:
                 json.dump(mod_manifest, outfile, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
     # just run a quick test
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_core(
-        requirements="./src/reqs-cpython-mpy.txt", stub_path="./scratch/cpython_common"
-    )
+    get_core(requirements="./src/reqs-cpython-mpy.txt", stub_path="./scratch/cpython_common")
