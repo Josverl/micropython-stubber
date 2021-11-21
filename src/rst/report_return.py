@@ -10,7 +10,7 @@ build test and  % report
 import json
 from pathlib import Path
 from typing import List, Tuple
-from . import utils
+from . import rst_utils
 
 
 def process(folder: Path, pattern: str):

@@ -41,6 +41,18 @@ from typing import Dict, List, Union
 
 from .lookup import LOOKUP_LIST, NONE_VERBS
 
+# These are shown to import
+__all__ = [
+    "simple_candidates",
+    "compound_candidates",
+    "object_candidates",
+    "distill_return",
+    "return_type_from_context",
+    "_type_from_context",  # For testing only
+    "TYPING_IMPORT",
+]
+
+
 # logging
 log = logging.getLogger(__name__)
 
