@@ -7,6 +7,7 @@ with modification
 from typing import List
 import re
 
+__all__ = ['sort_classes']
 RE_CLASS = re.compile(r"class\s+(?P<class>\w+)(\((?P<parent>\w*)\))?")
 
 

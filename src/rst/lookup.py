@@ -6,6 +6,8 @@ Format: a dictionary with :
 - value : two-tuple with ( return type , priority )
 
 """
+# These are shown to import 
+__all__= ["LOOKUP_LIST", "NONE_VERBS","CHILD_PARENT_CLASS","PARAM_FIXES","MODULE_GLUE"  ]
 
 LOOKUP_LIST = {
     "builtins.bytes": ("bytes", 0.95),

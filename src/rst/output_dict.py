@@ -35,6 +35,14 @@ from __future__ import annotations
 from typing import OrderedDict, List, Union
 from .classsort import sort_classes
 
+# These are shown to import
+__all__ = [
+    "SourceDict",
+    "ModuleSourceDict",
+    "ClassSourceDict",
+    "FunctionSourceDict",
+]
+
 
 def spaces(n: int = 4) -> str:
     return " " * n
