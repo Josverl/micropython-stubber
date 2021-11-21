@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import libcst as cst
-from libcst import matchers as m
+from libcst import matchers as m  # type: ignore - used as convention
 from libcst.codemod._context import CodemodContext
 from libcst.codemod._visitor import ContextAwareTransformer
 from libcst.codemod.visitors._add_imports import AddImportsVisitor
