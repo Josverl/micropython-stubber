@@ -1,6 +1,7 @@
 """ Work in Progress  
 
 build test and  % report 
+Will need to be updated after new_output has been implemented.
 
 """
 # ref: https://regex101.com/codegen?language=python
@@ -10,7 +11,6 @@ build test and  % report
 import json
 from pathlib import Path
 from typing import List, Tuple
-from . import rst_utils
 
 
 def process(folder: Path, pattern: str):
