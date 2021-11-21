@@ -9,6 +9,7 @@ from version import VERSION
 from typing import List
 
 import mypy.stubgen as stubgen
+from mypy.errors import CompileError
 import sys
 
 
@@ -35,9 +36,12 @@ def stubfolder(path: str) -> str:
     return "{}/{}".format(STUB_FOLDER, path)
 
 
-def flat_version(version: str):
+def flat_version(version: str, keep_v: bool = False):
     "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
-    return version.replace("v", "").replace(".", "_")
+    version = version.strip().replace(".", "_")
+    if not keep_v:
+        version = version.lstrip("v")
+    return version
 
 
 def cleanup(modules_folder: Path, all_pyi: bool = False):
@@ -93,13 +97,16 @@ def generate_pyi_from_file(file: Path) -> bool:
         quiet=False,
         export_less=False,
     )
-
+    # Deal with generator passed in
+    if not isinstance(file, Path):
+        raise TypeError
     sg_opt.files = [str(file)]
     sg_opt.output_dir = str(file.parent)
     try:
+        print(f"Calling stubgen on {str(file)}")
         stubgen.generate_stubs(sg_opt)
         return True
-    except Exception as e:
+    except (Exception, CompileError, SystemExit) as e:
         print(e)
         return False
 
@@ -129,8 +136,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         if result != 0:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
-            print("Failure on folder, attempt to stub per file.py")
-            py_files = modules_folder.glob("**/*.py")
+            print("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
+            py_files = list(modules_folder.rglob("*.py"))
             for py in py_files:
                 generate_pyi_from_file(py)
                 # todo: report failures by adding to module manifest
@@ -174,6 +181,13 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # and clean after to only check-in good stuff
         # cleanup(modules_folder)
         return True
+    #     ##
+    # for mod_manifest in modlist:
+    #     ## generate fyi files for folder
+    #     generate_pyi_files(mod_manifest.parent)
+
+    #     # todo: collect and report results
+    # return True
 
 
 def manifest(
@@ -187,6 +201,7 @@ def manifest(
     release=None,
     firmware=None,
 ) -> dict:
+
     "create a new empty manifest dict"
     if family is None:
         family = "micropython"  # family

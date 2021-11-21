@@ -24,7 +24,7 @@ def test_get_mpy(tmp_path):
     lib_path = "./micropython-lib"
     try:
         version = clean_version(git.get_tag(mpy_path))
-    except:
+    except Exception:
         warnings.warn("Could not find the micropython version Tag - assuming v1.x")
         version = "v1.x"
 

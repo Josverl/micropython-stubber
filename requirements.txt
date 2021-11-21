@@ -12,6 +12,8 @@ mpy-cross >= 1.16
 
 rshell  == 0.0.30
 # stub refactoring
-# libcst >= 0.3.19
+libcst  >= 0.3
 
+requests >= 2.25.1
 
+mypy >= 0.812

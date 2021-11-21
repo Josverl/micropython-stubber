@@ -1,6 +1,7 @@
 [tool.black]
-line-length = 120
-target_version = ['py34']
+# use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
+line-length = 140
+target_version = ['py38']
 include = '\.pyi?$'
 exclude = '''
 (
@@ -14,7 +15,6 @@ exclude = '''
     )/
 )
 '''
-
 
 [tool.pytest.ini_options]
 junit_family = "xunit1"
@@ -35,6 +35,10 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "minified: marks test of the minified version of createstubs",
+    "docfix: upstream documentation fix needed",
+    "micropython: tests of MicroPython code on Cpython with mocks",
+    "rst_stub: tests to generate stobs from the rst documentation",
+    # os versions
     "win32: run test only on Windows",
     "linux: run test only on linux",
     "darwin: run test only on Mac",
