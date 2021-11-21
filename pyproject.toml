@@ -36,6 +36,8 @@ markers = [
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "minified: marks test of the minified version of createstubs",
     "docfix: upstream documentation fix needed",
+    "micropython: tests of MicroPython code on Cpython with mocks",
+    "rst_stub: tests to generate stobs from the rst documentation",
     # os versions
     "win32: run test only on Windows",
     "linux: run test only on linux",
