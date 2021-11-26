@@ -29,7 +29,7 @@ todo.md
 ```
 
 ```{toctree}
-:caption: 'development:'
+:caption: 'Development:'
 :maxdepth: 1
 developing.md
 testing.md
