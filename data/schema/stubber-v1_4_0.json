@@ -1,0 +1,192 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_3_9.json",
+    "title": "Root",
+    "type": "object",
+    "required": [
+        "firmware",
+        "modules",
+        "stubber"
+    ],
+    "properties": {
+        "firmware": {
+            "$id": "#root/firmware",
+            "title": "Firmware",
+            "type": "object",
+            "required": [
+                "family",
+                "firmware",
+                "machine",
+                "nodename",
+                "platform",
+                "port",
+                "release",
+                "sysname",
+                "type",
+                "version"
+            ],
+            "properties": {
+                "family": {
+                    "$id": "#root/firmware/family",
+                    "title": "Family",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "micropython"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "firmware": {
+                    "$id": "#root/firmware/firmware",
+                    "title": "Firmware",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "micropython---1_16"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "machine": {
+                    "$id": "#root/firmware/machine",
+                    "title": "Machine",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "micropython"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "nodename": {
+                    "$id": "#root/firmware/nodename",
+                    "title": "Nodename",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "micropython"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "platform": {
+                    "$id": "#root/firmware/platform",
+                    "title": "Platform",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "-"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "port": {
+                    "$id": "#root/firmware/port",
+                    "title": "Port",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "-"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "release": {
+                    "$id": "#root/firmware/release",
+                    "title": "Release",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "v1_16"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "sysname": {
+                    "$id": "#root/firmware/sysname",
+                    "title": "Sysname",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "micropython"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "type": {
+                    "$id": "#root/firmware/type",
+                    "title": "Type",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "docs",
+                        "firmware",
+                        "frozen"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "version": {
+                    "$id": "#root/firmware/version",
+                    "title": "Version",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "v1_16"
+                    ],
+                    "pattern": "^.*$"
+                }
+            }
+        },
+        "modules": {
+            "$id": "#root/modules",
+            "title": "Modules",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$id": "#root/modules/items",
+                "title": "Items",
+                "type": "object",
+                "required": [
+                    "file",
+                    "module"
+                ],
+                "properties": {
+                    "file": {
+                        "$id": "#root/modules/items/file",
+                        "title": "File",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "btree.py"
+                        ],
+                        "pattern": "^.*$"
+                    },
+                    "module": {
+                        "$id": "#root/modules/items/module",
+                        "title": "Module",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "btree"
+                        ],
+                        "pattern": "^.*$"
+                    }
+                }
+            }
+        },
+        "stubber": {
+            "$id": "#root/stubber",
+            "title": "Stubber",
+            "type": "object",
+            "required": [
+                "version"
+            ],
+            "properties": {
+                "version": {
+                    "$id": "#root/stubber/version",
+                    "title": "Version",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "1.3.8"
+                    ],
+                    "pattern": "^.*$"
+                }
+            }
+        }
+    }
+}
