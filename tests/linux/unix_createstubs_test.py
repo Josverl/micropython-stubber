@@ -84,6 +84,7 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str):
     with open(jsons[0], "r") as file:
         manifest = json.load(file)
 
-    assert len(manifest) == 3, "module manifest should contain firmware, stubber , modules"
+    for x in ["firmware", "stubber", "modules"]:
+        assert x in manifest.keys(), "module manifest should contain firmware, stubber , modules"
 
     assert len(manifest["modules"]) - len(stubfiles) == 0, "number of modules must match count of stubfiles."
