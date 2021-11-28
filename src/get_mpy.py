@@ -359,7 +359,7 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
     mpy_path = "./micropython"
     lib_path = "./micropython-lib"
-    version = utils.clean_version(git.get_tag(mpy_path) or "x.x")
+    version = utils.clean_version(git.get_tag(mpy_path) or "0.0")
 
     if version:
         log.info("found micropython version : {}".format(version))
