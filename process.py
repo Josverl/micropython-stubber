@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Pre/Post Processing for createstubs.py"""
+from typing import Union
 import itertools
 from pathlib import Path
 import subprocess
@@ -11,10 +12,6 @@ try:
     import python_minifier
 except ImportError:
     python_minifier = None
-
-ROOT = Path(__file__).parent
-source_script = ROOT / "board" / "createstubs.py"
-destination_script = ROOT / "minified" / "createstubs.py"
 
 
 def edit_lines(content, edits, show_diff=False):
@@ -242,13 +239,12 @@ def minify_script(source_script: Path, keep_report=True, show_diff=False):
 
 
 @click.group()
-@click.option("--debug", is_flag=True, default=False)
+# @click.option("--debug", is_flag=True, default=False)
 @click.pass_context
 def cli(ctx, debug=False):
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
     ctx.ensure_object(dict)
-
     ctx.obj["DEBUG"] = debug
 
 
@@ -258,6 +254,7 @@ def cli(ctx, debug=False):
 # @cli.command()  # @cli, not @click!
 # @click.pass_context
 # def sync(ctx):
+#     click.echo(f"Debug is {'on' if ctx.obj['DEBUG'] else 'off'}")
 #     click.echo("Syncing")
 
 
@@ -266,26 +263,24 @@ def cli(ctx, debug=False):
 # todo: allow multiple source
 @click.argument("source", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
 @click.argument("target", default="./minified", type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--report/--no-report", "keep_report", default=True)
-@click.option("--show-diff/--no-diff", default=False)
-@click.option("--cross-compile/--no-compile", default=False)
+@click.option("--show-diff", help="show the functional changes made to the source script", default=False, is_flag=True)
+@click.option("--cross-compile", help="cross compile after minification", default=False, is_flag=True)
+@click.option(
+    "--report/--no-report", "keep_report", help="keep or disable minimal progress reporting in the minified version.", default=True
+)
 @click.pass_context
 def cli_minify(
     ctx,
-    source: Path,
-    target: Path,
+    source: Union[str, Path],
+    target: Union[str, Path],
     keep_report: bool,
     show_diff: bool,
     cross_compile: bool,
 ) -> str:
-    """minifies a micropython file"""
+    """minifies SOURCE micropython file to TARGET (file or folder)"""
 
-    click.echo(click.format_filename(source))
-    click.echo(click.format_filename(target))
-    click.echo(f"keep report = {keep_report}")
-    click.echo(f"show_diff   = {show_diff}")
-    click.echo(f"mpy-cross   = {cross_compile}")
-
+    source = Path(source)
+    target = Path(target)
     assert python_minifier
     print(f"\nMinifying {source}...")
     # if target is a folder , then append the filename
