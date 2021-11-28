@@ -9,6 +9,7 @@
         "modules",
         "stubber"
     ],
+    "additionalProperties": false,
     "properties": {
         "firmware": {
             "$id": "#root/firmware",
@@ -17,13 +18,9 @@
             "required": [
                 "family",
                 "firmware",
-                "machine",
-                "nodename",
                 "platform",
                 "port",
-                "release",
-                "sysname",
-                "type",
+                "stubtype",
                 "version"
             ],
             "properties": {
@@ -33,7 +30,10 @@
                     "type": "string",
                     "default": "",
                     "examples": [
-                        "micropython"
+                        "micropython",
+                        "pycopy",
+                        "circuitpython",
+                        "loboris"
                     ],
                     "pattern": "^.*$"
                 },
@@ -83,7 +83,11 @@
                     "type": "string",
                     "default": "",
                     "examples": [
-                        "-"
+                        "esp32",
+                        "stm32",
+                        "unix",
+                        "rp2",
+                        "common"
                     ],
                     "pattern": "^.*$"
                 },
@@ -108,14 +112,16 @@
                     "pattern": "^.*$"
                 },
                 "type": {
-                    "$id": "#root/firmware/type",
+                    "$id": "#root/firmware/stubtype",
                     "title": "Type",
                     "type": "string",
-                    "default": "",
+                    "default": "firmware",
                     "examples": [
-                        "docs",
+                        "cpython",
                         "firmware",
-                        "frozen"
+                        "frozen",
+                        "library",
+                        "docs"
                     ],
                     "pattern": "^.*$"
                 },
@@ -127,7 +133,7 @@
                     "examples": [
                         "v1_16"
                     ],
-                    "pattern": "^.*$"
+                    "pattern": "^v.*$"
                 }
             }
         },
@@ -151,7 +157,8 @@
                         "type": "string",
                         "default": "",
                         "examples": [
-                            "btree.py"
+                            "btree.py",
+                            "micropython.py"
                         ],
                         "pattern": "^.*$"
                     },
@@ -161,7 +168,8 @@
                         "type": "string",
                         "default": "",
                         "examples": [
-                            "btree"
+                            "btree",
+                            "micropython"
                         ],
                         "pattern": "^.*$"
                     }
