@@ -5,12 +5,19 @@
     "title": "Root",
     "type": "object",
     "required": [
+        "$schema",
         "firmware",
         "modules",
         "stubber"
     ],
     "additionalProperties": false,
     "properties": {
+        "$schema": {
+            "$id": "#root/$schema",
+            "title": "$schema",
+            "type": "string",
+            "default": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_4_0.json"
+        },
         "firmware": {
             "$id": "#root/firmware",
             "title": "Firmware",
