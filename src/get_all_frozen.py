@@ -37,7 +37,7 @@ def get_all(mpy_path=MPY_PATH):
     #
     get_cpython.get_core(stub_path=utils.stubfolder("cpython_core"), requirements="./src/reqs-cpython-mpy.txt")
 
-    version = utils.clean_version(git.get_tag(mpy_path))
+    version = utils.clean_version(git.get_tag(mpy_path) or "0.0")
 
     if version:
         log.info("found micropython version : {}".format(version))
