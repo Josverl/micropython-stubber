@@ -10,7 +10,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.4.3"
+__version__ = "1.4.4"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -78,18 +78,14 @@ class Stubber:
         _result = []
         _errors = []
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
-        try:
-            for name in dir(item_instance):
-                try:
-                    val = getattr(item_instance, name)
-                    # name , item_repr(value) , type as text, item_instance
-                    _result.append((name, repr(val), repr(type(val)), val))
-                except AttributeError as e:
-                    _errors.append(
-                        "Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e)
-                    )
-        except AttributeError as e:
-            _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+        for name in dir(item_instance):
+            try:
+                val = getattr(item_instance, name)
+                # name , item_repr(value) , type as text, item_instance
+                _result.append((name, repr(val), repr(type(val)), val))
+            except AttributeError as e:
+                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+
         # remove internal __
         _result = [i for i in _result if not (i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
@@ -168,9 +164,7 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
-                module_name, self._fwid, self.info, __version__
-            )
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
 
             fp.write(s)
             fp.write("from typing import Any\n\n")
@@ -339,7 +333,7 @@ class Stubber:
                 f.write("{")
                 f.write(dumps({"firmware": self.info})[1:-1])
                 f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__}})[1:-1])
+                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
                 f.write(",\n")
                 f.write('"modules" :[\n')
                 start = True

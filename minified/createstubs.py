@@ -26,7 +26,7 @@ C=OSError
 import sys,gc as B,uos as os
 from utime import sleep_us as g
 from ujson import dumps as O
-__version__='1.4.3'
+__version__='1.4.4'
 T=2
 h=2
 try:from machine import resetWDT as U
@@ -135,16 +135,16 @@ class Stubber:
 				try:E.clean(B);os.rmdir(B)
 				except C:pass
 	def report(D,filename='modules.json'):
-		E=',\n';H=e.format(D.path,filename);B.collect()
+		H='firmware';E=',\n';I=e.format(D.path,filename);B.collect()
 		try:
-			with open(H,'w')as A:
-				A.write('{');A.write(O({'firmware':D.info})[1:-1]);A.write(E);A.write(O({'stubber':{N:__version__}})[1:-1]);A.write(E);A.write('"modules" :[\n');F=R
-				for I in D._report:
+			with open(I,'w')as A:
+				A.write('{');A.write(O({H:D.info})[1:-1]);A.write(E);A.write(O({'stubber':{N:__version__},'stubtype':H})[1:-1]);A.write(E);A.write('"modules" :[\n');F=R
+				for J in D._report:
 					if F:F=G
 					else:A.write(E)
-					A.write(O(I))
+					A.write(O(J))
 				A.write('\n]}')
-			J=D._start_free-B.mem_free()
+			K=D._start_free-B.mem_free()
 		except C:pass
 def V(path):
 	B=path;A=F=0
