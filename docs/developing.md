@@ -52,9 +52,9 @@ Pylance natively supports [multi-root workspaces](https://code.visualstudio.com/
 
 ## Minification 
 
-if you make changes to the createstubs.py script , you should also update the minified version by running `python process.py minify` at some point.
+If you make changes to the createstubs.py script , you should also update the minified version by running `python process.py minify` at some point.
 
-if you forget to do this there is a github action that should do this for you and create a PR for your branch.
+If you forget to do this there is a github action that should do this for you and create a PR for your branch.
 
 ## Testing 
 
@@ -87,7 +87,34 @@ if isMicroPython():
 
 
 **Testing on micropython linux port(s)**
-in order to be able to test `createstubs.py`, it has been updated to run on linux, and accept a --path parameter to indicate the path where the stubs should be stored.
+In order to be able to test `createstubs.py`, it has been updated to run on linux, and accept a --path parameter to indicate the path where the stubs should be stored.
+
+## Debugging Cpython code that run Micropython 
+
+Some of the test code run the micropython executable using `subprocess.run()`.
+When you try to debug these tests the VSCode debugger (debugpy](https://github.com/microsoft/debugpy) then tries to attach to that micropython subprocess in order to facilitate debugging.
+This will fail as reported in this [issue](https://github.com/microsoft/debugpy/issues/781).  
+
+The solution to this problem is to disable subprocess debugging using the `"subProcess": false` switch.
+
+``` json 
+// launch.json
+        {
+            // disable pytest coverage report as it conflicts with debugging tests
+            "name": "Debug pytest tests",
+            "type": "python",
+            "purpose": [
+                "debug-test"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false,
+            "subProcess": false, // Avoid debugpy trying to debug micropython
+            "env": {
+                "PYTEST_ADDOPTS": "--no-cov"
+            }
+        },
+```
 
 ## github actions
 
