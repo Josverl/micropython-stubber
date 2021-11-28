@@ -29,7 +29,7 @@ def clean_version(
     patch: bool = False,
     commit: bool = False,
     drop_v: bool = False,
-    flat: bool = False
+    flat: bool = False,
 ):
     "Clean up and transform the many flavours of versions"
     # 'v1.13.0-103-gb137d064e' --> 'v1.13-103'
@@ -58,7 +58,6 @@ def clean_version(
         if not version.startswith("v"):
             version = "v" + version
     return version
-
 
 
 def stubfolder(path: str) -> str:
@@ -221,7 +220,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 
 
 def manifest(
-    family=None,
+    family="micropython",
+    stubtype="frozen",
     machine=None,
     port=None,
     platform=None,
@@ -233,8 +233,6 @@ def manifest(
 ) -> dict:
 
     "create a new empty manifest dict"
-    if family is None:
-        family = "micropython"  # family
     if machine is None:
         machine = family  # family
 
@@ -254,6 +252,7 @@ def manifest(
         firmware = "{}-{}-{}".format(family, port, flat_version(version))
 
     mod_manifest = {
+        "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_4_0.json",
         "firmware": {
             "family": family,
             "port": port,
@@ -265,15 +264,18 @@ def manifest(
             "release": release,
             "sysname": sysname,
         },
-        "stubber": {"version": VERSION},
+        "stubber": {
+            "version": VERSION,
+            "stubtype": stubtype,
+        },
         "modules": [],
     }
     return mod_manifest
 
 
-def make_manifest(folder: Path, family: str, port: str, version: str) -> bool:
+def make_manifest(folder: Path, family: str, port: str, version: str, stubtype="") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
-    mod_manifest = manifest(family=family, port=port, sysname=family, version=version)
+    mod_manifest = manifest(family=family, port=port, sysname=family, version=version, stubtype=stubtype)
 
     try:
         # list all *.py files, not strictly modules but decent enough for documentation

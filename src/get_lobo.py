@@ -53,7 +53,13 @@ def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
     # download
     downloader.download_files(repo, frozen_modules, stub_path)
     # make a manifest
-    utils.make_manifest(stub_path, FAMILY, port="esp32", version=version)
+    utils.make_manifest(
+        stub_path,
+        FAMILY,
+        port="esp32",
+        version=version,
+        stubtype="frozen",
+    )
 
 
 if __name__ == "__main__":
