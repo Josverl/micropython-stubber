@@ -834,7 +834,7 @@ def cli_docstubs(
     utils.make_manifest(
         folder=dst_path,
         family="micropython",
-        version=utils.clean_version(v_tag, flat=True),
+        version=utils.clean_version(v_tag),
         port="-",
         stubtype="documentation",
     )
