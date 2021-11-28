@@ -77,14 +77,16 @@ Not yet implemented
 
 """
 
-import sys
-import json
-import re
-import subprocess
-import basicgit as git
 from typing import List, Tuple
+import sys
+import re
+import logging
+import json
+import subprocess
 from pathlib import Path
-from utils import flat_version
+import basicgit as git
+import utils
+import click
 
 from rst import (
     return_type_from_context,
@@ -96,6 +98,10 @@ from rst import (
     ClassSourceDict,
     FunctionSourceDict,
 )
+
+# logging
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 NEW_OUTPUT = True
 #: self.gather_docs = True
@@ -116,8 +122,7 @@ def _red(*args) -> str:
 
 
 class RSTReader:
-    __debug = False  # a
-    verbose = True
+    verbose = False
     gather_docs = False  # used only during Development
     target = ".py"  # py/pyi
 
@@ -185,16 +190,12 @@ class RSTReader:
                 name = name.replace(prefix + ".", "")
         return name
 
-    def log(self, *arg):
-        if self.verbose:
-            print(*arg)
-
     def leave_class(self):
         if self.current_class != "":
             self.current_class = ""
 
     def read_file(self, filename: Path):
-        print(f"::group::[Reading RST] {filename}")
+        log.debug(f"Reading : {filename}")
         # ingore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
@@ -214,14 +215,14 @@ class RSTReader:
     def write_file(self, filename: Path) -> bool:
         self.prepare_output()
         try:
-            print(f" - Writing to: {filename}")
+            log.info(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
         except OSError as e:
-            print(e)
+            log.error(e)
             return False
         if self.gather_docs:
-            print(f" - Writing to: {filename}")
+            log.info(f" - Writing to: {filename.with_suffix('json')}")
             with open(filename.with_suffix(".json"), mode="w", encoding="utf8") as file:
                 json.dump(self.return_info, file, ensure_ascii=False, indent=4)
             self.return_info = []
@@ -348,7 +349,7 @@ class RSTReader:
         # TODO: Add / update information to existing class definition
         full_name = self.output_dict.find(f"class {name}")
         if full_name:
-            print(_red(f"TODO: UPDATE EXISTING CLASS : {name}"))
+            log.warning(f"TODO: UPDATE EXISTING CLASS : {name}")
             class_def = self.output_dict[full_name]
         else:
             # TODO: add the parent class(es) to the formal documentation
@@ -374,7 +375,7 @@ class RSTReader:
 
     def parse_toc(self):
         "process table of content with additional rst files, and add / include them in the current module"
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         self.line_no += 1  # skip one line
         toctree = self.parse_docstring()
         # cleanup toctree
@@ -389,7 +390,7 @@ class RSTReader:
 
     def parse_module(self):
         "parse a module tag and set the module's docstring"
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         module_name = self.line.split(SEPERATOR)[-1].strip()
 
         self.current_module = module_name
@@ -415,12 +416,12 @@ class RSTReader:
             self.output_dict.add_import(MODULE_GLUE[module_name])
 
     def parse_current_module(self):
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         module_name = self.line.split(SEPERATOR)[-1].strip()
         mod_comment = f"# + module: {self.current_module}.rst"
         self.current_module = module_name
         self.current_function = self.current_class = ""
-        self.log(mod_comment)
+        log.info(mod_comment)
         if NEW_OUTPUT:  # new output
             self.output_dict.name = module_name
             self.output_dict.add_comment(mod_comment)
@@ -429,7 +430,7 @@ class RSTReader:
         # todo: read first block and do something with it ( for a submodule)
 
     def parse_function(self):
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         # this_function = self.line.split(SEPERATOR)[-1].strip()
         # name = this_function
 
@@ -447,7 +448,7 @@ class RSTReader:
             try:
                 name, params = this_function.split("(", maxsplit=1)
             except ValueError:
-                print(_red(this_function))
+                log.error(this_function)
             self.current_function = name
             if name in ("classmethod", "staticmethod"):
                 # skip the classmethod and static method functions
@@ -479,7 +480,7 @@ class RSTReader:
                 self.output_dict += fn_def
 
     def parse_class(self):
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         this_class = self.line.split(SEPERATOR)[-1].strip()  # raw
         if "(" in this_class:
             name, params = this_class.split("(", 2)
@@ -490,14 +491,14 @@ class RSTReader:
         self.current_class = name
         self.current_function = ""
 
-        self.log(f"# class:: {name} - {this_class}")
+        log.debug(f"# class:: {name} - {this_class}")
         # fixup parameters
         params = self.fix_parameters(params)
         docstr = self.parse_docstring()
 
         if any(":noindex:" in line for line in docstr):
             # if the class docstring contains ':noindex:' on any line then skip
-            self.log(f"# Skip :noindex: class {name}")
+            log.debug(f"# Skip :noindex: class {name}")
         else:
             # write a class header
             self.create_update_class(name, params, docstr)
@@ -516,7 +517,7 @@ class RSTReader:
         # params = ")"
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
 
         ## rst_hint is used to access the method decorator ( method, staticmethod, staticmethod ... )
         rst_hint = self.get_rst_hint()
@@ -600,7 +601,7 @@ class RSTReader:
                 parent_class += method
 
     def parse_exception(self):
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         name = self.line.split(SEPERATOR)[1].strip()
         # TODO : check name scope : Module.class.<name>
         if "." in name:
@@ -646,7 +647,7 @@ class RSTReader:
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
             if self.verbose:
-                print(_green("Sequence detected"))
+                log.debug("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
         # now advance the linecounter
@@ -657,7 +658,7 @@ class RSTReader:
     def parse_data(self):
         # todo: find a way to reliably add Constants at the correct level
         # Note : makestubs has no issue with this
-        self.log(f"# {self.line.rstrip()}")
+        log.debug(f"# {self.line.rstrip()}")
         # Get one or more names
         names = self.parse_names()
 
@@ -701,10 +702,8 @@ class RSTReader:
 
             elif len(rst_hint) > 0:
                 # something new / not yet parsed
-                self.log(f"# {line.rstrip()}")
-                if self.verbose:
-                    print(_red(line.rstrip()))
                 self.line_no += 1
+                log.debug(f"# {line.rstrip()}")
             else:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
@@ -724,22 +723,25 @@ class RSTReader:
         self.prepare_output()
 
 
-def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True, pattern: str = "*.rst") -> int:
-    if not dst_folder.exists():
-        dst_folder.mkdir(parents=True)
+def generate_from_rst(
+    rst_path: Path, dst_path: Path, v_tag: str, black=True, stubgen=True, pattern: str = "*.rst", verbose: bool = False
+) -> int:
+    if not dst_path.exists():
+        dst_path.mkdir(parents=True)
     # no index, and module.xxx.rst is included in module.py
-    files = [f for f in rst_folder.glob(pattern) if f.stem != "index" and "." not in f.stem]
+    files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
     for file in files:
         reader = RSTReader(v_tag)
+        reader.verbose = verbose
+        log.info(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()
-        reader.write_file((dst_folder / file.name).with_suffix(".py"))
+        reader.write_file((dst_path / file.name).with_suffix(".py"))
         del reader
 
     if black:
         try:
-
-            cmd = ["black", str(dst_folder)]
+            cmd = ["black", str(dst_path)]
             if sys.version_info.major == 3 and sys.version_info.minor == 7:
                 # black on python 3.7 does not like some function defs
                 # def sizeof(struct, layout_type=NATIVE, /) -> int:
@@ -748,21 +750,97 @@ def generate_from_rst(rst_folder: Path, dst_folder: Path, v_tag: str, black=True
             if result.returncode != 0:
                 raise Exception(result.stderr.decode("utf-8"))
         except subprocess.SubprocessError:
-            print(_red("some of the files are not in a proper format"))
+            log.error("some of the files are not in a proper format")
+    if stubgen:
+        utils.generate_pyi_files(dst_path)
 
     return len(files)
 
 
-if __name__ == "__main__":
-    base_path = Path("micropython")
-    # base_path = Path("../pycopy")
-    v_tag = git.get_tag(base_path.as_posix())
+##########################################################################################
+# command line interface
+##########################################################################################
+# @click.group()
+# # @click.option("--debug", is_flag=True, default=False)
+# @click.pass_context
+# def cli(ctx, debug=False):
+#     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
+#     # by means other than the `if` block below)
+#     ctx.ensure_object(dict)
+#     ctx.obj["DEBUG"] = debug
+##########################################################################################
+
+
+@click.command(name="docstubs")
+# todo: allow multiple source
+@click.option(
+    "--source",
+    "-s",
+    default="./micropython/docs/library",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="The location of the RST file to read. Default './micropython/docs/library'",
+)
+@click.option(
+    "--target",
+    "-t",
+    default="./all-stubs",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="Destination of the files to be generated. default : ./all-stubs/{micropython}-{version}-docstub",
+)
+@click.option("--family", "-f", "basename", default="micropython", help="Micropython family. default:'micropython'")
+@click.option("--black/--no-black", "-b/-nb", default=True, help="Run black, default :yes")
+@click.option("--stubgen/--no-stubgen", default=True, help="Run stubgen, default: yes")
+@click.option("--verbose", "-v", is_flag=True, default=False)
+def cli_docstubs(
+    source: str = "./micropython",
+    target: str = "./all-stubs",
+    verbose: bool = False,
+    black: bool = True,
+    stubgen: bool = True,
+    basename="micropython",
+):
+    """\b
+    Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
+    Generates:
+    - modules
+        - docstrings
+        - module constants
+        - function definitions
+            - docstrings
+            - function parameters based on documentation
+        classes
+            - docstrings
+            - __init__ method
+            - class constants
+            - parameters based on documentation for class
+            - methods
+                - parameters based on documentation for the method
+                - docstrings
+        - exceptions
+    """
+    if verbose:
+        log.setLevel(logging.DEBUG)
+
+    rst_path = Path(source)  #  / "docs"/"library"
+    v_tag = git.get_tag(rst_path.as_posix())
     if not v_tag:
         # if we can't find a tag , bail
         raise ValueError
 
-    rst_folder = base_path / "docs" / "library"
-    dst_folder = Path("all-stubs") / base_path.stem / (flat_version(v_tag, keep_v=True) + "-docs")
+    dst_path = Path(target) / f"{basename}-{utils.clean_version(v_tag,flat=True)}-docstubs"
 
-    generate_from_rst(rst_folder, dst_folder, v_tag)
-    # generate_from_rst(rst_folder, dst_folder, v_tag, pattern="binascii.rst")  # debug
+    generate_from_rst(rst_path, dst_path, v_tag, black=black, stubgen=stubgen, verbose=verbose)
+    # Also generate a module manifest
+    utils.make_manifest(
+        folder=dst_path,
+        family="micropython",
+        version=utils.clean_version(v_tag, flat=True),
+        port="-",
+        stubtype="documentation",
+    )
+
+
+##########################################################################################
+
+if __name__ == "__main__":
+    cli_docstubs()

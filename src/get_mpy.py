@@ -245,7 +245,13 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
         # make a module manifest
         port = dest_path.split(os.path.sep)[-2]
         # todo: add board / variant into manifest files ?
-        utils.make_manifest(Path(dest_path), family=FAMILY, port=port, version=version)
+        utils.make_manifest(
+            Path(dest_path),
+            family=FAMILY,
+            port=port,
+            version=version,
+            stubtype="frozen",
+        )
     return targets
 
 
@@ -351,7 +357,7 @@ def get_frozen_manifest(
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # make a module manifest
-        utils.make_manifest(Path(stub_dir), FAMILY, "frozen", version)
+        utils.make_manifest(Path(stub_dir), FAMILY, port="", version=version, stubtype="frozen")
 
 
 if __name__ == "__main__":
