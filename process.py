@@ -261,10 +261,10 @@ def cli(ctx, debug=False):
 ##########################################################################################
 @cli.command(name="minify")
 # todo: allow multiple source
-@click.argument("source", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
-@click.argument("target", default="./minified", type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--show-diff", help="show the functional changes made to the source script", default=False, is_flag=True)
-@click.option("--cross-compile", help="cross compile after minification", default=False, is_flag=True)
+@click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
+@click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
+@click.option("--show-diff", "-d", help="show the functional changes made to the source script", default=False, is_flag=True)
+@click.option("--cross-compile", "-xc", help="cross compile after minification", default=False, is_flag=True)
 @click.option(
     "--report/--no-report", "keep_report", help="keep or disable minimal progress reporting in the minified version.", default=True
 )
@@ -276,7 +276,7 @@ def cli_minify(
     keep_report: bool,
     show_diff: bool,
     cross_compile: bool,
-) -> str:
+) -> int:
     """minifies SOURCE micropython file to TARGET (file or folder)"""
 
     source = Path(source)
@@ -284,12 +284,14 @@ def cli_minify(
     assert python_minifier
     print(f"\nMinifying {source}...")
     # if target is a folder , then append the filename
-    if target.is_dir:
+    if target.exists() and target.is_dir():
         target = target / source.name
-
-    with target.open("w+") as f:
-        minified = minify_script(source_script=source, keep_report=keep_report, show_diff=show_diff)
-        f.write(minified)
+    try:
+        with target.open("w+") as f:
+            minified = minify_script(source_script=source, keep_report=keep_report, show_diff=show_diff)
+            f.write(minified)
+    except Exception as e:
+        print(e)
 
     print("Minified file written to :", target)
     if cross_compile:
@@ -298,6 +300,7 @@ def cli_minify(
             print("mpy-cross compiled to    :", target.with_suffix(".mpy"))
 
     print("\nDone!")
+    return 0
 
 
 ##########################################################################################
