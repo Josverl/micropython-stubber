@@ -279,13 +279,38 @@ def test_fix_param_dynamic():
 import subprocess
 import json
 
+# @pytest.mark.xfail(reason="upstream docfix needed")
+# @pytest.mark.docfix
+def test_pyright_Non_default_follows_default(pyright_results, capsys):
+    """use pyright to check the validity of the generated stubs
+    - Non-default argument follows default argument
+    """
+    issues: List[Dict] = pyright_results["generalDiagnostics"]
+    # workaround : "Non-default argument follows default argument", does not specify rule
+    # TODO: apparently the mypy.stubgen does not quite get this right in generating the .pyi
+    # , so only flag errors in .py files
+
+    issues = list(
+        filter(
+            lambda diag: "message" in diag.keys()
+            and diag["message"] == "Non-default argument follows default argument"
+            and diag["file"].endswith(".py"),
+            issues,
+        )
+    )
+    with capsys.disabled():
+        for issue in issues:
+            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    assert len(issues) == 0
+
 
 # @pytest.mark.xfail(reason="upstream docfix needed")
 @pytest.mark.docfix
 def test_pyright_undefined_variable(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
-    issues = list(filter(lambda diag: diag["rule"] == "reportUndefinedVariable", issues))
+    # workaround : "Non-default argument follows default argument", does not specify rule
+    issues = list(filter(lambda diag: "rule" in diag.keys() and diag["rule"] == "reportUndefinedVariable", issues))
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
@@ -297,9 +322,12 @@ def test_pyright_undefined_variable(pyright_results, capsys):
 def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs - reportGeneralTypeIssues"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
+    # workaround : "Non-default argument follows default argument", does not specify rule
     issues = list(
         filter(
-            lambda diag: diag["rule"] == "reportGeneralTypeIssues" and not "is obscured by a declaration" in diag["message"],
+            lambda diag: "rule" in diag.keys()
+            and diag["rule"] == "reportGeneralTypeIssues"
+            and not "is obscured by a declaration" in diag["message"],
             issues,
         )
     )
