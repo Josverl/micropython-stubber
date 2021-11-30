@@ -2,20 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """Pre/Post Processing for createstubs.py"""
-import argparse
+from typing import Union
 import itertools
-import sys
 from pathlib import Path
 import subprocess
+import click
 
 try:
     import python_minifier
 except ImportError:
     python_minifier = None
-
-ROOT = Path(__file__).parent
-source_script = ROOT / "board" / "createstubs.py"
-destination_script = ROOT / "minified" / "createstubs.py"
 
 
 def edit_lines(content, edits, show_diff=False):
@@ -237,62 +233,77 @@ def minify_script(source_script: Path, keep_report=True, show_diff=False):
     return source
 
 
-def cli_minify(**kwargs):
-    """minify cli handler"""
-    source_path: Path = kwargs.pop("source")
-    print(f"\nMinifying {source_path}...")
-    out: Path = kwargs.pop("output")
-    if not python_minifier:
-        print("python_minifier is required to minify createstubs.py\n")
-        print("Please install via:\n  pip install python_minifier")
-        sys.exit(1)
-    with out.open("w+") as f:
-        report = kwargs.pop("no_report")
-        diff = kwargs.pop("diff")
+##########################################################################################
+# command line interface
+##########################################################################################
 
-        source = minify_script(source_script=source_path, keep_report=report, show_diff=diff)
-        f.write(source)
 
-    print("Minified file written to :", out)
-    result = subprocess.run(["mpy-cross", "-O2", str(out)])
-    if result.returncode == 0:
-        print("mpy-cross compiled to    :", out.with_suffix(".mpy"))
+@click.group()
+# @click.option("--debug", is_flag=True, default=False)
+@click.pass_context
+def cli(ctx, debug=False):
+    # ensure that ctx.obj exists and is a dict (in case `cli()` is called
+    # by means other than the `if` block below)
+    ctx.ensure_object(dict)
+    ctx.obj["DEBUG"] = debug
+
+
+##########################################################################################
+
+
+# @cli.command()  # @cli, not @click!
+# @click.pass_context
+# def sync(ctx):
+#     click.echo(f"Debug is {'on' if ctx.obj['DEBUG'] else 'off'}")
+#     click.echo("Syncing")
+
+
+##########################################################################################
+@cli.command(name="minify")
+# todo: allow multiple source
+@click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
+@click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
+@click.option("--show-diff", "-d", help="show the functional changes made to the source script", default=False, is_flag=True)
+@click.option("--cross-compile", "-xc", help="cross compile after minification", default=False, is_flag=True)
+@click.option(
+    "--report/--no-report", "keep_report", help="keep or disable minimal progress reporting in the minified version.", default=True
+)
+@click.pass_context
+def cli_minify(
+    ctx,
+    source: Union[str, Path],
+    target: Union[str, Path],
+    keep_report: bool,
+    show_diff: bool,
+    cross_compile: bool,
+) -> int:
+    """minifies SOURCE micropython file to TARGET (file or folder)"""
+
+    source = Path(source)
+    target = Path(target)
+    assert python_minifier
+    print(f"\nMinifying {source}...")
+    # if target is a folder , then append the filename
+    if target.exists() and target.is_dir():
+        target = target / source.name
+    try:
+        with target.open("w+") as f:
+            minified = minify_script(source_script=source, keep_report=keep_report, show_diff=show_diff)
+            f.write(minified)
+    except Exception as e:
+        print(e)
+
+    print("Minified file written to :", target)
+    if cross_compile:
+        result = subprocess.run(["mpy-cross", "-O2", str(target)])
+        if result.returncode == 0:
+            print("mpy-cross compiled to    :", target.with_suffix(".mpy"))
 
     print("\nDone!")
+    return 0
 
+
+##########################################################################################
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pre/Post Processing for createstubs.py")
-
-    parser.set_defaults(func=None)
-    parser.add_argument(
-        "-s",
-        "--source",
-        help="Specify source file to read from. Defaults to {}".format(source_script),
-        type=Path,
-        default=source_script,
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Specify file to output to. Defaults to {}".format(destination_script),
-        type=Path,
-        default=destination_script,
-    )
-    subparsers = parser.add_subparsers(help="Command to execute")
-
-    minify_parser = subparsers.add_parser("minify", help=("Create minified version of createstubs.py"))
-    minify_parser.add_argument("-d", "--diff", help="Print diff report from minify", action="store_true")
-    minify_parser.add_argument(
-        "-n",
-        "--no-report",
-        help=("Disables all output from createstubs.py." " Use if your having memory related issues."),
-        action="store_false",
-    )
-    minify_parser.set_defaults(func=cli_minify)
-
-    args = parser.parse_args()
-    if not args.func:
-        parser.print_help()
-    else:
-        args.func(**vars(args))
+    cli()

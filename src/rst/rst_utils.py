@@ -168,7 +168,7 @@ def simple_candidates(
         result = BASE.copy()
         result["type"] = type
         result["confidence"] = rate * dist_rate(i)  # OK
-        log.info(f" - found '{kw}' at position {i} with rating {dist_rate(i)}")
+        log.debug(f" - found '{kw}' at position {i} with rating {dist_rate(i)}")
         candidates.append(result)
     return candidates
 
@@ -230,7 +230,7 @@ def compound_candidates(
             result["type"] = f"{type}"
         confidence = confidence * dist_rate(i)  # distance weighting
         result["confidence"] = confidence
-        log.info(f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}")
+        log.debug(f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}")
 
         candidates.append(result)
     return candidates

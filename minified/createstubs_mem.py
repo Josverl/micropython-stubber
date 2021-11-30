@@ -22,7 +22,7 @@ A=OSError
 import sys,gc as C,uos as os
 from utime import sleep_us as c
 from ujson import dumps as O
-__version__='1.4.3'
+__version__='1.4.4'
 S=2
 d=2
 try:from machine import resetWDT as T
@@ -45,14 +45,12 @@ class Stubber:
 		try:U(D+E)
 		except A:pass
 		B.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];B.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];B.modules=[]
-	def get_obj_attributes(K,item_instance):
-		J="Couldn't get attribute '{}' from object '{}', Err: {}";A=item_instance;B=[];E=[]
-		try:
-			for D in dir(A):
-				try:G=getattr(A,D);B.append((D,repr(G),repr(type(G)),G))
-				except F as H:E.append(J.format(D,A,H))
-		except F as H:E.append(J.format(D,A,H))
-		B=[A for A in B if not(A[0].startswith(I)and A[0]!=Q)];C.collect();return B,E
+	def get_obj_attributes(J,item_instance):
+		B=item_instance;A=[];G=[]
+		for D in dir(B):
+			try:E=getattr(B,D);A.append((D,repr(E),repr(type(E)),E))
+			except F as H:G.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(D,B,H))
+		A=[B for B in A if not(B[0].startswith(I)and B[0]!=Q)];C.collect();return A,G
 	def add_modules(A,modules):A.modules=sorted(set(A.modules)|set(modules))
 	def create_all_stubs(A):
 		C.collect()
@@ -131,16 +129,16 @@ class Stubber:
 				try:E.clean(C);os.rmdir(C)
 				except A:pass
 	def report(D,filename='modules.json'):
-		E=',\n';H=b.format(D.path,filename);C.collect()
+		H='firmware';E=',\n';I=b.format(D.path,filename);C.collect()
 		try:
-			with P(H,'w')as B:
-				B.write('{');B.write(O({'firmware':D.info})[1:-1]);B.write(E);B.write(O({'stubber':{N:__version__}})[1:-1]);B.write(E);B.write('"modules" :[\n');F=R
-				for I in D._report:
+			with P(I,'w')as B:
+				B.write('{');B.write(O({H:D.info})[1:-1]);B.write(E);B.write(O({'stubber':{N:__version__},'stubtype':H})[1:-1]);B.write(E);B.write('"modules" :[\n');F=R
+				for J in D._report:
 					if F:F=G
 					else:B.write(E)
-					B.write(O(I))
+					B.write(O(J))
 				B.write('\n]}')
-			J=D._start_free-C.mem_free()
+			K=D._start_free-C.mem_free()
 		except A:pass
 def U(path):
 	C=path;B=F=0

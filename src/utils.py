@@ -19,16 +19,45 @@ logging.basicConfig(level=logging.INFO)
 STUB_FOLDER = "./all-stubs"
 
 
-def clean_version(version: str, build: bool = False):
-    "omit the commit hash from the git tag"
-    # 'v1.13-103-gb137d064e' --> 'v1.13-103'
-    nibbles = version.split("-")
-    if len(nibbles) == 1:
+LATEST = "Latest"
+
+
+def clean_version(
+    version: str,
+    *,
+    build: bool = False,
+    patch: bool = False,
+    commit: bool = False,
+    drop_v: bool = False,
+    flat: bool = False,
+):
+    "Clean up and transform the many flavours of versions"
+    # 'v1.13.0-103-gb137d064e' --> 'v1.13-103'
+
+    if version in ["", "-"]:
         return version
+    nibbles = version.split("-")
+    if not patch:
+        if nibbles[0] >= "1.10.0" and nibbles[0].endswith(".0"):
+            # remove the last ".0"
+            nibbles[0] = nibbles[0][0:-2]
+    if len(nibbles) == 1:
+        version = nibbles[0]
     elif build and build != "dirty":
-        return "-".join(version.split("-")[0:-1])
+        if not commit:
+            version = "-".join(nibbles[0:-1])
+        else:
+            version = "-".join(nibbles)
     else:
-        return "-".join((version.split("-")[0], "N"))
+        version = "-".join((nibbles[0], LATEST))
+    if flat:
+        version = version.strip().replace(".", "_")
+    if drop_v:
+        version = version.lstrip("v")
+    else:
+        if not version.startswith("v"):
+            version = "v" + version
+    return version
 
 
 def stubfolder(path: str) -> str:
@@ -191,7 +220,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 
 
 def manifest(
-    family=None,
+    family="micropython",
+    stubtype="frozen",
     machine=None,
     port=None,
     platform=None,
@@ -203,8 +233,6 @@ def manifest(
 ) -> dict:
 
     "create a new empty manifest dict"
-    if family is None:
-        family = "micropython"  # family
     if machine is None:
         machine = family  # family
 
@@ -224,6 +252,7 @@ def manifest(
         firmware = "{}-{}-{}".format(family, port, flat_version(version))
 
     mod_manifest = {
+        "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_4_0.json",
         "firmware": {
             "family": family,
             "port": port,
@@ -235,15 +264,18 @@ def manifest(
             "release": release,
             "sysname": sysname,
         },
-        "stubber": {"version": VERSION},
+        "stubber": {
+            "version": VERSION,
+            "stubtype": stubtype,
+        },
         "modules": [],
     }
     return mod_manifest
 
 
-def make_manifest(folder: Path, family: str, port: str, version: str) -> bool:
+def make_manifest(folder: Path, family: str, port: str, version: str, stubtype="") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
-    mod_manifest = manifest(family=family, port=port, sysname=family, version=version)
+    mod_manifest = manifest(family=family, port=port, sysname=family, version=version, stubtype=stubtype)
 
     try:
         # list all *.py files, not strictly modules but decent enough for documentation

@@ -1,10 +1,9 @@
 # This workflow will :
-# - create a minified version of createstubs.py
-# - run a quick test on that
+# - create minified versions of createstubs*.py
+# - run tests on these
 # - and submit a PR to the branch <branch>-minify
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: minify-RP
+name: minify-all
 
 on:
   workflow_dispatch:
@@ -44,9 +43,9 @@ jobs:
 
       - name: minify createstubs
         run: |
-          python process.py minify
-          python process.py -s board/createstubs_mem.py -o minified/createstubs_mem.py minify
-          python process.py -s board/createstubs_db.py -o minified/createstubs_db.py minify
+          python process.py minify -o ./minified -xc
+          python process.py minify -s ./board/createstubs_mem.py -o ./minified -xc
+          python process.py minify -s ./board/createstubs_db.py  -o ./minified -xc
 
 
       - name: run test on minified/createstubs.by
@@ -64,12 +63,6 @@ jobs:
           # E1121: Too many positional arguments for method call (too-many-function-args)
           # E0213: Method should have "self" as first argument (no-self-argument)
           # E0602: Undefined variable (undefined-variable)
-
-      - name: run minified/createstubs.py
-        run: |
-          mkdir $GITHUB_WORKSPACE/scratch
-          cd $GITHUB_WORKSPACE/scratch
-          ../tests/tools/ubuntu_20_04/micropython_v1_16 ../minified/createstubs.py
 
       - name: Create Pull Request
         id: cpr
