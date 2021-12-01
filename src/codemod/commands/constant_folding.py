@@ -12,7 +12,7 @@ from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 # Tutorial https://libcst.readthedocs.io/en/latest/codemods_tutorial.html
 
 
-class ConvertConstantCommand(VisitorBasedCodemodCommand):
+class ConvertConstantCommand(VisitorBasedCodemodCommand):  # lgtm [py/multiple-calls-to-init]
 
     # Add a description so that future codemodders can see what this does.
     DESCRIPTION: str = "Converts raw strings to constant accesses."

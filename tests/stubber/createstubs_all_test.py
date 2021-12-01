@@ -9,8 +9,9 @@ pytestmark = pytest.mark.micropython
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
 
-LOCATIONS = ["board", pytest.param("minified",marks=pytest.mark.minified)]
-VARIANTS = ["createstubs", "createstubs_mem","createstubs_db"]
+LOCATIONS = ["board", pytest.param("minified", marks=pytest.mark.minified)]
+VARIANTS = ["createstubs", "createstubs_mem", "createstubs_db"]
+
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
@@ -118,7 +119,6 @@ def test_stubber_fwid(
 @pytest.mark.skip(reason="test not working")
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_read_path(
     location,
     variant,
@@ -132,7 +132,6 @@ def test_read_path(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_get_obj_attributes(
     location,
     variant,
@@ -152,7 +151,6 @@ def test_get_obj_attributes(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_create_all_stubs(
     location,
     variant,
@@ -183,7 +181,6 @@ def test_create_all_stubs(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_get_root(
     location,
     variant,
@@ -199,7 +196,6 @@ def test_get_root(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_create_module_stub(
     location,
     variant,
@@ -222,7 +218,6 @@ def test_create_module_stub(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_create_module_stub_folder(
     location,
     variant,
@@ -243,7 +238,6 @@ def test_create_module_stub_folder(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_create_module_stub_ignored(
     location,
     variant,
@@ -267,7 +261,6 @@ def test_create_module_stub_ignored(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_nested_modules(
     location,
     variant,
@@ -288,7 +281,6 @@ def test_nested_modules(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-
 def test_unavailable_modules(
     location,
     variant,

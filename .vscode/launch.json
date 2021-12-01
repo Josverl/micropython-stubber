@@ -91,7 +91,9 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false,
-            "subProcess": false, // Avoid debugpy trying to debug micropython
+            // false : Avoid debugpy trying to debug micropython
+            // but may cause issue with pytest-cov coverage reporting 
+            "subProcess": false,
             "env": {
                 "PYTEST_ADDOPTS": "--no-cov"
             }

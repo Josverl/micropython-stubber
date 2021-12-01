@@ -7,8 +7,8 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
 
-import libcst as cst
-from libcst import matchers as m  # type: ignore - used as convention
+import libcst as cst  # lgtm [py/import-and-import-from] - used as convention
+from libcst import matchers as m  # lgtm [py/import-and-import-from] - used as convention
 from libcst.codemod._context import CodemodContext
 from libcst.codemod._visitor import ContextAwareTransformer
 from libcst.codemod.visitors._add_imports import AddImportsVisitor
@@ -185,7 +185,7 @@ class Annotations:
     class_definitions: Dict[str, cst.ClassDef] = field(default_factory=dict)
 
 
-class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):
+class ApplyStubberAnnotationsVisitor(ContextAwareTransformer):  # lgtm [py/multiple-calls-to-init]
     """
     Apply type annotations to a source module using the given stub modules.
     You can also pass in explicit annotations for functions and attributes and

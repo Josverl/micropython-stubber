@@ -27,6 +27,7 @@ import basicgit as git
 import utils
 from pathlib import Path  # start moving from os & glob to pathlib
 
+
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
 
@@ -36,9 +37,23 @@ FAMILY = "micropython"
 path_vars = {"MPY_DIR": "", "MPY_LIB_DIR": "", "PORT_DIR": "", "BOARD_DIR": ""}
 stub_dir = None
 
-# functions from makemanifest to ensure that the manifest.py files can be processed
+# Classes and functions from makemanifest to ensure that the manifest.py files can be processed
+# do not change class name
 class FreezeError(Exception):
     pass
+
+
+# do not change class name
+class IncludeOptions:
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        self._defaults = {}
+
+    def defaults(self, **kwargs):
+        self._defaults = kwargs
+
+    def __getattr__(self, name):
+        return self._kwargs.get(name, self._defaults.get(name, None))
 
 
 # do not change method name
@@ -136,7 +151,7 @@ def freezedry(path, script):
 
 
 # do not change method name
-def include(manifest):
+def include(manifest, **kwargs):
     """
     Include another manifest.
 
@@ -156,7 +171,8 @@ def include(manifest):
             prev_cwd = os.getcwd()
             os.chdir(os.path.dirname(manifest))
             try:
-                exec(f.read())  # pylint: disable=exec-used
+                # exec(f.read())  # pylint: disable=exec-used
+                exec(f.read(), globals(), {"options": IncludeOptions(**kwargs)})  # pylint: disable=exec-used
             except OSError:
                 log.warning("Could not process manifest: {}".format(manifest))
             os.chdir(prev_cwd)
