@@ -1,12 +1,15 @@
 import sys
+from pathlib import Path
 import subprocess
+import pytest
 
 
-def test_minifier(tmp_path):
+@pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
+def test_minification_cli(tmp_path: Path, source: str):
     "test creation of minified version"
     # load process.py in the same python environment
-    # TODO: Use temp_path to generate stubs
-    cmd = [sys.executable, "process.py", "minify"]
+    source_path = Path("./board") / source
+    cmd = [sys.executable, "process.py", "minify", "--source", source_path.as_posix(), "--target", tmp_path.as_posix()]
     try:
         subproc = subprocess.run(cmd, timeout=100000)
         assert subproc.returncode == 0, "process minify should run without errors"
@@ -14,10 +17,8 @@ def test_minifier(tmp_path):
     except ImportError as e:
         print(e)
         pass
-
-
-def test_minified_no_log():
-    with open("minified/createstubs.py") as f:
+    # now test that log statements have been removed
+    with open(tmp_path / source) as f:
         content = f.readlines()
     for line in content:
         assert line.find("._log") == -1, "all references to ._log have been removed"
