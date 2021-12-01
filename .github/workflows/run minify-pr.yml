@@ -29,10 +29,10 @@ jobs:
         with:
           python-version: 3.9
           cache: 'pip'
-          cache-dependency-path: 
-            'requirements-dev.txt'
-            'requirements.txt'
-            'docs/requirements.txt'
+          # cache-dependency-path: 
+          #   'requirements-dev.txt'
+          #   'requirements.txt'
+          #   'docs/requirements.txt'
 
       - name: Install dependencies
         run: |

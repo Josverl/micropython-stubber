@@ -41,10 +41,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 
-            'requirements-dev.txt'
-            'requirements.txt'
-            'docs/requirements.txt'
+          # cache-dependency-path: 
+          #   'requirements-dev.txt'
+          #   'requirements.txt'
+          #   'docs/requirements.txt'
 
       - name: Install dependencies
         run: |
