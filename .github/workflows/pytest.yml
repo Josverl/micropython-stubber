@@ -4,8 +4,7 @@
 # - test the minified createstubs on  multiple micropyton linux versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: pytest tests/common
-
+name: pytest
 on:
   workflow_dispatch:
   push:
@@ -14,13 +13,14 @@ on:
 
 jobs:
   run_tests:
-    name: Test on (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-20.04 # ubuntu-latest
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9,]
+        os: [ubuntu-latest, windows-latest, macos-latest]       
+        python-version: ["3.7", "3.8", "3.9","3.10"]
 
     steps:
       - name: Checkout repository
