@@ -74,11 +74,11 @@
             "program": "process.py",
             "subProcess": false, // Avoid debugpy trying to debug micropython
             "args": [
+                "minify",
                 "-s",
                 "board/createstubs_mem.py",
                 "-o",
-                "minified/createstubs_mem.py",
-                "minify"
+                "minified/createstubs_mem.py"
             ]
         },
         {
