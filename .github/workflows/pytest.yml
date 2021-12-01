@@ -46,7 +46,8 @@ jobs:
           pip install pytest pylint
           pip install -r requirements-dev.txt
 
-      - name: flag tools executable
+      - name: flag tools executable (on linux) 
+        if: runner.os == 'Linux'
         run: |
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
           MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_16 -c "import sys;print(sys.path);import logging"
