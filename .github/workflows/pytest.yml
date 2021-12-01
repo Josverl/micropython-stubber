@@ -20,8 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]       
-        # TODO : support python "3.10" - rshell > pyreadline 
         python-version: ["3.7", "3.8", "3.9"]
+        # TODO : support python "3.10" - rshell > pyreadline 
 
     steps:
       - name: Checkout repository
