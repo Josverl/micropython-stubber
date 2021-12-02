@@ -28,20 +28,21 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-          cache: 'pip'
-          # cache-dependency-path: 
-          #   'requirements-dev.txt'
-          #   'requirements.txt'
-          #   'docs/requirements.txt'
+
+      - name: restore Python from cache 
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest pylint
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install -r requirements-dev.txt
 
       - name: flag tools executable
+        if: runner.os == 'Linux'
         run: |
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
           MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_16 -c "import sys;print(sys.path);import logging"
