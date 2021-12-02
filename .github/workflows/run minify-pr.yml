@@ -29,7 +29,8 @@ jobs:
         with:
           python-version: 3.9
 
-      - uses: actions/cache@v2
+      - name: restore Python from cache 
+        uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
