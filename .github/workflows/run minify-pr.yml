@@ -28,11 +28,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-          cache: 'pip'
-          # cache-dependency-path: 
-          #   'requirements-dev.txt'
-          #   'requirements.txt'
-          #   'docs/requirements.txt'
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
 
       - name: Install dependencies
         run: |
