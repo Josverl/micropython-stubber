@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: restore Python from cache 
+      - name: restore Python from cache
         uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
