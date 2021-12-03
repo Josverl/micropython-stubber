@@ -286,7 +286,7 @@ def test_exception_class():
     od = ModuleSourceDict("utest")
     # add child class first
     e = ClassSourceDict(
-        name="class AssertionError(BaseException) : ...",
+        name="class AssertionError(Exception) : ...",
         docstr=[],
         init="",
     )
@@ -295,5 +295,5 @@ def test_exception_class():
 
     lines = str(od).splitlines()
 
-    assert "class AssertionError(BaseException) : ..." in lines
+    assert "class AssertionError(Exception) : ..." in lines
     assert od.find("class AssertionError") != None

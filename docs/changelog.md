@@ -1,5 +1,9 @@
 
 # Changelog 
+## Documentation Stubs 
+
+- avoid the use of BaseException
+
 ## createstubs.py - v1.4.3
 - significant memory optimisation for use on low-memory devices such as the esp8266 family
   - load the list of modules to be stubbed from a text file rather than as part of the source 

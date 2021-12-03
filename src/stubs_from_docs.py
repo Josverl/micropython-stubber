@@ -606,11 +606,10 @@ class RSTReader:
         # TODO : check name scope : Module.class.<name>
         if "." in name:
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
-        except_1 = ClassSourceDict(name=f"class {name}(BaseException) : ...", docstr=[], init="")
+        except_1 = ClassSourceDict(name=f"class {name}(Exception) : ...", docstr=[], init="")
         self.output_dict += except_1
         # no docstream read (yet) , so need to advance to next line
         self.line_no += 1
-        # class Exception(BaseException): ...
 
     def parse_name(self, line: str = None):
         "get the constant/function/class name from a line with an identifier"
