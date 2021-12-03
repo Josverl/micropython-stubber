@@ -35,7 +35,7 @@ def get_all(mpy_path=MPY_PATH):
     "get all frozen modules for the current version of micropython"
 
     #
-    get_cpython.get_core(stub_path=utils.stubfolder("cpython_core"), requirements="./src/reqs-cpython-mpy.txt")
+    # get_cpython.get_core(stub_path=utils.stubfolder("cpython_core"), requirements="./src/reqs-cpython-mpy.txt")
 
     version = utils.clean_version(git.get_tag(mpy_path) or "0.0")
 
