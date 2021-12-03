@@ -15,13 +15,20 @@ def _run_git(cmd: List[str], repo: str = None, expect_stderr=False):
             result = subprocess.run(cmd, capture_output=True, check=True, cwd=os.path.abspath(repo))
         else:
             result = subprocess.run(cmd, capture_output=True, check=True)
-        if result.stderr != b"":
-            if not expect_stderr:
-                raise Exception(result.stderr.decode("utf-8"))
-            print(result.stderr.decode("utf-8"))
-
-    except subprocess.CalledProcessError as err:
-        raise Exception(err)
+    except subprocess.CalledProcessError as e:
+        # add some logging for github actions
+        print("Exception on process, rc=", e.returncode, "output=", e.output)
+        if e.returncode == 128:
+            pwd = os.system("pwd")
+            print(f"current directory: {pwd}")
+            if repo:
+                cwd = os.path.abspath(repo)
+                print(f"git directory: {cwd}")
+        return ""
+    if result.stderr != b"":
+        if not expect_stderr:
+            raise Exception(result.stderr.decode("utf-8"))
+        print(result.stderr.decode("utf-8"))
 
     if result.returncode < 0:
         raise Exception(result.stderr.decode("utf-8"))
