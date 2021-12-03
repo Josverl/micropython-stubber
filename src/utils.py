@@ -158,7 +158,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # TODO: CLean out the old pyi files
         cleanup(modules_folder, all_pyi=True)
 
-        print("running stubgen on {0}".format(modules_folder))
+        print("::group::[stubgen] running stubgen on {0}".format(modules_folder))
         cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
         result = os.system(cmd)
         # Check on error
