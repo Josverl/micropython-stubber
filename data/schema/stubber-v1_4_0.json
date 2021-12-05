@@ -140,7 +140,7 @@
                     "examples": [
                         "v1_16"
                     ],
-                    "pattern": "^v.*$"
+                    "pattern": "^v?.*$"
                 }
             }
         },
