@@ -373,7 +373,7 @@ def get_frozen_manifest(
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # make a module manifest
-        utils.make_manifest(Path(stub_dir), FAMILY, port="", version=version, stubtype="frozen")
+        utils.make_manifest(Path(stub_dir), FAMILY,  port=port_name, version=version, stubtype="frozen")
 
 
 if __name__ == "__main__":
