@@ -4,7 +4,7 @@
 micropython-cpython-ffi
 micropython-cpython-micropython
 micropython-cpython-array   # differece pcopy - micropython
-micropython-cpython-uasyncio
+micropython-cpython-uasyncio==0.2.2
 micropython-cpython-ucollections
 micropython-cpython-uctypes
 micropython-cpython-uerrno
