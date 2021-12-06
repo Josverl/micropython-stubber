@@ -11,7 +11,7 @@ micropython-cpython-uerrno
 micropython-cpython-uhashlib
 micropython-cpython-uio
 micropython-cpython-ujson
-micropython-cpython-ulogging
+micropython-cpython-ulogging==0.0
 micropython-cpython-uos
 micropython-cpython-upip
 micropython-cpython-ure
