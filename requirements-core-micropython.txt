@@ -13,7 +13,7 @@ micropython-cpython-uio
 micropython-cpython-ujson
 micropython-cpython-ulogging
 micropython-cpython-uos
-micropython-cpython-upip
+micropython-cpython-upip==1.2.6
 micropython-cpython-ure
 micropython-cpython-uselect
 micropython-cpython-usocket
