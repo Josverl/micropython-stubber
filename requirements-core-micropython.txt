@@ -1,7 +1,7 @@
 # list of modules to mimic micropython on CPython
 # micropython generally has more and more complete stubs
 
-micropython-cpython-ffi
+micropython-cpython-ffi==0.1
 micropython-cpython-micropython
 micropython-cpython-array   # differece pcopy - micropython
 micropython-cpython-uasyncio
