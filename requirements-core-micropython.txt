@@ -2,7 +2,7 @@
 # micropython generally has more and more complete stubs
 
 micropython-cpython-ffi
-micropython-cpython-micropython
+micropython-cpython-micropython==0.1.1
 micropython-cpython-array   # differece pcopy - micropython
 micropython-cpython-uasyncio
 micropython-cpython-ucollections
