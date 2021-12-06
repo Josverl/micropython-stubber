@@ -3,7 +3,7 @@
 
 micropython-cpython-ffi
 micropython-cpython-micropython
-micropython-cpython-array   # differece pcopy - micropython
+micropython-cpython-array==0.0   # differece pcopy - micropython
 micropython-cpython-uasyncio
 micropython-cpython-ucollections
 micropython-cpython-uctypes
