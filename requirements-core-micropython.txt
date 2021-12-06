@@ -8,7 +8,7 @@ micropython-cpython-uasyncio
 micropython-cpython-ucollections
 micropython-cpython-uctypes
 micropython-cpython-uerrno
-micropython-cpython-uhashlib
+micropython-cpython-uhashlib==0.1
 micropython-cpython-uio
 micropython-cpython-ujson
 micropython-cpython-ulogging
