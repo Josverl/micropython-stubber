@@ -6,7 +6,7 @@ micropython-cpython-micropython
 micropython-cpython-array   # differece pcopy - micropython
 micropython-cpython-uasyncio
 micropython-cpython-ucollections
-micropython-cpython-uctypes
+micropython-cpython-uctypes==0.1
 micropython-cpython-uerrno
 micropython-cpython-uhashlib
 micropython-cpython-uio
