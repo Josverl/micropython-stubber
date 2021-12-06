@@ -15,7 +15,7 @@ micropython-cpython-ulogging
 micropython-cpython-uos
 micropython-cpython-upip
 micropython-cpython-ure
-micropython-cpython-uselect
+micropython-cpython-uselect==0.0
 micropython-cpython-usocket
 micropython-cpython-ussl
 micropython-cpython-utime
