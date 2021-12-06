@@ -10,7 +10,7 @@ micropython-cpython-uctypes
 micropython-cpython-uerrno
 micropython-cpython-uhashlib
 micropython-cpython-uio
-micropython-cpython-ujson
+micropython-cpython-ujson==0.2
 micropython-cpython-ulogging
 micropython-cpython-uos
 micropython-cpython-upip
