@@ -27,7 +27,6 @@
                 "firmware",
                 "platform",
                 "port",
-                "stubtype",
                 "version"
             ],
             "properties": {
@@ -50,7 +49,7 @@
                     "type": "string",
                     "default": "",
                     "examples": [
-                        "micropython---1_16"
+                        "micropython-1_16"
                     ],
                     "pattern": "^.*$"
                 },
@@ -115,20 +114,6 @@
                     "default": "",
                     "examples": [
                         "micropython"
-                    ],
-                    "pattern": "^.*$"
-                },
-                "type": {
-                    "$id": "#root/firmware/stubtype",
-                    "title": "Type",
-                    "type": "string",
-                    "default": "firmware",
-                    "examples": [
-                        "cpython",
-                        "firmware",
-                        "frozen",
-                        "library",
-                        "docs"
                     ],
                     "pattern": "^.*$"
                 },
@@ -198,6 +183,20 @@
                     "default": "",
                     "examples": [
                         "1.3.8"
+                    ],
+                    "pattern": "^.*$"
+                },
+                "type": {
+                    "$id": "#root/stubber/stubtype",
+                    "title": "Type",
+                    "type": "string",
+                    "default": "firmware",
+                    "examples": [
+                        "cpython",
+                        "firmware",
+                        "frozen",
+                        "library",
+                        "docs"
                     ],
                     "pattern": "^.*$"
                 }
