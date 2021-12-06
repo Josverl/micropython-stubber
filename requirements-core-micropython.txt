@@ -12,7 +12,7 @@ micropython-cpython-uhashlib
 micropython-cpython-uio
 micropython-cpython-ujson
 micropython-cpython-ulogging
-micropython-cpython-uos
+micropython-cpython-uos==0.1
 micropython-cpython-upip
 micropython-cpython-ure
 micropython-cpython-uselect
