@@ -222,7 +222,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
 def manifest(
     family="micropython",
     stubtype="frozen",
-    machine=None,
+    machine=None,  # also frozen.variant
     port=None,
     platform=None,
     sysname=None,
@@ -273,9 +273,9 @@ def manifest(
     return mod_manifest
 
 
-def make_manifest(folder: Path, family: str, port: str, version: str, stubtype="") -> bool:
+def make_manifest(folder: Path, family: str, port: str, version: str, stubtype: str = "", board: str = "") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
-    mod_manifest = manifest(family=family, port=port, sysname=family, version=version, stubtype=stubtype)
+    mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, stubtype=stubtype)
     modules = []
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
