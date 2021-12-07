@@ -8,7 +8,7 @@ pycopy-cpython-uasyncio
 pycopy-cpython-ucollections
 pycopy-cpython-uctypes
 pycopy-cpython-uerrno
-pycopy-cpython-uhashlib
+pycopy-cpython-uhashlib==0.1
 pycopy-cpython-uio
 pycopy-cpython-ujson
 pycopy-cpython-ulogging
