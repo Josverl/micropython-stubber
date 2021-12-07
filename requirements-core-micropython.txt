@@ -21,7 +21,7 @@ micropython-cpython-ussl
 micropython-cpython-utime
 micropython-cpython-utimeq
 # micropython-cpython-utokenize # not on micropython 
-micropython-cpython-uzlib
+micropython-cpython-uzlib==0.1
 
 # below are on pypi ,but seem to be empty
 # micropython-cpython-array
