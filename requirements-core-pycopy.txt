@@ -12,7 +12,7 @@ pycopy-cpython-uhashlib
 pycopy-cpython-uio
 pycopy-cpython-ujson
 pycopy-cpython-ulogging
-pycopy-cpython-uos
+pycopy-cpython-uos==0.1
 pycopy-cpython-upip
 pycopy-cpython-ure
 pycopy-cpython-uselect
