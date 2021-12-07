@@ -10,7 +10,7 @@ pycopy-cpython-uctypes
 pycopy-cpython-uerrno
 pycopy-cpython-uhashlib
 pycopy-cpython-uio
-pycopy-cpython-ujson
+pycopy-cpython-ujson==0.2
 pycopy-cpython-ulogging
 pycopy-cpython-uos
 pycopy-cpython-upip
