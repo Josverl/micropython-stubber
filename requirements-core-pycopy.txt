@@ -3,7 +3,7 @@
 
 pycopy-cpython-ffi
 pycopy-cpython-micropython
-pycopy-cpython-uarray
+pycopy-cpython-uarray==0.0
 pycopy-cpython-uasyncio
 pycopy-cpython-ucollections
 pycopy-cpython-uctypes
