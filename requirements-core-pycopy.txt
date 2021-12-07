@@ -11,7 +11,7 @@ pycopy-cpython-uerrno
 pycopy-cpython-uhashlib
 pycopy-cpython-uio
 pycopy-cpython-ujson
-pycopy-cpython-ulogging
+pycopy-cpython-ulogging==0.1
 pycopy-cpython-uos
 pycopy-cpython-upip
 pycopy-cpython-ure
