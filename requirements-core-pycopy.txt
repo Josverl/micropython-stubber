@@ -1,7 +1,7 @@
 # list of modules to mimic micropython on CPython
 # pycopy generally has more and more complete stubs
 
-pycopy-cpython-ffi
+pycopy-cpython-ffi==0.2
 pycopy-cpython-micropython
 pycopy-cpython-uarray
 pycopy-cpython-uasyncio
