@@ -18,7 +18,7 @@ micropython-cpython-ure
 micropython-cpython-uselect
 micropython-cpython-usocket
 micropython-cpython-ussl
-micropython-cpython-utime
+micropython-cpython-utime==0.4
 micropython-cpython-utimeq
 # micropython-cpython-utokenize # not on micropython 
 micropython-cpython-uzlib
