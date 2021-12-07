@@ -5,7 +5,7 @@ pycopy-cpython-ffi
 pycopy-cpython-micropython
 pycopy-cpython-uarray
 pycopy-cpython-uasyncio
-pycopy-cpython-ucollections
+pycopy-cpython-ucollections==0.2.1
 pycopy-cpython-uctypes
 pycopy-cpython-uerrno
 pycopy-cpython-uhashlib
