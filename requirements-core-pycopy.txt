@@ -2,7 +2,7 @@
 # pycopy generally has more and more complete stubs
 
 pycopy-cpython-ffi
-pycopy-cpython-micropython
+pycopy-cpython-micropython==1.0
 pycopy-cpython-uarray
 pycopy-cpython-uasyncio
 pycopy-cpython-ucollections
