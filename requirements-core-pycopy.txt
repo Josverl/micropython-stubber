@@ -13,7 +13,7 @@ pycopy-cpython-uio
 pycopy-cpython-ujson
 pycopy-cpython-ulogging
 pycopy-cpython-uos
-pycopy-cpython-upip
+pycopy-cpython-upip==1.3.3
 pycopy-cpython-ure
 pycopy-cpython-uselect
 pycopy-cpython-usocket
