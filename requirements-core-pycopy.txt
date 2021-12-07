@@ -14,7 +14,7 @@ pycopy-cpython-ujson
 pycopy-cpython-ulogging
 pycopy-cpython-uos
 pycopy-cpython-upip
-pycopy-cpython-ure
+pycopy-cpython-ure==0.2
 pycopy-cpython-uselect
 pycopy-cpython-usocket
 pycopy-cpython-ussl
