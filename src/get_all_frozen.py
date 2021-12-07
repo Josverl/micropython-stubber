@@ -108,6 +108,7 @@ def get_all(
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_all()
     # Click: Debugging
-    # get_all(["-stubs", ".\\scratch\\stubs\\", "--core", "--no-mpy", "--core-type", "micropython", "--no-pyi"])
+    # get_all(["-stubs", ".\\scratch\\stubs\\", "--mpy", "--no-pyi"])
+
+    get_all()

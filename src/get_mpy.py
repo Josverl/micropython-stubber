@@ -64,17 +64,18 @@ def freeze_as_mpy(path, script=None, opt=0):
 
 
 # do not change method name
-# TODO: see if/how `freeze_as_str` should be handled, may need re-implementing based on the v1.13 code
 def freeze_as_str(path):
     log.debug(" - freeze_as_str({})".format(path))
-    log.warning("WARNING: Currently freeze_as_string({:s}) is not supported/processed".format(path))
+    freeze(path)
 
 
-# def freeze_as_str(path):
-#     """Freeze the given `path` and all .py scripts within it as a string,
-#     which will be compiled upon import.
-#     """
-#     freeze_internal(KIND_AS_STR, path, None, 0)
+# do not change method name
+def freeze_mpy(path, script=None, opt=0):
+    """Freeze the input (see above), which must be .mpy files that are
+    frozen directly.
+    """
+    log.debug(" - freeze_as_mpy({})".format(path))
+    freeze(path, script)
 
 
 # function used commonly in manifest.py to freeze a set of scripts
@@ -111,43 +112,54 @@ def freeze(path, script=None, opt=0):
     if script is None:
         # folder of scripts.
         # for s in os.listdir(path):
-        #     freezedry(path, s)
+        #     freeze_internal(path, s)
 
         for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
             for script in filenames:
                 # can recurse folder, so add relative path to script.
-                freezedry(path, (dirpath + "/" + script)[len(path) + 1 :])
+                freeze_internal(path, (dirpath + "/" + script)[len(path) + 1 :])
                 # freeze_internal(kind, path, (dirpath + '/' + f)[len(path) + 1:], opt)
     elif not isinstance(script, str):
         # several specific scripts.
         for script in script:
-            freezedry(path, script)
+            freeze_internal(path, script)
     else:
         # on specific script, may include a path: 'umqtt/simple.py'
-        freezedry(path, script)
+        freeze_internal(path, script)
 
 
 # called by freeze.
 # do not change method name
-def freezedry(path, script):
-    "copy the to-be-frozen module to the destination folder to be stubbed"
+def freeze_internal(path: str, script: str):
+    """
+    Copy the to-be-frozen module to the destination folder to be stubbed.
 
-    log.debug(" - freezedry({},{})".format(path, script))
+    Parameters:
+    path (str)  : the destination
+    script (str): the source script to be frozen
+    """
+
+    log.debug(" - freeze_internal({},{})".format(path, script))
+    path = convert_path(path)
+    if not os.path.isdir(path):
+        raise FreezeError("freeze path must be a directory")
 
     script_path = os.path.join(path, script)
 
     if stub_dir:
-        log.info("freezedry : {:<30} to {}".format(script, stub_dir))
+        log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
         dest_path = os.path.dirname(os.path.join(stub_dir, script))
         # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
         try:
             shutil.copy2(script_path, dest_path)
-        except OSError as e:
+        except (FileNotFoundError) as e:
+            log.warning(f"File {path}/{script} not found")
+        except (OSError, FileNotFoundError) as e:
             log.exception(e)
     else:
-        log.error("Stub folder not set")
+        raise FreezeError("Stub folder not set")
 
 
 # do not change method name
@@ -159,6 +171,20 @@ def include(manifest, **kwargs):
     strings.
 
     Relative paths are resolved with respect to the current manifest file.
+
+    Optional kwargs can be provided which will be available to the
+    included script via the `options` variable.
+
+    e.g. include("path.py", extra_features=True)
+
+    in path.py:
+        options.defaults(standard_features=True)
+
+        # freeze minimal modules.
+        if options.standard_features:
+            # freeze standard modules.
+        if options.extra_features:
+            # freeze extra modules.
     """
     if not isinstance(manifest, str):
         for m in manifest:
@@ -187,12 +213,7 @@ def convert_path(path):
     return os.path.abspath(path)
 
 
-def get_frozen(
-    stub_path: str,
-    version: str,
-    mpy_path: str = None,
-    lib_path: str = None,
-):
+def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str = None):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
@@ -244,7 +265,7 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
             mpy_board = "GENERIC"
 
         dest_path = os.path.join(stub_path, mpy_port, mpy_board)
-        log.info("freezedry : {:<30} to {}".format(script, dest_path))
+        log.info("freeze_internal : {:<30} to {}".format(script, dest_path))
         # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
@@ -373,7 +394,7 @@ def get_frozen_manifest(
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # make a module manifest
-        utils.make_manifest(Path(stub_dir), FAMILY,  port=port_name, version=version, stubtype="frozen")
+        utils.make_manifest(Path(stub_dir), FAMILY, port=port_name, board=board_name, version=version, stubtype="frozen")
 
 
 if __name__ == "__main__":
