@@ -19,7 +19,7 @@ micropython-cpython-uselect
 micropython-cpython-usocket
 micropython-cpython-ussl
 micropython-cpython-utime
-micropython-cpython-utimeq
+micropython-cpython-utimeq==0.0
 # micropython-cpython-utokenize # not on micropython 
 micropython-cpython-uzlib
 
