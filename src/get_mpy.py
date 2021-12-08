@@ -14,6 +14,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 
 # locating frozen modules :
 # tested on MicroPython v1.12 - v1.13
+# - 1.16 - using manifests.py, include can specify kwargs
 # - 1.13 - using manifests.py, and support for variant
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
@@ -296,7 +297,7 @@ def get_target_names(path: str) -> tuple:
     "get path to port and board names from a path"
     # https://regexr.com/4sram
     # but with an extra P for Python named groups...
-    # regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
+    # regex_port = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"              # port
     re_portboard = r".*[\\/]+ports[\\/]+(?P<port>\w+)[\\/]+boards[\\/]+(?P<board>\w+)"  # port & board
     re_port = r".*[\\/]+ports[\\/]+(?P<port>\w+)[\\/]+"  # port
     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
@@ -340,8 +341,8 @@ def get_frozen_manifest(
 
     # https://regexr.com/4rh39
     # but with an extra P for Python named groups...
-    regex_1 = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"  # port
-    regex_2 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"  # port & board
+    regex_port = r"(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+"  # port
+    regex_port_board = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+boards[\\/]+\w+)"  # port & board
 
     # todo: variants
     # regex_3 = r"(?P<board>(?P<port>.*[\\/]+ports[\\/]+\w+)[\\/]+variants[\\/]+\w+)"  # port & variant
@@ -354,7 +355,9 @@ def get_frozen_manifest(
         log.info("Manifest: {}".format(manifest))
         path_vars["PORT_DIR"] = ""
         path_vars["BOARD_DIR"] = ""
-        matches = re.search(regex_2, manifest)  # BOARD AND PORT
+
+        # check BOARD AND PORT pattern
+        matches = re.search(regex_port_board, manifest)  
         if matches:
             # port and board
             path_vars["PORT_DIR"] = matches.group("port") or ""
@@ -363,7 +366,7 @@ def get_frozen_manifest(
                 path_vars["BOARD_DIR"] = ""
         else:
             # TODO: Variants
-            matches = re.search(regex_2, manifest)  # BOARD AND VARIANT
+            matches = re.search(regex_port_board, manifest)  # BOARD AND VARIANT
             if matches:
                 # port and variant
                 path_vars["PORT_DIR"] = matches.group("port") or ""
@@ -372,7 +375,7 @@ def get_frozen_manifest(
                     path_vars["BOARD_DIR"] = ""
             else:
                 # just port
-                matches = re.search(regex_1, manifest)
+                matches = re.search(regex_port, manifest)
                 if matches:
                     path_vars["PORT_DIR"] = matches.group("port") or ""
 
