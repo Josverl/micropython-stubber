@@ -17,3 +17,5 @@ libcst  >= 0.3
 requests >= 2.25.1
 
 mypy >= 0.812
+
+click == 8.0.3
