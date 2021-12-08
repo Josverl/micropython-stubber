@@ -780,11 +780,11 @@ def generate_from_rst(
     help="The location of the RST file to read. Default './micropython/docs/library'",
 )
 @click.option(
-    "--target",
-    "-t",
+    "--stub-folder",
+    "target",
     default="./all-stubs",
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="Destination of the files to be generated. default : ./all-stubs/{micropython}-{version}-docstub",
+    help="Destination of the files to be generated. default : ./all-stubs/{micropython}-{version}-docstubs",
 )
 @click.option("--family", "-f", "basename", default="micropython", help="Micropython family. default:'micropython'")
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black, default :yes")
@@ -826,7 +826,7 @@ def cli_docstubs(
         # if we can't find a tag , bail
         raise ValueError
 
-    dst_path = Path(target) / f"{basename}-{utils.clean_version(v_tag,flat=True)}-docstubs"
+    dst_path = Path(target) / f"{basename}-{utils.clean_version(v_tag,flat=True,drop_v=False)}-docstubs"
 
     generate_from_rst(rst_path, dst_path, v_tag, black=black, stubgen=stubgen, verbose=verbose)
     # Also generate a module manifest
