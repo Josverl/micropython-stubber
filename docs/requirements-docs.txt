@@ -1,5 +1,5 @@
 Sphinx                      >= 4
 myst-parser                 >= 0.15
-sphinxcontrib-mermaid
+sphinxcontrib-mermaid==0.7.1
 sphinx_rtd_theme
 sphinx-autoapi              >= 1.8
