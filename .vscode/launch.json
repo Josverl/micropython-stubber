@@ -16,8 +16,17 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${fileDirname}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: this File - Args ",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "${input:cmdlineParams}"
+            ]
         },
         {
             "name": "Python: debug update pyi",
@@ -98,5 +107,13 @@
                 "PYTEST_ADDOPTS": "--no-cov"
             }
         },
+    ],
+    "inputs": [
+        {
+            "id": "cmdlineParams",
+            "type": "promptString",
+            "description": "commandline parameters",
+            "default": ""
+        }
     ]
 }
