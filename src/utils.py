@@ -5,7 +5,7 @@ import shutil
 
 from fnmatch import fnmatch
 from pathlib import Path
-from version import VERSION
+from version import __version__
 from typing import List
 
 import mypy.stubgen as stubgen
@@ -265,7 +265,7 @@ def manifest(
             "sysname": sysname,
         },
         "stubber": {
-            "version": VERSION,
+            "version": __version__,
             "stubtype": stubtype,
         },
         "modules": [],

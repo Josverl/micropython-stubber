@@ -14,7 +14,7 @@ def test_minified(mock_micropython_path, fx_add_minified_path):
 
 
 def test_version():
-    assert version.VERSION
+    assert version.__version__
 
 
 def test_dummy():
