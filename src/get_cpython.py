@@ -12,7 +12,7 @@ import json
 
 import utils
 from pathlib import Path
-from version import VERSION
+from version import __version__
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def get_core(requirements, stub_path=None):
     # remove build folder
     shutil.rmtree(build_path, ignore_errors=True)
     # build modules.json
-    mod_manifest = utils.manifest(machine=family, version=VERSION)
+    mod_manifest = utils.manifest(machine=family, version=__version__)
     mod_manifest["modules"] += modlist
 
     if mod_manifest and len(modlist):

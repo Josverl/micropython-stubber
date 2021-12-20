@@ -19,7 +19,7 @@ src_path = str(Path("..") / "src")
 if not src_path in sys.path:
     sys.path.append(src_path)
 
-from version import VERSION as MODULE_VERSION
+from version import __version__ as MODULE_VERSION
 
 
 # -- Project information -----------------------------------------------------
