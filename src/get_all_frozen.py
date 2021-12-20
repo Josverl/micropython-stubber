@@ -110,5 +110,5 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
     # Click: Debugging
     # get_all(["-stubs", ".\\scratch\\stubs\\", "--mpy", "--no-pyi"])
-
+    # get_all(["--stub-folder", "../micropython-stubs/stubs", "--core"])
     get_all()
