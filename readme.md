@@ -43,6 +43,11 @@ you should use micropy-cli to consume stubs in this repo.
 
 The (stretch) goal is to create a VSCode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
 
+
+## Developing & testing 
+
+this is described in more detail in the [developing](docs/developing.md) and [testing](docs/testing.md)  documents in the docs folder.
+
 ## Licensing 
 
 MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
