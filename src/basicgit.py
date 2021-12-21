@@ -45,12 +45,21 @@ def get_tag(repo: str = None) -> Union[str, None]:
     if not repo:
         repo = "."
     repo = repo.replace("\\", "/")
-    cmd = ["git", "describe"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+
+    result = _run_git(["git", "describe"], repo=repo, expect_stderr=True)
     if not result:
         return None
     tag: str = result.stdout.decode("utf-8")
     tag = tag.replace("\r", "").replace("\n", "")
+    if "-" in tag:
+        # this may or not be the latest on the master branch
+        result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
+        if result:
+            ref: str = result.stdout.decode("utf-8").replace("\r", "").replace("\n", "")
+            if ref == "master":
+                tag = "latest"
+            elif ref in ["fix_lib_documentation"]:
+                tag = ref
     return tag
 
 

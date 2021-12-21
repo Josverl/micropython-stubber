@@ -1,9 +1,8 @@
 import sys
 import os
 import pytest
+import subprocess
 from pathlib import Path
-
-
 
 
 # make sure that the source can be found
@@ -34,6 +33,18 @@ def test_get_tag_current():
         tag = git.get_tag()
         common_tst(tag)
 
+
+# @pytest.mark.basicgit
+def test_get_tag_latest():
+    repo = Path("./micropython")
+    if not (repo / ".git").exists():
+        pytest.skip("no git repo in current folder")
+
+    result = subprocess.run(["git", "switch", "master", "--force"], capture_output=True, check=True, cwd=repo.as_posix())
+
+    # get tag of current repro
+    tag = git.get_tag("./micropython")
+    assert tag == "latest"
 
 @pytest.mark.basicgit
 def test_get_failure_throws():
@@ -69,7 +80,7 @@ def test_checkout_sibling(testrepo_micropython):
     repo_path = testrepo_micropython
     x = git.get_tag(repo_path)
     assert x
-    
+
     for ver in ["v1.11", "v1.9.4", "v1.12"]:
         git.checkout_tag(ver, repo=repo_path)
         assert git.get_tag(repo_path) == ver
