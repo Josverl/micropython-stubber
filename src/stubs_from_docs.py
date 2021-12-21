@@ -144,6 +144,7 @@ class RSTReader:
         self.output_dict.add_import(TYPING_IMPORT)
 
         self.source_tag = v_tag
+        self.source_release = v_tag
 
         # development aids only
         self.return_info: List[Tuple] = []
@@ -723,14 +724,24 @@ class RSTReader:
 
 
 def generate_from_rst(
-    rst_path: Path, dst_path: Path, v_tag: str, black=True, stubgen=True, pattern: str = "*.rst", verbose: bool = False
+    rst_path: Path,
+    dst_path: Path,
+    v_tag: str,
+    release: str = None,
+    black=True,
+    stubgen=True,
+    pattern: str = "*.rst",
+    verbose: bool = False,
 ) -> int:
     if not dst_path.exists():
         dst_path.mkdir(parents=True)
+    if not release:
+        release = v_tag
     # no index, and module.xxx.rst is included in module.py
     files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
     for file in files:
         reader = RSTReader(v_tag)
+        reader.source_release = release
         reader.verbose = verbose
         log.info(f"Reading: {file}")
         reader.read_file(file)
@@ -825,15 +836,18 @@ def cli_docstubs(
     if not v_tag:
         # if we can't find a tag , bail
         raise ValueError
+    v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
+    release = git.get_tag(rst_path.as_posix(), abbreviate=False)
 
-    dst_path = Path(target) / f"{basename}-{utils.clean_version(v_tag,flat=True,drop_v=False)}-docstubs"
+    dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 
-    generate_from_rst(rst_path, dst_path, v_tag, black=black, stubgen=stubgen, verbose=verbose)
+    generate_from_rst(rst_path, dst_path, v_tag, release=release, black=black, stubgen=stubgen, verbose=verbose)
     # Also generate a module manifest
     utils.make_manifest(
         folder=dst_path,
         family="micropython",
         version=utils.clean_version(v_tag),
+        release = release,
         port="-",
         stubtype="documentation",
     )
