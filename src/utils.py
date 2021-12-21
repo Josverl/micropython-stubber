@@ -55,7 +55,8 @@ def clean_version(
     if drop_v:
         version = version.lstrip("v")
     else:
-        if not version.startswith("v"):
+        # prefix with `v` but not before latest
+        if not version.startswith("v") and version.lower() != "latest":
             version = "v" + version
     return version
 
@@ -273,9 +274,9 @@ def manifest(
     return mod_manifest
 
 
-def make_manifest(folder: Path, family: str, port: str, version: str, stubtype: str = "", board: str = "") -> bool:
+def make_manifest(folder: Path, family: str, port: str, version: str, release: str, stubtype: str = "", board: str = "") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
-    mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, stubtype=stubtype)
+    mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, release=release, stubtype=stubtype)
     modules = []
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
