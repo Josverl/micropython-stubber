@@ -35,7 +35,7 @@ def _run_git(cmd: List[str], repo: str = None, expect_stderr=False):
     return result
 
 
-def get_tag(repo: str = None) -> Union[str, None]:
+def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo
     repo should be in the form of : repo = "./micropython"
@@ -51,7 +51,7 @@ def get_tag(repo: str = None) -> Union[str, None]:
         return None
     tag: str = result.stdout.decode("utf-8")
     tag = tag.replace("\r", "").replace("\n", "")
-    if "-" in tag:
+    if abbreviate and "-" in tag:
         # this may or not be the latest on the master branch
         result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
         if result:
