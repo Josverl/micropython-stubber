@@ -9,8 +9,9 @@
     "exclude": [
         "**/node_modules",
         "**/__pycache__",
-        "src/experimental",
-        "src/typestubs"
+        "minified",
+        "tests/data",
+        "tests/mocks"
     ],
     "ignore": [
         "data",
