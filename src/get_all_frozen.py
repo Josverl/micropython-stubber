@@ -111,4 +111,5 @@ if __name__ == "__main__":
     # Click: Debugging
     # get_all(["-stubs", ".\\scratch\\stubs\\", "--mpy", "--no-pyi"])
     # get_all(["--stub-folder", "../micropython-stubs/stubs", "--core"])
+    # get_all(["--stub-folder", "scratch/stubs", "--lobo"])
     get_all()
