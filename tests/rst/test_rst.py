@@ -20,24 +20,19 @@ MICROPYTHON_FOLDER = "micropython"
 def test_black_installed():
     "Check if black is installed and can be run"
     cmd = ["black", "--version"]
-
-    try:
-        status, result = subprocess.getstatusoutput(" ".join(cmd))
-    except OSError as e:
-        raise e
-    assert "black" in result
+    result = subprocess.run(cmd, capture_output=True)
+    assert "black" in result.stdout.decode("utf-8")
+    # black does not use semver :-(
 
 
 def test_pyright_installed():
     "Check if Pyright is installed and can be run"
     cmd = ["pyright", "--version"]
 
-    try:
-        status, result = subprocess.getstatusoutput(" ".join(cmd))
-    except OSError as e:
-        raise e
-    assert "pyright" in result
-    ver = result.split()[-1]
+    result = subprocess.run(cmd, capture_output=True)
+
+    assert "pyright" in result.stdout.decode("utf-8")
+    ver = result.stdout.decode("utf-8").strip().split()[-1]
     assert version.parse(ver) > version.parse("1.1")
 
 

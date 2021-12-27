@@ -17,10 +17,11 @@ import basicgit as git
 
 
 def common_tst(tag):
-    print(tag)
+    # print(tag)
     assert isinstance(tag, str), "tag must be a string"
-    assert tag.startswith("v"), "tags start with a v"
-    assert len(tag) >= 2, "tags are longer than 2 chars"
+    if tag != "latest":
+        assert tag.startswith("v"), "tags start with a v"
+        assert len(tag) >= 2, "tags are longer than 2 chars"
 
 
 @pytest.mark.basicgit
@@ -34,7 +35,7 @@ def test_get_tag_current():
         common_tst(tag)
 
 
-# @pytest.mark.basicgit
+@pytest.mark.basicgit
 def test_get_tag_latest():
     repo = Path("./micropython")
     if not (repo / ".git").exists():
@@ -45,6 +46,7 @@ def test_get_tag_latest():
     # get tag of current repro
     tag = git.get_tag("./micropython")
     assert tag == "latest"
+
 
 @pytest.mark.basicgit
 def test_get_failure_throws():
