@@ -6,7 +6,7 @@ import shutil
 from fnmatch import fnmatch
 from pathlib import Path
 from version import __version__
-from typing import List
+from typing import List, Optional
 
 import mypy.stubgen as stubgen
 from mypy.errors import CompileError
@@ -208,29 +208,20 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             generate_pyi_from_file(py)
             # todo: report failures by adding to module manifest
 
-        # and clean after to only check-in good stuff
-        # cleanup(modules_folder)
         return True
-    #     ##
-    # for mod_manifest in modlist:
-    #     ## generate fyi files for folder
-    #     generate_pyi_files(mod_manifest.parent)
-
-    #     # todo: collect and report results
-    # return True
 
 
 def manifest(
-    family="micropython",
-    stubtype="frozen",
-    machine=None,  # also frozen.variant
-    port=None,
-    platform=None,
-    sysname=None,
-    nodename=None,
-    version=None,
-    release=None,
-    firmware=None,
+    family: str = "micropython",
+    stubtype: str = "frozen",
+    machine: Optional[str] = None,  # also frozen.variant
+    port: Optional[str] = None,
+    platform: Optional[str] = None,
+    sysname: Optional[str] = None,
+    nodename: Optional[str] = None,
+    version: Optional[str] = None,
+    release: Optional[str] = None,
+    firmware: Optional[str] = None,
 ) -> dict:
 
     "create a new empty manifest dict"
@@ -274,7 +265,7 @@ def manifest(
     return mod_manifest
 
 
-def make_manifest(folder: Path, family: str, port: str, version: str, release: str, stubtype: str = "", board: str = "") -> bool:
+def make_manifest(folder: Path, family: str, port: str, version: str, release: str = "", stubtype: str = "", board: str = "") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
     mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, release=release, stubtype=stubtype)
     modules = []
