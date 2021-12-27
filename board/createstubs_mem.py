@@ -10,7 +10,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-    you can find a cross-compiled version located here: `.\minified\createstubs_mem.mpy
+    you can find a cross-compiled version located here: .\minified\createstubs_mem.mpy
 
 Copyright (c) 2019-2021 Jos Verlinde
 """
@@ -343,7 +343,7 @@ class Stubber:
                 f.write("{")
                 f.write(dumps({"firmware": self.info})[1:-1])
                 f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__},"stubtype": "firmware"})[1:-1])
+                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
                 f.write(",\n")
                 f.write('"modules" :[\n')
                 start = True
