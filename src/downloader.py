@@ -7,6 +7,7 @@ import requests
 import logging
 
 log = logging.getLogger(__name__)
+log.setLevel(level=logging.INFO)
 
 
 def download_file(url: str, module: str, folder: str = "./"):
