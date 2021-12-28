@@ -22,6 +22,8 @@
     "reportMissingTypeStubs": false,
     "pythonVersion": "3.8",
     "pythonPlatform": "Linux",
+    "reportInvalidStringEscapeSequence": "information",
+    "reportUnboundVariable": "warning",
     "executionEnvironments": [
         {
             "root": "board",
