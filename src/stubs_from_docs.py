@@ -605,6 +605,9 @@ class RSTReader:
         log.debug(f"# {self.line.rstrip()}")
         name = self.line.split(SEPERATOR)[1].strip()
         # TODO : check name scope : Module.class.<name>
+        if name == "Exception":
+            # no need to redefine Exception
+            return
         if "." in name:
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
         except_1 = ClassSourceDict(name=f"class {name}(Exception) : ...", docstr=[], init="")
@@ -751,7 +754,7 @@ def generate_from_rst(
 
     if black:
         try:
-            cmd = ["black", str(dst_path)]
+            cmd = ["black", str(dst_path / "**" / "*.py")]
             if sys.version_info.major == 3 and sys.version_info.minor == 7:
                 # black on python 3.7 does not like some function defs
                 # def sizeof(struct, layout_type=NATIVE, /) -> int:
@@ -847,7 +850,7 @@ def cli_docstubs(
         folder=dst_path,
         family="micropython",
         version=utils.clean_version(v_tag),
-        release = release,
+        release=release,
         port="-",
         stubtype="documentation",
     )
