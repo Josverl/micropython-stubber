@@ -17,6 +17,7 @@ PORT = "esp32_lobo"
 
 
 log = logging.getLogger(__name__)
+log.setLevel(level=logging.INFO)
 # log.setLevel(level=logging.DEBUG)
 
 
