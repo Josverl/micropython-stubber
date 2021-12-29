@@ -23,7 +23,7 @@ A=OSError
 import sys,gc as E,uos as os
 from utime import sleep_us as d
 from ujson import dumps as Q
-__version__='1.4.4'
+__version__='1.5.0'
 S=2
 e=2
 try:from machine import resetWDT as T
@@ -37,7 +37,7 @@ class Stubber:
 		except G:pass
 		B._report=[];B.info=_info();E.collect()
 		if F:B._fwid=str(F).lower()
-		else:B._fwid='{family}-{port}-{ver}'.format(**B.info).lower()
+		else:B._fwid='{family}-{ver}-{port}'.format(**B.info).lower()
 		B._start_free=E.mem_free()
 		if C:
 			if C.endswith(D):C=C[:-1]
@@ -156,35 +156,36 @@ def U(path):
 				else:raise G
 		F=B+1
 def _info():
-	g='loboris';f=' on ';e='0.0.0';d='port';c='platform';b='machine';a='nodename';Y='name';T='v';S='mpy';R='unknown';Q='-';O='sysname';J='ver';F='family';E='build';B='release';U=sys.implementation.name;V=sys.platform;A={Y:U,B:e,P:e,E:H,O:R,a:R,b:R,F:U,c:V,d:V,J:H}
-	try:A[B]=L.join([str(A)for A in sys.implementation.version]);A[P]=A[B];A[Y]=sys.implementation.name;A[S]=sys.implementation.mpy
+	f=' on ';e='0.0.0';d='port';c='platform';b='machine';a='nodename';Y='name';T='mpy';S='unknown';R='-';Q='sysname';K='v';J='family';F='build';D='ver';B='release';U=sys.implementation.name;V=sys.platform;A={Y:U,B:e,P:e,F:H,Q:S,a:S,b:S,J:U,c:V,d:V,D:H}
+	try:A[B]=L.join([str(A)for A in sys.implementation.version]);A[P]=A[B];A[Y]=sys.implementation.name;A[T]=sys.implementation.mpy
 	except G:pass
 	if sys.platform not in('unix','win32'):
 		try:
-			D=os.uname();A[O]=D.sysname;A[a]=D.nodename;A[B]=D.release;A[b]=D.machine
-			if f in D.version:
-				K=D.version.split(f)[0]
-				if A[O]=='esp8266':
-					if Q in K:W=K.split(Q)[0]
-					else:W=K
-					A[P]=A[B]=W.lstrip(T)
-				try:A[E]=K.split(Q)[1]
+			E=os.uname();A[Q]=E.sysname;A[a]=E.nodename;A[B]=E.release;A[b]=E.machine
+			if f in E.version:
+				O=E.version.split(f)[0]
+				if A[Q]=='esp8266':
+					if R in O:W=O.split(R)[0]
+					else:W=O
+					A[P]=A[B]=W.lstrip(K)
+				try:A[F]=O.split(R)[1]
 				except Z:pass
 		except (Z,G,TypeError):pass
-	try:from pycopy import const;A[F]='pycopy';del const
+	try:from pycopy import const;A[J]='pycopy';del const
 	except (M,N):pass
-	if A[c]=='esp32_LoBo':A[F]=g;A[d]='esp32'
-	elif A[O]=='ev3':
-		A[F]='ev3-pybricks';A[B]='1.0.0'
+	if A[c]=='esp32_LoBo':A[J]='loboris';A[d]='esp32'
+	elif A[Q]=='ev3':
+		A[J]='ev3-pybricks';A[B]='1.0.0'
 		try:from pybricks.hubs import EV3Brick;A[B]='2.0.0'
 		except M:pass
-	if A[B]:A[J]=T+A[B].lstrip(T)
-	if A[F]!=g:
-		if A[B]and A[B]>='1.10.0'and A[B].endswith('.0'):A[J]=A[B][:-2]
-		else:A[J]=A[B]
-		if A[E]!=H and I(A[E])<4:A[J]+=Q+A[E]
-	if S in A:
-		h=int(A[S]);X=[C,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][h>>10]
+	if A[B]:A[D]=K+A[B].lstrip(K)
+	if A[J]=='micropython':
+		if A[B]and A[B]>='1.10.0'and A[B].endswith('.0'):A[D]=A[B][:-2]
+		else:A[D]=A[B]
+		if A[F]!=H and I(A[F])<4:A[D]+=R+A[F]
+	if A[D][0]!=K:A[D]=K+A[D]
+	if T in A:
+		g=int(A[T]);X=[C,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][g>>10]
 		if X:A['arch']=X
 	return A
 def get_root():
