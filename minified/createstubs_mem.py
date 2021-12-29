@@ -1,3 +1,4 @@
+c='micropython'
 b='{}/{}'
 a='_thread'
 Z=IndexError
@@ -7,9 +8,9 @@ W=NotImplementedError
 R=True
 Q='__init__'
 P=open
-N='version'
-M=KeyError
-L=ImportError
+O='version'
+N=KeyError
+M=ImportError
 K='.'
 I='_'
 J=len
@@ -20,13 +21,13 @@ E='/'
 D=None
 A=OSError
 import sys,gc as C,uos as os
-from utime import sleep_us as c
-from ujson import dumps as O
-__version__='1.4.4'
+from utime import sleep_us as d
+from ujson import dumps as L
+__version__='1.5.0'
 S=2
-d=2
+e=2
 try:from machine import resetWDT as T
-except L:
+except M:
 	def T():0
 class Stubber:
 	def __init__(B,path=D,firmware_id=D):
@@ -36,7 +37,7 @@ class Stubber:
 		except F:pass
 		B._report=[];B.info=_info();C.collect()
 		if G:B._fwid=str(G).lower()
-		else:B._fwid='{family}-{port}-{ver}'.format(**B.info).lower()
+		else:B._fwid='{family}-{ver}-{port}'.format(**B.info).lower()
 		B._start_free=C.mem_free()
 		if D:
 			if D.endswith(E):D=D[:-1]
@@ -72,31 +73,31 @@ class Stubber:
 		if E in B:B=B.replace(E,K)
 		J=D
 		try:J=__import__(B,D,D,'*')
-		except L:return
+		except M:return
 		U(G)
-		with P(G,'w')as N:O='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(B,F._fwid,F.info,__version__);N.write(O);N.write('from typing import Any\n\n');F.write_object_stub(N,J,B,H)
+		with P(G,'w')as L:O='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(B,F._fwid,F.info,__version__);L.write(O);L.write('from typing import Any\n\n');F.write_object_stub(L,J,B,H)
 		F._report.append({'module':B,'file':G})
 		if not B in['os','sys','logging','gc']:
 			try:del J
-			except (A,M):pass
+			except (A,N):pass
 			try:del sys.modules[B]
-			except M:pass
+			except N:pass
 		C.collect()
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
 		b='tuple';a='list';Z='dict';X='{0}{1} = {2} # type: {3}\n';W='bound_method';V='Any';P=in_class;O=object_expr;I=fp;B=indent;C.collect()
 		if O in L.problematic:return
-		R,e=L.get_obj_attributes(O)
+		R,c=L.get_obj_attributes(O)
 		for (D,K,F,S) in R:
 			if D in['classmethod','staticmethod']:continue
-			T();c(1)
-			if F=="<class 'type'>"and J(B)<=d*4:E='\n'+B+'class '+D+':\n';E+=B+"    ''\n";I.write(E);L.write_object_stub(I,S,'{0}.{1}'.format(obj_name,D),B+'    ',P+1)
+			T();d(1)
+			if F=="<class 'type'>"and J(B)<=e*4:E='\n'+B+'class '+D+':\n';E+=B+"    ''\n";I.write(E);L.write_object_stub(I,S,'{0}.{1}'.format(obj_name,D),B+'    ',P+1)
 			elif'method'in F or'function'in F or D==Q:
-				N=V;U=H
+				M=V;U=H
 				if P>0:
 					U='self, '
-					if D==Q:N='None'
-				if W in F or W in K:E='{}@classmethod\n'.format(B);E+='{}def {}(cls, *args) -> {}:\n'.format(B,D,N)
-				else:E='{}def {}({}*args) -> {}:\n'.format(B,D,U,N)
+					if D==Q:M='None'
+				if W in F or W in K:E='{}@classmethod\n'.format(B);E+='{}def {}(cls, *args) -> {}:\n'.format(B,D,M)
+				else:E='{}def {}({}*args) -> {}:\n'.format(B,D,U,M)
 				E+=B+'    ...\n\n';I.write(E)
 			elif F=="<class 'module'>":0
 			elif F.startswith("<class '"):
@@ -108,9 +109,9 @@ class Stubber:
 					E='{0}{1} : {2} ## {3} = {4}\n'.format(B,D,G,F,K)
 				I.write(E)
 			else:I.write("# all other, type = '{0}'\n".format(F));I.write(B+D+' # type: Any\n')
-		del R;del e
+		del R;del c
 		try:del D,K,F,S
-		except (A,M,Y):pass
+		except (A,N,Y):pass
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
@@ -132,11 +133,11 @@ class Stubber:
 		H='firmware';E=',\n';I=b.format(D.path,filename);C.collect()
 		try:
 			with P(I,'w')as B:
-				B.write('{');B.write(O({H:D.info})[1:-1]);B.write(E);B.write(O({'stubber':{N:__version__},'stubtype':H})[1:-1]);B.write(E);B.write('"modules" :[\n');F=R
+				B.write('{');B.write(L({H:D.info})[1:-1]);B.write(E);B.write(L({'stubber':{O:__version__},'stubtype':H})[1:-1]);B.write(E);B.write('"modules" :[\n');F=R
 				for J in D._report:
 					if F:F=G
 					else:B.write(E)
-					B.write(O(J))
+					B.write(L(J))
 				B.write('\n]}')
 			K=D._start_free-C.mem_free()
 		except A:pass
@@ -155,35 +156,36 @@ def U(path):
 				else:raise G
 		F=B+1
 def _info():
-	g='loboris';f=' on ';e='0.0.0';d='port';c='platform';b='machine';a='nodename';Y='name';T='v';S='mpy';R='unknown';Q='-';P='sysname';I='ver';G='family';E='build';B='release';U=sys.implementation.name;V=sys.platform;A={Y:U,B:e,N:e,E:H,P:R,a:R,b:R,G:U,c:V,d:V,I:H}
-	try:A[B]=K.join([str(A)for A in sys.implementation.version]);A[N]=A[B];A[Y]=sys.implementation.name;A[S]=sys.implementation.mpy
+	g=' on ';f='0.0.0';e='port';d='platform';b='machine';a='nodename';Y='name';T='mpy';S='unknown';R='-';Q='sysname';L='v';I='family';G='build';C='ver';B='release';U=sys.implementation.name;V=sys.platform;A={Y:U,B:f,O:f,G:H,Q:S,a:S,b:S,I:U,d:V,e:V,C:H}
+	try:A[B]=K.join([str(A)for A in sys.implementation.version]);A[O]=A[B];A[Y]=sys.implementation.name;A[T]=sys.implementation.mpy
 	except F:pass
 	if sys.platform not in('unix','win32'):
 		try:
-			C=os.uname();A[P]=C.sysname;A[a]=C.nodename;A[B]=C.release;A[b]=C.machine
-			if f in C.version:
-				O=C.version.split(f)[0]
-				if A[P]=='esp8266':
-					if Q in O:W=O.split(Q)[0]
-					else:W=O
-					A[N]=A[B]=W.lstrip(T)
-				try:A[E]=O.split(Q)[1]
+			E=os.uname();A[Q]=E.sysname;A[a]=E.nodename;A[B]=E.release;A[b]=E.machine
+			if g in E.version:
+				P=E.version.split(g)[0]
+				if A[Q]=='esp8266':
+					if R in P:W=P.split(R)[0]
+					else:W=P
+					A[O]=A[B]=W.lstrip(L)
+				try:A[G]=P.split(R)[1]
 				except Z:pass
 		except (Z,F,TypeError):pass
-	try:from pycopy import const;A[G]='pycopy';del const
-	except (L,M):pass
-	if A[c]=='esp32_LoBo':A[G]=g;A[d]='esp32'
-	elif A[P]=='ev3':
-		A[G]='ev3-pybricks';A[B]='1.0.0'
+	try:from pycopy import const;A[I]='pycopy';del const
+	except (M,N):pass
+	if A[d]=='esp32_LoBo':A[I]='loboris';A[e]='esp32'
+	elif A[Q]=='ev3':
+		A[I]='ev3-pybricks';A[B]='1.0.0'
 		try:from pybricks.hubs import EV3Brick;A[B]='2.0.0'
-		except L:pass
-	if A[B]:A[I]=T+A[B].lstrip(T)
-	if A[G]!=g:
-		if A[B]and A[B]>='1.10.0'and A[B].endswith('.0'):A[I]=A[B][:-2]
-		else:A[I]=A[B]
-		if A[E]!=H and J(A[E])<4:A[I]+=Q+A[E]
-	if S in A:
-		h=int(A[S]);X=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][h>>10]
+		except M:pass
+	if A[B]:A[C]=L+A[B].lstrip(L)
+	if A[I]==c:
+		if A[B]and A[B]>='1.10.0'and A[B].endswith('.0'):A[C]=A[B][:-2]
+		else:A[C]=A[B]
+		if A[G]!=H and J(A[G])<4:A[C]+=R+A[G]
+	if A[C][0]!=L:A[C]=L+A[C]
+	if T in A:
+		h=int(A[T]);X=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][h>>10]
 		if X:A['arch']=X
 	return A
 def get_root():
@@ -210,7 +212,7 @@ def V():
 def main():
 	stubber=Stubber(path=read_path());stubber.clean()
 	try:stubber.modules=[A.strip()for A in P('modulelist'+'.txt')if J(A.strip())and A.strip()[0]!='#']
-	except A:stubber.modules=['micropython']
+	except A:stubber.modules=[c]
 	C.collect();stubber.create_all_stubs();stubber.report()
 if __name__=='__main__'or V():
 	try:logging.basicConfig(level=logging.INFO)
