@@ -84,7 +84,7 @@ References :
 
 possible testing / diag : 
 
-[pyright/command-line.md at master · microsoft/pyright (github.com)](https://github.com/microsoft/pyright/blob/master/docs/command-line.md)
+[pyright/command-line.md at microsoft/pyright (github.com)](https://github.com/microsoft/pyright/blob/master/docs/command-line.md)
 
 
 

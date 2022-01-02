@@ -62,14 +62,14 @@ def pyright_results(rst_stubs):
 @pytest.fixture(scope="module")
 def micropython_repo():
     "make sure a recent branch is checked out"
-    git.switch_branch("master", MICROPYTHON_FOLDER)
+    git.switch_branch("main", MICROPYTHON_FOLDER)
     TEST_DOCFIX = True
     if TEST_DOCFIX:
         # run test against the proposed documentation fixes
         try:
             git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
         except Exception:
-            git.switch_branch("master", MICROPYTHON_FOLDER)
+            git.switch_branch("main", MICROPYTHON_FOLDER)
 
     v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
     yield v_tag
