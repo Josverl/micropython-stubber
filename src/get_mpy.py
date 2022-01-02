@@ -220,6 +220,7 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
      - repos should be cloned side-by-side as some of the manifests refer to micropython-lib scripts using a relative path
     """
 
+    current_dir = os.getcwd()
     if not mpy_path:
         mpy_path = "./micropython"
     if not lib_path:
@@ -248,6 +249,8 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
         log.debug("MicroPython v1.11, older or other")
         # others
         get_frozen_folders(stub_path, mpy_path, lib_path, version)
+    # restore cwd
+    os.chdir(current_dir)
 
 
 def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: str):
