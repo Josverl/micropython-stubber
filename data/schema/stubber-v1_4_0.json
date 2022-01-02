@@ -1,7 +1,7 @@
 {
     "definitions": {},
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_3_9.json",
+    "$id": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_3_9.json",
     "title": "Root",
     "type": "object",
     "required": [
@@ -16,7 +16,7 @@
             "$id": "#root/$schema",
             "title": "$schema",
             "type": "string",
-            "default": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_4_0.json"
+            "default": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json"
         },
         "firmware": {
             "$id": "#root/firmware",

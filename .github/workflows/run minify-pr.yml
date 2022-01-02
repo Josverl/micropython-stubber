@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
   # pull_request:
-  #   branches: [ master ]
+  #   branches: [ main ]
   # TODO: for PR need to specify a base when committing the PR
 
 jobs:
