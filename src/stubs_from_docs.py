@@ -607,6 +607,7 @@ class RSTReader:
         # TODO : check name scope : Module.class.<name>
         if name == "Exception":
             # no need to redefine Exception
+            self.line_no += 1
             return
         if "." in name:
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
