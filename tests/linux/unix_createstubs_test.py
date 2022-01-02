@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 import pytest
+from _pytest.config import Config
 import distro
 
 
@@ -46,10 +47,11 @@ if ubuntu_version == "18.04":
 )
 # only run createsubs in the unix version of micropython
 @pytest.mark.linux
-def test_createstubs(firmware: str, tmp_path: Path, script_folder: str):
+def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, pytestconfig: Config):
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
-    fw_filename = (Path("./tests/tools") / firmware).absolute().as_posix()
+    # BUG: other tests may / will change the CWD to a different folder
+    fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute().as_posix()
     cmd = [fw_filename, "createstubs.py", "--path", str(tmp_path)]
     try:
         subproc = subprocess.run(
