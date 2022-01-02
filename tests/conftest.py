@@ -9,7 +9,7 @@ from _pytest.config import Config
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig(encoding="utf-8", level=logging.INFO)
+logging.basicConfig( level=logging.INFO) # encoding="utf-8", on 3.10 only
 
 
 # make sure that the source can be found, but not twice
