@@ -607,6 +607,7 @@ class RSTReader:
         # TODO : check name scope : Module.class.<name>
         if name == "Exception":
             # no need to redefine Exception
+            self.line_no += 1
             return
         if "." in name:
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
@@ -754,12 +755,14 @@ def generate_from_rst(
 
     if black:
         try:
-            cmd = ["black", str(dst_path / "**" / "*.py")]
+            cmd = ["black", str(dst_path), "--include", "\\.py$"]
+
             if sys.version_info.major == 3 and sys.version_info.minor == 7:
                 # black on python 3.7 does not like some function defs
                 # def sizeof(struct, layout_type=NATIVE, /) -> int:
                 cmd += ["--fast"]
-            result = subprocess.run(cmd, capture_output=False, check=True, shell=True)
+            # shell=false on ubuntu
+            result = subprocess.run(cmd, capture_output=False, check=True, shell=False)
             if result.returncode != 0:
                 raise Exception(result.stderr.decode("utf-8"))
         except subprocess.SubprocessError:

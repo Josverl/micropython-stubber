@@ -1,5 +1,5 @@
 {
-    "version": "0.1",
+    "version": "0.2",
     "dictionaryDefinitions": [
         {
             "name": "micropython",
@@ -56,6 +56,11 @@
         "toctree",
         "typeshed",
         "updent",
-        "writeln"
+        "writeln",
+        "micropython",
+        "Verlinde"
+    ],
+    "enableFiletypes": [
+        "!plaintext"
     ]
 }
