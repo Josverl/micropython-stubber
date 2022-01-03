@@ -244,7 +244,7 @@ def manifest(
         firmware = "{}-{}-{}".format(family, port, flat_version(version))
 
     mod_manifest = {
-        "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/master/data/schema/stubber-v1_4_0.json",
+        "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json",
         "firmware": {
             "family": family,
             "port": port,

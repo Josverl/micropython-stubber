@@ -17,8 +17,8 @@ npm install
 ### adding additional submodules 
 how to add : 
 ``` bash
-git submodule add --force -b master https://github.com/micropython/micropython.git 
-git submodule add --force -b master https://github.com/micropython/micropython-lib.git 
+git submodule add --force -b main https://github.com/micropython/micropython.git 
+git submodule add --force -b main https://github.com/micropython/micropython-lib.git 
 ```
 
 ## Windows 10 

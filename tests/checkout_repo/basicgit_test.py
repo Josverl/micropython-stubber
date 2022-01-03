@@ -53,7 +53,7 @@ def test_get_tag_latest():
     if not (repo / ".git").exists():
         pytest.skip("no git repo in current folder")
 
-    result = subprocess.run(["git", "switch", "master", "--force"], capture_output=True, check=True, cwd=repo.as_posix())
+    result = subprocess.run(["git", "switch", "main", "--force"], capture_output=True, check=True, cwd=repo.as_posix())
 
     # get tag of current repro
     tag = git.get_tag("./micropython")
@@ -68,10 +68,10 @@ def test_get_failure_throws():
 
 @pytest.mark.basicgit
 @pytest.mark.skip(reason="test discards uncomitted changes in top repo")
-def test_pull_master(testrepo_micropython):
+def test_pull_main(testrepo_micropython):
     "test and force update to most recent"
     repo_path = testrepo_micropython
-    x = git.pull(repo_path, "master")
+    x = git.pull(repo_path, "main")
     # Should succeed.
     assert x
 

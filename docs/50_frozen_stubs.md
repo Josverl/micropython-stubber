@@ -77,7 +77,7 @@ In some cases `stubgen` detects duplicate modules in a 'collected stub folder', 
 then __Plan B__ is to run stubgen for each separate `*.py` file in that folder. THis is significantly slower and according to the stubgen documentation the resulting stubs may of lesser quality, but that is better than no stubs at all.
 
 **Note**: In several cases `stubgen` creates folders in inappropriate locations (reason undetermined), which would cause issues when re-running `stubgen` at a later time.
-to compensate for this behaviour the known-incorrect .pyi files are removed before and after stubgen is run [see: `cleanup(modules_folder)` in `utils.py`](https://github.com/Josverl/micropython-stubber/blob/master/src/utils.py#L40-L66)
+to compensate for this behaviour the known-incorrect .pyi files are removed before and after stubgen is run [see: `cleanup(modules_folder)` in `utils.py`](https://github.com/Josverl/micropython-stubber/blob/main/src/utils.py#L40-L66)
 
 
 [stubs-repo]:   https://github.com/Josverl/micropython-stubs
@@ -89,7 +89,7 @@ to compensate for this behaviour the known-incorrect .pyi files are removed befo
 [demo]:         docs/img/demo.gif	"demo of writing code using the stubs"
 [stub processing order]: docs/img/stuborder_pylance.png	"recommended stub processing order"
 [naming-convention]: #naming-convention-and-stub-folder-structure
-[all-stubs]: https://github.com/Josverl/micropython-stubs/blob/master/firmwares.md
+[all-stubs]: https://github.com/Josverl/micropython-stubs/blob/main/firmwares.md
 [micropython]: https://github.com/micropython/micropython
 [micropython-lib]:  https://github.com/micropython/micropython-lib
 [pycopy]: https://github.com/pfalcon/pycopy
