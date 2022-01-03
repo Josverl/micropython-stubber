@@ -66,14 +66,6 @@ def stubfolder(path: str) -> str:
     return "{}/{}".format(STUB_FOLDER, path)
 
 
-def flat_version(version: str, keep_v: bool = False):
-    "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
-    version = version.strip().replace(".", "_")
-    if not keep_v:
-        version = version.lstrip("v")
-    return version
-
-
 def cleanup(modules_folder: Path, all_pyi: bool = False):
     "Q&D cleanup"
     # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice
@@ -211,6 +203,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         return True
 
 
+# TODO:
 def manifest(
     family: str = "micropython",
     stubtype: str = "frozen",
@@ -241,7 +234,7 @@ def manifest(
     if release is None:
         release = version
     if firmware is None:
-        firmware = "{}-{}-{}".format(family, port, flat_version(version))
+        firmware = "{}-{}-{}".format(family, port, clean_version(version, flat=True))
 
     mod_manifest = {
         "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json",

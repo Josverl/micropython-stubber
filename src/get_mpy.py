@@ -227,7 +227,7 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
     if not lib_path:
         lib_path = "./micropython-lib"
     if not stub_path:
-        stub_path = "{}/{}_{}_frozen".format(utils.STUB_FOLDER, FAMILY, utils.flat_version(version))
+        stub_path = "{}/{}_{}_frozen".format(utils.STUB_FOLDER, FAMILY, utils.clean_version(version, flat=True))
     # get the manifests of the different ports and boards
     mpy_path = os.path.abspath(mpy_path)
     lib_path = os.path.abspath(lib_path)
@@ -360,7 +360,7 @@ def get_frozen_manifest(
         path_vars["BOARD_DIR"] = ""
 
         # check BOARD AND PORT pattern
-        matches = re.search(regex_port_board, manifest)  
+        matches = re.search(regex_port_board, manifest)
         if matches:
             # port and board
             path_vars["PORT_DIR"] = matches.group("port") or ""
@@ -413,7 +413,7 @@ if __name__ == "__main__":
     if version:
         log.info("found micropython version : {}".format(version))
         # folder/{family}_{version}_frozen
-        stub_path = utils.stubfolder("{}-{}-frozen".format(FAMILY, utils.flat_version(version)))
+        stub_path = utils.stubfolder("{}-{}-frozen".format(FAMILY, utils.clean_version(version, flat=True)))
         get_frozen(stub_path, version=version, mpy_path=mpy_path, lib_path=lib_path)
         exit(0)
     else:
