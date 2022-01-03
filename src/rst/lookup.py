@@ -6,9 +6,10 @@ Format: a dictionary with :
 - value : two-tuple with ( return type , priority )
 
 """
-# These are shown to import 
-__all__= ["LOOKUP_LIST", "NONE_VERBS","CHILD_PARENT_CLASS","PARAM_FIXES","MODULE_GLUE"  ]
+# These are shown to import
+__all__ = ["LOOKUP_LIST", "NONE_VERBS", "CHILD_PARENT_CLASS", "PARAM_FIXES", "MODULE_GLUE"]
 
+# contains return types for functions and methods that are not clearly documented.
 LOOKUP_LIST = {
     "builtins.bytes": ("bytes", 0.95),
     "builtins.from_bytes": ("int", 0.95),
@@ -39,7 +40,7 @@ LOOKUP_LIST = {
 }
 
 
-# if no type has been determined, and the docstring starts with one of these verbs, then assume the return type in None
+# if no type has been determined, and the docstring starts with one of these verbs, then assume the return type is None
 # - The starting word or words with a training space
 NONE_VERBS = [
     "Activate ",
