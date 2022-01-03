@@ -87,7 +87,7 @@ def get_all(
             log.info("MicroPython version : {}".format(version))
             # folder/{family}-{version}-frozen
             family = "micropython"
-            stub_path = Path(stub_folder) / f"{family}-{utils.flat_version(version)}-frozen"
+            stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
             stub_paths.append(stub_path)
             get_mpy.get_frozen(str(stub_path), version=version, mpy_path=mpy_folder, lib_path=mpy_lib_folder)
 
@@ -96,7 +96,7 @@ def get_all(
     if lobo or all:
         family = "loboris"
         version = "v3.2.24"
-        stub_path = Path(stub_folder) / f"{family}-{utils.flat_version(version)}-frozen"
+        stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
         get_lobo.get_frozen(str(stub_path))
 
