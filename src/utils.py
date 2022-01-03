@@ -111,7 +111,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
 
     sg_opt = stubgen.Options(
-        pyversion=(3, 5),
+        pyversion=(3, 6),
         no_import=False,
         include_private=True,
         doc_dir="",
