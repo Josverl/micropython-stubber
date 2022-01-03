@@ -51,7 +51,7 @@ https://github.com/dastultz/micropython-pyb
 [demo]:         docs/img/demo.gif	"demo of writing code using the stubs"
 [stub processing order]: docs/img/stuborder_pylance.png	"recommended stub processing order"
 [naming-convention]: #naming-convention-and-stub-folder-structure
-[all-stubs]: https://github.com/Josverl/micropython-stubs/blob/master/firmwares.md
+[all-stubs]: https://github.com/Josverl/micropython-stubs/blob/main/firmwares.md
 [micropython]: https://github.com/micropython/micropython
 [micropython-lib]:  https://github.com/micropython/micropython-lib
 [pycopy]: https://github.com/pfalcon/pycopy

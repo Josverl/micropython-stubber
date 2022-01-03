@@ -35,5 +35,5 @@ The (stretch) goal is to create a VSCode add-in to simplify the configuration, a
 
 ## Licensing 
 
-MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](https://github.com/Josverl/micropython-stubber/blob/master/LICENSE).
+MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](https://github.com/Josverl/micropython-stubber/blob/main/LICENSE).
 

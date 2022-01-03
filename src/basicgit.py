@@ -52,11 +52,11 @@ def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
     tag: str = result.stdout.decode("utf-8")
     tag = tag.replace("\r", "").replace("\n", "")
     if abbreviate and "-" in tag:
-        # this may or not be the latest on the master branch
+        # this may or not be the latest on the main branch
         result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
         if result:
             ref: str = result.stdout.decode("utf-8").replace("\r", "").replace("\n", "")
-            if ref == "master":
+            if ref in [ "main", "master"]:
                 tag = "latest"
             elif ref in ["fix_lib_documentation"]:
                 tag = ref
@@ -128,9 +128,9 @@ def fetch(repo: str) -> bool:
     return result.returncode == 0
 
 
-def pull(repo: str, branch="master") -> bool:
+def pull(repo: str, branch="main") -> bool:
     """
-    pull a repo origin into master
+    pull a repo origin into main
     repo should be in the form of : path/.git
     repo = '../micropython/.git'
     returns True on success
@@ -139,10 +139,10 @@ def pull(repo: str, branch="master") -> bool:
         raise NotADirectoryError
     repo = repo.replace("\\", "/")
     # first checkout HEAD
-    cmd = ["git", "checkout", "master", "--quiet", "--force"]
+    cmd = ["git", "checkout", "main", "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
-        print("error during git checkout master", result)
+        print("error during git checkout main", result)
         return False
 
     cmd = ["git", "pull", "origin", branch, "--quiet"]

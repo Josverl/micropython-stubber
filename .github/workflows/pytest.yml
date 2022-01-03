@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-  #   branches: [ master ]
+  #   branches: [ main ]
 
 jobs:
   run_tests:
@@ -19,9 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]       
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.7", "3.8", "3.9"]
-        # TODO : support python "3.10" - rshell > pyreadline 
+        # TODO : support python "3.10" - rshell > pyreadline
 
     steps:
       - name: Checkout repository
@@ -53,7 +53,7 @@ jobs:
           pip install pytest pylint
           pip install -r requirements-dev.txt
 
-      - name: flag tools executable (on linux) 
+      - name: flag tools executable (on linux)
         if: runner.os == 'Linux'
         run: |
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
@@ -80,7 +80,8 @@ jobs:
           # E0602: Undefined variable (undefined-variable)
 
       - name: Test with pytest
-        run: pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+        run: |
+          coverage run -m pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload Unit Test Results
         if: always()

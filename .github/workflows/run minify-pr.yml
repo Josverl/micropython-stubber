@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
   # pull_request:
-  #   branches: [ master ]
+  #   branches: [ main ]
   # TODO: for PR need to specify a base when committing the PR
 
 jobs:
@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: restore Python from cache 
+      - name: restore Python from cache
         uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
@@ -52,7 +52,6 @@ jobs:
           python process.py minify -o ./minified -xc
           python process.py minify -s ./board/createstubs_mem.py -o ./minified -xc
           python process.py minify -s ./board/createstubs_db.py  -o ./minified -xc
-
 
       - name: run test on minified/createstubs.by
         run: |
