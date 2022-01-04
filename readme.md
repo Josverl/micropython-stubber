@@ -46,7 +46,21 @@ The (stretch) goal is to create a VSCode add-in to simplify the configuration, a
 
 ## Developing & testing 
 
-this is described in more detail in the [developing](docs/developing.md) and [testing](docs/testing.md)  documents in the docs folder.
+This is described in more detail in the [developing](docs/developing.md) and [testing](docs/testing.md)  documents in the docs folder.
+
+## Branch Main
+The name of the default branch has been changed to `main`.
+If you have cloned this repo before you main need to adjust the local repro to be aware of this, or create a fresh clone.
+
+To update run the below command:  
+``` bash
+git branch -m master main                    
+git fetch origin
+git branch -u origin/main main                      
+git remote set-head origin -a
+```
+
+for more info see [**Renaming a branch**](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch#updating-a-local-clone-after-a-branch-name-changes)
 
 ## Licensing 
 
