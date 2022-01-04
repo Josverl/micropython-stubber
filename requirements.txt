@@ -1,21 +1,19 @@
 #production requirements
-esptool >= 2.8
 
-python-minifier >= 2.5.0
-
-requests >= 2.25.1
-
-mypy >= 0.812
+python-minifier == 2.5.0
+requests == 2.27.0
+mypy == 0.930
 
 # Cross compilation 
-mpy-cross >= 1.16
+mpy-cross == 1.16
 
+# Bulk stubber
+black   == 21.12b0
+esptool == 3.2
 rshell  == 0.0.30
+
 # stub refactoring
-libcst  >= 0.3
+libcst  == 0.3.23
 
-requests >= 2.25.1
-
-mypy >= 0.812
 
 click == 8.0.3
