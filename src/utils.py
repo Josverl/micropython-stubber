@@ -148,7 +148,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     else:  # one or less module manifests
         ## generate fyi files for folder
         # clean before to clean any old stuff
-        # TODO: CLean out the old pyi files
         cleanup(modules_folder, all_pyi=True)
 
         print("::group::[stubgen] running stubgen on {0}".format(modules_folder))

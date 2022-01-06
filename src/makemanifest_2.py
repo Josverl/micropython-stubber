@@ -216,18 +216,19 @@ def freeze_internal_2(path: str, script: str, opt=None):
     src_path: Path = Path(convert_path(path))
     if not src_path.is_dir():
         raise FreezeError("freeze path must be a directory")
-    src_path = src_path / convert_path(script)
-    if stub_dir != "":
-        log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
-        dst_path = Path(stub_dir) / convert_path(script)
-        # ensure folder, including possible path prefix for script
-        os.makedirs(dst_path.parent.as_posix(), exist_ok=True)
-        # copy file
-        try:
-            shutil.copy2(src_path.as_posix(), dst_path.as_posix())
-        except (FileNotFoundError) as e:
-            log.warning(f"File {src_path.as_posix()} not found")
-        except (OSError, FileNotFoundError) as e:
-            log.exception(e)
-    else:
+    if stub_dir == "":
         raise FreezeError("Stub folder not set")
+
+    src_path = src_path / convert_path(script)
+    dst_path = Path(stub_dir) / convert_path(script)
+
+    log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
+    # ensure folder, including possible path prefix for script
+    os.makedirs(dst_path.parent.as_posix(), exist_ok=True)
+    # copy file
+    try:
+        shutil.copy2(src_path.as_posix(), dst_path.as_posix())
+    except (FileNotFoundError) as e:
+        log.warning(f"File {src_path.as_posix()} not found")
+    except (OSError, FileNotFoundError) as e:
+        log.exception(e)
