@@ -32,8 +32,7 @@ from collections import defaultdict
 from pathlib import Path  # start moving from os & glob to pathlib
 
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
-from makemanifest_2 import include, FreezeError
-import makemanifest_2
+import makemanifest_2 as makemanifest
 
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -73,7 +72,7 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
 
     if len(manifests) > 0:
         log.info("MicroPython v1.12 and newer")
-        get_frozen_manifest(manifests, stub_path, mpy_path, lib_path, version)
+        get_frozen_from_manifest(manifests, stub_path, mpy_path, lib_path, version)
     else:
         log.info("MicroPython v1.11, older or other")
         # others
@@ -89,6 +88,11 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
     - 'ports/<port>/modules/*.py'
     - 'ports/<port>/boards/<board>/modules/*.py'
     """
+    micropython_lib_commits = read_micropython_lib_commits()
+    # Make sure that the correct micropython-lib release is checked out
+    log.info(f"Matching repo's:  Micropython {version} needs micropython-lib:{micropython_lib_commits[version]}")
+    git.checkout_commit(micropython_lib_commits[version], lib_path)
+
     targets = []
     scripts = glob.glob(mpy_path + "/ports/**/modules/*.py", recursive=True)
     for script in scripts:
@@ -148,7 +152,28 @@ def get_target_names(path: str) -> tuple:
     return mpy_port, mpy_board
 
 
-def get_frozen_manifest(
+def read_micropython_lib_commits(filename="data/micropython_tags.txt"):
+    """
+    Read a csv with the micropython version and matchin micropython-lib commit-hashes
+    these can be used to make sure that the correct micropython-lib version is checked out.
+
+    TODO: it would be nice if micropython-lib had matching commit-tags
+
+    # git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
+    """
+    version_commit = defaultdict()
+    with open(filename, newline="", encoding="utf-8") as csv_file:
+        # read the csv file using DictReader
+        reader = csv.DictReader(csv_file, skipinitialspace=True)  # dialect="excel",
+        rows = list(reader)
+        # create a dict version --> commit_hash
+        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
+    # add default
+    version_commit = defaultdict(lambda: "master", version_commit)
+    return version_commit
+
+
+def get_frozen_from_manifest(
     manifests,
     stub_path: str,
     mpy_path: str,
@@ -164,8 +189,8 @@ def get_frozen_manifest(
 
     stub_path = os.path.abspath(stub_path)
 
-    makemanifest_2.path_vars["MPY_DIR"] = mpy_path
-    makemanifest_2.path_vars["MPY_LIB_DIR"] = lib_path
+    makemanifest.path_vars["MPY_DIR"] = mpy_path
+    makemanifest.path_vars["MPY_LIB_DIR"] = lib_path
 
     # https://regexr.com/4rh39
     # but with an extra P for Python named groups...
@@ -177,55 +202,62 @@ def get_frozen_manifest(
 
     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
     # print( matches.group('port'), matches.group('board'))
+    micropython_lib_commits = read_micropython_lib_commits()
+    # Make sure that the correct micropython-lib release is checked out
+    log.info(f"Matching repo's:  Micropython {version} needs micropython-lib:{micropython_lib_commits[version]}")
+    git.checkout_commit(micropython_lib_commits[version], lib_path)
 
     # Include top-level inputs, to generate the manifest
     for manifest in manifests:
         log.info("Manifest: {}".format(manifest))
-        makemanifest_2.path_vars["PORT_DIR"] = ""
-        makemanifest_2.path_vars["BOARD_DIR"] = ""
+        makemanifest.path_vars["PORT_DIR"] = ""
+        makemanifest.path_vars["BOARD_DIR"] = ""
 
         # check BOARD AND PORT pattern
         matches = re.search(regex_port_board, manifest)
         if matches:
             # port and board
-            makemanifest_2.path_vars["PORT_DIR"] = matches.group("port") or ""
-            makemanifest_2.path_vars["BOARD_DIR"] = matches.group("board") or ""
+            makemanifest.path_vars["PORT_DIR"] = matches.group("port") or ""
+            makemanifest.path_vars["BOARD_DIR"] = matches.group("board") or ""
             if os.path.basename(matches.group("board")) == "manifest":
-                makemanifest_2.path_vars["BOARD_DIR"] = ""
+                makemanifest.path_vars["BOARD_DIR"] = ""
         else:
             # TODO: Variants
             matches = re.search(regex_port_board, manifest)  # BOARD AND VARIANT
             if matches:
                 # port and variant
-                makemanifest_2.path_vars["PORT_DIR"] = matches.group("port") or ""
-                makemanifest_2.path_vars["BOARD_DIR"] = matches.group("board") or ""
+                makemanifest.path_vars["PORT_DIR"] = matches.group("port") or ""
+                makemanifest.path_vars["BOARD_DIR"] = matches.group("board") or ""
                 if os.path.basename(matches.group("board")) == "manifest":
-                    makemanifest_2.path_vars["BOARD_DIR"] = ""
+                    makemanifest.path_vars["BOARD_DIR"] = ""
             else:
                 # just port
                 matches = re.search(regex_port, manifest)
                 if matches:
-                    makemanifest_2.path_vars["PORT_DIR"] = matches.group("port") or ""
+                    makemanifest.path_vars["PORT_DIR"] = matches.group("port") or ""
 
-        port_name = os.path.basename(makemanifest_2.path_vars["PORT_DIR"])
-        board_name = os.path.basename(makemanifest_2.path_vars["BOARD_DIR"])
+        port_name = os.path.basename(makemanifest.path_vars["PORT_DIR"])
+        board_name = os.path.basename(makemanifest.path_vars["BOARD_DIR"])
 
         if board_name == "":
             board_name = "GENERIC"
 
         if board_name == "manifest_release":
-            board_name = "RELEASE"
+            # board_name = "RELEASE"
+            # skip this as it:
+            # - appears to be used for CI/CD testing only
+            # - generates stubs that include errors
+            continue
 
         # set global for later use - must be an absolute path.
-        makemanifest_2.stub_dir = os.path.abspath(os.path.join(stub_path, port_name, board_name))
-
+        makemanifest.stub_dir = os.path.abspath(os.path.join(stub_path, port_name, board_name))
         try:
-            makemanifest_2.include(manifest)
-        except FreezeError as er:
+            makemanifest.include(manifest)
+        except makemanifest.FreezeError as er:
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # make a module manifest
-        utils.make_manifest(Path(makemanifest_2.stub_dir), FAMILY, port=port_name, board=board_name, version=version, stubtype="frozen")
+        utils.make_manifest(Path(makemanifest.stub_dir), FAMILY, port=port_name, board=board_name, version=version, stubtype="frozen")
 
 
 if __name__ == "__main__":

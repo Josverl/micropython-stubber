@@ -56,7 +56,7 @@ def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
         result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
         if result:
             ref: str = result.stdout.decode("utf-8").replace("\r", "").replace("\n", "")
-            if ref in [ "main", "master"]:
+            if ref in ["main", "master"]:
                 tag = "latest"
             elif ref in ["fix_lib_documentation"]:
                 tag = ref
@@ -65,12 +65,22 @@ def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
 
 def checkout_tag(tag: str, repo: str = None) -> bool:
     """
-    get the most recent git version tag of a local repo"
-    repo should be in the form of : repo = "../micropython/.git"
-
-    returns the tag or None
+    checkout a specific git tag
     """
     cmd = ["git", "checkout", "tags/" + tag, "--quiet", "--force"]
+    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    if not result:
+        return False
+    # actually a good result
+    print(result.stderr.decode("utf-8"))
+    return True
+
+
+def checkout_commit(commit_hash: str, repo: str = None) -> bool:
+    """
+    Checkout a specific commit
+    """
+    cmd = ["git", "checkout", commit_hash, "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return False
