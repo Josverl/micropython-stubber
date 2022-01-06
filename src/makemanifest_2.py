@@ -3,7 +3,7 @@ Classes and functions copied & adapted from micropypythons makemanifest.py to en
 """
 import os
 import logging
-import pathlib
+from pathlib import Path
 import shutil
 
 log = logging.getLogger(__name__)
@@ -174,19 +174,19 @@ def freeze_internal(path: str, script: str, opt=None):
     """
 
     log.debug(" - freeze_internal({},{})".format(path, script))
-    path = convert_path(path)
-    if not os.path.isdir(path):
-        raise FreezeError("freeze source path should be a directory")
 
+    _path = Path(convert_path(path))
+    source_path = _path / script
+    dest_path = Path(stub_dir) / script
+
+    if not _path.is_dir():
+        raise FreezeError("freeze source path should be a directory")
     if not stub_dir or stub_dir == "":
         raise FreezeError("Stub folder not set")
 
-    source_path = os.path.join(path, script)
-
     log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
-    dest_path = os.path.dirname(os.path.join(stub_dir, script))
     # ensure folder, including possible path prefix for script
-    os.makedirs(dest_path, exist_ok=True)
+    os.makedirs(dest_path.parent, exist_ok=True)
     # copy file
     try:
         shutil.copy2(source_path, dest_path)
