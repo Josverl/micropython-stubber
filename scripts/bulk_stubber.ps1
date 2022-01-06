@@ -14,7 +14,7 @@
 # ESP32 board on USB + Serial drivers 
 # ESP8266 board on USB + Serial drivers 
 
-Import-Module ..\..\FIRMWARE\get-serialport.ps1 -Force
+Import-Module .\get-serialport.ps1 -Force
 
 
 function restart-MCU {
@@ -218,7 +218,7 @@ $download_path = (join-path -Path $WSRoot -ChildPath "stubs/machine-stubs")
 #  - rshell can copy folders 
 #  - pyboard is install as part of rshell but cannot copy files 
 
-$pyboard_py = join-path $WSRoot "micropython/tools/pyboard.py" 
+$pyboard_py = join-path $WSRoot "src/libs/pyboard.py" 
 $update_pyi_py = join-path $WSRoot "src/update_pyi.py" 
 
 
@@ -246,7 +246,7 @@ $all_versions = @(
     # @{version = "v1.10"; chip = "esp8266"; } ,    
     # @{version = "v1.10"; chip = "esp8266"; },
 
-    @{version = "v1.9.4"; chip = "esp32"; },
+    #     @{version = "v1.9.4"; chip = "esp32"; "NoSpiram" = $true },
     @{version = "v1.10"; chip = "esp32"; },
     @{version = "v1.11"; chip = "esp32"; },
 
