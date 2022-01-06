@@ -68,7 +68,8 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
 
     # remove any manifests  that are below one of the virtual environments (venv) \
     # 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\build-venv\\lib64\\python3.6\\site-packages\\pip\\_vendor\\distlib\\manifest.py'
-    manifests = [m for m in manifests if not "venv" in m]
+    # and skip the manifest used for coverage tests
+    manifests = [m for m in manifests if not "venv" in m and Path(m).parent.name != "coverage"]
 
     if len(manifests) > 0:
         log.info("MicroPython v1.12 and newer")
@@ -95,6 +96,9 @@ def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: st
 
     targets = []
     scripts = glob.glob(mpy_path + "/ports/**/modules/*.py", recursive=True)
+    if len(scripts) > 0:
+        # clean target folder
+        shutil.rmtree(stub_path, ignore_errors=True)
     for script in scripts:
         mpy_port, mpy_board = get_target_names(script)
         if not mpy_board:
@@ -243,14 +247,15 @@ def get_frozen_from_manifest(
             board_name = "GENERIC"
 
         if board_name == "manifest_release":
-            # board_name = "RELEASE"
-            # skip this as it:
-            # - appears to be used for CI/CD testing only
-            # - generates stubs that include errors
-            continue
+            board_name = "RELEASE"
 
         # set global for later use - must be an absolute path.
-        makemanifest.stub_dir = os.path.abspath(os.path.join(stub_path, port_name, board_name))
+        freeze_path = (Path(stub_path) / port_name / board_name).absolute()
+
+        makemanifest.stub_dir = freeze_path.as_posix()
+        # clean target folder
+        shutil.rmtree(freeze_path, ignore_errors=True)
+
         try:
             makemanifest.include(manifest)
         except makemanifest.FreezeError as er:
