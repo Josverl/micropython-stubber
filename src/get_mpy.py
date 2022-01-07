@@ -165,7 +165,7 @@ def read_micropython_lib_commits(filename="data/micropython_tags.txt"):
 
     # git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
     """
-    version_commit = defaultdict()
+    version_commit = defaultdict()  # lgtm [py/multiple-definition]
     with open(filename, newline="", encoding="utf-8") as csv_file:
         # read the csv file using DictReader
         reader = csv.DictReader(csv_file, skipinitialspace=True)  # dialect="excel",
