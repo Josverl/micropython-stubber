@@ -17,8 +17,6 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 STUB_FOLDER = "./all-stubs"
-
-
 LATEST = "Latest"
 
 
@@ -215,23 +213,15 @@ def manifest(
     release: Optional[str] = None,
     firmware: Optional[str] = None,
 ) -> dict:
-
     "create a new empty manifest dict"
-    if machine is None:
-        machine = family  # family
 
-    if port is None:
-        port = "common"  # family
-    if platform is None:
-        platform = port  # family
-
-    if version is None:
-        version = "0.0.0"
-
-    if nodename is None:
-        nodename = sysname
-    if release is None:
-        release = version
+    machine = machine or family  # family
+    port = port or "common"  # family
+    platform = platform or port  # family
+    version = version or "0.0.0"
+    sysname = sysname or ""
+    nodename = nodename or sysname or ""
+    release = release or version or ""
     if firmware is None:
         firmware = "{}-{}-{}".format(family, port, clean_version(version, flat=True))
 
