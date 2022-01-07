@@ -250,7 +250,6 @@ def manifest(
 def make_manifest(folder: Path, family: str, port: str, version: str, release: str = "", stubtype: str = "", board: str = "") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
     mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, release=release, stubtype=stubtype)
-    modules = []
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
         # sort the list
