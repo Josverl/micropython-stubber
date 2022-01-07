@@ -46,13 +46,7 @@ MPY_LIB_FOLDER = "./micropython-lib"
 @click.option("--version", default="", type=str, help="Version number to use. Default: Current Git tag")
 @click.option("--mpy", default=False, is_flag=True, help="Download the micropython frozen modules.")
 @click.option("--lobo", default=False, is_flag=True, help="Download the loboris frozen modules.")
-@click.option("--core", default=False, is_flag=True, help="Download the cpython core modules.")
-@click.option(
-    "--core-type",
-    type=click.Choice(["pycopy", "micropython"], case_sensitive=False),
-    default="pycopy",
-    help="Download CPthon modules Pycopy or Micropython version. Default: Pycopy",
-)
+@click.option("--core", default=False, is_flag=True, help="Download the cpython core modules for both pycopy and micropython.")
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules")
 @click.option("--all", default=False, is_flag=True, help="Get all frozen modules")
 def get_all(
@@ -74,11 +68,13 @@ def get_all(
 
     stub_paths: List[Path] = []
     if core or all:
-        req_filename = f"requirements-core-{core_type}.txt"
-        log.info(f"::group:: Get Cpython core :{core_type}")
-        stub_path = Path(stub_folder) / "cpython_core"
-        get_cpython.get_core(stub_path=str(stub_path), requirements=req_filename)
-        stub_paths.append(stub_path)
+        for core_type in ["pycopy", "micropython"]:
+            log.info(f"::group:: Get Cpython core :{core_type}")
+            req_filename = f"requirements-core-{core_type}.txt"
+            stub_path = Path(stub_folder) / f"cpython_core-{core_type}"
+
+            get_cpython.get_core(stub_path=str(stub_path), requirements=req_filename, family=core_type)
+            stub_paths.append(stub_path)
 
     if len(version) == 0:
         version = utils.clean_version(git.get_tag(mpy_folder) or "0.0")
