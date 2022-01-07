@@ -63,7 +63,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
     # remove build folder
     shutil.rmtree(build_path, ignore_errors=True)
     # build modules.json
-    mod_manifest = utils.manifest(family=family, version=__version__, stubtype="core", platform="cpython")
+    mod_manifest = utils.manifest(family="cpython-core", port=family, version=__version__, stubtype="core", platform="cpython")
     mod_manifest["modules"] += modlist
 
     if mod_manifest and len(modlist):
