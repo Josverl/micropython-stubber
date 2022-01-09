@@ -3,9 +3,10 @@
 The current configuration  section describes how to use [Pylance].
 
 ```{epigraph}
-*To deliver an improved user experience, we’ve created Pylance as a brand-new language server based on Microsoft’s [Pyright](https://github.com/microsoft/pyright) static type checking tool. Pylance leverages type stubs ([.pyi files](https://www.python.org/dev/peps/pep-0561/)) and lazy type inferencing to provide a highly-performant development experience. Pylance supercharges your Python IntelliSense experience with rich type information, helping you write better code, faster. The Pylance extension is also shipped with a collection of type stubs for popular modules to provide fast and accurate auto-completions and type checking.*
-``` 
+Pylance leverages type stubs ([.pyi files](https://www.python.org/dev/peps/pep-0561/)) and lazy type inferencing to provide a highly-performant development experience. Pylance supercharges your Python IntelliSense experience with rich type information, helping you write better code, faster.
 
+The Pylance extension is also shipped with a collection of type stubs for popular modules to provide fast and accurate auto-completions and type checking.
+``` 
 
 Some sections  may still refer to the use of [Microsoft Python Language Server][mpls], which has been deprecated.
 
