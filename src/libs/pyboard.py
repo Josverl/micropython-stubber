@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#
+# v1.17+
 # This file is part of the MicroPython project, http://micropython.org/
 #
 # The MIT License (MIT)
@@ -104,9 +104,7 @@ class TelnetToSerial:
                 time.sleep(0.2)
                 self.tn.write(bytes(password, "ascii") + b"\r\n")
 
-                if b"for more information." in self.tn.read_until(
-                    b'Type "help()" for more information.', timeout=read_timeout
-                ):
+                if b"for more information." in self.tn.read_until(b'Type "help()" for more information.', timeout=read_timeout):
                     # login successful
                     from collections import deque
 
@@ -252,9 +250,7 @@ class ProcessPtyToTerminal:
 
 
 class Pyboard:
-    def __init__(
-        self, device, baudrate=115200, user="micro", password="python", wait=0, exclusive=True
-    ):
+    def __init__(self, device, baudrate=115200, user="micro", password="python", wait=0, exclusive=True):
         self.in_raw_repl = False
         self.use_raw_paste = True
         if device.startswith("exec:"):
@@ -479,16 +475,12 @@ class Pyboard:
     def fs_ls(self, src):
         cmd = (
             "import uos\nfor f in uos.ilistdir(%s):\n"
-            " print('{:12} {}{}'.format(f[3]if len(f)>3 else 0,f[0],'/'if f[1]&0x4000 else ''))"
-            % (("'%s'" % src) if src else "")
+            " print('{:12} {}{}'.format(f[3]if len(f)>3 else 0,f[0],'/'if f[1]&0x4000 else ''))" % (("'%s'" % src) if src else "")
         )
         self.exec_(cmd, data_consumer=stdout_write_bytes)
 
     def fs_cat(self, src, chunk_size=256):
-        cmd = (
-            "with open('%s') as f:\n while 1:\n"
-            "  b=f.read(%u)\n  if not b:break\n  print(b,end='')" % (src, chunk_size)
-        )
+        cmd = "with open('%s') as f:\n while 1:\n" "  b=f.read(%u)\n  if not b:break\n  print(b,end='')" % (src, chunk_size)
         self.exec_(cmd, data_consumer=stdout_write_bytes)
 
     def fs_get(self, src, dest, chunk_size=256):
@@ -703,9 +695,7 @@ def main():
 
     # open the connection to the pyboard
     try:
-        pyb = Pyboard(
-            args.device, args.baudrate, args.user, args.password, args.wait, args.exclusive
-        )
+        pyb = Pyboard(args.device, args.baudrate, args.user, args.password, args.wait, args.exclusive)
     except PyboardError as er:
         print(er)
         sys.exit(1)
@@ -724,9 +714,7 @@ def main():
         def execbuffer(buf):
             try:
                 if args.follow is None or args.follow:
-                    ret, ret_err = pyb.exec_raw(
-                        buf, timeout=None, data_consumer=stdout_write_bytes
-                    )
+                    ret, ret_err = pyb.exec_raw(buf, timeout=None, data_consumer=stdout_write_bytes)
                 else:
                     pyb.exec_raw_no_follow(buf)
                     ret_err = None
