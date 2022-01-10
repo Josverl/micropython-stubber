@@ -171,7 +171,6 @@ class Stubber:
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append({"module": module_name, "file": file_name})
-        print({"module": module_name, "file": file_name})
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
@@ -326,6 +325,7 @@ class Stubber:
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
+        print("Report to :", f_name)
         gc.collect()
         try:
             # write json by node to reduce memory requirements
@@ -487,18 +487,17 @@ def _info():
 
 def get_root() -> str:
     "Determine the root folder of the device"
-    r = "/flash"
     try:
-        _ = os.stat(r)
-    except OSError as e:
-        if e.args[0] == ENOENT:
-            try:
-                r = os.getcwd()
-            except (OSError, AttributeError):
-                # unix port
-                r = "."
-        else:
-            r = "/"
+        c = os.getcwd()
+    except (OSError, AttributeError):
+        # unix port
+        c = "."
+    for r in [c, "/sd", "/flash", "/", "."]:
+        try:
+            _ = os.stat(r)
+            break
+        except OSError as e:
+            continue
     return r
 
 

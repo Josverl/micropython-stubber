@@ -508,18 +508,17 @@ def _info():
 
 def get_root() -> str:
     "Determine the root folder of the device"
-    r = "/flash"
     try:
-        _ = os.stat(r)
-    except OSError as e:
-        if e.args[0] == ENOENT:
-            try:
-                r = os.getcwd()
-            except (OSError, AttributeError):
-                # unix port
-                r = "."
-        else:
-            r = "/"
+        c = os.getcwd()
+    except (OSError, AttributeError):
+        # unix port
+        c = "."
+    for r in [c, "/sd", "/flash", "/", "."]:
+        try:
+            _ = os.stat(r)
+            break
+        except OSError as e:
+            continue
     return r
 
 
