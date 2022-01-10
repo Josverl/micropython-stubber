@@ -10,7 +10,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -85,7 +85,6 @@ class Stubber:
                 _result.append((name, repr(val), repr(type(val)), val))
             except AttributeError as e:
                 _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
-
         # remove internal __
         _result = [i for i in _result if not (i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
@@ -165,7 +164,6 @@ class Stubber:
         with open(file_name, "w") as fp:
             # todo: improve header
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
-
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -325,7 +323,6 @@ class Stubber:
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
-        print("Report to :", f_name)
         gc.collect()
         try:
             # write json by node to reduce memory requirements
