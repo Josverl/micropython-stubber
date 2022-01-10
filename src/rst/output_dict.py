@@ -28,7 +28,7 @@ FunctionSourceDict represents a source file with the following components
     - optional: individual lines of code 
 
 SourceDict is the 'base class' 
-it 
+
 """
 from __future__ import annotations
 
@@ -233,8 +233,11 @@ class ModuleSourceDict(SourceDict):
         "add a [list of] imports this module"
         _imports = self["imports"] or []
         if isinstance(imports, str):
-            _imports += [imports]
-        elif isinstance(imports, list):
+            imports = [imports]
+        if "from __future__ import annotations" in imports:
+            # from future ... must be the first import
+            _imports = imports + _imports
+        else:
             _imports += imports
         self.update({"imports": _imports})
 
