@@ -32,7 +32,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.

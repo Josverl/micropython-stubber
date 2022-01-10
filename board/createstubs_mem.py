@@ -22,7 +22,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -181,7 +181,6 @@ class Stubber:
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append({"module": module_name, "file": file_name})
-        print({"module": module_name, "file": file_name})
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
