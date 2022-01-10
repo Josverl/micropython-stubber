@@ -28,7 +28,7 @@ function Get-SerialPort {
                 # Pyboard 
                 if ($ID.startsWith("USB\VID_F055&PID_9800")) {
                     #TODO : determine Pyboard version 
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name "Chip" -Value "Pyb1.1" 
+                    Add-Member -InputObject $_ -MemberType NoteProperty -Name "Chip" -Value "pyb11" 
                     break
                 }
             }

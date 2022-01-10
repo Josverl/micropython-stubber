@@ -203,133 +203,145 @@ function download_stubs {
     return $LASTEXITCODE -eq 0
 }
 
+function DetectDevices {
+    param (
+    )
+    Write-Host -ForegroundColor Cyan "Detecting devices...."
+    # find ESP 
+    $devices = Get-SerialPort -chip  
+    $devices = $devices | Where-Object { $_.chip }
+    # $devices = $devices | Where-Object { $_.chip -and $_.chip.ToLower().StartsWith('esp') }
+    if (-not $devices) {
+        Write-Error "No ESP devices connected"
+    }
+    return $devices
+}
+
+# todo: find WSroot automatically
+$WSRoot = "C:\develop\MyPython\micropython-stubber"
+function stub_all {
+    param (
+        $download_path = (join-path -Path $WSRoot -ChildPath "stubs/machine-stubs"),
+        $pyboard_py = (join-path $WSRoot "src/libs/pyboard.py" ),
+        $update_pyi_py = (join-path $WSRoot "src/update_pyi.py" )
+    )
+    
+
+    # use the local microython pyboard script , not the old version from PyPi 
+    # note multiple versions of pyboard are present 
+    #  - micropython/tools/pyboard.py - has simple file transfer options 
+    #  - rshell can copy folders 
+    #  - pyboard is install as part of rshell but cannot copy files 
+
+    Clear-Host 
+    $devices = @(DetectDevices)
+
+    $all_versions = @( 
+        
+        @{version = "v1.17"; chip = "esp8266"; } ,
+        @{version = "v1.16"; chip = "esp8266"; } ,
+        @{version = "v1.15"; chip = "esp8266"; } ,
+        @{version = "v1.14"; chip = "esp8266"; } ,
+        @{version = "v1.13"; chip = "esp8266"; nightly = $true }
+        # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
+        # Older versions need a different version of mpy-cross cross compiler
+        # @{version = "v1.11"; chip = "esp8266"; } ,
+        # @{version = "v1.10"; chip = "esp8266"; } ,    
+
+        
+        @{version = "v1.17"; chip = "esp32"; },
+        @{version = "v1.16"; chip = "esp32"; },
+        @{version = "v1.15"; chip = "esp32"; },
+        @{version = "v1.14"; chip = "esp32"; },
+        @{version = "v1.13"; chip = "esp32"; nightly = $true },
+        @{version = "v1.12"; chip = "esp32"; },
+        @{version = "v1.11"; chip = "esp32"; },
+        @{version = "v1.10"; chip = "esp32"; },
 
 
+        @{version = "v1.17"; chip = "pyb11"; }
+    )
+
+
+
+    $results = @()
+        
+    foreach ($fw in $all_versions) {
+        $result = $fw
+        $result.Flash = "-"
+        $result.Reset = "-"
+        $result.Stub = "-"
+        $result.Download = "-"
+        $result.Error = "-"
+        $device = $devices | Where-Object { $_.chip -and $_.chip.ToLower() -eq $fw.chip } | Select-Object -First 1
+        if (-not $device) {
+
+            $result.Error = "No '$($fw.chip)' device connected , skipping Flashing firmware $($fw.chip) $($fw.version)"
+            Write-Warning $result.Error
+            $results += $result
+            continue
+                
+        }
+        $serialport = $device.port
+        Write-Host -ForegroundColor Cyan "Found an $($device.chip) device connected to $serialport"
+        # 1) Flash a firmware
+
+        Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Flashing firmware on the device"
+        ..\..\FIRMWARE\flash_MPY.ps1 -serialport $serialport -KeepFlash:$false  @fw
+        $result.Flash = "OK"
+        
+        # 2) restart MCU
+        Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Restart device after flashing ..."
+        $OK = restart-MCU -serialport $serialport
+        if (-not $OK) {
+            Write-Warning "$($serialport, $fw.chip, $fw.version) -Problem restarting the MCU "
+            $result.Reset = "?"
+        }
+        else {
+            $result.Reset = "OK"
+        }
+
+        # 3) upload & run stubber
+        Write-Host -ForegroundColor Cyan "Starting createstubs.py"
+        $OK = run_stubber -serialport $serialport -chip $fw.chip
+        if (-not $OK) {
+            Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem running Stubber"
+            $result.Stub = "Error"
+            $results += $result
+            continue
+        }
+        else {
+            $result.Stub = "OK"
+        }
+
+        # 4) download the stubs 
+
+        Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Downloading the machine stubs"
+        $OK = download_stubs -serialport $serialport -path $download_path
+        if (-not $OK) {
+            Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem downloading the machine stubs"
+            $result.Download = "Error"
+            $results += $result
+            continue
+        } 
+        $result.Download = "OK"
+        # Add to done
+        $results += $result
+    }
+
+    # now generate .pyi files 
+    python $update_pyi_py $download_path
+    # and run black formatting across all 
+    black $download_path
+
+    return $results
+
+}
+
+ 
 # Save this spot
 Push-Location -StackName "start-remote-stubber"
-
-# $cwd = Get-Location
-$WSRoot = "C:\develop\MyPython\micropython-stubber"
-$download_path = (join-path -Path $WSRoot -ChildPath "stubs/machine-stubs")
-
-# use the local microython pyboard script , not the old version from PyPi 
-# note multiple versions of pyboard are present 
-#  - micropython/tools/pyboard.py - has simple file transfer options 
-#  - rshell can copy folders 
-#  - pyboard is install as part of rshell but cannot copy files 
-
-$pyboard_py = join-path $WSRoot "src/libs/pyboard.py" 
-$update_pyi_py = join-path $WSRoot "src/update_pyi.py" 
-
-
-Clear-Host 
-Write-Host -ForegroundColor Cyan "Detecting devices...."
-
-$devices = Get-SerialPort -chip  | Where-Object { $_.chip -and $_.chip.ToLower().StartsWith('esp') }
-if (-not $devices) {
-    Write-Error "No ESP devices connected"
-    exit -1
-}
-$devices | Select -Property Chip, Port, Service , Description | Out-Host
-
-
-$all_versions = @( 
-    
-    @{version = "v1.17"; chip = "esp8266"; } ,
-    @{version = "v1.16"; chip = "esp8266"; } ,
-    @{version = "v1.15"; chip = "esp8266"; } ,
-    @{version = "v1.14"; chip = "esp8266"; } ,
-    @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-    # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
-    # Older versions need a different version of mpy-cross cross compiler
-    # @{version = "v1.11"; chip = "esp8266"; } ,
-    # @{version = "v1.10"; chip = "esp8266"; } ,    
-    # @{version = "v1.10"; chip = "esp8266"; },
-
-    #     @{version = "v1.9.4"; chip = "esp32"; "NoSpiram" = $true },
-    @{version = "v1.10"; chip = "esp32"; },
-    @{version = "v1.11"; chip = "esp32"; },
-
-    @{version = "v1.17"; chip = "esp32"; },
-    @{version = "v1.16"; chip = "esp32"; },
-    @{version = "v1.15"; chip = "esp32"; },
-    @{version = "v1.14"; chip = "esp32"; },
-    @{version = "v1.13"; chip = "esp32"; nightly = $true },
-    @{version = "v1.12"; chip = "esp32"; }
-)
-
-
-
-$results = @()
-    
-foreach ($fw in $all_versions) {
-    $result = $fw
-    $result.Flash = "-"
-    $result.Reset = "-"
-    $result.Stub = "-"
-    $result.Download = "-"
-    $result.Error = "-"
-    $device = $devices | Where-Object { $_.chip -and $_.chip.ToLower() -eq $fw.chip } | Select-Object -First 1
-    if (-not $device) {
-
-        $result.Error = "No '$($fw.chip)' device connected , skipping Flashing firmware $($fw.chip) $($fw.version)"
-        Write-Warning $result.Error
-        $results += $result
-        continue
-            
-    }
-    $serialport = $device.port
-    Write-Host -ForegroundColor Cyan "Found an $($device.chip) device connected to $serialport"
-    # 1) Flash a firmware
-
-    Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Flashing firmware on the device"
-    ..\..\FIRMWARE\flash_MPY.ps1 -serialport $serialport -KeepFlash:$false  @fw
-    $result.Flash = "OK"
-    
-    # 2) restart MCU
-    Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Restart device after flashing ..."
-    $OK = restart-MCU -serialport $serialport
-    if (-not $OK) {
-        Write-Warning "$($serialport, $fw.chip, $fw.version) -Problem restarting the MCU "
-        $result.Reset = "?"
-    }
-    else {
-        $result.Reset = "OK"
-    }
-
-    # 3) upload & run stubber
-    Write-Host -ForegroundColor Cyan "Starting createstubs.py"
-    $OK = run_stubber -serialport $serialport -chip $fw.chip
-    if (-not $OK) {
-        Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem running Stubber"
-        $result.Stub = "Error"
-        $results += $result
-        continue
-    }
-    else {
-        $result.Stub = "OK"
-    }
-
-    # 4) download the stubs 
-
-    Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Downloading the machine stubs"
-    $OK = download_stubs -serialport $serialport -path $download_path
-    if (-not $OK) {
-        Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem downloading the machine stubs"
-        $result.Download = "Error"
-        $results += $result
-        continue
-    } 
-    $result.Download = "OK"
-    # Add to done
-    $results += $result
-}
-
-# now generate .pyi files 
-python $update_pyi_py $download_path
-# and run black formatting across all 
-black $download_path
-
+$results = stub_all
 Pop-Location  -StackName "start-remote-stubber"
 
 Write-host -ForegroundColor Cyan "Finished processing: flash, reset, stubbing  and download :"
@@ -338,3 +350,4 @@ $results = $results | ForEach-Object { new-object psobject -property $_ }
 # basic output
 $results | FT | Out-Host
 $results | ConvertTo-json | Out-File bulk_stubber.json
+
