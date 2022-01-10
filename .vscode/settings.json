@@ -91,4 +91,5 @@
         "titleBar.inactiveBackground": "#61320699",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
+    "python.terminal.activateEnvInCurrentTerminal": true,
 }

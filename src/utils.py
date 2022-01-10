@@ -17,8 +17,6 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 STUB_FOLDER = "./all-stubs"
-
-
 LATEST = "Latest"
 
 
@@ -64,14 +62,6 @@ def clean_version(
 def stubfolder(path: str) -> str:
     "return path in the stub folder"
     return "{}/{}".format(STUB_FOLDER, path)
-
-
-def flat_version(version: str, keep_v: bool = False):
-    "Turn version from 'v1.2.3' into '1_2_3' to be used in filename"
-    version = version.strip().replace(".", "_")
-    if not keep_v:
-        version = version.lstrip("v")
-    return version
 
 
 def cleanup(modules_folder: Path, all_pyi: bool = False):
@@ -156,7 +146,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     else:  # one or less module manifests
         ## generate fyi files for folder
         # clean before to clean any old stuff
-        # TODO: CLean out the old pyi files
         cleanup(modules_folder, all_pyi=True)
 
         print("::group::[stubgen] running stubgen on {0}".format(modules_folder))
@@ -211,6 +200,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         return True
 
 
+# TODO:
 def manifest(
     family: str = "micropython",
     stubtype: str = "frozen",
@@ -223,25 +213,17 @@ def manifest(
     release: Optional[str] = None,
     firmware: Optional[str] = None,
 ) -> dict:
-
     "create a new empty manifest dict"
-    if machine is None:
-        machine = family  # family
 
-    if port is None:
-        port = "common"  # family
-    if platform is None:
-        platform = port  # family
-
-    if version is None:
-        version = "0.0.0"
-
-    if nodename is None:
-        nodename = sysname
-    if release is None:
-        release = version
+    machine = machine or family  # family
+    port = port or "common"  # family
+    platform = platform or port  # family
+    version = version or "0.0.0"
+    sysname = sysname or ""
+    nodename = nodename or sysname or ""
+    release = release or version or ""
     if firmware is None:
-        firmware = "{}-{}-{}".format(family, port, flat_version(version))
+        firmware = "{}-{}-{}".format(family, port, clean_version(version, flat=True))
 
     mod_manifest = {
         "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json",
@@ -268,7 +250,6 @@ def manifest(
 def make_manifest(folder: Path, family: str, port: str, version: str, release: str = "", stubtype: str = "", board: str = "") -> bool:
     """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
     mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, release=release, stubtype=stubtype)
-    modules = []
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
         # sort the list

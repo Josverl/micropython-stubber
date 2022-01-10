@@ -1,5 +1,27 @@
 
 # changelog 
+# Naming convention
+- use {family}-v{version}-{port} notation across all scripts and tools
+- updated documentation accordingly 
+- single function to handle version names in various formats (clean_version)
+- requirements: pin dependencies to avoid differences when running acriss multiple machines.
+- get_mpy_frozen: 
+    - refactor module
+    - checkout the matching commit of micropython-lib 
+      withouth this it is not possible to build stubs older versions due to a restructure of micropython-lib
+- bulk_stubber: 
+    - make more robust by including depedencies in the project.
+    - detect pyboard based on USB VID & PID
+    - prep autostubber for pybv11
+- manifest.json generation
+    - improve core manifest.json information 
+    - improve support for grouping and sorting 
+- createstubs: v1.5.1
+    - get_root can detect /sd cards
+    - sample bootfile works on pyb1.1, esp323, esp8266
+
+## generate stubs from documentation 
+
 ## betterstubs branch
 - createstubs  - version 1.3.16
     - fix for 1.16 
