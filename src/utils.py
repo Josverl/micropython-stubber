@@ -124,6 +124,12 @@ def generate_pyi_from_file(file: Path) -> bool:
     sg_opt.output_dir = str(file.parent)
     try:
         print(f"Calling stubgen on {str(file)}")
+        # WORKAROUND: Stubgen.generate_stubs does not provide a way to return the errors
+        # such as `cannot perform relative import`
+        # UPSTREAM: robust.py needs this to do a relative import
+        if file.name == "robust.py" and file.parent.name == "umqtt":
+            with open(file.with_name("__init__.py"), "a") as init:
+                init.write("# force __init__.py")
         stubgen.generate_stubs(sg_opt)
         return True
     except (Exception, CompileError, SystemExit) as e:
@@ -254,7 +260,7 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
         # list all *.py files, not strictly modules but decent enough for documentation
         # sort the list
         for file in sorted(folder.glob("**/*.py")):
-            mod_manifest["modules"].append({"file": str(file.relative_to(folder)), "module": file.stem})
+            mod_manifest["modules"].append({"file": str(file.relative_to(folder).as_posix()), "module": file.stem})
 
         # write the the module manifest
         with open(os.path.join(folder, "modules.json"), "w") as outfile:
