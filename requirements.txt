@@ -10,7 +10,7 @@ mpy-cross == 1.16
 # Bulk stubber
 black   == 21.12b0
 esptool == 3.2
-rshell  == 0.0.30
+rshell  == 0.0.31
 
 # stub refactoring
 libcst  == 0.3.23
