@@ -753,6 +753,18 @@ def generate_from_rst(
         reader.write_file((dst_path / file.name).with_suffix(".py"))
         del reader
 
+    # run autoflake to remove unused imports
+    # needs to be run BEFORE black otherwise it does not recognize long import froms.
+    cmd = [
+        "autoflake",
+        "-r",
+        "--in-place",
+        dst_path.as_posix(),
+        "-v",
+        "-v",  # show some feedback
+    ]
+    subprocess.run(cmd)
+
     if black:
         try:
             cmd = ["black", str(dst_path), "--include", "\\.py$"]
