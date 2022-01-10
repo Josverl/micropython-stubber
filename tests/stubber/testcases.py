@@ -88,24 +88,24 @@ pyb1_v1_13 = UName(
 )
 
 # TODO: add support for -Latest
-# ('micropython-esp32-1.13-latest', 'micropython', 'esp32', mpy_v1_13_build),
+# ('micropython-1.13-latest-esp32', 'micropython', 'esp32', mpy_v1_13_build),
 fwid_test_cases = [
     # mpy esp32
-    ("micropython-esp32-1.9.4", "micropython", "esp32", mpy_v1_9_4),
-    ("micropython-esp32-1.10", "micropython", "esp32", mpy_v1_10),
-    ("micropython-esp32-1.13-103", "micropython", "esp32", mpy_v1_13_build),
+    ("micropython-v1.9.4-esp32", "micropython", "esp32", mpy_v1_9_4),
+    ("micropython-v1.10-esp32", "micropython", "esp32", mpy_v1_10),
+    ("micropython-v1.13-103-esp32", "micropython", "esp32", mpy_v1_13_build),
     # mpy esp8622
-    ("micropython-esp8622-1.11", "micropython", "esp8622", mpy_v1_11_esp8622),
-    ("micropython-esp8622-1.11-8", "micropython", "esp8622", mpy_v1_11_8_esp8622),
-    ("micropython-esp8622-1.17", "micropython", "esp8622", mpy_v1_17_esp8622),
+    ("micropython-v1.11-esp8622", "micropython", "esp8622", mpy_v1_11_esp8622),
+    ("micropython-v1.11-8-esp8622", "micropython", "esp8622", mpy_v1_11_8_esp8622),
+    ("micropython-v1.17-esp8622", "micropython", "esp8622", mpy_v1_17_esp8622),
     # mpy pyb1
-    ("micropython-pyb1-1.13-95", "micropython", "pyb1", pyb1_v1_13),
+    ("micropython-v1.13-95-pyb1", "micropython", "pyb1", pyb1_v1_13),
     # lobo
-    ("loboris-esp32-v3.2.24", "micropython", "esp32_LoBo", lobo),
-    ("loboris-esp32-v3.2.24", "micropython", "esp32_LoBo", lobo_bt_ram),
+    ("loboris-v3.2.24-esp32", "micropython", "esp32_LoBo", lobo),
+    ("loboris-v3.2.24-esp32", "micropython", "esp32_LoBo", lobo_bt_ram),
     # ev3_pybricks_1_0_0
     (
-        "ev3-pybricks-linux-1.0.0",
+        "ev3-pybricks-v1.0.0-linux",
         "",
         "linux",
         UName(machine="ev3", nodename="ev3", release=None, sysname="ev3", version=None),

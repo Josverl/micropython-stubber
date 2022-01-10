@@ -87,7 +87,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: Unit Test Results (Python ${{ matrix.python-version }})
+          name: Unit Test Results (Python ${{ matrix.python-version }}-${{ matrix.os }})
           path: junit/test-results*.xml
 
       # # https://github.com/marketplace/actions/publish-unit-test-results

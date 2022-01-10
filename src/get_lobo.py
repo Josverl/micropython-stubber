@@ -24,7 +24,7 @@ log.setLevel(level=logging.INFO)
 def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
     "Loboris frozen modules"
     if stub_path is None:
-        stub_path = Path("./all-stubs") / "{}-{}-frozen".format(FAMILY, utils.flat_version(version))
+        stub_path = Path("./all-stubs") / "{}-{}-frozen".format(FAMILY, utils.clean_version(version, flat=True))
     else:
         stub_path = Path(stub_path)
 

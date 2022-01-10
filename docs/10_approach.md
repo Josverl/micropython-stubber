@@ -42,11 +42,11 @@ Note that for some modules (such as the  `gc`, `time`  and `sys` modules) this a
 5. Due to the method of generation nested modules are included, rather than referenced. While this leads to somewhat larger stubs, this should not be limiting for using the stubs on a PC.  
 6. 
 
-##  Firmware naming convention 
+##  Stub  naming convention 
 
 The firmware naming conventions is most relevant to provide clear folder names when selecting which stubs to use.
 
-for stubfiles: {**firmware**}-{port}-{version}[-{build}]
+for stubfiles: {**firmware**}-{version}-{port}
 
 for frozen modules : {firmware}-{version}-frozen
 
@@ -55,10 +55,10 @@ for frozen modules : {firmware}-{version}-frozen
 * ***port***: lowercase , as reported by os.implementation.platform 
   * esp32 | linux | win32 | esp32_lobo
 * ***version*** : digits only , dots replaced by underscore, follow version in documentation rather than semver 
-  * 1_13
-  * 1_9_4
-* ***build***, only for nightly build, the build nr. extracted from the git tag 
-  * Nothing , for released versions
-  * 103 
-  * N ( short notation)
+  * v1_13
+  * v1_9_4
+  * ***build***, only for nightly build, the build nr. extracted from the git tag 
+    * Nothing , for released versions
+    * 103 
+    * Latest
 

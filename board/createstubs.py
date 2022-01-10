@@ -10,7 +10,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.4.4"
+__version__ = "1.5.1"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -39,7 +39,7 @@ class Stubber:
         if firmware_id:
             self._fwid = str(firmware_id).lower()
         else:
-            self._fwid = "{family}-{port}-{ver}".format(**self.info).lower()
+            self._fwid = "{family}-{ver}-{port}".format(**self.info).lower()
         self._start_free = gc.mem_free()  # type: ignore
 
         if path:
@@ -85,7 +85,6 @@ class Stubber:
                 _result.append((name, repr(val), repr(type(val)), val))
             except AttributeError as e:
                 _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
-
         # remove internal __
         _result = [i for i in _result if not (i[0].startswith("_") and i[0] != "__init__")]
         gc.collect()
@@ -165,13 +164,11 @@ class Stubber:
         with open(file_name, "w") as fp:
             # todo: improve header
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
-
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append({"module": module_name, "file": file_name})
-        print({"module": module_name, "file": file_name})
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
@@ -452,7 +449,7 @@ def _info():
     # version info
     if info["release"]:
         info["ver"] = "v" + info["release"].lstrip("v")
-    if info["family"] != "loboris":
+    if info["family"] == "micropython":
         if info["release"] and info["release"] >= "1.10.0" and info["release"].endswith(".0"):
             # drop the .0 for newer releases
             info["ver"] = info["release"][:-2]
@@ -461,6 +458,8 @@ def _info():
         # add the build nr, but avoid a git commit-id
         if info["build"] != "" and len(info["build"]) < 4:
             info["ver"] += "-" + info["build"]
+    if info["ver"][0] != "v":
+        info["ver"] = "v" + info["ver"]
     # spell-checker: disable
     if "mpy" in info:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
@@ -485,18 +484,17 @@ def _info():
 
 def get_root() -> str:
     "Determine the root folder of the device"
-    r = "/flash"
     try:
-        _ = os.stat(r)
-    except OSError as e:
-        if e.args[0] == ENOENT:
-            try:
-                r = os.getcwd()
-            except (OSError, AttributeError):
-                # unix port
-                r = "."
-        else:
-            r = "/"
+        c = os.getcwd()
+    except (OSError, AttributeError):
+        # unix port
+        c = "."
+    for r in [c, "/sd", "/flash", "/", "."]:
+        try:
+            _ = os.stat(r)
+            break
+        except OSError as e:
+            continue
     return r
 
 

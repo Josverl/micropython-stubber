@@ -57,15 +57,15 @@ def test_extract_target_names(path, port, board):
     assert _port == port
 
 
-@pytest.mark.basicgit
-def test_freezer_mpy_manifest(tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
+# @pytest.mark.basicgit
+@pytest.mark.slow
+@pytest.mark.parametrize("mpy_version", ["v1.12", "v1.13", "v1.15", "v1.16", "master"])
+def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if we can freeze source using manifest.py files"
     # mpy_path = Path(testrepo_micropython)
     # mpy_lib = Path(testrepo_micropython_lib)
     mpy_path = testrepo_micropython.as_posix()
     mpy_lib = testrepo_micropython_lib.as_posix()
-    # mpy version must be at 1.12 or newer
-    mpy_version = "v1.12"
 
     version = git.get_tag(mpy_path)
     if not version or version < mpy_version:
@@ -80,13 +80,13 @@ def test_freezer_mpy_manifest(tmp_path: Path, testrepo_micropython: Path, testre
     assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
 
 
-@pytest.mark.basicgit
-def test_freezer_mpy_folders(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
+# @pytest.mark.basicgit
+@pytest.mark.slow
+@pytest.mark.parametrize("mpy_version", ["v1.10", "v1.9.4"])
+def test_freezer_mpy_folders(mpy_version, tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if we can freeze source using modules folders"
     mpy_path = testrepo_micropython.as_posix()
 
-    # mpy version must not be older than 1.12 ( so use 1.10)
-    mpy_version = "v1.10"
     version_x = version = git.get_tag(mpy_path)
     if version != mpy_version:
         git.checkout_tag(mpy_version, mpy_path)

@@ -10,7 +10,7 @@ if not sys.warnoptions:
 
 # Dependencies
 import basicgit as git
-from utils import clean_version, flat_version
+from utils import clean_version
 
 # Module Under Test
 import get_mpy
@@ -32,7 +32,7 @@ def test_get_mpy(tmp_path):
     print("found micropython version : {}".format(version))
     # folder/{family}-{version}-frozen
     family = "micropython"
-    stub_path = "{}-{}-frozen".format(family, flat_version(version))
+    stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
     get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
 
     modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))

@@ -4,7 +4,6 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 """
 
 import os
-import glob
 import shutil
 import subprocess
 import logging
@@ -16,10 +15,8 @@ from version import __version__
 
 log = logging.getLogger(__name__)
 
-family = "common"
 
-
-def get_core(requirements, stub_path=None):
+def get_core(requirements, stub_path=None, family: str = "core"):
     "Download MicroPython compatibility modules"
     if not stub_path:
         stub_path = "./all-stubs/cpython-core"
@@ -66,7 +63,7 @@ def get_core(requirements, stub_path=None):
     # remove build folder
     shutil.rmtree(build_path, ignore_errors=True)
     # build modules.json
-    mod_manifest = utils.manifest(machine=family, version=__version__)
+    mod_manifest = utils.manifest(family="cpython-core", port=family, version=__version__, stubtype="core", platform="cpython")
     mod_manifest["modules"] += modlist
 
     if mod_manifest and len(modlist):

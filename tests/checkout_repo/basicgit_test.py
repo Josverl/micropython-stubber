@@ -43,6 +43,7 @@ def test_get_tag_latest():
 
     result = subprocess.run(["git", "switch", "main", "--force"], capture_output=True, check=True, cwd=repo.as_posix())
 
+    assert result.stderr == 0
     # get tag of current repro
     tag = git.get_tag("./micropython")
     assert tag == "latest"
