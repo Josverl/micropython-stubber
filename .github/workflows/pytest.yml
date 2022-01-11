@@ -101,7 +101,7 @@ jobs:
 
       - name: Push result to Testspace server
         run: |
-          testspace junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          testspace [Python ${{ matrix.python-version }}/${{ matrix.os }}]junit/test-results-*.xml
         if: always()
 
 
