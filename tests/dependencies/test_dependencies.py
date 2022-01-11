@@ -1,5 +1,7 @@
 import pytest
 import subprocess
+from packaging import version
+
 
 def test_black_installed():
     "Check if black is installed and can be run"
@@ -18,9 +20,8 @@ def test_pyright_installed():
     assert version.parse(ver) > version.parse("1.1")
 
 
-def test_mpy-cross_installed():
+def test_mpy_cross_installed():
     "Check if mpy-cross can be installed and run"
     cmd = ["mpy-cross", "--version"]
     result = subprocess.run(cmd, capture_output=True)
     assert "mpy-cross emitting mpy v5" in result.stdout.decode("utf-8")
-
