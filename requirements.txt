@@ -1,6 +1,6 @@
 #production requirements
 python-minifier == 2.5.0
-requests == 2.27.0
+requests == 2.27.1
 mypy == 0.931
 
 # Cross compilation 
