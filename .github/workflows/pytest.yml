@@ -12,8 +12,8 @@ on:
       - 'readme.md'
       - 'changelog.md'
 
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   run_tests:
