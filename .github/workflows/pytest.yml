@@ -90,20 +90,16 @@ jobs:
           name: Unit Test Results (Python ${{ matrix.python-version }}-${{ matrix.os }})
           path: junit/test-results*.xml
 
-      # # https://github.com/marketplace/actions/publish-unit-test-results
-      # - name: Publish Unit Test Results
-      #   uses: EnricoMi/publish-unit-test-result-action@v1
-      #   if: always()
-      #   with:
-      #     files: junit/test-results*.xml
 
-      # - name: Upload pytest test results
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: pytest-results-${{ matrix.python-version }}
-      #     path: junit/test-results-${{ matrix.python-version }}.xml
-      #   # Use always() to always run this step to publish test results when there are test failures
-      #   if: always()
+      - uses: testspace-com/setup-testspace@v1
+        with:
+          domain: josverl
+
+      - name: Push result to Testspace server
+        run: |
+          testspace junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+        if: always()
+
 
   publish-test-results:
     name: "Publish Unit Tests Results"
