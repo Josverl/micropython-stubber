@@ -8,7 +8,11 @@ name: pytest
 on:
   workflow_dispatch:
   push:
-  pull_request:
+    paths-ignore:
+      - 'readme.md'
+      - 'changelog.md'
+
+  # pull_request:
   #   branches: [ main ]
 
 jobs:
