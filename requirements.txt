@@ -1,5 +1,4 @@
 #production requirements
-
 python-minifier == 2.5.0
 requests == 2.27.0
 mypy == 0.931
@@ -15,5 +14,7 @@ rshell  == 0.0.31
 # stub refactoring
 libcst  == 0.3.23
 
+# Docstubs
+autoflake == 1.4
 
 click == 8.0.3
