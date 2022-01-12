@@ -88,20 +88,6 @@ jobs:
           coverage run -m pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
           coverage xml -o coverage.xml
 
-      - name: Upload Unit Test Results
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: Unit Test Results (Python ${{ matrix.python-version }}-${{ matrix.os }})
-          path: junit/test-results*.xml
-
-      - name: Upload Test Coverage
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          path: coverage.xml
-
-
       - uses: testspace-com/setup-testspace@v1
         with:
           domain: josverl
@@ -111,22 +97,3 @@ jobs:
           testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]junit/test-results-*.xml
           testspace --link codecov coverage.xml
         if: always()
-
-
-  publish-test-results:
-    name: "Publish Unit Tests Results"
-    needs: run_tests
-    runs-on: ubuntu-latest
-    # the run_tests job might be skipped, we don't need to run this job then
-    if: success() || failure()
-
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: artifacts
-
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        with:
-          files: artifacts/**/*.xml
