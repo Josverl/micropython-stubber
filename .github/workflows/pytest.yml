@@ -86,6 +86,7 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run -m pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          coverage xml -o coverage.xml
 
       - name: Upload Unit Test Results
         if: always()
@@ -94,6 +95,12 @@ jobs:
           name: Unit Test Results (Python ${{ matrix.python-version }}-${{ matrix.os }})
           path: junit/test-results*.xml
 
+      - name: Upload Test Coverage
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          path: coverage.xml
+
 
       - uses: testspace-com/setup-testspace@v1
         with:
@@ -101,7 +108,8 @@ jobs:
 
       - name: Push result to Testspace server
         run: |
-          testspace [Python_${{ matrix.python-version }}/${{ matrix.os }}]junit/test-results-*.xml
+          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]junit/test-results-*.xml
+          testspace --link codecov coverage.xml
         if: always()
 
 
