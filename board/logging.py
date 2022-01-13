@@ -60,12 +60,12 @@ class Logger:
     def critical(self, msg, *args):
         self.log(CRITICAL, msg, *args)
 
-    def exc(self, e, msg, *args):
-        self.log(ERROR, msg, *args)
-        sys.print_exception(e, _stream)  # pylint: disable=no-member
+    # def exc(self, e, msg, *args):
+    #     self.log(ERROR, msg, *args)
+    #     sys.print_exception(e, _stream)  # type : disable
 
     def exception(self, msg, *args):
-        self.exc(sys.exc_info()[1], msg, *args)
+        self.critical(sys.exc_info()[1], msg, *args)
 
 
 _level = INFO

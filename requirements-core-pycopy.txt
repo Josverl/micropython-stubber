@@ -4,7 +4,7 @@
 pycopy-cpython-ffi
 pycopy-cpython-micropython
 pycopy-cpython-uarray
-pycopy-cpython-uasyncio
+# pycopy-cpython-uasyncio # too many changes
 pycopy-cpython-ucollections
 pycopy-cpython-uctypes
 pycopy-cpython-uerrno
@@ -13,7 +13,6 @@ pycopy-cpython-uio
 pycopy-cpython-ujson
 pycopy-cpython-ulogging
 pycopy-cpython-uos
-pycopy-cpython-upip
 pycopy-cpython-ure
 pycopy-cpython-uselect
 pycopy-cpython-usocket
@@ -22,6 +21,8 @@ pycopy-cpython-utime
 pycopy-cpython-utimeq
 pycopy-cpython-utokenize
 pycopy-cpython-uzlib
+
+# pycopy-cpython-upip # this is a tool , not a core library
 
 # below are on pypi ,but seem to be empty
 # pycopy-cpython-array

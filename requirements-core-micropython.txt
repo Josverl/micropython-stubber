@@ -3,8 +3,8 @@
 
 micropython-cpython-ffi
 micropython-cpython-micropython
-micropython-cpython-array   # differece pcopy - micropython
-micropython-cpython-uasyncio
+micropython-cpython-array   # difference pcopy - micropython
+# micropython-cpython-uasyncio  # the uasyncIO stub has errors and does not fit Asyncio v3 
 micropython-cpython-ucollections
 micropython-cpython-uctypes
 micropython-cpython-uerrno
@@ -13,7 +13,7 @@ micropython-cpython-uio
 micropython-cpython-ujson
 micropython-cpython-ulogging
 micropython-cpython-uos
-micropython-cpython-upip
+# micropython-cpython-upip  # not really part of the core 
 micropython-cpython-ure
 micropython-cpython-uselect
 micropython-cpython-usocket

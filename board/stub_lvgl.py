@@ -4,7 +4,7 @@ Note that the stubs can be very large, and it may be best to directly store them
 """
 
 try:
-    import lvgl
+    import lvgl  # type: ignore
 except Exception:
     print("\n\nNOTE: The `lvgl` module could not be found on this firmware\n\n")
 
