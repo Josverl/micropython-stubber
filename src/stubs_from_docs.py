@@ -200,7 +200,7 @@ class RSTReader:
         # ingore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
-        self.filename = filename
+        self.filename = filename.as_posix()  # use fwd slashes in origin
         self.max_line = len(self.rst_text) - 1
         self.current_module = filename.stem  # just to be sure
 
@@ -855,7 +855,7 @@ def cli_docstubs(
         # if we can't find a tag , bail
         raise ValueError
     v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
-    release = git.get_tag(rst_path.as_posix(), abbreviate=False)
+    release = git.get_tag(rst_path.as_posix(), abbreviate=False) or ""
 
     dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 
