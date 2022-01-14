@@ -159,7 +159,14 @@ PARAM_FIXES = [
         "trigger=IRQ_SM0 | IRQ_SM1 | IRQ_SM2 | IRQ_SM3",
         "trigger=IRQ_SM0",
     ),  ## rp2.PIO.irq
-    #            (), #
+    (
+        "prescaler, polarity=1",
+        "prescaler=1, polarity=1",
+    ),  # SPI.INIT - to fix error: Non-default argument follows default argument # TODO: Upstream Fix
+    (
+        ", value, drive, alt",
+        ", value=None, drive=None, alt=None",
+    ),  # Pin constructor - Defaults assumed from the documentation. # TODO: Upstream Fix
 ]
 
 # List of classes and their parent classes that should be added to the class definition
