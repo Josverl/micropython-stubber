@@ -155,18 +155,24 @@ PARAM_FIXES = [
         "pins=(SCK, MOSI, MISO)",
         "pins:Optional[Tuple]",
     ),  #
+    ## rp2.PIO.irq
     (
         "trigger=IRQ_SM0 | IRQ_SM1 | IRQ_SM2 | IRQ_SM3",
         "trigger=IRQ_SM0",
-    ),  ## rp2.PIO.irq
+    ),
+    # SPI.INIT - to fix error: Non-default argument follows default argument
+    # TODO: Upstream Fix
     (
         "prescaler, polarity=1",
         "prescaler=1, polarity=1",
-    ),  # SPI.INIT - to fix error: Non-default argument follows default argument # TODO: Upstream Fix
+    ),
+    # machine.Pin.__init__ constructor - Defaults assumed from the documentation.
+    # # TODO: Pin init differs per port : Search '// pin.init' in micropython repo for
+    # https://github.com/micropython/micropython/blob/b47b245c2eeb734f69d5445372d0947f1ea43259/ports/stm32/pin.c#L331-L339
     (
         ", value, drive, alt",
-        ", value=None, drive=None, alt=None",
-    ),  # Pin constructor - Defaults assumed from the documentation. # TODO: Upstream Fix
+        ", value=None, drive=-1, alt=-1",
+    ),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
