@@ -12,11 +12,12 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # pylint: disable= line-too-long, W1202
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-
+import sys
 from typing import List
 import logging
 import basicgit as git
 import utils
+import subprocess
 from pathlib import Path
 import click
 
@@ -48,6 +49,7 @@ MPY_LIB_FOLDER = "./micropython-lib"
 @click.option("--lobo", default=False, is_flag=True, help="Download the loboris frozen modules.")
 @click.option("--core", default=False, is_flag=True, help="Download the cpython core modules for both pycopy and micropython.")
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules")
+@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules")
 @click.option("--all", default=False, is_flag=True, help="Get all frozen modules")
 def get_all(
     stub_folder: str = STUB_FOLDER,
@@ -59,6 +61,7 @@ def get_all(
     mpy: bool = False,
     lobo: bool = False,
     pyi: bool = True,
+    black: bool = True,
     all: bool = False,
 ):
     "get all frozen modules for the current version of micropython"
@@ -96,10 +99,24 @@ def get_all(
         stub_paths.append(stub_path)
         get_lobo.get_frozen(str(stub_path))
 
-    if pyi:
-        for pth in stub_paths:
+    for pth in stub_paths:
+        if pyi:
             log.info("Generate type hint files (pyi) in folder: {}".format(pth))
             utils.generate_pyi_files(pth)
+        if black:
+            try:
+                cmd = ["black", str(pth), "--include", "\\.py$"]
+
+                if sys.version_info.major == 3 and sys.version_info.minor == 7:
+                    # black on python 3.7 does not like some function defs
+                    # def sizeof(struct, layout_type=NATIVE, /) -> int:
+                    cmd += ["--fast"]
+                # shell=false on ubuntu
+                result = subprocess.run(cmd, capture_output=False, check=True, shell=False)
+                if result.returncode != 0:
+                    raise Exception(result.stderr.decode("utf-8"))
+            except subprocess.SubprocessError:
+                log.error("some of the files are not in a proper format")
 
 
 if __name__ == "__main__":
