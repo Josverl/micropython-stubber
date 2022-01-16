@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 STUB_FOLDER = "./all-stubs"
-LATEST = "Latest"
 
 
 def clean_version(
@@ -47,7 +46,9 @@ def clean_version(
         else:
             version = "-".join(nibbles)
     else:
-        version = "-".join((nibbles[0], LATEST))
+        # version = "-".join((nibbles[0], LATEST))
+        # HACK: thi sis not always right, but good enough most of the time
+        version = "latest"
     if flat:
         version = version.strip().replace(".", "_")
     if drop_v:
