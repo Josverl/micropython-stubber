@@ -54,13 +54,17 @@ def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
     if abbreviate and "-" in tag:
         # this may or not be the latest on the main branch
         result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
+        result = _run_git(["git", "status", "--branch"], repo=repo, expect_stderr=True)
         if result:
-            ref: str = result.stdout.decode("utf-8").replace("\r", "").replace("\n", "")
-            if ref in ["main", "master"]:
-                tag = "latest"
-            elif ref in ["fix_lib_documentation"]:
-                tag = ref
+            lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
+            if lines[0].startswith("On branch"):
+                if lines[0].endswith("master"):
+                    tag = "latest"
+                elif lines[0].endswith("fix_lib_documentation"):
+                    tag = "fix_lib_documentation"
     return tag
+
+
 
 
 def checkout_tag(tag: str, repo: str = None) -> bool:
