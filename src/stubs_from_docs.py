@@ -87,6 +87,7 @@ from pathlib import Path
 import basicgit as git
 import utils
 import click
+from version import __version__
 
 from rst import (
     return_type_from_context,
@@ -848,7 +849,7 @@ def cli_docstubs(
     """
     if verbose:
         log.setLevel(logging.DEBUG)
-
+    print(f"stubs_from_docs version {__version__}\n")
     rst_path = Path(source)  #  / "docs"/"library"
     v_tag = git.get_tag(rst_path.as_posix())
     if not v_tag:
