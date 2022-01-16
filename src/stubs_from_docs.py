@@ -358,7 +358,8 @@ class RSTReader:
             parent = ""
             if name in CHILD_PARENT_CLASS.keys():
                 parent = CHILD_PARENT_CLASS[name]
-
+            if parent == "" and (name.endswith("Error") or name.endswith("Exception")):
+                parent = "Exception"
             class_def = ClassSourceDict(
                 f"class {name}({parent}):",
                 docstr=docstr,
