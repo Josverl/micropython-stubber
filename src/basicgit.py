@@ -18,12 +18,6 @@ def _run_git(cmd: List[str], repo: str = None, expect_stderr=False):
     except subprocess.CalledProcessError as e:
         # add some logging for github actions
         print("Exception on process, rc=", e.returncode, "output=", e.output)
-        if e.returncode == 128:
-            pwd = os.system("pwd")
-            print(f"current directory: {pwd}")
-            if repo:
-                cwd = os.path.abspath(repo)
-                print(f"git directory: {cwd}")
         return ""
     if result.stderr != b"":
         if not expect_stderr:
@@ -53,7 +47,7 @@ def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
     tag = tag.replace("\r", "").replace("\n", "")
     if abbreviate and "-" in tag:
         # this may or not be the latest on the main branch
-        result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
+        # result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
         result = _run_git(["git", "status", "--branch"], repo=repo, expect_stderr=True)
         if result:
             lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
@@ -63,8 +57,6 @@ def get_tag(repo: str = None, abbreviate: bool = True) -> Union[str, None]:
                 elif lines[0].endswith("fix_lib_documentation"):
                     tag = "fix_lib_documentation"
     return tag
-
-
 
 
 def checkout_tag(tag: str, repo: str = None) -> bool:
