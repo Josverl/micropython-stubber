@@ -15,7 +15,7 @@ from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
 MICROPYTHON_FOLDER = "micropython"
-
+TEST_DOCFIX = True
 
 
 ###################################################################################################
@@ -25,6 +25,7 @@ MICROPYTHON_FOLDER = "micropython"
 @pytest.fixture(scope="module")
 def pyright_results(rst_stubs):
     "Run pyright over folder with rst generated stubs, and return the results"
+    # TODO this fails if the nodeJS version of pyright is installed , and only works for the SLOWER pip install Pyright
 
     cmd = ["pyright", "--project", "tests/pyrightconfig.json", "--outputjson", rst_stubs.as_posix()]
     try:
@@ -36,22 +37,19 @@ def pyright_results(rst_stubs):
         results = json.loads(result.stdout)
     except Exception:
         assert 0, "Could not load pyright's JSON output :-("
-    # assert results["summary"]["filesAnalyzed"] >= 40, ">= 40 files checked"
     return results
-    # cleanup code here
 
 
 @pytest.fixture(scope="module")
 def micropython_repo():
     "make sure a recent branch is checked out"
-    git.switch_branch("main", MICROPYTHON_FOLDER)
-    TEST_DOCFIX = True
+    git.switch_branch("master", MICROPYTHON_FOLDER)
     if TEST_DOCFIX:
         # run test against the proposed documentation fixes
         try:
             git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
         except Exception:
-            git.switch_branch("main", MICROPYTHON_FOLDER)
+            git.switch_branch("master", MICROPYTHON_FOLDER)
 
     v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
     yield v_tag
@@ -313,7 +311,7 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     # TODO: 1 known issue
     # 'Cannot access member "MSB" for type "Type[SPI]" 'Member "MSB" is unknown'
-    assert len(issues) == 1, "there should be no type issues"
+    assert len(issues) == 1, "There should be no type issues"
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
@@ -328,7 +326,7 @@ def test_pyright_invalid_strings(pyright_results, capsys):
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
-    assert len(issues) == 0, "all string should be valid"
+    assert len(issues) == 0, "All strings should be valid"
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
