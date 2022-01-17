@@ -7,7 +7,19 @@ Format: a dictionary with :
 
 """
 # These are shown to import
-__all__ = ["LOOKUP_LIST", "NONE_VERBS", "CHILD_PARENT_CLASS", "PARAM_FIXES", "MODULE_GLUE"]
+__all__ = ["LOOKUP_LIST", "NONE_VERBS", "CHILD_PARENT_CLASS", "PARAM_FIXES", "MODULE_GLUE", "RST_DOC_FIXES"]
+
+# Some classes are documented as functions
+# This table is used to try to correct the errors in the documentation.
+# it is applied to each .rst file after loading the contents.
+# TODO : create upstream Fix
+RST_DOC_FIXES = [
+    # uselect.rst
+    (".. function:: poll(", ".. class:: poll("),
+    # collections.rst
+    (".. function:: deque(", ".. class:: deque("),
+    (".. function:: OrderedDict(", ".. class:: OrderedDict("),
+]
 
 # contains return types for functions and methods that are not clearly documented.
 LOOKUP_LIST = {
@@ -195,4 +207,8 @@ CHILD_PARENT_CLASS = {
     "md5": "hash",
     "sha1": "hash",
     "sha265": "hash",
+    # collections
+    "OrderedDict": "dict",
+    "namedtuple": "tuple",
+    "deque": "queu",  # TODO: Check if this is correct
 }

@@ -95,6 +95,7 @@ from rst import (
     MODULE_GLUE,
     PARAM_FIXES,
     CHILD_PARENT_CLASS,
+    RST_DOC_FIXES,
     ModuleSourceDict,
     ClassSourceDict,
     FunctionSourceDict,
@@ -201,6 +202,12 @@ class RSTReader:
         # ingore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
+
+        # HACK: Temporay S&R waiting for DocFix
+        # Replace incorrect defeintions in .rst files with better ones
+        for FIX in RST_DOC_FIXES:
+            self.rst_text = [line.replace(FIX[0], FIX[1]) for line in self.rst_text]
+
         self.filename = filename.as_posix()  # use fwd slashes in origin
         self.max_line = len(self.rst_text) - 1
         self.current_module = filename.stem  # just to be sure
@@ -745,6 +752,10 @@ def generate_from_rst(
         release = v_tag
     # no index, and module.xxx.rst is included in module.py
     files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
+
+    # simplify debugging
+    # files = [f for f in files if f.name == "collections.rst"]
+
     for file in files:
         reader = RSTReader(v_tag)
         reader.source_release = release
