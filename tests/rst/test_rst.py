@@ -389,6 +389,7 @@ def test_doc_socket_class_def(rst_stubs: Path):
     [
         ("uselect", "poll"),
         ("collections", "deque"),
+        ("collections", "OrderedDict"),
     ],
 )
 @pytest.mark.docfix
@@ -403,8 +404,10 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
         content = read_stub(rst_stubs, filename)
         if content == []:
             assert f"module {modulename} was not stubbed"
-    found = any(f"def {classname}(" in line for line in content)
-    assert not found, f"class {modulename}.{classname} should not be stubbed as a function"
+    found = any(f"def {classname}" in line for line in content)
+    # there is actually a poll.poll method ... , so there will be method: def poll ....
+    if classname != "poll":
+        assert not found, f"class {modulename}.{classname} should not be stubbed as a function"
 
     found = any(f"class {classname}" in line for line in content)
     assert found, f"class {modulename}.{classname} must be stubbed as a class"
