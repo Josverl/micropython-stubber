@@ -1,4 +1,5 @@
 # others
+from pydoc import classname
 from typing import Dict, List, Union
 import pytest
 from pathlib import Path
@@ -15,7 +16,7 @@ from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
 MICROPYTHON_FOLDER = "micropython"
-TEST_DOCFIX = True
+TEST_DOCFIX = False
 
 
 ###################################################################################################
@@ -49,7 +50,8 @@ def micropython_repo():
         try:
             git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
         except Exception:
-            git.switch_branch("master", MICROPYTHON_FOLDER)
+            # git.switch_branch("master", MICROPYTHON_FOLDER)
+            git.checkout_commit("micropython/master")
 
     v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
     yield v_tag
@@ -280,15 +282,14 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
 
 
 # @pytest.mark.xfail(reason="upstream docfix needed")
-@pytest.mark.docfix
+@pytest.mark.xfail(TEST_DOCFIX == False, reason="Documentation updates needed")
 def test_pyright_undefined_variable(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
-    # workaround : "Non-default argument follows default argument", does not specify rule
     issues = list(filter(lambda diag: "rule" in diag.keys() and diag["rule"] == "reportUndefinedVariable", issues))
     with capsys.disabled():
         for issue in issues:
-            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+            print(f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  ")
     assert len(issues) == 0, "there should be no `Undefined Variables`"
 
 
@@ -383,20 +384,30 @@ def test_doc_socket_class_def(rst_stubs: Path):
     assert found, "(u)socket.socket __init__ should be generated"
 
 
-# @pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.parametrize(
+    "modulename, classname",
+    [
+        ("uselect", "poll"),
+        ("collections", "deque"),
+    ],
+)
 @pytest.mark.docfix
-def test_doc_poll_class_def(rst_stubs: Path):
-    "make sense of `uselect.socket` class documented as a function - Upstream Docfix pending"
-    content = read_stub(rst_stubs, "uselect.py")
-    if content == []:
+# @pytest.mark.xfail(reason="Documentation updates needed")
+def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname: str):
+    "verify `collections.deque` class documented as a function - Upstream Docfix pending"
+    filename = modulename + ".py"
+    content = read_stub(rst_stubs, filename)
+    if content == [] and modulename[0] == "u":
         # module name change to select.py in v1.17+
-        content = read_stub(rst_stubs, "select.py")
+        filename = filename[1:]
+        content = read_stub(rst_stubs, filename)
+        if content == []:
+            assert f"module {modulename} was not stubbed"
+    found = any(f"def {classname}(" in line for line in content)
+    assert not found, f"class {modulename}.{classname} should not be stubbed as a function"
 
-    found = any("def poll()" in line for line in content)
-    assert not found, "uselect.poll class should not be stubbed as a function"
-
-    found = any("class poll" in line for line in content)
-    assert found, "uselect.poll should be stubbed as a class"
+    found = any(f"class {classname}" in line for line in content)
+    assert found, f"class {modulename}.{classname} must be stubbed as a class"
 
 
 @pytest.mark.parametrize(
