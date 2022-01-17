@@ -35,6 +35,10 @@ jobs:
           fetch-depth: 0
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
+      - uses: testspace-com/setup-testspace@v1
+        with:
+          domain: josverl
+
       # - name: Extract branch name
       #   id: extract_branch
       #   shell: bash
@@ -88,12 +92,9 @@ jobs:
           coverage run -m pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
           coverage xml -o coverage.xml
 
-      - uses: testspace-com/setup-testspace@v1
-        with:
-          domain: josverl
 
       - name: Push result to Testspace server
+        if: always()
         run: |
           testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]junit/test-results-*.xml
           testspace --link codecov coverage.xml
-        if: always()
