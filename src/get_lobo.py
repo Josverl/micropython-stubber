@@ -45,9 +45,9 @@ def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
         "pye.py",
         "ssd1306.py",
         "tpcalib.py",
-        "upip.py",
-        "upip_utarfile.py",
-        "upysh.py",
+        #        "upip.py",
+        #        "upip_utarfile.py",
+        #        "upysh.py",
         "urequests.py",
         "writer.py",
     ]
