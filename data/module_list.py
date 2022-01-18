@@ -92,6 +92,9 @@ def main():
             "port_diag",
             "example_sub_led",
             "example_pub_button",
+            "upip",
+            "upip_utarfile",
+            "upysh",
         ]
     )
 

@@ -107,8 +107,7 @@ umachine
 umqtt/robust
 umqtt/simple
 uos
-upip
-upip_utarfile
+uplatform
 uqueue
 urandom
 ure

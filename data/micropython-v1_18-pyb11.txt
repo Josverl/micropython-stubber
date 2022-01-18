@@ -1,0 +1,12 @@
+#MicroPython v1.18 on 2022-01-17; PYBv1.1 with STM32F405RG
+__main__          micropython       uasyncio/stream   uplatform
+_onewire          network           ubinascii         urandom
+_uasyncio         onewire           ucollections      ure
+builtins          pyb               uctypes           uselect
+cmath             stm               uerrno            usocket
+dht               uarray            uhashlib          ustruct
+framebuf          uasyncio/__init__ uheapq            usys
+gc                uasyncio/core     uio               utime
+lcd160cr          uasyncio/event    ujson             utimeq
+lcd160cr_test     uasyncio/funcs    umachine          uzlib
+math              uasyncio/lock     uos
