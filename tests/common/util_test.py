@@ -18,9 +18,9 @@ if do_profiling:
         ("v1.13-103-gb137d064e", True, "v1.13-103"),
         ("v1.13", True, "v1.13"),
         ("v1.13-dirty", True, "v1.13"),
-        ("v1.13-103-gb137d064e", False, "v1.13-Latest"),
+        ("v1.13-103-gb137d064e", False, "latest"),  # "v1.13-Latest"),
         ("v1.13", False, "v1.13"),
-        ("v1.13-dirty", False, "v1.13-Latest"),
+        ("v1.13-dirty", False, "latest"),  # "v1.13-Latest"),
     ],
 )
 def test_clean_version_build(commit, build, clean):
@@ -34,16 +34,19 @@ def test_clean_version():
     assert utils.clean_version("v1.9.3") == "v1.9.3"
     assert utils.clean_version("v1.10.0") == "v1.10"
     assert utils.clean_version("v1.13.0") == "v1.13"
-    assert utils.clean_version("v1.13.0-103-gb137d064e") == "v1.13-Latest"
+    #    assert utils.clean_version("v1.13.0-103-gb137d064e") == "v1.13-Latest"
+    assert utils.clean_version("v1.13.0-103-gb137d064e") == "latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True) == "v1.13-103"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True) == "v1.13-103-gb137d064e"
     # with path
-    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "v1.13.0-Latest"
+    #    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "v1.13.0-Latest"
+    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True) == "v1.13.0-103"
     # with commit
     assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True, commit=True) == "v1.13.0-103-gb137d064e"
     # FLats
-    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "v1_13-Latest"
+    #    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "v1_13-Latest"
+    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True, flat=True) == "v1_13-103-gb137d064e"
 
     # all options , no V for version
