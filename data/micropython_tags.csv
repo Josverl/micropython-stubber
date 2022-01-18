@@ -9,4 +9,5 @@ version,            micropython_date_time,            lib_date,      lib_commit_
 "refs/tags/v1.15",  "Mon Apr 19 00:18:54 2021 +1000", "Sep  3 2020", "eae01bd4e4cd1b22d9ccfedbd6bf9d879f64d9bd", "logging: Add levelno entry to log record object/dict. …"
 "refs/tags/v1.16",  "Fri Jun 18 16:39:16 2021 +1000", "Jul 12 2020", "3c383f6d2864a4b39bbe4ceb2ae8f29b519c9afe", "aioble: Fix docs for subscribe (needs await)."
 "refs/tags/v1.17",  "Thu Sep  2 00:08:08 2021 +1000", "Jul 12 2020", "3c383f6d2864a4b39bbe4ceb2ae8f29b519c9afe", "aioble: Fix docs for subscribe (needs await)."
+"refs/tags/v1.18",  "Sun Jan 16 00:08:08 2022 +1000", "Nov 11 2021", "cdd260f0792d04a1ded99171b4c7a2582b7856b4",  "aioble/multitests: Add multitest for shutdown handlers."
 

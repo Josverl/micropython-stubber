@@ -156,7 +156,7 @@ def get_target_names(path: str) -> tuple:
     return mpy_port, mpy_board
 
 
-def read_micropython_lib_commits(filename="data/micropython_tags.txt"):
+def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
     """
     Read a csv with the micropython version and matchin micropython-lib commit-hashes
     these can be used to make sure that the correct micropython-lib version is checked out.
