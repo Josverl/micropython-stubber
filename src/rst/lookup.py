@@ -19,8 +19,6 @@ RST_DOC_FIXES = [
     # collections.rst
     (".. function:: deque(", ".. class:: deque("),
     (".. function:: OrderedDict(", ".. class:: OrderedDict("),
-    # re.rst
-    (".. function:: match(", ".. class:: match("),
 ]
 
 # contains return types for functions and methods that are not clearly documented.
