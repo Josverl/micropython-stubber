@@ -2,6 +2,7 @@
 # used by the memory optimised createstubs_mem.py
 _onewire
 _thread
+_rp2
 _uasyncio
 ak8963
 apa102
@@ -129,3 +130,5 @@ writer
 xpt2046
 ymodem
 zlib
+rp2
+apa106

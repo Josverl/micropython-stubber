@@ -32,7 +32,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.1"
+__version__ = "1.5.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -125,7 +125,7 @@ class Stubber:
         self._log.info("Finally done")
 
     def create_one_stub(self, module_name):
-        # use training comma to overide black formatting to avoid minify chocking on this
+        # use trailing comma to overide black formatting to avoid minify chocking on this
         if module_name.startswith("_") and module_name != "_thread":
             self._log.warning(
                 "Skip module: {:<20}        : Internal ".format(module_name),
@@ -157,10 +157,6 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        if module_name.startswith("_") and module_name != "_thread":
-            self._log.warning("SKIPPING internal module:{}".format(module_name))
-            return
-
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
             return
@@ -219,21 +215,29 @@ class Stubber:
             self._log.error(errors)
 
         for item_name, item_repr, item_type_txt, item_instance in items:
-            # # name_, repr_(value) , type as text, item_instance
-            # allow the scheduler to run on LoBo based FW
-            if item_name in ["classmethod", "staticmethod"]:
+            # name_, repr_(value), type as text, item_instance
+            # do not create stubs for these primitives
+            if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
                 continue
 
+            # allow the scheduler to run on LoBo based FW
             resetWDT()
             sleep_us(1)
 
             # Class expansion only on first 3 levels (bit of a hack)
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, item_name))
-                # stub style : generic __init__ with Empty comment and pass
-                s = "\n" + indent + "class " + item_name + ":\n"  #
+                superclass = ""
+                is_exception = item_name.endswith("Exception") or item_name.endswith("Error")
+                if is_exception:
+                    superclass = "Exception"
+                s = "\n{}class {}({}):\n".format(indent, item_name, superclass)
                 s += indent + "    ''\n"
-
+                if not is_exception:
+                    # Add __init__
+                    s += indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
+                    s += indent + "        ''\n"
+                    s += indent + "        ...\n"
                 fp.write(s)
                 # self._log.debug("\n" + s)
 
@@ -513,6 +517,7 @@ def get_root() -> str:
     except (OSError, AttributeError):
         # unix port
         c = "."
+    r = c
     for r in [c, "/sd", "/flash", "/", "."]:
         try:
             _ = os.stat(r)

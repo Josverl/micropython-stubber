@@ -12,6 +12,8 @@ UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machi
 LOCATIONS = ["board", pytest.param("minified", marks=pytest.mark.minified)]
 VARIANTS = ["createstubs", "createstubs_mem", "createstubs_db"]
 
+# TODO: add test to check if all variants x locations have the same version number
+
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
