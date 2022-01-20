@@ -10,7 +10,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.1"
+__version__ = "1.5.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -86,7 +86,7 @@ class Stubber:
             except AttributeError as e:
                 _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
         # remove internal __
-        _result = [i for i in _result if not (i[0].startswith("_") and i[0] != "__init__")]
+        _result = [i for i in _result if not (i[0].startswith("_"))]
         gc.collect()
         return _result, _errors
 
@@ -103,12 +103,8 @@ class Stubber:
         self._log.info("Finally done")
 
     def create_one_stub(self, module_name):
-        # use training comma to overide black formatting to avoid minify chocking on this
-        if module_name.startswith("_") and module_name != "_thread":
-            self._log.warning(
-                "Skip module: {:<20}        : Internal ".format(module_name),
-            )
-            return False
+        # use trailing comma to overide black formatting to avoid minify chocking on this
+
         if module_name in self.problematic:
             self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
             return False
@@ -135,9 +131,9 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        if module_name.startswith("_") and module_name != "_thread":
-            self._log.warning("SKIPPING internal module:{}".format(module_name))
-            return
+        # if module_name.startswith("_") and module_name != "_thread":
+        #     self._log.warning("SKIPPING internal module:{}".format(module_name))
+        #     return
 
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
@@ -196,21 +192,29 @@ class Stubber:
             self._log.error(errors)
 
         for item_name, item_repr, item_type_txt, item_instance in items:
-            # # name_, repr_(value) , type as text, item_instance
-            # allow the scheduler to run on LoBo based FW
-            if item_name in ["classmethod", "staticmethod"]:
+            # name_, repr_(value), type as text, item_instance
+            # do not create stubs for these primitives
+            if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
                 continue
 
+            # allow the scheduler to run on LoBo based FW
             resetWDT()
             sleep_us(1)
 
             # Class expansion only on first 3 levels (bit of a hack)
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, item_name))
-                # stub style : generic __init__ with Empty comment and pass
-                s = "\n" + indent + "class " + item_name + ":\n"  #
+                superclass = ""
+                is_exception = item_name.endswith("Exception") or item_name.endswith("Error")
+                if is_exception:
+                    superclass = "Exception"
+                s = "\n{}class {}({}):\n".format(indent, item_name, superclass)
                 s += indent + "    ''\n"
-
+                if not is_exception:
+                    # Add __init__
+                    s += indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
+                    s += indent + "        ''\n"
+                    s += indent + "        ...\n"
                 fp.write(s)
                 # self._log.debug("\n" + s)
 
@@ -223,7 +227,7 @@ class Stubber:
                     in_class + 1,
                 )
             # Class Methods and functions
-            elif "method" in item_type_txt or "function" in item_type_txt or item_name == "__init__":
+            elif "method" in item_type_txt or "function" in item_type_txt:
                 self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
                 # will accept any number of params
@@ -233,15 +237,12 @@ class Stubber:
                 # Self parameter only on class methods/functions
                 if in_class > 0:
                     first = "self, "
-                    # __init__ returns None
-                    if item_name == "__init__":
-                        ret = "None"
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
                     s = "{}@classmethod\n".format(indent)
-                    s += "{}def {}(cls, *args) -> {}:\n".format(indent, item_name, ret)
+                    s += "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args) -> {}:\n".format(indent, item_name, first, ret)
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
@@ -489,6 +490,7 @@ def get_root() -> str:
     except (OSError, AttributeError):
         # unix port
         c = "."
+    r = c
     for r in [c, "/sd", "/flash", "/", "."]:
         try:
             _ = os.stat(r)
@@ -553,6 +555,7 @@ def main():
     stubber.modules = [
         "_onewire",
         "_thread",
+        "_rp2",
         "_uasyncio",
         "ak8963",
         "apa102",
@@ -658,8 +661,7 @@ def main():
         "umqtt/robust",
         "umqtt/simple",
         "uos",
-        "upip",
-        "upip_utarfile",
+        "uplatform",
         "uqueue",
         "urandom",
         "ure",
@@ -681,6 +683,9 @@ def main():
         "xpt2046",
         "ymodem",
         "zlib",
+        # manual adds
+        "rp2",
+        "apa106"
     ]  # spell-checker: enable
 
     gc.collect()
