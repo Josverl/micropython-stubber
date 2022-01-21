@@ -11,4 +11,4 @@ import get_lobo
 def test_get_lobo(tmp_path):
     get_lobo.get_frozen(tmp_path)
     filecount = len(list(tmp_path.iterdir()))
-    assert filecount == 19, "there should be 18 files + 1 manifest"
+    assert filecount == 17, "there should be 16 files + 1 manifest"
