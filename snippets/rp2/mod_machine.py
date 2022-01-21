@@ -22,6 +22,14 @@ for i in [1, 2]:  # no infinite loop
     led.off()
     time.sleep_ms(250)
 
+# Timers
+
+from machine import Timer
+
+tim = Timer(period=5000, mode=Timer.ONE_SHOT, callback=lambda t: print(1))
+tim.init(period=2000, mode=Timer.PERIODIC, callback=lambda t: print(2))
+
+
 # Pins and GPIO
 p0 = Pin(0, Pin.OUT)  # create output pin on GPIO0
 p0.on()  # set pin to "on" (high) level

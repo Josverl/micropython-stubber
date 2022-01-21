@@ -1,11 +1,14 @@
 # type: ignore
 # FIXME: ignore for now : other issues to solve first
-from machine import Pin
-import rp2
-
+"""
+Sample from micropython documentaton
 
 # programmable IO
 # ref : https://docs.micropython.org/en/latest/rp2/quickref.html#programmable-io-pio
+"""
+
+from machine import Pin
+import rp2
 
 
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)
