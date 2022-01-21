@@ -92,4 +92,18 @@
         "titleBar.inactiveForeground": "#e7e7e799"
     },
     "python.terminal.activateEnvInCurrentTerminal": true,
+    "todo-tree.filtering.ignoreGitSubmodules": true,
+    "todo-tree.filtering.excludeGlobs": [
+        "**/node_modules",
+        "**/.venv"
+    ],
+    "todo-tree.general.debug": true,
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "[ ]",
+        "[x]"
+    ],
 }
