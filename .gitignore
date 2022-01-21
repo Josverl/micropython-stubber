@@ -18,15 +18,6 @@ scratch/*
 board/stubs
 minified/stubs
 all-stubs
-# need to find a better location for the automated machine stubs
-stubs/machine-stubs
-stubs/extmod
-
-stubs/*
-dev-stubs
-# generated stubs
-generated
-
 
 # ignore test coverage reports
 .coverage*
