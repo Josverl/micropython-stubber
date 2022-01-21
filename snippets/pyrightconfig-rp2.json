@@ -1,0 +1,19 @@
+// https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+{
+    "include": [
+        "./rp2"
+    ],
+    "exclude": [],
+    "ignore": [],
+    "pythonVersion": "3.8",
+    "pythonPlatform": "All",
+    "verboseOutput": true,
+    "reportMissingImports": "error",
+    "reportMissingModuleSource": "error",
+    "reportMissingTypeStubs": "warning",
+    "typeshedPath": "../stubs/mpy-typeshed",
+    "extraPaths": [
+        "../all-stubs/micropython-v1_18-frozen/rp2/GENERIC",
+        "../all-stubs/micropython-v1_18-rp2"
+    ]
+}
