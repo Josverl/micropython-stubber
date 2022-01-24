@@ -12,6 +12,7 @@
     "reportMissingModuleSource": "error",
     "reportMissingTypeStubs": "warning",
     "typeshedPath": "../stubs/mpy-typeshed",
+    //"typeshedPath": "all-stubs/micropython-pico-go",
     "extraPaths": [
         "../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
         "../all-stubs/micropython-v1_18-esp32"

@@ -1,5 +1,5 @@
 {
-    // python.autoComplete.extraPaths has chnaged to "python.analysis.extraPaths"
+    // python.autoComplete.extraPaths has changed to "python.analysis.extraPaths"
     // https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#unresolved-import-warnings
     "python.autoComplete.extraPaths": [
         "stubs/mpy-typeshed"
