@@ -40,20 +40,25 @@ Note that for some modules (such as the  `gc`, `time`  and `sys` modules) this a
 3. Instances of imported classes have no type (due to 2)
 4. The stubs use the .py extension rather than .pyi (for autocomplete to work) 
 5. Due to the method of generation nested modules are included, rather than referenced. While this leads to somewhat larger stubs, this should not be limiting for using the stubs on a PC.  
-6. 
 
 ##  Stub  naming convention 
 
 The firmware naming conventions is most relevant to provide clear folder names when selecting which stubs to use.
 
-for stubfiles: {**firmware**}-{version}-{port}
+for stubfiles: {**firmware family**}-{version}-{port}
 
-for frozen modules : {firmware}-{version}-frozen
+for frozen modules : {firmware}-{version}-frozen\{port}\{board}
 
-* ***firmware***: lowercase 
+* ***firmware family***: lowercase 
   * micropython | loboris | pycopy | ...
 * ***port***: lowercase , as reported by os.implementation.platform 
-  * esp32 | linux | win32 | esp32_lobo
+  * stm32 | esp32 | linux | win32 | rp2 | samd | ...
+
+* ***board***: used mainly for frozen stubs
+  * GENERIC | RELEASE | UM_TINYPICO | GENERIC_512K |  ARDUINO_NANO_RP2040_CONNECT | ...
+  
+_Note:_ RELEASE appears to be used mainly for CI/CD purposes and is not commonly used on hardware.
+  
 * ***version*** : digits only , dots replaced by underscore, follow version in documentation rather than semver 
   * v1_13
   * v1_9_4
