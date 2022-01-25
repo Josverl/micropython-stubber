@@ -11,7 +11,7 @@ For this the order in which these tools use, the stub folders is significant, an
 
 In most cases the best results are achieved by the below setup:  
 
-![stub processing order][]
+![stub processing order][./img/stuborder_pylance.png]
 
  1. **Your own source files**, including any libraries you add to your project.
  This can be a single libs folder or multiple directories.
