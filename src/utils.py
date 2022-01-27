@@ -47,7 +47,7 @@ def clean_version(
             version = "-".join(nibbles)
     else:
         # version = "-".join((nibbles[0], LATEST))
-        # HACK: thi sis not always right, but good enough most of the time
+        # HACK: this is not always right, but good enough most of the time
         version = "latest"
     if flat:
         version = version.strip().replace(".", "_")
@@ -127,10 +127,13 @@ def generate_pyi_from_file(file: Path) -> bool:
         print(f"Calling stubgen on {str(file)}")
         # WORKAROUND: Stubgen.generate_stubs does not provide a way to return the errors
         # such as `cannot perform relative import`
-        # UPSTREAM: robust.py needs this to do a relative import
+        # TODO: micropython-lib: robust.py needs this to do a relative import
         if file.name == "robust.py" and file.parent.name == "umqtt":
-            with open(file.with_name("__init__.py"), "a") as init:
-                init.write("# force __init__.py")
+            # do not overwrite an existing __init__.py
+            if not (file.with_name("__init__.py")).exists():
+                with open(file.with_name("__init__.py"), "a") as init:
+                    init.write("# force __init__.py")
+                    init.write("pass")
         stubgen.generate_stubs(sg_opt)
         return True
     except (Exception, CompileError, SystemExit) as e:
