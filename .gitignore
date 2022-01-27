@@ -40,3 +40,6 @@ docs/~$*
 
 # no node_modules ( pyright ) 
 node_modules
+
+# Interim storage for bulkstubber
+stubs/machine-stubs/
