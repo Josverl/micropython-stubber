@@ -134,8 +134,8 @@ def generate_pyi_from_file(file: Path) -> bool:
                 with open(file.with_name("__init__.py"), "a") as init:
                     init.writelines(
                         [
-                            "# force __init__.py",
-                            "pass",
+                            "# force __init__.py\n",
+                            "pass\n",
                         ]
                     )
 
