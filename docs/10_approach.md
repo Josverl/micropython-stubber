@@ -2,16 +2,16 @@
 
 The stubs are used by 3 components.
 
-  2. pylint
-  3. the VSCode Pylance Language Server
-  4. the VSCode Python add-in
+  1. the VSCode Pylance Language Server
+  2. the VSCode Python add-in
+  3. a linter such as pylint
 
 These 3 tools work together to provide code completion/prediction, type checking and all the other good things.
 For this the order in which these tools use, the stub folders is significant, and best results are when all use the same order. 
 
 In most cases the best results are achieved by the below setup:  
 
-![stub processing order][]
+![stub processing order][./img/stuborder_pylance.png]
 
  1. **Your own source files**, including any libraries you add to your project.
  This can be a single libs folder or multiple directories.
@@ -40,20 +40,25 @@ Note that for some modules (such as the  `gc`, `time`  and `sys` modules) this a
 3. Instances of imported classes have no type (due to 2)
 4. The stubs use the .py extension rather than .pyi (for autocomplete to work) 
 5. Due to the method of generation nested modules are included, rather than referenced. While this leads to somewhat larger stubs, this should not be limiting for using the stubs on a PC.  
-6. 
 
 ##  Stub  naming convention 
 
 The firmware naming conventions is most relevant to provide clear folder names when selecting which stubs to use.
 
-for stubfiles: {**firmware**}-{version}-{port}
+for stubfiles: {**firmware family**}-{version}-{port}
 
-for frozen modules : {firmware}-{version}-frozen
+for frozen modules : {firmware}-{version}-frozen\{port}\{board}
 
-* ***firmware***: lowercase 
+* ***firmware family***: lowercase 
   * micropython | loboris | pycopy | ...
 * ***port***: lowercase , as reported by os.implementation.platform 
-  * esp32 | linux | win32 | esp32_lobo
+  * stm32 | esp32 | linux | win32 | rp2 | samd | ...
+
+* ***board***: used mainly for frozen stubs
+  * GENERIC | RELEASE | UM_TINYPICO | GENERIC_512K |  ARDUINO_NANO_RP2040_CONNECT | ...
+  
+_Note:_ RELEASE appears to be used mainly for CI/CD purposes and is not commonly used on hardware.
+  
 * ***version*** : digits only , dots replaced by underscore, follow version in documentation rather than semver 
   * v1_13
   * v1_9_4
