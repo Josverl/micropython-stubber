@@ -132,8 +132,13 @@ def generate_pyi_from_file(file: Path) -> bool:
             # do not overwrite an existing __init__.py
             if not (file.with_name("__init__.py")).exists():
                 with open(file.with_name("__init__.py"), "a") as init:
-                    init.write("# force __init__.py")
-                    init.write("pass")
+                    init.writelines(
+                        [
+                            "# force __init__.py",
+                            "pass",
+                        ]
+                    )
+
         stubgen.generate_stubs(sg_opt)
         return True
     except (Exception, CompileError, SystemExit) as e:
