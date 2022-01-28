@@ -35,6 +35,7 @@ LOOKUP_LIST = {
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
+    "micropython.const": ("int", 0.95),  # const is always an int
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
@@ -170,7 +171,7 @@ PARAM_FIXES = [
     ),  #
     ## rp2.PIO.irq
     (
-        "trigger=IRQ_SM0 | IRQ_SM1 | IRQ_SM2 | IRQ_SM3",
+        "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
         "trigger=IRQ_SM0",
     ),
     # SPI.INIT - to fix error: Non-default argument follows default argument
