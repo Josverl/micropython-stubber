@@ -5,7 +5,7 @@
     "ignore": [],
     "pythonVersion": "3.8",
     "pythonPlatform": "All",
-    "verboseOutput": true,
+    "verboseOutput": false,
     //"stubPath": "./typings",
     "reportMissingImports": "error",
     "reportMissingModuleSource": "error",
@@ -23,7 +23,6 @@
                 "./board/stubs/micropython-v1_18-esp32",
                 // TODO: use All-stubs ?
             ],
-            "verboseOutput": true
         },
         {
             "root": "snippets/esp8266",
@@ -33,7 +32,6 @@
                 // TODO: V1.18 
                 // TODO: use All-stubs ?
             ],
-            "verboseOutput": true
         },
         {
             "root": "snippets/pyboard",
@@ -42,7 +40,6 @@
                 "./board/stubs/micropython-v1_18-pyboard",
                 // TODO: use All-stubs ?
             ],
-            "verboseOutput": true
         },
         {
             "root": "snippets/rp2",
@@ -51,7 +48,6 @@
                 "./board/stubs/micropython-v1_18-rp2",
                 // TODO: use All-stubs ?
             ],
-            "verboseOutput": true
         },
         {
             "root": "board",
@@ -65,7 +61,6 @@
                 "all-stubs/micropython-v1_17-pyboard",
                 //                "all-stubs/micropython-latest-docstubs",
             ],
-            "verboseOutput": true
         },
         {
             "root": "src",
