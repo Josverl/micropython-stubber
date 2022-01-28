@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import shutil
+import subprocess
 
 from fnmatch import fnmatch
 from pathlib import Path
@@ -125,25 +126,27 @@ def generate_pyi_from_file(file: Path) -> bool:
     sg_opt.output_dir = str(file.parent)
     try:
         print(f"Calling stubgen on {str(file)}")
-        # WORKAROUND: Stubgen.generate_stubs does not provide a way to return the errors
+        # TDOD: Stubgen.generate_stubs does not provide a way to return the errors
         # such as `cannot perform relative import`
-        # TODO: micropython-lib: robust.py needs this to do a relative import
-        if file.name == "robust.py" and file.parent.name == "umqtt":
-            # do not overwrite an existing __init__.py
-            if not (file.with_name("__init__.py")).exists():
-                with open(file.with_name("__init__.py"), "a") as init:
-                    init.writelines(
-                        [
-                            "# force __init__.py\n",
-                            "pass\n",
-                        ]
-                    )
 
         stubgen.generate_stubs(sg_opt)
         return True
     except (Exception, CompileError, SystemExit) as e:
         print(e)
         return False
+
+
+def fix_umqtt_init(modules_path: Path):
+    # micropython-lib: robust.py needs __init__ to do a relative import
+    init_p = modules_path / "umqtt" / "__init__.py"
+    if (modules_path / "umqtt").exists() and not init_p.exists():
+        with open(init_p, "a") as init:
+            init.writelines(
+                [
+                    "# force __init__.py\n",
+                    "pass\n",
+                ]
+            )
 
 
 def generate_pyi_files(modules_folder: Path) -> bool:
@@ -162,12 +165,13 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         ## generate fyi files for folder
         # clean before to clean any old stuff
         cleanup(modules_folder, all_pyi=True)
-
+        # fix umqtt/robust issue before it happens
+        fix_umqtt_init(modules_folder)
         print("::group::[stubgen] running stubgen on {0}".format(modules_folder))
         cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
-        result = os.system(cmd)
+        result = subprocess.run(cmd)
         # Check on error
-        if result != 0:
+        if result.returncode != 0:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
             print("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
@@ -193,7 +197,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # try to match them to py files and move them to the correct location
         worklist = pyi_files.copy()
         for pyi in worklist:
-            match = [py for py in py_files if py.stem == pyi.stem]
+            match = [py for py in py_files if py.stem == pyi.stem and py.parent.stem == pyi.parent.stem]
             if match:
                 # move the .pyi next to the corresponding .py
                 log.info(f"moving : {str(pyi)}")
@@ -215,7 +219,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         return True
 
 
-# TODO:
 def manifest(
     family: str = "micropython",
     stubtype: str = "frozen",

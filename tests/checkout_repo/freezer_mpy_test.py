@@ -7,6 +7,7 @@ import basicgit as git
 
 # Module Under Test
 import get_mpy
+import utils
 
 
 if not sys.warnoptions:
@@ -16,8 +17,6 @@ if not sys.warnoptions:
     os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
 
 # No Mocks, does actual extraction from repro
-
-# TODO: allow tests to work on any path, not just my own machine
 
 
 @pytest.mark.parametrize(
@@ -79,6 +78,9 @@ def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropy
     assert scripts is not None, "can freeze scripts from manifest"
     assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
 
+    result = utils.generate_pyi_files(tmp_path)
+    assert result == True
+
 
 # @pytest.mark.basicgit
 @pytest.mark.slow
@@ -98,4 +100,6 @@ def test_freezer_mpy_folders(mpy_version, tmp_path, testrepo_micropython: Path, 
     get_mpy.get_frozen_folders(stub_path, mpy_path, lib_path=testrepo_micropython_lib.as_posix(), version=mpy_version)
     # restore original version
     git.checkout_tag(version_x, mpy_path)  # type:ignore
-    assert True
+
+    result = utils.generate_pyi_files(tmp_path)
+    assert result == True

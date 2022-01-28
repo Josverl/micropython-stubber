@@ -310,9 +310,8 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
-    # TODO: 1 known issue
     # 'Cannot access member "MSB" for type "Type[SPI]" 'Member "MSB" is unknown'
-    assert len(issues) == 1, "There should be no type issues"
+    assert len(issues) <= 1, "There should be no type issues"
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
@@ -346,10 +345,7 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
-    # TODO:
-
-    # Method declaration "__init__" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\cryptolib.py line 23
-    # Class declaration "match" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\re.py line 156
+    # TODO: Class declaration "match" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\re.py line 156
 
     assert len(issues) <= 1, f"There are {len(issues)} function or class defs that obscure earlier defs"
 
