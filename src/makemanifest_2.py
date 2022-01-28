@@ -156,7 +156,7 @@ def convert_path(path: str) -> str:
 # plug in the microsoft-stubber functionality
 #
 
-# stubdir MUIST be set externally
+# stubdir MUST be set externally
 stub_dir: str = ""
 from pathlib import Path
 
