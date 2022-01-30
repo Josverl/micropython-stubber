@@ -48,34 +48,6 @@ function restart-MCU {
     return $true
 }
 
-# function restart-MCU-rshell {
-#     [CmdletBinding()]
-#     param (
-#         [string]
-#         $serialport
-
-#     )
-#     # avoid MCU waiting in bootloader on hardware restart by setting both dtr and rts high
-#     start-sleep 5
-#     rshell -p $serialport  --buffer-size 512 --rts 1 repl "~ print('connected') ~"  | write-host
-#     Write-Host -F Yellow "Exitcode: $LASTEXITCODE"
-#     $EXIT_1 = $LASTEXITCODE
-#     $n = 1
-#     do {
-#         start-sleep $delay
-#         rshell -p $serialport --quiet --rts 1 repl "~ import machine ~ machine.reset() ~" | Tee-Object -Variable out | write-host
-#         $EXIT_2 = $LASTEXITCODE
-#         $TracebackFound = ($out -join "").Contains('Traceback')
-#         Write-Host -F Yellow "Exitcode: $LASTEXITCODE"
-#         $n = $n + 1 
-#     } until (($EXIT_2 -eq 0 -and -not $TracebackFound) -or $n -gt 3)
-#     if ($LASTEXITCODE -ne 0) {
-#         Write-Host -F Red "this FW $version is a dud, try next"
-#         return $false
-#     }
-#     return $true
-# }
-
 function run_stubber {
     param( 
         $chip = "esp32",
@@ -237,29 +209,35 @@ function stub_all {
     $devices = @(DetectDevices)
 
     $all_versions = @( 
+
         
-        @{version = "v1.17"; chip = "esp8266"; } ,
-        @{version = "v1.16"; chip = "esp8266"; } ,
-        @{version = "v1.15"; chip = "esp8266"; } ,
-        @{version = "v1.14"; chip = "esp8266"; } ,
-        @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-        # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
         # Older versions need a different version of mpy-cross cross compiler
-        # @{version = "v1.11"; chip = "esp8266"; } ,
         # @{version = "v1.10"; chip = "esp8266"; } ,    
+        # @{version = "v1.11"; chip = "esp8266"; } ,
+        # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
+
+
+        # @{version = "v1.13"; chip = "esp8266"; nightly = $true }
+        # @{version = "v1.14"; chip = "esp8266"; } ,
+        # @{version = "v1.15"; chip = "esp8266"; } ,
+        # @{version = "v1.16"; chip = "esp8266"; } ,
+        @{version = "v1.17"; chip = "esp8266"; } ,
+        @{version = "v1.18"; chip = "esp8266"; } ,
 
         
-        @{version = "v1.17"; chip = "esp32"; },
-        @{version = "v1.16"; chip = "esp32"; },
-        @{version = "v1.15"; chip = "esp32"; },
-        @{version = "v1.14"; chip = "esp32"; },
-        @{version = "v1.13"; chip = "esp32"; nightly = $true },
-        @{version = "v1.12"; chip = "esp32"; },
-        @{version = "v1.11"; chip = "esp32"; },
         @{version = "v1.10"; chip = "esp32"; },
+        @{version = "v1.11"; chip = "esp32"; },
+        @{version = "v1.12"; chip = "esp32"; },
+        @{version = "v1.13"; chip = "esp32"; nightly = $true },
+        @{version = "v1.14"; chip = "esp32"; },
+        @{version = "v1.15"; chip = "esp32"; },
+        @{version = "v1.16"; chip = "esp32"; },
+        @{version = "v1.17"; chip = "esp32"; },
+        @{version = "v1.18"; chip = "esp32"; },
 
 
-        @{version = "v1.17"; chip = "pyb11"; }
+        @{version = "v1.17"; chip = "stm32"; }
+        @{version = "v1.18"; chip = "stm32"; }
     )
 
 
@@ -348,6 +326,6 @@ Write-host -ForegroundColor Cyan "Finished processing: flash, reset, stubbing  a
 # Array of Dict --> Array of objects with props
 $results = $results | ForEach-Object { new-object psobject -property $_ }  
 # basic output
-$results | FT | Out-Host
+$results | Format-Table | Out-Host
 $results | ConvertTo-json | Out-File bulk_stubber.json
 
