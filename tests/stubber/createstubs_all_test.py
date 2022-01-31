@@ -117,19 +117,19 @@ def test_stubber_fwid(
         assert c not in stubber.flat_fwid, "flat_fwid must not contain '{}'".format(c)
 
 
-# throws an error on the commandline
-@pytest.mark.skip(reason="test not working")
-@pytest.mark.parametrize("variant", VARIANTS)
-@pytest.mark.parametrize("location", LOCATIONS)
-def test_read_path(
-    location,
-    variant,
-    mock_micropython_path,
-):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+# # throws an error on the commandline
+# @pytest.mark.skip(reason="test not working")
+# @pytest.mark.parametrize("variant", VARIANTS)
+# @pytest.mark.parametrize("location", LOCATIONS)
+# def test_read_path(
+#     location,
+#     variant,
+#     mock_micropython_path,
+# ):
+#     # import createstubs  # type: ignore
+#     createstubs = import_module(f"{location}.{variant}")  # type: ignore
 
-    assert createstubs.read_path() == ""
+#     assert createstubs.read_path() == ""
 
 
 @pytest.mark.parametrize("variant", VARIANTS)

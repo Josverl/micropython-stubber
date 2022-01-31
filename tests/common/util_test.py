@@ -105,19 +105,7 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
     shutil.copytree(source, dest)
     PROBLEMATIC = 1  # number of files with issues
 
-    if do_profiling:
-        with cProfile.Profile() as pr:
-            result = utils.generate_pyi_files(dest)
-
-        with open("profiling_stats.txt", "w") as stream:
-            stats = Stats(pr, stream=stream)
-            stats.strip_dirs()
-            stats.sort_stats("time")
-            stats.dump_stats(".prof_stats")
-            stats.print_stats()
-
-    else:
-        result = utils.generate_pyi_files(dest)
+    result = utils.generate_pyi_files(dest)
 
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
