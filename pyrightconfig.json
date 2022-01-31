@@ -1,16 +1,16 @@
 {
     "exclude": [
-        "**/all-stubs"
+        "**/all-stubs",
+        "board",
+        "minified",
     ],
     "ignore": [
         "tests/mocks",
         "tests/data",
     ],
     "include": [
-        "board",
-        // "snippets",
-        // "src", 
-        // "tests"
+        "src",
+        "tests"
     ],
     "verboseOutput": true,
     "executionEnvironments": [
