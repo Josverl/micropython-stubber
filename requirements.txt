@@ -4,7 +4,7 @@ requests == 2.27.0
 mypy == 0.931
 
 # Cross compilation 
-mpy-cross == 1.17
+mpy-cross == 1.18
 
 # Bulk stubber
 black   == 21.12b0
