@@ -39,7 +39,7 @@ class Stubber:
 
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103": # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
@@ -412,9 +412,9 @@ def _info():
         "ver": "",  # short version
     }
     try:
-        info["release"] = ".".join([str(n) for n in sys.implementation.version])
+        info["release"] = ".".join([str(n) for n in sys.implementation.version])# type: ignore
         info["version"] = info["release"]
-        info["name"] = sys.implementation.name
+        info["name"] = sys.implementation.name# type: ignore
         info["mpy"] = sys.implementation.mpy  # type: ignore
     except AttributeError:
         pass
@@ -422,13 +422,13 @@ def _info():
     if sys.platform not in ("unix", "win32"):
         try:
             u = os.uname()
-            info["sysname"] = u.sysname
-            info["nodename"] = u.nodename
-            info["release"] = u.release
-            info["machine"] = u.machine
+            info["sysname"] = u.sysname# type: ignore
+            info["nodename"] = u.nodename# type: ignore
+            info["release"] = u.release# type: ignore
+            info["machine"] = u.machine# type: ignore
             # parse micropython build info
-            if " on " in u.version:
-                s = u.version.split(" on ")[0]
+            if " on " in u.version:# type: ignore
+                s = u.version.split(" on ")[0]# type: ignore
                 if info["sysname"] == "esp8266":
                     # esp8266 has no usable info on the release
                     if "-" in s:
