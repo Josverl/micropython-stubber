@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 # this script is referenced from the codespaces devcontainer dockerfile
-# git submodule init
-# git submodule update
+
+git submodule init
+git submodule update
+
+cd micropython
+git remote add --tags micropython https://github.com/micropython/micropython.git
+git fetch --all --tags
+cd ..
+
 #
 if [ "${CODESPACES}" = "true" ]; then
     # create & activate venv and install the dependencies in there 
