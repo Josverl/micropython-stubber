@@ -19,6 +19,25 @@ logging.basicConfig(level=logging.INFO)
 
 STUB_FOLDER = "./all-stubs"
 
+# default stubgen options
+STUBGEN_OPT = stubgen.Options(
+    pyversion=(3, 6),
+    no_import=False,
+    include_private=True,
+    doc_dir="",
+    search_path=[],
+    interpreter=sys.executable,
+    parse_only=False,
+    ignore_errors=True,
+    modules=[],
+    packages=[],
+    files=[],
+    output_dir="",
+    verbose=True,
+    quiet=False,
+    export_less=False,
+)
+
 
 def clean_version(
     version: str,
@@ -102,23 +121,7 @@ def cleanup(modules_folder: Path, all_pyi: bool = False):
 def generate_pyi_from_file(file: Path) -> bool:
     """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
 
-    sg_opt = stubgen.Options(
-        pyversion=(3, 6),
-        no_import=False,
-        include_private=True,
-        doc_dir="",
-        search_path=[],
-        interpreter=sys.executable,
-        parse_only=False,
-        ignore_errors=True,
-        modules=[],
-        packages=[],
-        files=[],
-        output_dir="",
-        verbose=True,
-        quiet=False,
-        export_less=False,
-    )
+    sg_opt = STUBGEN_OPT
     # Deal with generator passed in
     if not isinstance(file, Path):
         raise TypeError
@@ -132,7 +135,9 @@ def generate_pyi_from_file(file: Path) -> bool:
         stubgen.generate_stubs(sg_opt)
         return True
     except (Exception, CompileError, SystemExit) as e:
-        print(e)
+        # the only way to know if an error was encountered by generate_stubs
+        # TODO: Extract info from e.code or e.args[0] and add that to the manifest ?
+        log.warning(e.args[0])
         return False
 
 
@@ -168,10 +173,21 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # fix umqtt/robust issue before it happens
         fix_umqtt_init(modules_folder)
         print("::group::[stubgen] running stubgen on {0}".format(modules_folder))
-        cmd = "stubgen {0} --output {0} --include-private --ignore-errors".format(modules_folder)
-        result = subprocess.run(cmd)
-        # Check on error
-        if result.returncode != 0:
+
+        Error_Found = False
+        sg_opt = STUBGEN_OPT
+        sg_opt.files = [str(modules_folder)]
+        sg_opt.output_dir = str(modules_folder)
+        try:
+            stubgen.generate_stubs(sg_opt)
+        except (BaseException, SystemExit) as e:
+            # the only way to know if an error was encountered by generate_stubs
+            # mypy.errors.CompileError and others ?
+            # TODO: Extract info from e.code or e.args[0]
+            log.warning(e.args[0])
+            Error_Found = True
+
+        if Error_Found:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
             print("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
@@ -275,7 +291,7 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
             mod_manifest["modules"].append({"file": str(file.relative_to(folder).as_posix()), "module": file.stem})
 
         # write the the module manifest
-        with open(os.path.join(folder, "modules.json"), "w") as outfile:
+        with open(folder / "modules.json", "w") as outfile:
             json.dump(mod_manifest, outfile, indent=4)
         return True
     except OSError:
