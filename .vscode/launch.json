@@ -104,9 +104,6 @@
             // false : Avoid debugpy trying to debug micropython
             // but may cause issue with pytest-cov coverage reporting 
             "subProcess": false,
-            "env": {
-                "PYTEST_ADDOPTS": "--no-cov"
-            }
         },
     ],
     "inputs": [
