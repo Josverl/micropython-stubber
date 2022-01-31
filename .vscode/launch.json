@@ -97,6 +97,7 @@
             "purpose": [
                 "debug-test"
             ],
+            "request": "launch",
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false,
