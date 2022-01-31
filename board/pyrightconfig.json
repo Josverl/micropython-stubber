@@ -1,21 +1,25 @@
 // https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 {
     "include": [
-        "."
+        ".",
     ],
-    "exclude": [],
-    "ignore": [],
+    "exclude": [
+        "stubs"
+    ],
+    "ignore": [
+        "stubs"
+    ],
     "pythonVersion": "3.9",
     "pythonPlatform": "All",
     "verboseOutput": true,
     "reportMissingImports": "error",
     "reportMissingModuleSource": "warning",
     "reportMissingTypeStubs": "warning",
-    "typeshedPath": "C:\\develop\\MyPython\\micropython-stubber\\stubs\\mpy-typeshed",
-    //"typeshedPath": "all-stubs/micropython-pico-go",
+    "typeshedPath": "../stubs/mpy-typeshed",
     "extraPaths": [
-        // "../../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
-        // "../../all-stubs/micropython-v1_18-esp32"
+        "../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
+        "../all-stubs/micropython-v1_18-esp32",
+        "../all-stubs/micropython-v1_18-pyboard"
     ],
     "logLevel": "Trace",
 }
