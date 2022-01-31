@@ -1,27 +1,24 @@
-// https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 {
-    "include": [],
-    "exclude": [],
-    "ignore": [],
-    "pythonVersion": "3.8",
-    "pythonPlatform": "All",
-    "verboseOutput": false,
-    //"stubPath": "./typings",
-    "reportMissingImports": "error",
-    "reportMissingModuleSource": "error",
-    "reportMissingTypeStubs": "warning",
-    // 
-    // "stubPath": "./typings",
-    //    "typeshedPath": "./all-stubs/micropython-v1_18-rp2",
-    //    "typeshedPath": "all-stubs/typings/typeshed",
-    "extraPaths": [],
+    "exclude": [
+        "**/all-stubs"
+    ],
+    "ignore": [
+        "tests/mocks",
+        "tests/data",
+    ],
+    "include": [
+        "board",
+        // "snippets",
+        // "src", 
+        // "tests"
+    ],
+    "verboseOutput": true,
     "executionEnvironments": [
         {
-            "root": "snippets/esp32",
+            "root": "snippets/ulib",
+            "typeshedPath": "\\develop\\MyPython\\micropython-stubber\\stubs\\mpy-typeshed\\stdlib",
             "extraPaths": [
-                "all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
-                "./board/stubs/micropython-v1_18-esp32",
-                // TODO: use All-stubs ?
+                // 
             ],
         },
         {
