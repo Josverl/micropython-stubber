@@ -12,7 +12,7 @@ esptool == 3.2
 rshell  == 0.0.31
 
 # stub refactoring
-libcst  == 0.3.23
+libcst  == 0.4.1
 
 # Docstubs
 autoflake == 1.4
