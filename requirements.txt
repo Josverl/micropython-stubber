@@ -7,7 +7,7 @@ mypy == 0.931
 mpy-cross == 1.18
 
 # Bulk stubber
-black   == 21.12b0
+black   == 22.1.0
 esptool == 3.2
 rshell  == 0.0.31
 
