@@ -50,9 +50,13 @@ function restart-MCU {
 
 function run_stubber {
     param( 
-        $chip = "esp32",
+        $chip = "",
         $serialport 
     )
+    # TODO: refactor to :
+    # - type: board/minified/compiled 
+    # - variant : normal/mem/db
+    # need to have a verson with no logging
     switch ($chip) {
         "esp8266" { 
             $type = "compiled" 
@@ -65,14 +69,14 @@ function run_stubber {
             $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
         }
         "needs_reset" { 
-            $type = "compiled" 
+            $type = "database" 
             $createstubs_py = join-path $WSRoot "minified/createstubs_mem_db.py" 
             $createstubs_mpy = join-path $WSRoot "minified/createstubs_mem_db.mpy" 
         }
 
         Default { 
-            $type = "Default"
-            $createstubs_py = join-path $WSRoot "board/createstubs.py" 
+            $type = "minified"
+            $createstubs_py = join-path $WSRoot "minified/createstubs.py" 
         }
     }
     
@@ -148,6 +152,7 @@ function download_stubs {
     param (
         [Parameter(Mandatory = $true)]
         $path ,
+        $source = "/pyboard/stubs",
         $subfolder = "stubs",
         $serialport = "COM5"
     )
@@ -163,14 +168,15 @@ function download_stubs {
     # reverse sync 
     # $dest = path relative to current directory
     # $source = path on board ( all boards are called pyboard) 
-    $source = "/pyboard/stubs"
+    
+    write-host "> rshell -p $serialport --buffer-size 512 rsync $source $subfolder"
     $n = 1
     do {
         rshell -p $serialport --buffer-size 512 rsync $source $subfolder  | write-host
         $n += 1
     } until ($LASTEXITCODE -eq 0 -or $n -eq 3)
     
-    # restire cwd
+    # restore cwd
     Pop-Location
     return $LASTEXITCODE -eq 0
 }
@@ -207,20 +213,21 @@ function stub_all {
 
     Clear-Host 
     $devices = @(DetectDevices)
+    $devices | FT -Property Port, Chip, Board | out-host
 
     $all_versions = @( 
-
         
-        # Older versions need a different version of mpy-cross cross compiler
-        # @{version = "v1.10"; chip = "esp8266"; } ,    
+        # Older versions need a different/older/specific version of mpy-cross cross compiler
+        # TODO: add old versions of mpy-cross to tools
+        # @{version = "v1.10"; chip = "esp8266"; } ,
         # @{version = "v1.11"; chip = "esp8266"; } ,
         # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
 
 
-        # @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-        # @{version = "v1.14"; chip = "esp8266"; } ,
-        # @{version = "v1.15"; chip = "esp8266"; } ,
-        # @{version = "v1.16"; chip = "esp8266"; } ,
+        @{version = "v1.13"; chip = "esp8266"; nightly = $true }
+        @{version = "v1.14"; chip = "esp8266"; } ,
+        @{version = "v1.15"; chip = "esp8266"; } ,
+        @{version = "v1.16"; chip = "esp8266"; } ,
         @{version = "v1.17"; chip = "esp8266"; } ,
         @{version = "v1.18"; chip = "esp8266"; } ,
 
@@ -236,51 +243,119 @@ function stub_all {
         @{version = "v1.18"; chip = "esp32"; },
 
 
+        @{version = "v1.10"; chip = "stm32"; }
+        @{version = "v1.11"; chip = "stm32"; }
+        @{version = "v1.12"; chip = "stm32"; }
+        @{version = "v1.13"; chip = "stm32"; }
+        @{version = "v1.14"; chip = "stm32"; }
+        @{version = "v1.15"; chip = "stm32"; }
+        @{version = "v1.16"; chip = "stm32"; }
         @{version = "v1.17"; chip = "stm32"; }
         @{version = "v1.18"; chip = "stm32"; }
     )
 
+    # Sort by version, newest first
+    $all_versions = $all_versions | sort -Property version , chip  -Descending 
+
+    # $all_versions = @(     @{version = "v1.18"; chip = "esp32"; })
 
 
     $results = @()
-        
     foreach ($fw in $all_versions) {
+
         $result = $fw
         $result.Flash = "-"
         $result.Reset = "-"
         $result.Stub = "-"
         $result.Download = "-"
         $result.Error = "-"
+        $result.path = $null
+
         $device = $devices | Where-Object { $_.chip -and $_.chip.ToLower() -eq $fw.chip } | Select-Object -First 1
         if (-not $device) {
 
-            $result.Error = "No '$($fw.chip)' device connected , skipping Flashing firmware $($fw.chip) $($fw.version)"
+            $result.Error = "No '$($fw.chip)' device connected."
             Write-Warning $result.Error
             $results += $result
             continue
                 
         }
         $serialport = $device.port
+        Write-Host -ForegroundColor Cyan ("-" * 100)
         Write-Host -ForegroundColor Cyan "Found an $($device.chip) device connected to $serialport"
+        ###################################################################################################
         # 1) Flash a firmware
+        Write-Host -ForegroundColor Cyan ("-" * 100)
+        Write-Host -ForegroundColor Cyan "Micropython $($fw.version) on $($fw.chip) connected to $serialport"
+        Write-Host -ForegroundColor Cyan "Flash new firmware"
 
-        Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Flashing firmware on the device"
-        ..\..\FIRMWARE\flash_MPY.ps1 -serialport $serialport -KeepFlash:$false  @fw
-        $result.Flash = "OK"
-        
+        switch -wildcard ($fw.chip) {
+            "esp*" { 
+                Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Flashing firmware on the device"
+                $ret = ..\..\FIRMWARE\flash_MPY.ps1 -serialport $serialport -KeepFlash:$false  @fw
+                if ($ret -ieq "OK") {
+                    $result.Flash = $ret
+                }
+                else {
+                    $result.Error = $ret
+                }
+            }
+            "stm32" {
+                Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Flashing firmware on the device"
+                # TODO: KeepFLash / Erase 
+                # TODO: Erase does NOT erase the SD Card 
+                $ret = ..\..\FIRMWARE\flash_PYB11.ps1 -serialport $serialport  -version $fw.version -erase
+                if ($ret -ieq "OK") {
+                    $result.Flash = $ret
+                }
+                else {
+                    $result.Error = $ret
+                }
+
+            }
+            Default {
+                Write-Warning "$($serialport, $fw.chip, $fw.version) - unknown chip type"
+                $result.Flash = "Failed"
+
+            }
+        }
+        if ($result.Flash -ine "OK" ) {
+            # Flashing did not work, move on to the next
+            # Add to done
+            $results += $result
+            continue
+        }
+
         # 2) restart MCU
-        Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Restart device after flashing ..."
-        $OK = restart-MCU -serialport $serialport
-        if (-not $OK) {
-            Write-Warning "$($serialport, $fw.chip, $fw.version) -Problem restarting the MCU "
-            $result.Reset = "?"
-        }
-        else {
-            $result.Reset = "OK"
+        Write-Host -ForegroundColor Cyan ("-" * 100)
+        Write-Host -ForegroundColor Cyan "Micropython $($fw.version) on $($fw.chip) connected to $serialport"
+        Write-Host -ForegroundColor Cyan "Restart $($device.chip) after flashing"
+        switch -wildcard ($fw.chip) {
+            "esp*" {
+                # esp need some help after esptool is done with them 
+                # todo: maybe split out esp32/esp8266 specifics
+                Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Restart device after flashing ..."
+                $OK = restart-MCU -serialport $serialport
+                if (-not $OK) {
+                    Write-Warning "$($serialport, $fw.chip, $fw.version) -Problem restarting the MCU "
+                    $result.Reset = "?"
+                }
+                else {
+                    $result.Reset = "OK"
+                }
+            }
+            default {
+                $result.Reset = "OK"
+            }
         }
 
+        ###################################################################################################
         # 3) upload & run stubber
+        Write-Host -ForegroundColor Cyan ("-" * 100)
+        Write-Host -ForegroundColor Cyan "Micropython $($fw.version) on $($fw.chip) connected to $serialport"
         Write-Host -ForegroundColor Cyan "Starting createstubs.py"
+        
+
         $OK = run_stubber -serialport $serialport -chip $fw.chip
         if (-not $OK) {
             Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem running Stubber"
@@ -291,11 +366,25 @@ function stub_all {
         else {
             $result.Stub = "OK"
         }
-
+        
+        ###################################################################################################
         # 4) download the stubs 
+        Write-Host -ForegroundColor Cyan ("-" * 100)
+        Write-Host -ForegroundColor Cyan "Micropython $($fw.version) on $($fw.chip) connected to $serialport"
+        Write-Host -ForegroundColor Cyan "Download the stubs to $download_path"
 
-        Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Downloading the machine stubs"
-        $OK = download_stubs -serialport $serialport -path $download_path
+        switch -wildcard ($fw.chip) {
+            "esp*" {
+                Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Downloading the machine stubs"
+                $OK = download_stubs -serialport $serialport -path $download_path  
+            }
+            "stm32" {
+                Write-Host -ForegroundColor Cyan "$($serialport, $fw.chip, $fw.version) - Downloading the machine stubs from SD card"
+
+                $OK = download_stubs -serialport $serialport -path $download_path -source "/pyboard/sd/stubs"
+            }
+            #   default {}
+        }
         if (-not $OK) {
             Write-Warning "$($serialport, $fw.chip, $fw.version) - Problem downloading the machine stubs"
             $result.Download = "Error"
@@ -303,14 +392,11 @@ function stub_all {
             continue
         } 
         $result.Download = "OK"
+
         # Add to done
+        $result.path = $download_path
         $results += $result
     }
-
-    # now generate .pyi files 
-    python $update_pyi_py $download_path
-    # and run black formatting across all 
-    black $download_path
 
     return $results
 
@@ -323,9 +409,24 @@ $results = stub_all
 Pop-Location  -StackName "start-remote-stubber"
 
 Write-host -ForegroundColor Cyan "Finished processing: flash, reset, stubbing  and download :"
-# Array of Dict --> Array of objects with props
-$results = $results | ForEach-Object { new-object psobject -property $_ }  
+# # Array of Dict --> Array of objects with props
+$results2 = $results | ForEach-Object { new-object psobject -property $_ -ea SilentlyContinue }  
 # basic output
-$results | Format-Table | Out-Host
-$results | ConvertTo-json | Out-File bulk_stubber.json
+$results2 | Format-Table -Property Version, Chip, Flash, Reset, Stub, Download, Error, Path| Out-Host
+$results2 | ConvertTo-json | Out-File bulk_stubber.json
 
+
+foreach ($result in $results) {
+    Write-Host -ForegroundColor Cyan ("-" * 100)
+    Write-Host -ForegroundColor Cyan "processing stubs in $($result.path)"
+    if (len($result.path ) >0 ) {
+        # now generate .pyi files 
+        python $update_pyi_py $result.path 
+        # and run black formatting across all 
+        black $result.path 
+    }
+}
+
+
+# basic output
+$results2 | Format-Table -Property Version, Chip, Flash, Reset, Stub, Download, Error, Path| Out-Host
