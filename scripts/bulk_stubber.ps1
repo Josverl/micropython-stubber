@@ -195,11 +195,11 @@ function DetectDevices {
     return $devices
 }
 
-# todo: find WSroot automatically
-$WSRoot = "C:\develop\MyPython\micropython-stubber"
+
 function stub_all {
     param (
-        $download_path = (join-path -Path $WSRoot -ChildPath "stubs/machine-stubs"),
+        $download_path ,
+        #TODO: replace with somthing simpler
         $pyboard_py = (join-path $WSRoot "src/libs/pyboard.py" ),
         $update_pyi_py = (join-path $WSRoot "src/update_pyi.py" )
     )
@@ -402,31 +402,50 @@ function stub_all {
 
 }
 
- 
+
+# todo: find WSroot automatically
+$WSRoot = "C:\develop\MyPython\micropython-stubber"
+$download_path = join-path -Path $WSRoot -ChildPath "firmware-stubs"
+$update_pyi_py = join-path $WSRoot "src/update_pyi.py" 
+
 # Save this spot
 Push-Location -StackName "start-remote-stubber"
-$results = stub_all
+$results = stub_all -download_path $download_path
 Pop-Location  -StackName "start-remote-stubber"
 
-Write-host -ForegroundColor Cyan "Finished processing: flash, reset, stubbing  and download :"
+Write-host -ForegroundColor Cyan "Finished processing: flash, reset, stubbing  and download:"
 # # Array of Dict --> Array of objects with props
 $results2 = $results | ForEach-Object { new-object psobject -property $_ -ea SilentlyContinue }  
 # basic output
-$results2 | Format-Table -Property Version, Chip, Flash, Reset, Stub, Download, Error, Path| Out-Host
+$results2 | Format-Table -Property Version, Chip, Flash, Reset, Stub, Download, Error, Path | Out-Host
 $results2 | ConvertTo-json | Out-File bulk_stubber.json
 
 
-foreach ($result in $results) {
-    Write-Host -ForegroundColor Cyan ("-" * 100)
-    Write-Host -ForegroundColor Cyan "processing stubs in $($result.path)"
-    if (len($result.path ) >0 ) {
-        # now generate .pyi files 
-        python $update_pyi_py $result.path 
-        # and run black formatting across all 
-        black $result.path 
-    }
+
+Write-Host -ForegroundColor Cyan ("-" * 100)
+Write-Host -ForegroundColor Cyan "Create .pyi and apply black formatting $download_path"
+# now generate .pyi files 
+python $update_pyi_py $download_path 
+# and run black formatting across all 
+black $result.path $download_path 
+
+
+Write-Host -ForegroundColor Cyan ("-" * 100)
+Write-Host -ForegroundColor Cyan "Create .pyi and apply black formatting $download_path"
+
+# folder are deep down
+$stub_path = (join-path -Path $WSRoot -ChildPath "all-stubs")
+# Copy per folder 
+# - first clear all files in target, then add new 
+foreach ($folder in (Get-ChildItem ( join-path $download_path "stubs" ) -Directory)) {
+    $TargetFolder = Join-Path $stub_path  $folder.BaseName
+    mkdir $TargetFolder -Force -ErrorAction SilentlyContinue | Out-Null
+    # remove all .py and .pyi files in the target folder 
+    Get-ChildItem $TargetFolder -recurse -include *.py, *.pyi -force | remove-item -Force
+    # now copy in the new stuff 
+    Copy-Item -Path $folder -Destination $stub_path -recurse -Force -Container -PassThru
 }
 
 
 # basic output
-$results2 | Format-Table -Property Version, Chip, Flash, Reset, Stub, Download, Error, Path| Out-Host
+$results2 | Format-Table -Property Version, Chip, Flash, Reset, Stub, Download, Error, Path | Out-Host
