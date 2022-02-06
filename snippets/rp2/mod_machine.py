@@ -16,7 +16,7 @@ led = Pin()
 led = Pin(1, value=2)
 
 
-for i in [1, 2]:  # no infinite loop
+for i in range(2):  # no infinite loop
     led.on()
     time.sleep_ms(250)
     led.off()
@@ -147,7 +147,7 @@ np[0] = (255, 255, 255)  # set the first pixel to white
 np.write()  # write data to all pixels
 r, g, b = np[0]  # get first pixel colour
 
-# BUG  - Docbug: module apa106 not implemented in v1.18
+# BUG:  - Docbug: module apa106 not implemented in v1.18
 # from apa106 import APA106
 # ap = APA106(pin, 8)
 # r, g, b = ap[0]

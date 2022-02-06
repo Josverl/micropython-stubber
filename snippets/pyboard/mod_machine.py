@@ -13,7 +13,7 @@ pyb.freq(60000000)  # set CPU freq to 60MHz
 pyb.stop()  # stop CPU, waiting for external interrupt
 
 
-# Internal LEDs¶
+# Internal LEDs
 # See pyb.LED.
 
 from pyb import LED

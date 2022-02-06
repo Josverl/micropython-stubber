@@ -1,5 +1,6 @@
 # type: ignore
-# FIXME: ignore for now : other issues to solve first
+# FIXME: The functions defined in the asm_pio decorator are not recognized by pyright.
+# ignore for now : other issues to solve first
 """
 Sample from micropython documentaton
 

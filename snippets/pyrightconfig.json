@@ -5,7 +5,7 @@
         "pyboard",
         "rp2",
         "esp8266",
-        "mpylib",
+        "mpy-stdlib",
     ],
     "exclude": [],
     "ignore": [],
@@ -15,17 +15,24 @@
     "reportMissingImports": "error",
     "reportMissingModuleSource": "warning",
     "reportMissingTypeStubs": "warning",
-    "typeshedPath": "../stubs/mpy-typeshed",
-    // Do not specify extraPath at toplevel
-    // See https://github.com/microsoft/pyright/issues/2924
+    "stubPath": "micropython-typings",
     "logLevel": "Trace",
+    "extraPaths": [
+        "../all-stubs/typings/fallback",
+    ],
     "executionEnvironments": [
+        {
+            "root": "mpy-stdlib",
+            "extraPaths": [
+                "../all-stubs/typings/fallback",
+            ]
+        },
         {
             "root": "esp32",
             "extraPaths": [
                 "../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
-                "../all-stubs/micropython-v1_18-esp32"
-                // TODO: use All-stubs ?
+                "../all-stubs/micropython-v1_18-esp32",
+                //"../all-stubs/typings/fallback",
             ]
         },
         {
@@ -36,17 +43,26 @@
             ]
         },
         {
+            "root": "rp2/nano_connect",
+            "extraPaths": [
+                "../all-stubs/micropython-v1_18-frozen/rp2/ARDUINO_NANO_RP2040_CONNECT",
+                "../all-stubs/micropython-v1_18-rp2",
+                "../all-stubs/typings/fallback",
+            ]
+        },
+        {
             "root": "rp2",
             "extraPaths": [
                 "../all-stubs/micropython-v1_18-frozen/rp2/GENERIC",
-                "../all-stubs/micropython-v1_18-rp2"
+                "../all-stubs/micropython-v1_18-rp2",
+                "../all-stubs/typings/fallback",
             ]
         },
         {
             "root": "esp8266",
             "extraPaths": [
-                "../all-stubs/micropython-v1_17-frozen/esp8266/GENERIC",
-                "../all-stubs/micropython-v1_17-esp8266"
+                "../all-stubs/micropython-v1_18-frozen/esp8266/GENERIC",
+                "../all-stubs/micropython-v1_18-esp8266"
             ]
         },
     ]
