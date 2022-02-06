@@ -128,9 +128,9 @@ class SourceDict(OrderedDict):
         else:
             if "*" in name:
                 # * wildcard used in documentation
-                line = f"# {name} : {type}"
+                line = f"# {name} : {type} = ..."
             else:
-                line = f"{name} : {type}"
+                line = f"{name} : {type} = ..."
             _docstr = docstr
             if autoindent:
                 line = spaces(self._indent + self._body) + line
