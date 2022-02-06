@@ -669,8 +669,6 @@ class RSTReader:
         return [n.strip() for n in names if n.strip() != "etc."]
 
     def parse_data(self):
-        # todo: find a way to reliably add Constants at the correct level
-        # Note : makestubs has no issue with this
         log.debug(f"# {self.line.rstrip()}")
         # Get one or more names
         names = self.parse_names()
