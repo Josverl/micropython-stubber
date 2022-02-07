@@ -151,7 +151,7 @@ PARAM_FIXES = [
     ),  #
     (
         "(ip, subnet, gateway, dns):Optional[Any]",
-        "config: Optional[Tuple]",
+        "configtuple: Optional[Tuple]",
     ),  # ifconfig
     (
         "lambda",

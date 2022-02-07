@@ -44,3 +44,4 @@ node_modules
 # Interim storage for bulkstubber
 firmware-stubs
 
+scripts/bulk_stubber.json

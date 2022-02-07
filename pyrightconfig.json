@@ -15,38 +15,6 @@
     "verboseOutput": true,
     "executionEnvironments": [
         {
-            "root": "snippets/ulib",
-            "typeshedPath": "\\develop\\MyPython\\micropython-stubber\\stubs\\mpy-typeshed\\stdlib",
-            "extraPaths": [
-                // 
-            ],
-        },
-        {
-            "root": "snippets/esp8266",
-            "extraPaths": [
-                "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC",
-                "all-stubs/micropython-v1_17-esp8266",
-                // TODO: V1.18 
-                // TODO: use All-stubs ?
-            ],
-        },
-        {
-            "root": "snippets/pyboard",
-            "extraPaths": [
-                "all-stubs/micropython-v1_18-frozen/stm32/GENERIC",
-                "./board/stubs/micropython-v1_18-pyboard",
-                // TODO: use All-stubs ?
-            ],
-        },
-        {
-            "root": "snippets/rp2",
-            "extraPaths": [
-                "all-stubs/micropython-v1_18-frozen/rp2/GENERIC",
-                "./board/stubs/micropython-v1_18-rp2",
-                // TODO: use All-stubs ?
-            ],
-        },
-        {
             "root": "board",
             "extraPaths": [
                 "board/lib",
