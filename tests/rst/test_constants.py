@@ -132,10 +132,10 @@ def test_class_constants():
     expected = [
         "class Pin():",
         "    #    Selects the pin mode.",
-        "    IN : Any",
-        "    OPEN_DRAIN : Any",
+        "    IN : Any = ...",
+        "    OPEN_DRAIN : Any = ...",
         "    #    Test wildcard handling.",
-        "    # JOKER_* : Any",
+        "    # JOKER_* : Any = ...",
         "    def __init__(self, id, mode=-1, pull=-1, *, value=None, drive=-1, alt=-1) -> None:",
     ]
     lines = [l.rstrip() for l in r.output]
