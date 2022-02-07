@@ -75,7 +75,8 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
 #
 ###################################################################################################
 
-# @pytest.mark.xfail(reason="upstream docfix needed")
+
+@pytest.mark.xfail(reason="upstream docfix needed", condition=TEST_DOCFIX == False)
 @pytest.mark.docfix
 def test_rst_all(tmp_path, micropython_repo):
     v_tag = micropython_repo
@@ -190,7 +191,6 @@ def test_rst_parse_class_10(line: str):
         ("([angle])", "(angle: Optional[Any])"),  # simple optional
         ("([angle, time=0])", "(angle: Optional[Any], time=0)"),  # dual optional - hardcoded
         ("('param')", "(param)"),
-        ("(cert_reqs=CERT_NONE)", "(cert_reqs=None)"),
         (
             "(if_id=0, config=['dhcp' or configtuple])",
             "(if_id=0, config: Union[str,Tuple]='dhcp')",
@@ -281,8 +281,7 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
     assert len(issues) == 0
 
 
-# @pytest.mark.xfail(reason="upstream docfix needed")
-@pytest.mark.xfail(TEST_DOCFIX == False, reason="Documentation updates needed")
+@pytest.mark.xfail(reason="Documentation updates needed", condition=TEST_DOCFIX == False)
 def test_pyright_undefined_variable(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -314,7 +313,7 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     assert len(issues) <= 1, "There should be no type issues"
 
 
-@pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.xfail(reason="upstream docfix needed", condition=TEST_DOCFIX == False)
 @pytest.mark.docfix
 def test_pyright_invalid_strings(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
@@ -329,9 +328,10 @@ def test_pyright_invalid_strings(pyright_results, capsys):
     assert len(issues) == 0, "All strings should be valid"
 
 
-@pytest.mark.xfail(reason="upstream docfix needed")
+@pytest.mark.xfail(reason="upstream docfix needed", condition=TEST_DOCFIX == False)
 @pytest.mark.docfix
 def test_doc_pyright_obscured_definitions(pyright_results, capsys):
+
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
     # Only look at errors
@@ -345,9 +345,8 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
     with capsys.disabled():
         for issue in issues:
             print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
-    # TODO: Class declaration "match" is obscured by a declaration of the same name in C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-78\stubs0\v1.17-nightly\re.py line 156
 
-    assert len(issues) <= 1, f"There are {len(issues)} function or class defs that obscure earlier defs"
+    assert len(issues) == 0, f"There are {len(issues)} function or class defs that obscure earlier defs"
 
 
 @pytest.mark.xfail(reason="upstream docfix needed")
