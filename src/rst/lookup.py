@@ -16,16 +16,19 @@ __all__ = ["LOOKUP_LIST", "NONE_VERBS", "CHILD_PARENT_CLASS", "PARAM_FIXES", "MO
 # PR: https://github.com/micropython/micropython/pull/7976
 
 RST_DOC_FIXES = [
-    # uselect.rst
-    (".. function:: poll(", ".. class:: poll("),
-    # collections.rst
-    (".. function:: deque(", ".. class:: deque("),
-    (".. function:: OrderedDict(", ".. class:: OrderedDict("),
     # re.rst - function and class with the same name
-    # Class declaration "match" is obscured by a declaration of the same name in re.py
     # todo: issue https://github.com/micropython/micropython/issues/8273
     (".. method:: match.", ".. method:: Match."),
     ("            match.end", "            Match.end"),
+    # generator functions - WILL_NOT_FIX in the MicroPython documentation
+    # these are documented as functions, but return an object with the the same name as the function.
+    # for static type analysis this is best considered as a Class, so morph them before processing.
+    # uselect.rst
+    (".. function:: poll(", ".. class:: poll("),
+]
+
+DOCSTUB_SKIP = [
+    "re.rst",  # regex is complex
 ]
 
 # contains return types for functions and methods that are not clearly documented.
