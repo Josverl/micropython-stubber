@@ -63,18 +63,7 @@
     - Child/ Parent classes
         are added based on a (manual) lookup table CHILD_PARENT_CLASS
 
-
-
-Not yet implemented 
--------------------
-
-    - manual tweaks for uasync 
-        https://docs.python.org/3/library/typing.html#asynchronous-programming
-
-
-    # correct warnings for 'Unsupported escape sequence in string literal'
-
-
+TODO: correct warnings for 'Unsupported escape sequence in string literal'
 """
 
 from typing import List, Tuple
@@ -90,16 +79,14 @@ import click
 from version import __version__
 
 from rst import (
-    return_type_from_context,
     TYPING_IMPORT,
-    MODULE_GLUE,
-    PARAM_FIXES,
-    CHILD_PARENT_CLASS,
-    RST_DOC_FIXES,
+    return_type_from_context,
     ModuleSourceDict,
     ClassSourceDict,
     FunctionSourceDict,
 )
+
+from rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP
 
 # logging
 log = logging.getLogger(__name__)
@@ -355,13 +342,13 @@ class RSTReader:
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
         self.leave_class()
-        # TODO: Add / update information to existing class definition
+        # DOC: Add / update information to existing class definition
         full_name = self.output_dict.find(f"class {name}")
         if full_name:
             log.warning(f"TODO: UPDATE EXISTING CLASS : {name}")
             class_def = self.output_dict[full_name]
         else:
-            # TODO: add the parent class(es) to the formal documentation
+            # DOC: add the parent class(es) to the formal documentation
             parent = ""
             if name in CHILD_PARENT_CLASS.keys():
                 parent = CHILD_PARENT_CLASS[name]
@@ -613,13 +600,13 @@ class RSTReader:
     def parse_exception(self):
         log.debug(f"# {self.line.rstrip()}")
         name = self.line.split(SEPERATOR)[1].strip()
-        # TODO : check name scope : Module.class.<name>
         if name == "Exception":
             # no need to redefine Exception
             self.line_no += 1
             return
+        # Take only the last part from module.ExceptionX
         if "." in name:
-            name = name.split(".")[-1]  # Take only the last part from Pin.toggle
+            name = name.split(".")[-1]
         except_1 = ClassSourceDict(name=f"class {name}(Exception) : ...", docstr=[], init="")
         self.output_dict += except_1
         # no docstream read (yet) , so need to advance to next line
@@ -748,8 +735,12 @@ def generate_from_rst(
         dst_path.mkdir(parents=True)
     if not release:
         release = v_tag
-    # no index, and module.xxx.rst is included in module.py
-    files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
+    # skip
+    #  - index,
+    # - modules with a . in the stem :  module.xxx.rst is included in module.py
+    # - excluded modules, ones that offer little advantage  or cause much problems
+
+    files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem and f.name not in DOCSTUB_SKIP]
 
     # simplify debugging
     # files = [f for f in files if f.name == "collections.rst"]
