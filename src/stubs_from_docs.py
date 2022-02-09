@@ -752,7 +752,13 @@ def generate_from_rst(
         log.info(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()
-        reader.write_file((dst_path / file.name).with_suffix(".py"))
+        if file.stem in ["os", "time", "array", "binascii", "io", "json", "select", "socket", "ssl", "struct", "zlib"]:
+            # create umod.py file and mod.py file that imports umod
+            reader.write_file((dst_path / ("u" + file.name)).with_suffix(".py"))
+            with open((dst_path / file.name).with_suffix(".py"), "w") as new_file:
+                new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
+        else:
+            reader.write_file((dst_path / file.name).with_suffix(".py"))
         del reader
 
     # run autoflake to remove unused imports
