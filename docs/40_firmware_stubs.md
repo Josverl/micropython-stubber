@@ -6,13 +6,11 @@ the script goes though the following stages
 
 1. it determines the firmware family, the version and the port of the device, 
    and based on that information it creates a firmware identifier (fwid) in the format : {family}-{port}-{version}
-   the fwid is used to name the folder that stores the subs for that device.
+   the fwid is used to name the folder that stores the stubs for that device.
+   - stubs/micropython-v1_10-pyboard
+   - stubs/micropython-v1_12-esp32
+   - stubs/loboris-v3_2_4-esp32
 
-   - micropython-pyboard-1_10
-
-   - micropython-esp32-1_12
-
-   - loboris-esp32_LoBo-3_2_4
 2. it cleans the stub folder 
 3. it generates stubs, using a predetermined list of module names.
    for each found module or submodule a stub file is written to the device and progress is output to the console/repl.
@@ -24,7 +22,7 @@ Due to the module naming convention in micropython some modules will be duplicat
 
 ## Running the script
 
-The createstubs.py script can either be run as a script or imported as a module depending on your preferences.
+The `createstubs.py` script can either be run as a script or imported as a module depending on your preferences.
 
 Running as a script is used on the linux or win32 platforms in order to pass a --path parameter to the script.
 
@@ -62,16 +60,11 @@ After the sub files have been generated , you will need to download the generate
 if you work with multiple firmwares, ports or version it is simple to keep the stub files in a common folder as the firmware id is used to generate unique names
 
 - ./stubs
-
-  - /micropython-pyboard-1_10
-
-  - /micropython-esp32-1_12
-
-  - /micropython-linux-1_11
-
-  - /loboris-esp32_LoBo-3_1_20
-
-  - /loboris-esp32_LoBo-3_2_24
+  - /micropython-v1_10-pyboard
+  - /micropython-v1_12-esp32
+  - /micropython-v1_11-linux
+  - /loboris-v3_1_20-esp32
+  - /loboris-v3_2_24-esp32
 
 ## Custom firmware 
 
@@ -107,7 +100,7 @@ the problematic category throw errors or lock up the stubbing process altogether
  self.problematic=["upysh","webrepl_setup","http_client","http_client_ssl","http_server","http_server_ssl"]
 ```
 
-the excluded category provides no relevant stub information 
+The excluded category provides no relevant stub information 
 
 ``` python 
  self.excluded=["webrepl","_webrepl","port_diag","example_sub_led.py","example_pub_button.py"]
@@ -115,4 +108,5 @@ the excluded category provides no relevant stub information
 
 `createstubs.py` will not process a module in either category.
 
-Note that some of these modules are in fact included in the frozen modules that are gathered for those ports or boards
+Note: that some of these modules are also included in the frozen modules that are gathered for those ports or boards. 
+For those modules it makes sense to use/prioritize the .pyi stubs for the forzen modules over the firmware stubs.
