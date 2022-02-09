@@ -738,9 +738,14 @@ def generate_from_rst(
     # skip
     #  - index,
     # - modules with a . in the stem :  module.xxx.rst is included in module.py
-    # - excluded modules, ones that offer little advantage  or cause much problems
 
-    files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem and f.name not in DOCSTUB_SKIP]
+    files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
+
+    # - excluded modules, ones that offer little advantage  or cause much problems
+    files = [f for f in files if f.name not in DOCSTUB_SKIP]
+
+    # modules documented with base name only
+    U_MODULES = ["os", "time", "array", "binascii", "io", "json", "select", "socket", "ssl", "struct", "zlib"]
 
     # simplify debugging
     # files = [f for f in files if f.name == "collections.rst"]
@@ -752,7 +757,7 @@ def generate_from_rst(
         log.info(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()
-        if file.stem in ["os", "time", "array", "binascii", "io", "json", "select", "socket", "ssl", "struct", "zlib"]:
+        if file.stem in U_MODULES:
             # create umod.py file and mod.py file that imports umod
             reader.write_file((dst_path / ("u" + file.name)).with_suffix(".py"))
             with open((dst_path / file.name).with_suffix(".py"), "w") as new_file:
