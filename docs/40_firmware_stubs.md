@@ -31,7 +31,7 @@ Running as a script is used on the linux or win32 platforms in order to pass a -
 The steps are : 
 
 1. Connect to your board 
-2. Upload the script(s) to your board. All variants of the script are located in the [`/board`](https://github.com/Josverl/micropython-stubber/tree/main/board] folder of this repo   
+2. Upload the script(s) to your board. All variants of the script are located in the [`/board`](https://github.com/Josverl/micropython-stubber/tree/main/board) folder of this repo   
 3. Run/import the `createstubs.py` script 
 4. Download the generated stubs to a folder on your PC
 5. run the post-processor [optional, but recommended]
