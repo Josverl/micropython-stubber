@@ -27,7 +27,10 @@ RST_DOC_FIXES = [
     (".. function:: poll(", ".. class:: poll("),
 ]
 
+# docstubs generation, exclude stub generation for below stubs.
 DOCSTUB_SKIP = [
+    "uasyncio.rst", # can create better stubs from frozen python modules.
+    "builtins.rst", # conflicts with static type checking , has very little information anyway
     "re.rst",  # regex is complex
 ]
 
