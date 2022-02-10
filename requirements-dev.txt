@@ -3,12 +3,12 @@
 --requirement docs/requirements-docs.txt
 
 # dev requirements
-pytest              == 6.2.5
+pytest              == 7.0.0
 pytest-mock         == 3.7.0
 pytest-json-report  == 1.4.1
 pytest-metadata     == 1.11.0
 mock                == 4.0.3
-coverage            == 6.3
+coverage            == 6.3.1
 
 
 pyright             == 0.0.13   # does not match the actual pyright version
