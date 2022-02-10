@@ -5,10 +5,9 @@ project.pymakr
 .env
 .venv*
 
-# no compiled python 
-**/__pycache__/**
-.py_cache
-.pytest_cache/*
+# no compiled python or caches
+**/__pycache__
+**/.py*_cache
 
 #ignore the scratchpad 
 scratch/*
