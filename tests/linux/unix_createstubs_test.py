@@ -9,36 +9,41 @@ from _pytest.config import Config
 import distro
 
 
-ubuntu_version = "?"
 fw_list = []
 # Figure out ubuntu version
 os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
 
-if os_distro_version in ['linux-ubuntu-20.04','linux-debian-11']: 
-        # Default = 20.04 - focal
-        fw_list = [
-            "ubuntu_20_04/micropython_v1_11",
-            "ubuntu_20_04/micropython_v1_12",
-            "ubuntu_20_04/micropython_v1_14",
-            "ubuntu_20_04/micropython_v1_15",
-            "ubuntu_20_04/micropython_v1_16",
-            "ubuntu_20_04/micropython_v1_17",
-            "ubuntu_20_04/micropython_v1_18",
-        ]
-elif os_distro_version in ['linux-ubuntu-18.04']: 
-        if ubuntu_version == "18.04":
-            # 18.04 - bionic
-            fw_list = [
-                "ubuntu_18_04/micropython_1_12",
-                "ubuntu_18_04/micropython_1_13",
-                "ubuntu_18_04/pycopy_3_3_2-25",
-            ]
+if os_distro_version in ["linux-ubuntu-20.04", "linux-debian-11"]:
+    # Default = 20.04 - focal
+    fw_list = [
+        "ubuntu_20_04/micropython_v1_11",
+        "ubuntu_20_04/micropython_v1_12",
+        "ubuntu_20_04/micropython_v1_14",
+        "ubuntu_20_04/micropython_v1_15",
+        "ubuntu_20_04/micropython_v1_16",
+        "ubuntu_20_04/micropython_v1_17",
+        "ubuntu_20_04/micropython_v1_18",
+    ]
+elif os_distro_version in ["linux-ubuntu-18.04"]:
+    # 18.04 - bionic
+    fw_list = [
+        "ubuntu_18_04/micropython_1_12",
+        "ubuntu_18_04/micropython_1_13",
+        "ubuntu_18_04/pycopy_3_3_2-25",
+    ]
 # distro does not cover windows... but no problem as long as it is not 16 bit it will run.
 elif sys.platform == "win32":
     fw_list = [
         "windows/micropython_v1_18.exe",
     ]
+VARIANTS = [
+    "createstubs",
+    "createstubs_mem",
+    # "createstubs_db",
+]
 
+
+@pytest.mark.parametrize("variant", VARIANTS)
 # specify the minified tests using a marker
 @pytest.mark.parametrize(
     "script_folder",
@@ -54,12 +59,12 @@ elif sys.platform == "win32":
 # only run createstubs in the unix version of micropython
 @pytest.mark.linux
 # TODO: enable test on micropython-windows.
-def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, pytestconfig: Config):
+def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant: str, pytestconfig: Config):
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
     # BUG: other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute().as_posix()
-    cmd = [fw_filename, "createstubs.py", "--path", str(tmp_path)]
+    cmd = [fw_filename, variant + ".py", "--path", str(tmp_path)]
     try:
         subproc = subprocess.run(
             cmd,
