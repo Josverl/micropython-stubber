@@ -53,7 +53,7 @@ function run_stubber {
         $chip = "",
         $serialport 
     )
-    # TODO: refactor to :
+    # TODO: refactor bulkstubber to allow more board types :
     # - type: board/minified/compiled 
     # - variant : normal/mem/db
     # need to have a verson with no logging
@@ -218,7 +218,7 @@ function stub_all {
     $all_versions = @( 
         
         # Older versions need a different/older/specific version of mpy-cross cross compiler
-        # TODO: add old versions of mpy-cross to tools
+        # TODO: add old new  and versions of mpy-cross to tools
         # @{version = "v1.10"; chip = "esp8266"; } ,
         # @{version = "v1.11"; chip = "esp8266"; } ,
         # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
