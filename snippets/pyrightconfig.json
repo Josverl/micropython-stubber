@@ -22,7 +22,7 @@
     ],
     "executionEnvironments": [
         {
-            "root": "mpy-stdlib",
+            "root": "validate-stdlib",
             "extraPaths": [
                 "../all-stubs/typings/fallback",
             ]

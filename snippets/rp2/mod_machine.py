@@ -147,7 +147,7 @@ np[0] = (255, 255, 255)  # set the first pixel to white
 np.write()  # write data to all pixels
 r, g, b = np[0]  # get first pixel colour
 
-# BUG:  - Docbug: module apa106 not implemented in v1.18
-# from apa106 import APA106
+# FIXME:  - Docbug: module apa106 not implemented in v1.18
+# from apa106 import APA106 
 # ap = APA106(pin, 8)
 # r, g, b = ap[0]
