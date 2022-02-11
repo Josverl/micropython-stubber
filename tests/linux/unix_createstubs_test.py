@@ -12,10 +12,9 @@ import distro
 ubuntu_version = "?"
 fw_list = []
 # Figure out ubuntu version
-if sys.platform == "linux":
-    if distro.id() == "ubuntu":
-        ubuntu_version = distro.version()
+os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
 
+if os_distro_version in ['linux-ubuntu-20.04','linux-debian-11']: 
         # Default = 20.04 - focal
         fw_list = [
             "ubuntu_20_04/micropython_v1_11",
@@ -26,6 +25,7 @@ if sys.platform == "linux":
             "ubuntu_20_04/micropython_v1_17",
             "ubuntu_20_04/micropython_v1_18",
         ]
+elif os_distro_version in ['linux-ubuntu-18.04']: 
         if ubuntu_version == "18.04":
             # 18.04 - bionic
             fw_list = [
@@ -33,6 +33,7 @@ if sys.platform == "linux":
                 "ubuntu_18_04/micropython_1_13",
                 "ubuntu_18_04/pycopy_3_3_2-25",
             ]
+# distro does not cover windows... but no problem as long as it is not 16 bit it will run.
 elif sys.platform == "win32":
     fw_list = [
         "windows/micropython_v1_18.exe",
@@ -50,7 +51,7 @@ elif sys.platform == "win32":
     "firmware",
     fw_list,
 )
-# only run createsubs in the unix version of micropython
+# only run createstubs in the unix version of micropython
 @pytest.mark.linux
 def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, pytestconfig: Config):
     # Use temp_path to generate stubs

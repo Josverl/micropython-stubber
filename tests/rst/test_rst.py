@@ -17,6 +17,7 @@ from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 MICROPYTHON_FOLDER = "micropython"
 TEST_DOCFIX = False
+XFAIL_DOCFIX = False
 
 
 ###################################################################################################
@@ -26,11 +27,11 @@ TEST_DOCFIX = False
 @pytest.fixture(scope="module")
 def pyright_results(rst_stubs):
     "Run pyright over folder with rst generated stubs, and return the results"
-    # TODO this fails if the nodeJS version of pyright is installed , and only works for the SLOWER pip install Pyright
+    # TODO: this fails if the nodeJS version of pyright is installed , and only works for the SLOWER pip install Pyright
 
     cmd = ["pyright", "--project", "tests/pyrightconfig.json", "--outputjson", rst_stubs.as_posix()]
     try:
-        result = subprocess.run(cmd, shell=False, capture_output=True)
+        result = subprocess.run(cmd, shell=False, capture_output=True, cwd=rst_stubs.as_posix()  )
     except OSError as e:
         raise e
     results = {}
@@ -76,7 +77,7 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
 ###################################################################################################
 
 
-@pytest.mark.xfail(reason="upstream docfix needed", condition=TEST_DOCFIX == False)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 @pytest.mark.docfix
 def test_rst_all(tmp_path, micropython_repo):
     v_tag = micropython_repo
@@ -258,7 +259,7 @@ import json
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_Non_default_follows_default(pyright_results, capsys):
     """use pyright to check the validity of the generated stubs
     - Non-default argument follows default argument
@@ -283,19 +284,18 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_undefined_variable(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
     issues = list(filter(lambda diag: "rule" in diag.keys() and diag["rule"] == "reportUndefinedVariable", issues))
-    with capsys.disabled():
-        for issue in issues:
-            print(f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  ")
+    for issue in issues:
+        print(f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  ")
     assert len(issues) == 0, "there should be no `Undefined Variables`"
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs - reportGeneralTypeIssues"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -316,7 +316,7 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_invalid_strings(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -331,7 +331,7 @@ def test_pyright_invalid_strings(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_pyright_obscured_definitions(pyright_results, capsys):
 
     "use pyright to check the validity of the generated stubs"
@@ -344,15 +344,14 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
             issues,
         )
     )
-    with capsys.disabled():
-        for issue in issues:
-            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    for issue in issues:
+        print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
 
     assert len(issues) == 0, f"There are {len(issues)} function or class defs that obscure earlier defs"
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
@@ -365,7 +364,7 @@ def test_doc_deepsleep_stub(rst_stubs):
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_socket_class_def(rst_stubs: Path):
     "make sense of `usocket.socket` class documented as a function - Upstream Docfix needed"
     content = read_stub(rst_stubs, "usocket.py")
@@ -392,7 +391,7 @@ def test_doc_socket_class_def(rst_stubs: Path):
     ],
 )
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname: str):
     "verify `collections.deque` class documented as a function - Upstream Docfix pending"
     filename = modulename + ".py"
@@ -422,7 +421,7 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
     ],
 )
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=not TEST_DOCFIX)
+@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_CONSTANTS(error, modulename, pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
