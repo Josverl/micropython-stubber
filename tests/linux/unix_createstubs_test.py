@@ -16,22 +16,27 @@ if sys.platform == "linux":
     if distro.id() == "ubuntu":
         ubuntu_version = distro.version()
 
-# Default = 20.04 - focal
-fw_list = [
-    "ubuntu_20_04/micropython_v1_11",
-    "ubuntu_20_04/micropython_v1_12",
-    "ubuntu_20_04/micropython_v1_14",
-    "ubuntu_20_04/micropython_v1_15",
-    "ubuntu_20_04/micropython_v1_16",
-]
-if ubuntu_version == "18.04":
-    # 18.04 - bionic
+        # Default = 20.04 - focal
+        fw_list = [
+            "ubuntu_20_04/micropython_v1_11",
+            "ubuntu_20_04/micropython_v1_12",
+            "ubuntu_20_04/micropython_v1_14",
+            "ubuntu_20_04/micropython_v1_15",
+            "ubuntu_20_04/micropython_v1_16",
+            "ubuntu_20_04/micropython_v1_17",
+            "ubuntu_20_04/micropython_v1_18",
+        ]
+        if ubuntu_version == "18.04":
+            # 18.04 - bionic
+            fw_list = [
+                "ubuntu_18_04/micropython_1_12",
+                "ubuntu_18_04/micropython_1_13",
+                "ubuntu_18_04/pycopy_3_3_2-25",
+            ]
+elif sys.platform == "win32":
     fw_list = [
-        "ubuntu_18_04/micropython_1_12",
-        "ubuntu_18_04/micropython_1_13",
-        "ubuntu_18_04/pycopy_3_3_2-25",
+        "windows/micropython_v1_18.exe",
     ]
-
 
 # specify the minified tests using a marker
 @pytest.mark.parametrize(

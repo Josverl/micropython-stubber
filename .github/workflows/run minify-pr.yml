@@ -45,7 +45,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
-          MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_16 -c "import sys;print(sys.path);import logging"
+          MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_18 -c "import sys;print(sys.path);import logging"
 
       - name: minify createstubs
         run: |
