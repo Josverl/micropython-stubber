@@ -12,14 +12,20 @@ __all__ = ["LOOKUP_LIST", "NONE_VERBS", "CHILD_PARENT_CLASS", "PARAM_FIXES", "MO
 # Some classes are documented as functions
 # This table is used to try to correct the errors in the documentation.
 # it is applied to each .rst file after loading the contents.
-# TODO: merge upstream
-# PR: https://github.com/micropython/micropython/pull/7976
 
 RST_DOC_FIXES = [
+    # ------------------------------------------------------------------------------------------------
     # re.rst - function and class with the same name
     # todo: issue https://github.com/micropython/micropython/issues/8273
     (".. method:: match.", ".. method:: Match."),
     ("            match.end", "            Match.end"),
+    # ------------------------------------------------------------------------------------------------
+    # collections.rst - should be fixed in v1.19
+    # PR: https://github.com/micropython/micropython/pull/7976
+    # keep around for older docstubs
+    (".. function:: deque(", ".. class:: deque("),
+    (".. function:: OrderedDict(", ".. class:: OrderedDict("),
+    # ------------------------------------------------------------------------------------------------
     # generator functions - WILL_NOT_FIX in the MicroPython documentation
     # these are documented as functions, but return an object with the the same name as the function.
     # for static type analysis this is best considered as a Class, so morph them before processing.
@@ -29,8 +35,8 @@ RST_DOC_FIXES = [
 
 # docstubs generation, exclude stub generation for below stubs.
 DOCSTUB_SKIP = [
-    "uasyncio.rst", # can create better stubs from frozen python modules.
-    "builtins.rst", # conflicts with static type checking , has very little information anyway
+    "uasyncio.rst",  # can create better stubs from frozen python modules.
+    "builtins.rst",  # conflicts with static type checking , has very little information anyway
     "re.rst",  # regex is complex
 ]
 
