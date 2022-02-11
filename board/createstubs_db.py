@@ -32,7 +32,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.4"
+__version__ = "1.5.5"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -49,7 +49,7 @@ class Stubber:
 
     def __init__(self, path: str = None, firmware_id: str = None):
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":# type: ignore
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
@@ -125,8 +125,6 @@ class Stubber:
         self._log.info("Finally done")
 
     def create_one_stub(self, module_name):
-        # use trailing comma to overide black formatting to avoid minify chocking on this
-
         if module_name in self.problematic:
             self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
             return False
@@ -138,15 +136,16 @@ class Stubber:
         gc.collect()
         m1 = gc.mem_free()  # type: ignore
         self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
+        result = False
         try:
-            self.create_module_stub(module_name, file_name)
+            result = self.create_module_stub(module_name, file_name)
         except OSError:
             return False
         gc.collect()
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
-        return True
+        return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None):
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:
         """Create a Stub of a single python module
 
         Args:
@@ -155,7 +154,7 @@ class Stubber:
         """
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
-            return
+            return False
 
         if file_name is None:
             file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
@@ -169,9 +168,9 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
         except ImportError:
-            #            failed = True
-            self._log.warning("Skip module: {:<20}        : Failed to import".format(module_name))
-            return
+            # move one line up to overwrite
+            self._log.warning("{}Skip module: {:<20} to file: {:<55}".format("\u001b[1A", module_name, "Failed to import"))
+            return False
 
         # Start a new file
         ensure_folder(file_name)
@@ -195,6 +194,7 @@ class Stubber:
             except KeyError:
                 self._log.debug("could not del sys.modules[{}]".format(module_name))
         gc.collect()
+        return True
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
@@ -421,9 +421,9 @@ def _info():
         "ver": "",  # short version
     }
     try:
-        info["release"] = ".".join([str(n) for n in sys.implementation.version])# type: ignore
+        info["release"] = ".".join([str(n) for n in sys.implementation.version])
         info["version"] = info["release"]
-        info["name"] = sys.implementation.name# type: ignore
+        info["name"] = sys.implementation.name
         info["mpy"] = sys.implementation.mpy  # type: ignore
     except AttributeError:
         pass
@@ -431,13 +431,13 @@ def _info():
     if sys.platform not in ("unix", "win32"):
         try:
             u = os.uname()
-            info["sysname"] = u.sysname# type: ignore
-            info["nodename"] = u.nodename# type: ignore
-            info["release"] = u.release# type: ignore
-            info["machine"] = u.machine# type: ignore
+            info["sysname"] = u.sysname
+            info["nodename"] = u.nodename
+            info["release"] = u.release
+            info["machine"] = u.machine
             # parse micropython build info
-            if " on " in u.version:# type: ignore
-                s = u.version.split(" on ")[0]# type: ignore
+            if " on " in u.version:
+                s = u.version.split(" on ")[0]
                 if info["sysname"] == "esp8266":
                     # esp8266 has no usable info on the release
                     if "-" in s:
@@ -580,7 +580,7 @@ def main_esp8266():
         f = open("modulelist" + ".db", "w+b")
         _log.info("created new db")
         was_running = False
-    #
+
     stubber = Stubber(path=read_path())
     # stubber = Stubber(path="/sd")
     # Option: Specify a firmware name & version
@@ -602,7 +602,7 @@ def main_esp8266():
         db.flush()
 
     for key in db.keys():
-        print("{0:<32} {1}".format(key, db[key]))
+        _log.debug("{0:<32} {1}".format(key, db[key]))
         if db[key] != b"todo":
             continue
         # ------------------------------------
@@ -619,19 +619,20 @@ def main_esp8266():
 
         # save the (last) result back to the database
         if OK:
-            # try:
-            #     result = bytearray(stubber._report[-1])
-            # except KeyError:
-            result = "good, I guess"
+            result = bytes(repr(stubber._report[-1]), "utf8")
         else:
-            result = b"skipped"
+            result = b"fail"
         # -------------------------------------
         db[key] = result
         db.flush()
-        _log.info(result)
-    # Finished processing
-    print(list(db))
-    #     print("{0:<32} {1}".format(key, db[key]))
+        _log.debug(result)
+
+    # Finished processing - load all the results from the db
+    all = [i for i in db.items() if not i[1] == b"todo" and not i[1] == b"fail"]
+    if len(all) > 0:
+        stubber._report = all
+        stubber.report()
+
     db.close()
     f.close()
 

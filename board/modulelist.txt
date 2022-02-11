@@ -10,9 +10,9 @@ apa106
 array
 binascii
 btree
-builtins
+# builtins
 cmath
-collections
+# collections
 crypto
 curl
 dht
