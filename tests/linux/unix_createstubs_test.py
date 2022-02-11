@@ -53,6 +53,7 @@ elif sys.platform == "win32":
 )
 # only run createstubs in the unix version of micropython
 @pytest.mark.linux
+# TODO: enable test on micropython-windows.
 def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, pytestconfig: Config):
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
@@ -72,6 +73,10 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, pytestco
     except ImportError as e:
         print(e)
         pass
+    except BaseException as e:
+        print(e)
+        pass
+
     # did it run without error ?
 
     stub_path = tmp_path / "stubs"
