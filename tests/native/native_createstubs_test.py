@@ -9,7 +9,7 @@ from _pytest.config import Config
 import distro
 
 
-fw_list = []
+fw_list = []  # no tests on mac
 # Figure out ubuntu version
 os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
 
@@ -36,14 +36,16 @@ elif sys.platform == "win32":
     fw_list = [
         "windows/micropython_v1_18.exe",
     ]
-VARIANTS = [
-    "createstubs",
-    "createstubs_mem",
-    # "createstubs_db",
-]
 
 
-@pytest.mark.parametrize("variant", VARIANTS)
+@pytest.mark.parametrize(
+    "variant",
+    [
+        pytest.param("createstubs"),
+        pytest.param("createstubs_mem"),
+        pytest.param("createstubs_db", marks=pytest.mark.linux),  # no btree on windows build
+    ],
+)
 # specify the minified tests using a marker
 @pytest.mark.parametrize(
     "script_folder",
@@ -57,13 +59,13 @@ VARIANTS = [
     fw_list,
 )
 # only run createstubs in the unix version of micropython
-@pytest.mark.linux
+# @pytest.mark.linux
 # TODO: enable test on micropython-windows.
 def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant: str, pytestconfig: Config):
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
     # BUG: other tests may / will change the CWD to a different folder
-    fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute().as_posix()
+    fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
     cmd = [fw_filename, variant + ".py", "--path", str(tmp_path)]
     try:
         subproc = subprocess.run(
