@@ -1,4 +1,4 @@
-#MicroPython v1.18 on 2022-01-17; PYBv1.1 with STM32F405RG
+# MicroPython v1.18 on 2022-01-17; PYBv1.1 with STM32F405RG
 __main__          micropython       uasyncio/stream   uplatform
 _onewire          network           ubinascii         urandom
 _uasyncio         onewire           ucollections      ure

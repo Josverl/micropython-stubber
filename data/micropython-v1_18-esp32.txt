@@ -1,0 +1,17 @@
+# MicroPython v1.18 on 2022-01-17; ESP32 module (spiram) with ESP32
+__main__          gc                ubinascii         upysh
+_boot             inisetup          ubluetooth        urandom
+_onewire          machine           ucollections      ure
+_thread           math              ucryptolib        urequests
+_uasyncio         micropython       uctypes           uselect
+_webrepl          neopixel          uerrno            usocket
+apa106            network           uhashlib          ussl
+btree             ntptime           uheapq            ustruct
+builtins          onewire           uio               usys
+cmath             uarray            ujson             utime
+dht               uasyncio/__init__ umqtt/robust      utimeq
+ds18x20           uasyncio/core     umqtt/simple      uwebsocket
+esp               uasyncio/event    uos               uzlib
+esp32             uasyncio/funcs    upip              webrepl
+flashbdev         uasyncio/lock     upip_utarfile     webrepl_setup
+framebuf          uasyncio/stream   uplatform         websocket_helper
