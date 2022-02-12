@@ -1,11 +1,9 @@
 # others
-from pydoc import classname
-from typing import Dict, List, Union
+from typing import Dict, List
 import pytest
 from pathlib import Path
 import basicgit as git
 import subprocess
-from packaging import version
 
 from helpers import load_rst, read_stub
 
@@ -31,7 +29,7 @@ def pyright_results(rst_stubs):
 
     cmd = ["pyright", "--project", "tests/pyrightconfig.json", "--outputjson", rst_stubs.as_posix()]
     try:
-        result = subprocess.run(cmd, shell=False, capture_output=True, cwd=rst_stubs.as_posix()  )
+        result = subprocess.run(cmd, shell=False, capture_output=True, cwd=rst_stubs.as_posix())
     except OSError as e:
         raise e
     results = {}
@@ -277,12 +275,14 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
             issues,
         )
     )
-    with capsys.disabled():
-        for issue in issues:
-            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    for issue in issues:
+        print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     assert len(issues) == 0
 
-
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\machine.py:778:17 - "MSB" is not defined  
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined  
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined  
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined  
 @pytest.mark.docfix
 @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_undefined_variable(pyright_results, capsys):
@@ -308,9 +308,8 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
             issues,
         )
     )
-    with capsys.disabled():
-        for issue in issues:
-            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    for issue in issues:
+        print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     # 'Cannot access member "MSB" for type "Type[SPI]" 'Member "MSB" is unknown'
     assert len(issues) <= 1, "There should be no type issues"
 
@@ -324,9 +323,8 @@ def test_pyright_invalid_strings(pyright_results, capsys):
     # Only fail on errors
     issues = list(filter(lambda diag: diag["severity"] == "error", issues))
     issues = list(filter(lambda diag: diag["rule"] == "reportInvalidStringEscapeSequence", issues))
-    with capsys.disabled():
-        for issue in issues:
-            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    for issue in issues:
+        print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     assert len(issues) == 0, "All strings should be valid"
 
 
@@ -433,7 +431,6 @@ def test_doc_CONSTANTS(error, modulename, pyright_results, capsys):
             issues,
         )
     )
-    with capsys.disabled():
-        for issue in issues:
-            print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
+    for issue in issues:
+        print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     assert len(issues) == 0
