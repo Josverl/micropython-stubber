@@ -60,19 +60,24 @@ elif sys.platform == "win32":
     "firmware",
     fw_list,
 )
-# only run createstubs in the unix version of micropython
-# @pytest.mark.linux
-# TODO: enable test on micropython-windows.
 def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant: str, pytestconfig: Config):
+    "run createstubs in the native (linux/windows) version of micropython"
+
+    # skip this on windows - python 3.7
+    # TODO: why does it not work?
+    if sys.platform == "win32" and sys.version_info[0] == 3 and sys.version_info[0] == 7:
+        pytest.skip(msg="Test does not work well on Win + Python 3.7 ....")
+
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
     # BUG: other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
     cmd = [fw_filename, variant + ".py", "--path", str(tmp_path)]
-    # TODO: Delete database or move database to stubs
+
+    # Delete database before the test
     if variant == "createstubs_db":
         if firmware.endswith("v1_11"):
-            pytest.skip(msg="v1.11 has no  machine module")
+            pytest.skip(msg="v1.11 has no  machine module")  # type: ignore
         if (Path(script_folder) / "modulelist.db").exists():
             os.remove(Path(script_folder) / "modulelist.db")
     try:
@@ -96,7 +101,7 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
 
     stub_path = tmp_path / "stubs"
     stubfiles = list(stub_path.rglob("*.py"))
-    # use rough filecount to see if there were results withouth checking the details
+    # use rough filecount to see if there were results without checking the details
     if "micropython" in script_folder:
         assert len(stubfiles) >= 45, "micropython: there should be 45 stubs or more"
     else:
