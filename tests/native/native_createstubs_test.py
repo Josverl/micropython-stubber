@@ -1,6 +1,7 @@
 # run createstubs in the unix version of micropython
 import json
 import sys
+import os
 import subprocess
 from pathlib import Path
 from typing import List
@@ -9,6 +10,7 @@ from _pytest.config import Config
 import distro
 
 
+# "list of avaialble micropython versions on the current platfor"
 fw_list = []  # no tests on mac
 # Figure out ubuntu version
 os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
@@ -67,6 +69,12 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
     # BUG: other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
     cmd = [fw_filename, variant + ".py", "--path", str(tmp_path)]
+    # TODO: Delete database or move database to stubs
+    if variant == "createstubs_db":
+        if firmware.endswith("v1_11"):
+            pytest.skip(msg="v1.11 has no  machine module")
+        if (Path(script_folder) / "modulelist.db").exists():
+            os.remove(Path(script_folder) / "modulelist.db")
     try:
         subproc = subprocess.run(
             cmd,
@@ -88,7 +96,7 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
 
     stub_path = tmp_path / "stubs"
     stubfiles = list(stub_path.rglob("*.py"))
-    # filecount
+    # use rough filecount to see if there were results withouth checking the details
     if "micropython" in script_folder:
         assert len(stubfiles) >= 45, "micropython: there should be 45 stubs or more"
     else:
