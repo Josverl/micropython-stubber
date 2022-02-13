@@ -6,11 +6,16 @@ for this :
     - combine them in one set
     - remove the ones than cannot be stubbed
     - remove test modules, ending in `_test`
-    - todo: remove the frozen modules from this list
+    - write updates to:
+        - board/modulelist.txt
+        - board/createsubs.py 
+
+    - TODO: remove the frozen modules from this list
+    - TODO: bump patch number if there are actual changes
 """
 
 from pathlib import Path
-from typing import Set
+from typing import Set, List, Union
 
 
 def read_modules(path: Path = None) -> Set:
@@ -22,6 +27,7 @@ def read_modules(path: Path = None) -> Set:
             and add each module to a set
     """
     path = Path(path or "./data")
+    assert path
     all_modules = set()
     for file in path.glob("*.txt"):
         print("processing:", file)
@@ -45,7 +51,7 @@ def read_modules(path: Path = None) -> Set:
     return all_modules
 
 
-def wrapped(modules: Set) -> str:
+def wrapped(modules: Union[Set, List]) -> str:
     "wrap code line at spaces"
     long_line = str(modules)
     _wrapped = "        self.modules = "
@@ -95,6 +101,13 @@ def main():
             "upip",
             "upip_utarfile",
             "upysh",
+            # DOCSTUB_SKIP = [
+            "uasyncio",  # can create better stubs from frozen python modules.
+            "builtins",  # conflicts with static type checking , has very little information anyway
+            "re",  # regex is too complex
+            "collections",
+            "io",
+            "uio",
         ]
     )
 
@@ -104,8 +117,39 @@ def main():
     # remove pycom MQTT* from defaults
     modules_to_stub = sorted({m for m in modules_to_stub if not m.startswith("MQTT")})
 
-    print("modules to stub :", len(modules_to_stub))
-    print(wrapped(modules_to_stub))
+    # print("modules to stub :", len(modules_to_stub))
+    # print(wrapped(modules_to_stub))
+
+    # update modules.txt
+    modules_txt = Path("board/modulelist.txt")
+    if modules_txt.exists():
+        with open(modules_txt) as f:
+            lines = f.readlines()
+            # only keep comment lines
+            lines = [l for l in lines if l[0] == "#"]
+    else:
+        lines = ["# list of modules to stub."]
+    lines = lines + [m + "\n" for m in modules_to_stub]
+
+    with open(modules_txt, "w") as f:
+        f.writelines(lines)
+
+    # update createstubs.py
+    createstubs = Path("board/createstubs.py")
+    if createstubs.exists():
+        with open(createstubs) as f:
+            lines = f.readlines()
+
+    l_start = lines.index("    stubber.modules = [\n")
+    assert l_start
+    l_end = lines.index("    ]  # spell-checker: enable\n", l_start)
+    assert l_end
+
+    # Plug in the new list of modules
+    lines = lines[: l_start + 1] + [f'        "{m}",\n' for m in modules_to_stub] + lines[l_end:]
+
+    with open(createstubs, "w") as f:
+        f.writelines(lines)
 
 
 if __name__ == "__main__":
