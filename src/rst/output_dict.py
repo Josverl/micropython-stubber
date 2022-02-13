@@ -131,6 +131,14 @@ class SourceDict(OrderedDict):
                 line = f"# {name} : {type}"
             else:
                 line = f"{name} : {type}"
+            # assign a value so constant can be used as default value
+            if type == "Any":
+                line += " = ..."
+            elif type == "int":
+                line += " = 1"
+            elif type == "str":
+                line += ' = ""'
+
             _docstr = docstr
             if autoindent:
                 line = spaces(self._indent + self._body) + line

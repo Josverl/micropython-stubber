@@ -4,6 +4,7 @@
 path_classifiers:
   test: 
     - "tests"
+    - "snippets"
   docs: 
     - "docs"
   library:

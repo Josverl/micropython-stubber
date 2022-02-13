@@ -180,7 +180,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         sg_opt.output_dir = str(modules_folder)
         try:
             stubgen.generate_stubs(sg_opt)
-        except (BaseException, SystemExit) as e:
+        except (ValueError, SystemExit) as e:
             # the only way to know if an error was encountered by generate_stubs
             # mypy.errors.CompileError and others ?
             # TODO: Extract info from e.code or e.args[0]

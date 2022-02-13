@@ -22,7 +22,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.4"
+__version__ = "1.5.5"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -115,8 +115,6 @@ class Stubber:
         self._log.info("Finally done")
 
     def create_one_stub(self, module_name):
-        # use trailing comma to overide black formatting to avoid minify chocking on this
-
         if module_name in self.problematic:
             self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
             return False
@@ -128,25 +126,25 @@ class Stubber:
         gc.collect()
         m1 = gc.mem_free()  # type: ignore
         self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
+        result = False
         try:
-            self.create_module_stub(module_name, file_name)
+            result = self.create_module_stub(module_name, file_name)
         except OSError:
             return False
         gc.collect()
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
-        return True
+        return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None):
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:
         """Create a Stub of a single python module
 
         Args:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-
         if module_name in self.problematic:
             self._log.warning("SKIPPING problematic module:{}".format(module_name))
-            return
+            return False
 
         if file_name is None:
             file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
@@ -160,9 +158,9 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
         except ImportError:
-            #            failed = True
-            self._log.warning("Skip module: {:<20}        : Failed to import".format(module_name))
-            return
+            # move one line up to overwrite
+            self._log.warning("{}Skip module: {:<20} to file: {:<55}".format("\u001b[1A", module_name, "Failed to import"))
+            return False
 
         # Start a new file
         ensure_folder(file_name)
@@ -186,6 +184,7 @@ class Stubber:
             except KeyError:
                 self._log.debug("could not del sys.modules[{}]".format(module_name))
         gc.collect()
+        return True
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."

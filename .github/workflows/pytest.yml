@@ -65,29 +65,34 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
-          MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_16 -c "import sys;print(sys.path);import logging"
+          MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_18 -c "import sys;print(sys.path);import logging"
 
       - name: create or update minified version
         run: |
-          python process.py minify
+          python process.py minify -xc
+          # Minify low_mem version
+          python process.py minify -s board/createstubs_mem.py -o minified -xc
+          # Minify low_mem _ restartable version
+          python process.py minify -s board/createstubs_db.py -o minified -xc
 
-      - name: run test on minified/createstubs.by
-        run: |
-          pytest -m minified
+      # - name: run test on minified/createstubs.by
+      #   run: |
+      #     pytest -m minified
 
-      - name: verify minified using pylint
-        run: |
-          pylint minified/createstubs.py -E -d E0401,E1101,E0213,E0602,E1121,E0211
-          # CPython/Micropython Errors 
-          # E0401: Unable to import '<upythonmodule>' (import-error)
-          # E1101: Module 'gc' has no 'mem_free' member (no-member)
-          # errors by minification 
-          # E0211: Method has no argument (no-method-argument)
-          # E1121: Too many positional arguments for method call (too-many-function-args)
-          # E0213: Method should have "self" as first argument (no-self-argument)
-          # E0602: Undefined variable (undefined-variable)
+      # - name: verify minified using pylint
+      #   run: |
+      #     pylint minified/createstubs.py -E -d E0401,E1101,E0213,E0602,E1121,E0211
+      #     # CPython/Micropython Errors 
+      #     # E0401: Unable to import '<upythonmodule>' (import-error)
+      #     # E1101: Module 'gc' has no 'mem_free' member (no-member)
+      #     # errors by minification 
+      #     # E0211: Method has no argument (no-method-argument)
+      #     # E1121: Too many positional arguments for method call (too-many-function-args)
+      #     # E0213: Method should have "self" as first argument (no-self-argument)
+      #     # E0602: Undefined variable (undefined-variable)
 
       - name: Test with pytest
+        if: always()
         run: |
           coverage run -m pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
           coverage xml -o coverage.xml
