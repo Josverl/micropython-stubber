@@ -15,3 +15,4 @@ esp               uasyncio/event    uos               uzlib
 esp32             uasyncio/funcs    upip              webrepl
 flashbdev         uasyncio/lock     upip_utarfile     webrepl_setup
 framebuf          uasyncio/stream   uplatform         websocket_helper
+platform
