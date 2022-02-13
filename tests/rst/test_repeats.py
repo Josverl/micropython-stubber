@@ -82,8 +82,8 @@ def test_comma_sequence():
 
     # check that etc is not found
     etc = "etc. : Any\n" in r.output
-    eexist = "EEXIST : Any\n" in r.output
-    eagain = "EAGAIN : Any\n" in r.output
+    eexist = "EEXIST : Any = ...\n" in r.output
+    eagain = "EAGAIN : Any = ...\n" in r.output
     assert not etc
     assert eexist
     assert eagain

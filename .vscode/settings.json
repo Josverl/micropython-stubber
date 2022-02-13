@@ -1,15 +1,29 @@
 {
+    // python.autoComplete.extraPaths has changed to "python.analysis.extraPaths"
+    // https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#unresolved-import-warnings
+    "python.autoComplete.extraPaths": [
+        "stubs/mpy-typeshed"
+    ],
+    "python.analysis.typeshedPaths": [
+        // No errors with absolute native path
+        // "C:\\develop\\MyPython\\micropython-stubber\\stubs\\mpy-typeshed"
+        // No Errors with native WS relative path
+        //"stubs\\mpy-typeshed"
+        "stubs/mpy-typeshed"
+    ],
+    "python.analysis.extraPaths": [
+        // "board/lib",
+        // "all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
+        // "all-stubs/micropython-v1_18-esp32",
+    ],
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.logLevel": "Trace",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    //////////////////////////////////////////////////////////////
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
-    // "python.linting.pylintArgs": [
-    //     "--rcfile", "${workspaceFolder}/.pylintrc-cpython"
-    // ],
-    "python.autoComplete.extraPaths": [
-        "board/lib",
-        "all-stubs/cpython-core",
-        "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
-        "all-stubs/micropython-esp32-1_15"
-    ],
+    // Paths to look for typeshed modules. Pyright currently honors only the first path in the array.
+    // "python.analysis.typeshedPaths": [],
     "python.testing.pytestArgs": [
         "tests"
     ],
@@ -17,7 +31,6 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "peacock.color": "#613206",
-    "editor.formatOnSave": true,
     "restructuredtext.languageServer.disabled": true,
     "cSpell.words": [
         "aivar",
@@ -62,12 +75,6 @@
     //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
     // ],
     "editor.formatOnSave": true,
-    "python.analysis.extraPaths": [
-        "board/lib",
-        "all-stubs/cpython-core",
-        "all-stubs/micropython-1_15-frozen/esp32/GENERIC",
-        "all-stubs/micropython-esp32-1_15"
-    ],
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#914b09",
@@ -104,6 +111,8 @@
         "FIXME",
         "TODO",
         "[ ]",
-        "[x]"
+        "[x]",
+        "DOC",
+        "PYRIGHT"
     ],
 }

@@ -17,7 +17,7 @@ builtins          re                uio
 cmath             select            ujson
 crypto            socket            umachine
 
-pycom
+
 crypto ucrypto
 
 

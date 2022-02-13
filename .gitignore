@@ -41,4 +41,6 @@ docs/~$*
 node_modules
 
 # Interim storage for bulkstubber
-stubs/machine-stubs/
+firmware-stubs
+
+scripts/bulk_stubber.json

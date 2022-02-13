@@ -1,5 +1,5 @@
 # type: ignore
-# FIXME: ignore for now : other issues to solve first
+# FIXME: uctypes module ignore for now : other issues to solve first
 """
 Sample from micropython documentaton
 ref: https://docs.micropython.org/en/v1.18/library/uctypes.html

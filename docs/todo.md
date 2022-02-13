@@ -1,11 +1,39 @@
 # TO-DO (provisional)
+# Upstream Documentation
+
+
+in docstubs: 
+### ifconfig 
+in order to accept `ifconfig()` withouth any parameters 
+from : 	configtuple: Optional[Any] 
+to : 	configtuple: Optional[Tuple] = None 
+
+### ap.config
+from:	def config(self, param) -> Any:
+to:		def config(self, param:str="", **kwargs) -> Any:
+
+### write_pulses
+Argument of type "Literal[0]" cannot be assigned to parameter "data" of type "bool" in function "write_pulses"
+  "Literal[0]" is incompatible with "bool"
+
+from:
+    def write_pulses(self, duration, data=True) -> Any:
+to:	
+	    def write_pulses(self, duration:Union[List, Tuple], data:int=1) -> None:
+
+or even better an overload 
+
+    @overload
+    def write_pulses(self, duration:Union[List, Tuple], data:int=1) -> None:
+        ...
+    @overload
+    def write_pulses(self, duration:int, data: Union[List, Tuple]) -> None:
+        ...
+    def write_pulses(self, duration:Union[List, Tuple], data:Union[List, Tuple]) -> None:
+
+
 
 ## working on it 
-
-### read RST files 
-- add prototypes from RST 
-        ref: https://github.com/python/mypy/blob/master/mypy/stubdoc.py
-
 
 
 ### documentation 
@@ -26,36 +54,9 @@
 ### Stub augmentation/ merging typeinformation from copied / generated typerich info
 https://libcst.readthedocs.io/en/latest/tutorial.html
 
-- add prototypes from Source ? 
-        check if https://github.com/python/mypy/blob/master/mypy/stubgenc.py
-        might be useful
-
 - test to auto-merge common prototypes by stubber
         ie. add common return types to make_stub_files.cfg
 
-- resolve import time issues 
-
-
-### SYS en GC 
-#pylint: disable=no-member      ## workaround for sys and gc
-
-Module 'sys' has no 'print_exception' member
-Module 'gc' has no 'mem_free' member
-Module 'gc' has no 'threshold' member
-Module 'gc' has no 'mem_free' member
-Module 'gc' has no 'mem_alloc' member
-{
-	"resource": "/c:/develop/MyPython/ESP32-P1Meter/src/main.py",
-	"owner": "python",
-	"code": "no-member",
-	"severity": 8,
-	"message": "Module 'gc' has no 'mem_free' member",
-	"source": "pylint",
-	"startLineNumber": 33,
-	"startColumn": 22,
-	"endLineNumber": 33,
-	"endColumn": 22
-}
 
 
 ### Webrepl
