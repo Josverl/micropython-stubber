@@ -320,9 +320,11 @@ class RSTReader:
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
         params = params.replace("]", ": Optional[Any]")
+        # params = params.replace("]", ": Optional[Any]=None")
 
         # deal with overloads for Flash and Partition .readblock/writeblocks
-        params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]")
+        # TODO: DocUpdate ?
+        params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]=0")
 
         # Remove modulename. and Classname. from class constant
         params = self.strip_prefixes(params, strip_mod=True, strip_class=True)
@@ -330,6 +332,8 @@ class RSTReader:
         for fix in PARAM_FIXES:
             if fix[0] in params:
                 params = params.replace(fix[0], fix[1])
+        # FIXME: Fix Optional[Any]=None
+        # *args: Optional[Any]=None --> *args: Any
 
         # formatting
         # fixme: ... not allowed in .py

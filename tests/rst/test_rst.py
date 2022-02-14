@@ -161,8 +161,8 @@ CLASS_10 = [
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
         "    def info(self) -> Tuple:",
-        "    def readblocks(self, block_num, buf, offset: Optional[int]) -> Any:",
-        "    def writeblocks(self, block_num, buf, offset: Optional[int]) -> Any:",
+        "    def readblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
+        "    def writeblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
     ],
 )
 # def test_rst_parse_class_10(expected: List[str]):
@@ -187,8 +187,8 @@ def test_rst_parse_class_10(line: str):
         ("()", "()"),
         ("() :", "()"),  # strip additional stuff
         ("(\\*, something)", "(*, something)"),  # wrong escaping
-        ("([angle])", "(angle: Optional[Any])"),  # simple optional
-        ("([angle, time=0])", "(angle: Optional[Any], time=0)"),  # dual optional - hardcoded
+        ("([angle])", "(angle: Optional[Any]=None)"),  # simple optional
+        ("([angle, time=0])", "(angle: Optional[Any]=None, time=0)"),  # dual optional - hardcoded
         ("('param')", "(param)"),
         (
             "(if_id=0, config=['dhcp' or configtuple])",
@@ -196,6 +196,7 @@ def test_rst_parse_class_10(line: str):
         ),
         ("lambda)", "lambda_fn)"),
         ("(block_device or path)", "(block_device_or_path)"),
+        # *args: Optional[Any]=None --> *args: Any
         # ("()", "()"),
         # ("()", "()"),
         # ("()", "()"),
@@ -279,10 +280,11 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
         print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     assert len(issues) == 0
 
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\machine.py:778:17 - "MSB" is not defined  
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined  
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined  
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined  
+
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\machine.py:778:17 - "MSB" is not defined
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined
 @pytest.mark.docfix
 @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_undefined_variable(pyright_results, capsys):
