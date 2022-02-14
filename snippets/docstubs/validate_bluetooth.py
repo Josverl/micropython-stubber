@@ -1,0 +1,35 @@
+import bluetooth
+
+from micropython import const
+_FLAG_BROADCAST = const(0x0001)
+_FLAG_READ = const(0x0002)
+_FLAG_WRITE_NO_RESPONSE = const(0x0004)
+_FLAG_WRITE = const(0x0008)
+_FLAG_NOTIFY = const(0x0010)
+_FLAG_INDICATE = const(0x0020)
+_FLAG_AUTHENTICATED_SIGNED_WRITE = const(0x0040)
+
+_FLAG_AUX_WRITE = const(0x0100)
+_FLAG_READ_ENCRYPTED = const(0x0200)
+_FLAG_READ_AUTHENTICATED = const(0x0400)
+_FLAG_READ_AUTHORIZED = const(0x0800)
+_FLAG_WRITE_ENCRYPTED = const(0x1000)
+_FLAG_WRITE_AUTHENTICATED = const(0x2000)
+_FLAG_WRITE_AUTHORIZED = const(0x4000)
+
+
+
+bt = bluetooth.BLE()
+
+
+
+
+HR_UUID = bluetooth.UUID(0x180D)
+HR_CHAR = (bluetooth.UUID(0x2A37), bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,)
+HR_SERVICE = (HR_UUID, (HR_CHAR,),)
+UART_UUID = bluetooth.UUID('6E400001-B5A3-F393-E0A9-E50E24DCCA9E')
+UART_TX = (bluetooth.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E'), bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,)
+UART_RX = (bluetooth.UUID('6E400002-B5A3-F393-E0A9-E50E24DCCA9E'), bluetooth.FLAG_WRITE,)
+UART_SERVICE = (UART_UUID, (UART_TX, UART_RX,),)
+SERVICES = (HR_SERVICE, UART_SERVICE,)
+( (hr,), (tx, rx,), ) = bt.gatts_register_services(SERVICES)

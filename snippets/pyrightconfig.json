@@ -28,6 +28,13 @@
             ]
         },
         {
+            "root": "docstubs",
+            "extraPaths": [
+                "../all-stubs/micropython-v1_18-docstubs",
+                "../all-stubs/typings/fallback",
+            ]
+        },
+        {
             "root": "esp32",
             "extraPaths": [
                 "../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
