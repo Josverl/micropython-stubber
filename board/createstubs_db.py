@@ -453,10 +453,15 @@ def _info():
             pass
 
     try:  # families
-        from pycopy import const  # type: ignore
-
+        from pycopy import const as _t # type: ignore
         info["family"] = "pycopy"
-        del const
+        del _t
+    except (ImportError, KeyError):
+        pass
+    try:  # families
+        from pycom import FAT as _t # type: ignore
+        info["family"] = "pycom"
+        del _t
     except (ImportError, KeyError):
         pass
     if info["platform"] == "esp32_LoBo":
