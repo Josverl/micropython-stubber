@@ -190,8 +190,7 @@ class RSTReader:
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
 
-        # HACK: Temporay S&R waiting for DocFix
-        # Replace incorrect defeintions in .rst files with better ones
+        # Replace incorrect defenitions in .rst files with better ones
         for FIX in RST_DOC_FIXES:
             self.rst_text = [line.replace(FIX[0], FIX[1]) for line in self.rst_text]
 
@@ -319,11 +318,17 @@ class RSTReader:
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
-        params = params.replace("]", ": Optional[Any]")
-        # params = params.replace("]", ": Optional[Any]=None")
 
-        # deal with overloads for Flash and Partition .readblock/writeblocks
-        # TODO: DocUpdate ?
+        # Handle Optional arguments
+        # Optional step 1: [x] --> x: Optional[Any]=None
+        params = params.replace("]", ": Optional[Any]=None")
+        # Optional step 2: x: Optional[Any]=None='abc' --> x: Optional[Any]='abc'
+        params = re.sub(r": Optional\[Any\]=None\s*=", r": Optional[Any]=", params)
+        # Optional step 3: fix ...
+        params = re.sub(r"\.\.\.: Optional\[Any\]=None", r"...: Optional[Any]", params)
+
+        # 
+        # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
         params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]=0")
 
         # Remove modulename. and Classname. from class constant
@@ -332,8 +337,6 @@ class RSTReader:
         for fix in PARAM_FIXES:
             if fix[0] in params:
                 params = params.replace(fix[0], fix[1])
-        # FIXME: Fix Optional[Any]=None
-        # *args: Optional[Any]=None --> *args: Any
 
         # formatting
         # fixme: ... not allowed in .py
