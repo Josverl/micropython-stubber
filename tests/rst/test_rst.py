@@ -29,6 +29,7 @@ def pyright_results(rst_stubs):
 
     cmd = ["pyright", "--project", "tests/pyrightconfig.json", "--outputjson", rst_stubs.as_posix()]
     try:
+        # run pyright in the docstub folder to allow modules to import each other.
         result = subprocess.run(cmd, shell=False, capture_output=True, cwd=rst_stubs.as_posix())
     except OSError as e:
         raise e
