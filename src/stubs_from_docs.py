@@ -63,7 +63,6 @@
     - Child/ Parent classes
         are added based on a (manual) lookup table CHILD_PARENT_CLASS
 
-TODO: correct warnings for 'Unsupported escape sequence in string literal'
 """
 
 from typing import List, Tuple
@@ -224,10 +223,20 @@ class RSTReader:
 
         return True
 
+    def at_anchor(self) -> bool:
+        "Stop at anchor ( however .. note: should be added)"
+        _l = self.rst_text[self.line_no].lstrip()
+        return _l.startswith("..") and not _l.startswith(".. note:")
+
+    def at_heading(self) -> bool:
+        "stop at heading"
+        _l = self.rst_text[min(self.line_no + 1, self.max_line - 1)]
+        # Heading  ---, ==, ~~~
+        return _l.startswith("--") or _l.startswith("==") or _l.startswith("~~")
+
     def parse_docstring(self) -> List[str]:
         """Read a textblock that will be used as a docstring, or used to process a toc tree
         The textblock is terminated at the following RST line structures/tags
-
             .. <anchor>
             -- Heading
             == Heading
@@ -237,17 +246,14 @@ class RSTReader:
         """
         if self.line_no >= len(self.rst_text):
             raise IndexError
+
         block: List[str] = []
         self.line_no += 1  # advance over current line
         try:
             while (
                 self.line_no < len(self.rst_text)
-                and not self.rst_text[self.line_no]
-                .lstrip()
-                .startswith("..")  # stop at anchor ( however .. note: could be considered to be added)
-                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith("--")  # Heading --
-                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith("==")  # Heading ==
-                and not self.rst_text[min(self.line_no + 1, self.max_line - 1)].startswith("~~")  # Heading ~~
+                and not self.at_anchor()  # stop at next anchor ( however .. note: should be added)
+                and not self.at_heading()  # stop at next heading
             ):
                 line = self.rst_text[self.line_no]
                 block.append(line.rstrip())
@@ -279,23 +285,28 @@ class RSTReader:
                 )
         # add clickable hyperlinks to CPython docpages
         for i in range(0, len(block)):
+
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
             # Optionally link to python 3.4 / 3.5 documentation
-            block[i] = re.sub(
+            _l = re.sub(
                 r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|\s]*)`)[.]?",
                 r"\g<1> https://docs.python.org/3/library/\g<mod>.html .",
                 block[i],
             )
             # RST hyperlink format is not clickable in v
             # https://regex101.com/r/5RN8rj/1
-            block[i] = re.sub(
+            _l = re.sub(
                 r"(.*)(?P<url><https://docs\.python\.org/.*>)(`_)",
                 r"\g<1>`\g<url>",
-                block[i],
+                _l,
             )
-
-        #
+            # Clean up note
+            _l = _l.replace(".. note:: ", "``Note:`` ")
+            # clean up unsupported escape sequences in rst
+            _l = _l.replace(r"\ ", " ")
+            _l = _l.replace(r"\*", "*")
+            block[i] = _l
         return block
 
     def fix_parameters(self, params: str):
@@ -327,7 +338,7 @@ class RSTReader:
         # Optional step 3: fix ...
         params = re.sub(r"\.\.\.: Optional\[Any\]=None", r"...: Optional[Any]", params)
 
-        # 
+        #
         # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
         params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]=0")
 
@@ -737,6 +748,7 @@ def generate_from_rst(
     stubgen=True,
     pattern: str = "*.rst",
     verbose: bool = False,
+    suffix=".py",
 ) -> int:
     if not dst_path.exists():
         dst_path.mkdir(parents=True)
@@ -766,11 +778,11 @@ def generate_from_rst(
         reader.parse()
         if file.stem in U_MODULES:
             # create umod.py file and mod.py file that imports umod
-            reader.write_file((dst_path / ("u" + file.name)).with_suffix(".py"))
-            with open((dst_path / file.name).with_suffix(".py"), "w") as new_file:
+            reader.write_file((dst_path / ("u" + file.name)).with_suffix(suffix))
+            with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
                 new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
         else:
-            reader.write_file((dst_path / file.name).with_suffix(".py"))
+            reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
 
     # run autoflake to remove unused imports
@@ -787,7 +799,7 @@ def generate_from_rst(
 
     if black:
         try:
-            cmd = ["black", str(dst_path), "--include", "\\.py$"]
+            cmd = ["black", str(dst_path / "**/*.*")]
 
             if sys.version_info.major == 3 and sys.version_info.minor == 7:
                 # black on python 3.7 does not like some function defs
@@ -799,7 +811,7 @@ def generate_from_rst(
                 raise Exception(result.stderr.decode("utf-8"))
         except subprocess.SubprocessError:
             log.error("some of the files are not in a proper format")
-    if stubgen:
+    if stubgen and suffix == ".py":
         utils.generate_pyi_files(dst_path)
 
     return len(files)
@@ -829,6 +841,7 @@ def generate_from_rst(
     help="The location of the RST file to read. Default './micropython/docs/library'",
 )
 @click.option(
+    "--stub-path",
     "--stub-folder",
     "target",
     default="./all-stubs",
@@ -879,7 +892,7 @@ def cli_docstubs(
 
     dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 
-    generate_from_rst(rst_path, dst_path, v_tag, release=release, black=black, stubgen=stubgen, verbose=verbose)
+    generate_from_rst(rst_path, dst_path, v_tag, release=release, black=black, stubgen=stubgen, verbose=verbose, suffix=".pyi")
     # Also generate a module manifest
     utils.make_manifest(
         folder=dst_path,

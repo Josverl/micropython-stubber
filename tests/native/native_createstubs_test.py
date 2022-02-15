@@ -77,7 +77,7 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
     # Delete database before the test
     if variant == "createstubs_db":
         if firmware.endswith("v1_11"):
-            pytest.skip(msg="v1.11 has no  machine module")  # type: ignore
+            pytest.skip(reason="v1.11 has no  machine module")  # type: ignore
         if (Path(script_folder) / "modulelist.db").exists():
             os.remove(Path(script_folder) / "modulelist.db")
     try:

@@ -1,7 +1,5 @@
-project.pymakr
-*.zip
-
 # no python virtual environment
+venv*
 .env
 .venv*
 
@@ -17,16 +15,18 @@ scratch/*
 board/stubs
 minified/stubs
 all-stubs
+# Interim storage for bulkstubber
+firmware-stubs
+
 
 # ignore test coverage reports
 .coverage*
 coverage/*
 cov.xml
 
-
-# and tests results
+# no  test results 
 junit/*
-
+results/
 
 # OS specific stuff
 desktop.ini
@@ -40,9 +40,9 @@ docs/~$*
 # no node_modules ( pyright ) 
 node_modules
 
-# Interim storage for bulkstubber
-firmware-stubs
 
 scripts/bulk_stubber.json
+
+# ignore databases 
 board/modulelist.db
 minified/modulelist.db
