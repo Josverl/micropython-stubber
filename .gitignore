@@ -44,3 +44,5 @@ node_modules
 firmware-stubs
 
 scripts/bulk_stubber.json
+board/modulelist.db
+minified/modulelist.db

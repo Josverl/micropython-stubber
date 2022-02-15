@@ -902,7 +902,7 @@
             "     from other resets."
         ],
         "docstring_len": 965,
-        "type": "None",
+        "type": "NoReturn",
         "confidence": 0.18000000000000002,
         "match": "<re.Match object; span=(865, 880), match='return `machine'>",
         "module": "machine",
