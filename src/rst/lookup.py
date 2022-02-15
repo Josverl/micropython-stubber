@@ -47,7 +47,7 @@ LOOKUP_LIST = {
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
     "gc.collect": ("None", 0.95),
-    "machine.deepsleep": ("None", 0.95),
+    "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.Signal.value": ("int", 0.95),
@@ -157,7 +157,7 @@ PARAM_FIXES = [
     #     "cert_reqs=None",
     # ),  # .. function:: ussl.wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)
     (
-        "='dhcp' or configtuple: Optional[Any]",
+        "='dhcp' or configtuple: Optional[Any]=None",
         ": Union[str,Tuple]='dhcp'",
     ),  # network.rst method:: WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
     (
@@ -169,7 +169,7 @@ PARAM_FIXES = [
         "block_device_or_path",
     ),  #
     (
-        "(ip, subnet, gateway, dns):Optional[Any]",
+        "(ip, subnet, gateway, dns):Optional[Any]=None",
         "configtuple: Optional[Tuple]",
     ),  # ifconfig
     (

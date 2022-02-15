@@ -161,8 +161,8 @@ CLASS_10 = [
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
         "    def info(self) -> Tuple:",
-        "    def readblocks(self, block_num, buf, offset: Optional[int]) -> Any:",
-        "    def writeblocks(self, block_num, buf, offset: Optional[int]) -> Any:",
+        "    def readblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
+        "    def writeblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
     ],
 )
 # def test_rst_parse_class_10(expected: List[str]):
@@ -187,8 +187,8 @@ def test_rst_parse_class_10(line: str):
         ("()", "()"),
         ("() :", "()"),  # strip additional stuff
         ("(\\*, something)", "(*, something)"),  # wrong escaping
-        ("([angle])", "(angle: Optional[Any])"),  # simple optional
-        ("([angle, time=0])", "(angle: Optional[Any], time=0)"),  # dual optional - hardcoded
+        ("([angle])", "(angle: Optional[Any]=None)"),  # simple optional
+        ("([angle, time=0])", "(angle: Optional[Any]=None, time=0)"),  # dual optional - hardcoded
         ("('param')", "(param)"),
         (
             "(if_id=0, config=['dhcp' or configtuple])",
@@ -196,7 +196,8 @@ def test_rst_parse_class_10(line: str):
         ),
         ("lambda)", "lambda_fn)"),
         ("(block_device or path)", "(block_device_or_path)"),
-        # ("()", "()"),
+        # network - AbstractNIC.connect
+        ("([service_id, key=None, *, ...])", "(service_id, key=None, *args: Optional[Any])"),
         # ("()", "()"),
         # ("()", "()"),
         # ("()", "()"),
@@ -279,10 +280,11 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
         print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
     assert len(issues) == 0
 
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\machine.py:778:17 - "MSB" is not defined  
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined  
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined  
-# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined  
+
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\machine.py:778:17 - "MSB" is not defined
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined
+# C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined
 @pytest.mark.docfix
 @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_undefined_variable(pyright_results, capsys):
@@ -354,10 +356,8 @@ def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
     # return type omitted as this is tested seperately
-    found = any("def deepsleep(time_ms: Optional[Any]) -> " in line for line in content)
+    found = any(line.startswith("def deepsleep(time_ms") for line in content)
     assert found, "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
-    # # .. function:: deepsleep([time_ms])
-    # def deepsleep(time_ms: Optional[Any]) -> xxx:
 
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
@@ -370,10 +370,10 @@ def test_doc_socket_class_def(rst_stubs: Path):
         # post version 1.16 documentation has been updated usocket.rst -->socket.rst
         content = read_stub(rst_stubs, "socket.py")
 
-    found = any("def socket(" in line for line in content)
+    found = any(line.startswith("def socket(") for line in content)
     assert not found, "(u)socket.socket should be stubbed as a class, not as a function"
 
-    found = any("class socket:" in line for line in content)
+    found = any(line.startswith("class socket:") for line in content)
     assert found, "(u)socket.socket classdef should be generated"
 
     found = any("def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> None:" in line for line in content)
@@ -400,12 +400,12 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
         content = read_stub(rst_stubs, filename)
         if content == []:
             assert f"module {modulename} was not stubbed"
-    found = any(f"def {classname}" in line for line in content)
+    found = any(line.startswith(f"def {classname}") for line in content)
     # there is actually a poll.poll method ... , so there will be method: def poll ....
     if classname != "poll":
         assert not found, f"class {modulename}.{classname} should not be stubbed as a function"
 
-    found = any(f"class {classname}" in line for line in content)
+    found = any(line.startswith(f"class {classname}") for line in content)
     assert found, f"class {modulename}.{classname} must be stubbed as a class"
 
 
