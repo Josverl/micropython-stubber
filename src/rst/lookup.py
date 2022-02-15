@@ -52,6 +52,7 @@ LOOKUP_LIST = {
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.Signal.value": ("int", 0.95),
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
+    "machine.UART.irq": ("Any", 0.95),  # no IRQ type defined
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
     "micropython.const": ("int", 0.95),  # const is always an int
