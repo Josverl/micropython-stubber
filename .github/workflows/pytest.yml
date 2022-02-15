@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.8", "3.9", "3.10"]
         # TODO : support python "3.10" - rshell > pyreadline
 
     steps:
@@ -94,12 +94,12 @@ jobs:
       - name: Test with pytest
         if: always()
         run: |
-          coverage run -m pytest tests -m "not basicgit" --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
-          coverage xml -o coverage.xml
+          coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          coverage xml -o results/coverage.xml
 
 
       - name: Push result to Testspace server
         if: always()
         run: |
-          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]junit/test-results-*.xml
-          testspace --link codecov coverage.xml
+          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml
+          testspace --link codecov results/coverage.xml
