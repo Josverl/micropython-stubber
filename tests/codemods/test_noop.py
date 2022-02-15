@@ -76,10 +76,10 @@ def test_LibCST_noop_codemod(version, before, after) -> None:
     # wrap unittest in Pytest for simpler matrix testing
     # known failures
     if "keywords" in before and version < "3.7":
-        pytest.xfail("STAR param not supported on older pythons")
+        pytest.skip("STAR param not supported on older python < 3.7")
 
     if "positional" in before and version < "3.8":
-        pytest.xfail("SLASH param not supported on older pythons")
+        pytest.skip("SLASH param not supported on older python < 3.8")
 
     Sot = TestNOOPCodemod()
     Sot.tst_noop_36(before, before, version)
