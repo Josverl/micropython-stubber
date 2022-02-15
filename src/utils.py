@@ -21,7 +21,7 @@ STUB_FOLDER = "./all-stubs"
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(
-    pyversion=(3, 6),
+    pyversion=(3, 8),  # documentation uses position-only argument indicator which requires 3.8 or higher
     no_import=False,
     include_private=True,
     doc_dir="",

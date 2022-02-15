@@ -374,10 +374,10 @@ def test_doc_socket_class_def(rst_stubs: Path):
     found = any(line.startswith("def socket(") for line in content)
     assert not found, "(u)socket.socket should be stubbed as a class, not as a function"
 
-    found = any(line.startswith("class socket:") for line in content)
+    found = any(line.startswith("class socket") for line in content)
     assert found, "(u)socket.socket classdef should be generated"
 
-    found = any("def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> None:" in line for line in content)
+    found = any(line.lstrip().startswith("def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP") for line in content)
     assert found, "(u)socket.socket __init__ should be generated"
 
 
