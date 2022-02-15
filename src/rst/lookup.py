@@ -47,7 +47,7 @@ LOOKUP_LIST = {
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
     "gc.collect": ("None", 0.95),
-    "machine.deepsleep": ("None", 0.95),
+    "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.Signal.value": ("int", 0.95),

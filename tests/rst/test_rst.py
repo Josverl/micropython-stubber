@@ -356,10 +356,8 @@ def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
     # return type omitted as this is tested seperately
-    found = any("def deepsleep(time_ms: Optional[Any]) -> " in line for line in content)
+    found = any(line.startswith("def deepsleep(time_ms") for line in content)
     assert found, "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
-    # # .. function:: deepsleep([time_ms])
-    # def deepsleep(time_ms: Optional[Any]) -> xxx:
 
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
@@ -372,10 +370,10 @@ def test_doc_socket_class_def(rst_stubs: Path):
         # post version 1.16 documentation has been updated usocket.rst -->socket.rst
         content = read_stub(rst_stubs, "socket.py")
 
-    found = any("def socket(" in line for line in content)
+    found = any(line.startswith("def socket(") for line in content)
     assert not found, "(u)socket.socket should be stubbed as a class, not as a function"
 
-    found = any("class socket:" in line for line in content)
+    found = any(line.startswith("class socket:") for line in content)
     assert found, "(u)socket.socket classdef should be generated"
 
     found = any("def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP, /) -> None:" in line for line in content)
@@ -402,12 +400,12 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
         content = read_stub(rst_stubs, filename)
         if content == []:
             assert f"module {modulename} was not stubbed"
-    found = any(f"def {classname}" in line for line in content)
+    found = any(line.startswith(f"def {classname}") for line in content)
     # there is actually a poll.poll method ... , so there will be method: def poll ....
     if classname != "poll":
         assert not found, f"class {modulename}.{classname} should not be stubbed as a function"
 
-    found = any(f"class {classname}" in line for line in content)
+    found = any(line.startswith(f"class {classname}") for line in content)
     assert found, f"class {modulename}.{classname} must be stubbed as a class"
 
 
