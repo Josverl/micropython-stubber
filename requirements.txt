@@ -17,4 +17,4 @@ libcst  == 0.4.1
 # Docstubs
 autoflake == 1.4
 
-click == 8.0.3
+click == 8.0.4
