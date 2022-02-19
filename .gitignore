@@ -46,3 +46,6 @@ scripts/bulk_stubber.json
 # ignore databases 
 board/modulelist.db
 minified/modulelist.db
+
+# no poetry packaging 
+dist/

@@ -29,6 +29,11 @@ def get_core(requirements, stub_path=None, family: str = "core"):
     os.makedirs(build_path, exist_ok=True)
     mod_manifest = None
     modlist = []
+
+    #
+    here = Path(os.path.realpath(__file__)).parent
+    req_filename = str(here / "data" / requirements)
+
     try:
         subprocess.run(
             [
@@ -37,7 +42,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
                 "--target",
                 build_path.as_posix(),
                 "-r",
-                requirements,
+                req_filename,
                 "--no-cache-dir",
                 "--no-compile",
                 "--upgrade",
@@ -75,4 +80,4 @@ def get_core(requirements, stub_path=None, family: str = "core"):
 if __name__ == "__main__":
     # just run a quick test
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_core(requirements="./requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")
+    get_core(requirements="requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")
