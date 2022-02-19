@@ -5,7 +5,9 @@ description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
 readme = "readme.md"
+keywords = ["Micropython","stubs","vscode","static type check"]
 homepage= "https://micropython-stubber.readthedocs.io/"
+repository= "https://github.com/Josverl/micropython-stubber"
 classifiers = [
     "Programming Language :: Python :: Implementation :: MicroPython",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -13,12 +15,23 @@ classifiers = [
     "Topic :: Software Development :: Build Tools"
 ]
 packages = [
-    { include = "*.py", from = "src" },
-    { include = "rst/**/*.py", from = "src" },
-    { include = "codemod/**/*.py", from = "src" },
-    { include = "libs/*.py", from = "src" },
+    { include = "**/*.*", from = "src" },
+#    { include = "rst/**/*.py", from = "src" },
+#    { include = "codemod/**/*.py", from = "src" },
+#    { include = "libs/*.py", from = "src" },
 ]
-exclude = ["**/tests/**" ,"**/samples.py" ]
+include =[
+#   { path = "src/data/*.*"},
+#    { path = "tests", format = "sdist" }
+]
+exclude = [
+    "**/tests/**" 
+    ,"**/*-test" 
+    ,"**/samples.py" 
+    ,"**/OneOff" 
+    ,"**/.vscode"
+    
+]
 
 [tool.poetry.scripts]
 get_frozen = "get_all_frozen:get_all"
