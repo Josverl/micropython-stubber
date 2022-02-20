@@ -3,6 +3,7 @@ Download or update the micropyton compatibility modules from pycopy and stores t
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
 
+from errno import ENOENT
 import os
 import shutil
 import subprocess
@@ -12,6 +13,8 @@ import json
 import utils
 from pathlib import Path
 from version import __version__
+import pkgutil
+import tempfile
 
 log = logging.getLogger(__name__)
 
@@ -30,9 +33,17 @@ def get_core(requirements, stub_path=None, family: str = "core"):
     mod_manifest = None
     modlist = []
 
+    # within package/mymodule1.py, for example
+
+    data = pkgutil.get_data(__name__, "data/" + requirements)
+    if not data:
+        raise Exception("Resource Not found")
+    temp_file = tempfile.NamedTemporaryFile(prefix="requirements", suffix=".txt", delete=False)
+    with temp_file.file as fp:
+        fp.write(data)
+        fp.close
     #
-    here = Path(os.path.realpath(__file__)).parent
-    req_filename = str(here / "data" / requirements)
+    req_filename = temp_file.name
 
     try:
         subprocess.run(
