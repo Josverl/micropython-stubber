@@ -10,9 +10,9 @@ import subprocess
 import logging
 import json
 
-import utils
+from . import utils
 from pathlib import Path
-from version import __version__
+from .version import __version__
 import pkgutil
 import tempfile
 

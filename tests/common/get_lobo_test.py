@@ -3,7 +3,7 @@ import pytest
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
-import get_lobo
+import stubber.get_lobo as get_lobo
 
 # No Mocks, does actual download from github
 

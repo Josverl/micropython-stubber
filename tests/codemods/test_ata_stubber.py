@@ -4,15 +4,14 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-import sys
 import textwrap
-import unittest
 from typing import Type
 
 from libcst import parse_module
 from libcst.codemod import Codemod, CodemodContext, CodemodTest
-from codemod.visitors import ApplyStubberAnnotationsVisitor
 from libcst.testing.utils import data_provider
+
+from stubber.codemod.visitors import ApplyStubberAnnotationsVisitor
 
 PYTHON_GRAMMER = "3.8"
 

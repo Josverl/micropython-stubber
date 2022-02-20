@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 # SOT
-from rst.rst_utils import _type_from_context, return_type_from_context
+from stubber.rst.rst_utils import _type_from_context, return_type_from_context
 
 
 ### Test setup

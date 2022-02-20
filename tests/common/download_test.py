@@ -2,7 +2,7 @@ import os
 import pytest
 
 # SOT
-import downloader
+import stubber.downloader as downloader
 
 # 2 pytest.skip("---===*** DEBUGGING ***===---", allow_module_level=True)
 

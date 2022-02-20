@@ -1,12 +1,9 @@
-import sys
 import pytest
-from pathlib import Path
 
 # Module Under Test
-import get_cpython
-import utils
+import stubber.get_cpython as get_cpython
 
-# No Mocks, does actual extractionusing pip-install
+# No Mocks, does actual extraction using pip-install
 @pytest.mark.parametrize(
     "requirements",
     [

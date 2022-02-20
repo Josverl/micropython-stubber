@@ -5,7 +5,7 @@ import pytest
 # pytest.skip("---===*** DEBUGGING ***===---", allow_module_level=True)
 
 # SOT
-from rst import sort_classes
+from stubber.rst import sort_classes
 
 
 def test_sort_classes():
