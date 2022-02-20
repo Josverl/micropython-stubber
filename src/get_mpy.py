@@ -34,6 +34,9 @@ from pathlib import Path  # start moving from os & glob to pathlib
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
 import makemanifest_2 as makemanifest
 
+import pkgutil
+import tempfile
+
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
 
@@ -165,10 +168,15 @@ def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
 
     # git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
     """
+    data = pkgutil.get_data(__name__, filename)
+    if not data:
+        raise Exception(f"Resource {filename} not found")
     version_commit = defaultdict()  # lgtm [py/multiple-definition]
-    with open(filename, newline="", encoding="utf-8") as csv_file:
+    with tempfile.NamedTemporaryFile(prefix="tags", suffix=".csv", mode="w+t") as ntf:
+        ntf.file.write(data.decode(encoding="utf8"))
+        ntf.file.seek(0)
         # read the csv file using DictReader
-        reader = csv.DictReader(csv_file, skipinitialspace=True)  # dialect="excel",
+        reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
         rows = list(reader)
         # create a dict version --> commit_hash
         version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
