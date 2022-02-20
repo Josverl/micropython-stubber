@@ -2,7 +2,7 @@
 from typing import Dict, List
 import pytest
 from pathlib import Path
-import basicgit as git
+import stubber.basicgit as git
 import subprocess
 
 from helpers import load_rst, read_stub
@@ -10,7 +10,7 @@ from helpers import load_rst, read_stub
 pytestmark = pytest.mark.rst_stub
 
 # SOT
-from stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
+from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
 MICROPYTHON_FOLDER = "micropython"

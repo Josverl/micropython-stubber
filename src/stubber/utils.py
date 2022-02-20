@@ -6,7 +6,7 @@ import subprocess
 
 from fnmatch import fnmatch
 from pathlib import Path
-from version import __version__
+from .version import __version__
 from typing import List, Optional
 
 import mypy.stubgen as stubgen

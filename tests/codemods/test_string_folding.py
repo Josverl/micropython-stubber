@@ -1,7 +1,7 @@
 from libcst.codemod import CodemodTest
 
 # MOT
-from codemod.commands.constant_folding import ConvertConstantCommand
+from stubber.codemod.commands.constant_folding import ConvertConstantCommand
 
 
 class TestConvertConstantCommand(CodemodTest):

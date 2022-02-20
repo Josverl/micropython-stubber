@@ -15,15 +15,15 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 import sys
 from typing import List
 import logging
-import basicgit as git
-import utils
 import subprocess
 from pathlib import Path
 import click
 
-import get_cpython
-import get_mpy
-import get_lobo
+from . import basicgit as git
+from . import utils
+from . import get_cpython
+from . import get_mpy
+from . import get_lobo
 
 # todo: add frozen modules for : pycopy
 # import freezer_pycopy

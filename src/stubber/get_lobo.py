@@ -9,8 +9,9 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # MIT license
 import logging
 from pathlib import Path
-import downloader
-import utils
+
+from . import downloader
+from . import utils
 
 FAMILY = "loboris"
 PORT = "esp32_lobo"

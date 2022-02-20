@@ -13,7 +13,7 @@ if not src_path in sys.path:
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
-import basicgit as git
+import stubber.basicgit as git
 
 
 def common_tst(tag):

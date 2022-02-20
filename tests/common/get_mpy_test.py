@@ -9,11 +9,11 @@ if not sys.warnoptions:
 
 
 # Dependencies
-import basicgit as git
-from utils import clean_version
+import stubber.basicgit as git
+from stubber.utils import clean_version
 
 # Module Under Test
-import get_mpy
+import stubber.get_mpy as get_mpy
 
 
 def test_get_mpy(tmp_path):

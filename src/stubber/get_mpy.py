@@ -24,15 +24,15 @@ import re
 import shutil
 import warnings
 import logging
-import basicgit as git
-import utils
+from . import basicgit as git
+from . import utils
 import csv
 from collections import defaultdict
 
 from pathlib import Path  # start moving from os & glob to pathlib
 
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
-import makemanifest_2 as makemanifest
+from . import makemanifest_2 as makemanifest
 
 import pkgutil
 import tempfile

@@ -4,7 +4,7 @@ from pathlib import Path
 import shutil
 
 # SOT
-import utils
+import stubber.utils as utils
 
 do_profiling = False
 if do_profiling:
