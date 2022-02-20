@@ -2,5 +2,5 @@
 in-project = true
 
 [repositories]
-[repositories.testpypi]
+[repositories.test-pypi]
 url = "https://test.pypi.org/legacy/"
