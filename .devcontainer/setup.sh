@@ -19,4 +19,6 @@ else
     source .venv-ub/bin/activate
 fi
 # python -m pip install --upgrade pip
-python -m pip install -r requirements-dev.txt
+# python -m pip install -r requirements-dev.txt
+pip install poetry
+poetry install
