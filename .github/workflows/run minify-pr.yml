@@ -54,7 +54,7 @@ jobs:
       - name: create or update minified version
         shell: pwsh
         run: |
-          scripts/minify.ps1
+          scripts/minify_ci.ps1
 
       - name: run test on minified/createstubs.by
         run: |

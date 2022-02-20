@@ -77,7 +77,7 @@ jobs:
       - name: create or update minified version
         shell: pwsh
         run: |
-          scripts/minify.ps1
+          scripts/minify_ci.ps1
 
       - name: Test with pytest
         if: always()
