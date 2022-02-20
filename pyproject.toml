@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "micropython-stubber"
-version = "0.1.0"
+version = "1.5.2-alpha.7"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -50,6 +50,8 @@ click = "8.0.3"
 
 rshell = {version = "0.0.31", optional = true}
 esptool = {version = "3.2", optional = true}
+importlib-metadata = {version = "^1.0", python = "<3.8"}
+
 
 [tool.poetry.dev-dependencies]
 pytest = "7.0.1"
