@@ -1,21 +1,7 @@
 {
     // python.autoComplete.extraPaths has changed to "python.analysis.extraPaths"
     // https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#unresolved-import-warnings
-    "python.autoComplete.extraPaths": [
-        "stubs/mpy-typeshed"
-    ],
-    "python.analysis.typeshedPaths": [
-        // No errors with absolute native path
-        // "C:\\develop\\MyPython\\micropython-stubber\\stubs\\mpy-typeshed"
-        // No Errors with native WS relative path
-        //"stubs\\mpy-typeshed"
-        "stubs/mpy-typeshed"
-    ],
-    "python.analysis.extraPaths": [
-        // "board/lib",
-        // "all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
-        // "all-stubs/micropython-v1_18-esp32",
-    ],
+
     "python.analysis.autoSearchPaths": true,
     "python.analysis.logLevel": "Trace",
     "python.analysis.diagnosticMode": "openFilesOnly",
