@@ -63,7 +63,10 @@ jobs:
 
       - name: POETRY Install dependencies
         run: |
-          poetry install --no-interaction
+          poetry install --no-interaction      - name: create or update minified version
+        shell: pwsh
+        run: |
+          scripts/minify.ps1
 
       - name: flag tools executable (on linux)
         if: runner.os == 'Linux'
