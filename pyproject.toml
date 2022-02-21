@@ -1,3 +1,76 @@
+[tool.poetry]
+name = "micropython-stubber"
+version = "1.5.5-alpha.1"
+description = "Tooling to create and maintain stubs for MicroPython"
+authors = ["Jos Verlinde"]
+license = "MIT"
+readme = "readme.md"
+keywords = ["Micropython","stubs","vscode","static type check"]
+homepage= "https://micropython-stubber.readthedocs.io/"
+repository= "https://github.com/Josverl/micropython-stubber"
+classifiers = [
+    "Programming Language :: Python :: Implementation :: MicroPython",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Text Editors :: Integrated Development Environments (IDE)",
+    "Topic :: Software Development :: Build Tools"
+]
+packages = [
+    { include = "**/*.*", from = "src" },
+]
+include =[
+
+]
+exclude = [
+    "**/tests/**" 
+    ,"**/*-test" 
+    ,"**/samples.py" 
+    ,"**/OneOff" 
+    ,"**/.vscode"
+    
+]
+
+[tool.poetry.scripts]
+get_frozen = "stubber.get_all_frozen:get_all"
+get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
+pyboard = "stubber.pyboard:main"
+update_pyi = "stubber.update_pyi:main"
+stubber = "stubber.process:cli"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+python-minifier = "2.5.0"
+requests = "2.27.0"
+mypy = "0.931"
+mpy-cross = "1.18"
+black = "22.1.0"
+libcst = "0.4.1"
+autoflake = "1.4"
+click = "8.0.3"
+
+rshell = {version = "0.0.31", optional = true}
+esptool = {version = "3.2", optional = true}
+importlib-metadata = {version = "^1.0", python = "<3.8"}
+
+
+[tool.poetry.dev-dependencies]
+pytest = "7.0.1"
+pytest-mock = "3.7.0"
+pytest-json-report = "1.4.1"
+pytest-metadata = "1.11.0"
+mock = "4.0.3"
+coverage = "6.3.1"
+pyright = "0.0.13"
+packaging = "21.3"
+distro = "1.7.0"
+toml = "^0.10.2"
+
+[tool.poetry.extras]
+tools = ["rshell","esptool"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 # use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
 line-length = 140
@@ -57,12 +130,19 @@ source = [
         "src"
         ]
 omit = [
-        "*/commands/__init__.py",
+        # helper files in board
         "*/boot.py",
         "*/main.py",
+        "*/stub_lvgl.py",
+
+        # not my code 
         "*/logging.py",
         "*/make_stub_files.py",
-        "*/micropip.py"
+
+        # codemods
+        "*/_apply_stubber_annotations.py",
+        "*/commands/__init__.py",
+
         ]
 
 
@@ -91,6 +171,8 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
 
+    "except subprocess.CalledProcessError as e:",
+
     # Don't complain if non-runnable code isn't run:
     "if __name__ == .__main__.:",
 
@@ -113,5 +195,8 @@ exclude_lines = [
     # catch error
     "except (OSError, KeyError):",
     "except (OSError, AttributeError):",
+
+    # Backward compat <= 3.7 
+    "if sys.version_info.major == 3 and sys.version_info.minor <= 7:"
 
 ]

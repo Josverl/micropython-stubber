@@ -3,7 +3,8 @@ import os
 import pytest
 import subprocess
 from pathlib import Path
-
+from pytest_mock import MockerFixture
+from typing import List
 
 # make sure that the source can be found
 RootPath = Path(os.getcwd())
@@ -13,7 +14,7 @@ if not src_path in sys.path:
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
-import basicgit as git
+import stubber.basicgit as git
 
 
 def common_tst(tag):
@@ -90,3 +91,43 @@ def test_checkout_sibling(testrepo_micropython):
 
     git.checkout_tag(x, repo=repo_path)
     assert git.get_tag(repo_path) == x, "can restore to prior version"
+
+
+def test_fetch():
+    with pytest.raises(NotADirectoryError):
+        git.fetch(repo=None)  # type: ignore
+
+    git.fetch(repo=".")
+
+
+def test_run_git_fails(mocker: MockerFixture):
+    "test what happens if _run_git fails"
+
+    def mock_run_git_1(cmd: List[str], repo: str = None, expect_stderr=False):
+        return None
+
+    mocker.patch("stubber.basicgit._run_git", mock_run_git_1)
+
+    # fail to fetch
+    r = git.fetch(repo=".")
+    assert r == False
+
+    # fail to get tag
+    r = git.get_tag()
+    assert r == None
+
+    # fail to checkout tag
+    r = git.checkout_tag("v1.10")
+    assert r == False
+
+    # fail to checkout commit
+    r = git.checkout_commit(commit_hash="123")
+    assert r == False
+
+    # fail to switch tag
+    r = git.switch_tag(tag="v1.10")
+    assert r == False
+
+    # fail to switch branch
+    r = git.switch_branch(branch="foobar")
+    assert r == False

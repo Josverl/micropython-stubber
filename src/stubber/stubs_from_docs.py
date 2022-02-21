@@ -72,12 +72,12 @@ import logging
 import json
 import subprocess
 from pathlib import Path
-import basicgit as git
-import utils
 import click
-from version import __version__
+from .version import __version__
+from . import basicgit as git
+from . import utils
 
-from rst import (
+from .rst import (
     TYPING_IMPORT,
     return_type_from_context,
     ModuleSourceDict,
@@ -85,7 +85,7 @@ from rst import (
     FunctionSourceDict,
 )
 
-from rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP
+from .rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP
 
 # logging
 log = logging.getLogger(__name__)
@@ -801,7 +801,7 @@ def generate_from_rst(
         try:
             cmd = ["black", str(dst_path / "**/*.*")]
 
-            if sys.version_info.major == 3 and sys.version_info.minor == 7:
+            if sys.version_info.major == 3 and sys.version_info.minor <= 7:
                 # black on python 3.7 does not like some function defs
                 # def sizeof(struct, layout_type=NATIVE, /) -> int:
                 cmd += ["--fast"]

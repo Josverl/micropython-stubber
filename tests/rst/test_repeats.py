@@ -1,5 +1,5 @@
 # SOT
-from stubs_from_docs import RSTReader
+from stubber.stubs_from_docs import RSTReader
 
 
 #: Use this content as input for moo to do bar

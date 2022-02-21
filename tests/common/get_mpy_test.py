@@ -9,14 +9,13 @@ if not sys.warnoptions:
 
 
 # Dependencies
-import basicgit as git
-from utils import clean_version
+import stubber.basicgit as git
+from stubber.utils import clean_version
 
 # Module Under Test
-import get_mpy
+import stubber.get_mpy as get_mpy
 
 
-@pytest.mark.basicgit
 def test_get_mpy(tmp_path):
 
     # Use Submodules
@@ -44,3 +43,11 @@ def test_get_mpy(tmp_path):
     elif version >= "v1.15":
         assert modules_count >= 7, "there should at least 7 module manifests"
         assert stub_count >= 100, "there should > 100 frozen modules"
+
+
+def test_get_version_commits():
+    commits = get_mpy.read_micropython_lib_commits()
+    assert commits
+    assert len(commits) > 0
+    # default should be "master"
+    assert commits["latest"] == "master"
