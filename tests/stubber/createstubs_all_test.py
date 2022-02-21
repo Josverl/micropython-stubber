@@ -2,6 +2,7 @@
 import sys
 from collections import namedtuple
 import pytest
+from pytest_mock import MockerFixture
 from importlib import import_module
 from pathlib import Path
 
@@ -74,7 +75,7 @@ from testcases import fwid_test_cases
 def test_stubber_fwid(
     location,
     variant,
-    mocker,
+    mocker:MockerFixture,
     fwid,
     sys_imp_name,
     sys_platform,
