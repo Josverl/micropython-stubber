@@ -6,7 +6,8 @@ try:
     import esp
 
     esp.osdebug(None)
-except:
+except ImportError:
+    esp = None
     pass
 
 try:
@@ -15,8 +16,7 @@ try:
     pyb.country("US")  # ISO 3166-1 Alpha-2 code, eg US, GB, DE, AU
     pyb.usb_mode("VCP+MSC")  # act as a serial and a storage device
     # pyb.main('main.py') # main script to run after this one
-    # pyb.usb_mode('VCP+HID') # act as a serial device and a mouse
-except:
+except ImportError:
     pass
 
 SD = False
