@@ -8,6 +8,8 @@ cd micropython
 git remote add --tags micropython https://github.com/micropython/micropython.git
 git fetch --all --tags
 cd ..
+# install poetry before creating the venv
+curl -sSL https://install.python-poetry.org | python3 - -y
 
 #
 if [ "${CODESPACES}" = "true" ]; then
@@ -18,7 +20,5 @@ else
     python3 -m venv .venv-ub
     source .venv-ub/bin/activate
 fi
-# python -m pip install --upgrade pip
-# python -m pip install -r requirements-dev.txt
-pip install poetry
+#poetry will re-use the active venv
 poetry install

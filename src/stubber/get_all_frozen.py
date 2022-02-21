@@ -107,7 +107,7 @@ def get_all(
             try:
                 cmd = ["black", str(pth / "**/*.*")]
 
-                if sys.version_info.major == 3 and sys.version_info.minor == 7:
+                if sys.version_info.major == 3 and sys.version_info.minor <= 7:
                     # black on python 3.7 does not like some function defs
                     # def sizeof(struct, layout_type=NATIVE, /) -> int:
                     cmd += ["--fast"]

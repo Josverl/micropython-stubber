@@ -133,12 +133,19 @@ source = [
         "src"
         ]
 omit = [
-        "*/commands/__init__.py",
+        # helper files in board
         "*/boot.py",
         "*/main.py",
+        "*/stub_lvgl.py",
+
+        # not my code 
         "*/logging.py",
         "*/make_stub_files.py",
-        "*/micropip.py"
+
+        # codemods
+        "*/_apply_stubber_annotations.py",
+        "*/commands/__init__.py",
+
         ]
 
 
@@ -167,6 +174,8 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
 
+    "except subprocess.CalledProcessError as e:",
+
     # Don't complain if non-runnable code isn't run:
     "if __name__ == .__main__.:",
 
@@ -189,5 +198,8 @@ exclude_lines = [
     # catch error
     "except (OSError, KeyError):",
     "except (OSError, AttributeError):",
+
+    # Backward compat <= 3.7 
+    "if sys.version_info.major == 3 and sys.version_info.minor <= 7:"
 
 ]
