@@ -5,6 +5,9 @@ import pytest
 from pytest_mock import MockerFixture
 from importlib import import_module
 from pathlib import Path
+from packaging.version import parse
+import toml
+
 
 pytestmark = pytest.mark.micropython
 
@@ -14,6 +17,40 @@ LOCATIONS = ["board", pytest.param("minified", marks=pytest.mark.minified)]
 VARIANTS = ["createstubs", "createstubs_mem", "createstubs_db"]
 
 # TODO: add test to check if all variants x locations have the same version number
+FIRST_VERSION = None
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+@pytest.mark.parametrize("location", LOCATIONS)
+def test_firmwarestubber_all_versions_same(
+    location,
+    variant,
+    mock_micropython_path,
+):
+    global FIRST_VERSION
+
+    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    if not FIRST_VERSION:
+        FIRST_VERSION = parse(createstubs.__version__)
+    # all versions should be the same
+    assert FIRST_VERSION == parse(createstubs.__version__)
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+@pytest.mark.parametrize("location", LOCATIONS)
+def test_firmwarestubber_base_version_match_package(
+    location,
+    variant,
+    mock_micropython_path,
+):
+    # Q&D Location
+    path = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    pyproject = toml.loads(open(str(path)).read())
+    pyproject_version = pyproject["tool"]["poetry"]["version"]
+
+    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    # base version should match the package
+    assert parse(createstubs.__version__).base_version == parse(pyproject_version).base_version
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -75,7 +112,7 @@ from testcases import fwid_test_cases
 def test_stubber_fwid(
     location,
     variant,
-    mocker:MockerFixture,
+    mocker: MockerFixture,
     fwid,
     sys_imp_name,
     sys_platform,
