@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.5.2-alpha.8"
+version = "1.5.5-alpha.1"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -16,13 +16,9 @@ classifiers = [
 ]
 packages = [
     { include = "**/*.*", from = "src" },
-#    { include = "rst/**/*.py", from = "src" },
-#    { include = "codemod/**/*.py", from = "src" },
-#    { include = "libs/*.py", from = "src" },
 ]
 include =[
-#   { path = "src/data/*.*"},
-#    { path = "tests", format = "sdist" }
+
 ]
 exclude = [
     "**/tests/**" 
@@ -66,6 +62,7 @@ coverage = "6.3.1"
 pyright = "0.0.13"
 packaging = "21.3"
 distro = "1.7.0"
+toml = "^0.10.2"
 
 [tool.poetry.extras]
 tools = ["rshell","esptool"]
