@@ -1,8 +1,6 @@
-import os
 import json
 import logging
 import shutil
-import subprocess
 
 from fnmatch import fnmatch
 from pathlib import Path
