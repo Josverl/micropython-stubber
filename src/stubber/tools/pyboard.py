@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # v1.17+
+# type: ignore
 # This file is part of the MicroPython project, http://micropython.org/
 #
 # The MIT License (MIT)
