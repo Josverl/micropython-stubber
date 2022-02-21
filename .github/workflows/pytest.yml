@@ -39,34 +39,34 @@ jobs:
         with:
           domain: josverl
 
-      # - name: Extract branch name
-      #   id: extract_branch
-      #   shell: bash
-      #   run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: restore Python from cache
-        uses: actions/cache@v2
+      #----------------------------------------------
+      # poetry is not in the default image
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
 
-      - name: PIP Install basics
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          pip install pytest
+      #----------------------------------------------
+      # install dependencies 
+      #----------------------------------------------
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
 
-      - name: POETRY Install dependencies
-        run: |
-          poetry install --no-interaction      - name: create or update minified version
-        shell: pwsh
-        run: |
-          scripts/minify.ps1
+      #----------------------------------------------
+      # install root project
+      #----------------------------------------------
+      - name: Install library
+        run: poetry install --no-interaction
+
+
 
       - name: flag tools executable (on linux)
         if: runner.os == 'Linux'
@@ -77,14 +77,17 @@ jobs:
       - name: create or update minified version
         shell: pwsh
         run: |
-          scripts/minify_ci.ps1
+          poetry run pwsh scripts/minify.ps1
 
       - name: Test with pytest
         if: always()
         run: |
-          coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
-          coverage xml -o results/coverage.xml
+          poetry run coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
+      - name: Coverage
+        if: always()
+        run: |
+          poetry run coverage xml -o results/coverage.xml
 
       - name: Push result to Testspace server
         if: always()
