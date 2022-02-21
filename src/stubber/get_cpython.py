@@ -2,8 +2,6 @@
 Download or update the micropyton compatibility modules from pycopy and stores them in the all_stubs folder
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
-
-from errno import ENOENT
 import os
 import shutil
 import subprocess
