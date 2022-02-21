@@ -1,5 +1,5 @@
 # Ref: https://github.com/typeddjango/django-stubs/blob/99ed5b1a094bc441115a56fb01828b89e6906372/scripts/merge_stubs_into_django.py
-
+# type: ignore
 
 from libcst import parse_module, CSTValidationError, Module
 from libcst.codemod import CodemodContext

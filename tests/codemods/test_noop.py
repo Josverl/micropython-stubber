@@ -2,7 +2,7 @@ import pytest
 
 #
 from libcst.codemod import CodemodTest
-from codemod.commands.noop import NOOPCommand
+from stubber.codemod.commands.noop import NOOPCommand
 
 ################################################################################
 # Define a few codeblock for testing of the libcst parser

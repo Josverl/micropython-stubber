@@ -28,14 +28,14 @@ function restart-MCU {
     )
     # avoid MCU waiting in bootloader on hardware restart by setting both dtr and rts high
     start-sleep $delay_1
-    python $pyboard_py --device $serialport --no-soft-reset -c "help('modules')" | Write-Host
+    pyboard --device $serialport --no-soft-reset -c "help('modules')" | Write-Host
     #rshell -p $serialport  --buffer-size 512 --rts 1 repl "~ print('connected') ~"  | write-host
     Write-Host -F Yellow "Exitcode: $LASTEXITCODE"
     $EXIT_1 = $LASTEXITCODE
     $n = 1
     do {
         start-sleep $delay_2
-        python $pyboard_py --device $serialport --no-soft-reset -c "help('modules')" | Tee-Object -Variable out | write-host
+        pyboard --device $serialport --no-soft-reset -c "help('modules')" | Tee-Object -Variable out | write-host
         $EXIT_2 = $LASTEXITCODE
         $TracebackFound = ($out -join "").Contains('Traceback')
         Write-Host -F Yellow "Exitcode: $LASTEXITCODE"
@@ -88,10 +88,10 @@ function run_stubber {
             
 
             # copy modulelist.txt to the board
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $createstubs_py :createstubs.py | Write-Host
+            pyboard --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
+            pyboard --device $serialport --no-soft-reset -f cp $createstubs_py :createstubs.py | Write-Host
             # run the minified & compiled version 
-            python $pyboard_py --device $serialport --no-soft-reset -c  "import createstubs" | write-host
+            pyboard --device $serialport --no-soft-reset -c  "import createstubs" | write-host
             # 0 = Success
             return $LASTEXITCODE -eq 0
         }
@@ -115,16 +115,16 @@ function run_stubber {
 
             write-host "Using compiled versions: $createstubs_mpy"
             # copy modulelist.txt to the board
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $createstubs_mpy :createstubs.mpy | Write-Host
+            pyboard --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
+            pyboard --device $serialport --no-soft-reset -f cp $createstubs_mpy :createstubs.mpy | Write-Host
             # run the minified & compiled version 
-            python $pyboard_py --device $serialport --no-soft-reset -c  "import createstubs" | write-host
-            # python $pyboard_py --device $serialport $createstubs_py | write-host
+            pyboard --device $serialport --no-soft-reset -c  "import createstubs" | write-host
+            # pyboard --device $serialport $createstubs_py | write-host
             # 0 = Success
             return $LASTEXITCODE -eq 0
         }
         "run" {
-            #python $pyboard_py --device $serialport $createstubs_py | write-host
+            #pyboard --device $serialport $createstubs_py | write-host
             # MISTERY:  needs some magic introduction by rshell to make rshells pyboard work 
             rshell -p $serialport  --rts 1 repl "~ print('connected') ~"  | write-host
             start-sleep 2
@@ -136,11 +136,11 @@ function run_stubber {
         }
         Default {
             # copy modulelist.txt to the board
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
-            python $pyboard_py --device $serialport --no-soft-reset -f cp $createstubs_py :createstubs.py | Write-Host
+            pyboard --device $serialport --no-soft-reset -f cp $modulelist_txt :modulelist.txt | Write-Host
+            pyboard --device $serialport --no-soft-reset -f cp $createstubs_py :createstubs.py | Write-Host
             # run the minified & compiled version 
-            python $pyboard_py --device $serialport --no-soft-reset -c  "import createstubs" | write-host
-            # python $pyboard_py --device $serialport $createstubs_py | write-host
+            pyboard --device $serialport --no-soft-reset -c  "import createstubs" | write-host
+            # pyboard --device $serialport $createstubs_py | write-host
             # 0 = Success
             return $LASTEXITCODE -eq 0
 
@@ -198,10 +198,10 @@ function DetectDevices {
 
 function stub_all {
     param (
-        $download_path ,
+        $download_path
         #TODO: replace with somthing simpler
-        $pyboard_py = (join-path $WSRoot "src/libs/pyboard.py" ),
-        $update_pyi_py = (join-path $WSRoot "src/update_pyi.py" )
+        #$pyboard_py = (join-path $WSRoot "src/libs/pyboard.py" ),
+        #$update_pyi_py = (join-path $WSRoot "src/update_pyi.py" )
     )
     
 
@@ -406,7 +406,7 @@ function stub_all {
 # todo: find WSroot automatically
 $WSRoot = "C:\develop\MyPython\micropython-stubber"
 $download_path = join-path -Path $WSRoot -ChildPath "firmware-stubs"
-$update_pyi_py = join-path $WSRoot "src/update_pyi.py" 
+
 
 # Save this spot
 Push-Location -StackName "start-remote-stubber"
@@ -425,7 +425,7 @@ $results2 | ConvertTo-json | Out-File bulk_stubber.json
 Write-Host -ForegroundColor Cyan ("-" * 100)
 Write-Host -ForegroundColor Cyan "Create .pyi and apply black formatting $download_path"
 # now generate .pyi files 
-python $update_pyi_py $download_path 
+update_pyi $download_path 
 # and run black formatting across all 
 black $result.path $download_path 
 

@@ -39,27 +39,34 @@ jobs:
         with:
           domain: josverl
 
-      # - name: Extract branch name
-      #   id: extract_branch
-      #   shell: bash
-      #   run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: restore Python from cache
-        uses: actions/cache@v2
+      #----------------------------------------------
+      # poetry is not in the default image
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
 
+      #----------------------------------------------
+      # install dependencies 
+      #----------------------------------------------
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pylint
-          pip install -r requirements-dev.txt
+        run: poetry install --no-interaction --no-root
+
+      #----------------------------------------------
+      # install root project
+      #----------------------------------------------
+      - name: Install library
+        run: poetry install --no-interaction
+
+
 
       - name: flag tools executable (on linux)
         if: runner.os == 'Linux'
@@ -68,35 +75,28 @@ jobs:
           MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_18 -c "import sys;print(sys.path);import logging"
 
       - name: create or update minified version
+        shell: pwsh
         run: |
-          python process.py minify -xc
-          # Minify low_mem version
-          python process.py minify -s board/createstubs_mem.py -o minified -xc
-          # Minify low_mem _ restartable version
-          python process.py minify -s board/createstubs_db.py -o minified -xc
-
-      # - name: run test on minified/createstubs.by
-      #   run: |
-      #     pytest -m minified
-
-      # - name: verify minified using pylint
-      #   run: |
-      #     pylint minified/createstubs.py -E -d E0401,E1101,E0213,E0602,E1121,E0211
-      #     # CPython/Micropython Errors 
-      #     # E0401: Unable to import '<upythonmodule>' (import-error)
-      #     # E1101: Module 'gc' has no 'mem_free' member (no-member)
-      #     # errors by minification 
-      #     # E0211: Method has no argument (no-method-argument)
-      #     # E1121: Too many positional arguments for method call (too-many-function-args)
-      #     # E0213: Method should have "self" as first argument (no-self-argument)
-      #     # E0602: Undefined variable (undefined-variable)
+          poetry run pwsh scripts/minify.ps1
 
       - name: Test with pytest
         if: always()
         run: |
-          coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
-          coverage xml -o results/coverage.xml
+          poetry run coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
+      - name: Coverage
+        if: always()
+        run: |
+          poetry run coverage xml -o results/coverage.xml
+
+      #----------------------------------------------
+      # upload coverage stats
+      #----------------------------------------------
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+        with:
+          file: results/coverage.xml
+          fail_ci_if_error: false
 
       - name: Push result to Testspace server
         if: always()

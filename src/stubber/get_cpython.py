@@ -2,16 +2,17 @@
 Download or update the micropyton compatibility modules from pycopy and stores them in the all_stubs folder
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
-
 import os
 import shutil
 import subprocess
 import logging
 import json
 
-import utils
+from . import utils
 from pathlib import Path
-from version import __version__
+from .version import __version__
+import pkgutil
+import tempfile
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,19 @@ def get_core(requirements, stub_path=None, family: str = "core"):
     os.makedirs(build_path, exist_ok=True)
     mod_manifest = None
     modlist = []
+
+    # within package/mymodule1.py, for example
+
+    data = pkgutil.get_data(__name__, "data/" + requirements)
+    if not data:
+        raise Exception("Resource Not found")
+    temp_file = tempfile.NamedTemporaryFile(prefix="requirements", suffix=".txt", delete=False)
+    with temp_file.file as fp:
+        fp.write(data)
+        fp.close
+    #
+    req_filename = temp_file.name
+
     try:
         subprocess.run(
             [
@@ -37,7 +51,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
                 "--target",
                 build_path.as_posix(),
                 "-r",
-                requirements,
+                req_filename,
                 "--no-cache-dir",
                 "--no-compile",
                 "--upgrade",
@@ -75,4 +89,4 @@ def get_core(requirements, stub_path=None, family: str = "core"):
 if __name__ == "__main__":
     # just run a quick test
     logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_core(requirements="./requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")
+    get_core(requirements="requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")

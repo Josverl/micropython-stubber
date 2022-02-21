@@ -1,7 +1,7 @@
 # others
 
 # SOT
-from rst import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
+from stubber.rst import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
 
 
 def test_Module_SD():

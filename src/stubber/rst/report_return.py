@@ -11,6 +11,7 @@ Will need to be updated after new_output has been implemented.
 import json
 from pathlib import Path
 from typing import List, Tuple
+import stubber.utils as utils
 
 
 def process(folder: Path, pattern: str):

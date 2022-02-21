@@ -3,11 +3,11 @@ import pytest
 from pathlib import Path
 
 # pylint: disable=wrong-import-position,import-error
-import basicgit as git
+import stubber.basicgit as git
 
 # Module Under Test
-import get_mpy
-import utils
+import stubber.get_mpy as get_mpy
+import stubber.utils as utils
 
 
 if not sys.warnoptions:

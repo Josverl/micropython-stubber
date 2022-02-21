@@ -1,6 +1,6 @@
 ##########################
 import pytest
-import version
+import stubber.version as version
 
 ##########################
 

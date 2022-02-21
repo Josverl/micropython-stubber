@@ -3,7 +3,7 @@ from pathlib import Path
 from click.testing import CliRunner
 
 # module under test :
-from get_all_frozen import get_all
+from stubber.get_all_frozen import get_all
 
 
 def test_get_all_help():
