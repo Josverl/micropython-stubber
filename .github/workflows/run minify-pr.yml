@@ -35,6 +35,9 @@ jobs:
       #     path: ${{ env.pythonLocation }}
       #     key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
 
+      #----------------------------------------------
+      # poetry is not in the default image
+      #----------------------------------------------
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
