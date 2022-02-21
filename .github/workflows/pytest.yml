@@ -89,6 +89,15 @@ jobs:
         run: |
           poetry run coverage xml -o results/coverage.xml
 
+      #----------------------------------------------
+      # upload coverage stats
+      #----------------------------------------------
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+        with:
+          file: results/coverage.xml
+          fail_ci_if_error: false
+
       - name: Push result to Testspace server
         if: always()
         run: |
