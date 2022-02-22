@@ -1,7 +1,6 @@
 {
     // python.autoComplete.extraPaths has changed to "python.analysis.extraPaths"
     // https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#unresolved-import-warnings
-
     "python.analysis.autoSearchPaths": true,
     "python.analysis.logLevel": "Trace",
     "python.analysis.diagnosticMode": "openFilesOnly",
@@ -101,4 +100,5 @@
         "DOC",
         "PYRIGHT"
     ],
+    "markiscodecoverage.searchCriteria": "results/coverage.lcov",
 }
