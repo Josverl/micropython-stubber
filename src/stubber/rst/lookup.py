@@ -195,16 +195,13 @@ PARAM_FIXES = [
         "trigger=IRQ_SM0",
     ),
     # SPI.INIT - to fix error: Non-default argument follows default argument
-    # TODO: Upstream Fix
-    # PR: https://github.com/micropython/micropython/pull/7976
+    # fixed in doc v1.18+
     (
         "prescaler, polarity=1",
         "prescaler=1, polarity=1",
     ),
     # machine.Pin.__init__ constructor - Defaults assumed from the documentation.
-    # # TODO: Pin init differs per port : Search '// pin.init' in micropython repo for
-    # PR: https://github.com/micropython/micropython/pull/7976
-    # https://github.com/micropython/micropython/blob/b47b245c2eeb734f69d5445372d0947f1ea43259/ports/stm32/pin.c#L331-L339
+    # fixed in doc v1.18+
     (
         ", value, drive, alt",
         ", value=None, drive=0, alt=-1",
@@ -234,5 +231,5 @@ CHILD_PARENT_CLASS = {
     # collections
     "OrderedDict": "dict",
     "namedtuple": "tuple",
-    "deque": "Queue",  # TODO: Check if this is correct
+    "deque": "Queue",
 }
