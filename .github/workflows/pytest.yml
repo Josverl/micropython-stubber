@@ -87,7 +87,7 @@ jobs:
       - name: Coverage
         if: always()
         run: |
-          poetry run coverage xml -o results/coverage.xml
+          poetry run coverage xml -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       #----------------------------------------------
       # upload coverage stats
@@ -95,11 +95,11 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v1
         with:
-          file: results/coverage.xml
+          file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           fail_ci_if_error: false
 
       - name: Push result to Testspace server
         if: always()
         run: |
           testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml
-          testspace --link codecov results/coverage.xml
+          testspace --link codecov results/coverage-*.xml
