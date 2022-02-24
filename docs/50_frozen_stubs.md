@@ -47,8 +47,8 @@ If you want to run this manually
 - link repos using all_stubs symlink
 - checkout tag / version in the micropython folder  
   (for most accurate results should checkout micropython-lib for the same date)
-- run `src/get-frozen.py`
-- run `src/update-stubs.py`
+- run `get-frozen`
+- run `update_stub`
 
 - create a PR for changes to the stubs repo 
 
@@ -57,14 +57,9 @@ If you want to run this manually
 You can run postprocessing for all stubs by running either of the two scripts.
 There is an optional parameter to specify the location of the stub folder. The default path is `./all_stubs`
 
-Powershell:  
-``` powershell
-./scripts/updates_stubs.ps1 [-path ./mystubs]
 
-```
-or python  
 ``` bash
-python ./src/update_stubs.py [./mystubs]
+update_stubs [./mystubs]
 ```
 
 This will generate or update the `.pyi` stubs for all new (and existing) stubs in the `./all_stubs` or specified folder.
@@ -74,7 +69,7 @@ From version '1.3.8' the  `.pyi` stubs are generated using `stubgen`, before tha
 Stubgen is run on each 'collected stub folder' (that contains a `modules.json` manifest) using the options : `--ignore-errors --include-private` and the resulting `.pyi` files are stored in the same folder (`foo.py` and `foo.pyi` are stored next to each other).
 
 In some cases `stubgen` detects duplicate modules in a 'collected stub folder', and subsequently does not generate any stubs for any `.py` module or script.
-then __Plan B__ is to run stubgen for each separate `*.py` file in that folder. THis is significantly slower and according to the stubgen documentation the resulting stubs may of lesser quality, but that is better than no stubs at all.
+then __Plan B__ is to run stubgen for each separate `*.py` file in that folder. While this is significantly slower and according to the stubgen documentation the resulting stubs may of lesser quality, but that is better than no stubs at all.
 
 **Note**: In several cases `stubgen` creates folders in inappropriate locations (reason undetermined), which would cause issues when re-running `stubgen` at a later time.
 to compensate for this behaviour the known-incorrect .pyi files are removed before and after stubgen is run [see: `cleanup(modules_folder)` in `utils.py`](https://github.com/Josverl/micropython-stubber/blob/main/src/utils.py#L40-L66)

@@ -86,7 +86,7 @@ suppress_warnings = ["myst.header"]
 # Generate documentation for the source code in
 # https://sphinx-autoapi.readthedocs.io/en/latest/tutorials.html#setting-up-automatic-api-documentation-generation
 
-autoapi_dirs = ["../board", "../src"]
+autoapi_dirs = ["../board", "../src/stubber"]
 autoapi_root = "api"
 autoapi_file_patterns = ["*.py"]
 autoapi_keep_files = False
@@ -100,7 +100,8 @@ autoapi_ignore = [
     "*/stubs/**",  # skip the stubs folder (as it will fail on that)
     "*/boot.py",  # not relevant
     "*/logging.py",  # not relevant
-    "",
+    "*/main.py",  # not relevant
+    "*/test*.*",
 ]
 
 # -- allow for documenting micropython -------------------------------------------------

@@ -1,17 +1,18 @@
 """
 generate the list of modules that should be attempted to stub
 for this : 
-    - combine the modules from the different texts files
-    - split the lines into individual module names
-    - combine them in one set
-    - remove the ones than cannot be stubbed
-    - remove test modules, ending in `_test`
-    - write updates to:
-        - board/modulelist.txt
-        - board/createsubs.py 
+- combine the modules from the different texts files
+- split the lines into individual module names
+- combine them in one set
+- remove the ones than cannot be stubbed
+- remove test modules, ending in `_test`
+- write updates to:
+    - board/modulelist.txt
+    - board/createsubs.py 
 
-    - TODO: remove the frozen modules from this list
-    - TODO: bump patch number if there are actual changes
+- TODO: remove the frozen modules from this list
+- TODO: bump patch number if there are actual changes
+
 """
 
 from pathlib import Path
@@ -22,9 +23,9 @@ def read_modules(path: Path = None) -> Set:
     """
     read text files with modules per firmware.
     each contains the output of help("modules")
-        lines starting with # are comments.
-            split the other lines at whitespace seperator,
-            and add each module to a set
+    - lines starting with # are comments.
+    - split the other lines at whitespace seperator,
+    - and add each module to a set
     """
     path = Path(path or "./data")
     assert path
