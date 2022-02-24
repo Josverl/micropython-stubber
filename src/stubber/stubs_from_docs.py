@@ -778,7 +778,8 @@ def generate_from_rst(
             # create umod.py file and mod.py file that imports umod
             reader.write_file((dst_path / ("u" + file.name)).with_suffix(suffix))
             with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
-                new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
+                # new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
+                new_file.write(f"from . import u{file.stem} # Type: Ignore\n")
         else:
             reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
