@@ -105,7 +105,7 @@ def get_all(
             utils.generate_pyi_files(pth)
         if black:
             try:
-                cmd = ["black", ".")]
+                cmd = ["black", "."]
 
                 if sys.version_info.major == 3 and sys.version_info.minor <= 7:
                     # black on python 3.7 does not like some function defs
