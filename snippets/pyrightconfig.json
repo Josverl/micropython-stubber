@@ -18,7 +18,6 @@
     "stubPath": "micropython-typings",
     "logLevel": "Trace",
     "extraPaths": [
-        "../all-stubs/typings/fallback",
     ],
     "executionEnvironments": [
         {
@@ -40,6 +39,15 @@
                 "../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
                 "../all-stubs/micropython-v1_18-esp32",
                 //"../all-stubs/typings/fallback",
+            ]
+        },
+        {
+            "root": "loboris-esp32",
+            "extraPaths": [
+                "../all-stubs/loboris-v3_2_24-esp32",
+                "../all-stubs/loboris-v3_2_24-frozen",
+                "../all-stubs/loboris-v3_2_24-esp32",
+                "../all-stubs/typings/fallback",
             ]
         },
         {
