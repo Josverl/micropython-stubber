@@ -101,7 +101,7 @@ This will fail as reported in this [issue](https://github.com/microsoft/debugpy/
 
 The solution to this problem is to disable subprocess debugging using the `"subProcess": false` switch.
 
-``` json 
+``` js
 // launch.json
         {
             // disable pytest coverage report as it conflicts with debugging tests

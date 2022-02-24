@@ -196,39 +196,39 @@ def freeze_internal(path: str, script: str, opt=None):
         log.exception(e)
 
 
-######
+###### TODO: Update to freeze_Internal_2
 
 
-def freeze_internal_2(path: str, script: str, opt=None):
-    """
-    micropython-stubber implementation to 'freeze' a single micropython file for stubbing, called by freeze.
-    Copy the to-be-frozen module to the destination folder to be stubbed.
+# def freeze_internal_2(path: str, script: str, opt=None):
+#     """
+#     micropython-stubber implementation to 'freeze' a single micropython file for stubbing, called by freeze.
+#     Copy the to-be-frozen module to the destination folder to be stubbed.
 
-    Parameters:
-    path (str)  : a relative source path, optionally with placeholders
-    script (str): the source script to be frozen, may have a relative path prefix
-    opt (Any): freeze option (ignored)
+#     Parameters:
+#     path (str)  : a relative source path, optionally with placeholders
+#     script (str): the source script to be frozen, may have a relative path prefix
+#     opt (Any): freeze option (ignored)
 
-    Copy {path}/{script} to {stub_dir}/{script}
-    """
+#     Copy {path}/{script} to {stub_dir}/{script}
+#     """
 
-    log.debug(" - freeze_internal({},{})".format(path, script))
-    src_path: Path = Path(convert_path(path))
-    if not src_path.is_dir():
-        raise FreezeError("freeze path must be a directory")
-    if stub_dir == "":
-        raise FreezeError("Stub folder not set")
+#     log.debug(" - freeze_internal({},{})".format(path, script))
+#     src_path: Path = Path(convert_path(path))
+#     if not src_path.is_dir():
+#         raise FreezeError("freeze path must be a directory")
+#     if stub_dir == "":
+#         raise FreezeError("Stub folder not set")
 
-    src_path = src_path / convert_path(script)
-    dst_path = Path(stub_dir) / convert_path(script)
+#     src_path = src_path / convert_path(script)
+#     dst_path = Path(stub_dir) / convert_path(script)
 
-    log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
-    # ensure folder, including possible path prefix for script
-    os.makedirs(dst_path.parent.as_posix(), exist_ok=True)
-    # copy file
-    try:
-        shutil.copy2(src_path.as_posix(), dst_path.as_posix())
-    except (FileNotFoundError) as e:
-        log.warning(f"File {src_path.as_posix()} not found")
-    except (OSError, FileNotFoundError) as e:
-        log.exception(e)
+#     log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
+#     # ensure folder, including possible path prefix for script
+#     os.makedirs(dst_path.parent.as_posix(), exist_ok=True)
+#     # copy file
+#     try:
+#         shutil.copy2(src_path.as_posix(), dst_path.as_posix())
+#     except (FileNotFoundError) as e:
+#         log.warning(f"File {src_path.as_posix()} not found")
+#     except (OSError, FileNotFoundError) as e:
+#         log.exception(e)
