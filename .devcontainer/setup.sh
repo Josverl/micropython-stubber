@@ -14,11 +14,11 @@ curl -sSL https://install.python-poetry.org | python3 - -y
 #
 if [ "${CODESPACES}" = "true" ]; then
     # create & activate venv and install the dependencies in there 
-    python -m venv .venv-cs
-    source .venv-cs/bin/activate
+    python -m venv .venv
+    source .venv/bin/activate
 else
     python3 -m venv .venv-ub
     source .venv-ub/bin/activate
 fi
 #poetry will re-use the active venv
-poetry install
+/home/vscode/.local/bin/poetry install
