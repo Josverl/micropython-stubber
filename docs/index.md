@@ -12,6 +12,7 @@ intro.md
 40_firmware_stubs.md
 45_createstubs.md
 50_frozen_stubs.md
+55_doc_stubs.md
 60_repos.md
 65_scripts.md
 70_stub_overview.md

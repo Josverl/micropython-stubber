@@ -20,11 +20,10 @@ def edit_lines(content, edits, show_diff=False):
     Args:
         content (str): content to edit
         edits ([(str, str)]): List of edits to make.
-            The first string in the tuple represents
-            the type of edit to make, can be either:
-                comment - comment text out (removed on minify)
-                rprint - replace text with print
-                rpass - replace text with pass
+            The first string in the tuple representsthe type of edit to make, can be either:
+            - comment - comment text out (removed on minify)
+            - rprint - replace text with print
+            - rpass - replace text with pass
             The second string is the matching text to replace
         show_diff (bool, optional): Prints diff of each edit.
             Defaults to False.

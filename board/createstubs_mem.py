@@ -12,8 +12,8 @@ Create stubs for (all) modules on a MicroPython board.
 
     you can find a cross-compiled version located here: ./minified/createstubs_mem.mpy
 
-Copyright (c) 2019-2021 Jos Verlinde
 """
+# Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import sys
 import gc
