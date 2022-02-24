@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "snippets"
+		},
+		{
+			"path": "micropython\\docs\\library"
 		}
 	],
 	"settings": {

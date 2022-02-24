@@ -70,7 +70,7 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
 
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
-    # BUG: other tests may / will change the CWD to a different folder
+    # other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
     cmd = [fw_filename, variant + ".py", "--path", str(tmp_path)]
 
