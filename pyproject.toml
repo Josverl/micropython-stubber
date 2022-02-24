@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.5.5-alpha.2"
+version = "1.5.5-alpha.4"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -150,10 +150,13 @@ omit = [
 directory = "coverage"
 
 [tool.coverage.xml]
-output = "cov.xml"
+output = "results/coverage.xml"
 
 [tool.coverage.json]
-output = "coverage.json"
+output = "results/coverage.json"
+
+[tool.coverage.lcov]
+output = "results/coverage.lcov"
 
 [tool.coverage.report]
 show_missing = true

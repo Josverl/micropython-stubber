@@ -419,7 +419,7 @@ def distill_return(return_text: str) -> List[Dict]:
     candidates += simple_candidates("str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR)
 
     candidates += simple_candidates("str", match_string, ["name", "names"], C_STR_NAMES)
-    ## TODO: "? contains 'None if there is no'  --> Union[Null, xxx]"
+    ## "? contains 'None if there is no'  --> Union[Null, xxx]"
     candidates += simple_candidates(
         "None",
         match_string,

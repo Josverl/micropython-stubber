@@ -15,15 +15,13 @@ Create stubs for (all) modules on a MicroPython board.
 
     If that cannot be found then only a single module (micropython) is stubbed.
     In order to run this on low-memory devices two additional steps are recommended: 
-    - minification, using python-minifier
-      to reduce overall size, and remove logging overhead.
-    - cross compilation, using mpy-cross, 
-      to avoid the compilation step on the micropython device 
+    - minification, using python-minifierto reduce overall size, and remove logging overhead.
+    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 You should find a cross-compiled version located here: `./minified/createstubs_db.mpy
 
-Copyright (c) 2019-2021 Jos Verlinde
 """
+# Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import sys
 import gc
