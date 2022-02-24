@@ -105,14 +105,14 @@ def get_all(
             utils.generate_pyi_files(pth)
         if black:
             try:
-                cmd = ["black", str(pth / "**/*.*")]
+                cmd = ["black", "."]
 
                 if sys.version_info.major == 3 and sys.version_info.minor <= 7:
                     # black on python 3.7 does not like some function defs
                     # def sizeof(struct, layout_type=NATIVE, /) -> int:
                     cmd += ["--fast"]
                 # shell=false on ubuntu
-                result = subprocess.run(cmd, capture_output=False, check=True, shell=False)
+                result = subprocess.run(cmd, capture_output=False, check=True, shell=False, cwd=pth)
                 if result.returncode != 0:
                     raise Exception(result.stderr.decode("utf-8"))
             except subprocess.SubprocessError:
