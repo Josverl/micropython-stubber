@@ -1,5 +1,11 @@
+# include the list exported exported from poetry
+# poetry export -o .\docs\requirements-export.txt --without-hashes 
+
+--requirement requirements-export.txt
+
 Sphinx                      == 4.4.0
 myst-parser                 == 0.17.0
 sphinxcontrib-mermaid       == 0.7.1
 sphinx_rtd_theme            == 1.0.0
 sphinx-autoapi              == 1.8.4
+toml                        == 0.10.2

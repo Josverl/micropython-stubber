@@ -10,17 +10,20 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 import sys
 from pathlib import Path
+import toml
 
-
-src_path = str(Path("..") / "src")
+src_path = str(Path("..") / "src" / "micropython-stubber")
 if not src_path in sys.path:
     sys.path.append(src_path)
 
-from version import __version__ as MODULE_VERSION
+# from stubber.version import __version__ as MODULE_VERSION
 
+# Q&D Location
+path = Path(__file__).resolve().parents[1] / "pyproject.toml"
+pyproject = toml.loads(open(str(path)).read())
+MODULE_VERSION = pyproject["tool"]["poetry"]["version"]
 
 # -- Project information -----------------------------------------------------
 
