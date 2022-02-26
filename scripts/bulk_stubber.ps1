@@ -199,9 +199,6 @@ function DetectDevices {
 function stub_all {
     param (
         $download_path
-        #TODO: replace with somthing simpler
-        #$pyboard_py = (join-path $WSRoot "src/libs/pyboard.py" ),
-        #$update_pyi_py = (join-path $WSRoot "src/update_pyi.py" )
     )
     
 
@@ -425,7 +422,7 @@ $results2 | ConvertTo-json | Out-File bulk_stubber.json
 Write-Host -ForegroundColor Cyan ("-" * 100)
 Write-Host -ForegroundColor Cyan "Create .pyi and apply black formatting $download_path"
 # now generate .pyi files 
-update_pyi $download_path 
+stubber stub -source $download_path 
 # and run black formatting across all 
 black $result.path $download_path 
 

@@ -4,10 +4,13 @@
 """Pre/Post Processing for createstubs.py"""
 from typing import Union
 from pathlib import Path
-import subprocess
 import click
-from .minify import minify
+import logging
 
+from .minify import minify
+from .utils import generate_pyi_files
+
+log = logging.getLogger(__name__)
 
 ##########################################################################################
 # command line interface
@@ -33,10 +36,22 @@ def cli(ctx, debug=False):
 #     click.echo(f"Debug is {'on' if ctx.obj['DEBUG'] else 'off'}")
 #     click.echo("Syncing")
 
+##########################################################################################
+# update-pyi
+##########################################################################################
+@cli.command(name="stub")
+@click.option("--source", "-s", type=click.Path(exists=True, file_okay=True, dir_okay=True))
+def cli_make_pyi(source: Union[str, Path]):
+    "Generate or update type hint files for all files in SOURCE"
+    log.info("Generate type hint files (pyi) in folder: {}".format(source))
+    OK = generate_pyi_files(Path(source))
+    return 0 if OK else 1
+
 
 ##########################################################################################
+# minify
+##########################################################################################
 @cli.command(name="minify")
-# todo: allow multiple source
 @click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
 @click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
 @click.option("--diff", "-d", help="show the functional changes made to the source script", default=False, is_flag=True)
