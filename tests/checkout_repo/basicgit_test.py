@@ -4,7 +4,9 @@ import pytest
 import subprocess
 from pathlib import Path
 from pytest_mock import MockerFixture
+from mock import MagicMock
 from typing import List
+from subprocess import CompletedProcess
 
 # make sure that the source can be found
 RootPath = Path(os.getcwd())
@@ -23,6 +25,35 @@ def common_tst(tag):
     if tag != "latest":
         assert tag.startswith("v"), "tags start with a v"
         assert len(tag) >= 2, "tags are longer than 2 chars"
+
+
+def test_git_clone_shallow(tmp_path):
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython")
+    assert result == True
+
+
+def test_git_clone(tmp_path):
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
+    assert result == True
+
+
+def test_git_clone_fast(mocker: MockerFixture, tmp_path):
+
+    result = CompletedProcess(
+        args=[
+            "git",
+            "clone",
+            "https://github.com/micropython/micropython.git",
+            "C:\\\\Users\\\\josverl\\\\AppData\\\\Local\\\\Temp\\\\pytest-of-josverl\\\\pytest-225\\\\test_git_clone0\\\\micropython",
+        ],
+        returncode=0,
+    )
+
+    mock: MagicMock = mocker.MagicMock(return_value=result)
+    mocker.patch("stubber.basicgit.subprocess.run", mock)
+
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
+    assert result == True
 
 
 @pytest.mark.basicgit
@@ -103,7 +134,7 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    def mock_run_git_1(cmd: List[str], repo: str = None, expect_stderr=False):
+    def mock_run_git_1(cmd: List[str], repo=None, expect_stderr=False):
         return None
 
     mocker.patch("stubber.basicgit._run_git", mock_run_git_1)
