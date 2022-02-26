@@ -34,7 +34,7 @@ get_frozen = "stubber.get_all_frozen:get_all"
 get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
 pyboard = "stubber.pyboard:main"
 update_pyi = "stubber.update_pyi:main"
-stubber = "stubber.process:cli"
+stubber = "stubber.stubber:cli"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
