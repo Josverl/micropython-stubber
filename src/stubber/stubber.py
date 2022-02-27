@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 @click.group()
 # @click.option("--debug", is_flag=True, default=False)
 @click.pass_context
-def cli(ctx, debug=False):
+def stubber_cli(ctx, debug=False):
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
     ctx.ensure_object(dict)
@@ -40,7 +40,7 @@ def cli(ctx, debug=False):
 ##########################################################################################
 # stub
 ##########################################################################################
-@cli.command(name="init")
+@stubber_cli.command(name="init")
 @click.option("--mpy/--no-mpy", "-m/-nm", help="clone micropython", default=True, is_flag=True)
 @click.option("--mpy-lib/--no-mpy-lib", "-l/-nl", help="clone micropython-lib", default=True, is_flag=True)
 @click.option("--path", "-p", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
@@ -56,7 +56,7 @@ def cli_init(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
 ##########################################################################################
 # stub
 ##########################################################################################
-@cli.command(name="stub")
+@stubber_cli.command(name="stub")
 @click.option("--source", "-s", type=click.Path(exists=True, file_okay=True, dir_okay=True))
 def cli_stub(source: Union[str, Path]):
     "Generate or update type hint files for all files in SOURCE"
@@ -68,7 +68,7 @@ def cli_stub(source: Union[str, Path]):
 ##########################################################################################
 # minify
 ##########################################################################################
-@cli.command(name="minify")
+@stubber_cli.command(name="minify")
 @click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
 @click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
 @click.option("--diff", "-d", help="show the functional changes made to the source script", default=False, is_flag=True)
@@ -104,4 +104,4 @@ def cli_minify(
 ##########################################################################################
 
 if __name__ == "__main__":
-    cli()
+    stubber_cli()
