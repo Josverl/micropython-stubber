@@ -33,7 +33,7 @@ exclude = [
 get_frozen = "stubber.get_all_frozen:get_all"
 get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
 pyboard = "stubber.pyboard:main"
-stubber = "stubber.stubber:cli"
+stubber = "stubber.stubber:stubber_cli"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
