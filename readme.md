@@ -1,14 +1,18 @@
 # Boost MicroPython productivity in VSCode
  
-  [![pytest tests/common](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml)
-  [![minify-RP](https://github.com/Josverl/micropython-stubber/actions/workflows/run%20minify-pr.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/run%20minify-pr.yml)
+  [![pypi version](https://badgen.net/pypi/v/micropython-stubber)](https://pypi.org/project/micropython-stubber/)
+  [![python versions](https://badgen.net/pypi/python/micropython-stubber)](https://badgen.net/pypi/python/micropython-stubber)
   [![Documentation Status](https://readthedocs.org/projects/micropython-stubber/badge/?version=latest)](https://micropython-stubber.readthedocs.io/en/latest/?badge=latest "Document build status badge")
-  [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
-  [![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#Contributions)
   [![Star on GitHub](https://img.shields.io/github/stars/josverl/micropython-stubber.svg?style=social)](https://github.com/josverl/micropython-stubber/stargazers)
+  [![All Contributors](https://img.shields.io/badge/all_contributors-19-green.svg?style=flat-square)](#Contributions)
+  <!-- break -->
   [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Josverl/micropython-stubber.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Josverl/micropython-stubber/context:python)
+  [![pytest tests/common](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml)
+  [![codecov](https://codecov.io/gh/Josverl/micropython-stubber/branch/main/graph/badge.svg?token=WJFGMKBHOV)](https://codecov.io/gh/Josverl/micropython-stubber)
+  [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
+  <!-- break -->
   [![Open in VSCode](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/josverl/micropython-stubber)
-
+  
 The intellisense and code linting that is so prevalent in modern editors, does not work out-of-the-gate for MicroPython projects.
 While the language is Python, the modules used are different from CPython , and also different ports have different modules and classes , or the same class with different parameters.
 
@@ -121,8 +125,8 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 [micropython-stubs]: https://github.com/Josverl/micropython-stubs#micropython-stubs
 [micropy-cli]: https://github.com/BradenM/micropy-cli
 [using-the-stubs]: https://github.com/Josverl/micropython-stubs#using-the-stubs
-[demo]:         docs/img/demo.gif	"demo of writing code using the stubs"
-[stub processing order]: docs/img/stuborder_pylance.png	"recommended stub processing order"
+[demo]:         https://github.com/Josverl/micropython-stubber/blob/main/docs/img/demo.gif?raw=true	"demo of writing code using the stubs"
+[stub processing order]: https://github.com/Josverl/micropython-stubber/blob/main/docs/img/stuborder_pylance.png?raw=true	"recommended stub processing order"
 [naming-convention]: #naming-convention-and-stub-folder-structure
 [all-stubs]: https://github.com/Josverl/micropython-stubs/blob/main/firmwares.md
 [micropython]: https://github.com/micropython/micropython
