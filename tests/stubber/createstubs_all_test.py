@@ -13,7 +13,6 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 
-
 pytestmark = pytest.mark.micropython
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
@@ -43,6 +42,7 @@ def test_firmwarestubber_all_versions_same(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
+@pytest.mark.skip(reason="not sure if this is needed")
 def test_firmwarestubber_base_version_match_package(
     location,
     variant,

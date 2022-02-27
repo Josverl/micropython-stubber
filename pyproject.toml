@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.5.5-alpha.5"
+version = "1.6.0"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
