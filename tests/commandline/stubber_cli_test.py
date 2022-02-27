@@ -65,7 +65,7 @@ def test_stubber_stub(mocker: MockerFixture):
 ##########################################################################################
 
 
-def test_stubber_get_frozen(mocker: MockerFixture):
+def test_stubber_get_frozen(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
     mock: MagicMock = mocker.MagicMock()
@@ -75,22 +75,19 @@ def test_stubber_get_frozen(mocker: MockerFixture):
     mocker.patch("stubber.stubber.git.get_tag", mock_version)
     mocker.patch("stubber.stubber.do_post_processing", mock_post)
 
-    # fake run
-    result = runner.invoke(stubber.stubber_cli, ["get-frozen"])
-    # FIXME : test failes in CI
-    # mock.assert_called_once_with(
-    #     "all-stubs/micropython-v1_42-frozen", version="v1.42", mpy_path="./micropython", lib_path="./micropython-lib"
-    # )
-
-    # mock_post.assert_called_once_with([Path("all-stubs/micropython-v1_42-frozen")], True, True)
-
+    # fake run - need to ensure that there is a destination folder
+    result = runner.invoke(stubber.stubber_cli, ["get-frozen", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
+    # FIXME : test failes in CI
+    mock.assert_called_once()
+
+    mock_post.assert_called_once_with([tmp_path / "micropython-v1_42-frozen"], True, True)
 
 
 ##########################################################################################
 # get-lobo
 ##########################################################################################
-def test_stubber_get_lobo(mocker: MockerFixture):
+def test_stubber_get_lobo(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
     mock: MagicMock = mocker.MagicMock()
@@ -99,10 +96,10 @@ def test_stubber_get_lobo(mocker: MockerFixture):
     mocker.patch("stubber.stubber.do_post_processing", mock_post)
 
     # fake run
-    result = runner.invoke(stubber.stubber_cli, ["get-lobo"])
+    result = runner.invoke(stubber.stubber_cli, ["get-lobo", "--stub-folder", tmp_path.as_posix()])
     mock.assert_called_once()
     mock_post.assert_called_once()
-    mock_post.assert_called_once_with([Path("all-stubs/loboris-v3_2_24-frozen")], True, True)
+    mock_post.assert_called_once_with([tmp_path / "loboris-v3_2_24-frozen"], True, True)
     assert result.exit_code == 0
 
 
@@ -111,7 +108,7 @@ def test_stubber_get_lobo(mocker: MockerFixture):
 ##########################################################################################
 
 
-def test_stubber_get_core(mocker: MockerFixture):
+def test_stubber_get_core(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
     mock: MagicMock = mocker.MagicMock()
@@ -120,17 +117,13 @@ def test_stubber_get_core(mocker: MockerFixture):
     mocker.patch("stubber.stubber.do_post_processing", mock_post)
 
     # fake run
-    result = runner.invoke(stubber.stubber_cli, ["get-core"])
+    result = runner.invoke(stubber.stubber_cli, ["get-core", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
     # process is called twice
     assert mock.call_count == 2
-    mock.assert_any_call(
-        stub_path="all-stubs/cpython_core-micropython", requirements="requirements-core-micropython.txt", family="micropython"
-    )
-    mock.assert_any_call(stub_path="all-stubs/cpython_core-pycopy", requirements="requirements-core-pycopy.txt", family="pycopy")
 
     # post is called one
-    mock_post.assert_called_with([Path("all-stubs/cpython_core-pycopy"), Path("all-stubs/cpython_core-micropython")], True, True)
+    mock_post.assert_called_with([tmp_path / "cpython_core-pycopy", tmp_path / "cpython_core-micropython"], True, True)
 
 
 ##########################################################################################
@@ -138,7 +131,7 @@ def test_stubber_get_core(mocker: MockerFixture):
 ##########################################################################################
 
 
-def test_stubber_get_docstubs(mocker: MockerFixture):
+def test_stubber_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
     mock_version: MagicMock = mocker.MagicMock(return_value="v1.42")
@@ -151,11 +144,11 @@ def test_stubber_get_docstubs(mocker: MockerFixture):
     mocker.patch("stubber.stubber.do_post_processing", mock_post)
 
     # fake run
-    result = runner.invoke(stubber.stubber_cli, ["get-docstubs"])
+    result = runner.invoke(stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
     # process is called twice
     assert mock.call_count == 1
     mock.assert_called_once()
 
     # post is called one
-    mock_post.assert_called_with([Path('all-stubs/micropython-v1_42-docstubs')], False, True)
+    mock_post.assert_called_with([tmp_path / "micropython-v1_42-docstubs"], False, True)
