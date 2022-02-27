@@ -29,17 +29,6 @@
             ]
         },
         {
-            "name": "Python: debug update pyi",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/update_pyi.py ",
-            "args": [
-                "./stubs/machine-stubs"
-            ],
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "Micro-CPython: Current File",
             "type": "python",
             "request": "launch",
