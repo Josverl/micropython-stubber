@@ -51,6 +51,7 @@ extensions = [
     # 'sphinx.ext.doctest', # use Test snippets in the documentation
     "sphinx.ext.intersphinx",  # Link to other projects’ documentation
     # 'sphinx.ext.todo', # Support for todo items
+    "sphinx_click", # Document stubber CLI 
 ]
 
 # Add any paths that contain templates here, relative to this directory.

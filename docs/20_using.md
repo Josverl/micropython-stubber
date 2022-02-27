@@ -3,6 +3,9 @@
 
 The manual configuration, including sample configuration files is described in detail in the sister-repo [micropython-stubs][] section [using-the-stubs][]
 
+## using micropython-stubber 
+
+You can install micropython stubber from PyPi using `pip install micropython-stubber`.
 
 ## Using micropy-cli
 
