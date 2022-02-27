@@ -65,7 +65,6 @@ Note: black on python 3.7 does not like some function defs
 
 import os
 from typing import List, Tuple, Optional
-import sys
 import re
 import logging
 import json
@@ -761,8 +760,7 @@ def generate_from_rst(
     # simplify debugging
     # files = [f for f in files if f.name == "collections.rst"]
 
-
-    # remove all files in desination folder to avoid left-behinds 
+    # remove all files in desination folder to avoid left-behinds
     for f in dst_path.rglob(pattern="*.*"):
         os.remove(f)
 

@@ -10,13 +10,9 @@ import click
 import logging
 
 from .minify import minify
-from .utils import generate_pyi_files
 
 from . import utils
 from . import basicgit as git
-
-from .basicgit import clone
-
 from . import get_cpython
 from . import get_mpy
 from . import get_lobo
@@ -83,9 +79,9 @@ def cli_init(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
     "Clone the micropython repos locally to be able to generate frozen-stubs and doc-stubs."
     dest_path = Path(path)
     if mpy:
-        clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / MPY_FOLDER)
+        git.clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / MPY_FOLDER)
     if mpy_lib:
-        clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=dest_path / MPY_LIB_FOLDER)
+        git.clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=dest_path / MPY_LIB_FOLDER)
 
 
 ##########################################################################################
@@ -96,7 +92,7 @@ def cli_init(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
 def cli_stub(source: Union[str, Path]):
     "Create or update .pyi type hint files for all .py files in SOURCE path."
     log.info("Generate type hint files (pyi) in folder: {}".format(source))
-    OK = generate_pyi_files(Path(source))
+    OK = utils.generate_pyi_files(Path(source))
     return 0 if OK else 1
 
 

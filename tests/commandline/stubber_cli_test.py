@@ -18,6 +18,21 @@ def test_stubber_help():
 
 
 ##########################################################################################
+# init
+##########################################################################################
+def test_stubber_init(mocker: MockerFixture, tmp_path: Path):
+    runner = CliRunner()
+    mock_clone: MagicMock = mocker.MagicMock(return_value=0)
+    mocker.patch("stubber.stubber.git.clone", mock_clone)
+    result = runner.invoke(stubber.stubber_cli, ["init"])
+    assert result.exit_code == 0
+
+    assert mock_clone.call_count == 2
+    # assert mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("micropython"))
+    # assert mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("micropython-lib"))
+
+
+##########################################################################################
 # minify
 ##########################################################################################
 def test_stubber_minify(mocker: MockerFixture):
@@ -52,7 +67,7 @@ def test_stubber_stub(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
     mock: MagicMock = mocker.MagicMock(return_value=True)
-    mocker.patch("stubber.stubber.generate_pyi_files", mock)
+    mocker.patch("stubber.stubber.utils.generate_pyi_files", mock)
     # fake run on current folder
     result = runner.invoke(stubber.stubber_cli, ["stub", "--source", "."])
 
