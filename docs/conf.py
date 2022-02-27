@@ -12,7 +12,11 @@
 #
 import sys
 from pathlib import Path
-import toml
+
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 src_path = str(Path("..") / "src" / "micropython-stubber")
 if not src_path in sys.path:
@@ -22,7 +26,7 @@ if not src_path in sys.path:
 
 # Q&D Location
 path = Path(__file__).resolve().parents[1] / "pyproject.toml"
-pyproject = toml.loads(open(str(path)).read())
+pyproject = tomllib.loads(open(str(path)).read())
 MODULE_VERSION = pyproject["tool"]["poetry"]["version"]
 
 # -- Project information -----------------------------------------------------
@@ -51,7 +55,7 @@ extensions = [
     # 'sphinx.ext.doctest', # use Test snippets in the documentation
     "sphinx.ext.intersphinx",  # Link to other projects’ documentation
     # 'sphinx.ext.todo', # Support for todo items
-    "sphinx_click", # Document stubber CLI 
+    "sphinx_click",  # Document stubber CLI
 ]
 
 # Add any paths that contain templates here, relative to this directory.
