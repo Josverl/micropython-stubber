@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.5.5-alpha.4"
+version = "1.5.5-alpha.5"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -30,10 +30,10 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
-get_frozen = "stubber.get_all_frozen:get_all"
+stubber = "stubber.stubber:stubber_cli"
+# get_frozen = "stubber.get_all_frozen:get_all"
 get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
 pyboard = "stubber.pyboard:main"
-stubber = "stubber.stubber:stubber_cli"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
