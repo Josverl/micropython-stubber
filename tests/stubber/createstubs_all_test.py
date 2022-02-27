@@ -6,7 +6,12 @@ from pytest_mock import MockerFixture
 from importlib import import_module
 from pathlib import Path
 from packaging.version import parse
-import toml
+
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib
+
 
 
 pytestmark = pytest.mark.micropython
@@ -45,7 +50,7 @@ def test_firmwarestubber_base_version_match_package(
 ):
     # Q&D Location
     path = Path(__file__).resolve().parents[2] / "pyproject.toml"
-    pyproject = toml.loads(open(str(path)).read())
+    pyproject = tomllib.loads(open(str(path)).read())
     pyproject_version = pyproject["tool"]["poetry"]["version"]
 
     createstubs = import_module(f"{location}.{variant}")  # type: ignore
