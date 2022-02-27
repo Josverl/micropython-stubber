@@ -7,6 +7,7 @@
 
 intro.md
 10_approach.md
+15_cli.rst
 20_using.md
 30_vscode.md
 40_firmware_stubs.md

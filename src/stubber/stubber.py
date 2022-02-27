@@ -45,7 +45,7 @@ def stubber_cli(ctx, debug=False):
 @click.option("--mpy-lib/--no-mpy-lib", "-l/-nl", help="clone micropython-lib", default=True, is_flag=True)
 @click.option("--path", "-p", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
 def cli_init(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
-    "clone the micropython repos locally to generate frozen- and doc-stubs"
+    "Clone the micropython repos locally to be able to generate frozen-stubs and doc-stubs."
     dest_path = Path(path)
     if mpy:
         clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / "micropython")
@@ -59,7 +59,7 @@ def cli_init(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
 @stubber_cli.command(name="stub")
 @click.option("--source", "-s", type=click.Path(exists=True, file_okay=True, dir_okay=True))
 def cli_stub(source: Union[str, Path]):
-    "Generate or update type hint files for all files in SOURCE"
+    "Create or update .pyi type hint files for all .py files in SOURCE path."
     log.info("Generate type hint files (pyi) in folder: {}".format(source))
     OK = generate_pyi_files(Path(source))
     return 0 if OK else 1
@@ -71,11 +71,11 @@ def cli_stub(source: Union[str, Path]):
 @stubber_cli.command(name="minify")
 @click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
 @click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
-@click.option("--diff", "-d", help="show the functional changes made to the source script", default=False, is_flag=True)
-@click.option("--compile", "-c", "-xc", "cross_compile", help="cross compile after minification", default=False, is_flag=True)
-@click.option("--all", "-a", help="minify all variants (normal, _mem and _db)", default=False, is_flag=True)
+@click.option("--diff", "-d", help="Show the functional changes made to the source script.", default=False, is_flag=True)
+@click.option("--compile", "-c", "-xc", "cross_compile", help="Cross compile after minification.", default=False, is_flag=True)
+@click.option("--all", "-a", help="Minify all variants (normal, _mem and _db).", default=False, is_flag=True)
 @click.option(
-    "--report/--no-report", "keep_report", help="keep or disable minimal progress reporting in the minified version.", default=True
+    "--report/--no-report", "keep_report", help="Keep or disable minimal progress reporting in the minified version.", default=True
 )
 @click.pass_context
 def cli_minify(
@@ -87,7 +87,7 @@ def cli_minify(
     cross_compile: bool,
     all: bool,
 ) -> int:
-    """minifies SOURCE micropython file to TARGET (file or folder)"""
+    """Creates a minified version of the SOURCE micropython file in TARGET (file or folder)."""
     if all:
         sources = ["board/createstubs.py", "board/createstubs_mem.py", "board/createstubs_db.py"]
     else:

@@ -15,7 +15,7 @@ pyflakes==2.4.0; python_version >= "2.7" and python_full_version < "3.0.0" or py
 python-minifier==2.5.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.3.0" and python_version < "3.11")
 pyyaml==6.0; python_version >= "3.6"
 requests==2.27.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.6.0")
-tomli==2.0.1; python_version >= "3.7" and python_full_version >= "3.6.2"
+tomli==2.0.1; python_version >= "3.7" and python_full_version >= "3.6.2" or python_version < "3.11"
 typing-extensions==4.1.1; python_version < "3.10" and python_full_version >= "3.6.2" and python_version >= "3.6"
 typing-inspect==0.7.1; python_version >= "3.6"
 urllib3==1.26.8; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version < "4"
