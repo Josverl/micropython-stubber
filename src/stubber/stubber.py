@@ -134,7 +134,7 @@ def cli_minify(
 
 
 ##########################################################################################
-# frozen
+# get-frozen
 ##########################################################################################
 @stubber_cli.command(name="get-frozen")
 @click.option("--stub-folder", "-stubs", default=STUB_FOLDER, type=click.Path(exists=True, file_okay=False, dir_okay=True))
@@ -163,7 +163,7 @@ def cli_get_frozen(
         family = "micropython"
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
-        get_mpy.get_frozen(str(stub_path), version=version, mpy_path=mpy_folder, lib_path=mpy_lib_folder)
+        get_mpy.get_frozen(stub_path.as_posix(), version=version, mpy_path=mpy_folder, lib_path=mpy_lib_folder)
 
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(mpy_folder))
@@ -172,7 +172,7 @@ def cli_get_frozen(
 
 
 ##########################################################################################
-# frozen lobo
+# get-lobo (frozen)
 ##########################################################################################
 @stubber_cli.command(name="get-lobo")
 @click.option("--stub-folder", "-stubs", default=STUB_FOLDER, type=click.Path(exists=True, file_okay=False, dir_okay=True))
@@ -220,7 +220,7 @@ def cli_get_core(
         req_filename = f"requirements-core-{core_type}.txt"
         stub_path = Path(stub_folder) / f"cpython_core-{core_type}"
 
-        get_cpython.get_core(stub_path=str(stub_path), requirements=req_filename, family=core_type)
+        get_cpython.get_core(stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type)
         stub_paths.append(stub_path)
 
     do_post_processing(stub_paths, pyi, black)
