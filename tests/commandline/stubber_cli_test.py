@@ -131,3 +131,31 @@ def test_stubber_get_core(mocker: MockerFixture):
 
     # post is called one
     mock_post.assert_called_with([Path("all-stubs/cpython_core-pycopy"), Path("all-stubs/cpython_core-micropython")], True, True)
+
+
+##########################################################################################
+# get-docstubs
+##########################################################################################
+
+
+def test_stubber_get_docstubs(mocker: MockerFixture):
+    # check basic commandline sanity check
+    runner = CliRunner()
+    mock_version: MagicMock = mocker.MagicMock(return_value="v1.42")
+    mocker.patch("stubber.stubber.git.get_tag", mock_version)
+
+    mock: MagicMock = mocker.MagicMock()
+    mocker.patch("stubber.stubber.generate_from_rst", mock)
+
+    mock_post: MagicMock = mocker.MagicMock()
+    mocker.patch("stubber.stubber.do_post_processing", mock_post)
+
+    # fake run
+    result = runner.invoke(stubber.stubber_cli, ["get-docstubs"])
+    assert result.exit_code == 0
+    # process is called twice
+    assert mock.call_count == 1
+    mock.assert_called_once()
+
+    # post is called one
+    mock_post.assert_called_with([Path('all-stubs/micropython-v1_42-docstubs')], False, True)

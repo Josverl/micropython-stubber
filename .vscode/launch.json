@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: stubber - Args",
+            "type": "python",
+            "request": "launch",
+            "module": "stubber.stubber",
+            "args": [
+                "${input:cmdlineParams}"
+            ]
+        },
+        {
             "name": "PS1: Current File",
             "type": "PowerShell",
             "request": "launch",
