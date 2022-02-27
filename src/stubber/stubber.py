@@ -20,6 +20,9 @@ from .basicgit import clone
 from . import get_cpython
 from . import get_mpy
 from . import get_lobo
+from .stubs_from_docs import generate_from_rst
+from .version import __version__
+
 
 ##########################################################################################
 
@@ -224,6 +227,61 @@ def cli_get_core(
         stub_paths.append(stub_path)
 
     do_post_processing(stub_paths, pyi, black)
+
+
+##########################################################################################
+# get-docstubs
+##########################################################################################
+
+
+@stubber_cli.command(name="get-docstubs")
+# todo: allow multiple source
+@click.option(
+    "--source",
+    "-s",
+    default=MPY_FOLDER,
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="Location of the MicroPython repo of folder or  folder or .rst files to proecess. Default './micropython'",
+)
+@click.option(
+    "--stub-path",
+    "--stub-folder",
+    "target",
+    default="./all-stubs",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="Destination of the files to be generated. default : `./all-stubs/{micropython}-{version}-docstubs`.",
+)
+@click.option("--family", "-f", "basename", default="micropython", help="Micropython family. default:'micropython'")
+@click.option("--black/--no-black", "-b/-nb", default=True, help="Run black, default :yes")
+@click.option("--verbose", "-v", is_flag=True, default=False)
+def cli_docstubs(
+    source: str = "",
+    target: str = "./all-stubs",
+    verbose: bool = False,
+    black: bool = True,
+    basename="micropython",
+):
+    """Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking."""
+    if verbose:
+        log.setLevel(logging.DEBUG)
+    log.info(f"stubs_from_docs version {__version__}\n")
+    if source == MPY_FOLDER:
+        rst_path = Path(MPY_FOLDER) / "docs" / "library"
+    else:
+        rst_path = Path(source)  # or specify full path
+    v_tag = git.get_tag(rst_path.as_posix())
+    if not v_tag:
+        # if we can't find a tag , bail
+        raise ValueError
+    v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
+    release = git.get_tag(rst_path.as_posix(), abbreviate=False) or ""
+
+    dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
+
+    generate_from_rst(rst_path, dst_path, v_tag, release=release, verbose=verbose, suffix=".pyi")
+
+    # no need to generate .pyi in post processing
+    do_post_processing([dst_path], False, black)
 
 
 ##########################################################################################
