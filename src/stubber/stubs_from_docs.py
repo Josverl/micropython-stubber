@@ -63,16 +63,14 @@ Note: black on python 3.7 does not like some function defs
 
 """
 
-from typing import List, Tuple
-import sys
+import os
+from typing import List, Tuple, Optional
 import re
 import logging
 import json
 import subprocess
 from pathlib import Path
-import click
 from .version import __version__
-from . import basicgit as git
 from . import utils
 
 from .rst import (
@@ -83,7 +81,7 @@ from .rst import (
     FunctionSourceDict,
 )
 
-from .rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP
+from .rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP, U_MODULES
 
 # logging
 log = logging.getLogger(__name__)
@@ -628,7 +626,7 @@ class RSTReader:
         # no docstream read (yet) , so need to advance to next line
         self.line_no += 1
 
-    def parse_name(self, line: str = None):
+    def parse_name(self, line: Optional[str] = None):
         "get the constant/function/class name from a line with an identifier"
         # this_const = self.line.split(SEPERATOR)[-1].strip()
         # name = this_const
@@ -741,9 +739,7 @@ def generate_from_rst(
     rst_path: Path,
     dst_path: Path,
     v_tag: str,
-    release: str = None,
-    black=True,
-    stubgen=True,
+    release: Optional[str] = None,
     pattern: str = "*.rst",
     verbose: bool = False,
     suffix=".py",
@@ -761,11 +757,12 @@ def generate_from_rst(
     # - excluded modules, ones that offer little advantage  or cause much problems
     files = [f for f in files if f.name not in DOCSTUB_SKIP]
 
-    # modules documented with base name only
-    U_MODULES = ["os", "time", "array", "binascii", "io", "json", "select", "socket", "ssl", "struct", "zlib"]
-
     # simplify debugging
     # files = [f for f in files if f.name == "collections.rst"]
+
+    # remove all files in desination folder to avoid left-behinds
+    for f in dst_path.rglob(pattern="*.*"):
+        os.remove(f)
 
     for file in files:
         reader = RSTReader(v_tag)
@@ -785,7 +782,7 @@ def generate_from_rst(
         del reader
 
     # run autoflake to remove unused imports
-    # needs to be run BEFORE black otherwise it does not recognize long import froms.
+    # needs to be run BEFORE black otherwise it does not recognize long import from`s.
     cmd = [
         "autoflake",
         "-r",
@@ -796,102 +793,6 @@ def generate_from_rst(
     ]
     subprocess.run(cmd)
 
-    if black:
-        try:
-            cmd = ["black", "."]
-
-            if sys.version_info.major == 3 and sys.version_info.minor <= 7:
-                # black on python 3.7 does not like some function defs
-                # def sizeof(struct, layout_type=NATIVE, /) -> int:
-                cmd += ["--fast"]
-            # shell=false on ubuntu
-            result = subprocess.run(cmd, capture_output=False, check=True, shell=False, cwd=dst_path)
-            if result.returncode != 0:
-                raise Exception(result.stderr.decode("utf-8"))
-        except subprocess.SubprocessError:
-            log.error("some of the files are not in a proper format")
-    if stubgen and suffix == ".py":
-        utils.generate_pyi_files(dst_path)
-
-    return len(files)
-
-
-##########################################################################################
-# command line interface
-##########################################################################################
-# @click.group()
-# # @click.option("--debug", is_flag=True, default=False)
-# @click.pass_context
-# def cli(ctx, debug=False):
-#     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
-#     # by means other than the `if` block below)
-#     ctx.ensure_object(dict)
-#     ctx.obj["DEBUG"] = debug
-##########################################################################################
-
-
-@click.command(name="docstubs")
-# todo: allow multiple source
-@click.option(
-    "--source",
-    "-s",
-    default="./micropython/docs/library",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="The location of the RST file to read. Default './micropython/docs/library'",
-)
-@click.option(
-    "--stub-path",
-    "--stub-folder",
-    "target",
-    default="./all-stubs",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="Destination of the files to be generated. default : ./all-stubs/{micropython}-{version}-docstubs",
-)
-@click.option("--family", "-f", "basename", default="micropython", help="Micropython family. default:'micropython'")
-@click.option("--black/--no-black", "-b/-nb", default=True, help="Run black, default :yes")
-@click.option("--stubgen/--no-stubgen", default=True, help="Run stubgen, default: yes")
-@click.option("--verbose", "-v", is_flag=True, default=False)
-def cli_docstubs(
-    source: str = "./micropython",
-    target: str = "./all-stubs",
-    verbose: bool = False,
-    black: bool = True,
-    stubgen: bool = True,
-    basename="micropython",
-):
-    """\b
-    Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
-    Generates:
-    - modules
-        - docstrings
-        - module constants
-        - function definitions
-            - docstrings
-            - function parameters based on documentation
-        classes
-            - docstrings
-            - __init__ method
-            - class constants
-            - parameters based on documentation for class
-            - methods
-                - parameters based on documentation for the method
-                - docstrings
-        - exceptions
-    """
-    if verbose:
-        log.setLevel(logging.DEBUG)
-    log.info(f"stubs_from_docs version {__version__}\n")
-    rst_path = Path(source)  #  / "docs"/"library"
-    v_tag = git.get_tag(rst_path.as_posix())
-    if not v_tag:
-        # if we can't find a tag , bail
-        raise ValueError
-    v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
-    release = git.get_tag(rst_path.as_posix(), abbreviate=False) or ""
-
-    dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
-
-    generate_from_rst(rst_path, dst_path, v_tag, release=release, black=black, stubgen=stubgen, verbose=verbose, suffix=".pyi")
     # Also generate a module manifest
     utils.make_manifest(
         folder=dst_path,
@@ -902,8 +803,4 @@ def cli_docstubs(
         stubtype="documentation",
     )
 
-
-##########################################################################################
-
-if __name__ == "__main__":
-    cli_docstubs()
+    return len(files)

@@ -8,4 +8,4 @@ myst-parser                 == 0.17.0
 sphinxcontrib-mermaid       == 0.7.1
 sphinx_rtd_theme            == 1.0.0
 sphinx-autoapi              == 1.8.4
-toml                        == 0.10.2
+sphinx-click

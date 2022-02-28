@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: stubber - Args",
+            "type": "python",
+            "request": "launch",
+            "module": "stubber.stubber",
+            "args": [
+                "${input:cmdlineParams}"
+            ]
+        },
+        {
             "name": "PS1: Current File",
             "type": "PowerShell",
             "request": "launch",
@@ -27,17 +36,6 @@
             "args": [
                 "${input:cmdlineParams}"
             ]
-        },
-        {
-            "name": "Python: debug update pyi",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/update_pyi.py ",
-            "args": [
-                "./stubs/machine-stubs"
-            ],
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
         },
         {
             "name": "Micro-CPython: Current File",
