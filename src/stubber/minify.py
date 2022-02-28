@@ -1,12 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""Pre/Post Processing for createstubs.py"""
+"""
+ Processing for createstubs.py
+ minimizes and cross-compiles a micropyton file.
+"""
 from typing import Union
 import itertools
-from pathlib import Path
 import subprocess
-import click
+from pathlib import Path
 
 try:
     import python_minifier
@@ -14,7 +13,7 @@ except ImportError:
     python_minifier = None
 
 
-def edit_lines(content, edits, show_diff=False):
+def edit_lines(content, edits, diff=False):
     """Edit string by list of edits
 
     Args:
@@ -25,7 +24,7 @@ def edit_lines(content, edits, show_diff=False):
             - rprint - replace text with print
             - rpass - replace text with pass
             The second string is the matching text to replace
-        show_diff (bool, optional): Prints diff of each edit.
+        diff (bool, optional): Prints diff of each edit.
             Defaults to False.
 
     Returns:
@@ -140,7 +139,7 @@ def edit_lines(content, edits, show_diff=False):
                 func = eval(edit)  # pylint: disable= eval-used
                 line = func(line, text)
                 if line != _line:
-                    if show_diff:
+                    if diff:
                         print(f"\n- {_line.strip()}")
                         print(f"+ {line.strip()}")
                     break
@@ -153,13 +152,13 @@ def edit_lines(content, edits, show_diff=False):
     return stripped
 
 
-def minify_script(source_script: Path, keep_report=True, show_diff=False):
+def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
     """minifies createstubs.py
 
     Args:
         keep_report (bool, optional): Keeps single report line in createstubs
             Defaults to True.
-        show_diff (bool, optional): Print diff from edits. Defaults to False.
+        diff (bool, optional): Print diff from edits. Defaults to False.
 
     Returns:
         str: minified source text
@@ -200,7 +199,7 @@ def minify_script(source_script: Path, keep_report=True, show_diff=False):
 
         content = f.read()
 
-        content = edit_lines(content, edits, show_diff=show_diff)
+        content = edit_lines(content, edits, diff=diff)
 
         source = python_minifier.minify(
             content,
@@ -232,62 +231,22 @@ def minify_script(source_script: Path, keep_report=True, show_diff=False):
     return source
 
 
-##########################################################################################
-# command line interface
-##########################################################################################
-
-
-@click.group()
-# @click.option("--debug", is_flag=True, default=False)
-@click.pass_context
-def cli(ctx, debug=False):
-    # ensure that ctx.obj exists and is a dict (in case `cli()` is called
-    # by means other than the `if` block below)
-    ctx.ensure_object(dict)
-    ctx.obj["DEBUG"] = debug
-
-
-##########################################################################################
-
-
-# @cli.command()  # @cli, not @click!
-# @click.pass_context
-# def sync(ctx):
-#     click.echo(f"Debug is {'on' if ctx.obj['DEBUG'] else 'off'}")
-#     click.echo("Syncing")
-
-
-##########################################################################################
-@cli.command(name="minify")
-# todo: allow multiple source
-@click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
-@click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
-@click.option("--show-diff", "-d", help="show the functional changes made to the source script", default=False, is_flag=True)
-@click.option("--cross-compile", "-xc", help="cross compile after minification", default=False, is_flag=True)
-@click.option(
-    "--report/--no-report", "keep_report", help="keep or disable minimal progress reporting in the minified version.", default=True
-)
-@click.pass_context
-def cli_minify(
-    ctx,
+def minify(
     source: Union[str, Path],
     target: Union[str, Path],
-    keep_report: bool,
-    show_diff: bool,
-    cross_compile: bool,
-) -> int:
-    """minifies SOURCE micropython file to TARGET (file or folder)"""
+    keep_report: bool = True,
+    diff: bool = False,
+    cross_compile: bool = False,
+):
 
     source = Path(source)
     target = Path(target)
-    assert python_minifier
-    print(f"\nMinifying {source}...")
     # if target is a folder , then append the filename
     if target.exists() and target.is_dir():
         target = target / source.name
     try:
         with target.open("w+") as f:
-            minified = minify_script(source_script=source, keep_report=keep_report, show_diff=show_diff)
+            minified = minify_script(source_script=source, keep_report=keep_report, diff=diff)
             f.write(minified)
     except Exception as e:
         print(e)
@@ -297,12 +256,6 @@ def cli_minify(
         result = subprocess.run(["mpy-cross", "-O2", str(target)])
         if result.returncode == 0:
             print("mpy-cross compiled to    :", target.with_suffix(".mpy"))
-
-    print("\nDone!")
-    return 0
-
-
-##########################################################################################
-
-if __name__ == "__main__":
-    cli()
+        return result.returncode
+    else:
+        return 0

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.5.5-alpha.4"
+version = "1.6.0"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -30,11 +30,10 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
-get_frozen = "stubber.get_all_frozen:get_all"
-get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
+stubber = "stubber.stubber:stubber_cli"
+# get_frozen = "stubber.get_all_frozen:get_all"
+# get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
 pyboard = "stubber.pyboard:main"
-update_pyi = "stubber.update_pyi:main"
-stubber = "stubber.process:cli"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
@@ -50,6 +49,7 @@ click = "8.0.3"
 rshell = {version = "0.0.31", optional = true}
 esptool = {version = "3.2", optional = true}
 importlib-metadata = {version = "^1.0", python = "<3.8"}
+tomli = { version ="^2.0.1", python = "<3.11"}
 
 
 [tool.poetry.dev-dependencies]
@@ -62,7 +62,6 @@ coverage = "6.3.1"
 pyright = "0.0.13"
 packaging = "21.3"
 distro = "1.7.0"
-toml = "^0.10.2"
 
 [tool.poetry.extras]
 tools = ["rshell","esptool"]
@@ -142,6 +141,8 @@ omit = [
         # codemods
         "*/_apply_stubber_annotations.py",
         "*/commands/__init__.py",
+
+        "*/rst/report_return.py",
 
         ]
 

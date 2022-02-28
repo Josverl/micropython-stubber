@@ -303,12 +303,6 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
         return False
 
 
-def generate_all_stubs():
-    "just create typeshed stubs"
-    # now generate typeshed files for all scripts
-    print("Generate type hint files (pyi) in folder: {}".format(STUB_FOLDER))
-    generate_pyi_files(Path(STUB_FOLDER))
-
 
 def read_exclusion_file(path: Path = None) -> List[str]:
     """Read a .exclusion file to determine which files should not be automatically re-generated
