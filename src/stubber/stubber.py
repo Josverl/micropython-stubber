@@ -69,13 +69,13 @@ def stubber_cli(ctx, debug=False):
 
 
 ##########################################################################################
-# stub
+# clone
 ##########################################################################################
-@stubber_cli.command(name="init")
+@stubber_cli.command(name="clone")
 @click.option("--mpy/--no-mpy", "-m/-nm", help="clone micropython", default=True, is_flag=True)
 @click.option("--mpy-lib/--no-mpy-lib", "-l/-nl", help="clone micropython-lib", default=True, is_flag=True)
 @click.option("--path", "-p", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
-def cli_init(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
+def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
     "Clone the micropython repos locally to be able to generate frozen-stubs and doc-stubs."
     dest_path = Path(path)
     if mpy:
