@@ -85,24 +85,10 @@ from .rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FI
 
 # logging
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
 
 NEW_OUTPUT = True
 #: self.gather_docs = True
 SEPERATOR = "::"
-
-
-def _color(c, *args) -> str:
-    s = str(*args)
-    return f"\033[{c}m {s}\033[00m"
-
-
-def _green(*args) -> str:
-    return _color(92, *args)
-
-
-def _red(*args) -> str:
-    return _color(91, *args)
 
 
 class RSTReader:
@@ -762,7 +748,10 @@ def generate_from_rst(
 
     # remove all files in desination folder to avoid left-behinds
     for f in dst_path.rglob(pattern="*.*"):
-        os.remove(f)
+        try:
+            os.remove(f)
+        except (OSError, PermissionError):
+            pass
 
     for file in files:
         reader = RSTReader(v_tag)
@@ -791,7 +780,7 @@ def generate_from_rst(
         "-v",
         "-v",  # show some feedback
     ]
-    subprocess.run(cmd)
+    subprocess.run(cmd, capture_output=log.level >= logging.INFO)
 
     # Also generate a module manifest
     utils.make_manifest(

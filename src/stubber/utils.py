@@ -13,7 +13,7 @@ import sys
 
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 STUB_FOLDER = "./all-stubs"
 
@@ -301,7 +301,6 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
         return True
     except OSError:
         return False
-
 
 
 def read_exclusion_file(path: Path = None) -> List[str]:
