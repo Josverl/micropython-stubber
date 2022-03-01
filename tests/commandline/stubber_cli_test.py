@@ -18,18 +18,18 @@ def test_stubber_help():
 
 
 ##########################################################################################
-# init
+# clone
 ##########################################################################################
-def test_stubber_init(mocker: MockerFixture, tmp_path: Path):
+def test_stubber_clone(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
     mock_clone: MagicMock = mocker.MagicMock(return_value=0)
     mocker.patch("stubber.stubber.git.clone", mock_clone)
-    result = runner.invoke(stubber.stubber_cli, ["init"])
+    result = runner.invoke(stubber.stubber_cli, ["clone"])
     assert result.exit_code == 0
 
-    assert mock_clone.call_count == 2
-    # assert mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("micropython"))
-    # assert mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("micropython-lib"))
+    assert mock_clone.call_count >= 2
+    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("micropython"))
+    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("micropython-lib"))
 
 
 ##########################################################################################
