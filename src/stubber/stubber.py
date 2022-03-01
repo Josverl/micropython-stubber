@@ -43,8 +43,8 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
                     # black on python 3.7 does not like some function defs
                     # def sizeof(struct, layout_type=NATIVE, /) -> int:
                     cmd += ["--fast"]
-                # shell=false on ubuntu
-                result = subprocess.run(cmd, capture_output=False, check=True, shell=False, cwd=pth)
+                # capture to suppress based on log level
+                result = subprocess.run(cmd, capture_output=log.level >= logging.INFO, check=True, shell=False, cwd=pth)
                 if result.returncode != 0:
                     raise Exception(result.stderr.decode("utf-8"))
             except subprocess.SubprocessError:
@@ -57,15 +57,29 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
 
 
 @click.group(chain=True)
-# @click.option("--debug", is_flag=True, default=False)
+@click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber")
+@click.option("--verbose", "-vv", is_flag=True, default=False)
+@click.option("--debug", "-vvv", is_flag=True, default=False)
+
 # TODO: add stubfolder to top level and pass using context
 # @click.option("--stub-folder", "-stubs", default=STUB_FOLDER, type=click.Path(exists=True, file_okay=False, dir_okay=True))
 @click.pass_context
-def stubber_cli(ctx, debug=False):
+def stubber_cli(ctx, verbose=False, debug=False):
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
-    # by means other than the `if` block below)
     ctx.ensure_object(dict)
-    ctx.obj["DEBUG"] = debug
+
+    # Set log level
+    lvl = logging.WARNING
+    if verbose:
+        lvl = logging.INFO
+    if debug:
+        lvl = logging.DEBUG
+    ctx.obj["loglevel"] = lvl
+
+    logging.basicConfig(level=lvl)
+    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+    for logger in loggers:
+        logger.setLevel(lvl)
 
 
 ##########################################################################################
