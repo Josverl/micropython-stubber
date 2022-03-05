@@ -1,11 +1,8 @@
-import json
 import logging
 import shutil
 
-from fnmatch import fnmatch
 from pathlib import Path
-from .version import __version__
-from typing import List, Optional
+from ..version import __version__
 
 import mypy.stubgen as stubgen
 from mypy.errors import CompileError
@@ -15,7 +12,11 @@ import sys
 log = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.INFO)
 
+# FIXME use config
 STUB_FOLDER = "./all-stubs"
+def stubfolder(path: str) -> str:
+    "return path in the stub folder"
+    return "{}/{}".format(STUB_FOLDER, path)
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(
@@ -35,52 +36,6 @@ STUBGEN_OPT = stubgen.Options(
     quiet=False,
     export_less=False,
 )
-
-
-def clean_version(
-    version: str,
-    *,
-    build: bool = False,
-    patch: bool = False,
-    commit: bool = False,
-    drop_v: bool = False,
-    flat: bool = False,
-):
-    "Clean up and transform the many flavours of versions"
-    # 'v1.13.0-103-gb137d064e' --> 'v1.13-103'
-
-    if version in ["", "-"]:
-        return version
-    nibbles = version.split("-")
-    if not patch:
-        if nibbles[0] >= "1.10.0" and nibbles[0].endswith(".0"):
-            # remove the last ".0"
-            nibbles[0] = nibbles[0][0:-2]
-    if len(nibbles) == 1:
-        version = nibbles[0]
-    elif build and build != "dirty":
-        if not commit:
-            version = "-".join(nibbles[0:-1])
-        else:
-            version = "-".join(nibbles)
-    else:
-        # version = "-".join((nibbles[0], LATEST))
-        # HACK: this is not always right, but good enough most of the time
-        version = "latest"
-    if flat:
-        version = version.strip().replace(".", "_")
-    if drop_v:
-        version = version.lstrip("v")
-    else:
-        # prefix with `v` but not before latest
-        if not version.startswith("v") and version.lower() != "latest":
-            version = "v" + version
-    return version
-
-
-def stubfolder(path: str) -> str:
-    "return path in the stub folder"
-    return "{}/{}".format(STUB_FOLDER, path)
 
 
 def cleanup(modules_folder: Path, all_pyi: bool = False):
@@ -231,100 +186,3 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             # todo: report failures by adding to module manifest
 
         return True
-
-
-def manifest(
-    family: str = "micropython",
-    stubtype: str = "frozen",
-    machine: Optional[str] = None,  # also frozen.variant
-    port: Optional[str] = None,
-    platform: Optional[str] = None,
-    sysname: Optional[str] = None,
-    nodename: Optional[str] = None,
-    version: Optional[str] = None,
-    release: Optional[str] = None,
-    firmware: Optional[str] = None,
-) -> dict:
-    "create a new empty manifest dict"
-
-    machine = machine or family  # family
-    port = port or "common"  # family
-    platform = platform or port  # family
-    version = version or "0.0.0"
-    sysname = sysname or ""
-    nodename = nodename or sysname or ""
-    release = release or version or ""
-    if firmware is None:
-        firmware = "{}-{}-{}".format(family, port, clean_version(version, flat=True))
-        # remove double dashes x2
-        firmware = firmware.replace("--", "-")
-        firmware = firmware.replace("--", "-")
-
-    mod_manifest = {
-        "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json",
-        "firmware": {
-            "family": family,
-            "port": port,
-            "platform": platform,
-            "machine": machine,
-            "firmware": firmware,
-            "nodename": nodename,
-            "version": version,
-            "release": release,
-            "sysname": sysname,
-        },
-        "stubber": {
-            "version": __version__,
-            "stubtype": stubtype,
-        },
-        "modules": [],
-    }
-    return mod_manifest
-
-
-def make_manifest(folder: Path, family: str, port: str, version: str, release: str = "", stubtype: str = "", board: str = "") -> bool:
-    """Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""
-    mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, release=release, stubtype=stubtype)
-    try:
-        # list all *.py files, not strictly modules but decent enough for documentation
-        files = list(folder.glob("**/*.py"))
-        if len(files) == 0:
-            files = list(folder.glob("**/*.pyi"))
-
-        # sort the list
-        for file in sorted(files):
-            mod_manifest["modules"].append({"file": str(file.relative_to(folder).as_posix()), "module": file.stem})
-
-        # write the the module manifest
-        with open(folder / "modules.json", "w") as outfile:
-            json.dump(mod_manifest, outfile, indent=4)
-        return True
-    except OSError:
-        return False
-
-
-def read_exclusion_file(path: Path = None) -> List[str]:
-    """Read a .exclusion file to determine which files should not be automatically re-generated
-    in .GitIgnore format
-
-    """
-    if path is None:
-        path = Path(".")
-    try:
-        with open(path.joinpath(".exclusions")) as f:
-            content = f.readlines()
-            return [line.rstrip() for line in content if line[0] != "#" and len(line.strip()) != 0]
-    except OSError:
-        return []
-    # exclusions = read_exclusion_file()
-
-
-def should_ignore(file: str, exclusions: List[str]) -> bool:
-    """Check if  a file matches a line in the exclusion list."""
-    for excl in exclusions:
-        if fnmatch(file, excl):
-            return True
-    return False
-    # for file in Path(".").glob("**/*.py*"):
-    #     if should_ignore(str(file), exclusions):
-    #         print(file)
