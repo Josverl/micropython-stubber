@@ -28,8 +28,17 @@ def test_stubber_clone(mocker: MockerFixture, tmp_path: Path):
     assert result.exit_code == 0
 
     assert mock_clone.call_count >= 2
-    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("micropython"))
-    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("micropython-lib"))
+    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("repos/micropython"))
+    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("repos/micropython-lib"))
+
+    mock_clone.reset_mock()
+    # now test with path specified
+    result = runner.invoke(stubber.stubber_cli, ["clone", "--path", "foobar"])
+    assert result.exit_code == 0
+
+    assert mock_clone.call_count >= 2
+    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("foobar/micropython"))
+    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("foobar/micropython-lib"))
 
 
 ##########################################################################################
