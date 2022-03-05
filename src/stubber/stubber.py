@@ -5,6 +5,7 @@
 from typing import Union, List
 from pathlib import Path
 import sys
+import os
 import subprocess
 import click
 import logging
@@ -23,8 +24,8 @@ from .version import __version__
 ##########################################################################################
 
 STUB_FOLDER = "./all-stubs"
-MPY_FOLDER = "./micropython"
-MPY_LIB_FOLDER = "./micropython-lib"
+MPY_FOLDER = "repos/micropython"
+MPY_LIB_FOLDER = "repos/micropython-lib"
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
 
 
 @click.group(chain=True)
-@click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber")
+@click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber✏️ ")
 @click.option("--verbose", "-vv", is_flag=True, default=False)
 @click.option("--debug", "-vvv", is_flag=True, default=False)
 
@@ -88,10 +89,12 @@ def stubber_cli(ctx, verbose=False, debug=False):
 @stubber_cli.command(name="clone")
 @click.option("--mpy/--no-mpy", "-m/-nm", help="clone micropython", default=True, is_flag=True)
 @click.option("--mpy-lib/--no-mpy-lib", "-l/-nl", help="clone micropython-lib", default=True, is_flag=True)
-@click.option("--path", "-p", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option("--path", "-p", default="repos", type=click.Path(file_okay=False, dir_okay=True))
 def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
     "Clone the micropython repos locally to be able to generate frozen-stubs and doc-stubs."
     dest_path = Path(path)
+    if not dest_path.exists():
+        os.mkdir(dest_path)
     if mpy:
         git.clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / MPY_FOLDER)
     if mpy_lib:
@@ -153,7 +156,7 @@ def cli_minify(
 @click.option("--stub-folder", "-stubs", default=STUB_FOLDER, type=click.Path(exists=True, file_okay=False, dir_okay=True))
 @click.option("--micropython", "mpy_folder", default=MPY_FOLDER, type=click.Path(exists=True, file_okay=False, dir_okay=True))
 @click.option("--micropython-lib", "mpy_lib_folder", default=MPY_LIB_FOLDER, type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--version", default="", type=str, help="Version number to use. Default: Current Git tag")
+@click.option("--version" "--tag", default="", type=str, help="Version number to use. Default: Current Git tag")
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules")
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules")
 def cli_get_frozen(
@@ -248,6 +251,7 @@ def cli_get_core(
 # todo: allow multiple source
 @click.option(
     "--source",
+    "--micropython",
     "-s",
     default=MPY_FOLDER,
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
