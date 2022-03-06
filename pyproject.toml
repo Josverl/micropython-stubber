@@ -4,7 +4,7 @@ repo-folder = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.6.3-alpha.3"
+version = "1.6.3"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"

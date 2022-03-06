@@ -8,7 +8,6 @@ try:
     esp.osdebug(None)
 except ImportError:
     esp = None
-    pass
 
 try:
     import pyb

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""create porcess and maintain stubs for micropython"""
-from typing import Dict, Union, List
+"""Create, Process, and Maintain stubs ✏️  for MicroPython"""
+from typing import Union, List
 from pathlib import Path
 import os
 import click
