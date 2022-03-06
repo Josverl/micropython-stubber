@@ -99,8 +99,10 @@ jobs:
           file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
           fail_ci_if_error: false
 
+      # lcov coverage to codecov
+      # XML  coverage to testspace
       - name: Push result to Testspace server
         if: always()
         run: |
           testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml
-          testspace --link codecov results/coverage-*.lcov
+          testspace --link codecov results/coverage-*.xml
