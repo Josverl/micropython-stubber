@@ -13,7 +13,11 @@ log = logging.getLogger(__name__)
 def readconfig() -> Dict[str, str]:
     config = {
         "stub-folder": "./stubs",
-        "repo-folder": "repos",
+        # relative to stubs
+        "fallback-folder": "typings/fallback",
+        # ------------------------------
+        "repo-folder": "./repos",
+        # relative to repos
         "mpy-folder": "micropython",
         "mpy-lib-folder": "micropython-lib",
     }

@@ -17,6 +17,7 @@ from . import get_cpython
 from . import get_mpy
 from . import get_lobo
 from .stubs_from_docs import generate_from_rst
+from .update_fallback import update_fallback, RELEASED
 from .version import __version__
 
 
@@ -93,13 +94,19 @@ def cli_stub(source: Union[str, Path]):
 # minify
 ##########################################################################################
 @stubber_cli.command(name="minify")
-@click.option("--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False))
-@click.option("--target", "-t", "-o", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True))
+@click.option(
+    "--source", "-s", default="board/createstubs.py", type=click.Path(exists=True, file_okay=True, dir_okay=False), show_default=True
+)
+@click.option("--target", "-t", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True), show_default=True)
 @click.option("--diff", "-d", help="Show the functional changes made to the source script.", default=False, is_flag=True)
 @click.option("--compile", "-c", "-xc", "cross_compile", help="Cross compile after minification.", default=False, is_flag=True)
 @click.option("--all", "-a", help="Minify all variants (normal, _mem and _db).", default=False, is_flag=True)
 @click.option(
-    "--report/--no-report", "keep_report", help="Keep or disable minimal progress reporting in the minified version.", default=True
+    "--report/--no-report",
+    "keep_report",
+    help="Keep or disable minimal progress reporting in the minified version.",
+    default=True,
+    show_default=True,
 )
 @click.pass_context
 def cli_minify(
@@ -129,13 +136,19 @@ def cli_minify(
 # get-frozen
 ##########################################################################################
 @stubber_cli.command(name="get-frozen")
-@click.option("--stub-folder", "-stubs", default=config["stub-folder"], type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--path", "-p", default=config["repo-folder"], type=click.Path(file_okay=False, dir_okay=True))
+@click.option(
+    "--stub-folder",
+    "-stubs",
+    default=config["stub-folder"],
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    show_default=True,
+)
+@click.option("--path", "-p", default=config["repo-folder"], type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 # @click.option("--micropython", "mpy_folder", default=config["mpy-folder"], type=click.Path(exists=True, file_okay=False, dir_okay=True))
 # @click.option("--micropython-lib", "mpy_lib_folder", default=config["mpy-lib-folder"], type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--version", "--tag", default="", type=str, help="Version number to use. Default: Current Git tag")
-@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules")
-@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules")
+@click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
+@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
+@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_frozen(
     stub_folder: str = config["stub-folder"],
     path: str = config["repo-folder"],
@@ -169,9 +182,15 @@ def cli_get_frozen(
 # get-lobo (frozen)
 ##########################################################################################
 @stubber_cli.command(name="get-lobo")
-@click.option("--stub-folder", "-stubs", default=config["stub-folder"], type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules")
-@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules")
+@click.option(
+    "--stub-folder",
+    "-stubs",
+    default=config["stub-folder"],
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    show_default=True,
+)
+@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
+@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_lobo(
     stub_folder: str = config["stub-folder"],
     pyi: bool = True,
@@ -197,9 +216,15 @@ def cli_get_lobo(
 
 
 @stubber_cli.command(name="get-core")
-@click.option("--stub-folder", "-stubs", default=config["stub-folder"], type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules")
-@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules")
+@click.option(
+    "--stub-folder",
+    "-stubs",
+    default=config["stub-folder"],
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    show_default=True,
+)
+@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
+@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_core(
     stub_folder: str = config["stub-folder"],
     # core_type: str = "pycopy",  # pycopy or Micropython CPython stubs
@@ -227,25 +252,18 @@ def cli_get_core(
 
 @stubber_cli.command(name="get-docstubs")
 # todo: allow multiple source
-@click.option("--path", "-p", default=config["repo-folder"], type=click.Path(file_okay=False, dir_okay=True))
-# @click.option(
-#     "--source",
-#     "--micropython",
-#     "-s",
-#     default=config["mpy-folder"],
-#     type=click.Path(exists=True, file_okay=False, dir_okay=True),
-#     help="Location of the MicroPython repo of folder or  folder or .rst files to proecess. Default './micropython'",
-# )
+@click.option("--path", "-p", default=config["repo-folder"], type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 @click.option(
     "--stub-path",
     "--stub-folder",
     "target",
     default=config["stub-folder"],
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="Destination of the files to be generated. default : `./{stub-folder}/{micropython}-{version}-docstubs`.",
+    help="Destination of the files to be generated.",
+    show_default=True,
 )
-@click.option("--family", "-f", "basename", default="micropython", help="Micropython family. default:'micropython'")
-@click.option("--black/--no-black", "-b/-nb", default=True, help="Run black, default :yes")
+@click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
+@click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.option("--verbose", "-v", is_flag=True, default=False)
 def cli_docstubs(
     path: str = config["repo-folder"],
@@ -280,6 +298,34 @@ def cli_docstubs(
 
     # no need to generate .pyi in post processing
     utils.do_post_processing([dst_path], False, black)
+
+
+##########################################################################################
+#
+##########################################################################################
+
+
+@stubber_cli.command(name="update-fallback")
+@click.option("--version", default=RELEASED, type=str, help="Version number to use", show_default=True)
+@click.option(
+    "--stub-folder",
+    default=config["stub-folder"],
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="Destination of the files to be generated.",
+    show_default=True,
+)
+def cli_update_fallback(
+    version: str,
+    stub_folder: str = config["stub-folder"],
+):
+    "Update the fallback stubs"
+    stub_path = Path(stub_folder)
+    config = utils.config.readconfig()
+    update_fallback(
+        stub_path,
+        stub_path / config["fallback-folder"],
+        version=version,
+    )
 
 
 ##########################################################################################
