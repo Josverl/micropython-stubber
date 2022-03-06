@@ -104,5 +104,4 @@ jobs:
       - name: Push result to Testspace server
         if: always()
         run: |
-          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml
-          testspace --link codecov results/coverage-*.xml
+          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml --link codecov results/coverage-*.xml
