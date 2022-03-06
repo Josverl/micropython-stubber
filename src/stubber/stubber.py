@@ -68,7 +68,11 @@ def stubber_cli(ctx, verbose=False, debug=False):
 @click.option("--mpy-lib/--no-mpy-lib", "-l/-nl", help="clone micropython-lib", default=True, is_flag=True)
 @click.option("--path", "-p", default=config["repo-folder"], type=click.Path(file_okay=False, dir_okay=True))
 def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
-    "Clone the micropython repos locally to be able to generate frozen-stubs and doc-stubs."
+    """
+    Clone the micropython repos locally.
+
+    The local repos are used to generate frozen-stubs and doc-stubs.
+    """
     dest_path = Path(path)
     if not dest_path.exists():
         os.mkdir(dest_path)
@@ -84,7 +88,8 @@ def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
 @stubber_cli.command(name="stub")
 @click.option("--source", "-s", type=click.Path(exists=True, file_okay=True, dir_okay=True))
 def cli_stub(source: Union[str, Path]):
-    "Create or update .pyi type hint files for all .py files in SOURCE path."
+    "Create or update .pyi type hint files."
+
     log.info("Generate type hint files (pyi) in folder: {}".format(source))
     OK = utils.generate_pyi_files(Path(source))
     return 0 if OK else 1
@@ -118,7 +123,12 @@ def cli_minify(
     cross_compile: bool,
     all: bool,
 ) -> int:
-    """Creates a minified version of the SOURCE micropython file in TARGET (file or folder)."""
+    """
+    Minify createsubs*.py.
+
+    Creates a minified version of the SOURCE micropython file in TARGET (file or folder).
+    The goal is to use less memory / not to run out of memory, while generating Firmware stubs.
+    """
     if all:
         sources = ["board/createstubs.py", "board/createstubs_mem.py", "board/createstubs_db.py"]
     else:
@@ -158,7 +168,11 @@ def cli_get_frozen(
     pyi: bool = True,
     black: bool = True,
 ):
-    "Get the frozen modules for the checked out version of MicroPython"
+    """
+    Get the frozen stubs for MicroPython.
+
+    Get the frozen modules for the checked out version of MicroPython
+    """
 
     mpy_path = Path(path) / config["mpy-folder"]
     mpy_lib_path = Path(path) / config["mpy-lib-folder"]
@@ -196,7 +210,11 @@ def cli_get_lobo(
     pyi: bool = True,
     black: bool = True,
 ):
-    "Get the frozen modules for the Loboris v3.2.24 fork of MicroPython"
+    """
+    Get the frozen stubs for Lobo-esp32.
+
+    Get the frozen modules for the Loboris v3.2.24 fork of MicroPython
+    """
 
     stub_paths: List[Path] = []
 
@@ -231,7 +249,11 @@ def cli_get_core(
     pyi: bool = True,
     black: bool = True,
 ):
-    "Get the core (CPython compat) modules for both MicroPython and Pycopy."
+    """
+    Download core CPython stubs from PyPi.
+
+    Get the core (CPython compat) modules for both MicroPython and Pycopy.
+    """
 
     stub_paths: List[Path] = []
     for core_type in ["pycopy", "micropython"]:
@@ -272,7 +294,11 @@ def cli_docstubs(
     black: bool = True,
     basename="micropython",
 ):
-    """Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking."""
+    """
+    Build stubs from documentation.
+
+    Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
+    """
     if verbose:
         log.setLevel(logging.DEBUG)
     log.info(f"stubs_from_docs version {__version__}\n")
@@ -318,7 +344,11 @@ def cli_update_fallback(
     version: str,
     stub_folder: str = config["stub-folder"],
 ):
-    "Update the fallback stubs"
+    """
+    Update the fallback stubs.
+
+    The fallback stubs are updated/collated from files of the firmware-stubs, doc-stubs and core-stubs.
+    """
     stub_path = Path(stub_folder)
     config = utils.config.readconfig()
     update_fallback(
