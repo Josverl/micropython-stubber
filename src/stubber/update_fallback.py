@@ -6,9 +6,11 @@ from distutils.dir_util import copy_tree
 import shutil
 
 import logging
+
 log = logging.getLogger()
 
 RELEASED = "v1_18"
+
 
 def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tuple[str, str]]:
     "list of sources to build/update the fallback 'catch-all' stubfolder"
@@ -61,7 +63,7 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
 
 
 def update_fallback(stubpath: Path, fallback_path, version: str = RELEASED):
-    "update the fallback stubs from the defined sources" 
+    "update the fallback stubs from the defined sources"
     # remove all *.py/.pyi files
     # Get-ChildItem $fallback_path -recurse -include *.py, *.pyi -force | remove-item -Force
     oldstubs = list(fallback_path.rglob("*.py")) + list(fallback_path.rglob("*.pyi"))
@@ -71,7 +73,6 @@ def update_fallback(stubpath: Path, fallback_path, version: str = RELEASED):
             os.remove(f)
         except OSError as e:
             log.warning(e)
-            pass
 
     for (name, source) in fallback_sources(version):
         if not "." in name:
@@ -92,6 +93,6 @@ if __name__ == "__main__":
     config = utils.config.readconfig()
     update_fallback(
         Path(config["stub-folder"]),
-        Path(config["stub-folder"]) / config["fallback-folder"] ,
+        Path(config["stub-folder"]) / config["fallback-folder"],
         version=RELEASED,
     )
