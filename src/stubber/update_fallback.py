@@ -16,9 +16,9 @@ RELEASED = "v1_18"
 def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tuple[str, str]]:
     """
     list of sources to build/update the fallback 'catch-all' stubfolder
-    version : the version to use 
-    fw_version : version to source the Firmware stubs from.  defaults to the version used , but can be lower  
-    
+    version : the version to use
+    fw_version : version to source the Firmware stubs from.  defaults to the version used , but can be lower
+
     """
     if not fw_version:
         fw_version = version
@@ -94,7 +94,6 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
                 added += 1
             except DistutilsFileError:
                 log.warning(f"{(stubpath / source / name).as_posix()} not found")
-                pass
         else:
             # copy file(s)
             log.info(f"add {source}")
