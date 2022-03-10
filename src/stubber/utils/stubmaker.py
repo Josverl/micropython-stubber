@@ -12,11 +12,6 @@ import sys
 log = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.INFO)
 
-# FIXME use config
-STUB_FOLDER = "./all-stubs"
-def stubfolder(path: str) -> str:
-    "return path in the stub folder"
-    return "{}/{}".format(STUB_FOLDER, path)
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(

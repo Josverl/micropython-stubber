@@ -286,7 +286,7 @@ def cli_get_core(
 )
 @click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
-@click.option("--verbose", "-v", is_flag=True, default=False)
+@click.option("--verbose", "-v", is_flag=True, default=False)  # todo: extra verbose / extra debug ?
 def cli_docstubs(
     path: str = config["repo-folder"],
     target: str = config["stub-folder"],
@@ -327,7 +327,7 @@ def cli_docstubs(
 
 
 ##########################################################################################
-#
+# update-fallback
 ##########################################################################################
 
 

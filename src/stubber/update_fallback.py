@@ -62,31 +62,38 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
     return SOURCES
 
 
-def update_fallback(stubpath: Path, fallback_path, version: str = RELEASED):
+def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED):
     "update the fallback stubs from the defined sources"
     # remove all *.py/.pyi files
-    # Get-ChildItem $fallback_path -recurse -include *.py, *.pyi -force | remove-item -Force
+
     oldstubs = list(fallback_path.rglob("*.py")) + list(fallback_path.rglob("*.pyi"))
-    log.info(f"deleting {oldstubs.count} stubs from {fallback_path.as_posix()}")
+    log.info(f"deleting {len(oldstubs)} stubs from {fallback_path.as_posix()}")
     for f in oldstubs:
         try:
             os.remove(f)
         except OSError as e:
             log.warning(e)
-
+    added = 0
     for (name, source) in fallback_sources(version):
         if not "." in name:
             # copy folder
             log.info(f"add {source} folder")
-            copy_tree(
-                (stubpath / source / name).as_posix(),
-                (fallback_path / name).as_posix(),
-            )
+            try:
+                copy_tree(
+                    (stubpath / source / name).as_posix(),
+                    (fallback_path / name).as_posix(),
+                )
+                added += 1
+            except OSError:
+                log.warning(f"{(stubpath / source / name).as_posix()} not found")
+                pass
         else:
             # copy file(s)
             log.info(f"add {source}")
             for f in (stubpath / source).glob(name):
                 shutil.copyfile(f, fallback_path / f.name)
+                added += 1
+    return added
 
 
 if __name__ == "__main__":

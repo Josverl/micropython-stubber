@@ -129,7 +129,6 @@ parallel = false
 branch = true
 source = [
         "board",
-        "minified",
         "src"
         ]
 omit = [
