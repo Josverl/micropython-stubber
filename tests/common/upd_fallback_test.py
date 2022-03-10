@@ -1,17 +1,20 @@
 import os
 from distutils.dir_util import copy_tree
+import shutil
 import pytest
 from pathlib import Path
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
-from stubber.update_fallback import update_fallback, utils
+from stubber.update_fallback import update_fallback, utils, fallback_sources, RELEASED
 
 
 def test_update_fallback(tmp_path):
     # test requires an actuall filled source
     config = utils.config.readconfig()
     # from actual source
+    # TODO: Make sure there is an actual source to copy from
+
     stub_path = Path(config["stub-folder"])
     # to tmp_path /....
     count = update_fallback(
@@ -19,5 +22,36 @@ def test_update_fallback(tmp_path):
         tmp_path / config["fallback-folder"],
     )
     # assert count >= 50
-    # limited expectations
-    assert count >= 1
+    # limited expectations as there is no source
+    assert count >= 0
+
+
+def test_update_fallback_2(tmp_path: Path):
+    # test requires an actuall filled source
+    config = utils.config.readconfig()
+    # from actual source
+    # Make sure there is an actual source to copy from
+
+    stub_path = tmp_path
+    fallback_path = tmp_path / config["fallback-folder"]
+    # create fake sources
+    fakes = 0
+    for (name, source) in fallback_sources(RELEASED):
+        if not "." in name:
+            ...
+            file = stub_path / source / name / "__init__.py"
+        else:
+            file = stub_path / source / name.replace("*", "")
+        # create fake file(s)
+        if not file.parent.exists():
+            os.makedirs(file.parent)
+        with open(file, "x") as f:
+            f.write("# fake \n")
+        fakes += 1
+    # to tmp_path /....
+    count = update_fallback(stub_path, fallback_path, version=RELEASED)
+    assert count == fakes
+    count = update_fallback(stub_path, fallback_path)
+    assert count == fakes
+    count = update_fallback(stub_path, fallback_path, version="latest")
+    assert count > 0

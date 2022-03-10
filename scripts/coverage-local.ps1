@@ -19,4 +19,4 @@ $env:CODECOV_TOKEN = (Get-ClearTextStoredCredentials  -Target "codecov@micropyth
 
 
 # for testspace just link to codecov
-\develop\tools\testspace.exe [dev]results/test-results*.xml --link codecov
+# \develop\tools\testspace.exe [dev]results/test-results*.xml --link codecov

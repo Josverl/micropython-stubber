@@ -14,7 +14,12 @@ RELEASED = "v1_18"
 
 
 def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tuple[str, str]]:
-    "list of sources to build/update the fallback 'catch-all' stubfolder"
+    """
+    list of sources to build/update the fallback 'catch-all' stubfolder
+    version : the version to use 
+    fw_version : version to source the Firmware stubs from.  defaults to the version used , but can be lower  
+    
+    """
     if not fw_version:
         fw_version = version
     if fw_version == "latest":
@@ -66,14 +71,16 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
 def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED):
     "update the fallback stubs from the defined sources"
     # remove all *.py/.pyi files
-
-    oldstubs = list(fallback_path.rglob("*.py")) + list(fallback_path.rglob("*.pyi"))
-    log.info(f"deleting {len(oldstubs)} stubs from {fallback_path.as_posix()}")
-    for f in oldstubs:
-        try:
-            os.remove(f)
-        except OSError as e:
-            log.warning(e)
+    if not fallback_path.exists():
+        os.makedirs(fallback_path)
+    else:
+        oldstubs = list(fallback_path.rglob("*.py")) + list(fallback_path.rglob("*.pyi"))
+        log.info(f"deleting {len(oldstubs)} stubs from {fallback_path.as_posix()}")
+        for f in oldstubs:
+            try:
+                os.remove(f)
+            except OSError as e:
+                log.warning(e)
     added = 0
     for (name, source) in fallback_sources(version):
         if not "." in name:
