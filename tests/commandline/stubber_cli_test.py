@@ -168,7 +168,23 @@ def test_stubber_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # process is called twice
     assert mock.call_count == 1
     mock.assert_called_once()
-    assert mock_version.call_count >=1
+    assert mock_version.call_count >= 1
 
     # post is called one
     mock_post.assert_called_with([tmp_path / "micropython-v1_42-docstubs"], False, True)
+
+
+##########################################################################################
+# get-lobo
+##########################################################################################
+def test_stubber_fallback(mocker: MockerFixture, tmp_path: Path):
+    # check basic commandline sanity check
+    runner = CliRunner()
+
+    mock: MagicMock = mocker.patch("stubber.stubber.update_fallback", autospec=True)
+    #mock2: MagicMock = mocker.patch("stubber.update_fallback.update_fallback", autospec=True)
+    # from .update_fallback import update_fallback,
+    # fake run
+    result = runner.invoke(stubber.stubber_cli, ["update-fallback", "--stub-folder", tmp_path.as_posix()])
+    mock.assert_called_once()
+    assert result.exit_code == 0
