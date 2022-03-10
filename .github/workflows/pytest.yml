@@ -92,8 +92,8 @@ jobs:
 
       #----------------------------------------------
       # upload coverage stats
-      # lcov coverage to codecov & artefacts (available for download) 
-      # XML  coverage to testspace
+      # .lcov to  artefacts (available for download) 
+      # .XML  to Codecov
       #----------------------------------------------
       - uses: actions/upload-artifact@v3
         with:
@@ -103,7 +103,7 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v1
         with:
-          file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
+          file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           fail_ci_if_error: false
 
       - name: Push result to Testspace server
