@@ -1,3 +1,4 @@
+from distutils.errors import DistutilsFileError
 import os
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -84,7 +85,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
                     (fallback_path / name).as_posix(),
                 )
                 added += 1
-            except OSError:
+            except DistutilsFileError:
                 log.warning(f"{(stubpath / source / name).as_posix()} not found")
                 pass
         else:
