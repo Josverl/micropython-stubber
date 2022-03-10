@@ -11,7 +11,7 @@ coverage html
 
 start coverage\index.html
 
-
+coverage lcov
 $env:CODECOV_TOKEN = (Get-ClearTextStoredCredentials  -Target "codecov@micropython-stubber").Password
 \develop\tools\codecov.exe -t ${env:CODECOV_TOKEN} -f results/cover*.lcov
 # \develop\tools\codecov.exe -t ${env:CODECOV_TOKEN} results/cover*.xml

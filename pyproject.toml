@@ -35,8 +35,6 @@ exclude = [
 
 [tool.poetry.scripts]
 stubber = "stubber.stubber:stubber_cli"
-# get_frozen = "stubber.get_all_frozen:get_all"
-# get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
 pyboard = "stubber.pyboard:main"
 
 [tool.poetry.dependencies]
