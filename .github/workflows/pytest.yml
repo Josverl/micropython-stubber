@@ -97,8 +97,8 @@ jobs:
       #----------------------------------------------
       - uses: actions/upload-artifact@v3
         with:
-          name: coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
-          path: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
+          path: results/
+          name: results-${{ matrix.python-version }}-${{ matrix.os }}
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
