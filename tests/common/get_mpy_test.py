@@ -32,7 +32,7 @@ def test_get_mpy(tmp_path):
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
+    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_folder=mpy_path, lib_folder=lib_path)
 
     modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
     stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))

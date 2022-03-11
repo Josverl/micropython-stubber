@@ -70,7 +70,7 @@ import logging
 import json
 import subprocess
 from pathlib import Path
-from .version import __version__
+from . import __version__
 from . import utils
 
 from .rst import (

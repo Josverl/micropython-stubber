@@ -36,12 +36,17 @@ def _run_git(
     return result
 
 
-def clone(remote_repo: str, path: Path, shallow=False) -> bool:
-    "git clone --depth 0 <remote> <directory>"
+def clone(remote_repo: str, path: Path, shallow=False, tag: Optional[str] = None) -> bool:
+    "git clone [--depth 1] [--branch <tag_name>] <remote> <directory>"
     cmd = ["git", "clone"]
     if shallow:
         cmd += ["--depth", "1"]
-    cmd += [remote_repo, str(path)]
+    if tag in ("latest", "master"):
+        tag = None
+    if not tag:
+        cmd += [remote_repo, str(path)]
+    else:
+        cmd += [remote_repo, "--branch", tag, str(path)]
     result = _run_git(cmd, expect_stderr=True, capture_output=False)
     if result:
         return result.returncode == 0

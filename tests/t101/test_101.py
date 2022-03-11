@@ -1,6 +1,6 @@
 ##########################
 import pytest
-import stubber.version as version
+import stubber
 
 ##########################
 
@@ -14,7 +14,7 @@ def test_minified(mock_micropython_path, fx_add_minified_path):
 
 
 def test_version():
-    assert version.__version__
+    assert stubber.__version__
 
 
 def test_dummy():

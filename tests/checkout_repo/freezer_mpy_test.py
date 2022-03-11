@@ -72,7 +72,7 @@ def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropy
         version = git.get_tag(mpy_path)
         assert version == mpy_version, "prep: could not checkout version {} of {}".format(mpy_version, mpy_path)
 
-    get_mpy.get_frozen(str(tmp_path), version=mpy_version, mpy_path=mpy_path, lib_path=mpy_lib)
+    get_mpy.get_frozen(str(tmp_path), version=mpy_version, mpy_folder=mpy_path, lib_folder=mpy_lib)
     scripts = list(tmp_path.rglob("*.py"))
 
     assert scripts is not None, "can freeze scripts from manifest"
@@ -97,7 +97,7 @@ def test_freezer_mpy_folders(mpy_version, tmp_path, testrepo_micropython: Path, 
 
     stub_path = tmp_path
     # freezer_mpy.get_frozen(stub_path, mpy_path, lib_path='./micropython-lib')
-    get_mpy.get_frozen_folders(stub_path, mpy_path, lib_path=testrepo_micropython_lib.as_posix(), version=mpy_version)
+    get_mpy.get_frozen_folders(stub_path, mpy_path, lib_folder=testrepo_micropython_lib.as_posix(), version=mpy_version)
     # restore original version
     git.checkout_tag(version_x, mpy_path)  # type:ignore
 

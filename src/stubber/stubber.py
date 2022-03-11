@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Create, Process, and Maintain stubs ✏️  for MicroPython"""
-from typing import Union, List
+from typing import Optional, Union, List
 from pathlib import Path
 import os
 import click
@@ -18,14 +18,13 @@ from . import get_mpy
 from . import get_lobo
 from .stubs_from_docs import generate_from_rst
 from .update_fallback import update_fallback, RELEASED
-from .version import __version__
-
+from . import __version__
+from . import config
 
 ##########################################################################################
 log = logging.getLogger(__name__)
 
 
-config = utils.readconfig()
 ##########################################################################################
 
 
@@ -67,7 +66,8 @@ def stubber_cli(ctx, verbose=False, debug=False):
 @click.option("--mpy/--no-mpy", "-m/-nm", help="clone micropython", default=True, is_flag=True)
 @click.option("--mpy-lib/--no-mpy-lib", "-l/-nl", help="clone micropython-lib", default=True, is_flag=True)
 @click.option("--path", "-p", default=config["repo-folder"], type=click.Path(file_okay=False, dir_okay=True))
-def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
+@click.option("--tag", "--version", type=click.Choice(["v1.17", "v1.18", "latest"], case_sensitive=False))
+def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path], tag: Optional[str] = None):
     """
     Clone the micropython repos locally.
 
@@ -76,10 +76,17 @@ def cli_clone(mpy: bool, mpy_lib: bool, path: Union[str, Path]):
     dest_path = Path(path)
     if not dest_path.exists():
         os.mkdir(dest_path)
+
     if mpy:
-        git.clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / config["mpy-folder"])
+        if not tag:
+            git.clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / config["mpy-folder"])
+        else:
+            git.clone(remote_repo="https://github.com/micropython/micropython.git", path=dest_path / config["mpy-folder"])
     if mpy_lib:
         git.clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=dest_path / config["mpy-lib-folder"])
+        if mpy and tag:
+            lib_folder = (dest_path / config["mpy-lib-folder"]).as_posix()
+            get_mpy.match_lib_with_mpy(version_tag=tag, lib_folder=lib_folder)
 
 
 ##########################################################################################
@@ -186,7 +193,7 @@ def cli_get_frozen(
         family = "micropython"
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
-        get_mpy.get_frozen(stub_path.as_posix(), version=version, mpy_path=mpy_path.as_posix(), lib_path=mpy_lib_path.as_posix())
+        get_mpy.get_frozen(stub_path.as_posix(), version=version, mpy_folder=mpy_path.as_posix(), lib_folder=mpy_lib_path.as_posix())
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(mpy_path.as_posix()))
     utils.do_post_processing(stub_paths, pyi, black)
@@ -350,7 +357,6 @@ def cli_update_fallback(
     The fallback stubs are updated/collated from files of the firmware-stubs, doc-stubs and core-stubs.
     """
     stub_path = Path(stub_folder)
-    config = utils.config.readconfig()
     update_fallback(
         stub_path,
         stub_path / config["fallback-folder"],
