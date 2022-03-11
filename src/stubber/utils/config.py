@@ -26,13 +26,13 @@ def readconfig() -> Dict[str, str]:
         try:
             with open("pyproject.toml", "rb") as f:
                 toml_dict = tomllib.load(f)
-        except tomllib.TOMLDecodeError:
+        except tomllib.TOMLDecodeError: # pragma: no cover
             log.warning("unable to read ")
         else:
             try:
                 toml_config = toml_dict["tool"]["micropython-stubber"]
                 config = {**config, **toml_config}
 
-            except KeyError:
+            except KeyError: # pragma: no cover
                 pass
     return config
