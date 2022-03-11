@@ -5,7 +5,7 @@ venv*
 
 # no compiled python or caches
 **/__pycache__
-**/.py*_cache
+**/.*_cache
 
 #ignore the scratchpad 
 scratch/*

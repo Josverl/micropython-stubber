@@ -32,7 +32,8 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
+		"mhutchie.git-graph"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
@@ -42,5 +43,8 @@
 	//"postCreateCommand": "pip3 install --user -r requirements-dev.txt &&npm install -g pyright",
 	"postCreateCommand": "bash .devcontainer/setup.sh",
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
+	"remoteUser": "vscode",
+	"features": {
+		"powershell": "7.1"
+	}
 }

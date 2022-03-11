@@ -1,6 +1,10 @@
+[tool.micropython-stubber]
+stub-folder = "./all-stubs"
+repo-folder = "./repos"
+
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.6.0"
+version = "1.6.3"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -31,8 +35,6 @@ exclude = [
 
 [tool.poetry.scripts]
 stubber = "stubber.stubber:stubber_cli"
-# get_frozen = "stubber.get_all_frozen:get_all"
-# get_docstubs = "stubber.stubs_from_docs:cli_docstubs"
 pyboard = "stubber.pyboard:main"
 
 [tool.poetry.dependencies]
@@ -125,7 +127,6 @@ parallel = false
 branch = true
 source = [
         "board",
-        "minified",
         "src"
         ]
 omit = [
