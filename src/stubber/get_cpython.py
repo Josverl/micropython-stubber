@@ -10,7 +10,7 @@ import json
 
 from . import utils
 from pathlib import Path
-from .version import __version__
+from . import __version__
 import pkgutil
 import tempfile
 

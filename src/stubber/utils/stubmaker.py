@@ -2,7 +2,7 @@ import logging
 import shutil
 
 from pathlib import Path
-from ..version import __version__
+from .. import __version__
 
 import mypy.stubgen as stubgen
 from mypy.errors import CompileError
