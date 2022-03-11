@@ -2,7 +2,9 @@
 import pytest
 from pathlib import Path
 import shutil
-
+from pytest_mock import MockerFixture
+from mock import MagicMock
+from types import SimpleNamespace
 # SOT
 import stubber.utils as utils
 
@@ -75,6 +77,25 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
         except ValueError:
             pass
     assert len(py_files) == 0, "py and pyi files should match 1:1 and stored in the same folder"
+
+
+# post processing
+# 
+def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
+    # source = pytestconfig.rootpath / "tests/data/stubs-ok"
+    dest = tmp_path / "stubs"
+    # shutil.copytree(source, dest)
+
+    mock: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
+    return_val = SimpleNamespace()
+    return_val.returncode = 0
+    mock_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
+
+    result = utils.do_post_processing([dest], pyi=True, black=True)
+
+    mock.assert_called_once()
+    mock_spr.assert_called_once()
+
 
 
 def test_stub_one_file(tmp_path, pytestconfig):
