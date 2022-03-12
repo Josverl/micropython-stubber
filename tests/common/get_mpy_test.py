@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 import pytest
 
@@ -16,11 +17,11 @@ from stubber.utils import clean_version
 import stubber.get_mpy as get_mpy
 
 
-def test_get_mpy(tmp_path):
+def test_get_mpy(tmp_path,testrepo_micropython:Path, testrepo_micropython_lib:Path):
 
     # Use Submodules
-    mpy_path = "./micropython"
-    lib_path = "./micropython-lib"
+    mpy_path = testrepo_micropython.as_posix()
+    lib_path = testrepo_micropython_lib.as_posix()
     try:
         version = clean_version(git.get_tag(mpy_path) or "0.0")
     except Exception:
