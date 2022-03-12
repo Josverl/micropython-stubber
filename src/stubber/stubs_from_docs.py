@@ -70,18 +70,21 @@ import logging
 import json
 import subprocess
 from pathlib import Path
+
+from .rst import return_type_from_context
+from .rst import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP, U_MODULES
+
 from . import __version__
 from . import utils
+from . import config
 
 from .rst import (
     TYPING_IMPORT,
-    return_type_from_context,
     ModuleSourceDict,
     ClassSourceDict,
     FunctionSourceDict,
 )
 
-from .rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP, U_MODULES
 
 # logging
 log = logging.getLogger(__name__)
@@ -379,7 +382,9 @@ class RSTReader:
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
         # Now parse all files mentioned in the toc
         for file in toctree:
-            self.read_file(Path("micropython/docs/library") / file.strip())
+            #
+            file_path = Path(config["repo-folder"]) / config["mpy-folder"] / "docs" / "library" / file.strip()
+            self.read_file(file_path)
             self.parse()
         # reset this file to done
         self.rst_text = []
