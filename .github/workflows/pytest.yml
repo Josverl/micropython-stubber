@@ -65,7 +65,13 @@ jobs:
       #----------------------------------------------
       - name: Install library
         run: poetry install --no-interaction
-
+      
+      #----------------------------------------------
+      # stubber clone 
+      # repos needed for tests 
+      #----------------------------------------------
+      - name: stubber clone
+        run: poetry run stubber clone
 
 
       - name: flag tools executable (on linux)
