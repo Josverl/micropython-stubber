@@ -14,11 +14,11 @@ def test_update_fallback(tmp_path):
     # from actual source
     # TODO: Make sure there is an actual source to copy from
 
-    stub_path = Path(config["stub-folder"])
+    stub_path = config.stub_path
     # to tmp_path /....
     count = update_fallback(
         stub_path,
-        tmp_path / config["fallback-folder"],
+        tmp_path / config.fallback_path
     )
     # assert count >= 50
     # limited expectations as there is no source
@@ -31,7 +31,7 @@ def test_update_fallback_2(tmp_path: Path):
     # Make sure there is an actual source to copy from
 
     stub_path = tmp_path
-    fallback_path = tmp_path / config["fallback-folder"]
+    fallback_path = tmp_path / config.fallback_path
     # create fake sources
     fakes = 0
     for (name, source) in fallback_sources(RELEASED):

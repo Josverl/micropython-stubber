@@ -101,4 +101,6 @@
         "PYRIGHT"
     ],
     "markiscodecoverage.searchCriteria": "results/coverage.lcov",
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.terminal.clearBeforeReusing": true,
 }

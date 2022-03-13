@@ -10,7 +10,10 @@
             "request": "launch",
             "module": "stubber.stubber",
             "args": [
-                "${input:cmdlineParams}"
+                "clone",
+                "--tag",
+                "v1.18"
+                // "${input:cmdlineParams}"
             ]
         },
         {

@@ -69,7 +69,7 @@ def test_get_tag_current():
 
 @pytest.mark.basicgit
 def test_get_tag_latest():
-    repo = Path("./micropython")
+    repo = Path("./repo/micropython")
     if not (repo / ".git").exists():
         pytest.skip("no git repo in current folder")
 
@@ -77,7 +77,7 @@ def test_get_tag_latest():
 
     assert result.stderr == 0
     # get tag of current repro
-    tag = git.get_tag("./micropython")
+    tag = git.get_tag("./repo/micropython")
     assert tag == "latest"
 
 

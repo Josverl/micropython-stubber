@@ -1,3 +1,4 @@
+from operator import truediv
 import pytest
 from pytest_mock import MockerFixture
 from mock import MagicMock
@@ -31,7 +32,15 @@ def test_stubber_clone(mocker: MockerFixture, tmp_path: Path):
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("repos/micropython"))
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("repos/micropython-lib"))
 
-    mock_clone.reset_mock()
+
+def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
+    runner = CliRunner()
+    mock_clone: MagicMock = mocker.MagicMock(return_value=0)
+    mocker.patch("stubber.stubber.git.clone", mock_clone)
+
+    m_tag = mocker.patch("stubber.stubber.git.get_tag", autospec=True)
+    m_dir = mocker.patch("stubber.stubber.os.mkdir", autospec=True)
+
     # now test with path specified
     result = runner.invoke(stubber.stubber_cli, ["clone", "--path", "foobar"])
     assert result.exit_code == 0
@@ -39,6 +48,7 @@ def test_stubber_clone(mocker: MockerFixture, tmp_path: Path):
     assert mock_clone.call_count >= 2
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("foobar/micropython"))
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("foobar/micropython-lib"))
+    assert m_tag.call_count >=2
 
 
 ##########################################################################################
@@ -182,7 +192,7 @@ def test_stubber_fallback(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
 
     mock: MagicMock = mocker.patch("stubber.stubber.update_fallback", autospec=True)
-    #mock2: MagicMock = mocker.patch("stubber.update_fallback.update_fallback", autospec=True)
+    # mock2: MagicMock = mocker.patch("stubber.update_fallback.update_fallback", autospec=True)
     # from .update_fallback import update_fallback,
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["update-fallback", "--stub-folder", tmp_path.as_posix()])
