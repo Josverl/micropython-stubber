@@ -2,14 +2,6 @@
 stub-path = "./all-stubs"
 repo-path = "./repos"
 
-
-[tool.deadparrot]
-species = "Norwegian Blue"
-state = "resting"
-details = ["pinging","Lovely plumage","3",4]
-store_owner = "Michael Palin"
-interval = 5
-
 [tool.poetry]
 name = "micropython-stubber"
 version = "1.6.3"
