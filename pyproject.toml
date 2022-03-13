@@ -1,6 +1,14 @@
 [tool.micropython-stubber]
-stub-folder = "./all-stubs"
-repo-folder = "./repos"
+stub-path = "./all-stubs"
+repo-path = "./repos"
+
+
+[tool.deadparrot]
+species = "Norwegian Blue"
+state = "resting"
+details = ["pinging","Lovely plumage","3",4]
+store_owner = "Michael Palin"
+interval = 5
 
 [tool.poetry]
 name = "micropython-stubber"
@@ -52,6 +60,7 @@ rshell = {version = "0.0.31", optional = true}
 esptool = {version = "3.2", optional = true}
 importlib-metadata = {version = "^1.0", python = "<3.8"}
 tomli = { version ="^2.0.1", python = "<3.11"}
+typed-config = "^1.1.0"
 
 
 [tool.poetry.dev-dependencies]

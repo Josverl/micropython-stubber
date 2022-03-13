@@ -106,7 +106,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
 if __name__ == "__main__":
     from . import config
     update_fallback(
-        Path(config["stub-folder"]),
-        Path(config["stub-folder"]) / config["fallback-folder"],
+        config.stub_path,
+        config.fallback_path,
         version=RELEASED,
     )

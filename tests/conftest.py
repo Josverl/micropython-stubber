@@ -73,13 +73,13 @@ def mock_micropython_path(pytestconfig: Config):
 @pytest.fixture(scope="session")
 def testrepo_micropython(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
-    return pytestconfig.rootpath / config["repo-folder"] / config["mpy-folder"]
+    return pytestconfig.rootpath / config.mpy_path
 
 
 @pytest.fixture(scope="session")
 def testrepo_micropython_lib(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
-    return pytestconfig.rootpath / config["repo-folder"] / config["mpy-lib-folder"]
+    return pytestconfig.rootpath / config.mpy_lib_path
 
 
 # --------------------------------------

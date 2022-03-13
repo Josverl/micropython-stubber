@@ -383,7 +383,7 @@ class RSTReader:
         # Now parse all files mentioned in the toc
         for file in toctree:
             #
-            file_path = Path(config["repo-folder"]) / config["mpy-folder"] / "docs" / "library" / file.strip()
+            file_path =  config.mpy_path / "docs" / "library" / file.strip()
             self.read_file(file_path)
             self.parse()
         # reset this file to done
