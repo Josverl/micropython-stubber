@@ -102,8 +102,12 @@ def cli_clone(path: Union[str, Path]):
 ##########################################################################################
 # switch
 ##########################################################################################
-# TODO: get version list from Git tags in the repo that is provided on the command line
-VERSION_LIST = ["latest"] + git.get_tags(config.mpy_path, minver="v1.10")
+# get version list from Git tags in the repo that is provided on the command line
+
+try:
+    VERSION_LIST = ["latest"] + git.get_tags(config.mpy_path, minver="v1.10")
+except Exception:
+    VERSION_LIST = ["latest"]
 
 
 @stubber_cli.command(name="switch")
@@ -127,7 +131,7 @@ def cli_fetch(path: Union[str, Path], tag: Optional[str] = None):
     in time to that version tag, in order to allow non-current versions to be
     stubbed correctly.
 
-    The repros must be cloned already 
+    The repros must be cloned already
     """
     dest_path = Path(path)
     if not dest_path.exists():
