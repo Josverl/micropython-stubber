@@ -6,7 +6,7 @@ Extend typed-config to read configuration from .toml files
 """
 # TODO : extend support for . notation in section names
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from pathlib import Path
 
 try:
@@ -14,8 +14,8 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from typedconfig.config import Config, key, section
-from typedconfig.source import ConfigSource, EnvironmentConfigSource
+from typedconfig.config import Config, key, section# type: ignore
+from typedconfig.source import ConfigSource, EnvironmentConfigSource# type: ignore
 
 import logging
 

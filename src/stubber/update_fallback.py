@@ -2,7 +2,6 @@ from distutils.errors import DistutilsFileError
 import os
 from pathlib import Path
 from typing import List, Optional, Tuple
-from . import utils
 from distutils.dir_util import copy_tree
 import shutil
 

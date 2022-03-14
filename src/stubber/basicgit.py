@@ -3,7 +3,6 @@ simple Git module, where needed via powershell
 """
 from typing import Union
 import subprocess
-import os
 from pathlib import Path
 from typing import Union, List, Optional
 

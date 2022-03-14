@@ -1,4 +1,3 @@
-from operator import truediv
 import pytest
 from pytest_mock import MockerFixture
 from mock import MagicMock
@@ -48,7 +47,7 @@ def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
     assert mock_clone.call_count >= 2
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("foobar/micropython"))
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("foobar/micropython-lib"))
-    assert m_tag.call_count >=2
+    assert m_tag.call_count >= 2
 
 
 ##########################################################################################
