@@ -146,31 +146,39 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    def mock_run_git_1(cmd: List[str], repo=None, expect_stderr=False):
-        return None
-
-    mocker.patch("stubber.basicgit._run_git", mock_run_git_1)
+    mock_run_git = mocker.patch("stubber.basicgit._run_git", autospec=True, return_value=None)
 
     # fail to fetch
     r = git.fetch(repo=".")
     assert r == False
+    mock_run_git.assert_called_once()
 
     # fail to get tag
+    mock_run_git.reset_mock()
     r = git.get_tag()
+    mock_run_git.assert_called_once()
     assert r == None
 
     # fail to checkout tag
+    mock_run_git.reset_mock()
     r = git.checkout_tag("v1.10")
+    mock_run_git.assert_called_once()
     assert r == False
 
     # fail to checkout commit
+    mock_run_git.reset_mock()
     r = git.checkout_commit(commit_hash="123")
+    mock_run_git.assert_called_once()
     assert r == False
 
     # fail to switch tag
+    mock_run_git.reset_mock()
     r = git.switch_tag(tag="v1.10")
+    mock_run_git.assert_called_once()
     assert r == False
 
     # fail to switch branch
+    mock_run_git.reset_mock()
     r = git.switch_branch(branch="foobar")
+    mock_run_git.assert_called_once()
     assert r == False
