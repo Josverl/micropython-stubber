@@ -1,13 +1,12 @@
 import os
-from distutils.dir_util import copy_tree
-import shutil
 import pytest
 from pathlib import Path
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
-from stubber.update_fallback import update_fallback, utils, fallback_sources, RELEASED
+from stubber.update_fallback import update_fallback, fallback_sources, RELEASED
 from stubber import config
+
 
 def test_update_fallback(tmp_path):
     # test requires an actuall filled source
@@ -16,10 +15,7 @@ def test_update_fallback(tmp_path):
 
     stub_path = config.stub_path
     # to tmp_path /....
-    count = update_fallback(
-        stub_path,
-        tmp_path / config.fallback_path
-    )
+    count = update_fallback(stub_path, tmp_path / config.fallback_path)
     # assert count >= 50
     # limited expectations as there is no source
     assert count >= 0
