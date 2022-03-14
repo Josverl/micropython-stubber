@@ -62,9 +62,6 @@ def stubber_cli(ctx, verbose=False, debug=False):
 ##########################################################################################
 # clone
 ##########################################################################################
-# TODO: get version list from Git tags
-# git tag -l
-VERSION_LIST = ["v1.10", "v1.11", "v1.12", "v1.13", "v1.14", "v1.15", "v1.16", "v1.17", "v1.18", "latest"]
 
 
 @stubber_cli.command(name="clone")
@@ -105,6 +102,8 @@ def cli_clone(path: Union[str, Path]):
 ##########################################################################################
 # switch
 ##########################################################################################
+# TODO: get version list from Git tags in the repo that is provided on the command line
+VERSION_LIST = ["latest"] + git.get_tags(config.mpy_path, minver="v1.10")
 
 
 @stubber_cli.command(name="switch")
@@ -115,6 +114,7 @@ def cli_clone(path: Union[str, Path]):
     default="latest",
     type=click.Choice(VERSION_LIST, case_sensitive=False),
     prompt=True,
+    prompt_required=False,
     help="The version of MicroPython to checkout",
 )
 def cli_fetch(path: Union[str, Path], tag: Optional[str] = None):
@@ -124,8 +124,10 @@ def cli_fetch(path: Union[str, Path], tag: Optional[str] = None):
     Specify the version with --tag or --version to specify the version tag
     of the MicroPython repo.
     The Micropython-lib repo will be checked out to a commit that corresponds
-    in time to that version tag, in oder to allow non-current versions to be
+    in time to that version tag, in order to allow non-current versions to be
     stubbed correctly.
+
+    The repros must be cloned already 
     """
     dest_path = Path(path)
     if not dest_path.exists():

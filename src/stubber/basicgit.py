@@ -5,6 +5,7 @@ from typing import Union
 import subprocess
 from pathlib import Path
 from typing import Union, List, Optional
+from packaging.version import parse
 
 
 def _run_git(
@@ -12,6 +13,7 @@ def _run_git(
     repo: Optional[Union[Path, str]] = None,
     expect_stderr=False,
     capture_output=True,
+    echo_output=True,
 ):
     "run a external (git) command in the repo's folder and deal with some of the errors"
     try:
@@ -28,7 +30,7 @@ def _run_git(
     if result.stderr != b"":
         if not expect_stderr:
             raise Exception(result.stderr.decode("utf-8"))
-        if capture_output:
+        if capture_output and echo_output:
             print(result.stderr.decode("utf-8"))
 
     if result.returncode < 0:
@@ -83,6 +85,23 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
                 elif lines[0].endswith("fix_lib_documentation"):
                     tag = "fix_lib_documentation"
     return tag
+
+
+def get_tags(repo: Optional[Path] = None, minver: Optional[str] = None) -> List[str]:
+    """
+    get list of tag of a local repo
+    """
+    if not repo:
+        repo = Path(".")
+
+    result = _run_git(["git", "tag", "-l"], repo=repo.as_posix(), expect_stderr=True)
+    if not result or result.returncode != 0:
+        return []
+    tags = result.stdout.decode("utf-8").replace("\r", "").split("\n")
+    tags = [tag for tag in tags if tag.startswith("v")]
+    if minver:
+        tags = [tag for tag in tags if parse(tag) >= parse(minver)]
+    return sorted(tags)
 
 
 def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
@@ -154,8 +173,8 @@ def fetch(repo: Union[Path, str]) -> bool:
     if not repo:
         raise NotADirectoryError
 
-    cmd = ["git", "fetch","--all", "--tags","--quiet"]
-    result = _run_git(cmd, repo=repo)
+    cmd = ["git", "fetch", "--all", "--tags", "--quiet"]
+    result = _run_git(cmd, repo=repo, echo_output=False)
     if not result:
         return False
     return result.returncode == 0

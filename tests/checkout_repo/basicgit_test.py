@@ -56,7 +56,7 @@ def test_git_clone_fast(mocker: MockerFixture, tmp_path):
     assert result == True
 
 
-@pytest.mark.basicgit
+# @pytest.mark.basicgit
 # @pytest.mark.skip(reason="test discards uncomitted changes in top repo")
 def test_get_tag_current():
     if not os.path.exists(".git"):
@@ -65,6 +65,18 @@ def test_get_tag_current():
         # get tag of current repro
         tag = git.get_tag()
         common_tst(tag)
+
+
+def test_get_tags():
+    # get tag of current repro
+    # requires that this repo has at least a v1.3 tag
+    tags = git.get_tags(minver="v1.3")
+    assert isinstance(tags, list)
+    assert len(tags) > 0
+    for tag in tags:
+        assert tag.startswith("v")
+        assert len(tag) >= 2
+        assert "." in tag
 
 
 @pytest.mark.basicgit
