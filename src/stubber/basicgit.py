@@ -154,7 +154,7 @@ def fetch(repo: Union[Path, str]) -> bool:
     if not repo:
         raise NotADirectoryError
 
-    cmd = ["git", "fetch origin"]
+    cmd = ["git", "fetch","--all", "--tags","--quiet"]
     result = _run_git(cmd, repo=repo)
     if not result:
         return False

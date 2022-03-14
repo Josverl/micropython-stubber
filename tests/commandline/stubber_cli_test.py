@@ -1,3 +1,4 @@
+from typing import List
 import pytest
 from pytest_mock import MockerFixture
 from mock import MagicMock
@@ -22,14 +23,19 @@ def test_stubber_help():
 ##########################################################################################
 def test_stubber_clone(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
-    mock_clone: MagicMock = mocker.MagicMock(return_value=0)
-    mocker.patch("stubber.stubber.git.clone", mock_clone)
+    mock_clone: MagicMock = mocker.patch("stubber.stubber.git.clone", autospec=True, return_value=0)
+    mock_fetch: MagicMock = mocker.patch("stubber.stubber.git.fetch", autospec=True, return_value=0)
     result = runner.invoke(stubber.stubber_cli, ["clone"])
     assert result.exit_code == 0
 
-    assert mock_clone.call_count >= 2
-    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("repos/micropython"))
-    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("repos/micropython-lib"))
+    # either clone or fetch
+    assert mock_clone.call_count + mock_fetch.call_count == 2
+    if mock_clone.call_count > 0:
+        mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("repos/micropython"))
+        mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("repos/micropython-lib"))
+    else:
+        mock_fetch.assert_any_call(Path("repos/micropython"))
+        mock_fetch.assert_any_call(Path("repos/micropython-lib"))
 
 
 def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
@@ -48,6 +54,51 @@ def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("foobar/micropython"))
     mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("foobar/micropython-lib"))
     assert m_tag.call_count >= 2
+
+
+##########################################################################################
+# switch
+##########################################################################################
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        ["switch", "--version", "latest", "--path", "foobar"],
+        ["switch", "--version", "v1.10", "--path", "foobar"],
+    ],
+)
+def test_stubber_switch(mocker: MockerFixture, params: List[str]):
+    runner = CliRunner()
+    # mock_clone: MagicMock = mocker.patch("stubber.stubber.git.clone", autospec=True, return_value=0)
+    # Mock Path.exists
+    m_fetch: MagicMock = mocker.patch("stubber.stubber.git.fetch", autospec=True, return_value=0)
+    m_switch: MagicMock = mocker.patch("stubber.stubber.git.switch_branch", autospec=True, return_value=0)
+    m_checkout: MagicMock = mocker.patch("stubber.stubber.git.checkout_tag", autospec=True, return_value=0)
+    m_get_tag: MagicMock = mocker.patch("stubber.stubber.git.get_tag", autospec=True, return_value="v1.42")
+    m_match = mocker.patch("stubber.stubber.get_mpy.match_lib_with_mpy", autospec=True)
+
+    m_exists = mocker.patch("stubber.stubber.Path.exists", return_value=True)
+    result = runner.invoke(stubber.stubber_cli, params)
+    assert result.exit_code == 0
+
+    # fetch latest
+    assert m_fetch.call_count == 2
+    # "foobar" from params is used as the path
+    m_fetch.assert_any_call(Path("foobar/micropython"))
+    m_fetch.assert_any_call(Path("foobar/micropython-lib"))
+
+    # core
+    m_match.assert_called_once()
+
+    if "latest" in params:
+        m_switch.assert_called_once()
+        m_checkout.assert_not_called()
+    else:
+        m_switch.assert_not_called()
+        m_checkout.assert_called_once()
+
+
 
 
 ##########################################################################################

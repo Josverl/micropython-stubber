@@ -62,16 +62,22 @@ def stubber_cli(ctx, verbose=False, debug=False):
 ##########################################################################################
 # clone
 ##########################################################################################
+# TODO: get version list from Git tags
+# git tag -l
+VERSION_LIST = ["v1.10", "v1.11", "v1.12", "v1.13", "v1.14", "v1.15", "v1.16", "v1.17", "v1.18", "latest"]
+
+
 @stubber_cli.command(name="clone")
 @click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
-@click.option("--tag", "--version", type=click.Choice(["v1.17", "v1.18", "latest"], case_sensitive=False))
-def cli_clone(path: Union[str, Path], tag: Optional[str] = None):
+def cli_clone(path: Union[str, Path]):
     """
-    Clone the micropython repos locally.
+    Clone/fetch the micropython repos locally.
 
     The local repos are used to generate frozen-stubs and doc-stubs.
     """
     dest_path = Path(path)
+    if not dest_path.exists():
+        os.mkdir(dest_path)
     # repos are relative to provided path
     if dest_path != config.repo_path:
         mpy_path = dest_path / "micropython"
@@ -80,24 +86,81 @@ def cli_clone(path: Union[str, Path], tag: Optional[str] = None):
         mpy_path = config.mpy_path
         mpy_lib_path = config.mpy_lib_path
 
-    if not dest_path.exists():
-        os.mkdir(dest_path)
+    # if exist : fetch
+    # allow switch to different tag
 
-    # TODO: if exist : fetch
-    # TODO: allow switch to different tag
-
-    if not tag:
+    if not (mpy_path / ".git").exists():
         git.clone(remote_repo="https://github.com/micropython/micropython.git", path=mpy_path)
     else:
-        git.clone(remote_repo="https://github.com/micropython/micropython.git", path=mpy_path, tag=tag)
-    git.clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=mpy_lib_path)
+        git.fetch(mpy_path)
 
-    if tag:
-        # TODO: clone then switch
-        get_mpy.match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
+    if not (mpy_lib_path / ".git").exists():
+        git.clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=mpy_lib_path)
+    else:
+        git.fetch(mpy_lib_path)
+    click.echo(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
+    click.echo(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
+
+
+##########################################################################################
+# switch
+##########################################################################################
+
+
+@stubber_cli.command(name="switch")
+@click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
+@click.option(
+    "--tag",
+    "--version",
+    default="latest",
+    type=click.Choice(VERSION_LIST, case_sensitive=False),
+    prompt=True,
+    help="The version of MicroPython to checkout",
+)
+def cli_fetch(path: Union[str, Path], tag: Optional[str] = None):
+    """
+    Switch to a specific version of the micropython repos.
+
+    Specify the version with --tag or --version to specify the version tag
+    of the MicroPython repo.
+    The Micropython-lib repo will be checked out to a commit that corresponds
+    in time to that version tag, in oder to allow non-current versions to be
+    stubbed correctly.
+    """
+    dest_path = Path(path)
+    if not dest_path.exists():
+        os.mkdir(dest_path)
+    # repos are relative to provided path
+    if dest_path != config.repo_path:
+        mpy_path = dest_path / "micropython"
+        mpy_lib_path = dest_path / "micropython-lib"
+    else:
+        mpy_path = config.mpy_path
+        mpy_lib_path = config.mpy_lib_path
+
+    # if no repos then error
+    if not (mpy_path / ".git").exists():
+        log.error("micropython repo not found")
+        return -1
+    if not (mpy_lib_path / ".git").exists():
+        log.error("micropython-lib repo not found")
+        return -1
+
+    # fetch then switch
+    git.fetch(mpy_path)
+    git.fetch(mpy_lib_path)
+
+    if not tag or tag == "":
+        tag = "latest"
+    if tag == "latest":
+        git.switch_branch(repo=mpy_path, branch="master")
+    else:
+        git.checkout_tag(repo=mpy_path, tag=tag)
+    get_mpy.match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
 
     click.echo(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
     click.echo(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
+    return 0
 
 
 ##########################################################################################
