@@ -113,6 +113,7 @@ except Exception:
 @stubber_cli.command(name="switch")
 @click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
 @click.option(
+    "-t",
     "--tag",
     "--version",
     default="latest",
