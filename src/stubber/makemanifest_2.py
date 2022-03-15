@@ -17,7 +17,7 @@ class FreezeError(Exception):
 
 
 # do not change class name
-class IncludeOptions:  # pragma : nocover
+class IncludeOptions:  # pragma : no cover
     def __init__(self, **kwargs):
         self._kwargs = kwargs
         self._defaults = {}
@@ -37,13 +37,13 @@ def freeze_as_mpy(path, script=None, opt=0):
 
 
 # do not change method name
-def freeze_as_str(path):  # pragma : nocover
+def freeze_as_str(path):  # pragma : no cover
     log.debug(" - freeze_as_str({})".format(path))
     freeze(path)
 
 
 # do not change method name
-def freeze_mpy(path, script=None, opt=0):  # pragma : nocover
+def freeze_mpy(path, script=None, opt=0):  # pragma : no cover
     """Freeze the input (see above), which must be .mpy files that are
     frozen directly.
     """
@@ -54,7 +54,7 @@ def freeze_mpy(path, script=None, opt=0):  # pragma : nocover
 # function used commonly in manifest.py to freeze a set of scripts
 # pylint: disable=unused-argument, unused-variable
 # do not change method name
-def freeze(path, script=None, opt=0):  # pragma : nocover
+def freeze(path, script=None, opt=0):  # pragma : no cover
     """Freeze the input, automatically determining its type.  A .py script
     will be compiled to a .mpy first then frozen, and a .mpy file will be
     frozen directly.
@@ -179,9 +179,9 @@ def freeze_internal(path: str, script: str, opt=None):
     source_path = _path / script
     dest_path = Path(stub_dir) / script
 
-    if not _path.is_dir():  # pragma : nocover
+    if not _path.is_dir():  # pragma : no cover
         raise FreezeError("freeze source path should be a directory")
-    if not stub_dir or stub_dir == "":  # pragma : nocover
+    if not stub_dir or stub_dir == "":  # pragma : no cover
         raise FreezeError("Stub folder not set")
 
     log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
@@ -190,9 +190,9 @@ def freeze_internal(path: str, script: str, opt=None):
     # copy file
     try:
         shutil.copy2(source_path, dest_path)
-    except (FileNotFoundError) as e:  # pragma : nocover
+    except (FileNotFoundError) as e:  # pragma : no cover
         log.warning(f"File {path}/{script} not found")
-    except (OSError, FileNotFoundError) as e:  # pragma : nocover
+    except (OSError, FileNotFoundError) as e:  # pragma : no cover
         log.exception(e)
 
 

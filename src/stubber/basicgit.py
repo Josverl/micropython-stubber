@@ -23,16 +23,16 @@ def _run_git(
             result = subprocess.run(cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix())
         else:
             result = subprocess.run(cmd, capture_output=capture_output, check=True)
-    except (NotADirectoryError, FileNotFoundError) as e:  # pragma : nocover
+    except (NotADirectoryError, FileNotFoundError) as e:  # pragma : no cover
         return None
-    except subprocess.CalledProcessError as e:  # pragma : nocover
+    except subprocess.CalledProcessError as e:  # pragma : no cover
         # add some logging for github actions
         print("Exception on process, rc=", e.returncode, "output=", e.output)
         return None
     if result.stderr != b"":
         if not expect_stderr:
             raise Exception(result.stderr.decode("utf-8"))
-        if capture_output and echo_output:  # pragma : nocover
+        if capture_output and echo_output:  # pragma : no cover
             print(result.stderr.decode("utf-8"))
 
     if result.returncode < 0:

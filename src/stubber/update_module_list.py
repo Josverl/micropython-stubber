@@ -1,4 +1,4 @@
-# pragma : nocover
+# pragma : no cover
 """
 generate the list of modules that should be attempted to stub
 for this : 
