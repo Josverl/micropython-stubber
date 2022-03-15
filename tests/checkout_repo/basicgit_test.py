@@ -39,7 +39,7 @@ def test_git_clone(tmp_path):
 
 def test_git_clone_fast(mocker: MockerFixture, tmp_path):
 
-    result = CompletedProcess(
+    m_result = CompletedProcess(
         args=[
             "git",
             "clone",
@@ -49,10 +49,19 @@ def test_git_clone_fast(mocker: MockerFixture, tmp_path):
         returncode=0,
     )
 
-    mock: MagicMock = mocker.MagicMock(return_value=result)
+    mock: MagicMock = mocker.MagicMock(return_value=m_result)
     mocker.patch("stubber.basicgit.subprocess.run", mock)
 
     result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
+    assert result == True
+
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True)
+    assert result == True
+
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True, tag="latest")
+    assert result == True
+
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True, tag="foobar")
     assert result == True
 
 
