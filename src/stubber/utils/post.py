@@ -29,7 +29,7 @@ def run_black(path: Path):
             cmd += ["--fast"]
         # capture to suppress based on log level
         result = subprocess.run(cmd, capture_output=log.level >= logging.INFO, check=True, shell=False, cwd=path)
-        if result.returncode != 0:  pragma: no cover #
+        if result.returncode != 0:  # pragma: no cover
             raise Exception(result.stderr.decode("utf-8"))
     except subprocess.SubprocessError:  # pragma: no cover
         log.error("some of the files are not in a proper format")
