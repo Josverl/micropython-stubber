@@ -9,7 +9,7 @@ from pathlib import Path
 
 try:
     import python_minifier
-except ImportError:  # pragma : no cover
+except ImportError:  # pragma: no cover
     python_minifier = None
 
 
@@ -78,13 +78,13 @@ def edit_lines(content, edits, diff=False):
         close_cnt = line.count(")")
         ahead_index = 1
         look_ahead = 0
-        while not open_cnt == close_cnt:  # pragma : no cover
+        while not open_cnt == close_cnt:  # pragma: no cover
             look_ahead = l_index + ahead_index
             ahead_index += 1
             next_l = content[look_ahead]
             open_cnt += next_l.count("(")
             close_cnt += next_l.count(")")
-        if ahead_index > 1:  # pragma : no cover
+        if ahead_index > 1:  # pragma: no cover
             return range(index, look_ahead + 1)
         prev = content[index - 1]
         _, line_ws, post_ws = get_whitespace_context(content, index)
@@ -194,7 +194,7 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
         edits.insert(1, clean)
 
     with source_script.open("r") as f:
-        if not python_minifier:  # pragma : no cover
+        if not python_minifier:  # pragma: no cover
             raise Exception("python_minifier not available")
 
         content = f.read()
@@ -248,7 +248,7 @@ def minify(
         with target.open("w+") as f:
             minified = minify_script(source_script=source, keep_report=keep_report, diff=diff)
             f.write(minified)
-    except Exception as e:  # pragma : no cover
+    except Exception as e:  # pragma: no cover
         print(e)
 
     print("Minified file written to :", target)
