@@ -241,13 +241,13 @@ def cli_minify(
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
-@click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
+# @click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 @click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_frozen(
     stub_folder: str = config.stub_path.as_posix(),
-    path: str = config.repo_path.as_posix(),
+    # path: str = config.repo_path.as_posix(),
     version: str = "",
     pyi: bool = True,
     black: bool = True,
@@ -383,7 +383,7 @@ def cli_docstubs(
 
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
     """
-    if verbose:
+    if verbose: # pragma: no cover
         log.setLevel(logging.DEBUG)
     log.info(f"stubs_from_docs version {__version__}\n")
 

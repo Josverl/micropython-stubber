@@ -383,7 +383,7 @@ class RSTReader:
         # Now parse all files mentioned in the toc
         for file in toctree:
             #
-            file_path =  config.mpy_path / "docs" / "library" / file.strip()
+            file_path = config.mpy_path / "docs" / "library" / file.strip()
             self.read_file(file_path)
             self.parse()
         # reset this file to done
@@ -641,17 +641,16 @@ class RSTReader:
             names += [self.parse_name()]
 
         m = re.search(r"..\s?\w+\s?::\s?", self.line)
-        if m:
-            col = m.end()
-        else:
+        if not m:  # pragma: no cover
             raise KeyError
+        col = m.end()
         counter = 1
         while (
             self.line_no + counter <= self.max_line
             and self.rst_text[self.line_no + counter].startswith(" " * col)
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
-            if self.verbose:
+            if self.verbose:  # pragma: no cover
                 log.debug("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
@@ -751,8 +750,8 @@ def generate_from_rst(
     # simplify debugging
     # files = [f for f in files if f.name == "collections.rst"]
 
-    # remove all files in desination folder to avoid left-behinds
-    for f in dst_path.rglob(pattern="*.*"):
+    # remove all .py/.pyi files in desination folder to avoid left-behinds
+    for f in dst_path.rglob(pattern="*.py*"):
         try:
             os.remove(f)
         except (OSError, PermissionError):
