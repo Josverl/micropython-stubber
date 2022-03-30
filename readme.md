@@ -77,7 +77,6 @@ MicroPython-Stubber is licensed under the MIT license, and all contributions sho
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
-
 <table>
   <tr>
     <td align="center"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=josverl" title="Code">💻</a> <a href="#research-josverl" title="Research">🔬</a> <a href="#ideas-josverl" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-josverl" title="Content">🖋</a> <a href="#stubs-josverl" title="MicroPython stubs">📚</a> <a href="#test-josverl" title="Test">✔</a></td>
@@ -103,6 +102,7 @@ MicroPython-Stubber is licensed under the MIT license, and all contributions sho
     <td align="center"><a href="https://github.com/MathijsNL"><img src="https://avatars0.githubusercontent.com/u/1612886?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MathijsNL</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/issues?q=author%3AMathijsNL" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://comingsoon.tm/"><img src="https://avatars0.githubusercontent.com/u/13251689?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Callum Jacob Hays</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/issues?q=author%3ACallumJHays" title="Bug reports">🐛</a> <a href="#test-CallumJHays" title="Test">✔</a></td>
     <td align="center"><a href="https://github.com/v923z"><img src="https://avatars0.githubusercontent.com/u/1310472?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zoltán Vörös</b></sub></a><br /><a href="#data-v923z" title="Data">🔣</a></td>
+    <td align="center"><a href="https://github.com/vincent-l-j"><img src="https://avatars.githubusercontent.com/u/20021376?v=4?s=100" width="100px;" alt=""/><br /><sub><b>vincent-l-j</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=vincent-l-j" title="Documentation">📖</a></td>
   </tr>
 </table>
 
