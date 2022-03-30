@@ -11,7 +11,8 @@
   [![codecov](https://codecov.io/gh/Josverl/micropython-stubber/branch/main/graph/badge.svg?token=WJFGMKBHOV)](https://codecov.io/gh/Josverl/micropython-stubber)
   [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
   <!-- break -->
-  [![Open in VSCode](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/josverl/micropython-stubber)
+  [![Open in VSCode](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc
+)](https://open.vscode.dev/josverl/micropython-stubber)
   
 The intellisense and code linting that is so prevalent in modern editors, does not work out-of-the-gate for MicroPython projects.
 While the language is Python, the modules used are different from CPython , and also different ports have different modules and classes , or the same class with different parameters.
