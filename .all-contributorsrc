@@ -205,6 +205,15 @@
       "contributions": [
         "data"
       ]
+    },
+    {
+      "login": "vincent-l-j",
+      "name": "vincent-l-j",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20021376?v=4",
+      "profile": "https://github.com/vincent-l-j",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#11---contributions)",
@@ -213,5 +222,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "none"
+  "commitConvention": "none",
+  "contributorsPerLine": 7
 }
