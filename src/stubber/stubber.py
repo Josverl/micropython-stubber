@@ -212,7 +212,7 @@ def cli_minify(
     all: bool,
 ) -> int:
     """
-    Minify createsubs*.py.
+    Minify createstubs*.py.
 
     Creates a minified version of the SOURCE micropython file in TARGET (file or folder).
     The goal is to use less memory / not to run out of memory, while generating Firmware stubs.
@@ -383,13 +383,13 @@ def cli_docstubs(
 
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
     """
-    if verbose: # pragma: no cover
+    if verbose:  # pragma: no cover
         log.setLevel(logging.DEBUG)
     log.info(f"stubs_from_docs version {__version__}\n")
 
     if path == config.repo_path.as_posix():
         # default
-        rst_path = Path(config.repo_path.as_posix()) / config.mpy_path / "docs" / "library"
+        rst_path = config.mpy_path / "docs" / "library"
     elif Path(path).stem == "micropython":
         # path to a micropython repo
         rst_path = Path(path) / "docs" / "library"
@@ -398,7 +398,7 @@ def cli_docstubs(
     v_tag = git.get_tag(rst_path.as_posix())
     if not v_tag:
         # if we can't find a tag , bail
-        raise ValueError
+        raise ValueError("No valid Tag found")
     v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
     release = git.get_tag(rst_path.as_posix(), abbreviate=False) or ""
 
