@@ -2,23 +2,12 @@
 # Developing
 
 ## Cloning the repo 
-The repo uses two submodules in order to generate the MicroPython frozen stubs.
-In order to fully check-out the repo you need to run additional commands: 
-how to clone inclusing submodules: 
 ``` bash
 git clone https://github.com/Josverl/micropython-stubber.git
 cd micropython-stubber
-git submodule init
-git submodule update --recursive
-# install pyright
-npm install 
-```
 
-### adding additional submodules 
-how to add : 
-``` bash
-git submodule add --force -b main https://github.com/micropython/micropython.git 
-git submodule add --force -b main https://github.com/micropython/micropython-lib.git 
+poetry install
+stubber clone
 ```
 
 ## Windows 10 

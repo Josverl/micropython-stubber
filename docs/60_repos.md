@@ -11,15 +11,10 @@
 | repo                | Why                      | Where                    | example
 |---------------------|--------------------------|----------------------------------|-----------------------------------|
 | micropython-stubber | needed to make stubs     | in your source folder            | develop/micropython-stubber | 
-| micropython         | to collect frozen modules| submodule of micropython-stubber | develop/micropython-stubber/micropython
-| micropython-lib     | to collect frozen modules| submodule of micropython-stubber | develop/micropython-stubber/micropython-lib
 | micropython-stubs   | stores collected stubs   | next to the `stubber`            | develop/micropython-stubs         |
 
 ```{note}
 - recommended is to create a symlink from `develop/micropython-stubber\all-stubs` to `develop/micropython-stubs`
-```
-```{note}
-- For Git submodules please refer to https://git-scm.com/book/en/v2/Git-Tools-Submodules
 ```
 
 ## Structure of this repo 
@@ -48,15 +43,17 @@ The file structure is based on my personal windows environment, but you should b
 
 Note: I found that, for me, using submodules caused more problems than it solved. So instead I link the two main repo's using a [symlink][].
 
-***Note:*** I in the repo tests I have used the folders `TESTREPO-micropython`  and `TESTREPO-micropython-lib` to avoid conflicts with any development that you might be doing on similar `micropython` repos at the potential cost of a little disk space.
-
 ``` powershell
 cd /develop 
 
 git clone  https://github.com/josverl/micropython-stubber.git 
 git clone  https://github.com/josverl/micropython-stubs.git 
-git clone  https://github.com/micropython/micropython.git 
-git clone  https://github.com/micropython/micropython.git 
+
+cd micropython-stubber
+poetry install
+
+stubber clone
+
 ```
 
 

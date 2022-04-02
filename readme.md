@@ -26,7 +26,7 @@ Fortunately with some additional configuration and data, it is possible to make 
 In order to achieve this a few things are needed:
 1) Stub files for the native / enabled modules in the firmware using PEP 484 Type Hints
 2) Specific configuration of the VSCode Python extensions 
-3) Specific configuration of Pylint
+3) Specific configuration of Pylint [ Optional ]
 4) Suppression of warnings that collide with the MicroPython principals or code optimization.
 
 Please review the documentation on [https://micropython-stubber.readthedocs.io]  
@@ -42,10 +42,41 @@ For now you will need to [configure this by hand](#manual-configuration), or use
 1. The sister-repo [**MicroPython-stubs**][stubs-repo] contains [all stubs][all-stubs] I have collected with the help of others, and which can be used directly.
 That repo also contains examples configuration files that can be easily adopted to your setup.
 
-2. A second repo [micropy-stubs repo][stubs-repo2] maintained by BradenM,  also contains stubs but in a structure used and distributed by the [micropy-cli](#using-micropy-cli) tool.
-you should use micropy-cli to consume stubs in this repo.
+2. A second repo [micropy-stubs repo][stubs-repo2] maintained by BradenM, also contains stubs, but in a structure only used and distributed by the [micropy-cli](#using-micropy-cli) tool.
+You should use micropy-cli to consume stubs from that repo.
 
 The (stretch) goal is to create a VSCode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
+
+
+## Install and basic usage
+
+``` sh
+pip install micropython-stubber
+
+# go to your working folder 
+cd my_stub_folder
+mkdir all-stubs
+
+# clone the micropython repo's and switch to a specific version 
+stubber clone
+stubber switch --version v1.18
+
+# get the document stubs for the current version ( v1.18 )
+stubber get-docstubs
+
+# get the frozen stubs for the current version ( v1.18 )
+stubber get-frozen
+
+# get the core CPython compatibility stubs from PyPi 
+stubber get-core
+
+# Update the fallback stubs
+stubber update-fallback
+
+#
+ls all-stubs
+dir all-stubs
+```
 
 
 ## Developing & testing 
