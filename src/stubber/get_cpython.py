@@ -10,7 +10,7 @@ import json
 
 from . import utils
 from pathlib import Path
-from .version import __version__
+from . import __version__, config
 import pkgutil
 import tempfile
 
@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 def get_core(requirements, stub_path=None, family: str = "core"):
     "Download MicroPython compatibility modules"
     if not stub_path:
-        stub_path = "./all-stubs/cpython-core"
+        stub_path = config.stub_path / "cpython-core"
     stub_path = Path(stub_path)
 
     # use pip to dowload requirements file to build folder in one go
@@ -34,7 +34,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
     # within package/mymodule1.py, for example
 
     data = pkgutil.get_data(__name__, "data/" + requirements)
-    if not data:
+    if not data:  # pragma: no cover
         raise Exception("Resource Not found")
     temp_file = tempfile.NamedTemporaryFile(prefix="requirements", suffix=".txt", delete=False)
     with temp_file.file as fp:
@@ -61,7 +61,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
             check=True,
         )
 
-    except OSError as err:
+    except OSError as err:  # pragma: no cover
         log.error("An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err))
 
     # copy *.py files in build folder to stub_path
@@ -72,7 +72,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
         modlist.append({"file": filename.name, "module": filename.stem})
         try:
             shutil.copy2(filename, stub_path)
-        except OSError as err:
+        except OSError as err:  # pragma: no cover
             log.exception(err)
     # remove build folder
     shutil.rmtree(build_path, ignore_errors=True)

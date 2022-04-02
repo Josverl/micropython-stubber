@@ -13,7 +13,6 @@ pytestmark = pytest.mark.rst_stub
 from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
-MICROPYTHON_FOLDER = "micropython"
 TEST_DOCFIX = False
 XFAIL_DOCFIX = False
 
@@ -42,29 +41,30 @@ def pyright_results(rst_stubs):
 
 
 @pytest.fixture(scope="module")
-def micropython_repo():
+def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "make sure a recent branch is checked out"
-    git.switch_branch("master", MICROPYTHON_FOLDER)
+
+    git.switch_branch("master", testrepo_micropython.as_posix())
     if TEST_DOCFIX:
         # run test against the proposed documentation fixes
         try:
-            git.switch_branch("fix_lib_documentation", MICROPYTHON_FOLDER)
+            git.switch_branch("fix_lib_documentation", testrepo_micropython.as_posix())
         except Exception:
             # git.switch_branch("master", MICROPYTHON_FOLDER)
             git.checkout_commit("micropython/master")
 
-    v_tag = git.get_tag(MICROPYTHON_FOLDER) or "xx_x"
+    v_tag = git.get_tag(testrepo_micropython.as_posix()) or "xx_x"
     yield v_tag
 
 
 # TODO: Source version and tag
 @pytest.fixture(scope="module")
-def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
+def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path):
     "Generate stubs from RST files - once for this module"
     v_tag = micropython_repo
     # setup our on folder for testing
     dst_folder = tmp_path_factory.mktemp("stubs") / v_tag
-    rst_folder = Path(MICROPYTHON_FOLDER) / "docs/library"
+    rst_folder = testrepo_micropython / "docs/library"
     generate_from_rst(rst_folder, dst_folder, v_tag=v_tag)
     yield dst_folder
 
@@ -78,10 +78,10 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo):
 
 @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 @pytest.mark.docfix
-def test_rst_all(tmp_path, micropython_repo):
+def test_rst_all(tmp_path, micropython_repo, testrepo_micropython: Path):
     v_tag = micropython_repo
 
-    rst_folder = Path(MICROPYTHON_FOLDER) / "docs/library"
+    rst_folder = Path(testrepo_micropython.as_posix()) / "docs/library"
     dst_folder = tmp_path / "noblack"
     x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag)
     assert type(x) == int, "returns a number"

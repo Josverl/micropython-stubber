@@ -3,9 +3,10 @@
 
 from libcst import parse_module, CSTValidationError, Module
 from libcst.codemod import CodemodContext
-from codemod.visitors import ApplyStubberAnnotationsVisitor
+from stubber.codemod.visitors import ApplyStubberAnnotationsVisitor
 
 from pathlib import Path
+from stubber import config
 
 
 def prRed(skk):
@@ -21,9 +22,9 @@ visitor = ApplyStubberAnnotationsVisitor(context)
 
 # Stubs := Rich
 # Sources: to be enriched
-
-stubs_dir = "all-stubs/micropython-v1_16-documentation/"
-sources_dir = "dev-stubs/micropython-v1_16-esp32/"
+# TOD
+stubs_dir = config.stub_path /  "micropython-v1_18-docstubs/"
+sources_dir = config.stub_path / "micropython-v1_18-esp32/"
 
 stubs_dict = {}
 sources_dict = {}

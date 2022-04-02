@@ -39,7 +39,7 @@ def test_git_clone(tmp_path):
 
 def test_git_clone_fast(mocker: MockerFixture, tmp_path):
 
-    result = CompletedProcess(
+    m_result = CompletedProcess(
         args=[
             "git",
             "clone",
@@ -49,14 +49,23 @@ def test_git_clone_fast(mocker: MockerFixture, tmp_path):
         returncode=0,
     )
 
-    mock: MagicMock = mocker.MagicMock(return_value=result)
+    mock: MagicMock = mocker.MagicMock(return_value=m_result)
     mocker.patch("stubber.basicgit.subprocess.run", mock)
 
     result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
     assert result == True
 
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True)
+    assert result == True
 
-@pytest.mark.basicgit
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True, tag="latest")
+    assert result == True
+
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True, tag="foobar")
+    assert result == True
+
+
+# @pytest.mark.basicgit
 # @pytest.mark.skip(reason="test discards uncomitted changes in top repo")
 def test_get_tag_current():
     if not os.path.exists(".git"):
@@ -67,9 +76,21 @@ def test_get_tag_current():
         common_tst(tag)
 
 
+def test_get_tags():
+    # get tag of current repro
+    # requires that this repo has at least a v1.3 tag
+    tags = git.get_tags(minver="v1.3")
+    assert isinstance(tags, list)
+    assert len(tags) > 0
+    for tag in tags:
+        assert tag.startswith("v")
+        assert len(tag) >= 2
+        assert "." in tag
+
+
 @pytest.mark.basicgit
 def test_get_tag_latest():
-    repo = Path("./micropython")
+    repo = Path("./repo/micropython")
     if not (repo / ".git").exists():
         pytest.skip("no git repo in current folder")
 
@@ -77,7 +98,7 @@ def test_get_tag_latest():
 
     assert result.stderr == 0
     # get tag of current repro
-    tag = git.get_tag("./micropython")
+    tag = git.get_tag("./repo/micropython")
     assert tag == "latest"
 
 
@@ -134,31 +155,39 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    def mock_run_git_1(cmd: List[str], repo=None, expect_stderr=False):
-        return None
-
-    mocker.patch("stubber.basicgit._run_git", mock_run_git_1)
+    mock_run_git = mocker.patch("stubber.basicgit._run_git", autospec=True, return_value=None)
 
     # fail to fetch
     r = git.fetch(repo=".")
     assert r == False
+    mock_run_git.assert_called_once()
 
     # fail to get tag
+    mock_run_git.reset_mock()
     r = git.get_tag()
+    mock_run_git.assert_called_once()
     assert r == None
 
     # fail to checkout tag
+    mock_run_git.reset_mock()
     r = git.checkout_tag("v1.10")
+    mock_run_git.assert_called_once()
     assert r == False
 
     # fail to checkout commit
+    mock_run_git.reset_mock()
     r = git.checkout_commit(commit_hash="123")
+    mock_run_git.assert_called_once()
     assert r == False
 
     # fail to switch tag
+    mock_run_git.reset_mock()
     r = git.switch_tag(tag="v1.10")
+    mock_run_git.assert_called_once()
     assert r == False
 
     # fail to switch branch
+    mock_run_git.reset_mock()
     r = git.switch_branch(branch="foobar")
+    mock_run_git.assert_called_once()
     assert r == False

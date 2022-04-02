@@ -6,11 +6,14 @@ import os
 from pathlib import Path
 import pytest
 from _pytest.config import Config
+
+# config
+from stubber import config
+
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig( level=logging.INFO) # encoding="utf-8", on 3.10 only
-
+logging.basicConfig(level=logging.INFO)  # encoding="utf-8", on 3.10 only
 
 # make sure that the source can be found, but not twice
 RootPath = Path(os.getcwd())
@@ -70,14 +73,13 @@ def mock_micropython_path(pytestconfig: Config):
 @pytest.fixture(scope="session")
 def testrepo_micropython(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
-    root = pytestconfig.rootpath
-    return pytestconfig.rootpath / "micropython"
+    return pytestconfig.rootpath / config.mpy_path
 
 
 @pytest.fixture(scope="session")
 def testrepo_micropython_lib(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
-    return pytestconfig.rootpath / "micropython-lib"
+    return pytestconfig.rootpath / config.mpy_lib_path
 
 
 # --------------------------------------

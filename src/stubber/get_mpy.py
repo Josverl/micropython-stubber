@@ -22,10 +22,12 @@ import os
 import glob
 import re
 import shutil
+from typing import Optional
 import warnings
 import logging
 from . import basicgit as git
 from . import utils
+from . import config
 import csv
 from collections import defaultdict
 
@@ -44,7 +46,7 @@ log = logging.getLogger(__name__)
 FAMILY = "micropython"
 
 
-def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str = None):
+def get_frozen(stub_folder: str, version: str, mpy_folder: Optional[str] = None, lib_folder: Optional[str] = None):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
@@ -52,21 +54,21 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
     """
 
     current_dir = os.getcwd()
-    if not mpy_path:
-        mpy_path = "./micropython"
-    if not lib_path:
-        lib_path = "./micropython-lib"
-    if not stub_path:
-        stub_path = "{}/{}_{}_frozen".format(utils.STUB_FOLDER, FAMILY, utils.clean_version(version, flat=True))
+    if not mpy_folder:
+        mpy_folder = "./micropython"
+    if not lib_folder:
+        lib_folder = "./micropython-lib"
+    if not stub_folder:
+        stub_folder = "{}/{}_{}_frozen".format(config.stub_path, FAMILY, utils.clean_version(version, flat=True))
     # get the manifests of the different ports and boards
-    mpy_path = Path(mpy_path).absolute().as_posix()
-    lib_path = Path(lib_path).absolute().as_posix()
-    stub_path = Path(stub_path).absolute().as_posix()
+    mpy_folder = Path(mpy_folder).absolute().as_posix()
+    lib_folder = Path(lib_folder).absolute().as_posix()
+    stub_folder = Path(stub_folder).absolute().as_posix()
 
     # manifest.py is used for board specific and daily builds
     # manifest_release.py is used for the release builds
-    manifests = glob.glob(mpy_path + "/ports/**/manifest.py", recursive=True) + glob.glob(
-        mpy_path + "/ports/**/manifest_release.py", recursive=True
+    manifests = glob.glob(mpy_folder + "/ports/**/manifest.py", recursive=True) + glob.glob(
+        mpy_folder + "/ports/**/manifest_release.py", recursive=True
     )
 
     # remove any manifests  that are below one of the virtual environments (venv) \
@@ -76,38 +78,35 @@ def get_frozen(stub_path: str, version: str, mpy_path: str = None, lib_path: str
 
     if len(manifests) > 0:
         log.info("MicroPython v1.12 and newer")
-        get_frozen_from_manifest(manifests, stub_path, mpy_path, lib_path, version)
+        get_frozen_from_manifest(manifests, stub_folder, mpy_folder, lib_folder, version)
     else:
         log.info("MicroPython v1.11, older or other")
         # others
-        get_frozen_folders(stub_path, mpy_path, lib_path, version)
+        get_frozen_folders(stub_folder, mpy_folder, lib_folder, version)
     # restore cwd
     os.chdir(current_dir)
 
 
-def get_frozen_folders(stub_path: str, mpy_path: str, lib_path: str, version: str):
+def get_frozen_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: str):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
     locates the to-be-frozen files in modules folders
     - 'ports/<port>/modules/*.py'
     - 'ports/<port>/boards/<board>/modules/*.py'
     """
-    micropython_lib_commits = read_micropython_lib_commits()
-    # Make sure that the correct micropython-lib release is checked out
-    log.info(f"Matching repo's:  Micropython {version} needs micropython-lib:{micropython_lib_commits[version]}")
-    git.checkout_commit(micropython_lib_commits[version], lib_path)
+    match_lib_with_mpy(version_tag=version, lib_folder=lib_folder)
 
     targets = []
-    scripts = glob.glob(mpy_path + "/ports/**/modules/*.py", recursive=True)
+    scripts = glob.glob(mpy_folder + "/ports/**/modules/*.py", recursive=True)
     if len(scripts) > 0:
         # clean target folder
-        shutil.rmtree(stub_path, ignore_errors=True)
+        shutil.rmtree(stub_folder, ignore_errors=True)
     for script in scripts:
         mpy_port, mpy_board = get_target_names(script)
         if not mpy_board:
             mpy_board = "GENERIC"
 
-        dest_path = os.path.join(stub_path, mpy_port, mpy_board)
+        dest_path = os.path.join(stub_folder, mpy_port, mpy_board)
         log.info("freeze_internal : {:<30} to {}".format(script, dest_path))
         # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
@@ -185,11 +184,18 @@ def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
     return version_commit
 
 
+def match_lib_with_mpy(version_tag: str, lib_folder: str):
+    micropython_lib_commits = read_micropython_lib_commits()
+    # Make sure that the correct micropython-lib release is checked out
+    log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
+    return git.checkout_commit(micropython_lib_commits[version_tag], lib_folder)
+
+
 def get_frozen_from_manifest(
     manifests,
-    stub_path: str,
-    mpy_path: str,
-    lib_path: str,
+    stub_folder: str,
+    mpy_folder: str,
+    lib_folder: str,
     version: str,
 ):
     """
@@ -199,10 +205,10 @@ def get_frozen_from_manifest(
     - manifest_release.py is used for the release builds
     """
 
-    stub_path = os.path.abspath(stub_path)
+    stub_folder = os.path.abspath(stub_folder)
 
-    makemanifest.path_vars["MPY_DIR"] = mpy_path
-    makemanifest.path_vars["MPY_LIB_DIR"] = lib_path
+    makemanifest.path_vars["MPY_DIR"] = mpy_folder
+    makemanifest.path_vars["MPY_LIB_DIR"] = lib_folder
 
     # https://regexr.com/4rh39
     # but with an extra P for Python named groups...
@@ -214,10 +220,7 @@ def get_frozen_from_manifest(
 
     # matches= re.search(regex, 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\boards\\TINYPICO\\manifest.py')
     # print( matches.group('port'), matches.group('board'))
-    micropython_lib_commits = read_micropython_lib_commits()
-    # Make sure that the correct micropython-lib release is checked out
-    log.info(f"Matching repo's:  Micropython {version} needs micropython-lib:{micropython_lib_commits[version]}")
-    git.checkout_commit(micropython_lib_commits[version], lib_path)
+    match_lib_with_mpy(version_tag=version, lib_folder=lib_folder)
 
     # Include top-level inputs, to generate the manifest
     for manifest in manifests:
@@ -258,7 +261,7 @@ def get_frozen_from_manifest(
             board_name = "RELEASE"
 
         # set global for later use - must be an absolute path.
-        freeze_path = (Path(stub_path) / port_name / board_name).absolute()
+        freeze_path = (Path(stub_folder) / port_name / board_name).absolute()
 
         makemanifest.stub_dir = freeze_path.as_posix()
         # clean target folder
@@ -271,21 +274,3 @@ def get_frozen_from_manifest(
 
         # make a module manifest
         utils.make_manifest(Path(makemanifest.stub_dir), FAMILY, port=port_name, board=board_name, version=version, stubtype="frozen")
-
-
-if __name__ == "__main__":
-    "just gather for the current version"
-    logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    mpy_path = "./micropython"
-    lib_path = "./micropython-lib"
-    version = utils.clean_version(git.get_tag(mpy_path) or "0.0")
-
-    if version:
-        log.info("found micropython version : {}".format(version))
-        # folder/{family}_{version}_frozen
-        stub_path = utils.stubfolder("{}-{}-frozen".format(FAMILY, utils.clean_version(version, flat=True)))
-        get_frozen(stub_path, version=version, mpy_path=mpy_path, lib_path=lib_path)
-        exit(0)
-    else:
-        log.warning("Unable to find the micropython repo in folder : {}".format(mpy_path))
-        exit(1)

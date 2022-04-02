@@ -7,7 +7,16 @@ Format: a dictionary with :
 
 """
 # These are shown to import
-__all__ = ["LOOKUP_LIST", "NONE_VERBS", "CHILD_PARENT_CLASS", "PARAM_FIXES", "MODULE_GLUE", "RST_DOC_FIXES"]
+__all__ = [
+    "LOOKUP_LIST",
+    "NONE_VERBS",
+    "CHILD_PARENT_CLASS",
+    "PARAM_FIXES",
+    "MODULE_GLUE",
+    "RST_DOC_FIXES",
+    "DOCSTUB_SKIP",
+    "U_MODULES",
+]
 
 
 # modules documented with base name only
