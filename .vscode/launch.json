@@ -15,6 +15,15 @@
             ]
         },
         {
+            "name": "Python: stubber get-docstubs",
+            "type": "python",
+            "request": "launch",
+            "module": "stubber.stubber",
+            "args": [
+                "get-docstubs"
+            ]
+        },
+        {
             "name": "PS1: Current File",
             "type": "PowerShell",
             "request": "launch",
