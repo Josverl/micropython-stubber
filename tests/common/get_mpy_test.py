@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 import pytest
 
@@ -16,11 +17,11 @@ from stubber.utils import clean_version
 import stubber.get_mpy as get_mpy
 
 
-def test_get_mpy(tmp_path):
+def test_get_mpy(tmp_path,testrepo_micropython:Path, testrepo_micropython_lib:Path):
 
     # Use Submodules
-    mpy_path = "./micropython"
-    lib_path = "./micropython-lib"
+    mpy_path = testrepo_micropython.as_posix()
+    lib_path = testrepo_micropython_lib.as_posix()
     try:
         version = clean_version(git.get_tag(mpy_path) or "0.0")
     except Exception:
@@ -32,7 +33,7 @@ def test_get_mpy(tmp_path):
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
+    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_folder=mpy_path, lib_folder=lib_path)
 
     modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
     stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))

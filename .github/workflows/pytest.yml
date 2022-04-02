@@ -33,7 +33,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          submodules: "true"
           fetch-depth: 0
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
@@ -67,7 +66,13 @@ jobs:
       #----------------------------------------------
       - name: Install library
         run: poetry install --no-interaction
-
+      
+      #----------------------------------------------
+      # stubber clone 
+      # repos needed for tests 
+      #----------------------------------------------
+      - name: stubber clone
+        run: poetry run stubber clone
 
 
       - name: flag tools executable (on linux)

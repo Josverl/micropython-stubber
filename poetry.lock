@@ -520,6 +520,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "typed-config"
+version = "1.1.0"
+description = "Typed, extensible, dependency free configuration reader for Python projects for multiple config sources and working well in IDEs for great autocomplete performance."
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+
+[[package]]
 name = "typing-extensions"
 version = "4.1.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -558,7 +566,7 @@ tools = ["rshell", "esptool"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "65f3f12476e662fcaf2eb2f34dfc7318f9511f175ceb29a959ecdfd73bd6a93f"
+content-hash = "88428c0c0a4d25a74f92ca688f098bfec0f664390693e91c005f70bd740ea543"
 
 [metadata.files]
 atomicwrites = [
@@ -950,6 +958,10 @@ six = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+typed-config = [
+    {file = "typed-config-1.1.0.tar.gz", hash = "sha256:a3c106f14e84d41057801d50fce8a550446275d80c665e3861868476e5a0d32a"},
+    {file = "typed_config-1.1.0-py3-none-any.whl", hash = "sha256:866cb26b8172058fe1aec09a66b1d362f7f6650593e3544b80e18d65fdedee5d"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.1.1-py3-none-any.whl", hash = "sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2"},

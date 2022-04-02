@@ -70,18 +70,21 @@ import logging
 import json
 import subprocess
 from pathlib import Path
-from .version import __version__
+
+from .rst import return_type_from_context
+from .rst import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP, U_MODULES
+
+from . import __version__
 from . import utils
+from . import config
 
 from .rst import (
     TYPING_IMPORT,
-    return_type_from_context,
     ModuleSourceDict,
     ClassSourceDict,
     FunctionSourceDict,
 )
 
-from .rst.lookup import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP, U_MODULES
 
 # logging
 log = logging.getLogger(__name__)
@@ -379,7 +382,9 @@ class RSTReader:
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
         # Now parse all files mentioned in the toc
         for file in toctree:
-            self.read_file(Path("micropython/docs/library") / file.strip())
+            #
+            file_path = config.mpy_path / "docs" / "library" / file.strip()
+            self.read_file(file_path)
             self.parse()
         # reset this file to done
         self.rst_text = []
@@ -636,17 +641,16 @@ class RSTReader:
             names += [self.parse_name()]
 
         m = re.search(r"..\s?\w+\s?::\s?", self.line)
-        if m:
-            col = m.end()
-        else:
+        if not m:  # pragma: no cover
             raise KeyError
+        col = m.end()
         counter = 1
         while (
             self.line_no + counter <= self.max_line
             and self.rst_text[self.line_no + counter].startswith(" " * col)
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
-            if self.verbose:
+            if self.verbose:  # pragma: no cover
                 log.debug("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
@@ -746,8 +750,8 @@ def generate_from_rst(
     # simplify debugging
     # files = [f for f in files if f.name == "collections.rst"]
 
-    # remove all files in desination folder to avoid left-behinds
-    for f in dst_path.rglob(pattern="*.*"):
+    # remove all .py/.pyi files in desination folder to avoid left-behinds
+    for f in dst_path.rglob(pattern="*.py*"):
         try:
             os.remove(f)
         except (OSError, PermissionError):

@@ -1,10 +1,10 @@
 [tool.micropython-stubber]
-stub-folder = "./all-stubs"
-repo-folder = "./repos"
+stub-path = "./all-stubs"
+repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.6.3"
+version = "1.6.4"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
@@ -52,6 +52,7 @@ rshell = {version = "0.0.31", optional = true}
 esptool = {version = "3.2", optional = true}
 importlib-metadata = {version = "^1.0", python = "<3.8"}
 tomli = { version ="^2.0.1", python = "<3.11"}
+typed-config = "^1.1.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -166,6 +167,7 @@ show_missing = true
 exclude_lines = [ 
     # Have to re-enable the standard pragma
     "pragma: no cover",
+    "pragma: nocover",
 
     # Don't complain about missing debug-only code:
     "def __repr__",
