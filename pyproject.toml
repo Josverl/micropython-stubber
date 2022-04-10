@@ -4,7 +4,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.6.4"
+version = "1.6.6"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde"]
 license = "MIT"
