@@ -13,8 +13,8 @@ pytestmark = pytest.mark.rst_stub
 from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
 
-TEST_DOCFIX = False
-XFAIL_DOCFIX = False
+TEST_DOCFIX = False  # run the tests agains the doc_fix_branch
+XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 
 
 ###################################################################################################
