@@ -9,13 +9,16 @@ libcst==0.4.1; python_version >= "3.6"
 mpy-cross==1.18
 mypy-extensions==0.4.3; python_version >= "3.6" and python_full_version >= "3.6.2"
 mypy==0.931; python_version >= "3.6"
+packaging==21.3; python_version >= "3.6"
 pathspec==0.9.0; python_full_version >= "3.6.2"
 platformdirs==2.5.1; python_version >= "3.7" and python_full_version >= "3.6.2"
 pyflakes==2.4.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0"
+pyparsing==3.0.7; python_version >= "3.6"
 python-minifier==2.5.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.3.0" and python_version < "3.11")
 pyyaml==6.0; python_version >= "3.6"
 requests==2.27.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.6.0")
 tomli==2.0.1; python_version >= "3.7" and python_full_version >= "3.6.2" or python_version < "3.11"
+typed-config==1.1.0; python_full_version >= "3.6.0"
 typing-extensions==4.1.1; python_version < "3.10" and python_full_version >= "3.6.2" and python_version >= "3.6"
 typing-inspect==0.7.1; python_version >= "3.6"
 urllib3==1.26.8; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version < "4"
