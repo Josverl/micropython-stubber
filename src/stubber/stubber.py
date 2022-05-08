@@ -105,7 +105,7 @@ def cli_clone(path: Union[str, Path]):
 # get version list from Git tags in the repo that is provided on the command line
 
 try:
-    VERSION_LIST = ["latest"] + git.get_tags(config.mpy_path, minver="v1.10")
+    VERSION_LIST = git.get_tags(config.mpy_path, minver="v1.10") + ["v1.9.3", "v1.9.4", "latest"]
 except Exception:
     VERSION_LIST = ["latest"]
 
