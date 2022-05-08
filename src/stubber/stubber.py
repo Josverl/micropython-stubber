@@ -90,6 +90,7 @@ def cli_clone(path: Union[str, Path]):
         git.clone(remote_repo="https://github.com/micropython/micropython.git", path=mpy_path)
     else:
         git.fetch(mpy_path)
+        git.pull(mpy_path)
 
     if not (mpy_lib_path / ".git").exists():
         git.clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=mpy_lib_path)

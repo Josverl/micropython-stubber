@@ -182,7 +182,7 @@ def fetch(repo: Union[Path, str]) -> bool:
     return result.returncode == 0
 
 
-def pull(repo: str, branch="main") -> bool:
+def pull(repo: Union[Path, str], branch="main") -> bool:
     """
     pull a repo origin into main
     repo should be in the form of : path/.git
@@ -191,7 +191,7 @@ def pull(repo: str, branch="main") -> bool:
     """
     if not repo:
         raise NotADirectoryError
-    repo = repo.replace("\\", "/")
+    repo = Path(repo)
     # first checkout HEAD
     cmd = ["git", "checkout", "main", "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
