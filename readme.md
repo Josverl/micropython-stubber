@@ -135,6 +135,7 @@ MicroPython-Stubber is licensed under the MIT license, and all contributions sho
     <td align="center"><a href="http://comingsoon.tm/"><img src="https://avatars0.githubusercontent.com/u/13251689?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Callum Jacob Hays</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/issues?q=author%3ACallumJHays" title="Bug reports">🐛</a> <a href="#test-CallumJHays" title="Test">✔</a></td>
     <td align="center"><a href="https://github.com/v923z"><img src="https://avatars0.githubusercontent.com/u/1310472?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zoltán Vörös</b></sub></a><br /><a href="#data-v923z" title="Data">🔣</a></td>
     <td align="center"><a href="https://github.com/vincent-l-j"><img src="https://avatars.githubusercontent.com/u/20021376?v=4?s=100" width="100px;" alt=""/><br /><sub><b>vincent-l-j</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=vincent-l-j" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/yegorLitvinov"><img src="https://avatars.githubusercontent.com/u/20367310?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Egor Litvinov</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/issues?q=author%3AyegorLitvinov" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
