@@ -145,6 +145,8 @@ def test_checkout_sibling(testrepo_micropython):
     assert git.get_tag(repo_path) == x, "can restore to prior version"
 
 
+@pytest.mark.basicgit
+@pytest.mark.skip()
 def test_fetch():
     with pytest.raises(NotADirectoryError):
         git.fetch(repo=None)  # type: ignore

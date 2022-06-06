@@ -149,14 +149,18 @@ class RSTReader:
         in order to do this the rst_test array is changed by the function
         and max_line is adjusted
         """
-        while not is_balanced(self.line) and self.line_no >= 0 and self.line_no < self.max_line:
-            # concat the ines
-            self.rst_text[self.line_no] = self.rst_text[self.line_no] + self.rst_text[self.line_no + 1]
-            # remove the next line
-            self.rst_text.pop(self.line_no + 1)
-            # adjust length
-            self.max_line -= 1
-
+        append = 0
+        newline = self.rst_text[self.line_no]
+        while not is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
+            append += 1
+            # concat the lines
+            newline += self.rst_text[self.line_no + append]
+        # only update line if things balanced out correctly
+        if is_balanced(newline):
+            self.rst_text[self.line_no] = newline
+            for i in range(append):
+                self.rst_text.pop(self.line_no + 1)
+                self.max_line -= 1
         # reprocess line
         return self.line
 
