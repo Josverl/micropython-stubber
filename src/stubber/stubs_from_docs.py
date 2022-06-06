@@ -202,7 +202,7 @@ class RSTReader:
 
     def read_file(self, filename: Path):
         log.debug(f"Reading : {filename}")
-        # ingore Unicode decoding issues
+        # ignore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
 
