@@ -94,6 +94,17 @@ NEW_OUTPUT = True
 SEPERATOR = "::"
 
 
+def is_balanced(s: str) -> bool:
+    """
+    Check if a string has balanced parentheses
+    """
+    if s.count("(") != s.count(")"):
+        return False
+    if s.count("{") != s.count("}"):
+        return False
+    return True
+
+
 class RSTReader:
     verbose = False
     gather_docs = False  # used only during Development
@@ -131,6 +142,23 @@ class RSTReader:
         else:
             self.last_line = ""
         return self.last_line
+
+    def extend_and_balance_line(self) -> str:
+        """
+        Append the current line + next line in order to try to balance the parentheses
+        in order to do this the rst_test array is changed by the function
+        and max_line is adjusted
+        """
+        while not is_balanced(self.line) and self.line_no >= 0 and self.line_no < self.max_line:
+            # concat the ines
+            self.rst_text[self.line_no] = self.rst_text[self.line_no] + self.rst_text[self.line_no + 1]
+            # remove the next line
+            self.rst_text.pop(self.line_no + 1)
+            # adjust length
+            self.max_line -= 1
+
+        # reprocess line
+        return self.line
 
     @property
     def module_names(self) -> List[str]:
@@ -520,6 +548,8 @@ class RSTReader:
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
         log.debug(f"# {self.line.rstrip()}")
+        if not is_balanced(self.line):
+            self.extend_and_balance_line()
 
         ## rst_hint is used to access the method decorator ( method, staticmethod, staticmethod ... )
         rst_hint = self.get_rst_hint()
