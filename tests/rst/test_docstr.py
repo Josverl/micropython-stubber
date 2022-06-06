@@ -124,6 +124,15 @@ Methods
 
    Initialise the CAN bus with the given parameters:
 
+
+.. method:: CAN.multi(mode, prescaler=100, *, sjw=1, 
+        bs1=6, bs2=8, auto_restart=False, baudrate=0, sample_point=75,
+        num_filter_banks=14, brs_sjw=1, brs_bs1=8, brs_bs2=3, brs_baudrate=0, 
+        brs_sample_point=75)
+
+   Initialise the CAN bus with the given parameters:
+
+
 """
 
 
@@ -135,6 +144,11 @@ def test_parse_long_method():
     assert len(r.output) > 1
     assert r.output_dict
     assert r.output_dict["class CAN():"]
+
     assert r.output_dict["class CAN():"]["def init"]
-    assert ")" in r.output_dict["class CAN():"]["def init"]["def"]
-    assert r.output_dict["class CAN():"]["def init"]["def"] == "    def init(self,  -> Any:"
+    # closing bracket in first line of method def
+    assert ")" in r.output_dict["class CAN():"]["def init"]["def"][0]
+
+    assert r.output_dict["class CAN():"]["def multi"]
+    # closing bracket in first line of method def
+    assert ")" in r.output_dict["class CAN():"]["def multi"]["def"][0]
