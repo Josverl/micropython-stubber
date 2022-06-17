@@ -22,7 +22,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.5"
+__version__ = "1.5.6"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -396,7 +396,7 @@ def ensure_folder(path: str):
 def _info():
     "collect base information on this runtime"
     _n = sys.implementation.name  # type: ignore
-    _p = sys.platform
+    _p = sys.platform if not sys.platform.startswith("pyb") else "stm32"
     info = {
         "name": _n,  # - micropython
         "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
