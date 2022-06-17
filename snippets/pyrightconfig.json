@@ -2,7 +2,7 @@
 {
     "include": [
         "esp32",
-        "pyboard",
+        "stm32",
         "rp2",
         "esp8266",
         "mpy-stdlib",
@@ -17,8 +17,7 @@
     "reportMissingTypeStubs": "warning",
     "stubPath": "micropython-typings",
     "logLevel": "Trace",
-    "extraPaths": [
-    ],
+    "extraPaths": [],
     "executionEnvironments": [
         {
             "root": "validate-stdlib",
@@ -51,10 +50,10 @@
             ]
         },
         {
-            "root": "pyboard",
+            "root": "stm32",
             "extraPaths": [
                 "../all-stubs/micropython-v1_18-frozen/stm32/GENERIC",
-                "../all-stubs/micropython-v1_18-pyboard"
+                "../all-stubs/micropython-v1_18-stm32"
             ]
         },
         {
