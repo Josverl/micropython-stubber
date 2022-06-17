@@ -21,7 +21,7 @@ C=OSError
 import sys,gc as E,uos as os
 from utime import sleep_us as e
 from ujson import dumps as K
-__version__='1.5.5'
+__version__='1.5.6'
 a=2
 f=2
 try:from machine import resetWDT as R
@@ -155,7 +155,7 @@ def S(path):
 				else:raise G
 		F=A+1
 def _info():
-	g=' on ';f='0.0.0';e='port';d='platform';c='machine';b='nodename';a='name';T='mpy';S='unknown';R='-';Q='sysname';L='v';K='family';F='build';C='ver';B='release';U=sys.implementation.name;V=sys.platform;A={a:U,B:f,O:f,F:G,Q:S,b:S,c:S,K:U,d:V,e:V,C:G}
+	g=' on ';f='0.0.0';e='port';d='platform';c='machine';b='nodename';a='name';T='mpy';S='unknown';R='-';Q='sysname';L='v';K='family';F='build';C='ver';B='release';U=sys.implementation.name;V=sys.platform if not sys.platform.startswith('pyb')else'stm32';A={a:U,B:f,O:f,F:G,Q:S,b:S,c:S,K:U,d:V,e:V,C:G}
 	try:A[B]=I.join([str(A)for A in sys.implementation.version]);A[O]=A[B];A[a]=sys.implementation.name;A[T]=sys.implementation.mpy
 	except H:pass
 	if sys.platform not in('unix','win32'):

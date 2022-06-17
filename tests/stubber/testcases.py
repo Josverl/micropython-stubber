@@ -99,7 +99,7 @@ fwid_test_cases = [
     ("micropython-v1.11-8-esp8622", "micropython", "esp8622", mpy_v1_11_8_esp8622),
     ("micropython-v1.17-esp8622", "micropython", "esp8622", mpy_v1_17_esp8622),
     # mpy pyb1
-    ("micropython-v1.13-95-pyb1", "micropython", "pyb1", pyb1_v1_13),
+    ("micropython-v1.13-95-stm32", "micropython", "pyb1", pyb1_v1_13),
     # lobo
     ("loboris-v3.2.24-esp32", "micropython", "esp32_LoBo", lobo),
     ("loboris-v3.2.24-esp32", "micropython", "esp32_LoBo", lobo_bt_ram),
