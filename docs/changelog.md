@@ -1,6 +1,11 @@
 
 # Changelog 
 
+# V1.6.9
+- update board stubber to report pyboards as port=stm32 
+- update filestructure to reflect this change in nameing
+
+
 # v1.6.4
 - unified different scripts into a single CLI tool
 - replace submodules with `stubber clone` command

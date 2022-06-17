@@ -4,33 +4,29 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.6.8"
+version = "1.6.9"
 description = "Tooling to create and maintain stubs for MicroPython"
-authors = ["Jos Verlinde"]
+authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
 readme = "readme.md"
-keywords = ["Micropython","stubs","vscode","static type check"]
-homepage= "https://micropython-stubber.readthedocs.io/"
-repository= "https://github.com/Josverl/micropython-stubber"
+keywords = ["Micropython", "stubs", "vscode", "static type check"]
+homepage = "https://micropython-stubber.readthedocs.io/"
+repository = "https://github.com/Josverl/micropython-stubber"
 classifiers = [
-    "Programming Language :: Python :: Implementation :: MicroPython",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Text Editors :: Integrated Development Environments (IDE)",
-    "Topic :: Software Development :: Build Tools"
+  "Programming Language :: Python :: Implementation :: MicroPython",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Text Editors :: Integrated Development Environments (IDE)",
+  "Topic :: Software Development :: Build Tools",
 ]
-packages = [
-    { include = "**/*.*", from = "src" },
-]
-include =[
-
-]
+packages = [{ include = "**/*.*", from = "src" }]
+include = []
 exclude = [
-    "**/tests/**" 
-    ,"**/*-test" 
-    ,"**/samples.py" 
-    ,"**/OneOff" 
-    ,"**/.vscode"
-    
+  "**/tests/**",
+  "**/*-test",
+  "**/samples.py",
+  "**/OneOff",
+  "**/.vscode",
+
 ]
 
 [tool.poetry.scripts]
@@ -48,10 +44,10 @@ libcst = "0.4.1"
 autoflake = "1.4"
 click = "8.0.3"
 
-rshell = {version = "0.0.31", optional = true}
-esptool = {version = "3.2", optional = true}
-importlib-metadata = {version = "^1.0", python = "<3.8"}
-tomli = { version ="^2.0.1", python = "<3.11"}
+rshell = { version = "0.0.31", optional = true }
+esptool = { version = "3.2", optional = true }
+importlib-metadata = { version = "^1.0", python = "<3.8" }
+tomli = { version = "^2.0.1", python = "<3.11" }
 typed-config = "^1.1.0"
 packaging = "^21.3"
 
@@ -68,7 +64,7 @@ packaging = "21.3"
 distro = "1.7.0"
 
 [tool.poetry.extras]
-tools = ["rshell","esptool"]
+tools = ["rshell", "esptool"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -105,49 +101,43 @@ junit_family = "xunit1"
 # Remove pytest-cov
 addopts = "-v -sv  -m 'not basicgit'"
 
-testpaths = [
-    "tests",
-    "src",
-]
+testpaths = ["tests", "src"]
 
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "basicgit: marks tests in the basicgit module that manipulate the checkout",
-    "minified: marks test of the minified version of createstubs",
-    "docfix: upstream documentation fix needed",
-    "micropython: tests of MicroPython code on Cpython with mocks",
-    "rst_stub: tests to generate stobs from the rst documentation",
-    # os versions
-    "win32: run test only on Windows",
-    "linux: run test only on linux",
-    "darwin: run test only on Mac",
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "basicgit: marks tests in the basicgit module that manipulate the checkout",
+  "minified: marks test of the minified version of createstubs",
+  "docfix: upstream documentation fix needed",
+  "micropython: tests of MicroPython code on Cpython with mocks",
+  "rst_stub: tests to generate stobs from the rst documentation",
+  # os versions
+  "win32: run test only on Windows",
+  "linux: run test only on linux",
+  "darwin: run test only on Mac",
 ]
 
 # coverage reports
 [tool.coverage.run]
 parallel = false
 branch = true
-source = [
-        "board",
-        "src"
-        ]
+source = ["board", "src"]
 omit = [
-        # helper files in board
-        "*/boot.py",
-        "*/main.py",
-        "*/stub_lvgl.py",
+  # helper files in board
+  "*/boot.py",
+  "*/main.py",
+  "*/stub_lvgl.py",
 
-        # not my code 
-        "*/logging.py",
-        "*/make_stub_files.py",
+  # not my code 
+  "*/logging.py",
+  "*/make_stub_files.py",
 
-        # codemods
-        "*/_apply_stubber_annotations.py",
-        "*/commands/__init__.py",
+  # codemods
+  "*/_apply_stubber_annotations.py",
+  "*/commands/__init__.py",
 
-        "*/rst/report_return.py",
+  "*/rst/report_return.py",
 
-        ]
+]
 
 
 [tool.coverage.html]
@@ -165,46 +155,46 @@ output = "results/coverage.lcov"
 [tool.coverage.report]
 show_missing = true
 # Regexes for lines to exclude from consideration
-exclude_lines = [ 
-    # Have to re-enable the standard pragma
-    "pragma: no cover",
-    "pragma: nocover",
+exclude_lines = [
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
+  "pragma: nocover",
 
-    # Don't complain about missing debug-only code:
-    "def __repr__",
-    "if self.debug",         # <-- Fix this 
-    "self._log.debug",
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self.debug",   # <-- Fix this 
+  "self._log.debug",
 
-    # Don't complain if tests don't hit defensive assertion code:
-    "raise AssertionError",
-    "raise NotImplementedError",
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
 
-    "except subprocess.CalledProcessError as e:",
+  "except subprocess.CalledProcessError as e:",
 
-    # Don't complain if non-runnable code isn't run:
-    "if __name__ == .__main__.:",
+  # Don't complain if non-runnable code isn't run:
+  "if __name__ == .__main__.:",
 
-    # mind the quotes 
-    'if __name__ == "__main__" or isMicroPython():', 
-    "main()",
-    
-    # utility functions
-    "show_help()",
-    "isMicroPython()",
-    "read_path()",
+  # mind the quotes 
+  'if __name__ == "__main__" or isMicroPython():',
+  "main()",
 
-    #unreachable
-    # mind the quotes 
-    'info["release"] = "2.0.0" ',
-    "if arch",
+  # utility functions
+  "show_help()",
+  "isMicroPython()",
+  "read_path()",
 
-    # Micropython detection
-    "except (NotImplementedError, SyntaxError):",
-    # catch error
-    "except (OSError, KeyError):",
-    "except (OSError, AttributeError):",
+  #unreachable
+  # mind the quotes 
+  'info["release"] = "2.0.0" ',
+  "if arch",
 
-    # Backward compat <= 3.7 
-    "if sys.version_info.major == 3 and sys.version_info.minor <= 7:"
+  # Micropython detection
+  "except (NotImplementedError, SyntaxError):",
+  # catch error
+  "except (OSError, KeyError):",
+  "except (OSError, AttributeError):",
+
+  # Backward compat <= 3.7 
+  "if sys.version_info.major == 3 and sys.version_info.minor <= 7:",
 
 ]
