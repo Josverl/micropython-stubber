@@ -53,9 +53,9 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
         # esp
         ("esp.py*", f"micropython-{version}-docstubs"),  # 8266 fw stub has most functions
         ("esp32.py*", f"micropython-{version}-docstubs"),  # esp32"),
-        # pyboard
-        ("pyb.py*", f"micropython-{fw_version}-pyboard"),
-        ("framebuf.py*", f"micropython-{fw_version}-pyboard"),
+        # pyboard == stm32 
+        ("pyb.py*", f"micropython-{fw_version}-stm32"),
+        ("framebuf.py*", f"micropython-{fw_version}-stm32"),
         # rp2
         ("_rp2.py*", f"micropython-{fw_version}-rp2"),
         # stdlib
@@ -104,6 +104,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
 
 if __name__ == "__main__":
     from . import config
+
     update_fallback(
         config.stub_path,
         config.fallback_path,

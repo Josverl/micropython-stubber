@@ -7,7 +7,7 @@ the script goes though the following stages
 1. it determines the firmware family, the version and the port of the device, 
    and based on that information it creates a firmware identifier (fwid) in the format : {family}-{port}-{version}
    the fwid is used to name the folder that stores the stubs for that device.
-   - stubs/micropython-v1_10-pyboard
+   - stubs/micropython-v1_10-stm32
    - stubs/micropython-v1_12-esp32
    - stubs/loboris-v3_2_4-esp32
 
@@ -60,7 +60,7 @@ After the sub files have been generated , you will need to download the generate
 if you work with multiple firmwares, ports or version it is simple to keep the stub files in a common folder as the firmware id is used to generate unique names
 
 - ./stubs
-  - /micropython-v1_10-pyboard
+  - /micropython-v1_10-stm32
   - /micropython-v1_12-esp32
   - /micropython-v1_11-linux
   - /loboris-v3_1_20-esp32

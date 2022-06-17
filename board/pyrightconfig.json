@@ -19,7 +19,7 @@
     "extraPaths": [
         "../all-stubs/micropython-v1_18-frozen/esp32/GENERIC",
         "../all-stubs/micropython-v1_18-esp32",
-        "../all-stubs/micropython-v1_18-pyboard"
+        "../all-stubs/micropython-v1_18-stm32"
     ],
     "logLevel": "Trace",
 }
