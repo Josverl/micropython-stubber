@@ -5,11 +5,19 @@
 - update board stubber to report pyboards as port=stm32 
 - update filestructure to reflect this change in nameing
 
+# v1.6.8
+- fix: `stubber docstubs` failed on methods and function definitions that were split 
+  across multiple lines.
+- fix: `stubber clone` must fetch and pull to get updates from upstream repos
+
+# v1.6.7
+- fix: correct dependencies 
+# v1.6.6
+- fix: allow switch to micropython 1.9.x versions   
 
 # v1.6.4
 - unified different scripts into a single CLI tool
 - replace submodules with `stubber clone` command
-
 
 ## Tests
 - add more clone test variants
