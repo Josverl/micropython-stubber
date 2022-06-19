@@ -13,7 +13,7 @@ packaging==21.3; python_version >= "3.6"
 pathspec==0.9.0; python_full_version >= "3.6.2"
 platformdirs==2.5.2; python_version >= "3.7" and python_full_version >= "3.6.2"
 pyflakes==2.4.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0"
-pyparsing==3.0.8; python_full_version >= "3.6.8" and python_version >= "3.6"
+pyparsing==3.0.9; python_full_version >= "3.6.8" and python_version >= "3.6"
 python-minifier==2.5.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.3.0" and python_version < "3.11")
 pyyaml==6.0; python_version >= "3.6"
 requests==2.27.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.6.0")
