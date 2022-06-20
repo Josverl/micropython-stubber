@@ -98,6 +98,7 @@ function run_stubber {
         "compiled" {
             # ref : https://docs.micropython.org/en/latest/reference/mpyfiles.html
             # MicroPython release  .mpy version
+            # v1.19 and up          6
             # v1.12 and up          5
             # v1.11                 4
             # v1.9.3 - v1.10        3
@@ -108,7 +109,7 @@ function run_stubber {
                 # # cross compile the minified version - squeeze out all bits
                 # # https://docs.micropython.org/en/latest/library/micropython.html#micropython.opt_level
                 # # &mpy-cross ../minified/createstubs.py -O3
-                # # Set to 0O2 for a bit more error info
+                # # Set to O2 for a bit more error info
                 write-host "mpy-cross compile : $createstubs_py --> $createstubs_mpy"
                 &mpy-cross $createstubs_py -O2 -o $createstubs_mpy
             }
@@ -221,34 +222,38 @@ function stub_all {
         # @{version = "v1.12"; chip = "esp8266"; }  fails on a memory error
 
 
-        @{version = "v1.13"; chip = "esp8266"; nightly = $true }
-        @{version = "v1.14"; chip = "esp8266"; } ,
-        @{version = "v1.15"; chip = "esp8266"; } ,
-        @{version = "v1.16"; chip = "esp8266"; } ,
-        @{version = "v1.17"; chip = "esp8266"; } ,
-        @{version = "v1.18"; chip = "esp8266"; } ,
+        # @{version = "v1.13"; chip = "esp8266"; nightly = $true }
+        # @{version = "v1.14"; chip = "esp8266"; } ,
+        # @{version = "v1.15"; chip = "esp8266"; } ,
+        # @{version = "v1.16"; chip = "esp8266"; } ,
+        # @{version = "v1.17"; chip = "esp8266"; } ,
+        # @{version = "v1.18"; chip = "esp8266"; } ,
 
         
-        @{version = "v1.10"; chip = "esp32"; },
-        @{version = "v1.11"; chip = "esp32"; },
-        @{version = "v1.12"; chip = "esp32"; },
-        @{version = "v1.13"; chip = "esp32"; nightly = $true },
-        @{version = "v1.14"; chip = "esp32"; },
-        @{version = "v1.15"; chip = "esp32"; },
-        @{version = "v1.16"; chip = "esp32"; },
-        @{version = "v1.17"; chip = "esp32"; },
-        @{version = "v1.18"; chip = "esp32"; },
+        # @{version = "v1.10"; chip = "esp32"; },
+        # @{version = "v1.11"; chip = "esp32"; },
+        # @{version = "v1.12"; chip = "esp32"; },
+        # @{version = "v1.13"; chip = "esp32"; nightly = $true },
+        # @{version = "v1.14"; chip = "esp32"; },
+        # @{version = "v1.15"; chip = "esp32"; },
+        # @{version = "v1.16"; chip = "esp32"; },
+        # @{version = "v1.17"; chip = "esp32"; },
+        # @{version = "v1.18"; chip = "esp32"; },
 
 
-        @{version = "v1.10"; chip = "stm32"; }
-        @{version = "v1.11"; chip = "stm32"; }
-        @{version = "v1.12"; chip = "stm32"; }
-        @{version = "v1.13"; chip = "stm32"; }
-        @{version = "v1.14"; chip = "stm32"; }
-        @{version = "v1.15"; chip = "stm32"; }
-        @{version = "v1.16"; chip = "stm32"; }
-        @{version = "v1.17"; chip = "stm32"; }
-        @{version = "v1.18"; chip = "stm32"; }
+        # @{version = "v1.10"; chip = "stm32"; }
+        # @{version = "v1.11"; chip = "stm32"; }
+        # @{version = "v1.12"; chip = "stm32"; }
+        # @{version = "v1.13"; chip = "stm32"; }
+        # @{version = "v1.14"; chip = "stm32"; }
+        # @{version = "v1.15"; chip = "stm32"; }
+        # @{version = "v1.16"; chip = "stm32"; }
+        # @{version = "v1.17"; chip = "stm32"; }
+        # @{version = "v1.18"; chip = "stm32"; }
+
+        @{version = "v1.19.1"; chip = "esp32"; }
+        @{version = "v1.19.1"; chip = "esp8266"; }
+        @{version = "v1.19.1"; chip = "stm32"; }
     )
 
     # Sort by version, newest first
@@ -422,13 +427,13 @@ $results2 | ConvertTo-json | Out-File bulk_stubber.json
 Write-Host -ForegroundColor Cyan ("-" * 100)
 Write-Host -ForegroundColor Cyan "Create .pyi and apply black formatting $download_path"
 # now generate .pyi files 
-stubber stub -source $download_path 
+stubber stub --source $download_path 
 # and run black formatting across all 
 black $result.path $download_path 
 
 
 Write-Host -ForegroundColor Cyan ("-" * 100)
-Write-Host -ForegroundColor Cyan "Create .pyi and apply black formatting $download_path"
+Write-Host -ForegroundColor Cyan "Copy Files from $download_path to $stub_path"
 
 # folder are deep down
 $stub_path = (join-path -Path $WSRoot -ChildPath "all-stubs")
