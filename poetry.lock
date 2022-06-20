@@ -561,12 +561,12 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [extras]
-tools = ["rshell", "esptool"]
+tools = ["rshell", "esptool", "pyserial"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "ff11ea9fc000b0013ccd42c1fa453c8503bcef3f491342e96820648d23fc4d3c"
+content-hash = "9081aa13079a7629c8fea31d134fdd483f6b8c5463addf5f156caddf717424d1"
 
 [metadata.files]
 atomicwrites = [

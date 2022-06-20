@@ -44,14 +44,17 @@ black = "22.1.0"
 libcst = "0.4.1"
 autoflake = "1.4"
 click = "8.0.3"
-esptool = { version = "3.2", optional = true }
-
-rshell = { version = "0.0.31", optional = true }
 importlib-metadata = { version = "^1.0", python = "<3.8" }
 tomli = { version = "^2.0.1", python = "<3.11" }
 typed-config = "^1.1.0"
 packaging = "^21.3"
+esptool = { version = "3.2", optional = true }
+rshell = { version = "0.0.31", optional = true }
+pyserial = { version = "3.5", optional = true }
 
+# Extras needed for bulkstubber.ps1
+[tool.poetry.extras]
+tools = ["rshell", "esptool", "pyserial"]
 
 [tool.poetry.dev-dependencies]
 pytest = "7.0.1"
@@ -64,8 +67,6 @@ pyright = "0.0.13"
 packaging = "21.3"
 distro = "1.7.0"
 
-[tool.poetry.extras]
-tools = ["rshell", "esptool"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
