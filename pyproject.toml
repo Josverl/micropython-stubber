@@ -4,13 +4,14 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.6.9"
+version = "1.6.10"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
 readme = "readme.md"
 keywords = ["Micropython", "stubs", "vscode", "static type check"]
-homepage = "https://micropython-stubber.readthedocs.io/"
+documentation = "https://micropython-stubber.readthedocs.io/"
+homepage = "https://github.com/Josverl/micropython-stubber#readme"
 repository = "https://github.com/Josverl/micropython-stubber"
 classifiers = [
   "Programming Language :: Python :: Implementation :: MicroPython",
@@ -31,21 +32,21 @@ exclude = [
 
 [tool.poetry.scripts]
 stubber = "stubber.stubber:stubber_cli"
-pyboard = "stubber.pyboard:main"
+pyboard = "stubber.tools.pyboard:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 python-minifier = "2.5.0"
 requests = "2.27.0"
 mypy = "0.931"
-mpy-cross = "1.18"
+mpy-cross = "1.19.1"
 black = "22.1.0"
 libcst = "0.4.1"
 autoflake = "1.4"
 click = "8.0.3"
+esptool = { version = "3.2", optional = true }
 
 rshell = { version = "0.0.31", optional = true }
-esptool = { version = "3.2", optional = true }
 importlib-metadata = { version = "^1.0", python = "<3.8" }
 tomli = { version = "^2.0.1", python = "<3.11" }
 typed-config = "^1.1.0"
