@@ -54,12 +54,12 @@ packaging = "^21.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "7.0.1"
-pytest-mock = "3.7.0"
+pytest-mock = "3.8.2"
 pytest-json-report = "1.4.1"
 pytest-metadata = "1.11.0"
 mock = "4.0.3"
 coverage = "6.3.1"
-pyright = "0.0.13"
+pyright = "1.1.261"
 packaging = "21.3"
 distro = "1.7.0"
 
