@@ -165,11 +165,11 @@ gmpy2 = ["gmpy2"]
 
 [[package]]
 name = "esptool"
-version = "3.2"
-description = "A serial utility to communicate & flash code to Espressif ESP8266 & ESP32 chips."
+version = "4.1"
+description = "A serial utility to communicate & flash code to Espressif chips."
 category = "main"
 optional = true
-python-versions = "*"
+python-versions = ">=3.7"
 
 [package.dependencies]
 bitstring = ">=3.1.6"
@@ -179,7 +179,7 @@ pyserial = ">=3.0"
 reedsolo = ">=1.5.3,<=1.5.4"
 
 [package.extras]
-dev = ["flake8 (>=3.2.0)", "flake8-future-import", "flake8-import-order", "pyelftools", "unittest-xml-reporting (<=2.5.2)", "coverage"]
+dev = ["flake8 (>=3.2.0)", "flake8-future-import", "flake8-import-order", "pyelftools", "unittest-xml-reporting", "coverage", "black", "pre-commit"]
 
 [[package]]
 name = "idna"
@@ -566,7 +566,7 @@ tools = ["rshell", "esptool"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "3801b6a36276da9f4770d89e7668be02e2f84a941cd493e0a7b18dff781341ef"
+content-hash = "6b4ad7d17beb9a5de4f7d380e3933cf71f45f6f8a103b4a3b9a1fc6dd69510d8"
 
 [metadata.files]
 atomicwrites = [
@@ -754,7 +754,7 @@ ecdsa = [
     {file = "ecdsa-0.17.0.tar.gz", hash = "sha256:b9f500bb439e4153d0330610f5d26baaf18d17b8ced1bc54410d189385ea68aa"},
 ]
 esptool = [
-    {file = "esptool-3.2.tar.gz", hash = "sha256:9638ff11c68e621e08e7c3335d4fd9d70b2ddcf7caae778073cd8cc27be1216f"},
+    {file = "esptool-4.1.tar.gz", hash = "sha256:51a41655187780cb802a5827fab68a3db0d6206330560459c55fcf0e222f277f"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
