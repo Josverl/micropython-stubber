@@ -439,7 +439,7 @@ dev = ["pre-commit", "tox", "pytest-asyncio"]
 
 [[package]]
 name = "python-minifier"
-version = "2.5.0"
+version = "2.6.0"
 description = "Transform Python source code into it's most compact representation"
 category = "main"
 optional = false
@@ -566,7 +566,7 @@ tools = ["rshell", "esptool"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "3801b6a36276da9f4770d89e7668be02e2f84a941cd493e0a7b18dff781341ef"
+content-hash = "8bde5717d9ef7971cef11c6be7d3592fdf409b8818bbafdc8c7a784dccd76991"
 
 [metadata.files]
 atomicwrites = [
@@ -900,8 +900,8 @@ pytest-mock = [
     {file = "pytest_mock-3.7.0-py3-none-any.whl", hash = "sha256:6cff27cec936bf81dc5ee87f07132b807bcda51106b5ec4b90a04331cba76231"},
 ]
 python-minifier = [
-    {file = "python_minifier-2.5.0-py3-none-any.whl", hash = "sha256:8c3d6b891af5c42d57d9b21f4d30db860dcb8cdb1e22517f1350c4e906405569"},
-    {file = "python_minifier-2.5.0.tar.gz", hash = "sha256:81397b9ec5bf1690e76b358c45af4ba6fa01be2739b478d4c1362b1fcdcf790b"},
+    {file = "python_minifier-2.6.0-py2.py3-none-any.whl", hash = "sha256:6db2f26d5486168495ea25515026874ca58eb8c82dc1ba5fc98159c3ed67d3e5"},
+    {file = "python_minifier-2.6.0.tar.gz", hash = "sha256:67ebdab1e153044ade352957d118ea78c5629700e962b57651c59ba152057f40"},
 ]
 pyudev = [
     {file = "pyudev-0.23.2-py3-none-any.whl", hash = "sha256:50d94bef0669f9aabd323a2259be67e8d49b9ebab9eae27b2cf8262767f9a2ae"},

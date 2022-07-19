@@ -35,7 +35,7 @@ pyboard = "stubber.pyboard:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-python-minifier = "2.5.0"
+python-minifier = "2.6.0"
 requests = "2.27.0"
 mypy = "0.931"
 mpy-cross = "1.18"
