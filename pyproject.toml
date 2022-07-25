@@ -41,7 +41,7 @@ requests = "2.27.0"
 mypy = "0.931"
 mpy-cross = "1.19.1"
 black = "22.1.0"
-libcst = "0.4.1"
+libcst = "0.4.7"
 autoflake = "1.4"
 click = "8.0.3"
 importlib-metadata = { version = "^1.0", python = "<3.8" }
