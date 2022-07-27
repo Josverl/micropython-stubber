@@ -3,7 +3,10 @@ from typing import NamedTuple, Tuple
 import libcst
 import pytest
 
-from stubber.cst_transformer import TornadoAsyncTransformer
+import difflib
+import sys
+
+from stubber.cst_transformer import StubMergeTransformer
 
 from .codemodcollector import (
     TestCase,
@@ -15,6 +18,21 @@ from .codemodcollector import (
 def test_merge(test_case: TestCase) -> None:
     "test merging of firmwarestubs with docstubs using libcst"
     source_tree = libcst.parse_module(test_case.before)
-    visited_tree = source_tree
-    visited_tree = source_tree.visit(TornadoAsyncTransformer())
-    assert visited_tree.code == test_case.after
+
+    # create transformer for this stubfile
+    transformer = StubMergeTransformer(stub=test_case.stub)
+    # apply the stub transformer to the source tree
+    merged_tree = source_tree.visit(transformer)
+
+    # note: test must deal with differences in code formatting /black formatting
+
+    if not merged_tree.code == test_case.after:
+        delta = difflib.unified_diff(
+            merged_tree.code.splitlines(keepends=True),
+            test_case.after.splitlines(keepends=True),
+            fromfile="merged",
+            tofile="expected after.py",
+        )
+        print("".join(delta))
+
+    assert merged_tree.code == test_case.after
