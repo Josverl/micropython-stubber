@@ -1,25 +1,18 @@
-from typing import List, Optional, Set, Tuple, Union
+from dataclasses import dataclass
+from typing import Any, List, Optional, Sequence, Set, Tuple, Dict
 
 import libcst as cst
 from libcst import matchers as m
 
-from .cst_helpers import with_added_imports
 
-
-# matchers
-# gen_return_statement_matcher = m.Raise(exc=some_version_of("tornado.gen.Return"))
-# gen_return_call_with_args_matcher = m.Raise(exc=m.Call(func=some_version_of("tornado.gen.Return"), args=[m.AtLeastN(n=1)]))
-# gen_return_call_matcher = m.Raise(exc=m.Call(func=some_version_of("tornado.gen.Return")))
-# gen_return_matcher = gen_return_statement_matcher | gen_return_call_matcher
-# gen_sleep_matcher = m.Call(func=some_version_of("gen.sleep"))
-# gen_task_matcher = m.Call(func=some_version_of("gen.Task"))
-# gen_coroutine_decorator_matcher = m.Decorator(decorator=some_version_of("tornado.gen.coroutine"))
-# gen_test_coroutine_decorator = m.Decorator(decorator=some_version_of("tornado.testing.gen_test"))
-# coroutine_decorator_matcher = gen_coroutine_decorator_matcher | gen_test_coroutine_decorator
-# coroutine_matcher = m.FunctionDef(
-#     asynchronous=None,
-#     decorators=[m.ZeroOrMore(), coroutine_decorator_matcher, m.ZeroOrMore()],
-# )
+@dataclass
+class TypeInfo:
+    "contains the  functiondefs and classdefs info read from the stubs source"
+    name: str
+    decorators: Sequence[cst.Decorator]
+    params: Optional[cst.Parameters] = None
+    returns: Optional[cst.Annotation] = None
+    docstring: Optional[str] = None
 
 
 class TransformError(Exception):
@@ -27,6 +20,56 @@ class TransformError(Exception):
     Error raised upon encountering a known error while attempting to transform
     the tree.
     """
+
+
+class TypingCollector(cst.CSTVisitor):
+    def __init__(self):
+        # stack for storing the canonical name of the current function
+        self.stack: List[str] = []
+        # store the annotations
+        self.annotations: Dict[
+            Tuple[str, ...],  # key: tuple of canonical class/function name
+            TypeInfo,  # value: TypeInfo
+        ] = {}
+
+    # ------------------------------------------------------------
+    #  keep track of the the (class, method) names to the stack
+    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+        self.stack.append(node.name.value)
+
+    def leave_ClassDef(self, node: cst.ClassDef) -> None:
+        self.stack.pop()
+
+    # ------------------------------------------------------------
+    def visit_Module(self, node: cst.Module) -> bool:
+        "Store the module docstring"
+        ti = TypeInfo(
+            name="module",
+            params=None,
+            returns=None,
+            docstring=node.get_docstring(clean=False),
+            decorators=(),
+        )
+        self.annotations[tuple(["__module"])] = ti
+        return True
+
+    # ------------------------------------------------------------
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+        "store each function/method signature"
+        self.stack.append(node.name.value)
+        ti = TypeInfo(
+            name=node.name.value,
+            params=node.params,
+            returns=node.returns,
+            docstring=node.get_docstring(clean=False),
+            decorators=node.decorators,
+        )
+        self.annotations[tuple(self.stack)] = ti
+        # pyi files don't support inner functions, return False to stop the traversal.
+        return False
+
+    def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
+        self.stack.pop()
 
 
 class StubMergeTransformer(cst.CSTTransformer):
@@ -43,42 +86,61 @@ class StubMergeTransformer(cst.CSTTransformer):
 
     """
 
-    def __init__(self) -> None:
-        # todo : read and store function defs from stubs
-        self.coroutine_stack: List[bool] = []
-        self.required_imports: Set[str] = set()
+    def __init__(self, stub: Optional[str] = None) -> None:
+        # stack for storing the canonical name of the current function/method
+        self.stack: List[str] = []
+        # store the annotations
+        self.annotations: Dict[
+            Tuple[str, ...],  # key: tuple of canonical class/function name
+            TypeInfo,  # value: TypeInfo
+        ] = {}
+        if stub:
+            stub_tree = cst.parse_module(stub)
+            visitor = TypingCollector()
+            stub_tree.visit(visitor)
+            self.annotations = visitor.annotations
 
     # ------------------------------------------------------------------------
 
     def leave_Module(self, node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        # if not self.required_imports:
-        #     return updated_node
-        # imports = [self.make_simple_package_import(required_import) for required_import in self.required_imports]
-        # return with_added_imports(updated_node, imports)
 
         # todo: merge module docstrings
         new_body = updated_node.body
         return updated_node.with_changes(body=new_body)
 
+    # ------------------------------------------------------------
+    #  keep track of the the (class, method) names to the stack
+    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+        self.stack.append(node.name.value)
+
+    def leave_ClassDef(self, node: cst.ClassDef) -> None:
+        self.stack.pop()
+
     # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+        self.stack.append(node.name.value)
         return True
 
     def leave_FunctionDef(self, node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
 
         # fake reading the stub information
-        x = cst.parse_statement("def foo(pin: int, /, limit: int = 100) -> str: ...")  # type: ignore
+        #  x = cst.parse_statement("def foo(pin: int, /, limit: int = 100) -> str: ...")  # type: ignore
 
-        assert isinstance(x, cst.FunctionDef)
+        stack_id = tuple(self.stack)
+        self.stack.pop()
+        if not stack_id in self.annotations:
+            return updated_node
+        else:
 
-        # todo: merge function  docstrings
-        new_body = updated_node.body
+            # update the firmware stub from the source
+            new = self.annotations[stack_id]
 
-        return updated_node.with_changes(params=x.params, returns=x.returns, body=new_body)
+            # TODO BODY MERGING
+            new_body = updated_node.body
 
-    # ------------------------------------------------------------------------
-
-    # @staticmethod
-    # def make_simple_package_import(package: str) -> cst.Import:
-    #     assert not "." in package, "this only supports a root package, e.g. 'import os'"
-    #     return cst.Import(names=[cst.ImportAlias(name=cst.Name(package))])
+            return updated_node.with_changes(
+                params=new.params,
+                returns=new.returns,
+                body=new_body,
+                decorators=new.decorators,
+            )
