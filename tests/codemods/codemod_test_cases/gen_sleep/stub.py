@@ -1,2 +1,0 @@
-# test stub
-x : int
