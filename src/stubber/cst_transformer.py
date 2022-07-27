@@ -113,8 +113,9 @@ class StubMergeTransformer(cst.CSTTransformer):
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(self, node: cst.ClassDef) -> None:
+    def leave_ClassDef(self, node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         self.stack.pop()
+        return updated_node
 
     # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
