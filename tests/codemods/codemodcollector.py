@@ -10,6 +10,7 @@ class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
     after: str  # The source code after the transformation.
     stub: str  # The stub to apply
+    output: Path = None  # where to save thoe output for testing the tests
 
 
 def collect_test_cases() -> Tuple[Any, ...]:
@@ -36,7 +37,13 @@ def collect_test_cases() -> Tuple[Any, ...]:
             after = file.read()
         with open(stub_files[0]) as file:
             stub = file.read()
-        test_cases.append(pytest.param(TestCase(before=before, after=after, stub=stub), id=test_case_directory.name))
+        
+        if 1:   # enable output for testing
+            output = test_case_directory.joinpath("output.py")
+        else:
+            output = None
+
+        test_cases.append(pytest.param(TestCase(before=before, after=after, stub=stub, output=output), id=test_case_directory.name))
     return tuple(test_cases)
 
 
