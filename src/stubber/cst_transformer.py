@@ -12,7 +12,7 @@ class TypeInfo:
     decorators: Sequence[cst.Decorator]
     params: Optional[cst.Parameters] = None
     returns: Optional[cst.Annotation] = None
-    docstring: Optional[str] = None
+    doc_tree: Optional[cst.SimpleStatementLine] = None
 
 
 class TransformError(Exception):
@@ -33,35 +33,57 @@ class TypingCollector(cst.CSTVisitor):
         ] = {}
 
     # ------------------------------------------------------------
+    def visit_Module(self, node: cst.Module) -> bool:
+        "Store the module docstring"
+        if node.get_docstring():
+            ## TODO: try / catch
+            assert isinstance(node.body[0], cst.SimpleStatementLine)
+            ti = TypeInfo(
+                name="module",
+                params=None,
+                returns=None,
+                doc_tree=node.body[0],
+                decorators=(),
+            )
+            self.annotations[tuple(["__module"])] = ti
+        return True
+
+    # ------------------------------------------------------------
     #  keep track of the the (class, method) names to the stack
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+        "Store the class docstring"
         self.stack.append(node.name.value)
+        if node.get_docstring():
+            ## TODO: try / catch
+            assert isinstance(node.body.body[0], cst.SimpleStatementLine)
+            ti = TypeInfo(
+                name="module",
+                params=None,
+                returns=None,
+                doc_tree=node.body.body[0],
+                decorators=(),
+            )
+            self.annotations[tuple(self.stack)] = ti
 
     def leave_ClassDef(self, node: cst.ClassDef) -> None:
         self.stack.pop()
 
     # ------------------------------------------------------------
-    def visit_Module(self, node: cst.Module) -> bool:
-        "Store the module docstring"
-        ti = TypeInfo(
-            name="module",
-            params=None,
-            returns=None,
-            docstring=node.get_docstring(clean=False),
-            decorators=(),
-        )
-        self.annotations[tuple(["__module"])] = ti
-        return True
-
-    # ------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         "store each function/method signature"
         self.stack.append(node.name.value)
+        if node.get_docstring():
+            ## TODO: try / catch
+            assert isinstance(node.body.body[0], cst.SimpleStatementLine)
+            docstr_node = node.body.body[0]
+        else:
+            docstr_node = None
+
         ti = TypeInfo(
             name=node.name.value,
             params=node.params,
             returns=node.returns,
-            docstring=node.get_docstring(clean=False),
+            doc_tree=docstr_node,
             decorators=node.decorators,
         )
         self.annotations[tuple(self.stack)] = ti
@@ -130,14 +152,29 @@ class StubMergeTransformer(cst.CSTTransformer):
         stack_id = tuple(self.stack)
         self.stack.pop()
         if not stack_id in self.annotations:
+            # no changes to the function
             return updated_node
         else:
-
             # update the firmware stub from the source
             new = self.annotations[stack_id]
 
-            # TODO BODY MERGING
             new_body = updated_node.body
+            if new.doc_tree:
+
+                # just checking
+                assert isinstance(updated_node, cst.FunctionDef)
+                assert isinstance(updated_node.body, cst.IndentedBlock)
+                assert isinstance(updated_node.body.body, Sequence)
+
+                # need some funcky casting to avoid issues with changing the body 
+                if updated_node.get_docstring():
+                    body=tuple([new.doc_tree] + list(updated_node.body.body[1:]))
+                else:
+                    # append the new docstring and append the function body
+                    body=tuple([new.doc_tree] + list(updated_node.body.body))
+                    
+                    
+                new_body = updated_node.body.with_changes(body=body)  
 
             return updated_node.with_changes(
                 params=new.params,
