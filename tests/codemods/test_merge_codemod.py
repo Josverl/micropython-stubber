@@ -35,4 +35,12 @@ def test_merge(test_case: TestCase) -> None:
         )
         print("".join(delta))
 
+    # Todo : format with usort // black ?
+    # https://ufmt.omnilib.dev/en/stable/
+
+    # write to output file if specified in test_case
+    if test_case.output:
+        with open(test_case.output, "w") as file:
+            file.write(merged_tree.code)
+
     assert merged_tree.code == test_case.after
