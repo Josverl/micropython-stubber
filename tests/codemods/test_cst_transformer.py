@@ -25,6 +25,13 @@ def test_merge(test_case: TestCase) -> None:
     merged_tree = source_tree.visit(transformer)
 
     # note: test must deal with differences in code formatting /black formatting
+    # Todo : format with usort // black ?
+    # https://ufmt.omnilib.dev/en/stable/
+
+    # write to output file if specified in test_case
+    if test_case.output:
+        with open(test_case.output, "w") as file:
+            file.write(merged_tree.code)
 
     if not merged_tree.code == test_case.after:
         delta = difflib.unified_diff(
@@ -34,13 +41,5 @@ def test_merge(test_case: TestCase) -> None:
             tofile="expected after.py",
         )
         print("".join(delta))
-
-    # Todo : format with usort // black ?
-    # https://ufmt.omnilib.dev/en/stable/
-
-    # write to output file if specified in test_case
-    if test_case.output:
-        with open(test_case.output, "w") as file:
-            file.write(merged_tree.code)
 
     assert merged_tree.code == test_case.after
