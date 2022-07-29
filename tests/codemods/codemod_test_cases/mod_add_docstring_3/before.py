@@ -1,7 +1,3 @@
-"""
-module docstring
-"""
-
 def foo():
     ''
     ...
