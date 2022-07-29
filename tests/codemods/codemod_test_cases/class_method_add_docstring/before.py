@@ -4,9 +4,9 @@ simple functions and classes
 
 
 def foo():
-    pass
+    ...
 
 
 class Bar:
-    def foo():
+    def foo(self):
         return 1

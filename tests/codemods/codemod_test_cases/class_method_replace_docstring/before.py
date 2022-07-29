@@ -5,11 +5,11 @@ simple functions and classes
 
 def foo():
     "before"
-    pass
+    ...
 
 
 class Bar:
     "before"
-    def foo():
+    def foo(self):
         "before"
         return 1

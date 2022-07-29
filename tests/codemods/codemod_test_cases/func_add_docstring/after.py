@@ -7,8 +7,8 @@ def foo(pin: int, /, limit: int = 100) -> str:
     """
     simple docstring
     """
-    pass
+    ...
 
 
 def bar():
-    pass
+    ...

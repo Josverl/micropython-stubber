@@ -2,11 +2,10 @@
 simple functions 
 """
 
+def bar(f):
+    ...
+
 
 @bar
 def foo():
-    pass
-
-
-def bar():
-    pass
+    ...
