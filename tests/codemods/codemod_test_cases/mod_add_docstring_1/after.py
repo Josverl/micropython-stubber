@@ -1,7 +1,4 @@
-"""
-module docstring
-"""
-
+"module docstring"
 def foo():
     ''
     ...
