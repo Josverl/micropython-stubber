@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Optional, Sequence, Set, Tuple, Dict
+from typing import Any, List, Optional, Sequence, Set, Tuple, Dict, Union
 
 import libcst as cst
 from libcst import matchers as m
@@ -12,7 +12,7 @@ class TypeInfo:
     decorators: Sequence[cst.Decorator]
     params: Optional[cst.Parameters] = None
     returns: Optional[cst.Annotation] = None
-    doc_tree: Optional[cst.SimpleStatementLine] = None
+    docstr_node: Optional[cst.SimpleStatementLine] = None
 
 
 class TransformError(Exception):
@@ -35,17 +35,17 @@ class TypingCollector(cst.CSTVisitor):
     # ------------------------------------------------------------
     def visit_Module(self, node: cst.Module) -> bool:
         "Store the module docstring"
-        if node.get_docstring():
-            ## TODO: try / catch
-            assert isinstance(node.body[0], cst.SimpleStatementLine)
-            ti = TypeInfo(
-                name="module",
-                params=None,
-                returns=None,
-                doc_tree=node.body[0],
-                decorators=(),
-            )
-            self.annotations[tuple(["__module"])] = ti
+        # if node.get_docstring():
+        #     ## TODO: try / catch
+        #     assert isinstance(node.body[0], cst.SimpleStatementLine)
+        #     ti = TypeInfo(
+        #         name="module",
+        #         params=None,
+        #         returns=None,
+        #         doc_tree=node.body[0],
+        #         decorators=(),
+        #     )
+        #     self.annotations[tuple(["__module"])] = ti
         return True
 
     # ------------------------------------------------------------
@@ -56,14 +56,18 @@ class TypingCollector(cst.CSTVisitor):
         if node.get_docstring():
             ## TODO: try / catch
             assert isinstance(node.body.body[0], cst.SimpleStatementLine)
-            ti = TypeInfo(
-                name="module",
-                params=None,
-                returns=None,
-                doc_tree=node.body.body[0],
-                decorators=(),
-            )
-            self.annotations[tuple(self.stack)] = ti
+            docstr_node = node.body.body[0]
+        else:
+            docstr_node = None
+
+        ti = TypeInfo(
+            name=node.name.value,
+            params=None,
+            returns=None,
+            docstr_node=docstr_node,
+            decorators=node.decorators,
+        )
+        self.annotations[tuple(self.stack)] = ti
 
     def leave_ClassDef(self, node: cst.ClassDef) -> None:
         self.stack.pop()
@@ -83,12 +87,10 @@ class TypingCollector(cst.CSTVisitor):
             name=node.name.value,
             params=node.params,
             returns=node.returns,
-            doc_tree=docstr_node,
+            docstr_node=docstr_node,
             decorators=node.decorators,
         )
         self.annotations[tuple(self.stack)] = ti
-        # pyi files don't support inner functions, return False to stop the traversal.
-        return False
 
     def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
         self.stack.pop()
@@ -136,8 +138,17 @@ class StubMergeTransformer(cst.CSTTransformer):
         self.stack.append(node.name.value)
 
     def leave_ClassDef(self, node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+        stack_id = tuple(self.stack)
         self.stack.pop()
-        return updated_node
+        if not stack_id in self.annotations:
+            # no changes to the function
+            return updated_node
+        # update the firmware_stub from the doc_stub information
+        new = self.annotations[stack_id]
+        # first update the docstring
+        updated_node = update_node_docstr(updated_node, new.docstr_node)
+        # then any other information
+        return updated_node.with_changes(decorators=new.decorators)
 
     # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
@@ -154,31 +165,36 @@ class StubMergeTransformer(cst.CSTTransformer):
         if not stack_id in self.annotations:
             # no changes to the function
             return updated_node
-        else:
-            # update the firmware stub from the source
-            new = self.annotations[stack_id]
+        # update the firmware_stub from the doc_stub information
+        new = self.annotations[stack_id]
 
-            new_body = updated_node.body
-            if new.doc_tree:
+        # first update the docstring
+        updated_node = update_node_docstr(updated_node, new.docstr_node)
+        # then any other information
+        return updated_node.with_changes(
+            params=new.params,
+            returns=new.returns,
+            decorators=new.decorators,
+        )
 
-                # just checking
-                assert isinstance(updated_node, cst.FunctionDef)
-                assert isinstance(updated_node.body, cst.IndentedBlock)
-                assert isinstance(updated_node.body.body, Sequence)
 
-                # need some funcky casting to avoid issues with changing the body 
-                if updated_node.get_docstring():
-                    body=tuple([new.doc_tree] + list(updated_node.body.body[1:]))
-                else:
-                    # append the new docstring and append the function body
-                    body=tuple([new.doc_tree] + list(updated_node.body.body))
-                    
-                    
-                new_body = updated_node.body.with_changes(body=body)  
+def update_node_docstr(node: Union[cst.FunctionDef, cst.ClassDef], doc_tree: Optional[cst.SimpleStatementLine]) -> Any:
+    if not doc_tree:
+        return node
 
-            return updated_node.with_changes(
-                params=new.params,
-                returns=new.returns,
-                body=new_body,
-                decorators=new.decorators,
-            )
+    # just checking
+    if not (isinstance(node.body, cst.IndentedBlock) and isinstance(node.body.body, Sequence)):
+        raise TransformError("Expected Def with Indented body")
+
+    # need some funcky casting to avoid issues with changing the body
+    if node.get_docstring():
+        body = tuple([doc_tree] + list(node.body.body[1:]))
+    else:
+        # append the new docstring and append the function body
+        body = tuple([doc_tree] + list(node.body.body))
+
+    new_body = node.body.with_changes(body=body)
+
+    return node.with_changes(
+        body=new_body,
+    )
