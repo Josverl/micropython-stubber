@@ -228,7 +228,7 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "mpy-cross"
-version = "1.19.1"
+version = "1.18"
 description = "micropython mpy-cross distribution"
 category = "main"
 optional = false
@@ -566,7 +566,7 @@ tools = ["rshell", "esptool", "pyserial"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "22d3b554ee6accfa6cc38a422418b687c0c290152ec415480ef8a89efb3ff1d0"
+content-hash = "c9239d0acc24eac2b1f486848e1e641180c1fcb114ed0d4c7de423a2ae47b32e"
 
 [metadata.files]
 atomicwrites = [
@@ -770,13 +770,13 @@ mock = [
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
 mpy-cross = [
-    {file = "mpy_cross-1.19.1-py2.py3-none-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:1668472a4c9982d99fbac7ec8ae452d8b7b09249dfa6c7697fc80d33266c0f4d"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux1_i686.whl", hash = "sha256:10d142b1ea8277bbaa1428f7ddf5e860f036b73553d339883aa6a40a62d58dcd"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:0dbc5c6106643bf84431cca61bcae5d9471233617e14de3ffd9d6f490dbd3106"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux2014_aarch64.whl", hash = "sha256:3be50b473f3271128971a670366b950636989bc2a23492fa7e8a51c26d96e6f1"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux2014_armv7l.whl", hash = "sha256:6e62e99149ed25213fa3a55d5509111a647aee7dea4d670a6a07434455adf998"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-win32.whl", hash = "sha256:197a7cef34128d1f2f1dbd90db05924bdb30180deb09340efbddf1fb8fe5f04e"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-win_amd64.whl", hash = "sha256:4941f54e3d5330e7f538f84d352cf3633280052fe5abefaca4f59d00e6c7075a"},
+    {file = "mpy_cross-1.18-py2.py3-none-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:be0140f4a130514c2f7801f6d9ce54a6b4ca3ae2116f20dbbfd5686cd3c734c0"},
+    {file = "mpy_cross-1.18-py2.py3-none-manylinux1_i686.whl", hash = "sha256:a04d6782505ebab179a818653c220944b609fa15781d98746525433972845a30"},
+    {file = "mpy_cross-1.18-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:98bd0ee6711576a94ed493896692942c6046b461c49608e3c8e0c95e1d2c89f2"},
+    {file = "mpy_cross-1.18-py2.py3-none-manylinux2014_aarch64.whl", hash = "sha256:91c322eb89393cf659e076a94cde881324c08fe87dee289dd017aae00192f8e6"},
+    {file = "mpy_cross-1.18-py2.py3-none-manylinux2014_armv7l.whl", hash = "sha256:1bf739870f657c0d7cfd278a733a55c05b08007a8f010cedb31c0c7f50b50db2"},
+    {file = "mpy_cross-1.18-py2.py3-none-win32.whl", hash = "sha256:01bea72298a661214e0a8352b6e0eb8ac875dd24efc20bc9f2835355f46a778a"},
+    {file = "mpy_cross-1.18-py2.py3-none-win_amd64.whl", hash = "sha256:e979dba96405687800ad0c38c568093cce264c86de950a660e3355600f3cf47b"},
 ]
 mypy = [
     {file = "mypy-0.931-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:3c5b42d0815e15518b1f0990cff7a705805961613e701db60387e6fb663fe78a"},
