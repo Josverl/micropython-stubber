@@ -3,7 +3,7 @@ black==22.1.0; python_full_version >= "3.6.2"
 certifi==2021.10.8; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0"
 charset-normalizer==2.0.12; python_full_version >= "3.6.0" and python_version >= "3"
 click==8.0.3; python_version >= "3.6"
-colorama==0.4.4; platform_system == "Windows" and python_version >= "3.6" and python_full_version >= "3.6.2"
+colorama==0.4.5; platform_system == "Windows" and python_version >= "3.6" and python_full_version >= "3.6.2"
 idna==3.3; python_version >= "3.5" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.5"
 libcst==0.4.1; python_version >= "3.6"
 mpy-cross==1.18
