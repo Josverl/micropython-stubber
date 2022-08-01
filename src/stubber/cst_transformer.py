@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, List, Optional, Sequence, Set, Tuple, Dict, Union
 
 import libcst as cst
-from libcst import matchers as m
+from libcst.codemod.visitors import AddImportsVisitor
 
 
 @dataclass
@@ -25,7 +25,7 @@ class TransformError(Exception):
 MODULE_KEY = tuple(["__module"])
 
 
-class TypingCollector(cst.CSTVisitor):
+class StubTypingCollector(cst.CSTVisitor):
     def __init__(self):
         # stack for storing the canonical name of the current function
         self.stack: List[str] = []
@@ -123,14 +123,15 @@ class StubMergeTransformer(cst.CSTTransformer):
         ] = {}
         if stub:
             stub_tree = cst.parse_module(stub)
-            visitor = TypingCollector()
-            stub_tree.visit(visitor)
-            self.annotations = visitor.annotations
+            typing_collector = StubTypingCollector()
+            stub_tree.visit(typing_collector)
+            self.annotations = typing_collector.annotations
 
     # ------------------------------------------------------------------------
 
     def leave_Module(self, node: cst.Module, updated_node: cst.Module) -> cst.Module:
         "Update the Module docstring"
+
         if not MODULE_KEY in self.annotations:
             # no changes
             return updated_node
