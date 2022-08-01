@@ -10,10 +10,13 @@ class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
     after: str  # The source code after the transformation.
     stub: str  # The stub to apply
-    output: Path = None  # where to save thoe output for testing the tests
+    stub_file: str  # The path to stub file to apply
+    output: Path = None  # where to save the output for testing the tests
+    path: Path = None  # where are the tests
 
 
-def collect_test_cases() -> Tuple[Any, ...]:
+
+def collect_test_cases() -> List[Tuple[Any, ...]]:
     """
     Collect tests cases for the test case folder , each containing a
     - before.py||.pyi
@@ -21,6 +24,7 @@ def collect_test_cases() -> Tuple[Any, ...]:
     - stub.py||.pyi
     """
     root_test_cases_directory = Path(__file__).parent.joinpath("codemod_test_cases")
+    print(root_test_cases_directory)
 
     test_cases: List = []
     for test_case_directory in root_test_cases_directory.iterdir():
@@ -37,13 +41,25 @@ def collect_test_cases() -> Tuple[Any, ...]:
             after = file.read()
         with open(stub_files[0]) as file:
             stub = file.read()
-        
-        if 1:   # enable output for testing
+
+        if 1:  # enable output for testing
             output = test_case_directory.joinpath("output.py")
         else:
             output = None
 
-        test_cases.append(pytest.param(TestCase(before=before, after=after, stub=stub, output=output), id=test_case_directory.name))
+        test_cases.append(
+            pytest.param(
+                TestCase(
+                    path=test_case_directory,
+                    before=before,
+                    after=after,
+                    stub=stub,
+                    stub_file=stub_files[0],
+                    output=output,
+                ),
+                id=test_case_directory.name,
+            )
+        )
     return tuple(test_cases)
 
 

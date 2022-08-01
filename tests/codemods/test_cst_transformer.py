@@ -17,6 +17,14 @@ from .codemodcollector import (
 @pytest.mark.parametrize("test_case", collect_test_cases())
 def test_merge(test_case: TestCase) -> None:
     "test merging of firmwarestubs with docstubs using libcst"
+
+    if "_skip" in str(test_case.path):
+        pytest.skip("Skipping test because of _skip")
+    elif "import_" in str(test_case.path):
+        pytest.skip("Skipping import test as they cannot be dealth with")
+    elif "_xfail" in str(test_case.path):
+        pytest.xfail("xfail")
+
     source_tree = libcst.parse_module(test_case.before)
 
     # create transformer for this stubfile
