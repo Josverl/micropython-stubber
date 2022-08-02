@@ -195,7 +195,7 @@ def update_def_docstr(node: Union[cst.FunctionDef, cst.ClassDef], doc_tree: Opti
 
     # need some funcky casting to avoid issues with changing the body
     # note : indented body is nested : body.body
-    if node.get_docstring():
+    if node.get_docstring() != None:
         body = tuple([doc_tree] + list(node.body.body[1:]))
     else:
         # append the new docstring and append the function body
@@ -215,7 +215,7 @@ def update_module_docstr(node: cst.Module, doc_tree: Optional[cst.SimpleStatemen
         raise TransformError("Expected module with body")
 
     # need some funcky casting to avoid issues with changing the body
-    if node.get_docstring():
+    if node.get_docstring() != None:
         body = tuple([doc_tree] + list(node.body[1:]))
     else:
         # append the new docstring and append the function body
