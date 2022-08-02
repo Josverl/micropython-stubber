@@ -143,6 +143,10 @@ class SourceDict(OrderedDict):
             if autoindent:
                 line = spaces(self._indent + self._body) + line
                 if len(_docstr):
+                    # TODO:
+                    #  - add docstring after line defining constant
+                    #  - if len = 1 add single " quotes before & after
+                    #  - if len > 1 add triple quotes before & after
                     # add docstr as comment before constant
                     _docstr = [spaces(self._indent + self._body) + "# " + l for l in _docstr]
             if len(_docstr):
