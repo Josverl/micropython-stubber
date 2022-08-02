@@ -220,8 +220,9 @@ class RSTReader:
             lines = str(self.output_dict).splitlines(keepends=True)
             self.output = lines
         for i in range(0, len(self.output)):
-            if "(self, ) ->" in self.output[i]:
-                self.output[i] = self.output[i].replace("(self, ) ->", "(self) ->")
+            for name in ("self", "cls"):
+                if f"({name}, ) ->" in self.output[i]:
+                    self.output[i] = self.output[i].replace(f"({name}, ) ->", f"({name}) ->")
 
     def write_file(self, filename: Path) -> bool:
         self.prepare_output()
