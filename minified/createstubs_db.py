@@ -23,7 +23,7 @@ C=OSError
 import sys,gc as E,uos as os
 from utime import sleep_us as e
 from ujson import dumps as P
-__version__='1.5.6'
+__version__='1.5.7'
 c=2
 f=2
 try:from machine import resetWDT as T
@@ -91,8 +91,9 @@ class Stubber:
 			if F=="<class 'type'>"and I(A)<=f*4:
 				S=G;U=D.endswith(M)or D.endswith('Error')or D in['KeyboardInterrupt','StopIteration','SystemExit']
 				if U:S=M
-				B='\n{}class {}({}):\n'.format(A,D,S);B+=A+"    ''\n"
-				if not U:B+=A+'    def __init__(self, *argv, **kwargs) -> None:\n';B+=A+"        ''\n";B+=A+'        ...\n'
+				B='\n{}class {}({}):\n'.format(A,D,S)
+				if U:B+=A+'    ...\n'
+				else:B+=A+'    def __init__(self, *argv, **kwargs) -> None:\n';B+=A+'        ...\n\n'
 				J.write(B);L.write_object_stub(J,R,'{0}.{1}'.format(obj_name,D),A+'    ',P+1)
 			elif'method'in F or'function'in F:
 				V=X;W=G

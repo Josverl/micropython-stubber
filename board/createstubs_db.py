@@ -30,7 +30,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.6"
+__version__ = "1.5.7"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -234,12 +234,13 @@ class Stubber:
                 if is_exception:
                     superclass = "Exception"
                 s = "\n{}class {}({}):\n".format(indent, item_name, superclass)
-                s += indent + "    ''\n"
-                if not is_exception:
+                # s += indent + "    ''\n"
+                if is_exception:
+                    s += indent + "    ...\n"
+                else:
                     # Add __init__
                     s += indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
-                    s += indent + "        ''\n"
-                    s += indent + "        ...\n"
+                    s += indent + "        ...\n\n"
                 fp.write(s)
                 # self._log.debug("\n" + s)
 
