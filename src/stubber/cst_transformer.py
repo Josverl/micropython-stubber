@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, List, Optional, Sequence, Set, Tuple, Dict, Union
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import libcst as cst
-from libcst.codemod.visitors import AddImportsVisitor
 
 
 @dataclass
@@ -13,6 +12,7 @@ class TypeInfo:
     params: Optional[cst.Parameters] = None
     returns: Optional[cst.Annotation] = None
     docstr_node: Optional[cst.SimpleStatementLine] = None
+    def_type: str = "?"  # funcdef or classdef or module
 
 
 class TransformError(Exception):
@@ -47,6 +47,7 @@ class StubTypingCollector(cst.CSTVisitor):
                 returns=None,
                 docstr_node=node.body[0],
                 decorators=(),
+                def_type="module",
             )
             self.annotations[MODULE_KEY] = ti
         return True
@@ -69,6 +70,7 @@ class StubTypingCollector(cst.CSTVisitor):
             returns=None,
             docstr_node=docstr_node,
             decorators=node.decorators,
+            def_type="classdef",
         )
         self.annotations[tuple(self.stack)] = ti
 
@@ -92,6 +94,7 @@ class StubTypingCollector(cst.CSTVisitor):
             returns=node.returns,
             docstr_node=docstr_node,
             decorators=node.decorators,
+            def_type="funcdef",
         )
         self.annotations[tuple(self.stack)] = ti
 
@@ -156,8 +159,18 @@ class StubMergeTransformer(cst.CSTTransformer):
         new = self.annotations[stack_id]
         # first update the docstring
         updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # then any other information
-        return updated_node.with_changes(decorators=new.decorators)
+        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
+        # we need to be carefull not to copy over all the annotations if the types are different        
+        if new.def_type == "classdef":
+            # Same type, we can copy over all the annotations
+            return updated_node.with_changes(decorators=new.decorators)
+        elif new.def_type == "funcdef":
+            # Different type: ClassDef --> FuncDef ,
+            # for now just return the updated node
+            return updated_node
+        else:
+            #  just return the updated node
+            return updated_node
 
     # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
@@ -177,12 +190,22 @@ class StubMergeTransformer(cst.CSTTransformer):
 
         # first update the docstring
         updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # then any other information
-        return updated_node.with_changes(
-            params=new.params,
-            returns=new.returns,
-            decorators=new.decorators,
-        )
+        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
+        # we need to be carefull not to copy over all the annotations if the types are different
+        if new.def_type == "funcdef":
+            # Same type, we can copy over all the annotations
+            return updated_node.with_changes(
+                params=new.params,
+                returns=new.returns,
+                decorators=new.decorators,
+            )
+        elif new.def_type == "classdef":
+            # Different type: ClassDef --> FuncDef ,
+            # for now just return the updated node
+            return updated_node
+        else:
+            #  just return the updated node
+            return updated_node
 
 
 def update_def_docstr(node: Union[cst.FunctionDef, cst.ClassDef], doc_tree: Optional[cst.SimpleStatementLine]) -> Any:
@@ -190,8 +213,12 @@ def update_def_docstr(node: Union[cst.FunctionDef, cst.ClassDef], doc_tree: Opti
     if not doc_tree:
         return node
     # just checking
-    if not (isinstance(node.body, cst.IndentedBlock) and isinstance(node.body.body, Sequence)):
+    if not isinstance(node.body, cst.IndentedBlock):
         raise TransformError("Expected Def with Indented body")
+    if not isinstance(node.body.body, Sequence):
+        # this is likely a .pyi file or a type declaration with a trailing ...
+        # no changes
+        return node
 
     # need some funcky casting to avoid issues with changing the body
     # note : indented body is nested : body.body

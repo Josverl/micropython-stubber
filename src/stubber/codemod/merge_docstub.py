@@ -4,42 +4,19 @@
 # LICENSE file in the root directory of this source tree.
 #
 import argparse
-from ast import alias
-from pathlib import Path
-from typing import List
-from libcst import Module
-from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
-
-
-from stubber.cst_transformer import StubTypingCollector, update_def_docstr, update_module_docstr
-
+import logging
 from dataclasses import dataclass
-from typing import List, Optional, Sequence, Tuple, Dict
+from pathlib import Path
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import libcst as cst
-from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, RemoveImportsVisitor, ImportItem
+from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
+from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
+from stubber.cst_transformer import StubTypingCollector, update_def_docstr, update_module_docstr, TypeInfo, MODULE_KEY
 
-from libcst.codemod.visitors._apply_type_annotations import _get_imported_names
-
-
-@dataclass
-class TypeInfo:
-    "contains the  functiondefs and classdefs info read from the stubs source"
-    name: str
-    decorators: Sequence[cst.Decorator]
-    params: Optional[cst.Parameters] = None
-    returns: Optional[cst.Annotation] = None
-    docstr_node: Optional[cst.SimpleStatementLine] = None
-
-
-class TransformError(Exception):
-    """
-    Error raised upon encountering a known error while attempting to transform
-    the tree.
-    """
-
-
-MODULE_KEY = tuple(["__module"])
+##########################################################################################
+log = logging.getLogger(__name__)
+#########################################################################################
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -63,23 +40,23 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """Add command-line args that a user can specify for running this codemod."""
 
         arg_parser.add_argument(
-            "-sf",
+            # "-sf",
             "--stubfile",
             dest="stub_file",
-            metavar="COMMENT",
+            metavar="PATH",
             help="The path to the doc-stub file",
             type=str,
             required=True,
         )
 
-    def __init__(self, context: CodemodContext, stub_file: str) -> None:
+    def __init__(self, context: CodemodContext, stub_file: Union[Path, str]) -> None:
         super().__init__(context)
         # stack for storing the canonical name of the current function/method
         self.stack: List[str] = []
         # stubfile is the path to the doc-stub file
         self.stub_path = Path(stub_file)
         # read the stub file from the path
-        self.stub_source = self.stub_path.read_text()
+        self.stub_source = self.stub_path.read_text(encoding="utf-8")
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
@@ -102,11 +79,6 @@ class MergeCommand(VisitorBasedCodemodCommand):
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
 
-    # def transform_module_impl(self, tree: Module) -> Module:
-    #     # Return the tree as-is, with absolutely no modification
-    #     print(f"hello from {self.DESCRIPTION}")
-    #     return tree
-
     # ------------------------------------------------------------------------
 
     def leave_Module(self, node: cst.Module, updated_node: cst.Module) -> cst.Module:
@@ -114,7 +86,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
             _imp = self.stub_imports[k]
-            print(f"import {k} = {_imp}")
+            log.debug(f"import {k} = {_imp}")
             AddImportsVisitor.add_needed_import(
                 self.context,
                 module=_imp.module_name,
@@ -149,8 +121,18 @@ class MergeCommand(VisitorBasedCodemodCommand):
         new = self.annotations[stack_id]
         # first update the docstring
         updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # then any other information
-        return updated_node.with_changes(decorators=new.decorators)
+        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
+        # we need to be carefull not to copy over all the annotations if the types are different
+        if new.def_type == "classdef":
+            # Same type, we can copy over all the annotations
+            return updated_node.with_changes(decorators=new.decorators)
+        elif new.def_type == "funcdef":
+            # Different type: ClassDef --> FuncDef ,
+            # for now just return the updated node
+            return updated_node
+        else:
+            #  just return the updated node
+            return updated_node
 
     # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
@@ -170,9 +152,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         # first update the docstring
         updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # then any other information
-        return updated_node.with_changes(
-            params=new.params,
-            returns=new.returns,
-            decorators=new.decorators,
-        )
+        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
+        # we need to be carefull not to copy over all the annotations if the types are different
+        if new.def_type == "funcdef":
+            # Same type, we can copy over all the annotations
+            return updated_node.with_changes(
+                params=new.params,
+                returns=new.returns,
+                decorators=new.decorators,
+            )
+        elif new.def_type == "classdef":
+            # Different type: ClassDef --> FuncDef ,
+            # for now just return the updated node
+            return updated_node
+        else:
+            #  just return the updated node
+            return updated_node
