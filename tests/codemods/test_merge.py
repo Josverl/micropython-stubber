@@ -1,5 +1,5 @@
 import pytest
-from libcst.codemod._testing import _CodemodTest, CodemodContext, parse_module, CodemodTest, PartialParserConfig
+from libcst.codemod._testing import _CodemodTest, CodemodContext, parse_module, CodemodTest, PartialParserConfig, SkipFile
 from stubber.codemod.merge_docstub import MergeCommand
 from .codemodcollector import (
     TestCase as MyTestCase,
@@ -91,7 +91,7 @@ class TestMergeDocStubs(PytestCodemodTest):
             pytest.skip("Skipping test because of _skip")
         if "_xfail" in str(test_case.path):
             pytest.xfail("xfail")
-            
+
         self.assertCodemod(
             test_case.before,
             test_case.after,
