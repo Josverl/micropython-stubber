@@ -51,6 +51,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
     def __init__(self, context: CodemodContext, stub_file: Union[Path, str]) -> None:
         super().__init__(context)
+        self.replace_functiondef_with_classdef = True
         # stack for storing the canonical name of the current function/method
         self.stack: List[str] = []
         # stubfile is the path to the doc-stub file
@@ -127,7 +128,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # Same type, we can copy over all the annotations
             return updated_node.with_changes(decorators=new.decorators)
         elif new.def_type == "funcdef":
-            # Different type: ClassDef --> FuncDef ,
+            # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
             return updated_node
         else:
@@ -139,7 +140,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(self, node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
+    def leave_FunctionDef(self, node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
 
         stack_id = tuple(self.stack)
@@ -162,7 +163,10 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 decorators=new.decorators,
             )
         elif new.def_type == "classdef":
-            # Different type: ClassDef --> FuncDef ,
+            # Different type: ClassDef != FuncDef ,
+            if new.def_node and self.replace_functiondef_with_classdef:
+                # replace the functiondef with the classdef from the stub file
+                return new.def_node
             # for now just return the updated node
             return updated_node
         else:
