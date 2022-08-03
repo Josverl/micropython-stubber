@@ -12,6 +12,7 @@ class TypeInfo:
     params: Optional[cst.Parameters] = None
     returns: Optional[cst.Annotation] = None
     docstr_node: Optional[cst.SimpleStatementLine] = None
+    def_node: Optional[Union[cst.FunctionDef, cst.ClassDef]] = None
     def_type: str = "?"  # funcdef or classdef or module
 
 
@@ -71,6 +72,7 @@ class StubTypingCollector(cst.CSTVisitor):
             docstr_node=docstr_node,
             decorators=node.decorators,
             def_type="classdef",
+            def_node=node,
         )
         self.annotations[tuple(self.stack)] = ti
 
@@ -95,6 +97,7 @@ class StubTypingCollector(cst.CSTVisitor):
             docstr_node=docstr_node,
             decorators=node.decorators,
             def_type="funcdef",
+            def_node=node,
         )
         self.annotations[tuple(self.stack)] = ti
 
