@@ -61,7 +61,6 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
 
     # list all the .py and .pyi files in the source folder
     source_files = sorted(list(source_folder.glob("**/*.py")) + list(source_folder.glob("**/*.pyi")))
-    source_files = sorted(list(source_folder.glob("**/*.py")))
     for source_file in source_files:
         try:
             enrich_sourcefile(source_file, docstub_path, show_diff)
