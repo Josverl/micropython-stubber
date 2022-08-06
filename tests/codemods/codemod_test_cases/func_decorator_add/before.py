@@ -1,0 +1,6 @@
+"""
+simple functions 
+"""
+
+def foo():
+    ...
