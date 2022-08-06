@@ -24,6 +24,8 @@ def test_merge(test_case: TestCase) -> None:
         pytest.skip("Skipping import test as they cannot be dealth with")
     elif "_xfail" in str(test_case.path):
         pytest.xfail("xfail")
+    elif "xxx_merge" in str(test_case.path):
+        pytest.skip("Skipping test")
 
     source_tree = libcst.parse_module(test_case.before)
 
