@@ -56,7 +56,8 @@ def test_extract_target_names(path, port, board):
     assert _port == port
 
 
-# @pytest.mark.basicgit
+@pytest.mark.basicgit
+@pytest.mark.skip(reason="cant test in CI/CD")
 @pytest.mark.slow
 @pytest.mark.parametrize("mpy_version", ["v1.12", "v1.13", "v1.15", "v1.16", "master"])
 def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
@@ -82,7 +83,8 @@ def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropy
     assert result == True
 
 
-# @pytest.mark.basicgit
+@pytest.mark.skip(reason="cant test in CI/CD")
+@pytest.mark.basicgit
 @pytest.mark.slow
 @pytest.mark.parametrize("mpy_version", ["v1.10", "v1.9.4"])
 def test_freezer_mpy_folders(mpy_version, tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
