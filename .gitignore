@@ -49,3 +49,6 @@ minified/modulelist.db
 
 # no poetry packaging 
 dist/
+
+# code modding output saved for tests / comparison
+tests/codemods/codemod_test_cases/**/output.py

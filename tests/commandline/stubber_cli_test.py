@@ -64,8 +64,8 @@ def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
 @pytest.mark.parametrize(
     "params",
     [
-        ["switch", "--version", "latest", "--path", "foobar"],
-        ["switch", "--version", "v1.10", "--path", "foobar"],
+        pytest.param(["switch", "--version", "latest", "--path", "foobar"], id="latest"),
+        pytest.param(["switch", "--version", "v1.9.4", "--path", "foobar"], id="v1.9.4"),
     ],
 )
 def test_stubber_switch(mocker: MockerFixture, params: List[str]):
@@ -97,8 +97,6 @@ def test_stubber_switch(mocker: MockerFixture, params: List[str]):
     else:
         m_switch.assert_not_called()
         m_checkout.assert_called_once()
-
-
 
 
 ##########################################################################################

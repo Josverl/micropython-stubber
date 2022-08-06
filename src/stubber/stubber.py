@@ -2,30 +2,23 @@
 # -*- coding: utf-8 -*-
 
 """Create, Process, and Maintain stubs ✏️  for MicroPython"""
-from typing import Optional, Union, List
-from pathlib import Path
-import os
-import click
 import logging
+import os
+from pathlib import Path
+from typing import List, Optional, Union
 
+import click
 
-from .minify import minify
-
-from . import utils
-from . import basicgit as git
-from . import get_cpython
-from . import get_mpy
-from . import get_lobo
-from .stubs_from_docs import generate_from_rst
-from .update_fallback import update_fallback, RELEASED
 from . import __version__
-from . import config
+from . import basicgit as git
+from . import config, get_cpython, get_lobo, get_mpy, utils
+from .minify import minify
+from .stubs_from_docs import generate_from_rst
+from .update_fallback import RELEASED, update_fallback
 
 ##########################################################################################
 log = logging.getLogger(__name__)
-
-
-##########################################################################################
+#########################################################################################
 
 
 ##########################################################################################

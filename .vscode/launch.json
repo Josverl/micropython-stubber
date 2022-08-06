@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: file as Module",
+            "type": "python",
+            "request": "launch",
+            "module": "stubber.${fileBasenameNoExtension}",
+            "justMyCode": false
+        },
+        {
             "name": "Python: stubber - Args",
             "type": "python",
             "request": "launch",
@@ -35,6 +42,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            // "cwd": "${fileDirname}",
             "console": "integratedTerminal"
         },
         {

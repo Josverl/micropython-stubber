@@ -74,7 +74,7 @@ def get_frozen(stub_folder: str, version: str, mpy_folder: Optional[str] = None,
     # remove any manifests  that are below one of the virtual environments (venv) \
     # 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\build-venv\\lib64\\python3.6\\site-packages\\pip\\_vendor\\distlib\\manifest.py'
     # and skip the manifest used for coverage tests
-    manifests = [m for m in manifests if not "venv" in m and Path(m).parent.name != "coverage"]
+    manifests = [m for m in manifests if not "venv" in str(m) and Path(m).parent.name != "coverage"]
 
     if len(manifests) > 0:
         log.info("MicroPython v1.12 and newer")
