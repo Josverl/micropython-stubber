@@ -6,11 +6,10 @@
 import argparse
 from typing import List
 from libcst import Module, Comment
-from libcst.codemod import CodemodCommand, CodemodContext, VisitorBasedCodemodCommand
+from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.helpers.module import insert_header_comments
 
 import re
-from stubber.cst_transformer import StubMergeTransformer
 from typing import Pattern
 
 
