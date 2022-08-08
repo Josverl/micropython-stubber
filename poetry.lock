@@ -355,7 +355,7 @@ python-versions = "*"
 
 [[package]]
 name = "pyright"
-version = "1.1.265"
+version = "1.1.266"
 description = "Command line wrapper for pyright"
 category = "dev"
 optional = false
@@ -566,7 +566,7 @@ tools = ["rshell", "esptool", "pyserial"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "091f07b1ce4f527646e79a17e3bc0d23e571fc54e4f13edeafe33c0deb7ce155"
+content-hash = "c03dc333d7fe49fd18858461603c79d356072b89e33400f535cda2ba0a971512"
 
 [metadata.files]
 atomicwrites = [
@@ -884,8 +884,8 @@ pyreadline = [
     {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 pyright = [
-    {file = "pyright-1.1.265-py3-none-any.whl", hash = "sha256:a504d67d559dc90bf7209df090d79392fee47f308b36066a467b98d2a4aa471d"},
-    {file = "pyright-1.1.265.tar.gz", hash = "sha256:0a98fd55ba8b9c16145c16b79c524fdb1daf55ed6dc094c8a7a2dd540af00b67"},
+    {file = "pyright-1.1.266-py3-none-any.whl", hash = "sha256:246b2fb33c9483ac6e684e8e7619e3ecf0fee20180ec22549a4f3cdf47dbd0de"},
+    {file = "pyright-1.1.266.tar.gz", hash = "sha256:1154aeaaa0b62f5161af09342bf0a586468d6789377dfd8710ba8d85c22eee94"},
 ]
 pyserial = [
     {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},

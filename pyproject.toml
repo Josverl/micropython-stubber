@@ -4,7 +4,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.7.0"
+version = "1.7.1"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -63,7 +63,7 @@ pytest-json-report = "1.4.1"
 pytest-metadata = "^2.0.2"
 mock = "4.0.3"
 coverage = "^6.4.2"
-pyright = "^1.1.265"
+pyright = "^1.1.266"
 packaging = "21.3"
 distro = "1.7.0"
 
