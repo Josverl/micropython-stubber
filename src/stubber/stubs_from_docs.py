@@ -800,12 +800,14 @@ def generate_from_rst(
         reader.read_file(file)
         reader.parse()
         if file.stem in U_MODULES:
-            # create umod.py file and mod.py file that imports umod
+            # create umod.py file and mod.py file
             reader.write_file((dst_path / ("u" + file.name)).with_suffix(suffix))
-            with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
-                # new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
-                new_file.write(f"from . import u{file.stem} # Type: Ignore\n")
+            reader.write_file((dst_path / file.name).with_suffix(suffix))
+            # with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
+            #     # new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
+            #     new_file.write(f"from . import u{file.stem} # Type: Ignore\n")
         else:
+            # create mod.py file
             reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
 
