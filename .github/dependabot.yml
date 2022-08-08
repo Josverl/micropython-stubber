@@ -2,9 +2,9 @@
 version: 2
 updates:
 
-  # Maintain dependencies for Composer
-  - package-ecosystem: "poetry"
-    directory: "/"
+  # Maintain dependencies for micropython-stubber
+  - package-ecosystem: "pip"
+    directory: "/src"
     schedule:
       interval: "daily"
 
