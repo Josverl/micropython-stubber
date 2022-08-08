@@ -112,8 +112,9 @@ def test_module_constants():
     # check
     assert len(r.output) > 1
     list = r.output_dict["constants"]
-    doc_list = [c for c in list if c.startswith("#")]
-    const_list = [c for c in list if not c.startswith("#")]
+
+    doc_list = [c for c in list if c.startswith('"""')]
+    const_list = [c for c in list if not c.startswith('"""')]
     # should have 11  constants
     assert len(const_list) == 11
     # and 11 single line comments for docstrings
@@ -131,13 +132,18 @@ def test_class_constants():
     assert len(r.output) > 1
     expected = [
         "class Pin():",
-        "    #    Selects the pin mode.",
-        "    IN : Any = ...",
-        "    OPEN_DRAIN : Any = ...",
-        "    #    Test wildcard handling.",
-        "    # JOKER_* : Any = ...",
-        "    def __init__(self, id, mode=-1, pull=-1, *, value=None, drive=0, alt=-1) -> None:",
+        "    IN: Any = ...",
+        "    OUT: Any = ...",
+        '    """Selects the pin mode."""',
+        "    OPEN_DRAIN: Any = ...",
+        "    ALT: Any = ...",
+        '    """\\',
+        "    Selects whether there is a pull up/down resistor.  Use the value",
+        "    ``None`` for no pull.",
+        '    """',
+        "    # JOKER_*: Any = ...",
+        '    """Test wildcard handling."""',
     ]
     lines = [l.rstrip() for l in r.output]
     for l in expected:
-        assert l in lines
+        assert l in lines, f"{l} not found"

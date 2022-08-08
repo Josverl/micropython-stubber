@@ -116,7 +116,7 @@ class SourceDict(OrderedDict):
         self.update({"constants": self["constants"] + [line]})
 
     def add_constant_smart(self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True):
-        "add constant to the constant scope of this block, or a class in this block"
+        """add constant to the constant scope of this block, or a class in this block"""
         if "." in name and isinstance(self, ModuleSourceDict):
             classname, const_name = name.split(".", 1)
             classfullname = self.find(classname.replace("# ", ""))  # Wildcards are
@@ -128,9 +128,9 @@ class SourceDict(OrderedDict):
         else:
             if "*" in name:
                 # * wildcard used in documentation
-                line = f"# {name} : {type}"
+                line = f"# {name}: {type}"
             else:
-                line = f"{name} : {type}"
+                line = f"{name}: {type}"
             # assign a value so constant can be used as default value
             if type == "Any":
                 line += " = ..."
@@ -143,14 +143,19 @@ class SourceDict(OrderedDict):
             if autoindent:
                 line = spaces(self._indent + self._body) + line
                 if len(_docstr):
-                    # TODO:
-                    #  - add docstring after line defining constant
-                    #  - if len = 1 add single " quotes before & after
-                    #  - if len > 1 add triple quotes before & after
-                    # add docstr as comment before constant
-                    _docstr = [spaces(self._indent + self._body) + "# " + l for l in _docstr]
+                    if len(_docstr) == 1:
+                        #  - if len = 1 add triple quotes before & after, respecting indentaion
+                        _docstr = [spaces(self._indent + self._body) + '"""' + _docstr[0].lstrip() + '"""']
+                    else:
+                        #  - if len > 1 add triple quotes on sep lines before & after,respecting indentaion
+                        _docstr = (
+                            [spaces(self._indent + self._body) + '"""\\']
+                            + [spaces(self._indent + self._body) + l.lstrip() for l in _docstr]
+                            + [spaces(self._indent + self._body) + '"""']
+                        )
             if len(_docstr):
-                self.update({"constants": self["constants"] + _docstr + [line]})
+                #  - add docstring after defining constant
+                self.update({"constants": self["constants"] + [line] + _docstr})
             else:
                 self.update({"constants": self["constants"] + [line]})
 
