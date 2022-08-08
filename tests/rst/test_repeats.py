@@ -59,7 +59,8 @@ def test_number_sequence():
     r.parse()
     # check
     assert len(r.output) > 1
-    constants = len([l for l in r.output_dict["constants"] if not l.startswith("# ")])
+    # todo: use regex to match
+    constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and " = " in l])
     assert constants == 8
 
 
@@ -80,10 +81,14 @@ def test_comma_sequence():
     # process
     r.parse()
 
+    # todo: use regex to match
+    constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and " = " in l])
+    assert constants == 2
+
     # check that etc is not found
     etc = "etc. : Any\n" in r.output
-    eexist = "EEXIST : Any = ...\n" in r.output
-    eagain = "EAGAIN : Any = ...\n" in r.output
+    eexist = "EEXIST: Any = ...\n" in r.output
+    eagain = "EAGAIN: Any = ...\n" in r.output
     assert not etc
     assert eexist
     assert eagain
@@ -138,7 +143,8 @@ def test_sequence_3():
 
     assert len(r.output) > 1
     c_list = r.output_dict["class framebuf():"]["constants"]
-    constants = len([l for l in c_list if not l.lstrip().startswith("# ")])
+    # todo: use regex to match
+    constants = len([l for l in c_list if not l.startswith('"""') and ": " in l])
     assert constants == 7
 
 
