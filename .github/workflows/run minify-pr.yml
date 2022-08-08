@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04 # ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Extract branch name (for potential PR)
         id: extract_branch
