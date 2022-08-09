@@ -108,7 +108,7 @@ jobs:
           name: results-${{ matrix.python-version }}-${{ matrix.os }}
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           fail_ci_if_error: false
