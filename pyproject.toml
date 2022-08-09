@@ -40,7 +40,7 @@ python-minifier = "^2.6.0"
 requests = "2.27.0"
 mypy = "0.971"
 mpy-cross = "1.18"
-black = "22.1.0"
+black = "22.6.0"
 libcst = "0.4.7"
 autoflake = "1.4"
 click = "8.0.3"
@@ -48,7 +48,7 @@ importlib-metadata = { version = "^1.0", python = "<3.8" }
 tomli = { version = "^2.0.1", python = "<3.11" }
 typed-config = "^1.1.0"
 packaging = "^21.3"
-esptool = { version = "3.2", optional = true }
+esptool ={ version = "3.3.1", optional = true }
 rshell = { version = "0.0.31", optional = true }
 pyserial = { version = "3.5", optional = true }
 
@@ -59,7 +59,7 @@ tools = ["rshell", "esptool", "pyserial"]
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
 pytest-mock = "3.7.0"
-pytest-json-report = "1.4.1"
+pytest-json-report = "1.5.0"
 pytest-metadata = "^2.0.2"
 mock = "4.0.3"
 coverage = "^6.4.3"
