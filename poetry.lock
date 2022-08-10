@@ -403,7 +403,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "pytest-json-report"
-version = "1.4.1"
+version = "1.5.0"
 description = "A pytest plugin to report test results as JSON files"
 category = "dev"
 optional = false
@@ -567,7 +567,7 @@ tools = ["rshell", "esptool", "pyserial"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "c260c490cf2ca6aa7083c86d17df45dcd9a8b1a24695e92a7075ecb1975d9fb4"
+content-hash = "4bb2c0c66be2652fe9977813760633c98c7b0c0a8ba2f15a4290781272d9b7bb"
 
 [metadata.files]
 atomicwrites = [
@@ -900,8 +900,8 @@ pytest = [
     {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
 ]
 pytest-json-report = [
-    {file = "pytest-json-report-1.4.1.tar.gz", hash = "sha256:87206752e1d9c6c86e8fdc66b34b7a452ad82766a621b263cd5e828d19caee55"},
-    {file = "pytest_json_report-1.4.1-py3-none-any.whl", hash = "sha256:722425e8910f62079ed0cf039581e70e042fcba0ca8f91094df2ef2239d3f8de"},
+    {file = "pytest-json-report-1.5.0.tar.gz", hash = "sha256:2dde3c647851a19b5f3700729e8310a6e66efb2077d674f27ddea3d34dc615de"},
+    {file = "pytest_json_report-1.5.0-py3-none-any.whl", hash = "sha256:9897b68c910b12a2e48dd849f9a284b2c79a732a8a9cb398452ddd23d3c8c325"},
 ]
 pytest-metadata = [
     {file = "pytest-metadata-2.0.2.tar.gz", hash = "sha256:fcd2f416f15be295943527b3c8ba16a44ae5a7141939c90c3dc5ce9d167cf2a5"},
