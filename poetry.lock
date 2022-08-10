@@ -165,8 +165,8 @@ gmpy2 = ["gmpy2"]
 
 [[package]]
 name = "esptool"
-version = "3.2"
-description = "A serial utility to communicate & flash code to Espressif ESP8266 & ESP32 chips."
+version = "3.3.1"
+description = "A serial utility to communicate & flash code to Espressif chips."
 category = "main"
 optional = true
 python-versions = "*"
@@ -567,7 +567,7 @@ tools = ["rshell", "esptool", "pyserial"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "14a1703c863e8b8b75ec98a4aa887ab5bcea24042e39cfeef4a1d5690271871e"
+content-hash = "54dbf54ca87173b8ba0e946463eeb4dfc53d46d6d42641bf7fd075430c971d5e"
 
 [metadata.files]
 atomicwrites = [
@@ -768,7 +768,7 @@ ecdsa = [
     {file = "ecdsa-0.18.0.tar.gz", hash = "sha256:190348041559e21b22a1d65cee485282ca11a6f81d503fddb84d5017e9ed1e49"},
 ]
 esptool = [
-    {file = "esptool-3.2.tar.gz", hash = "sha256:9638ff11c68e621e08e7c3335d4fd9d70b2ddcf7caae778073cd8cc27be1216f"},
+    {file = "esptool-3.3.1.tar.gz", hash = "sha256:f9ade989a7f5f19bfc60e11925c45f470b8155c7ecf1a37bc8c31380d5dd07b8"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
