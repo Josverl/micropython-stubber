@@ -71,7 +71,7 @@ class SourceDict(OrderedDict):
                     if isinstance(l, str):
                         out += l + self.lf
                     else:
-                        raise TypeError(f"Incorrect structure in Output dict: {l}")
+                        raise TypeError(f"Incorrect structure in Output dict: {l}") #noqa
             else:
                 out += str(code)
         return out

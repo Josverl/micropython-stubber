@@ -48,7 +48,7 @@ importlib-metadata = { version = "^1.0", python = "<3.8" }
 tomli = { version = "^2.0.1", python = "<3.11" }
 typed-config = "^1.1.0"
 packaging = "^21.3"
-esptool ={ version = "3.3.1", optional = true }
+esptool = { version = "3.3.1", optional = true }
 rshell = { version = "0.0.31", optional = true }
 pyserial = { version = "3.5", optional = true }
 
@@ -129,15 +129,16 @@ omit = [
   "*/main.py",
   "*/stub_lvgl.py",
 
+  # minfied files 
+  "*/minified/*.py",
+
+  # dev helper script in src
+  "src/stubber/rst/report_return.py",
+
   # not my code 
   "*/logging.py",
   "*/make_stub_files.py",
 
-  # codemods
-  "*/_apply_stubber_annotations.py",
-  "*/commands/__init__.py",
-
-  "*/rst/report_return.py",
 
 ]
 
@@ -164,7 +165,6 @@ exclude_lines = [
 
   # Don't complain about missing debug-only code:
   "def __repr__",
-  "if self.debug",   # <-- Fix this 
   "self._log.debug",
 
   # Don't complain if tests don't hit defensive assertion code:
@@ -172,7 +172,14 @@ exclude_lines = [
   "raise NotImplementedError",
 
   "except subprocess.CalledProcessError as e:",
-
+  "except OSError:",
+  "except OSError as e:",
+  "except OSError as e2:",
+  "except (OSError, KeyError):  # lgtm [py/unreachable-statement]",
+  "except (OSError, AttributeError):",
+  "except KeyError:",
+  "except AttributeError as e:",
+  "",
   # Don't complain if non-runnable code isn't run:
   "if __name__ == .__main__.:",
 
