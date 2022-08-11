@@ -27,7 +27,7 @@ E=OSError
 import sys,gc as D,uos as os
 from utime import sleep_us as g
 from ujson import dumps as L
-__version__='1.7.1'
+__version__='1.7.2'
 h=2
 i=2
 try:from machine import resetWDT as Q
