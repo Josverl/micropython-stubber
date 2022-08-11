@@ -1,6 +1,10 @@
+import pytest
+
 # SOT
 from stubber.stubs_from_docs import RSTReader
 
+# mark all tests
+pytestmark = pytest.mark.doc_stubs
 
 #: Use this content as input for moo to do bar
 # FOOBAR: Any = 1

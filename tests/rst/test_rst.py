@@ -7,7 +7,7 @@ import subprocess
 
 from helpers import load_rst, read_stub
 
-pytestmark = pytest.mark.rst_stub
+pytestmark = pytest.mark.doc_stubs
 
 # SOT
 from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT

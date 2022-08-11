@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 import stubber
-from stubber.utils.config import StubberConfig, TomlConfigSource
+from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 
 def test_toplevel_config():
@@ -11,7 +11,6 @@ def test_toplevel_config():
     assert stubber.config
     assert isinstance(stubber.config, StubberConfig)
 
-    print(stubber.config)
     assert isinstance(stubber.config.stub_path, Path)
     assert isinstance(stubber.config.repo_path, Path)
     # assert isinstance(stubber.config.fallback_path, Path )
@@ -19,12 +18,32 @@ def test_toplevel_config():
     # assert isinstance(stubber.config.mpy_lib_path, Path )
 
 
-@pytest.mark.skip(reason="TODO: test incomplete")
-def test_config_from_pyproject_toml():
-    # test if the config reads from the pyproject.toml file
+def test_bad_config_source():
+    # throws error if file not found
+    with pytest.raises(FileNotFoundError) as exc_info:
+        source = TomlConfigSource("test/data/no_config.toml", must_exist=True)
+    exception_raised = exc_info.value
+    assert exception_raised.args[0] == "Could not find config file test/data/no_config.toml"
 
-    config = StubberConfig()
-    assert isinstance(config, StubberConfig)
 
-    config.add_source(TomlConfigSource("pyproject.toml", prefix="tool.", must_exist=False))
+def test_ok_config_source():
+    source = TomlConfigSource("tests/data/test.toml", must_exist=True)
+    assert isinstance(source, TomlConfigSource)
+
+
+def test_ok_config_source_prefix():
+    source = TomlConfigSource("tests/data/test.toml", prefix=".tool", must_exist=True)
+    assert isinstance(source, TomlConfigSource)
+
+
+def test_config():
+    config = readconfig(filename="tests/data/test.toml", prefix="tool.", must_exist=True)
+
     assert isinstance(config, StubberConfig)
+    assert isinstance(config.stub_path, Path)
+    assert isinstance(config.repo_path, Path)
+    assert isinstance(config.fallback_path, Path)
+    assert isinstance(config.mpy_path, Path)
+    assert isinstance(config.mpy_lib_path, Path)
+
+    assert config.stub_path == Path("./my-stubs")

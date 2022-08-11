@@ -7,8 +7,11 @@ import stubber.basicgit as git
 # SOT
 from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
 
-
 from helpers import load_rst, read_stub
+
+# mark all tests
+pytestmark = pytest.mark.doc_stubs
+
 
 ####################################################################################################
 

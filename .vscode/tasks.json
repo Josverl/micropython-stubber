@@ -2,10 +2,6 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
-    // "windows": {
-    //     "echoCommand": true,
-    //     "command": "Read-Host -Prompt 'hallo'"
-    // },
     "tasks": [
         {
             "label": "run createstubs",
@@ -21,28 +17,15 @@
         },
         {
             "label": "minify",
-            "detail": "run minification",
-            "type": "shell",
-            "windows": {
-                "command": "python process.py minify --diff"
-            },
-            "linux": {
-                "command": "python3 process.py minify --diff"
-            },
-            "problemMatcher": [],
-        },
-        {
-            "label": "minify",
             "detail": "minify for esp8622",
             "type": "shell",
-            "command": " python process.py minify",
+            "command": "stubber minify -all -complile",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
-
         {
             "label": "run minified",
             "detail": "run minified createstubs in linux port",
@@ -77,29 +60,27 @@
             "linux": "make clean html"
         },
         {
-            "label": "pylint all",
-            "detail": "py -m pylint: whole project",
+            "label": "coverage",
+            "detail": "run coverage for all tests",
             "type": "shell",
-            "command": "py -m pylint --msg-template '{path}:{line}:{column}:{category}:{symbol} - {msg}' src",
-            "presentation": {
-                "reveal": "never",
-                "panel": "shared"
-            },
-            "problemMatcher": {
-                "owner": "python",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": {
-                    "regexp": "^(.+):(\\d+):(\\d+):(\\w+):(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "message": 5
-                }
-            }
+            "command": "poetry run coverage run -m pytest tests -m 'not basicgit' --junitxml=results/test-results.xml",
+        },
+        {
+            "label": "coverage html",
+            "detail": "update coverage html report",
+            "type": "shell",
+            "command": "poetry run coverage html",
+        },
+        {
+            "label": "coverage ALL",
+            "detail": "run coverage and create html report and .lcov file",
+            "type": "shell",
+            "command": "poetry run coverage lcov -o results/coverage.lcov",
+            "dependsOn": [
+                "coverage",
+                "coverage html"
+            ],
+            "dependsOrder": "sequence"
         }
     ]
 }
