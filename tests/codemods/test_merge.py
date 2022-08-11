@@ -9,6 +9,9 @@ import difflib
 from typing import Optional, Sequence, Tuple, Dict
 from pathlib import Path
 
+# mark all tests
+pytestmark = pytest.mark.codemod
+
 
 class PytestCodemodTest(_CodemodTest):
     "CodeMod test that uses use _CodemodTest as the superclass as that does not inherit from unittest.TestCase which will break pytest.parametrize"

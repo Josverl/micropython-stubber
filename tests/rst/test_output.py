@@ -1,7 +1,10 @@
 # others
-
+import pytest
 # SOT
 from stubber.rst import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
+
+# mark all tests
+pytestmark = pytest.mark.doc_stubs
 
 
 def test_Module_SD():

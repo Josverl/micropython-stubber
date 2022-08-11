@@ -8,6 +8,9 @@ from click.testing import CliRunner
 # module under test :
 import stubber.stubber as stubber
 
+# mark all tests 
+pytestmark = pytest.mark.cli
+
 
 def test_stubber_help():
     # check basic commandline sanity check

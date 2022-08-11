@@ -13,6 +13,9 @@ from .codemodcollector import (
     collect_test_cases,
 )
 
+# mark all tests
+pytestmark = pytest.mark.codemod
+
 
 @pytest.mark.parametrize("test_case", collect_test_cases())
 def test_merge(test_case: TestCase) -> None:

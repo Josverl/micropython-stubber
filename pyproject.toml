@@ -104,7 +104,9 @@ markers = [
   "minified: marks test of the minified version of createstubs",
   "docfix: upstream documentation fix needed",
   "micropython: tests of MicroPython code on Cpython with mocks",
-  "rst_stub: tests to generate stobs from the rst documentation",
+  "doc_stubs: tests to generate stubs from the rst documentation",
+  "codemod: test libcst code modification",
+  "cli: test command line interface",
   # os versions
   "win32: run test only on Windows",
   "linux: run test only on linux",
@@ -122,11 +124,15 @@ omit = [
   "*/main.py",
   "*/stub_lvgl.py",
 
-  # minfied files 
+  "*/__init__.py",
+
+  # minfied files should be excluded 
+  # duplicate file names in different folders break the coverage reports
   "*/minified/*.py",
 
   # dev helper script in src
-  "src/stubber/rst/report_return.py",
+  "*/src/stubber/rst/report_return.py",
+  "*/src/stubber/update_module_list.py",
 
   # not my code 
   "*/logging.py",
@@ -168,11 +174,12 @@ exclude_lines = [
   "except OSError:",
   "except OSError as e:",
   "except OSError as e2:",
-  "except (OSError, KeyError):  # lgtm [py/unreachable-statement]",
+  "except (OSError, KeyError):",
   "except (OSError, AttributeError):",
+  "except (OSError, KeyError, NameError):",
   "except KeyError:",
   "except AttributeError as e:",
-  "",
+
   # Don't complain if non-runnable code isn't run:
   "if __name__ == .__main__.:",
 

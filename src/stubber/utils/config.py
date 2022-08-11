@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 class StubberConfig(Config):
     "stubber confguration class"
     stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
-    "a Path to the stubs directory" 
+    "a Path to the stubs directory"
     # relative to stubs folder
     fallback_path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
 
@@ -33,9 +33,9 @@ class StubberConfig(Config):
         return config_updates
 
 
-def readconfig():
+def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exist: bool = True):
     config = StubberConfig()
     config.add_source(EnvironmentConfigSource())
-    config.add_source(TomlConfigSource("pyproject.toml", prefix="tool.", must_exist=False))  # ,"tools.micropython-stubber"))
+    config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
     config.read()
     return config
