@@ -1,0 +1,7 @@
+# some extra names 
+# Some modules are available by an u-name, and also by their non-u-name.
+# The non-u-name can be overridden by a file of that name in your package path.
+crypto
+# ucrypto
+bluetooth 
+# ubluetooth 
