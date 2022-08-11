@@ -10,7 +10,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.5.7"
+__version__ = "1.7.1"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -559,10 +559,33 @@ def main():
     # spell-checker: disable
     # modules to stub : 131
     stubber.modules = [
+        "_OTA",
+        "_coap",
+        "_flash_control_OTA",
+        "_main_pybytes",
+        "_mqtt",
+        "_mqtt_core",
+        "_msg_handl",
         "_onewire",
+        "_periodical_pin",
+        "_pybytes",
+        "_pybytes_ca",
+        "_pybytes_config",
+        "_pybytes_config_reader",
+        "_pybytes_connection",
+        "_pybytes_constants",
+        "_pybytes_debug",
+        "_pybytes_library",
+        "_pybytes_machine_learning",
+        "_pybytes_main",
+        "_pybytes_protocol",
+        "_pybytes_pyconfig",
+        "_pybytes_pymesh_config",
         "_rp2",
+        "_terminal",
         "_thread",
         "_uasyncio",
+        "_urequest",
         "aioble/__init__",
         "aioble/central",
         "aioble/client",
