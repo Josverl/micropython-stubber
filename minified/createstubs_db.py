@@ -23,7 +23,7 @@ C=OSError
 import sys,gc as E,uos as os
 from utime import sleep_us as e
 from ujson import dumps as P
-__version__='1.5.7'
+__version__='1.7.1'
 c=2
 f=2
 try:from machine import resetWDT as T
