@@ -8,10 +8,10 @@ S='utf8'
 R='_'
 Q=repr
 O='version'
-L=True
-N=KeyError
-M=ImportError
-K=open
+N=True
+M=KeyError
+L=open
+K=ImportError
 J='.'
 I=len
 H=AttributeError
@@ -23,11 +23,11 @@ C=OSError
 import sys,gc as E,uos as os
 from utime import sleep_us as e
 from ujson import dumps as P
-__version__='1.5.7'
+__version__='1.7.2'
 c=2
 f=2
 try:from machine import resetWDT as T
-except M:
+except K:
 	def T():0
 class Stubber:
 	def __init__(A,path=D,firmware_id=D):
@@ -71,26 +71,26 @@ class Stubber:
 		if F in A:A=A.replace(F,J)
 		O=D
 		try:O=__import__(A,D,D,'*')
-		except M:return B
+		except K:return B
 		U(I)
-		with K(I,'w')as P:Q='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(A,H._fwid,H.info,__version__);P.write(Q);P.write('from typing import Any\n\n');H.write_object_stub(P,O,A,G)
+		with L(I,'w')as P:Q='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(A,H._fwid,H.info,__version__);P.write(Q);P.write('from typing import Any\n\n');H.write_object_stub(P,O,A,G)
 		H._report.append({'module':A,'file':I})
 		if not A in['os','sys','logging','gc']:
 			try:del O
-			except (C,N):pass
+			except (C,M):pass
 			try:del sys.modules[A]
-			except N:pass
-		E.collect();return L
+			except M:pass
+		E.collect();return N
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
-		d='tuple';c='list';b='dict';a='{0}{1} = {2} # type: {3}\n';Z='bound_method';X='Any';P=in_class;O=object_expr;M='Exception';J=fp;A=indent;E.collect()
+		d='tuple';c='list';b='dict';a='{0}{1} = {2} # type: {3}\n';Z='bound_method';X='Any';P=in_class;O=object_expr;N='Exception';J=fp;A=indent;E.collect()
 		if O in L.problematic:return
 		Q,g=L.get_obj_attributes(O)
 		for (D,K,F,R) in Q:
-			if D in['classmethod','staticmethod','BaseException',M]:continue
+			if D in['classmethod','staticmethod','BaseException',N]:continue
 			T();e(1)
 			if F=="<class 'type'>"and I(A)<=f*4:
-				S=G;U=D.endswith(M)or D.endswith('Error')or D in['KeyboardInterrupt','StopIteration','SystemExit']
-				if U:S=M
+				S=G;U=D.endswith(N)or D.endswith('Error')or D in['KeyboardInterrupt','StopIteration','SystemExit']
+				if U:S=N
 				B='\n{}class {}({}):\n'.format(A,D,S)
 				if U:B+=A+'    ...\n'
 				else:B+=A+'    def __init__(self, *argv, **kwargs) -> None:\n';B+=A+'        ...\n\n'
@@ -113,7 +113,7 @@ class Stubber:
 			else:J.write("# all other, type = '{0}'\n".format(F));J.write(A+D+' # type: Any\n')
 		del Q;del g
 		try:del D,K,F,R
-		except (C,N,Y):pass
+		except (C,M,Y):pass
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
@@ -134,14 +134,14 @@ class Stubber:
 	def report(D,filename='modules.json'):
 		H='firmware';F=',\n';I=b.format(D.path,filename);E.collect()
 		try:
-			with K(I,'w')as A:
-				A.write('{');A.write(P({H:D.info})[1:-1]);A.write(F);A.write(P({'stubber':{O:__version__},'stubtype':H})[1:-1]);A.write(F);A.write('"modules" :[\n');G=L
+			with L(I,'w')as A:
+				A.write('{');A.write(P({H:D.info})[1:-1]);A.write(F);A.write(P({'stubber':{O:__version__},'stubtype':H})[1:-1]);A.write(F);A.write('"modules" :[\n');G=N
 				for J in D._report:
 					if G:G=B
 					else:A.write(F)
 					A.write(P(J))
 				A.write('\n]}')
-			M=D._start_free-E.mem_free()
+			K=D._start_free-E.mem_free()
 		except C:pass
 def U(path):
 	B=path;A=E=0
@@ -158,37 +158,39 @@ def U(path):
 				else:raise G
 		E=A+1
 def _info():
-	f=' on ';e='0.0.0';d='port';c='platform';b='machine';a='nodename';Y='name';T='mpy';S='unknown';R='-';Q='sysname';L='v';K='family';F='build';C='ver';B='release';U=sys.implementation.name;V=sys.platform if not sys.platform.startswith('pyb')else'stm32';A={Y:U,B:e,O:e,F:G,Q:S,a:S,b:S,K:U,c:V,d:V,C:G}
-	try:A[B]=J.join([str(A)for A in sys.implementation.version]);A[O]=A[B];A[Y]=sys.implementation.name;A[T]=sys.implementation.mpy
+	g=' on ';f='0.0.0';e='port';d='platform';c='machine';b='nodename';a='name';U='mpy';T='unknown';R='-';Q='sysname';N='v';L='build';F='family';C='ver';B='release';V=sys.implementation.name;W=sys.platform if not sys.platform.startswith('pyb')else'stm32';A={a:V,B:f,O:f,L:G,Q:T,b:T,c:T,F:V,d:W,e:W,C:G}
+	try:A[B]=J.join([str(A)for A in sys.implementation.version]);A[O]=A[B];A[a]=sys.implementation.name;A[U]=sys.implementation.mpy
 	except H:pass
 	if sys.platform not in('unix','win32'):
 		try:
-			E=os.uname();A[Q]=E.sysname;A[a]=E.nodename;A[B]=E.release;A[b]=E.machine
-			if f in E.version:
-				P=E.version.split(f)[0]
+			E=os.uname();A[Q]=E.sysname;A[b]=E.nodename;A[B]=E.release;A[c]=E.machine
+			if g in E.version:
+				P=E.version.split(g)[0]
 				if A[Q]=='esp8266':
-					if R in P:W=P.split(R)[0]
-					else:W=P
-					A[O]=A[B]=W.lstrip(L)
-				try:A[F]=P.split(R)[1]
+					if R in P:X=P.split(R)[0]
+					else:X=P
+					A[O]=A[B]=X.lstrip(N)
+				try:A[L]=P.split(R)[1]
 				except Z:pass
 		except (Z,H,TypeError):pass
-	try:from pycopy import const;A[K]='pycopy';del const
-	except (M,N):pass
-	if A[c]=='esp32_LoBo':A[K]='loboris';A[d]='esp32'
+	try:from pycopy import const as S;A[F]='pycopy';del S
+	except (K,M):pass
+	try:from pycom import FAT as S;A[F]='pycom';del S
+	except (K,M):pass
+	if A[d]=='esp32_LoBo':A[F]='loboris';A[e]='esp32'
 	elif A[Q]=='ev3':
-		A[K]='ev3-pybricks';A[B]='1.0.0'
+		A[F]='ev3-pybricks';A[B]='1.0.0'
 		try:from pybricks.hubs import EV3Brick;A[B]='2.0.0'
-		except M:pass
-	if A[B]:A[C]=L+A[B].lstrip(L)
-	if A[K]=='micropython':
+		except K:pass
+	if A[B]:A[C]=N+A[B].lstrip(N)
+	if A[F]=='micropython':
 		if A[B]and A[B]>='1.10.0'and A[B].endswith('.0'):A[C]=A[B][:-2]
 		else:A[C]=A[B]
-		if A[F]!=G and I(A[F])<4:A[C]+=R+A[F]
-	if A[C][0]!=L:A[C]=L+A[C]
-	if T in A:
-		g=int(A[T]);X=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][g>>10]
-		if X:A['arch']=X
+		if A[L]!=G and I(A[L])<4:A[C]+=R+A[L]
+	if A[C][0]!=N:A[C]=N+A[C]
+	if U in A:
+		h=int(A[U]);Y=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][h>>10]
+		if Y:A['arch']=Y
 	return A
 def get_root():
 	try:A=os.getcwd()
@@ -209,16 +211,16 @@ def read_path():
 	return B
 def V():
 	try:A=a('abc',encoding=S);C=V.__module__;return B
-	except (W,H):return L
+	except (W,H):return N
 def d():
-	O=b'fail';N='.db';H=b'todo';G='modulelist';import machine as P,btree
-	try:E=K(G+N,'r+b');F=L
-	except C:E=K(G+N,'w+b');F=B
+	O=b'fail';M='.db';H=b'todo';G='modulelist';import machine as P,btree
+	try:E=L(G+M,'r+b');F=N
+	except C:E=L(G+M,'w+b');F=B
 	stubber=Stubber(path=read_path())
 	if not F:stubber.clean()
 	A=btree.open(E)
 	if not F or I(list(A.keys()))==0:
-		for R in K(G+'.txt'):
+		for R in L(G+'.txt'):
 			D=R.strip()
 			if I(D)and D[0]!='#':A[D]=H
 		A.flush()
@@ -227,9 +229,9 @@ def d():
 		J=B
 		try:J=stubber.create_one_stub(D.decode(S))
 		except MemoryError:A.close();E.close();P.reset()
-		if J:M=a(Q(stubber._report[-1]),S)
-		else:M=O
-		A[D]=M;A.flush()
+		if J:K=a(Q(stubber._report[-1]),S)
+		else:K=O
+		A[D]=K;A.flush()
 	all=[B for B in A.items()if not B[1]==H and not B[1]==O]
 	if I(all)>0:stubber._report=all;stubber.report()
 	A.close();E.close()

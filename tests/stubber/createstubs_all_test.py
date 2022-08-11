@@ -1,11 +1,13 @@
 # type: ignore reportGeneralTypeIssues
 import sys
 from collections import namedtuple
+from typing import List
 import pytest
 from pytest_mock import MockerFixture
 from importlib import import_module
 from pathlib import Path
 from packaging.version import parse
+from mock import MagicMock
 
 try:
     import tomllib  # type: ignore
@@ -113,8 +115,9 @@ from testcases import fwid_test_cases
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-@pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname", fwid_test_cases)
+@pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname, mock_modules", fwid_test_cases)
 def test_stubber_fwid(
+    mock_micropython_path,
     location,
     variant,
     mocker: MockerFixture,
@@ -122,7 +125,7 @@ def test_stubber_fwid(
     sys_imp_name,
     sys_platform,
     os_uname,
-    mock_micropython_path,
+    mock_modules: List[str],
 ):
     # import createstubs  # type: ignore
     createstubs = import_module(f"{location}.{variant}")  # type: ignore
@@ -140,10 +143,17 @@ def test_stubber_fwid(
     # now run the tests
     stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
-
+    for mod in mock_modules:
+        # mock that these modules can be imported without errors
+        sys.modules[mod] = MagicMock()
     info = createstubs._info()
-    print("\nvalidating: " + fwid)
-    print(info)
+
+    for mod in mock_modules:
+        # unmock the module
+        del sys.modules[mod]
+
+    # print("\nvalidating: " + fwid)
+    # print(info)
 
     assert info["family"] != "", "stubber.info() - No Family detected"
     assert info["port"] != "", "stubber.info() - No port detected"

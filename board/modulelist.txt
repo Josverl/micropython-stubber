@@ -1,9 +1,32 @@
 # list of modules to stub.
 # used by the memory optimised createstubs_mem.py
+_OTA
+_coap
+_flash_control_OTA
+_main_pybytes
+_mqtt
+_mqtt_core
+_msg_handl
 _onewire
+_periodical_pin
+_pybytes
+_pybytes_ca
+_pybytes_config
+_pybytes_config_reader
+_pybytes_connection
+_pybytes_constants
+_pybytes_debug
+_pybytes_library
+_pybytes_machine_learning
+_pybytes_main
+_pybytes_protocol
+_pybytes_pyconfig
+_pybytes_pymesh_config
 _rp2
+_terminal
 _thread
 _uasyncio
+_urequest
 aioble/__init__
 aioble/central
 aioble/client
