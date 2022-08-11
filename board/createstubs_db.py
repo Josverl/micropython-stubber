@@ -30,7 +30,7 @@ import uos as os
 from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.7.1"
+__version__ = "1.7.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # deal with ESP32 firmware specific implementations.
@@ -452,13 +452,15 @@ def _info():
             pass
 
     try:  # families
-        from pycopy import const as _t # type: ignore
+        from pycopy import const as _t  # type: ignore
+
         info["family"] = "pycopy"
         del _t
     except (ImportError, KeyError):
         pass
     try:  # families
-        from pycom import FAT as _t # type: ignore
+        from pycom import FAT as _t  # type: ignore
+
         info["family"] = "pycom"
         del _t
     except (ImportError, KeyError):
