@@ -144,32 +144,3 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
 
     assert len(py_files) == PROBLEMATIC, "py and pyi files should match 1:1 and stored in the same folder"
 
-
-def test_read_exclusion():
-    exclusions = utils.read_exclusion_file()
-    assert type(exclusions) == list, "should be a list"
-    assert len(exclusions) > 0, "should contain some values"
-    for l in exclusions:
-        assert l.strip() == l, "Lines should be trimmed"
-        assert len(l) > 0, "empty lines should be removed"
-        assert l[0] != "#", "comment lines should be removed"
-
-
-def test_read_exclusion_nonexistent_folder():
-    exclusions = utils.read_exclusion_file(Path("./ThisFolderDoesNotExists"))
-    assert type(exclusions) == list, "should be a list"
-    assert len(exclusions) == 0, "Should conain no values"
-
-
-def test_read_exclusion_nonexistent_drive():
-    exclusions = utils.read_exclusion_file(Path("!:\\"))
-    assert type(exclusions) == list, "should be a list"
-    assert len(exclusions) == 0, "Should conain no values"
-
-
-def test_should_ignore():
-    exclusions = []
-    assert not utils.should_ignore("somefile.abc", exclusions), "No match"
-    assert utils.should_ignore("somefile.abc", ["*.abc"]), "Match simple"
-    assert not utils.should_ignore("somefile.abc", exclusions)
-    assert utils.should_ignore("somefile.abc", ["**/*.py", "*.abc"]), "Match second"
