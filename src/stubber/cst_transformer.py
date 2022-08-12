@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import libcst as cst
-from pytest import deprecated_call
 
 
 @dataclass
@@ -107,113 +106,6 @@ class StubTypingCollector(cst.CSTVisitor):
 
     def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
         self.stack.pop()
-
-
-# TODO: Remove duplicate code
-class StubMergeTransformer(cst.CSTTransformer):
-    """
-    A libcst transformer that merges the type-rich information from a doc-stub into
-    a firmware stub.
-    The resulting file will contain information from both sources.
-
-    - module docstring - from source
-
-    - function parameters and types - from docstubs
-    - function return types - from docstubs
-    - function docstrings - from source
-
-    """
-
-    def __init__(self, stub: Optional[str] = None) -> None:
-        # stack for storing the canonical name of the current function/method
-        self.stack: List[str] = []
-        # store the annotations
-        self.annotations: Dict[
-            Tuple[str, ...],  # key: tuple of canonical class/function name
-            TypeInfo,  # value: TypeInfo
-        ] = {}
-        if stub:
-            stub_tree = cst.parse_module(stub)
-            typing_collector = StubTypingCollector()
-            stub_tree.visit(typing_collector)
-            self.annotations = typing_collector.annotations
-
-    # ------------------------------------------------------------------------
-
-    def leave_Module(self, node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        "Update the Module docstring"
-
-        if not MODULE_KEY in self.annotations:
-            # no changes
-            return updated_node
-
-        # TODO: merge module docstrings
-        new = self.annotations[MODULE_KEY]
-        # first update the docstring
-        return update_module_docstr(updated_node, new.docstr_node)
-
-    # ------------------------------------------------------------
-    #  keep track of the the (class, method) names to the stack
-    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-        self.stack.append(node.name.value)
-
-    def leave_ClassDef(self, node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-        stack_id = tuple(self.stack)
-        self.stack.pop()
-        if not stack_id in self.annotations:
-            # no changes to the function
-            return updated_node
-        # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
-        # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
-        # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "classdef":
-            # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=new.decorators)
-        elif new.def_type == "funcdef":
-            # Different type: ClassDef --> FuncDef ,
-            # for now just return the updated node
-            return updated_node
-        else:
-            #  just return the updated node
-            return updated_node
-
-    # ------------------------------------------------------------------------
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-        self.stack.append(node.name.value)
-        return True
-
-    def leave_FunctionDef(self, node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
-        "Update the function Parameters and return type, decorators and docstring"
-
-        stack_id = tuple(self.stack)
-        self.stack.pop()
-        if not stack_id in self.annotations:
-            # no changes to the function
-            return updated_node
-        # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
-
-        # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node, new.def_node.body)
-        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
-        # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "funcdef":
-            # Same type, we can copy over all the annotations
-            return updated_node.with_changes(
-                params=new.params,
-                returns=new.returns,
-                decorators=new.decorators,
-            )
-        elif new.def_type == "classdef":
-            # Different type: ClassDef --> FuncDef ,
-            # for now just return the updated node
-            return updated_node
-        else:
-            #  just return the updated node
-            return updated_node
 
 
 def update_def_docstr(
