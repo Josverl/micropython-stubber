@@ -151,7 +151,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         new = self.annotations[stack_id]
 
         # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node)
+        updated_node = update_def_docstr(updated_node, new.docstr_node, new.def_node)
         # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
         if new.def_type == "funcdef":

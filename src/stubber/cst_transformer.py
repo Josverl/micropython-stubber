@@ -25,6 +25,9 @@ class TransformError(Exception):
 
 MODULE_KEY = tuple(["__module"])
 
+# debug helper
+_m = cst.parse_module("")
+
 
 class StubTypingCollector(cst.CSTVisitor):
     def __init__(self):
@@ -105,135 +108,48 @@ class StubTypingCollector(cst.CSTVisitor):
         self.stack.pop()
 
 
-class StubMergeTransformer(cst.CSTTransformer):
+def update_def_docstr(
+    dest_node: Union[cst.FunctionDef, cst.ClassDef],
+    src_comment: Optional[cst.SimpleStatementLine],
+    src_node=None,
+) -> Any:
     """
-    A libcst transformer that merges the type-rich information from a doc-stub into
-    a firmware stub.
-    The resulting file will contain information from both sources.
+    Update the docstring of a function/method or class
 
-    - module docstring - from source
-
-    - function parameters and types - from docstubs
-    - function return types - from docstubs
-    - function docstrings - from source
-
+    for functiondefs ending in an ellipsis, the entire body needs to be replaced.
+    in this case the src_body is mandatory.
     """
+    if not src_comment:
+        return dest_node
 
-    def __init__(self, stub: Optional[str] = None) -> None:
-        # stack for storing the canonical name of the current function/method
-        self.stack: List[str] = []
-        # store the annotations
-        self.annotations: Dict[
-            Tuple[str, ...],  # key: tuple of canonical class/function name
-            TypeInfo,  # value: TypeInfo
-        ] = {}
-        if stub:
-            stub_tree = cst.parse_module(stub)
-            typing_collector = StubTypingCollector()
-            stub_tree.visit(typing_collector)
-            self.annotations = typing_collector.annotations
-
-    # ------------------------------------------------------------------------
-
-    def leave_Module(self, node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        "Update the Module docstring"
-
-        if not MODULE_KEY in self.annotations:
-            # no changes
-            return updated_node
-
-        # todo: merge module docstrings
-        new = self.annotations[MODULE_KEY]
-        # first update the docstring
-        return update_module_docstr(updated_node, new.docstr_node)
-
-    # ------------------------------------------------------------
-    #  keep track of the the (class, method) names to the stack
-    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-        self.stack.append(node.name.value)
-
-    def leave_ClassDef(self, node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-        stack_id = tuple(self.stack)
-        self.stack.pop()
-        if not stack_id in self.annotations:
-            # no changes to the function
-            return updated_node
-        # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
-        # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
-        # we need to be carefull not to copy over all the annotations if the types are different        
-        if new.def_type == "classdef":
-            # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=new.decorators)
-        elif new.def_type == "funcdef":
-            # Different type: ClassDef --> FuncDef ,
-            # for now just return the updated node
-            return updated_node
+    # function def on a single line ending with an ellipsis (...)
+    if isinstance(dest_node.body, cst.SimpleStatementSuite):
+        # in order to add a boy the simple hack is to copy the src_node.body
+        if src_node:
+            return dest_node.with_changes(body=src_node.body)
         else:
-            #  just return the updated node
-            return updated_node
+            return dest_node
 
-    # ------------------------------------------------------------------------
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-        self.stack.append(node.name.value)
-        return True
-
-    def leave_FunctionDef(self, node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
-        "Update the function Parameters and return type, decorators and docstring"
-
-        stack_id = tuple(self.stack)
-        self.stack.pop()
-        if not stack_id in self.annotations:
-            # no changes to the function
-            return updated_node
-        # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
-
-        # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node)
-        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
-        # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "funcdef":
-            # Same type, we can copy over all the annotations
-            return updated_node.with_changes(
-                params=new.params,
-                returns=new.returns,
-                decorators=new.decorators,
-            )
-        elif new.def_type == "classdef":
-            # Different type: ClassDef --> FuncDef ,
-            # for now just return the updated node
-            return updated_node
-        else:
-            #  just return the updated node
-            return updated_node
-
-
-def update_def_docstr(node: Union[cst.FunctionDef, cst.ClassDef], doc_tree: Optional[cst.SimpleStatementLine]) -> Any:
-    "Update the docstring of a function/method or class"
-    if not doc_tree:
-        return node
     # just checking
-    if not isinstance(node.body, cst.IndentedBlock):
+    if not isinstance(dest_node.body, cst.IndentedBlock):
         raise TransformError("Expected Def with Indented body")
-    if not isinstance(node.body.body, Sequence):
+    if not isinstance(dest_node.body.body, Sequence):
         # this is likely a .pyi file or a type declaration with a trailing ...
         # no changes
-        return node
+        return dest_node
 
+    # classdef of functiondef with an indented body
     # need some funcky casting to avoid issues with changing the body
     # note : indented body is nested : body.body
-    if node.get_docstring() != None:
-        body = tuple([doc_tree] + list(node.body.body[1:]))
+    if dest_node.get_docstring() != None:
+        body = tuple([src_comment] + list(dest_node.body.body[1:]))
     else:
         # append the new docstring and append the function body
-        body = tuple([doc_tree] + list(node.body.body))
+        body = tuple([src_comment] + list(dest_node.body.body))
 
-    body_2 = node.body.with_changes(body=body)
+    body_2 = dest_node.body.with_changes(body=body)
 
-    return node.with_changes(body=body_2)
+    return dest_node.with_changes(body=body_2)
 
 
 def update_module_docstr(node: cst.Module, doc_tree: Optional[cst.SimpleStatementLine]) -> Any:

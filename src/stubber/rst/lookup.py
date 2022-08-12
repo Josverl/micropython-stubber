@@ -83,7 +83,10 @@ LOOKUP_LIST = {
     "utime.sleep_ms": (
         "Coroutine[None, None, None]",  # Micropython V1.15+ ?
         0.95,
-    ),  # class typing.Coroutine(Awaitable[V_co], Generic[T_co, T_contra, V_co])
+    ),
+    "stm.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
+    "stm.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
+    "stm.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
 }
 
 
@@ -220,6 +223,9 @@ PARAM_FIXES = [
         ", value, drive, alt",
         ", value=None, drive=0, alt=-1",
     ),
+    # network.LAN.init
+    # def __init__(self, id, *, phy_type=<board_default>, phy_addr=<board_default>, phy_clock=<board_default>) -> None:
+    ("=<board_default>", "=0"),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
