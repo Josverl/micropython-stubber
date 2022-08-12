@@ -33,39 +33,6 @@ STUBGEN_OPT = stubgen.Options(
 )
 
 
-def cleanup(modules_folder: Path, all_pyi: bool = False):
-    "Q&D cleanup"
-    # for some reason (?) the umqtt simple.pyi and robust.pyi are created twice
-    #  - modules_root folder ( simple.pyi and robust.pyi) - NOT OK
-    #       - umqtt folder (simple.py & pyi and robust.py & pyi) OK
-    #  similar for mpy 1.9x - 1.11
-    #       - core.pyi          - uasyncio\core.py'
-    #       - urequests.pyi     - urllib\urequest.py'
-    # Mpy 1.13+
-    #       - uasyncio.pyi      -uasyncio\__init__.py
-
-    if all_pyi:
-        for file in modules_folder.rglob("*.pyi"):
-            file.unlink()
-        # no need to remove anything else
-        return
-
-    for file_name in (
-        "simple.pyi",
-        "robust.pyi",
-        "core.pyi",
-        "urequest.pyi",
-        "uasyncio.pyi",
-    ):
-        f = Path.joinpath(modules_folder, file_name)
-        if f.exists():
-            try:
-                print(" - removing {}".format(f))
-                f.unlink()
-            except OSError:
-                log.error(" * Unable to remove extranous stub {}".format(f))
-
-
 def generate_pyi_from_file(file: Path) -> bool:
     """Generate a .pyi stubfile from a single .py module using mypy/stubgen"""
 
@@ -89,19 +56,6 @@ def generate_pyi_from_file(file: Path) -> bool:
         return False
 
 
-def fix_umqtt_init(modules_path: Path):
-    # micropython-lib: robust.py needs __init__ to do a relative import
-    init_p = modules_path / "umqtt" / "__init__.py"
-    if (modules_path / "umqtt").exists() and not init_p.exists():
-        with open(init_p, "a") as init:
-            init.writelines(
-                [
-                    "# force __init__.py\n",
-                    "pass\n",
-                ]
-            )
-
-
 def generate_pyi_files(modules_folder: Path) -> bool:
     """generate typeshed files for all scripts in a folder using mypy/stubgen"""
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
@@ -116,10 +70,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         return r
     else:  # one or less module manifests
         ## generate fyi files for folder
-        # clean before to clean any old stuff
-        cleanup(modules_folder, all_pyi=True)
-        # fix umqtt/robust issue before it happens
-        fix_umqtt_init(modules_folder)
         print("::group::[stubgen] running stubgen on {0}".format(modules_folder))
 
         Error_Found = False
@@ -156,23 +106,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
                 pyi_files.remove(pyi)
             except ValueError:
                 log.info(f"no matching py for : {str(pyi)}")
-
-        # if there are any pyi files remaining,
-        # try to match them to py files and move them to the correct location
-        worklist = pyi_files.copy()
-        for pyi in worklist:
-            match = [py for py in py_files if py.stem == pyi.stem and py.parent.stem == pyi.parent.stem]
-            if match:
-                # move the .pyi next to the corresponding .py
-                log.info(f"moving : {str(pyi)}")
-                src = str(pyi)
-                dst = str(match[0].with_suffix(".pyi"))
-                shutil.move(src, dst)
-                try:
-                    py_files.remove(match[0])
-                    pyi_files.remove(pyi)
-                except ValueError:
-                    pass
 
         # now stub the rest
         # note in some cases this will try a file twice
