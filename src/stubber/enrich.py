@@ -14,23 +14,35 @@ logging.basicConfig(level=logging.INFO)
 #########################################################################################
 
 
-def enrich_sourcefile(source_path: Path, docstub_path: Path, show_diff=False, write_back=False) -> Optional[str]:
-    """Enrich a firmware stubs using the doc-stubs in another folder."""
+def enrich_sourcefile(source_path: Path, docstub_path: Path, diff=False, write_back=False) -> Optional[str]:
+    """\
+    Enrich a firmware stubs using the doc-stubs in another folder.
+    Both (.py or .pyi) files are supported.
+
+    Parameters:
+        source_path: the path to the firmware stub to enrich
+        docstub_path: the path to the folder containg the doc-stubs
+        diff: if True, return the diff between the original and the enriched source file
+        write_back: if True, write the enriched source file back to the source_path
+
+    Returns:
+    - None or a string containing the diff between the original and the enriched source file
+    """
     config: Dict[str, Any] = _default_config()
     context = CodemodContext()
 
     # find a matching doc-stub file in the docstub_path
     docstub_file = None
     for ext in [".py", ".pyi"]:
-        docstub_file = docstub_path / (source_path.stem + ext)
-        if docstub_file.exists():
-            break
-        else:
-            docstub_file = None
+        for docstub_file in list(docstub_path.rglob(source_path.stem + ext)):
+            if docstub_file.exists():
+                break
+            else:
+                docstub_file = None
     if docstub_file is None:
         raise FileNotFoundError(f"No doc-stub file found for {source_path}")
 
-    log.info(f"Enriching {source_path} with {docstub_file}")
+    log.info(f"Augment {source_path} from {docstub_file}")
     # read source file
     oldcode = source_path.read_text()
 
@@ -45,9 +57,8 @@ def enrich_sourcefile(source_path: Path, docstub_path: Path, show_diff=False, wr
         # python_version=args.python_version,
     )
     if newcode:
-        if show_diff:
-
-            print(diff_code(oldcode, newcode, 5, filename=source_path.name))
+        if diff:
+            return diff_code(oldcode, newcode, 5, filename=source_path.name)
         if write_back:
             # write updated code to file
             source_path.write_text(newcode)
@@ -64,11 +75,14 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
     """
     count = 0
     # list all the .py and .pyi files in the source folder
-    source_files = sorted(list(source_folder.glob("**/*.py")) + list(source_folder.glob("**/*.pyi")))
+    source_files = sorted(list(source_folder.rglob("**/*.py")) + list(source_folder.rglob("**/*.pyi")))
     for source_file in source_files:
         try:
-            enrich_sourcefile(source_file, docstub_path, show_diff)
-            count += 1
+            diff = enrich_sourcefile(source_file, docstub_path, diff=True, write_back=write_back)
+            if diff:
+                count += 1
+                if show_diff:
+                    print(diff)
         except FileNotFoundError:
             # no docstub to enrich with
             if require_docsub:
