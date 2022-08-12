@@ -56,21 +56,21 @@ def enrich_sourcefile(source_path: Path, docstub_path: Path, show_diff=False, wr
         return None
 
 
-def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False) -> None:
-    """Enrich a folder with containing firmware stubs using the doc-stubs in another folder."""
-
+def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False, require_docsub=False) -> int:
+    """\
+        Enrich a folder with containing firmware stubs using the doc-stubs in another folder.
+        
+        Returns the number of files enriched.
+    """
+    count = 0
     # list all the .py and .pyi files in the source folder
     source_files = sorted(list(source_folder.glob("**/*.py")) + list(source_folder.glob("**/*.pyi")))
     for source_file in source_files:
         try:
             enrich_sourcefile(source_file, docstub_path, show_diff)
+            count += 1
         except FileNotFoundError:
-            print(f"No doc-stub file found for {source_file}")
-
-
-enrich_folder(
-    Path("scratch/stubs/micropython-v1_18-esp32"),
-    Path("all-stubs/micropython-v1_18-docstubs"),
-    show_diff=False,
-    write_back=False,
-)
+            # no docstub to enrich with
+            if require_docsub:
+                raise (FileNotFoundError(f"No doc-stub file found for {source_file}"))
+    return count
