@@ -83,7 +83,10 @@ LOOKUP_LIST = {
     "utime.sleep_ms": (
         "Coroutine[None, None, None]",  # Micropython V1.15+ ?
         0.95,
-    ),  # class typing.Coroutine(Awaitable[V_co], Generic[T_co, T_contra, V_co])
+    ),
+    "stm.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
+    "stm.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
+    "stm.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
 }
 
 
