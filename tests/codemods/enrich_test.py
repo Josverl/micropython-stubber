@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from stubber.enrich import enrich_folder, enrich_sourcefile
+from stubber.enrich import enrich_folder, enrich_file
 
 # mark all tests
 pytestmark = pytest.mark.codemod
@@ -14,12 +14,12 @@ pytestmark = pytest.mark.codemod
         (Path("./tests/data/stub_merge/micropython-v1_18-esp32/builtins.py"), False),
     ],
 )
-def test_enrich_file_with_stub(source_file:Path, expected:bool):
+def test_enrich_file_with_stub(source_file: Path, expected: bool):
     #    source_file = Path("./tests/data/stub_merge/micropython-v1_18-esp32/esp32.py")
     diff = None
     docstub_path = Path("./tests/data/stub_merge/micropython-v1_18-docstubs")
     try:
-        diff = enrich_sourcefile(source_file, docstub_path, diff=True, write_back=False)
+        diff = enrich_file(source_file, docstub_path, diff=True, write_back=False)
     except FileNotFoundError:
         assert not expected, "docstub File not found but expected"
 
