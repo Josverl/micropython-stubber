@@ -14,6 +14,7 @@ import click
 from . import __version__
 from . import basicgit as git
 from . import config, get_cpython, get_lobo, get_mpy, utils
+from .enrich import enrich_file, enrich_folder
 from .minify import minify
 from .stubs_from_docs import generate_from_rst
 from .update_fallback import RELEASED, update_fallback
@@ -434,6 +435,49 @@ def cli_update_fallback(
         stub_path,
         config.fallback_path,
         version=version,
+    )
+
+
+##########################################################################################
+# enrich machinestubs with docstubs
+##########################################################################################
+@stubber_cli.command(name="enrich")
+@click.option(
+    "--stubs",
+    "-s",
+    "stubs_folder",
+    default=config.stub_path.as_posix(),
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="folder containing the firmware stubs to be updated",
+    show_default=True,
+)
+@click.option(
+    "--docstubs",
+    "-ds",
+    "docstubs_folder",
+    default=config.stub_path.as_posix(),
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    help="folder containing the docstubs to be applied",
+    show_default=True,
+)
+@click.option("--diff", default=False, help="Show diff", show_default=True, is_flag=True)
+@click.option("--dry-run", default=False, help="Dry run does not write the files back", show_default=True, is_flag=True)
+def cli_enrich_folder(
+    stubs_folder: Union[str, Path],
+    docstubs_folder: Union[str, Path],
+    diff=False,
+    dry_run=False,
+):
+    """
+    Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
+    """
+    write_back = not dry_run
+    count = enrich_folder(
+        Path(stubs_folder),
+        Path(docstubs_folder),
+        show_diff=diff,
+        write_back=write_back,
+        require_docsub=False
     )
 
 
