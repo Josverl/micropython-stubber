@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 #########################################################################################
 
 
-def enrich_sourcefile(source_path: Path, docstub_path: Path, diff=False, write_back=False) -> Optional[str]:
+def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=False) -> Optional[str]:
     """\
     Enrich a firmware stubs using the doc-stubs in another folder.
     Both (.py or .pyi) files are supported.
@@ -34,7 +34,15 @@ def enrich_sourcefile(source_path: Path, docstub_path: Path, diff=False, write_b
     # find a matching doc-stub file in the docstub_path
     docstub_file = None
     for ext in [".py", ".pyi"]:
-        for docstub_file in list(docstub_path.rglob(source_path.stem + ext)):
+        candidates = list(docstub_path.rglob(source_path.stem + ext))
+        if source_path.stem[0].lower() == "u":
+            # also look for candidates without leading u
+            candidates += list(docstub_path.rglob(source_path.stem[1:] + ext))
+        else:
+            # also look for candidates with leading u
+            candidates += list(docstub_path.rglob("u" + source_path.stem + ext))
+
+        for docstub_file in candidates:
             if docstub_file.exists():
                 break
             else:
@@ -57,11 +65,11 @@ def enrich_sourcefile(source_path: Path, docstub_path: Path, diff=False, write_b
         # python_version=args.python_version,
     )
     if newcode:
-        if diff:
-            return diff_code(oldcode, newcode, 5, filename=source_path.name)
         if write_back:
             # write updated code to file
             source_path.write_text(newcode)
+        if diff:
+            return diff_code(oldcode, newcode, 5, filename=source_path.name)
         return newcode
     else:
         return None
@@ -78,7 +86,7 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
     source_files = sorted(list(source_folder.rglob("**/*.py")) + list(source_folder.rglob("**/*.pyi")))
     for source_file in source_files:
         try:
-            diff = enrich_sourcefile(source_file, docstub_path, diff=True, write_back=write_back)
+            diff = enrich_file(source_file, docstub_path, diff=True, write_back=write_back)
             if diff:
                 count += 1
                 if show_diff:
