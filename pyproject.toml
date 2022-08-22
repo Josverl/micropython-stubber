@@ -66,6 +66,7 @@ coverage = "^6.4.3"
 pyright = "^1.1.265"
 packaging = "21.3"
 distro = "1.7.0"
+pydeps = "^1.10.22"
 
 
 [build-system]
