@@ -2,7 +2,7 @@ import json
 import logging
 
 from pathlib import Path
-from .. import __version__
+from .my_version import __version__
 from typing import Optional
 from .versions import clean_version
 
