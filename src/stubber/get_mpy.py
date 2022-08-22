@@ -27,7 +27,8 @@ import warnings
 import logging
 from . import basicgit as git
 from . import utils
-from . import config
+from .utils.config import CONFIG 
+
 import csv
 from collections import defaultdict
 
@@ -59,7 +60,7 @@ def get_frozen(stub_folder: str, version: str, mpy_folder: Optional[str] = None,
     if not lib_folder:
         lib_folder = "./micropython-lib"
     if not stub_folder:
-        stub_folder = "{}/{}_{}_frozen".format(config.stub_path, FAMILY, utils.clean_version(version, flat=True))
+        stub_folder = "{}/{}_{}_frozen".format(CONFIG.stub_path, FAMILY, utils.clean_version(version, flat=True))
     # get the manifests of the different ports and boards
     mpy_folder = Path(mpy_folder).absolute().as_posix()
     lib_folder = Path(lib_folder).absolute().as_posix()
