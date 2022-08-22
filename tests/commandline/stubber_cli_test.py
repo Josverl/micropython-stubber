@@ -1,14 +1,14 @@
-from typing import List
-import pytest
-from pytest_mock import MockerFixture
-from mock import MagicMock
 from pathlib import Path
-from click.testing import CliRunner
+from typing import List
 
+import pytest
 # module under test :
 import stubber.stubber as stubber
+from click.testing import CliRunner
+from mock import MagicMock
+from pytest_mock import MockerFixture
 
-# mark all tests 
+# mark all tests
 pytestmark = pytest.mark.cli
 
 
@@ -26,36 +26,36 @@ def test_stubber_help():
 ##########################################################################################
 def test_stubber_clone(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
-    mock_clone: MagicMock = mocker.patch("stubber.stubber.git.clone", autospec=True, return_value=0)
-    mock_fetch: MagicMock = mocker.patch("stubber.stubber.git.fetch", autospec=True, return_value=0)
+    # from stubber.commands.clone import git
+    m_clone: MagicMock = mocker.patch("stubber.commands.clone.git.clone", autospec=True, return_value=0)
+    m_fetch: MagicMock = mocker.patch("stubber.commands.clone.git.fetch", autospec=True, return_value=0)
     result = runner.invoke(stubber.stubber_cli, ["clone"])
     assert result.exit_code == 0
 
     # either clone or fetch
-    assert mock_clone.call_count + mock_fetch.call_count == 2
-    if mock_clone.call_count > 0:
-        mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("repos/micropython"))
-        mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("repos/micropython-lib"))
+    assert m_clone.call_count + m_fetch.call_count == 2
+    if m_clone.call_count > 0:
+        m_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("repos/micropython"))
+        m_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("repos/micropython-lib"))
     else:
-        mock_fetch.assert_any_call(Path("repos/micropython"))
-        mock_fetch.assert_any_call(Path("repos/micropython-lib"))
+        m_fetch.assert_any_call(Path("repos/micropython"))
+        m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
 
 def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
-    mock_clone: MagicMock = mocker.MagicMock(return_value=0)
-    mocker.patch("stubber.stubber.git.clone", mock_clone)
+    m_clone: MagicMock = mocker.patch("stubber.commands.clone.git.clone", autospec=True, return_value=0)
 
-    m_tag = mocker.patch("stubber.stubber.git.get_tag", autospec=True)
-    m_dir = mocker.patch("stubber.stubber.os.mkdir", autospec=True)
+    m_tag = mocker.patch("stubber.commands.clone.git.get_tag", autospec=True)
+    m_dir = mocker.patch("stubber.commands.clone.os.mkdir", autospec=True)
 
     # now test with path specified
     result = runner.invoke(stubber.stubber_cli, ["clone", "--path", "foobar"])
     assert result.exit_code == 0
 
-    assert mock_clone.call_count >= 2
-    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("foobar/micropython"))
-    mock_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("foobar/micropython-lib"))
+    assert m_clone.call_count >= 2
+    m_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython.git", path=Path("foobar/micropython"))
+    m_clone.assert_any_call(remote_repo="https://github.com/micropython/micropython-lib.git", path=Path("foobar/micropython-lib"))
     assert m_tag.call_count >= 2
 
 
@@ -73,15 +73,18 @@ def test_stubber_clone_path(mocker: MockerFixture, tmp_path: Path):
 )
 def test_stubber_switch(mocker: MockerFixture, params: List[str]):
     runner = CliRunner()
-    # mock_clone: MagicMock = mocker.patch("stubber.stubber.git.clone", autospec=True, return_value=0)
     # Mock Path.exists
-    m_fetch: MagicMock = mocker.patch("stubber.stubber.git.fetch", autospec=True, return_value=0)
-    m_switch: MagicMock = mocker.patch("stubber.stubber.git.switch_branch", autospec=True, return_value=0)
-    m_checkout: MagicMock = mocker.patch("stubber.stubber.git.checkout_tag", autospec=True, return_value=0)
-    m_get_tag: MagicMock = mocker.patch("stubber.stubber.git.get_tag", autospec=True, return_value="v1.42")
-    m_match = mocker.patch("stubber.stubber.get_mpy.match_lib_with_mpy", autospec=True)
+    m_clone: MagicMock = mocker.patch("stubber.commands.clone.git.clone", autospec=True, return_value=0)
+    m_fetch: MagicMock = mocker.patch("stubber.commands.clone.git.fetch", autospec=True, return_value=0)
 
-    m_exists = mocker.patch("stubber.stubber.Path.exists", return_value=True)
+    
+    m_switch: MagicMock = mocker.patch("stubber.commands.clone.git.switch_branch", autospec=True, return_value=0)
+    m_checkout: MagicMock = mocker.patch("stubber.commands.clone.git.checkout_tag", autospec=True, return_value=0)
+    m_get_tag: MagicMock = mocker.patch("stubber.commands.clone.git.get_tag", autospec=True, return_value="v1.42")
+    
+    m_match = mocker.patch("stubber.get_mpy.match_lib_with_mpy", autospec=True)
+
+    m_exists = mocker.patch("stubber.commands.clone.Path.exists", return_value=True)
     result = runner.invoke(stubber.stubber_cli, params)
     assert result.exit_code == 0
 
@@ -109,7 +112,7 @@ def test_stubber_minify(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
     mock_minify: MagicMock = mocker.MagicMock(return_value=0)
-    mocker.patch("stubber.stubber.minify", mock_minify)
+    mocker.patch("stubber.commands.minify.minify", mock_minify)
 
     result = runner.invoke(stubber.stubber_cli, ["minify"])
     assert result.exit_code == 0
@@ -120,7 +123,7 @@ def test_stubber_minify_all(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
     mock_minify: MagicMock = mocker.MagicMock(return_value=0)
-    mocker.patch("stubber.stubber.minify", mock_minify)
+    mocker.patch("stubber.commands.minify.minify", mock_minify)
 
     result = runner.invoke(stubber.stubber_cli, ["minify", "--all"])
     assert result.exit_code == 0
@@ -137,7 +140,7 @@ def test_stubber_stub(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
     # mock: MagicMock = mocker.MagicMock(return_value=True)
-    mock: MagicMock = mocker.patch("stubber.stubber.utils.generate_pyi_files", autospec=True, return_value=True)
+    mock: MagicMock = mocker.patch("stubber.utils.generate_pyi_files", autospec=True, return_value=True)
     # fake run on current folder
     result = runner.invoke(stubber.stubber_cli, ["stub", "--source", "."])
 
@@ -154,10 +157,10 @@ def test_stubber_get_frozen(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
 
-    mock_version: MagicMock = mocker.patch("stubber.stubber.git.get_tag", autospec=True, return_value="v1.42")
+    mock_version: MagicMock = mocker.patch("stubber.basicgit.get_tag", autospec=True, return_value="v1.42")
 
-    mock: MagicMock = mocker.patch("stubber.stubber.get_mpy.get_frozen", autospec=True)
-    mock_post: MagicMock = mocker.patch("stubber.stubber.utils.do_post_processing", autospec=True)
+    mock: MagicMock = mocker.patch("stubber.get_mpy.get_frozen", autospec=True)
+    mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
 
     # fake run - need to ensure that there is a destination folder
     result = runner.invoke(stubber.stubber_cli, ["get-frozen", "--stub-folder", tmp_path.as_posix()])
@@ -176,8 +179,8 @@ def test_stubber_get_lobo(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
 
-    mock: MagicMock = mocker.patch("stubber.stubber.get_lobo.get_frozen", autospec=True)
-    mock_post: MagicMock = mocker.patch("stubber.stubber.utils.do_post_processing", autospec=True)
+    mock: MagicMock = mocker.patch("stubber.get_lobo.get_frozen", autospec=True)
+    mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
 
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["get-lobo", "--stub-folder", tmp_path.as_posix()])
@@ -195,8 +198,8 @@ def test_stubber_get_lobo(mocker: MockerFixture, tmp_path: Path):
 def test_stubber_get_core(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
-    mock: MagicMock = mocker.patch("stubber.stubber.get_cpython.get_core", autospec=True)
-    mock_post: MagicMock = mocker.patch("stubber.stubber.utils.do_post_processing", autospec=True)
+    mock: MagicMock = mocker.patch("stubber.get_cpython.get_core", autospec=True)
+    mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
 
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["get-core", "--stub-folder", tmp_path.as_posix()])
@@ -217,11 +220,12 @@ def test_stubber_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
 
-    mock_version: MagicMock = mocker.patch("stubber.stubber.git.get_tag", autospec=True, return_value="v1.42")
+    mock_version: MagicMock = mocker.patch("stubber.basicgit.get_tag", autospec=True, return_value="v1.42")
 
-    mock: MagicMock = mocker.patch("stubber.stubber.generate_from_rst", autospec=True)
+    # from stubber.commands.get_docstubs import generate_from_rst
+    mock: MagicMock = mocker.patch("stubber.commands.get_docstubs.generate_from_rst", autospec=True)
 
-    mock_post: MagicMock = mocker.patch("stubber.stubber.utils.do_post_processing", autospec=True)
+    mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
 
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix()])
@@ -241,8 +245,8 @@ def test_stubber_get_docstubs(mocker: MockerFixture, tmp_path: Path):
 def test_stubber_fallback(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
-
-    mock: MagicMock = mocker.patch("stubber.stubber.update_fallback", autospec=True)
+    
+    mock: MagicMock = mocker.patch("stubber.commands.update_fallback.update_fallback", autospec=True)
     # mock2: MagicMock = mocker.patch("stubber.update_fallback.update_fallback", autospec=True)
     # from .update_fallback import update_fallback,
     # fake run
