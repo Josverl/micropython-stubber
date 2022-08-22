@@ -165,8 +165,8 @@ def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
     these can be used to make sure that the correct micropython-lib version is checked out.
 
     TODO: it would be nice if micropython-lib had matching commit-tags
-
-    # git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
+    
+        git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
     """
     data = pkgutil.get_data(__name__, filename)
     if not data:

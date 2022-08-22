@@ -53,6 +53,9 @@ rshell = { version = "0.0.31", optional = true }
 pyserial = { version = "3.5", optional = true }
 
 # Extras needed for bulkstubber.ps1
+pysondb-v2 = "2.1.0"
+tomli-w = "^1.0.0"
+loguru = "^0.6.0"
 [tool.poetry.extras]
 tools = ["rshell", "esptool", "pyserial"]
 
