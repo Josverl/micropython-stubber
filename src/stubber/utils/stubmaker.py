@@ -1,13 +1,12 @@
 import logging
 import shutil
-
+import sys
 from pathlib import Path
-from .. import __version__
 
 import mypy.stubgen as stubgen
 from mypy.errors import CompileError
-import sys
 
+from .my_version import __version__
 
 log = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.INFO)
