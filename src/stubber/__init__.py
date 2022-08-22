@@ -11,5 +11,3 @@ except Exception:  # pragma: no cover
     __version__ = "0.0.0"
 
 from . import utils
-
-config = utils.readconfig()

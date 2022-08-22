@@ -39,3 +39,5 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
     config.read()
     return config
+
+CONFIG = readconfig()

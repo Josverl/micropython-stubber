@@ -1,16 +1,16 @@
 """
 Shared Test Fixtures
 """
-import sys
+import logging
 import os
+import sys
 from pathlib import Path
+
 import pytest
 from _pytest.config import Config
 
 # config
-from stubber import config
-
-import logging
+from stubber.utils.config import CONFIG
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)  # encoding="utf-8", on 3.10 only
@@ -73,13 +73,13 @@ def mock_micropython_path(pytestconfig: Config):
 @pytest.fixture(scope="session")
 def testrepo_micropython(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
-    return pytestconfig.rootpath / config.mpy_path
+    return pytestconfig.rootpath / CONFIG.mpy_path
 
 
 @pytest.fixture(scope="session")
 def testrepo_micropython_lib(pytestconfig: Config):
     "get path to the micropython-lib sub-repo"
-    return pytestconfig.rootpath / config.mpy_lib_path
+    return pytestconfig.rootpath / CONFIG.mpy_lib_path
 
 
 # --------------------------------------

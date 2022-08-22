@@ -8,14 +8,15 @@ from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 def test_toplevel_config():
     # exists on top-level
-    assert stubber.config
-    assert isinstance(stubber.config, StubberConfig)
+    from stubber.utils.config import CONFIG
+    assert CONFIG
+    assert isinstance(CONFIG, StubberConfig)
 
-    assert isinstance(stubber.config.stub_path, Path)
-    assert isinstance(stubber.config.repo_path, Path)
-    # assert isinstance(stubber.config.fallback_path, Path )
-    # assert isinstance(stubber.config.mpy_path, Path )
-    # assert isinstance(stubber.config.mpy_lib_path, Path )
+    assert isinstance(CONFIG.stub_path, Path)
+    assert isinstance(CONFIG.repo_path, Path)
+    assert isinstance(CONFIG.fallback_path, Path )
+    assert isinstance(CONFIG.mpy_path, Path )
+    assert isinstance(CONFIG.mpy_lib_path, Path )
 
 
 def test_bad_config_source():

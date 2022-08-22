@@ -2,17 +2,17 @@
 Download or update the micropyton compatibility modules from pycopy and stores them in the all_stubs folder
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
+import json
+import logging
 import os
+import pkgutil
 import shutil
 import subprocess
-import logging
-import json
-
-from . import utils
-from pathlib import Path
-from . import __version__, config
-import pkgutil
 import tempfile
+from pathlib import Path
+
+from . import __version__, utils
+from .utils.config import CONFIG
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 def get_core(requirements, stub_path=None, family: str = "core"):
     "Download MicroPython compatibility modules"
     if not stub_path:
-        stub_path = config.stub_path / "cpython-core"
+        stub_path = CONFIG.stub_path / "cpython-core"
     stub_path = Path(stub_path)
 
     # use pip to dowload requirements file to build folder in one go

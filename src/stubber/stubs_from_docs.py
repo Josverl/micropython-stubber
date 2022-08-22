@@ -63,28 +63,20 @@ Note: black on python 3.7 does not like some function defs
 
 """
 
-import os
-from typing import List, Tuple, Optional
-import re
-import logging
 import json
+import logging
+import os
+import re
 import subprocess
 from pathlib import Path
+from typing import List, Optional, Tuple
 
-from .rst import return_type_from_context
-from .rst import MODULE_GLUE, PARAM_FIXES, CHILD_PARENT_CLASS, RST_DOC_FIXES, DOCSTUB_SKIP, U_MODULES
-
-from . import __version__
-from . import utils
-from . import config
-
-from .rst import (
-    TYPING_IMPORT,
-    ModuleSourceDict,
-    ClassSourceDict,
-    FunctionSourceDict,
-)
-
+from . import __version__, utils
+from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
+                  RST_DOC_FIXES, TYPING_IMPORT, U_MODULES, ClassSourceDict,
+                  FunctionSourceDict, ModuleSourceDict,
+                  return_type_from_context)
+from .utils.config import CONFIG
 
 # logging
 log = logging.getLogger(__name__)
@@ -416,7 +408,7 @@ class RSTReader:
         # Now parse all files mentioned in the toc
         for file in toctree:
             #
-            file_path = config.mpy_path / "docs" / "library" / file.strip()
+            file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
             self.read_file(file_path)
             self.parse()
         # reset this file to done

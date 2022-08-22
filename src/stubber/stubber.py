@@ -13,11 +13,12 @@ import click
 
 from . import __version__
 from . import basicgit as git
-from . import config, get_cpython, get_lobo, get_mpy, utils
+from . import get_cpython, get_lobo, get_mpy, utils
 from .enrich import enrich_file, enrich_folder
 from .minify import minify
 from .stubs_from_docs import generate_from_rst
 from .update_fallback import RELEASED, update_fallback
+from .utils.config import CONFIG 
 
 ##########################################################################################
 log = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ def stubber_cli(ctx, verbose=False, debug=False):
 
 
 @stubber_cli.command(name="clone")
-@click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
+@click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
 def cli_clone(path: Union[str, Path]):
     """
     Clone/fetch the micropython repos locally.
@@ -72,12 +73,12 @@ def cli_clone(path: Union[str, Path]):
     if not dest_path.exists():
         os.mkdir(dest_path)
     # repos are relative to provided path
-    if dest_path != config.repo_path:
+    if dest_path != CONFIG.repo_path:
         mpy_path = dest_path / "micropython"
         mpy_lib_path = dest_path / "micropython-lib"
     else:
-        mpy_path = config.mpy_path
-        mpy_lib_path = config.mpy_lib_path
+        mpy_path = CONFIG.mpy_path
+        mpy_lib_path = CONFIG.mpy_lib_path
 
     # if exist : fetch
     # allow switch to different tag
@@ -102,13 +103,13 @@ def cli_clone(path: Union[str, Path]):
 # get version list from Git tags in the repo that is provided on the command line
 
 try:
-    VERSION_LIST = git.get_tags(config.mpy_path, minver="v1.10") + ["v1.9.3", "v1.9.4", "latest"]
+    VERSION_LIST = git.get_tags(CONFIG.mpy_path, minver="v1.10") + ["v1.9.3", "v1.9.4", "latest"]
 except Exception:
     VERSION_LIST = ["latest"]
 
 
 @stubber_cli.command(name="switch")
-@click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
+@click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
 @click.option(
     "-t",
     "--tag",
@@ -135,12 +136,12 @@ def cli_fetch(path: Union[str, Path], tag: Optional[str] = None):
     if not dest_path.exists():
         os.mkdir(dest_path)
     # repos are relative to provided path
-    if dest_path != config.repo_path:
+    if dest_path != CONFIG.repo_path:
         mpy_path = dest_path / "micropython"
         mpy_lib_path = dest_path / "micropython-lib"
     else:
-        mpy_path = config.mpy_path
-        mpy_lib_path = config.mpy_lib_path
+        mpy_path = CONFIG.mpy_path
+        mpy_lib_path = CONFIG.mpy_lib_path
 
     # if no repos then error
     if not (mpy_path / ".git").exists():
@@ -234,7 +235,7 @@ def cli_minify(
 @click.option(
     "--stub-folder",
     "-stubs",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
@@ -243,7 +244,7 @@ def cli_minify(
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_frozen(
-    stub_folder: str = config.stub_path.as_posix(),
+    stub_folder: str = CONFIG.stub_path.as_posix(),
     # path: str = config.repo_path.as_posix(),
     version: str = "",
     pyi: bool = True,
@@ -258,7 +259,7 @@ def cli_get_frozen(
     stub_paths: List[Path] = []
 
     if len(version) == 0:
-        version = utils.clean_version(git.get_tag(config.mpy_path.as_posix()) or "0.0")
+        version = utils.clean_version(git.get_tag(CONFIG.mpy_path.as_posix()) or "0.0")
     if version:
         log.info("MicroPython version : {}".format(version))
         # folder/{family}-{version}-frozen
@@ -266,10 +267,10 @@ def cli_get_frozen(
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
         get_mpy.get_frozen(
-            stub_path.as_posix(), version=version, mpy_folder=config.mpy_path.as_posix(), lib_folder=config.mpy_lib_path.as_posix()
+            stub_path.as_posix(), version=version, mpy_folder=CONFIG.mpy_path.as_posix(), lib_folder=CONFIG.mpy_lib_path.as_posix()
         )
     else:
-        log.warning("Unable to find the micropython repo in folder : {}".format(config.mpy_path.as_posix()))
+        log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
     utils.do_post_processing(stub_paths, pyi, black)
 
 
@@ -280,14 +281,14 @@ def cli_get_frozen(
 @click.option(
     "--stub-folder",
     "-stubs",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_lobo(
-    stub_folder: str = config.stub_path.as_posix(),
+    stub_folder: str = CONFIG.stub_path.as_posix(),
     pyi: bool = True,
     black: bool = True,
 ):
@@ -318,14 +319,14 @@ def cli_get_lobo(
 @click.option(
     "--stub-folder",
     "-stubs",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_core(
-    stub_folder: str = config.stub_path.as_posix(),
+    stub_folder: str = CONFIG.stub_path.as_posix(),
     # core_type: str = "pycopy",  # pycopy or Micropython CPython stubs
     pyi: bool = True,
     black: bool = True,
@@ -355,12 +356,12 @@ def cli_get_core(
 
 @stubber_cli.command(name="get-docstubs")
 # todo: allow multiple source
-@click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
+@click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 @click.option(
     "--stub-path",
     "--stub-folder",
     "target",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="Destination of the files to be generated.",
     show_default=True,
@@ -369,8 +370,8 @@ def cli_get_core(
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.option("--verbose", "-v", is_flag=True, default=False)  # todo: extra verbose / extra debug ?
 def cli_docstubs(
-    path: str = config.repo_path.as_posix(),
-    target: str = config.stub_path.as_posix(),
+    path: str = CONFIG.repo_path.as_posix(),
+    target: str = CONFIG.stub_path.as_posix(),
     verbose: bool = False,
     black: bool = True,
     basename="micropython",
@@ -384,9 +385,9 @@ def cli_docstubs(
         log.setLevel(logging.DEBUG)
     log.info(f"stubs_from_docs version {__version__}\n")
 
-    if path == config.repo_path.as_posix():
+    if path == CONFIG.repo_path.as_posix():
         # default
-        rst_path = config.mpy_path / "docs" / "library"
+        rst_path = CONFIG.mpy_path / "docs" / "library"
     elif Path(path).stem == "micropython":
         # path to a micropython repo
         rst_path = Path(path) / "docs" / "library"
@@ -416,14 +417,14 @@ def cli_docstubs(
 @click.option("--version", default=RELEASED, type=str, help="Version number to use", show_default=True)
 @click.option(
     "--stub-folder",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="Destination of the files to be generated.",
     show_default=True,
 )
 def cli_update_fallback(
     version: str,
-    stub_folder: str = config.stub_path.as_posix(),
+    stub_folder: str = CONFIG.stub_path.as_posix(),
 ):
     """
     Update the fallback stubs.
@@ -433,7 +434,7 @@ def cli_update_fallback(
     stub_path = Path(stub_folder)
     update_fallback(
         stub_path,
-        config.fallback_path,
+        CONFIG.fallback_path,
         version=version,
     )
 
@@ -446,7 +447,7 @@ def cli_update_fallback(
     "--stubs",
     "-s",
     "stubs_folder",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="folder containing the firmware stubs to be updated",
     show_default=True,
@@ -455,7 +456,7 @@ def cli_update_fallback(
     "--docstubs",
     "-ds",
     "docstubs_folder",
-    default=config.stub_path.as_posix(),
+    default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="folder containing the docstubs to be applied",
     show_default=True,
