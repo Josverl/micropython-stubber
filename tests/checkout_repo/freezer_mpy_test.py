@@ -1,25 +1,24 @@
 import sys
-import mock
-import pytest
 from pathlib import Path
 
+import mock
+import pytest
 # pylint: disable=wrong-import-position,import-error
 import stubber.basicgit as git
-
 # Module Under Test
 import stubber.get_mpy as get_mpy
 import stubber.utils as utils
 
-
 if not sys.warnoptions:
-    import os, warnings
+    import os
+    import warnings
 
     warnings.simplefilter("default")  # Change the filter in this process
     os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
 
+from mock import MagicMock
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
-from mock import MagicMock
 
 
 @pytest.mark.parametrize(
@@ -95,14 +94,14 @@ def test_freezer_mpy_manifest_m(
     "mocked test if we can freeze source using manifest.py files"
     mpy_version: str = "master"
 
-    mock_get_frozen_from: MagicMock = mocker.patch("stubber.stubber.get_mpy.get_frozen_from_manifest", autospec=True, return_value=0)
-    get_frozen_folders: MagicMock = mocker.patch("stubber.stubber.get_mpy.get_frozen_folders", autospec=True)
+    mock_get_frozen_from: MagicMock = mocker.patch("stubber.get_mpy.get_frozen_from_manifest", autospec=True, return_value=0)
+    get_frozen_folders: MagicMock = mocker.patch("stubber.get_mpy.get_frozen_folders", autospec=True)
     mpy_path = testrepo_micropython.as_posix()
     mpy_lib = testrepo_micropython_lib.as_posix()
 
     # call with folders
     mock_glob: MagicMock = mocker.patch(
-        "stubber.stubber.get_mpy.glob.glob",
+        "stubber.get_mpy.glob.glob",
         autospec=True,
         return_value=[Path("./repos/micropython/ports\\esp32\\boards\\manifest.py")],
     )
@@ -120,14 +119,15 @@ def test_freezer_mpy_manifest_m2(
     mocker: MockerFixture,
 ):
     "mocked test if we can freeze source oldstyle"
+
     mpy_version: str = "master"
-    mock_get_frozen_from: MagicMock = mocker.patch("stubber.stubber.get_mpy.get_frozen_from_manifest", autospec=True, return_value=0)
-    get_frozen_folders: MagicMock = mocker.patch("stubber.stubber.get_mpy.get_frozen_folders", autospec=True)
+    mock_get_frozen_from: MagicMock = mocker.patch("stubber.get_mpy.get_frozen_from_manifest", autospec=True, return_value=0)
+    get_frozen_folders: MagicMock = mocker.patch("stubber.get_mpy.get_frozen_folders", autospec=True)
     mpy_path = testrepo_micropython.as_posix()
     mpy_lib = testrepo_micropython_lib.as_posix()
 
     # fake with no manifest.py folders
-    mock_glob: MagicMock = mocker.patch("stubber.stubber.get_mpy.glob.glob")
+    mock_glob: MagicMock = mocker.patch("stubber.get_mpy.glob.glob")
 
     get_mpy.get_frozen(str(tmp_path), version=mpy_version, mpy_folder=mpy_path, lib_folder=mpy_lib)
 
