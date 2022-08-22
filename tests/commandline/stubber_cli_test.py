@@ -105,6 +105,43 @@ def test_stubber_switch(mocker: MockerFixture, params: List[str]):
         m_checkout.assert_called_once()
 
 
+from stubber.commands.switch import VERSION_LIST
+
+
+@pytest.mark.parametrize( "version", VERSION_LIST)
+def test_stubber_switch_version(mocker: MockerFixture, version: str):
+    runner = CliRunner()
+    # Mock Path.exists
+    m_clone: MagicMock = mocker.patch("stubber.commands.clone.git.clone", autospec=True, return_value=0)
+    m_fetch: MagicMock = mocker.patch("stubber.commands.clone.git.fetch", autospec=True, return_value=0)
+
+    m_switch: MagicMock = mocker.patch("stubber.commands.clone.git.switch_branch", autospec=True, return_value=0)
+    m_checkout: MagicMock = mocker.patch("stubber.commands.clone.git.checkout_tag", autospec=True, return_value=0)
+    m_get_tag: MagicMock = mocker.patch("stubber.commands.clone.git.get_tag", autospec=True, return_value="v1.42")
+    
+    m_match = mocker.patch("stubber.get_mpy.match_lib_with_mpy", autospec=True)
+
+    m_exists = mocker.patch("stubber.commands.clone.Path.exists", return_value=True)
+    result = runner.invoke(stubber.stubber_cli, ["switch", "--version", version])
+    assert result.exit_code == 0
+
+    # fetch latest
+    assert m_fetch.call_count == 2
+    # "foobar" from params is used as the path
+    m_fetch.assert_any_call(Path("repos/micropython"))
+    m_fetch.assert_any_call(Path("repos/micropython-lib"))
+
+
+from stubber.get_mpy import read_micropython_lib_commits
+
+
+@pytest.mark.parametrize( "version", VERSION_LIST)
+def test_stubber_switch_version_commit_list(version:str):
+    mpy_lib_commits = read_micropython_lib_commits()
+    if version != "latest":
+        assert len(mpy_lib_commits) > 0
+        assert version in mpy_lib_commits ,"match"
+
 ##########################################################################################
 # minify
 ##########################################################################################
