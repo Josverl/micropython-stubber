@@ -18,6 +18,8 @@ all-stubs
 # Interim storage for bulkstubber
 firmware-stubs
 
+# tempfolder used by get_core  
+build
 
 # ignore test coverage reports
 .coverage*

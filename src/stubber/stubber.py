@@ -11,49 +11,20 @@ from typing import List, Optional, Union
 
 import click
 
+from stubber.commands.enrich_folder import cli_enrich_folder
+from stubber.commands.stubber_cli import stubber_cli
+
 from . import __version__
 from . import basicgit as git
 from . import get_cpython, get_lobo, get_mpy, utils
-from .enrich import enrich_file, enrich_folder
 from .minify import minify
 from .stubs_from_docs import generate_from_rst
 from .update_fallback import RELEASED, update_fallback
-from .utils.config import CONFIG 
+from .utils.config import CONFIG
 
 ##########################################################################################
 log = logging.getLogger(__name__)
 #########################################################################################
-
-
-##########################################################################################
-# command line interface - main group
-##########################################################################################
-
-
-@click.group(chain=True)
-@click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber✏️ ")
-@click.option("--verbose", "-vv", is_flag=True, default=False)
-@click.option("--debug", "-vvv", is_flag=True, default=False)
-
-# TODO: add stubfolder to top level and pass using context
-# @click.option("--stub-folder", "-stubs", default=config.stub_folder, type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.pass_context
-def stubber_cli(ctx, verbose=False, debug=False):
-    # ensure that ctx.obj exists and is a dict (in case `cli()` is called
-    ctx.ensure_object(dict)
-
-    # Set log level
-    lvl = logging.WARNING
-    if verbose:
-        lvl = logging.INFO
-    if debug:
-        lvl = logging.DEBUG
-    ctx.obj["loglevel"] = lvl
-
-    logging.basicConfig(level=lvl)
-    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-    for logger in loggers:
-        logger.setLevel(lvl)
 
 
 ##########################################################################################
@@ -440,49 +411,7 @@ def cli_update_fallback(
 
 
 ##########################################################################################
-# enrich machinestubs with docstubs
-##########################################################################################
-@stubber_cli.command(name="enrich")
-@click.option(
-    "--stubs",
-    "-s",
-    "stubs_folder",
-    default=CONFIG.stub_path.as_posix(),
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="folder containing the firmware stubs to be updated",
-    show_default=True,
-)
-@click.option(
-    "--docstubs",
-    "-ds",
-    "docstubs_folder",
-    default=CONFIG.stub_path.as_posix(),
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="folder containing the docstubs to be applied",
-    show_default=True,
-)
-@click.option("--diff", default=False, help="Show diff", show_default=True, is_flag=True)
-@click.option("--dry-run", default=False, help="Dry run does not write the files back", show_default=True, is_flag=True)
-def cli_enrich_folder(
-    stubs_folder: Union[str, Path],
-    docstubs_folder: Union[str, Path],
-    diff=False,
-    dry_run=False,
-):
-    """
-    Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
-    """
-    write_back = not dry_run
-    count = enrich_folder(
-        Path(stubs_folder),
-        Path(docstubs_folder),
-        show_diff=diff,
-        write_back=write_back,
-        require_docsub=False
-    )
-
-
-##########################################################################################
 
 if __name__ == "__main__":
+    stubber_cli.add_command(cli_enrich_folder)
     stubber_cli()
