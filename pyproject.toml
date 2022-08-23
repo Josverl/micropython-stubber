@@ -95,12 +95,14 @@ exclude = '''
 '''
 
 [tool.pytest.ini_options]
+minversion = "7.0"
+python_functions = ["test_", "*_test"]
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["tests", "src"]
 junit_family = "xunit1"
 
 # Remove pytest-cov
 addopts = "-v -sv  -m 'not basicgit'"
-
-testpaths = ["tests", "src"]
 
 markers = [
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",

@@ -35,6 +35,7 @@ from packaging.version import parse
 from pysondb import PysonDB
 from stubber.utils.versions import clean_version
 
+from . import stubpacker
 from .stubpacker import StubPackage
 
 # replace std log handler with a custom one capped on INFO level
@@ -46,27 +47,29 @@ COMBINED = ALL_TYPES[0]
 DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
 
-def get_database(path:Union[Path,str], production:bool=False ) -> PysonDB:
-    
-    if path:
-        root_path= Path(path)
-    else:
-        root_path: Path = Path("./publish")
 
-    db_path = root_path / f"package_data{'' if production else '_test'}.jsondb"
+def get_database(root_path: Union[Path, str], production: bool = False) -> PysonDB:
+    """
+    Open the json database at the given root path.
+
+    The database is always located in a subfolder `/publish` of the root path.
+    The database name is determined by the production flag as `package_data[_test].jsondb`
+    """
+
+    if root_path:
+        path = Path(root_path) / "publish"
+    else:
+        path: Path = Path("./publish")
+    db_path = path / f"package_data{'' if production else '_test'}.jsondb"
     return PysonDB(db_path.as_posix())
 
 
-def package_name(
-    port: str = "", board: str = "", pkg=COMBINED, family="micropython"
-) -> str:
+def package_name(port: str = "", board: str = "", pkg=COMBINED, family="micropython") -> str:
     "generate a package name for the given package type"
     if pkg == COMBINED:
         # # {family}-{port}-{board}-stubs
-        return f"{family}-{port}-{board}-stubs".lower().replace(
-            "-generic-stubs", "-stubs"
-        )
-    elif pkg == DOC_STUBS :
+        return f"{family}-{port}-{board}-stubs".lower().replace("-generic-stubs", "-stubs")
+    elif pkg == DOC_STUBS:
         return f"{family}-doc-stubs".lower()
     elif pkg == CORE_STUBS:
         return f"{family}-core-stubs".lower()
@@ -79,14 +82,15 @@ def package_name(
 #     return pub_path / package_name( port, board, pkg, family)
 
 
-def get_package(
-    db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str
-) -> Union[StubPackage, None]:
-    "get package from db or create a new one"
+def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str) -> Union[Dict, None]:
+    """
+    get a package's record from the json db if it can be found
+    matches om the package name and version
+        pkg_name: package name (micropython-esp32-stubs)
+        mpy_version: micropython/firmware version (1.18)
+    """
     # find in the database
-    recs = db.get_by_query(
-        query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name
-    )
+    recs = db.get_by_query(query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name)
     # dict to list
     recs = [{"id": key, "data": recs[key]} for key in recs]
     # sort
@@ -107,16 +111,22 @@ def get_package(
 
 
 def create_package(
-    pkg_path: Path,
     pkg_name: str,
     mpy_version: str,
+    *,
+    publish_path: Path = stubpacker.PUBLISH_PATH,
     port: str = "",
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBINED,
+    stub_source="./stubs",
 ) -> StubPackage:
-    "create and initialize a package with the correct sources"
+    """
+    create and initialize a package with the correct sources
+
+    """
     package = None
+    stub_source = Path(stub_source)
     if pkg_type == COMBINED:
         assert port != ""
         assert board != ""
@@ -126,19 +136,19 @@ def create_package(
             ("Firmware stubs", Path("./stubs") / f"{family}-{ver_flat}-{port}"),
             (
                 "Frozen stubs",
-                Path("./stubs") / f"{family}-{ver_flat}-frozen" / port / board,
+                stub_source / f"{family}-{ver_flat}-frozen" / port / board,
             ),
-            ("Core Stubs", Path("./stubs") / "cpython_core-pycopy"),
+            ("Core Stubs", stub_source / "cpython_core-pycopy"),
         ]
-        package = StubPackage(pkg_path, pkg_name, mpy_version, stubs=stubs)
+        package = StubPackage( pkg_name, version=mpy_version, stubs=stubs)
     elif pkg_type == DOC_STUBS:
         # TODO add doc stubs
         ver_flat = clean_version(mpy_version, flat=True)
 
         stubs: List[Tuple[str, Path]] = [
-            ("Doc stubs", Path("./stubs") / f"{family}-{ver_flat}-docstubs"),
+            ("Doc stubs", stub_source / f"{family}-{ver_flat}-docstubs"),
         ]
-        package = StubPackage(pkg_path, pkg_name, mpy_version, stubs=stubs)
+        package = StubPackage( pkg_name, version= mpy_version, stubs=stubs)
 
     elif pkg_type == CORE_STUBS:
         # TODO add core stubs
@@ -175,21 +185,18 @@ def publish_doc_stubs(
         pkg_path = pub_path / pkg_name
         log.info("=" * 40)
 
-        package = get_package(db, pub_path,pkg_name=pkg_name, mpy_version= mpy_version )
+        package = get_package_info(db, pub_path, pkg_name=pkg_name, mpy_version=mpy_version)
         if not package:
             log.warning(f"No package found for {pkg_name}")
-            package = create_package(
-                pub_path, pkg_name, mpy_version, pkg_type=DOC_STUBS
-            )
+            package = create_package( pkg_name, mpy_version= mpy_version, pkg_type=DOC_STUBS)
             continue
         stubs: List[Tuple[str, Path]] = [
             ("Doc Stubs", Path("./stubs") / f"micropython-{ver_flat}-doc-stubs"),
         ]
-
+        # ? why throw away the previous retrieved / created package ?
         package = StubPackage(
-            pkg_path,
             pkg_name,
-            mpy_version,
+            version=mpy_version,
             description="Micropython Doc Stubs",
             stubs=stubs,
         )
@@ -203,9 +210,7 @@ def publish_doc_stubs(
 
         # If there are changes to the package, then publish it
         if not (package.is_changed() or force):
-            log.info(
-                f"No changes to package : {package.package_name} {package.pkg_version}"
-            )
+            log.info(f"No changes to package : {package.package_name} {package.pkg_version}")
         else:
             if not force:
                 log.info(
@@ -214,9 +219,7 @@ def publish_doc_stubs(
             ## TODO: get last published version.postXXX from PyPI and update version if different
             package.bump()
             package.hash = package.create_hash()
-            log.debug(
-                f"New hash: {package.package_name} {package.pkg_version} {package.hash}"
-            )
+            log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
             if dryrun:
                 log.warning("Updated package is NOT published.")
             else:
@@ -251,20 +254,28 @@ def publish_board_stubs(
                 pkg_name = package_name(port, board)
                 log.info("=" * 40)
 
-                package = get_package(db, pub_path, pkg_name= pkg_name, mpy_version=mpy_version,)
-                if not package:
+                package_info = get_package_info(
+                    db,
+                    pub_path,
+                    pkg_name=pkg_name,
+                    mpy_version=mpy_version,
+                )
+                if not package_info:
+                    # create package from json_info 
+                    package = stubpacker.StubPackage( pkg_name,version= mpy_version, json_data=package_info)
+
+                else:
                     log.warning(f"No package found for {pkg_name}")
                     package = create_package(
-                        pub_path,
                         pkg_name,
                         mpy_version,
-                        port,
-                        board,
-                        family,
+                        port=port,
+                        board=board,
+                        family=family,
                         pkg_type=pkg_type,
                     )
                     continue
-
+                
                 # check if the sources exist
                 OK = True
                 for (name, path) in package.stub_sources:
@@ -272,7 +283,7 @@ def publish_board_stubs(
                         log.warning(f"{pkg_name}: source {name} does not exist: {path}")
                         OK = False
                 if not OK:
-                    log.warning(f"{pkg_name}: skipping as source stubs are missing")
+                    log.warning(f"{pkg_name}: skipping as one or more source stub folderss are missing")
 
                     package._publish = False
                     continue
@@ -286,9 +297,7 @@ def publish_board_stubs(
 
                 # If there are changes to the package, then publish it
                 if not (package.is_changed() or force):
-                    log.info(
-                        f"No changes to package : {package.package_name} {package.pkg_version}"
-                    )
+                    log.info(f"No changes to package : {package.package_name} {package.pkg_version}")
                 else:
                     if not force:
                         log.info(
@@ -297,9 +306,7 @@ def publish_board_stubs(
                     ## TODO: get last published version.postXXX from PyPI and update version if different
                     package.bump()
                     package.hash = package.create_hash()
-                    log.debug(
-                        f"New hash: {package.package_name} {package.pkg_version} {package.hash}"
-                    )
+                    log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
                     if dryrun:
                         log.warning("Updated package is NOT published.")
                     else:
@@ -310,4 +317,3 @@ def publish_board_stubs(
 
                 if clean:
                     package.clean()
-

@@ -4,8 +4,7 @@ from typing import List
 
 import click
 from pysondb import PysonDB
-from stubber.publish.publish_stubs import (ALL_TYPES, publish_board_stubs,
-                                           publish_doc_stubs)
+from stubber.publish.publish_stubs import ALL_TYPES, get_database, publish_board_stubs, publish_doc_stubs
 from stubber.utils.config import CONFIG
 from stubber.utils.my_version import __version__
 
@@ -91,7 +90,18 @@ ALL_BOARDS = ["GENERIC"]
 )
 @click.option("-v", "--verbose", count=True)
 #
-def cli_publish(family:str, versions:List[str], ports:List[str], boards:List[str], production:bool, dryrun:bool, force:bool, verbose, clean:bool, stub_type: str):
+def cli_publish(
+    family: str,
+    versions: List[str],
+    ports: List[str],
+    boards: List[str],
+    production: bool,
+    dryrun: bool,
+    force: bool,
+    verbose,
+    clean: bool,
+    stub_type: str,
+):
     """
     Commandline interface to publish stubs.
     """
@@ -104,11 +114,10 @@ def cli_publish(family:str, versions:List[str], ports:List[str], boards:List[str
     boards = list(boards)
 
     root_path: Path = Path("./publish")
-    root_path: Path = Path("/develop/MyPython/micropython-stubs/publish")
+    root_path: Path = Path("/develop/MyPython/micropython-stubs")
 
-    db_path = root_path / f"package_data{'' if production else '_test'}.jsondb"
+    db = get_database(root_path=root_path, production=False)
 
-    db = PysonDB(db_path.as_posix())
     if stub_type == "combo":
         publish_board_stubs(
             versions=versions,
