@@ -7,7 +7,7 @@ import pytest
 import stubber.publish.stubpacker as stubpacker
 from stubber.publish.publish_stubs import (
     ALL_TYPES,
-    COMBINED,
+    COMBO_STUBS,
     CORE_STUBS,
     DOC_STUBS,
     create_package,
@@ -36,8 +36,8 @@ def cwd(path: Path):
 @pytest.mark.parametrize(
     "family, pkg, port, board, expected",
     [
-        ("micropython", COMBINED, "esp32", "GENERIC", "micropython-esp32-stubs"),
-        ("micropython", COMBINED, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "GENERIC", "micropython-esp32-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
         ("micropython", DOC_STUBS, "esp32", None, "micropython-doc-stubs"),
         ("micropython", DOC_STUBS, "esp32", "GENERIC", "micropython-doc-stubs"),
         ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
@@ -80,10 +80,17 @@ def test_get_package_info(package_name, version, present):
 
 
 # test creating a DOC_STUBS package
-def test_create_docstubs_package(tmp_path, pytestconfig):
+@pytest.mark.parametrize(
+    "pkg_type, port, board",
+    [
+        (DOC_STUBS, None, None),
+        (COMBO_STUBS, "esp32", "GENERIC"),
+    ],
+)
+# CORE_STUBS
+def test_create_package(tmp_path, pytestconfig, pkg_type, port, board):
     """ "
-    test prepare docs stubs for publishing
-    Create a new package with the DOC_STUBS type
+    test Create a new package with the DOC_STUBS type
     - test the different methods to manipulate the package on disk
     """
     # test data
@@ -92,18 +99,30 @@ def test_create_docstubs_package(tmp_path, pytestconfig):
     dest = root_path / "publish"
     shutil.copytree(source, dest)
 
-    publish_path = dest
+    # TODO: need to endure that the stubs are avaialble in GHA testing
+    stubpacker.ROOT_PATH = root_path
+    stubpacker.STUB_PATH = pytestconfig.rootpath
+    # stubpacker.PUBLISH_PATH = publish_path
+    # stubpacker.TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+
     mpy_version = "v1.18"
     family = "micropython"
-    pkg_name = "bar-doc-stubs"
+    pkg_name = f"foobar-{pkg_type}-stubs"
 
-    package = create_package(pkg_name, mpy_version=mpy_version, family=family, stub_source="./all-stubs", pkg_type=DOC_STUBS)
-
+    package = create_package(
+        pkg_name,
+        mpy_version=mpy_version,
+        family=family,
+        port=port,
+        board=board,
+        pkg_type=pkg_type,
+        stub_source="./all-stubs",  # for debugging 
+    )
     assert isinstance(package, stubpacker.StubPackage)
-    root_path(package, pkg_name, root_path)
+    run_common_package_tests(package, pkg_name, root_path, pkg_type)
 
 
-def run_common_package_tests(package, pkg_name, root_path: Path):
+def run_common_package_tests(package, pkg_name, root_path: Path, pkg_type):
     "a series of tests to re-use for all packages"
     assert isinstance(package, stubpacker.StubPackage)
     assert package.package_name == pkg_name
@@ -136,7 +155,8 @@ def run_common_package_tests(package, pkg_name, root_path: Path):
     assert len(filelist) >= 1
 
     package.update_included_stubs()
-    # todo:  how to test this ?
+    stubs_in_pkg = package.pyproject["tool"]["poetry"]["packages"]  # type: ignore
+    assert len(stubs_in_pkg) >= 1
 
     hash = package.create_hash()
     assert isinstance(hash, str)
@@ -150,10 +170,15 @@ def run_common_package_tests(package, pkg_name, root_path: Path):
     new_version = package.bump()
     assert new_version
     assert isinstance(new_version, stubpacker.Version)
-    assert package.build() == True
+
+    built = package.build() 
+    assert built
+    assert (root_path / package.package_path / "dist").exists() , "Distribution folder should exist"
+    filelist = list((root_path / package.package_path / "dist").glob("*.whl")) + list((root_path / package.package_path / "dist").glob("*.tar.gz"))
+    assert len(filelist) >= 2
 
     package.clean()
-    filelist = list(package.package_path.rglob("*.py")) + list(package.package_path.rglob("*.pyi"))
+    filelist = list((root_path / package.package_path).rglob("*.py")) + list((root_path / package.package_path).rglob("*.pyi"))
     assert len(filelist) == 0
 
 
@@ -192,25 +217,5 @@ def test_package_from_json(tmp_path, pytestconfig):
 
     package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=json)
     assert isinstance(package, stubpacker.StubPackage)
-    run_common_package_tests(package, pkg_name, root_path)
+    run_common_package_tests(package, pkg_name, root_path, pkg_type=None)
 
-
-@pytest.mark.skip(reason="working on it")
-def test_create_combined_stubs_package(tmp_path, pytestconfig):
-    # prepare data
-    source = pytestconfig.rootpath / "tests/publish/data"
-    dest = tmp_path / "publish"
-    shutil.copytree(source, dest)
-
-    package = create_package(
-        pkg_type=COMBINED,
-        pkg_name="micropython-esp32-stubs",
-        family="micropython",
-        port="esp32",
-        board="GENERIC",
-        mpy_version="1.18",
-    )
-    assert isinstance(package, stubpacker.StubPackage)
-    # assert pkg["name"] == "micropython-esp32-stubs"
-    # assert pkg["mpy_version"] == "1.18"
-    # assert len(pkg["path"]) > 0

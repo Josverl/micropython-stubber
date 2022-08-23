@@ -43,7 +43,7 @@ log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 ALL_TYPES = ["combo", "doc", "core"]
-COMBINED = ALL_TYPES[0]
+COMBO_STUBS = ALL_TYPES[0]
 DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
 
@@ -64,9 +64,9 @@ def get_database(root_path: Union[Path, str], production: bool = False) -> Pyson
     return PysonDB(db_path.as_posix())
 
 
-def package_name(port: str = "", board: str = "", pkg=COMBINED, family="micropython") -> str:
+def package_name(port: str = "", board: str = "", pkg=COMBO_STUBS, family="micropython") -> str:
     "generate a package name for the given package type"
-    if pkg == COMBINED:
+    if pkg == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
         return f"{family}-{port}-{board}-stubs".lower().replace("-generic-stubs", "-stubs")
     elif pkg == DOC_STUBS:
@@ -114,12 +114,12 @@ def create_package(
     pkg_name: str,
     mpy_version: str,
     *,
-    publish_path: Path = stubpacker.PUBLISH_PATH,
+    publish_path: Path = stubpacker.PUBLISH_PATH,  # TODO: remove unused parameter
     port: str = "",
     board: str = "",
     family: str = "micropython",
-    pkg_type=COMBINED,
-    stub_source="./stubs",
+    pkg_type=COMBO_STUBS,
+    stub_source="./stubs",  # ?? use stubpacker.STUB_SOURCE, ?? // wrong type
 ) -> StubPackage:
     """
     create and initialize a package with the correct sources
@@ -127,28 +127,37 @@ def create_package(
     """
     package = None
     stub_source = Path(stub_source)
-    if pkg_type == COMBINED:
+    if pkg_type == COMBO_STUBS:
         assert port != ""
         assert board != ""
         ver_flat = clean_version(mpy_version, flat=True)
 
         stubs: List[Tuple[str, Path]] = [
-            ("Firmware stubs", Path("./stubs") / f"{family}-{ver_flat}-{port}"),
+            (
+                "Firmware stubs",
+                stub_source / f"{family}-{ver_flat}-{port}",
+            ),
             (
                 "Frozen stubs",
                 stub_source / f"{family}-{ver_flat}-frozen" / port / board,
             ),
-            ("Core Stubs", stub_source / "cpython_core-pycopy"),
+            (
+                "Core Stubs",
+                stub_source / "cpython_core-pycopy",
+            ),
         ]
-        package = StubPackage( pkg_name, version=mpy_version, stubs=stubs)
+        package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
     elif pkg_type == DOC_STUBS:
         # TODO add doc stubs
         ver_flat = clean_version(mpy_version, flat=True)
 
         stubs: List[Tuple[str, Path]] = [
-            ("Doc stubs", stub_source / f"{family}-{ver_flat}-docstubs"),
+            (
+                "Doc stubs",
+                stub_source / f"{family}-{ver_flat}-docstubs",
+            ),
         ]
-        package = StubPackage( pkg_name, version= mpy_version, stubs=stubs)
+        package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
 
     elif pkg_type == CORE_STUBS:
         # TODO add core stubs
@@ -188,7 +197,7 @@ def publish_doc_stubs(
         package = get_package_info(db, pub_path, pkg_name=pkg_name, mpy_version=mpy_version)
         if not package:
             log.warning(f"No package found for {pkg_name}")
-            package = create_package( pkg_name, mpy_version= mpy_version, pkg_type=DOC_STUBS)
+            package = create_package(pkg_name, mpy_version=mpy_version, pkg_type=DOC_STUBS)
             continue
         stubs: List[Tuple[str, Path]] = [
             ("Doc Stubs", Path("./stubs") / f"micropython-{ver_flat}-doc-stubs"),
@@ -238,7 +247,7 @@ def publish_board_stubs(
     boards: List[str],
     db: PysonDB,
     pub_path: Path,
-    pkg_type=COMBINED,
+    pkg_type=COMBO_STUBS,
     family: str = "micropython",
     production=False,  # PyPI or Test-PyPi
     dryrun=False,  # don't publish , dont save to the database
@@ -261,8 +270,8 @@ def publish_board_stubs(
                     mpy_version=mpy_version,
                 )
                 if not package_info:
-                    # create package from json_info 
-                    package = stubpacker.StubPackage( pkg_name,version= mpy_version, json_data=package_info)
+                    # create package from json_info
+                    package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=package_info)
 
                 else:
                     log.warning(f"No package found for {pkg_name}")
@@ -275,7 +284,7 @@ def publish_board_stubs(
                         pkg_type=pkg_type,
                     )
                     continue
-                
+
                 # check if the sources exist
                 OK = True
                 for (name, path) in package.stub_sources:

@@ -305,14 +305,14 @@ class StubPackage:  # (dict):
         # find packages using __init__ files
         # take care no to include a module twice
         modules = set({})
-        for p in (STUB_PATH / self.package_path).rglob("**/__init__.py*"):
+        for p in (ROOT_PATH / self.package_path).rglob("**/__init__.py*"):
             # add the module to the package
             # fixme : only accounts for one level of packages
             modules.add(p.parent.name)
         for module in sorted(modules):
             _pyproject["tool"]["poetry"]["packages"] += [{"include": module}]
         # now find other stub files directly in the folder
-        for p in sorted((STUB_PATH / self.package_path).glob("*.py*")):
+        for p in sorted((ROOT_PATH / self.package_path).glob("*.py*")):
             if p.suffix in (".py", ".pyi"):
                 _pyproject["tool"]["poetry"]["packages"] += [{"include": p.name}]
 
@@ -333,20 +333,8 @@ class StubPackage:  # (dict):
         """
         # remove all *.py and *.pyi files in the folder
         for wc in ["*.py", "*.pyi", "modules.json"]:
-            for f in self.package_path.rglob(wc):
+            for f in ( ROOT_PATH / self.package_path).rglob(wc):
                 f.unlink()
-
-    def check(self) -> bool:
-        """check if the package is valid by running `poetry check`
-
-        Note: this will write some output to the console
-        """
-        try:
-            subprocess.run(["poetry", "check", "-vvv"], cwd=self.package_path)
-        except subprocess.CalledProcessError as e:
-            log.error(f"Error: {e}")
-            return False
-        return True
 
     def create_hash(self) -> str:
         """
@@ -401,19 +389,32 @@ class StubPackage:  # (dict):
             return None
         return new_version
 
+    def check(self) -> bool:
+        """check if the package is valid by running `poetry check`
+        Note: this will write some output to the console ('All set!')
+        """
+        try:
+            subprocess.run(
+                ["poetry", "check", "-vvv"],
+                cwd=ROOT_PATH / self.package_path,
+                check=True,
+            )
+        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
+            log.error("Exception on process, {}".format(e))
+            return False
+        except subprocess.CalledProcessError as e:  # pragma: no cover
+            log.error("Exception on process, {}".format(e))
+            return False
+        return True
+
     def build(self) -> bool:
         try:
             # create package
             subprocess.run(
-                [
-                    "poetry",
-                    "build",
-                    # "-vvv",
-                ],
-                cwd=self.package_path,
+                ["poetry", "build"],  # "-vvv"
+                cwd=ROOT_PATH / self.package_path,
                 check=True,
             )
-
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
             log.error("Exception on process, {}".format(e))
             return False
