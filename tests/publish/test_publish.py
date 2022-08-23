@@ -11,11 +11,12 @@ from stubber.publish.publish_stubs import (
     COMBO_STUBS,
     CORE_STUBS,
     DOC_STUBS,
-    create_package,
     get_database,
+    create_package,
     get_package_info,
     package_name,
-    publish_stubs,
+    publish_combo_stubs,
+    publish_doc_stubs,
 )
 
 # use our test paths
@@ -50,19 +51,33 @@ def test_publish(
     stubpacker.STUB_PATH = pytestconfig.rootpath
     stubpacker.PUBLISH_PATH = publish_path
 
-    # TODO: Mock publish 
+    # TODO: Mock publish
 
-
-    result = publish_stubs(
-        versions=versions,
-        ports=ports,
-        boards=boards,
-        db=db,
-        pub_path=stubpacker.PUBLISH_PATH,
-        pkg_type=pkg_type,
-        family="micropython",
-        production=False,  # Test-PyPi
-        dryrun=False,  # don't publish , dont save to the database
-        force=False,  # publish even if no changes
-        clean=False,  # clean up afterards
-    )
+    if pkg_type == COMBO_STUBS:
+        result = publish_combo_stubs(
+            pkg_type=pkg_type,
+            family="micropython",
+            ports=ports,
+            boards=boards,
+            versions=versions,
+            db=db,
+            pub_path=stubpacker.PUBLISH_PATH,
+            production=False,  # Test-PyPi
+            dryrun=False,  # don't publish , dont save to the database
+            force=False,  # publish even if no changes
+            clean=False,  # clean up afterards
+        )
+    elif pkg_type == DOC_STUBS:
+        result = publish_doc_stubs(
+            pkg_type=pkg_type,
+            family="micropython",
+            ports=ports,
+            boards=boards,
+            versions=versions,
+            db=db,
+            pub_path=stubpacker.PUBLISH_PATH,
+            production=False,  # Test-PyPi
+            dryrun=False,  # don't publish , dont save to the database
+            force=False,  # publish even if no changes
+            clean=False,  # clean up afterards
+        )

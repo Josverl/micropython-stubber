@@ -21,15 +21,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "hash": ""
@@ -44,15 +44,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "hash": ""
@@ -66,15 +66,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs for ESP32",
@@ -89,15 +89,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -112,15 +112,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -135,15 +135,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -158,15 +158,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -181,15 +181,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -204,15 +204,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -227,15 +227,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -250,15 +250,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -273,15 +273,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -296,15 +296,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -319,15 +319,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -342,15 +342,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -365,15 +365,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -388,15 +388,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -411,15 +411,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -434,15 +434,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -457,15 +457,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -480,15 +480,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -503,15 +503,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -526,15 +526,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -549,15 +549,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -572,15 +572,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -595,15 +595,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -618,15 +618,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -641,15 +641,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -664,15 +664,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -687,15 +687,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -710,15 +710,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -733,15 +733,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -756,15 +756,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -779,15 +779,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -802,15 +802,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -825,15 +825,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -848,15 +848,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -871,15 +871,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -894,15 +894,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -917,15 +917,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -940,15 +940,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -963,15 +963,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -986,15 +986,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1009,15 +1009,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1032,15 +1032,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1055,15 +1055,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1078,15 +1078,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1101,15 +1101,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1124,15 +1124,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1147,15 +1147,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1170,15 +1170,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1193,15 +1193,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1216,15 +1216,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1239,15 +1239,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1262,15 +1262,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1285,15 +1285,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1308,15 +1308,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1331,15 +1331,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1354,15 +1354,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1377,15 +1377,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1400,15 +1400,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1423,15 +1423,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1446,15 +1446,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1469,15 +1469,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1492,15 +1492,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1515,15 +1515,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1538,15 +1538,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1561,15 +1561,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1584,15 +1584,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1607,15 +1607,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1630,15 +1630,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1653,15 +1653,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1676,15 +1676,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1699,15 +1699,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1722,15 +1722,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1745,15 +1745,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1768,15 +1768,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1791,15 +1791,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1814,15 +1814,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1837,15 +1837,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1860,15 +1860,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1883,15 +1883,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1906,15 +1906,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1929,15 +1929,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1952,15 +1952,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1975,15 +1975,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -1998,15 +1998,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2021,15 +2021,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2044,15 +2044,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2067,15 +2067,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2090,15 +2090,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2113,15 +2113,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2136,15 +2136,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2159,15 +2159,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2182,15 +2182,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2205,15 +2205,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2228,15 +2228,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2251,15 +2251,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2274,15 +2274,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2297,15 +2297,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2320,15 +2320,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2343,15 +2343,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2366,15 +2366,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2389,15 +2389,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2412,15 +2412,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2435,15 +2435,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp8266"
+                    "stubs/micropython-v1_15-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2458,15 +2458,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp32"
+                    "stubs/micropython-v1_16-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2481,15 +2481,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_16-esp8266"
+                    "stubs/micropython-v1_16-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_16-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_16-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2504,15 +2504,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2527,15 +2527,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2550,15 +2550,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2573,15 +2573,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2596,15 +2596,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2619,15 +2619,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2642,15 +2642,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp32"
+                    "stubs/micropython-v1_14-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2665,15 +2665,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_14-esp8266"
+                    "stubs/micropython-v1_14-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_14-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_14-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2688,15 +2688,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_15-esp32"
+                    "stubs/micropython-v1_15-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_15-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_15-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2711,15 +2711,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2734,15 +2734,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2757,15 +2757,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2780,15 +2780,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-stm32"
+                    "stubs/micropython-v1_17-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2803,15 +2803,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2826,15 +2826,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2849,15 +2849,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2872,15 +2872,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-stm32"
+                    "stubs/micropython-v1_18-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2895,15 +2895,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2918,15 +2918,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2941,15 +2941,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2964,15 +2964,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -2987,15 +2987,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3010,15 +3010,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3033,15 +3033,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3056,15 +3056,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3079,15 +3079,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3102,15 +3102,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3125,15 +3125,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3148,15 +3148,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-stm32"
+                    "stubs/micropython-v1_17-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3171,15 +3171,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3194,15 +3194,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3217,15 +3217,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3240,15 +3240,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-stm32"
+                    "stubs/micropython-v1_18-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3263,15 +3263,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3286,15 +3286,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3309,15 +3309,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3332,15 +3332,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3355,15 +3355,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3378,15 +3378,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3401,15 +3401,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3424,15 +3424,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3447,15 +3447,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3470,15 +3470,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-stm32"
+                    "stubs/micropython-v1_17-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3493,15 +3493,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3516,15 +3516,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3539,15 +3539,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-stm32"
+                    "stubs/micropython-v1_18-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3562,15 +3562,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3585,15 +3585,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3608,15 +3608,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3631,15 +3631,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3654,15 +3654,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3677,15 +3677,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3700,15 +3700,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-stm32"
+                    "stubs/micropython-v1_17-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3723,15 +3723,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3746,15 +3746,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3769,15 +3769,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3792,15 +3792,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3815,15 +3815,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3838,15 +3838,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3861,15 +3861,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-stm32"
+                    "stubs/micropython-v1_17-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3884,15 +3884,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3907,15 +3907,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3930,15 +3930,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3953,15 +3953,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-stm32"
+                    "stubs/micropython-v1_18-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3976,15 +3976,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp32"
+                    "stubs/micropython-v1_17-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -3999,15 +3999,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-esp8266"
+                    "stubs/micropython-v1_17-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_17-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4022,15 +4022,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-rp2"
+                    "stubs/micropython-v1_17-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_17-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4045,15 +4045,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_17-stm32"
+                    "stubs/micropython-v1_17-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_17-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4068,15 +4068,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4091,15 +4091,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp8266"
+                    "stubs/micropython-v1_18-esp8266"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp8266/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp8266/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4114,15 +4114,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-rp2"
+                    "stubs/micropython-v1_18-rp2"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/rp2/GENERIC"
+                    "stubs/micropython-v1_18-frozen/rp2/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4137,15 +4137,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-stm32"
+                    "stubs/micropython-v1_18-stm32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/stm32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/stm32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4160,15 +4160,15 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_19_1-esp32"
+                    "stubs/micropython-v1_19_1-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_19_1-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_19_1-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
@@ -4183,19 +4183,34 @@
             "stub_sources": [
                 [
                     "Firmware stubs",
-                    "all-stubs/micropython-v1_18-esp32"
+                    "stubs/micropython-v1_18-esp32"
                 ],
                 [
                     "Frozen stubs",
-                    "all-stubs/micropython-v1_18-frozen/esp32/GENERIC"
+                    "stubs/micropython-v1_18-frozen/esp32/GENERIC"
                 ],
                 [
                     "Core Stubs",
-                    "all-stubs/cpython_core-pycopy"
+                    "stubs/cpython_core-pycopy"
                 ]
             ],
             "description": "MicroPython stubs",
             "hash": "0898c50ac2a4d2cbf101112c43a7da3823a5dd77"
+        },
+        "318840872558817242": {
+            "name": "micropython-doc-stubs",
+            "mpy_version": "1.18",
+            "publish": true,
+            "pkg_version": "1.18.post1",
+            "path": "publish/micropython-doc-stubs",
+            "stub_sources": [
+                [
+                    "Doc stubs",
+                    "stubs/micropython-v1_18-docstubs"
+                ]
+            ],
+            "description": "MicroPython stubs",
+            "hash": "1e836f6e9dd04f6b0e620a4d4d955c9be6774962"
         }
     }
 }

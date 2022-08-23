@@ -15,6 +15,7 @@ scratch/*
 board/stubs
 minified/stubs
 all-stubs
+stubs
 # Interim storage for bulkstubber
 firmware-stubs
 
