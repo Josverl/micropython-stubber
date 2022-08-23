@@ -10,10 +10,10 @@ from stubber.publish.publish_stubs import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
                                            get_database, get_package_info,
                                            package_name)
 
-# use our test paths
-stubpacker.PUBLISH_PATH = Path("./scratch/publish")
-stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
-stubpacker.STUB_PATH = Path("./all-stubs")
+# # use our test paths
+# stubpacker.PUBLISH_PATH = Path("./scratch/publish")
+# stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
+# stubpacker.STUB_PATH = Path("./all-stubs")
 
 
 @contextmanager
@@ -55,11 +55,11 @@ def test_package_name(family, pkg, port, board, expected):
         ("pycopy-foo-stubs", "1.18", False),
     ],
 )
-def test_get_package_info(pytestconfig,package_name, version, present):
+def test_get_package_info(pytestconfig, package_name, version, present):
     # Cache database in memory?
     # TODO: use test database with known content
-    source = pytestconfig.rootpath / "tests/publish/data"
-    db = get_database("/develop/MyPython/micropython-stubs", production=False)
+    testdata = pytestconfig.rootpath / "tests/publish/data"
+    db = get_database(testdata, production=False)
     pkg_info = get_package_info(db, Path("foo"), pkg_name=package_name, mpy_version=version)
     if present:
         assert pkg_info
@@ -88,6 +88,9 @@ def test_create_package(tmp_path, pytestconfig, pkg_type, port, board):
     test Create a new package with the DOC_STUBS type
     - test the different methods to manipulate the package on disk
     """
+    # allow stubpacker to use the test templates
+    stubpacker.TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+
     # test data
     source = pytestconfig.rootpath / "tests/publish/data"
     root_path = tmp_path
@@ -111,7 +114,7 @@ def test_create_package(tmp_path, pytestconfig, pkg_type, port, board):
         port=port,
         board=board,
         pkg_type=pkg_type,
-        stub_source="./all-stubs",  # for debugging 
+        stub_source="./all-stubs",  # for debugging
     )
     assert isinstance(package, stubpacker.StubPackage)
     run_common_package_tests(package, pkg_name, root_path, pkg_type)
@@ -166,10 +169,12 @@ def run_common_package_tests(package, pkg_name, root_path: Path, pkg_type):
     assert new_version
     assert isinstance(new_version, stubpacker.Version)
 
-    built = package.build() 
+    built = package.build()
     assert built
-    assert (root_path / package.package_path / "dist").exists() , "Distribution folder should exist"
-    filelist = list((root_path / package.package_path / "dist").glob("*.whl")) + list((root_path / package.package_path / "dist").glob("*.tar.gz"))
+    assert (root_path / package.package_path / "dist").exists(), "Distribution folder should exist"
+    filelist = list((root_path / package.package_path / "dist").glob("*.whl")) + list(
+        (root_path / package.package_path / "dist").glob("*.tar.gz")
+    )
     assert len(filelist) >= 2
 
     package.clean()
@@ -213,4 +218,3 @@ def test_package_from_json(tmp_path, pytestconfig):
     package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=json)
     assert isinstance(package, stubpacker.StubPackage)
     run_common_package_tests(package, pkg_name, root_path, pkg_type=None)
-

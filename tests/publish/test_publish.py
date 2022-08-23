@@ -24,9 +24,17 @@ stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
 stubpacker.STUB_PATH = Path("./all-stubs")
 
 
-def test_publish(pytestconfig):
+def test_publish(pytestconfig, tmp_path):
     source = pytestconfig.rootpath / "tests/publish/data"
     db = get_database(source, production=False)
+    publish_path = tmp_path / "publish"
+    publish_path.mkdir(parents=True)
+
+    stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
+    # TODO: need to endure that the stubs are avaialble in GHA testing
+    stubpacker.ROOT_PATH = tmp_path
+    stubpacker.STUB_PATH = pytestconfig.rootpath
+    stubpacker.PUBLISH_PATH = publish_path
 
     result = publish_board_stubs(
         versions=["1.18", "1.17"],
@@ -37,9 +45,7 @@ def test_publish(pytestconfig):
         pkg_type=COMBO_STUBS,
         family="micropython",
         production=False,  # Test-PyPi
-        dryrun=True,  # don't publish , dont save to the database
+        dryrun=False,  # don't publish , dont save to the database
         force=False,  # publish even if no changes
         clean=False,  # clean up afterards
     )
-
-    assert result == True
