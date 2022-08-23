@@ -120,7 +120,7 @@ def test_create_package(tmp_path, pytestconfig, pkg_type, port, board):
         port=port,
         board=board,
         pkg_type=pkg_type,
-        stub_source="./all-stubs",  # for debugging
+        # stub_source="./all-stubs",  # for debugging
     )
     assert isinstance(package, stubpacker.StubPackage)
     run_common_package_tests(package, pkg_name, root_path, pkg_type)
@@ -199,13 +199,13 @@ def test_package_from_json(tmp_path, pytestconfig):
     stubpacker.ROOT_PATH = tmp_path
     stubpacker.STUB_PATH = pytestconfig.rootpath
     # stubpacker.PUBLISH_PATH = publish_path
-    # stubpacker.TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+    stubpacker.TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
 
     mpy_version = "v1.18"
     family = "micropython"
     pkg_name = "foo-bar-stubs"
     # todo: include stubs in the test data
-    # note uses `all-stubs` relative to the project as stub source
+    # note uses `stubs` relative to the project as stub source
     json = {
         "name": "foo-bar-stubs",
         "mpy_version": "1.18",
@@ -213,9 +213,9 @@ def test_package_from_json(tmp_path, pytestconfig):
         "pkg_version": "1.18.post6",
         "path": "publish/foo-v1_18-bar-stubs",
         "stub_sources": [
-            ["Firmware stubs", "all-stubs/micropython-v1_17-stm32"],
-            ["Frozen stubs", "all-stubs/micropython-v1_17-frozen/stm32/GENERIC"],
-            ["Core Stubs", "all-stubs/cpython_core-pycopy"],
+            ["Firmware stubs", "stubs/micropython-v1_17-stm32"],
+            ["Frozen stubs", "stubs/micropython-v1_17-frozen/stm32/GENERIC"],
+            ["Core Stubs", "stubs/cpython_core-pycopy"],
         ],
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",

@@ -182,11 +182,19 @@ def publish_doc_stubs(
     force=False,  # publish even if no changes
     clean: bool = False,  # clean up afterards
     pkg_type=DOC_STUBS,
+    ports=None,
+    boards=None,
 ):
     port = board = ""
+    if pkg_type != DOC_STUBS:
+        raise NotImplementedError(pkg_type)
+    published_packages: List[str] = []
     for mpy_version in versions:
         # package name for firmware package
         # pkg_name = f"micropython-doc-stubs"
+        # /////////////////////////
+        # dit kan hergebruikt worden
+
         # package name for firmware package
         pkg_name = package_name(port, board, pkg_type=pkg_type, family=family)
         log.info("=" * 40)
@@ -200,12 +208,29 @@ def publish_doc_stubs(
         if package_info:
             # create package from the information retrieved from the database
             package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=package_info)
+
         else:
             log.warning(f"No package found for {pkg_name}")
-            package = create_package(pkg_name, mpy_version=mpy_version, pkg_type=pkg_type)
+            package = create_package(
+                pkg_name,
+                mpy_version,
+                port=port,
+                board=board,
+                family=family,
+                pkg_type=pkg_type,
+            )
 
-        # /////////////////////////
-        # dit kan hergebruikt worden
+        # check if the sources exist
+        OK = True
+        for (name, path) in package.stub_sources:
+            if not path.exists():
+                log.warning(f"{pkg_name}: source {name} does not exist: {path}")
+                OK = False
+        if not OK:
+            log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
+
+            package._publish = False
+            continue
 
         package.update_package_files()
         package.update_included_stubs()
@@ -224,18 +249,31 @@ def publish_doc_stubs(
             package.hash = package.create_hash()
             log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
             if dryrun:
-                log.warning("Updated package is NOT published.")
+                log.warning("Dryrun: Updated package is NOT published.")
             else:
-                package.build()
-                package.publish(production=production)
+                result = package.build()
+                if not result:
+                    log.warning(f"{pkg_name}: skipping as build failed")
+                    continue
+                result = package.publish(production=production)
+                if not result:
+                    log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
+                    continue
+                published_packages.append(package.package_name)
                 db.add(package.to_json())
                 db.commit()
+                # TODO: push to github
+                # git add tests\publish\data\package_data_test.jsondb
+                # git commit -m "Publish micropython-esp32-stubs (1.18.post24)"
+                # git push
+                # add tag ?
 
         if clean:
             package.clean()
+    return published_packages
 
 
-def publish_stubs(
+def publish_combo_stubs(
     versions: List[str],
     ports: List[str],
     boards: List[str],
@@ -248,6 +286,9 @@ def publish_stubs(
     force=False,  # publish even if no changes
     clean: bool = False,  # clean up afterards
 ):
+    if pkg_type != COMBO_STUBS:
+        raise NotImplementedError(pkg_type)
+
     published_packages: List[str] = []
     for mpy_version in versions:
         for port in ports:
