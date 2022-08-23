@@ -56,7 +56,7 @@ def get_database(root_path: Union[Path, str], production: bool = False) -> Pyson
     The database should be located in a subfolder `/publish` of the root path.
     The database name is determined by the production flag as `package_data[_test].jsondb`
     """
-
+    root_path = Path(root_path)
     db_path = root_path / f"package_data{'' if production else '_test'}.jsondb"
     return PysonDB(db_path.as_posix())
 
@@ -251,7 +251,7 @@ def publish_board_stubs(
     force=False,  # publish even if no changes
     clean: bool = False,  # clean up afterards
 ):
-    published_packages:List[str] = []
+    published_packages: List[str] = []
     for mpy_version in versions:
         for port in ports:
 
@@ -315,13 +315,24 @@ def publish_board_stubs(
                     package.hash = package.create_hash()
                     log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
                     if dryrun:
-                        log.warning("Updated package is NOT published.")
+                        log.warning("Dryrun: Updated package is NOT published.")
                     else:
-                        package.build()
-                        package.publish(production=production)
+                        result = package.build()
+                        if not result:
+                            log.warning(f"{pkg_name}: skipping as build failed")
+                            continue
+                        result = package.publish(production=production)
+                        if not result:
+                            log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
+                            continue
                         published_packages.append(package.package_name)
                         db.add(package.to_json())
                         db.commit()
+                        # TODO: push to github
+                        # git add tests\publish\data\package_data_test.jsondb
+                        # git commit -m "Publish micropython-esp32-stubs (1.18.post24)"
+                        # git push
+                        # add tag ?
 
                 if clean:
                     package.clean()

@@ -113,9 +113,10 @@ class StubPackage:  # (dict):
     def pkg_version(self) -> str:
         "return the version of the package"
         # read the version from the toml file
-        if not self.toml_path.exists():
+        _toml = ROOT_PATH / self.toml_path
+        if not _toml.exists():
             return self.mpy_version
-        with open(self.toml_path, "rb") as f:
+        with open(_toml, "rb") as f:
             pyproject = tomli.load(f)
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
@@ -123,12 +124,13 @@ class StubPackage:  # (dict):
     def pkg_version(self, version):
         "set the version of the package"
         # read the current file
-        with open(ROOT_PATH / self.toml_path, "rb") as f:
+        _toml = ROOT_PATH / self.toml_path
+        with open(_toml, "rb") as f:
             pyproject = tomli.load(f)
         pyproject["tool"]["poetry"]["version"] = version
 
         # update the version in the toml file
-        with open(ROOT_PATH / self.toml_path, "wb") as output:
+        with open(_toml, "wb") as output:
             tomli_w.dump(pyproject, output)
 
     # -----------------------------------------------
@@ -136,22 +138,25 @@ class StubPackage:  # (dict):
     def pyproject(self) -> Union[Dict[str, Any], None]:
         "parsed pyproject.toml or None"
         pyproject = None
-        if (ROOT_PATH / self.toml_path).exists():
-            with open(ROOT_PATH / self.toml_path, "rb") as f:
+        _toml = ROOT_PATH / self.toml_path
+        if (_toml).exists():
+            with open(_toml, "rb") as f:
                 pyproject = tomli.load(f)
         return pyproject
 
     @pyproject.setter
     def pyproject(self, pyproject):
         # check if the result is a valid toml file
+
         try:
             tomli.loads(tomli_w.dumps(pyproject))
         except tomli.TOMLDecodeError as e:
             print("Could not create a valid TOML file")
             raise (e)
         # make sure parent folder exists
-        (ROOT_PATH / self.toml_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(ROOT_PATH / self.toml_path, "wb") as output:
+        _toml = ROOT_PATH / self.toml_path
+        (_toml).parent.mkdir(parents=True, exist_ok=True)
+        with open(_toml, "wb") as output:
             tomli_w.dump(pyproject, output)
 
     # -----------------------------------------------
@@ -333,7 +338,7 @@ class StubPackage:  # (dict):
         """
         # remove all *.py and *.pyi files in the folder
         for wc in ["*.py", "*.pyi", "modules.json"]:
-            for f in ( ROOT_PATH / self.package_path).rglob(wc):
+            for f in (ROOT_PATH / self.package_path).rglob(wc):
                 f.unlink()
 
     def create_hash(self) -> str:
@@ -349,7 +354,8 @@ class StubPackage:  # (dict):
 
         hash = hashlib.sha1()
         files = (
-            list((ROOT_PATH / self.package_path).rglob("**/*.py*"))
+            list((ROOT_PATH / self.package_path).rglob("**/*.py"))
+            + list((ROOT_PATH / self.package_path).rglob("**/*.pyi"))
             + [ROOT_PATH / self.package_path / "LICENSE.md"]
             + [ROOT_PATH / self.package_path / "README.md"]
             # do not include [self.toml_file]
@@ -389,13 +395,13 @@ class StubPackage:  # (dict):
             return None
         return new_version
 
-    def check(self) -> bool:
+    def run_poetry(self, parameters: List[str]) -> bool:
         """check if the package is valid by running `poetry check`
         Note: this will write some output to the console ('All set!')
         """
         try:
             subprocess.run(
-                ["poetry", "check", "-vvv"],
+                ["poetry"] + parameters,
                 cwd=ROOT_PATH / self.package_path,
                 check=True,
             )
@@ -407,39 +413,23 @@ class StubPackage:  # (dict):
             return False
         return True
 
+    def check(self) -> bool:
+        """check if the package is valid by running `poetry check`
+        Note: this will write some output to the console ('All set!')
+        """
+        return self.run_poetry(["check", "-vvv"])
+
     def build(self) -> bool:
-        try:
-            # create package
-            subprocess.run(
-                ["poetry", "build"],  # "-vvv"
-                cwd=ROOT_PATH / self.package_path,
-                check=True,
-            )
-        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
-            log.error("Exception on process, {}".format(e))
-            return False
-        except subprocess.CalledProcessError as e:  # pragma: no cover
-            log.error("Exception on process, {}".format(e))
-            return False
-        return True
+        return self.run_poetry(["build"])  # ,"-vvv"
 
     def publish(self, production=False) -> bool:
         if not self._publish:
             log.warning(f"Publishing is disabled for {self.package_name}")
             return False
-        try:
-            # Publish to test
-            if production:
-                log.info(f"Publishing to PRODUCTION  https://pypy.org")
-                cmd = ["poetry", "publish"]
-            else:
-                log.info(f"Publishing to https://test.pypy.org")
-                cmd = ["poetry", "publish", "-r", "test-pypi"]
-            subprocess.run(cmd, cwd=self.package_path, check=True)
-        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
-            log.error("Exception on process, {}".format(e))
-            return False
-        except subprocess.CalledProcessError as e:  # pragma: no cover
-            log.error("Exception on process, {}".format(e))
-            return False
-        return True
+        if production:
+            log.info(f"Publishing to PRODUCTION  https://pypy.org")
+            params = ["publish"]
+        else:
+            log.info(f"Publishing to TEST-PyPi https://test.pypy.org")
+            params = ["publish", "-r", "test-pypi"]
+        return self.run_poetry(params)
