@@ -9,6 +9,7 @@ required folder structure:
 |
 +--publish
 |  +--package_data.jsondb
+|  +--package_data_test.jsondb
 |  +--template
 |     +--pyproject.toml
 |     +--README.md
@@ -50,17 +51,13 @@ CORE_STUBS = ALL_TYPES[2]
 
 def get_database(root_path: Union[Path, str], production: bool = False) -> PysonDB:
     """
-    Open the json database at the given root path.
+    Open the json database at the given path.
 
-    The database is always located in a subfolder `/publish` of the root path.
+    The database should be located in a subfolder `/publish` of the root path.
     The database name is determined by the production flag as `package_data[_test].jsondb`
     """
 
-    if root_path:
-        path = Path(root_path) / "publish"
-    else:
-        path: Path = Path("./publish")
-    db_path = path / f"package_data{'' if production else '_test'}.jsondb"
+    db_path = root_path / f"package_data{'' if production else '_test'}.jsondb"
     return PysonDB(db_path.as_posix())
 
 
@@ -254,6 +251,7 @@ def publish_board_stubs(
     force=False,  # publish even if no changes
     clean: bool = False,  # clean up afterards
 ):
+    published_packages:List[str] = []
     for mpy_version in versions:
         for port in ports:
 
@@ -269,8 +267,8 @@ def publish_board_stubs(
                     pkg_name=pkg_name,
                     mpy_version=mpy_version,
                 )
-                if not package_info:
-                    # create package from json_info
+                if package_info:
+                    # create package from the information retrieved from the database
                     package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=package_info)
 
                 else:
@@ -292,7 +290,7 @@ def publish_board_stubs(
                         log.warning(f"{pkg_name}: source {name} does not exist: {path}")
                         OK = False
                 if not OK:
-                    log.warning(f"{pkg_name}: skipping as one or more source stub folderss are missing")
+                    log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
 
                     package._publish = False
                     continue
@@ -321,8 +319,10 @@ def publish_board_stubs(
                     else:
                         package.build()
                         package.publish(production=production)
+                        published_packages.append(package.package_name)
                         db.add(package.to_json())
                         db.commit()
 
                 if clean:
                     package.clean()
+    return published_packages
