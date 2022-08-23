@@ -31,6 +31,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
+import pytest
 from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
@@ -61,17 +62,17 @@ def get_database(root_path: Union[Path, str], production: bool = False) -> Pyson
     return PysonDB(db_path.as_posix())
 
 
-def package_name(port: str = "", board: str = "", pkg=COMBO_STUBS, family="micropython") -> str:
+def package_name(port: str = "", board: str = "", pkg_type=COMBO_STUBS, family="micropython") -> str:
     "generate a package name for the given package type"
-    if pkg == COMBO_STUBS:
+    if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
         return f"{family}-{port}-{board}-stubs".lower().replace("-generic-stubs", "-stubs")
-    elif pkg == DOC_STUBS:
+    elif pkg_type == DOC_STUBS:
         return f"{family}-doc-stubs".lower()
-    elif pkg == CORE_STUBS:
+    elif pkg_type == CORE_STUBS:
         return f"{family}-core-stubs".lower()
 
-    raise NotImplementedError(port, board, pkg)
+    raise NotImplementedError(port, board, pkg_type)
 
 
 # def package_path(port, board, mpy_version, pub_path: Path, pkg=COMBINED, family="micropython") -> Path:
@@ -180,32 +181,28 @@ def publish_doc_stubs(
     dryrun=False,  # don't publish , dont save to the database
     force=False,  # publish even if no changes
     clean: bool = False,  # clean up afterards
+    pkg_type=DOC_STUBS,
 ):
-
+    port = board = ""
     for mpy_version in versions:
-        pkg_type = DOC_STUBS
-        ver_flat = clean_version(mpy_version, flat=True)
         # package name for firmware package
         # pkg_name = f"micropython-doc-stubs"
-        pkg_name = package_name(family=family, pkg=pkg_type)
-        pkg_path = pub_path / pkg_name
+        # package name for firmware package
+        pkg_name = package_name(port, board, pkg_type=pkg_type, family=family)
         log.info("=" * 40)
 
-        package = get_package_info(db, pub_path, pkg_name=pkg_name, mpy_version=mpy_version)
-        if not package:
-            log.warning(f"No package found for {pkg_name}")
-            package = create_package(pkg_name, mpy_version=mpy_version, pkg_type=DOC_STUBS)
-            continue
-        stubs: List[Tuple[str, Path]] = [
-            ("Doc Stubs", Path("./stubs") / f"micropython-{ver_flat}-doc-stubs"),
-        ]
-        # ? why throw away the previous retrieved / created package ?
-        package = StubPackage(
-            pkg_name,
-            version=mpy_version,
-            description="Micropython Doc Stubs",
-            stubs=stubs,
+        package_info = get_package_info(
+            db,
+            pub_path,
+            pkg_name=pkg_name,
+            mpy_version=mpy_version,
         )
+        if package_info:
+            # create package from the information retrieved from the database
+            package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=package_info)
+        else:
+            log.warning(f"No package found for {pkg_name}")
+            package = create_package(pkg_name, mpy_version=mpy_version, pkg_type=pkg_type)
 
         # /////////////////////////
         # dit kan hergebruikt worden
@@ -238,7 +235,7 @@ def publish_doc_stubs(
             package.clean()
 
 
-def publish_board_stubs(
+def publish_stubs(
     versions: List[str],
     ports: List[str],
     boards: List[str],
@@ -257,8 +254,12 @@ def publish_board_stubs(
 
             # Firmware Stubber MUST report "stm32" for a pyboard
             for board in boards:
+
+                # /////////////////////////
+                # dit kan hergebruikt worden
+
                 # package name for firmware package
-                pkg_name = package_name(port, board)
+                pkg_name = package_name(port, board, pkg_type=pkg_type, family=family)
                 log.info("=" * 40)
 
                 package_info = get_package_info(
@@ -294,9 +295,6 @@ def publish_board_stubs(
 
                     package._publish = False
                     continue
-
-                # /////////////////////////
-                # dit kan hergebruikt worden
 
                 package.update_package_files()
                 package.update_included_stubs()

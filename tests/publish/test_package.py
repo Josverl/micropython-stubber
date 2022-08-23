@@ -5,10 +5,16 @@ from pathlib import Path
 
 import pytest
 import stubber.publish.stubpacker as stubpacker
-from stubber.publish.publish_stubs import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
-                                           DOC_STUBS, create_package,
-                                           get_database, get_package_info,
-                                           package_name)
+from stubber.publish.publish_stubs import (
+    ALL_TYPES,
+    COMBO_STUBS,
+    CORE_STUBS,
+    DOC_STUBS,
+    create_package,
+    get_database,
+    get_package_info,
+    package_name,
+)
 
 # # use our test paths
 # stubpacker.PUBLISH_PATH = Path("./scratch/publish")
@@ -40,7 +46,7 @@ def cwd(path: Path):
     ],
 )
 def test_package_name(family, pkg, port, board, expected):
-    x = package_name(family=family, pkg=pkg, port=port, board=board)
+    x = package_name(family=family, pkg_type=pkg, port=port, board=board)
     assert x == expected
 
 

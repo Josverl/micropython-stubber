@@ -15,7 +15,7 @@ from stubber.publish.publish_stubs import (
     get_database,
     get_package_info,
     package_name,
-    publish_board_stubs,
+    publish_stubs,
 )
 
 # use our test paths
@@ -24,7 +24,21 @@ stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
 stubpacker.STUB_PATH = Path("./all-stubs")
 
 
-def test_publish(pytestconfig, tmp_path):
+@pytest.mark.parametrize(
+    "pkg_type, ports, boards, versions",
+    [
+        (COMBO_STUBS, ["esp32"], ["GENERIC"], ["1.18"]),
+        (DOC_STUBS, [], [], ["1.18"]),
+    ],
+)
+def test_publish(
+    pytestconfig,
+    tmp_path,
+    pkg_type,
+    ports,
+    boards,
+    versions,
+):
     source = pytestconfig.rootpath / "tests/publish/data"
     db = get_database(source, production=False)
     publish_path = tmp_path / "publish"
@@ -36,13 +50,16 @@ def test_publish(pytestconfig, tmp_path):
     stubpacker.STUB_PATH = pytestconfig.rootpath
     stubpacker.PUBLISH_PATH = publish_path
 
-    result = publish_board_stubs(
-        versions=["1.18", "1.17"],
-        ports=["esp32", "stm32"],
-        boards=["GENERIC", "TINY"],
+    # TODO: Mock publish 
+
+
+    result = publish_stubs(
+        versions=versions,
+        ports=ports,
+        boards=boards,
         db=db,
         pub_path=stubpacker.PUBLISH_PATH,
-        pkg_type=COMBO_STUBS,
+        pkg_type=pkg_type,
         family="micropython",
         production=False,  # Test-PyPi
         dryrun=False,  # don't publish , dont save to the database

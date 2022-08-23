@@ -4,7 +4,7 @@ from typing import List
 
 import click
 from pysondb import PysonDB
-from stubber.publish.publish_stubs import ALL_TYPES, get_database, publish_board_stubs, publish_doc_stubs
+from stubber.publish.publish_stubs import ALL_TYPES, get_database, publish_stubs, publish_doc_stubs
 from stubber.utils.config import CONFIG
 from stubber.utils.my_version import __version__
 
@@ -119,7 +119,7 @@ def cli_publish(
     db = get_database(root_path=root_path, production=False)
 
     if stub_type == "combo":
-        publish_board_stubs(
+        publish_stubs(
             versions=versions,
             ports=ports,
             boards=boards,
