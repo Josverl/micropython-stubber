@@ -7,7 +7,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import tomli
 import tomli_w
 from loguru import logger as log
-from packaging.version import LegacyVersion, Version, parse
+from packaging.version import Version, parse
+from typing_extensions import Self
+
+from .bump import bump_postrelease
 
 # TODO: Get git tag and store in DB for reference
 # import stubber.basicgit as git
@@ -15,58 +18,70 @@ from packaging.version import LegacyVersion, Version, parse
 # git log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
 # https://github.com/Josverl/micropython-stubs/tree/d45c8fa3dbdc01978af58532ff4c5313090aabfb
 
+#  git -C .\all-stubs\ log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
 
-# https://peps.python.org/pep-0440/
-def bump_postrelease(
-    current: Version,
-) -> Version:
-    """Increases the post release version number"""
-    parts = []
-    # Epoch
-    if current.epoch != 0:
-        parts.append(f"{current.epoch}!")
-    # Release segment
-    parts.append(".".join(str(x) for x in current.release))
-    # Pre-release
-    if current.pre is not None:
-        parts.append("".join(str(x) for x in current.pre))
-    # BUMP Post-release
-    if current.post is not None:
-        parts.append(f".post{current.post + 1}")
-    else:
-        parts.append(f".post{1}")
-    # Development release
-    if current.dev is not None:
-        parts.append(f".dev{current.dev}")
-
-    # Local version segment
-    if current.local is not None:
-        parts.append(f"+{current.local}")
-
-    new = parse("".join(parts))
-    if not isinstance(new, Version):
-        raise ValueError(f"{new} is not a valid version")
-
-    return new
+ROOT_PATH = Path(".")
+PUBLISH_PATH = ROOT_PATH / "./publish"
+TEMPLATE_PATH = ROOT_PATH / "./publish/template"
+STUB_PATH = ROOT_PATH / "stubs"
 
 
-class StubPackage(dict):
+class StubPackage:  # (dict):
     """
     Create a stub-only package for a specific version of micropython
-        - version
-        - port
-        - board
+
+    properties:
+        - toml_path - the path to the `pyproject.toml` file
+        - package_path - the path to the folder where the package info will be stored ('./publish').
+        - pkg_version - the version of the package as used on PyPi (semver). Is stored directly in the `pyproject.toml` file
+        - pyproject - the contents of the `pyproject.toml` file
+    methods:
+        - from_json - load the package from json
+        - to_json - return the package as json
+
+        - create_update_pyproject_toml - create or update the `pyproject.toml` file
+        - create_readme - create the readme file
+        - create_license - create the license file
+        - copy_stubs - copy the stubs to the package folder
+        - update_included_stubs - update the included stubs in the `pyproject.toml` file
+        - create_hash - create a hash of the package files
+
+        - update_package_files - combines clean, copy, and create reeadme & updates
     """
 
     def __init__(
         self,
-        package_path: Path,
         package_name: str,
+        publish_path: Path = PUBLISH_PATH,
         version: str = "0.0.1",
         description: str = "MicroPython stubs",
         stubs: Optional[List[Tuple[str, Path]]] = None,
         json_data: Optional[Dict[str, Any]] = None,
     ):
+        """
+        Create a stub-only package for a specific version of micropython
+        parameters:
+            - publish_path - the path to the folder where the package info will be stored ('./publish').
+              the package_name will be added to the path, and the path will be created if it does not exist
+            - package_name - the name of the package as used on PyPi
+            - version - the version of the package as used on PyPi (semver)
+            - description
+            - stubs - a list of tuples (name, path) of the stubs to copy
+            - json_data - Optional:  a json databse record that will be used to create the package from.
+              When `json_data` is provided, the version, description and stubs parameters are ignored
+
+        paths:
+            ROOT_PATH - the root path of the project ('./')
+            PUBLISH_PATH - root-relative path to the folder where the package info will be stored ('./publish').
+            TEMPLATE_PATH - root-relative path to the folder where the template files are stored ('./publish/template').
+            STUB_PATH - root-relative path to the folder where the stubs are stored ('./stubs').
+
+        """
+        # package must be stored in its own folder, add package name if needed
+        if not publish_path.name == package_name:
+            package_path = publish_path / package_name
+        else:
+            package_path = publish_path
         # create the package folder
         package_path.mkdir(parents=True, exist_ok=True)
         if json_data is not None:
@@ -78,17 +93,19 @@ class StubPackage(dict):
             self.description = description
             self.mpy_version = str(parse(version.replace("_", ".")))  # Initial version
             self.hash = None  # intial hash
-            self.create_pyproject()
+            self.create_update_pyproject_toml()
 
             # save the stub sources
-            stub_sources: List[Tuple[str, Path]] = []
             if stubs:
                 self.stub_sources = stubs
-            # normalise the version to semver
+            else:
+                self.stub_sources: List[Tuple[str, Path]] = []
             self._publish = True
 
     @property
-    def toml_file(self) -> Path:
+    def toml_path(self) -> Path:
+        "the path to the `pyproject.toml` file, relative to ROOT_PATH"
+        # todo: make sure this is always relative to the root path
         return self.package_path / "pyproject.toml"
 
     # -----------------------------------------------
@@ -96,9 +113,9 @@ class StubPackage(dict):
     def pkg_version(self) -> str:
         "return the version of the package"
         # read the version from the toml file
-        if not self.toml_file.exists():
+        if not self.toml_path.exists():
             return self.mpy_version
-        with open(self.toml_file, "rb") as f:
+        with open(self.toml_path, "rb") as f:
             pyproject = tomli.load(f)
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
@@ -106,12 +123,12 @@ class StubPackage(dict):
     def pkg_version(self, version):
         "set the version of the package"
         # read the current file
-        with open(self.toml_file, "rb") as f:
+        with open(ROOT_PATH / self.toml_path, "rb") as f:
             pyproject = tomli.load(f)
         pyproject["tool"]["poetry"]["version"] = version
 
         # update the version in the toml file
-        with open(self.toml_file, "wb") as output:
+        with open(ROOT_PATH / self.toml_path, "wb") as output:
             tomli_w.dump(pyproject, output)
 
     # -----------------------------------------------
@@ -119,8 +136,8 @@ class StubPackage(dict):
     def pyproject(self) -> Union[Dict[str, Any], None]:
         "parsed pyproject.toml or None"
         pyproject = None
-        if self.toml_file.exists():
-            with open(self.toml_file, "rb") as f:
+        if (ROOT_PATH / self.toml_path).exists():
+            with open(ROOT_PATH / self.toml_path, "rb") as f:
                 pyproject = tomli.load(f)
         return pyproject
 
@@ -132,7 +149,9 @@ class StubPackage(dict):
         except tomli.TOMLDecodeError as e:
             print("Could not create a valid TOML file")
             raise (e)
-        with open(self.toml_file, "wb") as output:
+        # make sure parent folder exists
+        (ROOT_PATH / self.toml_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(ROOT_PATH / self.toml_path, "wb") as output:
             tomli_w.dump(pyproject, output)
 
     # -----------------------------------------------
@@ -165,8 +184,11 @@ class StubPackage(dict):
         self.mpy_version = json_data["mpy_version"]
         self._publish = json_data["publish"]
         self.hash = json_data["hash"]
+        # create folder
+        if not self.package_path.exists():
+            self.package_path.mkdir(parents=True, exist_ok=True)
         #  create the pyproject.toml file
-        self.create_pyproject()
+        self.create_update_pyproject_toml()
         # set pkg version after creating the toml file
         self.pkg_version = json_data["pkg_version"]
         self.stub_sources = [(name, Path(path)) for (name, path) in json_data["stub_sources"]]
@@ -176,7 +198,10 @@ class StubPackage(dict):
     ):
         """
         Update the stub-only package for a specific version of micropython
-        copies the stubs from the  list of stubs.
+         - cleans the package folder
+         - copies the stubs from the list of stubs.
+         - creates/updates the readme and the license file
+
 
         """
         # create the package folder
@@ -184,32 +209,37 @@ class StubPackage(dict):
 
         self.clean()  # Delete any previous *.py? files
         self.copy_stubs()
-        # self.create_pyproject()
         self.create_readme()
         self.create_license()
 
     def copy_stubs(self):
         """
-        Copy the stubs to the package folder
+        Copy files from all listed stub folders to the package folder
+        the order of the stub folders is relevant as "last copy wins"
         """
         # Copy  the stubs to the package, directly in the package folder (no folders)
         for name, folder in self.stub_sources:
-            log.debug(f"Copying {name} from {folder}")
-            # shutil.copytree(folder, package_path / folder.name, symlinks=True, dirs_exist_ok=True)
-            shutil.copytree(folder, self.package_path, symlinks=True, dirs_exist_ok=True)
+            try:
+                log.debug(f"Copying {name} from {folder}")
+                shutil.copytree(STUB_PATH / folder, ROOT_PATH / self.package_path, symlinks=True, dirs_exist_ok=True)
+            except OSError as e:
+                log.error(f"Error copying stubs from : {STUB_PATH / folder}, {e}")
+                raise (e)
 
     def create_readme(self):
         """
         Create a readme file for the package
+         - based on the template readme file
+         - with a list of all included stub folders added to it (not the individual stub-files)
         """
         # read the readme file and update the version and description
-        with open(self.package_path / "../template/README.md", "r") as f:
+        with open(TEMPLATE_PATH / "README.md", "r") as f:
             TEMPLATE_README = f.read()
 
-        # add a readme with the names of the stubs
+        # add a readme with the names of the stub-folders
 
         # Prettify this by merging with template text
-        with open(self.package_path / "README.md", "w") as f:
+        with open(ROOT_PATH / self.package_path / "README.md", "w") as f:
             f.write(f"# {self.package_name}\n\n")
             f.write(TEMPLATE_README)
             f.write(f"Included stubs:\n")
@@ -219,13 +249,13 @@ class StubPackage(dict):
     def create_license(self):
         """
         Create a license file for the package
+         - copied from the template license file
         """
-        # copy the license file from the template  to the package
-        # copy the license file from the template  to the package
-        # todo: append other license files
-        shutil.copy(self.package_path / "../template/LICENSE.md", self.package_path)
+        # copy the license file from the template to the package folder
+        # option : append other license files
+        shutil.copy(TEMPLATE_PATH / "LICENSE.md", ROOT_PATH / self.package_path)
 
-    def create_pyproject(
+    def create_update_pyproject_toml(
         self,
     ):
         """
@@ -236,7 +266,7 @@ class StubPackage(dict):
         # Do not overwrite existing pyproject.toml but read and apply changes to it
         # 1) read from disk , if exists
         # 2) create from template, in all other cases
-        on_disk = (self.toml_file).exists()
+        on_disk = (ROOT_PATH / self.toml_path).exists()
         if on_disk:
             # do not overwrite the version of a pre-existing file
             _pyproject = self.pyproject
@@ -245,9 +275,8 @@ class StubPackage(dict):
             _pyproject["tool"]["poetry"]["packages"] = []
 
         else:
-            # read the template pyproject.toml file
-            template_path = self.package_path / "template"
-            with open(template_path / "pyproject.toml", "rb") as f:
+            # read the template pyproject.toml file from the template folder
+            with open(TEMPLATE_PATH / "pyproject.toml", "rb") as f:
                 _pyproject = tomli.load(f)
             _pyproject["tool"]["poetry"]["version"] = self.mpy_version
 
@@ -276,14 +305,14 @@ class StubPackage(dict):
         # find packages using __init__ files
         # take care no to include a module twice
         modules = set({})
-        for p in self.package_path.rglob("**/__init__.py*"):
+        for p in (STUB_PATH / self.package_path).rglob("**/__init__.py*"):
             # add the module to the package
             # fixme : only accounts for one level of packages
             modules.add(p.parent.name)
         for module in sorted(modules):
             _pyproject["tool"]["poetry"]["packages"] += [{"include": module}]
         # now find other stub files directly in the folder
-        for p in sorted(self.package_path.glob("*.py*")):
+        for p in sorted((STUB_PATH / self.package_path).glob("*.py*")):
             if p.suffix in (".py", ".pyi"):
                 _pyproject["tool"]["poetry"]["packages"] += [{"include": p.name}]
 
@@ -308,7 +337,10 @@ class StubPackage(dict):
                 f.unlink()
 
     def check(self) -> bool:
-        "check if the package is valid"
+        """check if the package is valid by running `poetry check`
+
+        Note: this will write some output to the console
+        """
         try:
             subprocess.run(["poetry", "check", "-vvv"], cwd=self.package_path)
         except subprocess.CalledProcessError as e:
@@ -317,16 +349,22 @@ class StubPackage(dict):
         return True
 
     def create_hash(self) -> str:
-        "Create a hash of all files in the package"
-        # BUF_SIZE is totally arbitrary, change for your app!
+        """
+        Create a SHA1 hash of all files in the package, excluding the pyproject.toml file itself.
+        tha hash is based on the content of the files only.
+        As a single has is created across all files, the files are sorted prior to hashing to ensure that the hash is stable.
+
+        A changed hash will not indicate which of the files in the package have been changed.
+        """
+        # BUF_SIZE is totally arbitrary,
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
         hash = hashlib.sha1()
         files = (
-            list(self.package_path.glob("**/*.py*"))
-            + [self.package_path / "LICENSE.md"]
-            + [self.package_path / "README.md"]
-            # + [self.toml_file]
+            list((ROOT_PATH / self.package_path).rglob("**/*.py*"))
+            + [ROOT_PATH / self.package_path / "LICENSE.md"]
+            + [ROOT_PATH / self.package_path / "README.md"]
+            # do not include [self.toml_file]
         )
 
         for file in sorted(files):
@@ -340,38 +378,28 @@ class StubPackage(dict):
         return hash.hexdigest()
 
     def is_changed(self) -> bool:
-        "Check if the package has changed"
-        new = self.create_hash()
-        log.debug(f"changed: {self.hash != new} : Old {self.hash} New: {new}")
-        return self.hash != new
+        "Check if the package has changed, based on the current and the stored hash"
+        current = self.create_hash()
+        log.debug(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
+        return self.hash != current
 
     def bump(self):
-        "bump the version of the package"
+        """
+        bump the postrelease version of the package, and write the change to disk
+        """
         try:
-            # read the pyproject.toml file
-            with open(self.toml_file, "rb") as f:
-                pyproject = tomli.load(f)
-
+            pyproject = self.pyproject
+            assert pyproject is not None, "No pyproject.toml file found"
             current = parse(pyproject["tool"]["poetry"]["version"])
             assert isinstance(current, Version)
             # bump the version
-            new = bump_postrelease(current)
-            pyproject["tool"]["poetry"]["version"] = str(new)
-            # write the pyproject.toml file
-            # check if the result is a valid toml file
-            try:
-                tomli.loads(tomli_w.dumps(pyproject))
-            except tomli.TOMLDecodeError as e:
-                log.error(f"Could not create a valid TOML file: {e}")
-                raise (e)
-
-            with open(self.toml_file, "wb") as output:
-                tomli_w.dump(pyproject, output)
-
-        except Exception as e:
+            new_version = bump_postrelease(current)
+            pyproject["tool"]["poetry"]["version"] = str(new_version)
+            self.pyproject = pyproject
+        except Exception as e:  # pragma: no cover
             log.error(f"Error: {e}")
-            return False
-        return True
+            return None
+        return new_version
 
     def build(self) -> bool:
         try:
