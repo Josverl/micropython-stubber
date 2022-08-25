@@ -6,11 +6,18 @@
 name: "CodeQL"
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main. refactor_cli]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
+    paths-ignore:
+      - 'docs'
+      - 'minified'
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.yml'
   schedule:
     - cron: '0 8 * * 3'
 
@@ -37,6 +44,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
+        queries: +security-and-quality        
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
