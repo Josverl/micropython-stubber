@@ -6,6 +6,7 @@
 name: "CodeQL"
 
 on:
+  workflow_dispatch:
   push:
     branches: [main. refactor_cli]
   pull_request:
