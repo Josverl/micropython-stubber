@@ -3,6 +3,7 @@
 queries:
   - uses: security-and-quality
 paths-ignore:
-  - tests
-  - .venv
+  - "tests/**/*"
+  - ".venv/**/*"
+  - "snippets/**/*"
   
