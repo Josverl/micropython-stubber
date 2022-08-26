@@ -1,10 +1,10 @@
 """
 simple Git module, where needed via powershell
 """
-from typing import Union
 import subprocess
 from pathlib import Path
-from typing import Union, List, Optional
+from typing import List, Optional, Union
+
 from packaging.version import parse
 
 
@@ -27,7 +27,7 @@ def _run_git(
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
         # add some logging for github actions
-        print("Exception on process, rc=", e.returncode, "output=", e.output)
+        print("Exception on process, rc=", e.returncode, "output=", e.output, "stderr=", e.stderr)
         return None
     if result.stderr != b"":
         if not expect_stderr:
@@ -193,7 +193,7 @@ def pull(repo: Union[Path, str], branch="main") -> bool:
         raise NotADirectoryError
     repo = Path(repo)
     # first checkout HEAD
-    cmd = ["git", "checkout", "main", "--quiet", "--force"]
+    cmd = ["git", "checkout", branch, "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         print("error during git checkout main", result)
