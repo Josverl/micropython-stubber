@@ -36,7 +36,7 @@ pyboard = "stubber.tools.pyboard:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-python-minifier = "^2.6.0"
+python-minifier = "2.6.0"
 requests = "2.27.0"
 mypy = "0.971"
 mpy-cross = "1.18"
@@ -44,18 +44,19 @@ black = "22.6.0"
 libcst = "0.4.7"
 autoflake = "1.4"
 click = "8.0.3"
-importlib-metadata = { version = "^1.0", python = "<3.8" }
+importlib-metadata = { version = "1.0", python = "<3.8" }
 tomli = { version = "^2.0.1", python = "<3.11" }
-typed-config = "^1.1.0"
-packaging = "^21.3"
+typed-config = "1.1.0"
+packaging = "21.3"
 esptool = { version = "3.3.1", optional = true }
 rshell = { version = "0.0.31", optional = true }
 pyserial = { version = "3.5", optional = true }
 
 # Extras needed for bulkstubber.ps1
 pysondb-v2 = "2.1.0"
-tomli-w = "^1.0.0"
-loguru = "^0.6.0"
+tomli-w = "1.0.0"
+loguru = "0.6.0"
+PyGithub = "1.55"
 [tool.poetry.extras]
 tools = ["rshell", "esptool", "pyserial"]
 
