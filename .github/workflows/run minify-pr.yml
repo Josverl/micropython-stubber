@@ -57,10 +57,10 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
           MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_18 -c "import sys;print(sys.path);import logging"
 
-      - name: create or update minified version
+      - name: stubber minify --all --compile
         shell: pwsh
         run: |
-          poetry run pwsh scripts/minify.ps1
+          poetry run stubber minify --all --compile
 
       - name: run test on minified/createstubs.by
         run: |
