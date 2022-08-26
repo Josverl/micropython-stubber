@@ -1,3 +1,6 @@
+from github import Github
+from packaging.version import parse
+
 
 def clean_version(
     version: str,
@@ -31,6 +34,9 @@ def clean_version(
         version = "latest"
     if flat:
         version = version.strip().replace(".", "_")
+    else:
+        version = version.strip().replace("_", ".")
+
     if drop_v:
         version = version.lstrip("v")
     else:
@@ -39,3 +45,13 @@ def clean_version(
             version = "v" + version
     return version
 
+
+def micropython_versions(start="v1.9.2"):
+    g = Github()
+    repo = g.get_repo("micropython/micropython")
+    return [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(start)]
+
+
+# def micropython_versions():
+#     "static version"
+#     return ['v1.19.1', 'v1.19', 'v1.18', 'v1.17', 'v1.16', 'v1.15', 'v1.14', 'v1.13', 'v1.12', 'v1.11', 'v1.10', 'v1.9.4', 'v1.9.3']
