@@ -33,22 +33,28 @@ def cli_clone(path: Union[str, Path]):
     if dest_path != CONFIG.repo_path:
         mpy_path = dest_path / "micropython"
         mpy_lib_path = dest_path / "micropython-lib"
+        # mpy_stubs_path = dest_path / "micropython-stubs"
     else:
         mpy_path = CONFIG.mpy_path
         mpy_lib_path = CONFIG.mpy_lib_path
+        # mpy_stubs_path = CONFIG.mpy_stubs_path
 
-    # if exist : fetch
-    # allow switch to different tag
+    repos = [
+        (mpy_path, "https://github.com/micropython/micropython.git", "master"),
+        (mpy_lib_path, "https://github.com/micropython/micropython-lib.git", "master"),
+        # (mpy_stubs_path, "https://github.com/josverl/micropython-stubs.git", "main"),
+    ]
 
-    if not (mpy_path / ".git").exists():
-        git.clone(remote_repo="https://github.com/micropython/micropython.git", path=mpy_path)
-    else:
-        git.fetch(mpy_path)
-        git.pull(mpy_path)
+    for _path, remote, branch in repos:
+        if not (_path / ".git").exists():
+            log.info(f"Cloning {_path.name}...")
+            git.clone(remote_repo=remote, path=_path)
+        else:
+            log.info(f"{_path.name} already exists, fetching...")
+            git.fetch(
+                _path,
+            )
+            git.pull(_path, branch=branch)  # DEFAULT
 
-    if not (mpy_lib_path / ".git").exists():
-        git.clone(remote_repo="https://github.com/micropython/micropython-lib.git", path=mpy_lib_path)
-    else:
-        git.fetch(mpy_lib_path)
     click.echo(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
     click.echo(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
