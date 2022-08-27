@@ -24,6 +24,9 @@ class StubberConfig(Config):
     mpy_lib_path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
     "a Path to the micropython-lib folder in the repos directory"
 
+    mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("micropython-stubs"))
+    "a Path to the micropython-stubs folder in the repos directory"
+
     def post_read_hook(self) -> dict:
         config_updates = dict()
         # relative to stubs
@@ -32,6 +35,7 @@ class StubberConfig(Config):
         # relative to repo path
         config_updates.update(mpy_path=self.repo_path / self.mpy_path)
         config_updates.update(mpy_lib_path=self.repo_path / self.mpy_lib_path)
+        config_updates.update(mpy_stubs_repo_path=self.repo_path / self.mpy_stubs_repo_path)
         return config_updates
 
 
@@ -43,4 +47,7 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     return config
 
 
+#######################
+# config singleton
 CONFIG = readconfig()
+#######################

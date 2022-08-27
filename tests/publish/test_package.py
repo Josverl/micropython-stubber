@@ -1,6 +1,5 @@
-import os
 import shutil
-from contextlib import contextmanager
+
 from pathlib import Path
 
 import pytest
@@ -11,25 +10,15 @@ from stubber.publish.publish_stubs import (
     CORE_STUBS,
     DOC_STUBS,
     create_package,
-    get_database,
     get_package_info,
     package_name,
 )
+
 
 # # use our test paths
 # stubpacker.PUBLISH_PATH = Path("./scratch/publish")
 # stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
 # stubpacker.STUB_PATH = Path("./all-stubs")
-
-
-@contextmanager
-def cwd(path: Path):
-    oldpwd = os.getcwd()
-    os.chdir(str(path))
-    try:
-        yield
-    finally:
-        os.chdir(oldpwd)
 
 
 # test generation of different package names
@@ -50,34 +39,6 @@ def test_package_name(family, pkg, port, board, expected):
     assert x == expected
 
 
-# test get package from database
-@pytest.mark.parametrize(
-    "package_name, version, present",
-    [
-        ("micropython-esp32-stubs", "1.18", True),
-        ("micropython-stm32-stubs", "1.17", True),
-        # ("micropython-doc-stubs", "1.18", True),
-        ("micropython-doc-stubs", "1.10", False),
-        ("pycopy-foo-stubs", "1.18", False),
-    ],
-)
-def test_get_package_info(pytestconfig, package_name, version, present):
-    # Cache database in memory?
-    # TODO: use test database with known content
-    testdata = pytestconfig.rootpath / "tests/publish/data"
-    db = get_database(testdata, production=False)
-    pkg_info = get_package_info(db, Path("foo"), pkg_name=package_name, mpy_version=version)
-    if present:
-        assert pkg_info
-        assert pkg_info["name"] == package_name
-        assert pkg_info["mpy_version"] == version
-        assert len(pkg_info["path"]) > 0
-        assert len(pkg_info["pkg_version"]) > 0
-        assert len(pkg_info["hash"]) > 0
-        assert len(pkg_info["description"]) > 0
-        assert len(pkg_info["stub_sources"]) > 0
-    else:
-        assert pkg_info == None
 
 
 # test creating a DOC_STUBS package
