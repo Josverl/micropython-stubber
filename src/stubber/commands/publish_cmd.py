@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import List
 
 import click
-from pysondb import PysonDB
-from stubber.publish.publish_stubs import ALL_TYPES, get_database, publish_combo_stubs, publish_doc_stubs
+from stubber.publish.database import get_database
+from stubber.publish.publish_stubs import ALL_TYPES, publish_combo_stubs, publish_doc_stubs
 from stubber.utils.config import CONFIG
 from stubber.utils.my_version import __version__
 

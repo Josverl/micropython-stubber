@@ -20,7 +20,8 @@ log = logging.getLogger("stubber")
 
 @stubber_cli.command(name="clone")
 @click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
-def cli_clone(path: Union[str, Path]):
+@click.option("--add-stubs", "stubs", default=False, is_flag=True)
+def cli_clone(path: Union[str, Path], stubs: bool = False):
     """
     Clone/fetch the micropython repos locally.
 
@@ -33,17 +34,18 @@ def cli_clone(path: Union[str, Path]):
     if dest_path != CONFIG.repo_path:
         mpy_path = dest_path / "micropython"
         mpy_lib_path = dest_path / "micropython-lib"
-        # mpy_stubs_path = dest_path / "micropython-stubs"
+        mpy_stubs_path = dest_path / "micropython-stubs"
     else:
         mpy_path = CONFIG.mpy_path
         mpy_lib_path = CONFIG.mpy_lib_path
-        # mpy_stubs_path = CONFIG.mpy_stubs_path
+        mpy_stubs_path = CONFIG.mpy_stubs_repo_path
 
     repos = [
         (mpy_path, "https://github.com/micropython/micropython.git", "master"),
         (mpy_lib_path, "https://github.com/micropython/micropython-lib.git", "master"),
-        # (mpy_stubs_path, "https://github.com/josverl/micropython-stubs.git", "main"),
     ]
+    if stubs:
+        repos.append((mpy_stubs_path, "https://github.com/josverl/micropython-stubs.git", "main"))
 
     for _path, remote, branch in repos:
         if not (_path / ".git").exists():
@@ -56,5 +58,6 @@ def cli_clone(path: Union[str, Path]):
             )
             git.pull(_path, branch=branch)  # DEFAULT
 
-    click.echo(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
+    click.echo(f"{mpy_path} {git.get_tag(mpy_path)}")
     click.echo(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
+    # click.echo(f"{mpy_stubs_path} {git.get_tag(mpy_stubs_path)}")
