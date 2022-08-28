@@ -1,9 +1,9 @@
 [tool.micropython-stubber]
-stub-path = "./repos/micropython-stubber/stubs"
+stub-path = "./repos/micropython-stubs/stubs"
 repo-path = "./repos"
 
-# publish-path = "./repos/micropython-stubber/publish"
-# template-path = "./repos/micropython-stubber/publish/template"
+# publish-path = "./repos/micropython-stubs/publish"
+# template-path = "./repos/micropython-stubs/publish/template"
 
 
 [tool.poetry]

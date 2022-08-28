@@ -3,15 +3,9 @@ from pprint import pprint
 from typing import Generator
 
 import pytest
-from stubber.publish.candidates import (
-    COMBO_STUBS,
-    CORE_STUBS,
-    DOC_STUBS,
-    docstub_candidates,
-    frozen_candidates,
-    subfolder_names,
-    version_cadidates,
-)
+from stubber.publish.candidates import (COMBO_STUBS, CORE_STUBS, DOC_STUBS,
+                                        docstub_candidates, frozen_candidates,
+                                        subfolder_names, version_cadidates)
 
 
 def test_subfoldernames(tmp_path, pytestconfig):
@@ -94,8 +88,8 @@ def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count)
     frozen = frozen_candidates(path=path, family=family, versions=versions, ports=ports, boards=boards)
     assert isinstance(frozen, Generator)
     l = list(frozen)
-    print()
-    pprint(l)
+    # print()
+    # pprint(l)
     assert len(l) == count, f"{len(l)} != {count}, {l}"
     if len(l) > 0:
         assert l[0]["pkg_type"] == COMBO_STUBS

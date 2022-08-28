@@ -33,7 +33,7 @@ class StubberConfig(Config):
     publish_path = key(key_name="publish-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish"))
     "a Path to the folder where all stub publication artefacts are stored"
 
-    template_path = key(key_name="template-path", cast=Path, required=False, default=Path("/repos/micropython-stubs/publish/template"))
+    template_path = key(key_name="template-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish/template"))
     "a Path to the publication folder that has the template files"
 
     def post_read_hook(self) -> dict:
@@ -59,4 +59,5 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
 #######################
 # config singleton
 CONFIG = readconfig()
+"stubber configuration singleton"
 #######################
