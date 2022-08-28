@@ -8,10 +8,15 @@ name: pytest
 on:
   workflow_dispatch:
   push:
-    paths-ignore:
-      - 'readme.md'
-      - 'changelog.md'
-      - 'docs/**'      
+    paths:
+      - 'board/**'
+      - "src/**"
+      - "tests/**"
+      - "snippets/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "pyrightconfig.json"
+   
 
   pull_request:
     branches: [ main ]
