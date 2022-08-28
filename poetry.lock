@@ -501,6 +501,17 @@ tomli = ">=1.0.0"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-github-actions-annotate-failures"
+version = "0.1.7"
+description = "pytest plugin to annotate failed tests with a workflow command for GitHub Actions"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pytest = ">=4.0.0"
+
+[[package]]
 name = "pytest-json-report"
 version = "1.5.0"
 description = "A pytest plugin to report test results as JSON files"
@@ -701,7 +712,7 @@ tools = ["rshell", "esptool", "pyserial"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "786000aeecfc91f741262a070d1b9c796d9b65756f84242a7a44544cbd468ce5"
+content-hash = "d2a0723282e8db16988fd9f399b78c4db347f234e7f028286cd3bf273f0a9b6f"
 
 [metadata.files]
 atomicwrites = []
@@ -815,6 +826,7 @@ pyserial = [
 ]
 pysondb-v2 = []
 pytest = []
+pytest-github-actions-annotate-failures = []
 pytest-json-report = []
 pytest-metadata = []
 pytest-mock = [
