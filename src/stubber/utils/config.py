@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 
-from .typed_config_toml import Config, EnvironmentConfigSource, TomlConfigSource, key, section
+from .typed_config_toml import (Config, EnvironmentConfigSource,
+                                TomlConfigSource, key, section)
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ class StubberConfig(Config):
 def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exist: bool = True):
     config = StubberConfig()
     config.add_source(EnvironmentConfigSource())
-    # config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
+    config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
     config.read()
     return config
 

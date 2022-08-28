@@ -1,5 +1,5 @@
-from typing import Dict
 from pathlib import Path
+from typing import Dict
 
 import pytest
 import stubber
@@ -9,14 +9,15 @@ from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 def test_toplevel_config():
     # exists on top-level
     from stubber.utils.config import CONFIG
+
     assert CONFIG
     assert isinstance(CONFIG, StubberConfig)
 
     assert isinstance(CONFIG.stub_path, Path)
     assert isinstance(CONFIG.repo_path, Path)
-    assert isinstance(CONFIG.fallback_path, Path )
-    assert isinstance(CONFIG.mpy_path, Path )
-    assert isinstance(CONFIG.mpy_lib_path, Path )
+    assert isinstance(CONFIG.fallback_path, Path)
+    assert isinstance(CONFIG.mpy_path, Path)
+    assert isinstance(CONFIG.mpy_lib_path, Path)
 
 
 def test_bad_config_source():
@@ -48,3 +49,7 @@ def test_config():
     assert isinstance(config.mpy_lib_path, Path)
 
     assert config.stub_path == Path("./my-stubs")
+    assert config.repo_path == Path("./my-repos")
+    assert config.mpy_path == Path("./my-repos/micropython")
+    # TODO Make sure this is relative to the stubs repo
+    assert config.publish_path == Path("./repos/micropython-stubs/publish")
