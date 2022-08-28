@@ -2,20 +2,7 @@ from pathlib import Path
 
 import pytest
 from stubber.publish.database import get_database
-import stubber.publish.stubpacker as stubpacker
-from stubber.publish.publish_stubs import (
-    ALL_TYPES,
-    COMBO_STUBS,
-    CORE_STUBS,
-    DOC_STUBS,
-    publish_combo_stubs,
-    publish_doc_stubs,
-)
-
-# use our test paths
-stubpacker.PUBLISH_PATH = Path("./scratch/publish")
-stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
-stubpacker.STUB_PATH = Path("./all-stubs")
+from stubber.publish.publish_stubs import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, publish_combo_stubs, publish_doc_stubs
 
 
 @pytest.mark.parametrize(
@@ -28,6 +15,7 @@ stubpacker.STUB_PATH = Path("./all-stubs")
 def test_publish(
     pytestconfig,
     tmp_path,
+    mocker,
     pkg_type,
     ports,
     boards,
@@ -35,16 +23,18 @@ def test_publish(
 ):
     source = pytestconfig.rootpath / "tests/publish/data"
     db = get_database(source, production=False)
-    publish_path = tmp_path / "publish"
-    publish_path.mkdir(parents=True)
 
-    stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
-    # TODO: need to endure that the stubs are avaialble in GHA testing
-    stubpacker.ROOT_PATH = tmp_path
-    stubpacker.STUB_PATH = pytestconfig.rootpath
-    stubpacker.PUBLISH_PATH = publish_path
+    source = pytestconfig.rootpath / "tests/publish/data"
+    PUBLISH_PATH = tmp_path / "publish"
+    PUBLISH_PATH.mkdir(parents=True)
 
-    # TODO: Mock publish
+    #  need to ensure that the stubs are avaialble in GHA testing
+    STUB_PATH = Path("./repos/micropython-stubs/stubs")
+    TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+
+    mocker.patch("stubber.publish.stubpacker.STUB_PATH", STUB_PATH)
+    mocker.patch("stubber.publish.stubpacker.TEMPLATE_PATH", TEMPLATE_PATH)
+    mocker.patch("stubber.publish.stubpacker.PUBLISH_PATH", PUBLISH_PATH)
 
     if pkg_type == COMBO_STUBS:
         result = publish_combo_stubs(
@@ -54,7 +44,7 @@ def test_publish(
             boards=boards,
             versions=versions,
             db=db,
-            pub_path=stubpacker.PUBLISH_PATH,
+            pub_path=PUBLISH_PATH,
             production=False,  # Test-PyPi
             dryrun=False,  # don't publish , dont save to the database
             force=False,  # publish even if no changes
@@ -68,7 +58,7 @@ def test_publish(
             boards=boards,
             versions=versions,
             db=db,
-            pub_path=stubpacker.PUBLISH_PATH,
+            pub_path=PUBLISH_PATH,
             production=False,  # Test-PyPi
             dryrun=False,  # don't publish , dont save to the database
             force=False,  # publish even if no changes
