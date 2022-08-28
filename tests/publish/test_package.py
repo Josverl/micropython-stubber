@@ -1,8 +1,7 @@
-import shutil
 from pathlib import Path
 
 import pytest
-import stubber.publish.stubpacker as stubpacker
+from stubber.publish.stubpacker import StubPackage, Version
 from stubber.publish.publish_stubs import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
                                            DOC_STUBS, create_package,
                                            get_package_info, package_name)
@@ -74,7 +73,7 @@ def test_create_package(tmp_path, pytestconfig, pkg_type, port, board, mocker):
         pkg_type=pkg_type,
         # stub_source="./all-stubs",  # for debugging
     )
-    assert isinstance(package, stubpacker.StubPackage)
+    assert isinstance(package, StubPackage)
     run_common_package_tests(package, pkg_name, publish_path=PUBLISH_PATH, stub_path=STUB_PATH, pkg_type=pkg_type)
 
 
@@ -143,14 +142,14 @@ def test_package_from_json(tmp_path, pytestconfig, mocker, json):
     # todo: include stubs in the test data
     # note uses `stubs` relative to the stubs_folder
 
-    package = stubpacker.StubPackage(pkg_name, version=mpy_version, json_data=json)
-    assert isinstance(package, stubpacker.StubPackage)
+    package = StubPackage(pkg_name, version=mpy_version, json_data=json)
+    assert isinstance(package, StubPackage)
     run_common_package_tests(package, pkg_name, PUBLISH_PATH, stub_path=STUB_PATH, pkg_type=None)
 
 
 def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type):
     "a series of tests to re-use for all packages"
-    assert isinstance(package, stubpacker.StubPackage)
+    assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
 
     assert package.package_path.relative_to(publish_path), "package path should be relative to publish path"
@@ -195,7 +194,7 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
 
     new_version = package.bump()
     assert new_version
-    assert isinstance(new_version, stubpacker.Version)
+    assert isinstance(new_version, Version)
 
     built = package.build()
     assert built
