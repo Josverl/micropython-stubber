@@ -2,15 +2,17 @@
 prepare a set of stub files for publishing to PyPi
 
 required folder structure:
+NOTE: stubs and publish paths can be located in different locations and repositories
 
-+--stubs
++--stubs                                                               - [config.stubs_path]
 |  +--<any stub folders in repo>
 |  +--micropython-v1_18-esp32
-|
-+--publish
+
+
++--publish                                                             - [config.publish_path]
 |  +--package_data.jsondb
 |  +--package_data_test.jsondb
-|  +--template
+|  +--template                                                         - [config.template_path]
 |     +--pyproject.toml
 |     +--README.md
 |     +--LICENSE.md
@@ -47,7 +49,6 @@ ALL_TYPES = ["combo", "doc", "core"]
 COMBO_STUBS = ALL_TYPES[0]
 DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
-
 
 
 def package_name(port: str = "", board: str = "", pkg_type=COMBO_STUBS, family="micropython") -> str:
@@ -105,14 +106,12 @@ def create_package(
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBO_STUBS,
-    stub_source="./stubs",  # ?? use stubpacker.STUB_SOURCE, ?? // wrong type
 ) -> StubPackage:
     """
     create and initialize a package with the correct sources
 
     """
     package = None
-    stub_source = Path(stub_source)
     if pkg_type == COMBO_STUBS:
         assert port != ""
         assert board != ""
@@ -121,15 +120,15 @@ def create_package(
         stubs: List[Tuple[str, Path]] = [
             (
                 "Firmware stubs",
-                stub_source / f"{family}-{ver_flat}-{port}",
+                Path(f"{family}-{ver_flat}-{port}"),
             ),
             (
                 "Frozen stubs",
-                stub_source / f"{family}-{ver_flat}-frozen" / port / board,
+                Path(f"{family}-{ver_flat}-frozen") / port / board,
             ),
             (
                 "Core Stubs",
-                stub_source / "cpython_core-pycopy",
+                Path("cpython_core-pycopy"),
             ),
         ]
         package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
@@ -140,7 +139,7 @@ def create_package(
         stubs: List[Tuple[str, Path]] = [
             (
                 "Doc stubs",
-                stub_source / f"{family}-{ver_flat}-docstubs",
+                Path(f"{family}-{ver_flat}-docstubs"),
             ),
         ]
         package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
