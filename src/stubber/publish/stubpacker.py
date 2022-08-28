@@ -1,7 +1,6 @@
 import hashlib
 import shutil
 import subprocess
-from distutils.command.config import config
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -11,7 +10,6 @@ from loguru import logger as log
 from packaging.version import Version, parse
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-from typing_extensions import Self
 
 from .bump import bump_postrelease
 
@@ -22,10 +20,6 @@ from .bump import bump_postrelease
 # https://github.com/Josverl/micropython-stubs/tree/d45c8fa3dbdc01978af58532ff4c5313090aabfb
 
 #  git -C .\all-stubs\ log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
-
-PUBLISH_PATH = Path("./publish")
-TEMPLATE_PATH = PUBLISH_PATH / "template"
-STUB_PATH = Path("./stubs")
 
 
 class StubPackage:
@@ -107,7 +101,7 @@ class StubPackage:
     @property
     def package_path(self) -> Path:
         "package path based on the package name and version and relative to the publish folder"
-        return PUBLISH_PATH / f"{self.package_name}-{clean_version(self.mpy_version, flat=True)}"
+        return CONFIG.publish_path / f"{self.package_name}-{clean_version(self.mpy_version, flat=True)}"
 
     @property
     def toml_path(self) -> Path:
@@ -237,9 +231,9 @@ class StubPackage:
         for name, folder in self.stub_sources:
             try:
                 log.debug(f"Copying {name} from {folder}")
-                shutil.copytree(STUB_PATH / folder, PUBLISH_PATH / self.package_path, symlinks=True, dirs_exist_ok=True)
+                shutil.copytree(CONFIG.stub_path / folder, CONFIG.publish_path / self.package_path, symlinks=True, dirs_exist_ok=True)
             except OSError as e:
-                log.error(f"Error copying stubs from : {STUB_PATH / folder}, {e}")
+                log.error(f"Error copying stubs from : {CONFIG.stub_path / folder}, {e}")
                 raise (e)
 
     def create_readme(self):
@@ -249,13 +243,13 @@ class StubPackage:
          - with a list of all included stub folders added to it (not the individual stub-files)
         """
         # read the readme file and update the version and description
-        with open(TEMPLATE_PATH / "README.md", "r") as f:
+        with open(CONFIG.template_path / "README.md", "r") as f:
             TEMPLATE_README = f.read()
 
         # add a readme with the names of the stub-folders
 
         # Prettify this by merging with template text
-        with open(PUBLISH_PATH / self.package_path / "README.md", "w") as f:
+        with open(CONFIG.publish_path / self.package_path / "README.md", "w") as f:
             f.write(f"# {self.package_name}\n\n")
             f.write(TEMPLATE_README)
             f.write(f"Included stubs:\n")
@@ -269,7 +263,7 @@ class StubPackage:
         """
         # copy the license file from the template to the package folder
         # option : append other license files
-        shutil.copy(TEMPLATE_PATH / "LICENSE.md", PUBLISH_PATH / self.package_path)
+        shutil.copy(CONFIG.template_path / "LICENSE.md", CONFIG.publish_path / self.package_path)
 
     def create_update_pyproject_toml(
         self,
@@ -293,7 +287,7 @@ class StubPackage:
         else:
             # read the template pyproject.toml file from the template folder
             try:
-                with open(TEMPLATE_PATH / "pyproject.toml", "rb") as f:
+                with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                     _pyproject = tomli.load(f)
                 _pyproject["tool"]["poetry"]["version"] = self.mpy_version
             except FileNotFoundError as e:
@@ -324,14 +318,14 @@ class StubPackage:
         # find packages using __init__ files
         # take care no to include a module twice
         modules = set({})
-        for p in (PUBLISH_PATH / self.package_path).rglob("**/__init__.py*"):
+        for p in (CONFIG.publish_path / self.package_path).rglob("**/__init__.py*"):
             # add the module to the package
             # fixme : only accounts for one level of packages
             modules.add(p.parent.name)
         for module in sorted(modules):
             _pyproject["tool"]["poetry"]["packages"] += [{"include": module}]
         # now find other stub files directly in the folder
-        for p in sorted((PUBLISH_PATH / self.package_path).glob("*.py*")):
+        for p in sorted((CONFIG.publish_path / self.package_path).glob("*.py*")):
             if p.suffix in (".py", ".pyi"):
                 _pyproject["tool"]["poetry"]["packages"] += [{"include": p.name}]
 
@@ -352,7 +346,7 @@ class StubPackage:
         """
         # remove all *.py and *.pyi files in the folder
         for wc in ["*.py", "*.pyi", "modules.json"]:
-            for f in (PUBLISH_PATH / self.package_path).rglob(wc):
+            for f in (CONFIG.publish_path / self.package_path).rglob(wc):
                 f.unlink()
 
     def create_hash(self) -> str:
@@ -368,10 +362,10 @@ class StubPackage:
 
         hash = hashlib.sha1()
         files = (
-            list((PUBLISH_PATH / self.package_path).rglob("**/*.py"))
-            + list((PUBLISH_PATH / self.package_path).rglob("**/*.pyi"))
-            + [PUBLISH_PATH / self.package_path / "LICENSE.md"]
-            + [PUBLISH_PATH / self.package_path / "README.md"]
+            list((CONFIG.publish_path / self.package_path).rglob("**/*.py"))
+            + list((CONFIG.publish_path / self.package_path).rglob("**/*.pyi"))
+            + [CONFIG.publish_path / self.package_path / "LICENSE.md"]
+            + [CONFIG.publish_path / self.package_path / "README.md"]
             # do not include [self.toml_file]
         )
 
@@ -416,7 +410,7 @@ class StubPackage:
         try:
             subprocess.run(
                 ["poetry"] + parameters,
-                cwd=PUBLISH_PATH / self.package_path,
+                cwd=CONFIG.publish_path / self.package_path,
                 check=True,
             )
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover

@@ -2,6 +2,10 @@
 stub-path = "./repos/micropython-stubber/stubs"
 repo-path = "./repos"
 
+# publish-path = "./repos/micropython-stubber/publish"
+# template-path = "./repos/micropython-stubber/publish/template"
+
+
 [tool.poetry]
 name = "micropython-stubber"
 version = "1.7.4"
