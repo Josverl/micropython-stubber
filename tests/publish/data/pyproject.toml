@@ -1,6 +1,0 @@
-# values used during testing
-[tool.micropython-stubber]
-stub-path = "./repos/micropython-stubber/stubs"
-repo-path = "./repos"
-publish-path = "./do-not-publish"
-template-path = "./tests/publish/data/template"

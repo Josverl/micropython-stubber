@@ -1,15 +1,13 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from stubber.publish.publish_stubs import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, create_package, get_package_info, package_name
 from stubber.publish.stubpacker import StubPackage, Version
-from stubber.publish.publish_stubs import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
-                                           DOC_STUBS, create_package,
-                                           get_package_info, package_name)
 from stubber.utils.config import CONFIG, readconfig
-# # use our test paths
-# stubpacker.PUBLISH_PATH = Path("./scratch/publish")
-# stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")
-# stubpacker.STUB_PATH = Path("./all-stubs")
+
+
+from .fakeconfig import FakeConfig
 
 
 # test generation of different package names
@@ -30,6 +28,9 @@ def test_package_name(family, pkg, port, board, expected):
     assert x == expected
 
 
+
+
+
 # test creating a DOC_STUBS package
 @pytest.mark.parametrize(
     "pkg_type, port, board",
@@ -39,26 +40,30 @@ def test_package_name(family, pkg, port, board, expected):
     ],
 )
 # CORE_STUBS
-def test_create_package(tmp_path, pytestconfig, pkg_type, port, board, mocker):
+def test_create_package(tmp_path, pytestconfig, pkg_type, port, board, mocker, monkeypatch: pytest.MonkeyPatch):
     """ "
     test Create a new package with the DOC_STUBS type
     - test the different methods to manipulate the package on disk
     """
+    publish_path = tmp_path / "publish"
+    publish_path.mkdir(parents=True)
 
-    PUBLISH_PATH = tmp_path / "publish"
-    PUBLISH_PATH.mkdir(parents=True)
+    stub_path = Path("./repos/micropython-stubs/stubs")
+    template_path = pytestconfig.rootpath / "tests/publish/data/template"
 
-    # TODO: need to ensure that the stubs are avaialble in GHA testing
-    STUB_PATH = Path("./repos/micropython-stubs/stubs")
-    TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+    config = FakeConfig(
+        publish_path=publish_path,
+        stub_path=stub_path,
+        template_path=template_path,
+    )
 
-    mocker.patch("stubber.publish.stubpacker.STUB_PATH", STUB_PATH)
-    mocker.patch("stubber.publish.stubpacker.TEMPLATE_PATH", TEMPLATE_PATH)
-    mocker.patch("stubber.publish.stubpacker.PUBLISH_PATH", PUBLISH_PATH)
-
-    # copy test data ?
-    source = pytestconfig.rootpath / "tests/publish/data"
-    #    shutil.copytree(source, PUBLISH_PATH)
+    # # setup mock to configure the config
+    # monkeypatch.setenv("MICROPYTHON-STUBBER_PUBLISH_PATH", publish_path.as_posix())
+    # monkeypatch.setenv("MICROPYTHON-STUBBER_TEMPLATE_PATH", template_path.as_posix())
+    # # resd config
+    # TEST_CONFIG = readconfig(pytestconfig.rootpath / "tests/publish/data/config.yaml")
+    # insert test config
+    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
     mpy_version = "v1.18"
     family = "micropython"
@@ -74,7 +79,7 @@ def test_create_package(tmp_path, pytestconfig, pkg_type, port, board, mocker):
         # stub_source="./all-stubs",  # for debugging
     )
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, publish_path=PUBLISH_PATH, stub_path=STUB_PATH, pkg_type=pkg_type)
+    run_common_package_tests(package, pkg_name, publish_path=publish_path, stub_path=stub_path, pkg_type=pkg_type)
 
 
 read_db_data = [
@@ -125,16 +130,20 @@ read_db_data = [
 def test_package_from_json(tmp_path, pytestconfig, mocker, json):
     # test data
     source = pytestconfig.rootpath / "tests/publish/data"
-    PUBLISH_PATH = tmp_path / "publish"
-    PUBLISH_PATH.mkdir(parents=True)
+    publish_path = tmp_path / "publish"
+    publish_path.mkdir(parents=True)
 
     # TODO: need to ensure that the stubs are avaialble in GHA testing
-    STUB_PATH = Path("./repos/micropython-stubs/stubs")
-    TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+    stub_path = Path("./repos/micropython-stubs/stubs")
+    template_path = pytestconfig.rootpath / "tests/publish/data/template"
 
-    mocker.patch("stubber.publish.stubpacker.STUB_PATH", STUB_PATH)
-    mocker.patch("stubber.publish.stubpacker.TEMPLATE_PATH", TEMPLATE_PATH)
-    mocker.patch("stubber.publish.stubpacker.PUBLISH_PATH", PUBLISH_PATH)
+    config = FakeConfig(
+        publish_path=publish_path,
+        stub_path=stub_path,
+        template_path=template_path,
+    )
+
+    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
     mpy_version = "v1.18"
     family = "micropython"
@@ -144,7 +153,7 @@ def test_package_from_json(tmp_path, pytestconfig, mocker, json):
 
     package = StubPackage(pkg_name, version=mpy_version, json_data=json)
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, PUBLISH_PATH, stub_path=STUB_PATH, pkg_type=None)
+    run_common_package_tests(package, pkg_name, publish_path, stub_path=stub_path, pkg_type=None)
 
 
 def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type):

@@ -5,6 +5,9 @@ from stubber.publish.database import get_database
 from stubber.publish.publish_stubs import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, publish_combo_stubs, publish_doc_stubs
 from stubber.utils.config import CONFIG, readconfig
 
+from .fakeconfig import FakeConfig
+
+
 @pytest.mark.parametrize(
     "pkg_type, ports, boards, versions",
     [
@@ -25,16 +28,20 @@ def test_publish(
     db = get_database(source, production=False)
 
     source = pytestconfig.rootpath / "tests/publish/data"
-    PUBLISH_PATH = tmp_path / "publish"
-    PUBLISH_PATH.mkdir(parents=True)
+    publish_path = tmp_path / "publish"
+    publish_path.mkdir(parents=True)
 
     #  need to ensure that the stubs are avaialble in GHA testing
-    STUB_PATH = Path("./repos/micropython-stubs/stubs")
-    TEMPLATE_PATH = pytestconfig.rootpath / "tests/publish/data/template"
+    stub_path = Path("./repos/micropython-stubs/stubs")
+    template_path = pytestconfig.rootpath / "tests/publish/data/template"
 
-    mocker.patch("stubber.publish.stubpacker.STUB_PATH", STUB_PATH)
-    mocker.patch("stubber.publish.stubpacker.TEMPLATE_PATH", TEMPLATE_PATH)
-    mocker.patch("stubber.publish.stubpacker.PUBLISH_PATH", PUBLISH_PATH)
+    config = FakeConfig(
+        publish_path=publish_path,
+        stub_path=stub_path,
+        template_path=template_path,
+    )
+
+    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
     if pkg_type == COMBO_STUBS:
         result = publish_combo_stubs(
@@ -44,7 +51,7 @@ def test_publish(
             boards=boards,
             versions=versions,
             db=db,
-            pub_path=PUBLISH_PATH,
+            pub_path=publish_path,
             production=False,  # Test-PyPi
             dryrun=False,  # don't publish , dont save to the database
             force=False,  # publish even if no changes
@@ -58,7 +65,7 @@ def test_publish(
             boards=boards,
             versions=versions,
             db=db,
-            pub_path=PUBLISH_PATH,
+            pub_path=publish_path,
             production=False,  # Test-PyPi
             dryrun=False,  # don't publish , dont save to the database
             force=False,  # publish even if no changes
