@@ -74,7 +74,7 @@ jobs:
       # repos needed for tests 
       #----------------------------------------------
       - name: stubber clone
-        run: poetry run stubber clone
+        run: poetry run stubber clone --add-stubs
 
 
       - name: flag tools executable (on linux)
