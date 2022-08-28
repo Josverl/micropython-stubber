@@ -1,0 +1,9 @@
+# configuration file for CodeQL scanning
+
+queries:
+  - uses: security-and-quality
+paths-ignore:
+  - "tests/**/*"
+  - ".venv/**/*"
+  - "snippets/**/*"
+  
