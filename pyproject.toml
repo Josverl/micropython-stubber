@@ -1,5 +1,5 @@
 [tool.micropython-stubber]
-stub-path = "./all-stubs"
+stub-path = "./repos/micropython-stubber/stubs"
 repo-path = "./repos"
 
 [tool.poetry]
@@ -71,6 +71,7 @@ pyright = "^1.1.265"
 packaging = "21.3"
 distro = "1.7.0"
 pydeps = "^1.10.22"
+pytest-github-actions-annotate-failures = "^0.1.7"
 
 
 [build-system]
