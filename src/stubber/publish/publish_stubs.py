@@ -37,6 +37,7 @@ from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
 from stubber.utils.versions import clean_version
+from stubber.utils.config import CONFIG
 
 from . import stubpacker
 from .stubpacker import StubPackage
@@ -101,7 +102,7 @@ def create_package(
     pkg_name: str,
     mpy_version: str,
     *,
-    publish_path: Path = stubpacker.PUBLISH_PATH,  # TODO: remove unused parameter
+    publish_path: Path = stubpacker.CONFIG.publish_path,  # TODO: remove unused parameter
     port: str = "",
     board: str = "",
     family: str = "micropython",

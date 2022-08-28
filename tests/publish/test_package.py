@@ -5,7 +5,7 @@ from stubber.publish.stubpacker import StubPackage, Version
 from stubber.publish.publish_stubs import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
                                            DOC_STUBS, create_package,
                                            get_package_info, package_name)
-
+from stubber.utils.config import CONFIG, readconfig
 # # use our test paths
 # stubpacker.PUBLISH_PATH = Path("./scratch/publish")
 # stubpacker.TEMPLATE_PATH = Path("./tests/publish/data/template")

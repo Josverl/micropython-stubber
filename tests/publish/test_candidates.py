@@ -1,4 +1,5 @@
 from pathlib import Path
+from pprint import pprint
 from typing import Generator
 
 import pytest
@@ -65,16 +66,26 @@ def test_docstub_candidates(pytestconfig, family, versions, count):
 @pytest.mark.parametrize(
     "family, versions, ports, boards, count",
     [
-        ("micropython", "latest", "auto", "auto", 12),
-        ("micropython", "v1.18", "auto", "auto", 6),
-        ("micropython", "v1.18", "esp32", "auto", 3),
-        ("micropython", "v1.18", "auto", "GENERIC", 2),
-        ("micropython", "v1.18", "auto", "generic", 2),
-        ("micropython", "v1.18", "esp32", "generic", 1),
-        ("micropython", "v1.00", "esp32", "generic", 1),
         ("foobar", "auto", "foo", "bar", 1),
+        ("foobar", "auto", "foo", "not", 0),
+        ("micropython", "v1.18", "esp32", "GENERIC", 1),
+        ("micropython", "v1.18", "stm32", "GENERIC", 1),
+        ("micropython", "v1.18", "stm32", "PYBD_SF2", 1),
+        ("micropython", "v1.00", "esp32", "GENERIC", 0),
+        # list borads for specific port
+        ("micropython", "v1.18", "stm32", "auto", 2),
+        ("micropython", "v1.18", "esp32", "auto", 3),
+        # list GENERIC boards for specific version (case sensitive on linux/mac)
+        ("micropython", "v1.18", "auto", "GENERIC", 2),
+        # list all ports / boards for a version
+        ("micropython", "v1.18", "auto", "auto", 5),
+        ("micropython", "latest", "auto", "auto", 8),
+        # list GENERIC boards for any version (case sensitive on linux/mac)
+        ("micropython", "auto", "auto", "GENERIC", 6),
+        # find no candidates
         ("nono", "auto", "auto", "auto", 0),
-        ("micropython", "auto", "auto", "auto", 48),
+        # find all candidates
+        ("micropython", "auto", "auto", "auto", 13),
     ],
 )
 def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count):
@@ -83,6 +94,8 @@ def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count)
     frozen = frozen_candidates(path=path, family=family, versions=versions, ports=ports, boards=boards)
     assert isinstance(frozen, Generator)
     l = list(frozen)
+    print()
+    pprint(l)
     assert len(l) == count, f"{len(l)} != {count}, {l}"
     if len(l) > 0:
         assert l[0]["pkg_type"] == COMBO_STUBS
