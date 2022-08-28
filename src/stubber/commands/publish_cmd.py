@@ -4,7 +4,8 @@ from typing import List
 
 import click
 from stubber.publish.database import get_database
-from stubber.publish.publish_stubs import ALL_TYPES, publish_combo_stubs, publish_doc_stubs
+from stubber.publish.package import ALL_TYPES
+from stubber.publish.publish import publish, publish_multiple
 from stubber.utils.config import CONFIG
 from stubber.utils.my_version import __version__
 
@@ -118,31 +119,31 @@ def cli_publish(
 
     db = get_database(root_path=root_path, production=False)
 
-    if stub_type == "combo":
-        publish_combo_stubs(
-            versions=versions,
-            ports=ports,
-            boards=boards,
-            db=db,
-            pub_path=root_path / "publish",
-            family=family,
-            production=production,
-            dryrun=dryrun,
-            clean=clean,
-        )
-    elif stub_type == "doc":
-        publish_doc_stubs(
-            versions=versions,
-            db=db,
-            pub_path=root_path / "publish",
-            family=family,
-            production=production,
-            dryrun=dryrun,
-            clean=clean,
-        )
-        pass
-    # elif stub_type == "core":
+    # if stub_type == "combo":
+    #     publish_combo_stubs(
+    #         versions=versions,
+    #         ports=ports,
+    #         boards=boards,
+    #         db=db,
+    #         pub_path=root_path / "publish",
+    #         family=family,
+    #         production=production,
+    #         dryrun=dryrun,
+    #         clean=clean,
+    #     )
+    # elif stub_type == "doc":
+    #     publish_doc_stubs(
+    #         versions=versions,
+    #         db=db,
+    #         pub_path=root_path / "publish",
+    #         family=family,
+    #         production=production,
+    #         dryrun=dryrun,
+    #         clean=clean,
+    #     )
     #     pass
-    else:
-        log.warning("unknown stub type :", stub_type)
-        raise ValueError
+    # # elif stub_type == "core":
+    # #     pass
+    # else:
+    #     log.warning("unknown stub type :", stub_type)
+    #     raise ValueError

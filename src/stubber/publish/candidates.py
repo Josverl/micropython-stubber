@@ -1,11 +1,11 @@
 import re
 from itertools import chain
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Generator, List, Union
 
-from stubber.publish.publish_stubs import COMBO_STUBS, CORE_STUBS, DOC_STUBS
+from stubber.publish.package import COMBO_STUBS, CORE_STUBS, DOC_STUBS
 from stubber.utils.versions import clean_version
-
+from stubber.utils.config import CONFIG
 
 def subfolder_names(path: Path):
     "returns a list of names of the subfolders of the given path"
@@ -31,8 +31,8 @@ def frozen_candidates(
     ports: Union[str, List[str]] = "auto",
     boards: Union[str, List[str]] = "auto",
     *,
-    path=Path("stubs"),
-):  # -> Generator[dict[str,str], None, None]:
+    path=CONFIG.stub_path,
+) -> Generator[dict[str,Any], None, None]:
     """
     generate a list of possible firmware stubs for the given family (, version port and board) ?
     - family = micropython
@@ -81,7 +81,7 @@ def frozen_candidates(
             # ---------------------------------------------------------------------------
             for board in boards:
                 if (path / f"{family}-{version}-frozen" / port / board).exists():
-                    yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
+                    yield {"family": family, "version": version , "port": port, "board": board, "pkg_type": COMBO_STUBS}
 
 
 def docstub_candidates(

@@ -2,7 +2,7 @@
 from pathlib import Path
 import pytest
 
-from stubber.publish.publish_stubs import get_package_info
+from stubber.publish.package import get_package_info
 
 
 @pytest.mark.parametrize(
