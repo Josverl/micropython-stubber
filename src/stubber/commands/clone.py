@@ -20,7 +20,7 @@ log = logging.getLogger("stubber")
 
 @stubber_cli.command(name="clone")
 @click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
-@click.option("--add-stubs", "stubs", default=False, is_flag=True)
+@click.option("--add-stubs/--no-stubs", "stubs", default=False, is_flag=True, help="Also clone the micropython-stubs repo")
 def cli_clone(path: Union[str, Path], stubs: bool = False):
     """
     Clone/fetch the micropython repos locally.
