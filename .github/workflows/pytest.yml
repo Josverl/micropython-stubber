@@ -12,7 +12,6 @@ on:
       - 'readme.md'
       - 'changelog.md'
       - 'docs/**'      
-      - '.*/**'      
 
   pull_request:
     branches: [ main ]
