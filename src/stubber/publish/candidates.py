@@ -38,9 +38,15 @@ def frozen_candidates(
     - family = micropython
         board and port are ignored, they are looked up from the available frozen stubs
     """
+    auto_port = isinstance(ports, str) and "auto" == ports
+    auto_board = isinstance(boards, str) and "auto" == boards
+    auto_version = isinstance(versions, str) and "auto" == versions
 
     if isinstance(versions, str):
-        versions = [versions]
+        if auto_version:
+            versions = list(version_cadidates(suffix="frozen", prefix=family, path=path))
+        else:
+            versions = [versions]
     versions = [clean_version(v, flat=True) for v in versions]
 
     if isinstance(ports, str):
@@ -48,11 +54,9 @@ def frozen_candidates(
     if isinstance(boards, str):
         boards = [boards]
     # ---------------------------------------------------------------------------
-    if "vauto" in versions:  # auto with vprefix ...
-        versions = list(version_cadidates(suffix="frozen", prefix=family, path=path))
     # ---------------------------------------------------------------------------
     for version in versions:
-        if "auto" in ports:
+        if auto_port:
             if family == "micropython":
                 # lookup the (frozen) micropython ports
                 ports_path = path / f"{family}-{version}-frozen"
@@ -65,7 +69,7 @@ def frozen_candidates(
             #     ports = ["esp32"]
         # ---------------------------------------------------------------------------
         for port in ports:
-            if "auto" in boards:
+            if auto_board:
                 if family == "micropython":
                     # lookup the (frozen) micropython ports
                     boards_path = path / f"{family}-{version}-frozen" / port
@@ -76,7 +80,8 @@ def frozen_candidates(
                 #     boards = ["wipy", "lopy", "gpy", "fipy"]
             # ---------------------------------------------------------------------------
             for board in boards:
-                yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
+                if (path / f"{family}-{version}-frozen" / port / board).exists():
+                    yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
 
 
 def docstub_candidates(

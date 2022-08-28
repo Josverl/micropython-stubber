@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from stubber.publish.database import get_database
 from stubber.publish.publish_stubs import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, publish_combo_stubs, publish_doc_stubs
-
+from stubber.utils.config import CONFIG, readconfig
 
 @pytest.mark.parametrize(
     "pkg_type, ports, boards, versions",

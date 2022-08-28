@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 
-from .typed_config_toml import Config, EnvironmentConfigSource, TomlConfigSource, key, section
+from .typed_config_toml import (Config, EnvironmentConfigSource,
+                                TomlConfigSource, key, section)
 
 log = logging.getLogger(__name__)
 
@@ -15,9 +16,11 @@ class StubberConfig(Config):
     fallback_path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
     "a Path to the fallback stubs directory"
 
+    #------------------------------------------------------------------------------------------
+    # micropython and micropython-lib are relative to ./repo folder
     repo_path = key(key_name="repo-path", cast=Path, required=False, default=Path("./repos"))
     "a Path to the repo directory"
-    # micropython and micropython-lib are relative to ./repo folder
+
     mpy_path = key(key_name="mpy-path", cast=Path, required=False, default=Path("micropython"))
     "a Path to the micropython folder in the repos directory"
 
@@ -26,6 +29,12 @@ class StubberConfig(Config):
 
     mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("micropython-stubs"))
     "a Path to the micropython-stubs folder in the repos directory"
+
+    publish_path = key(key_name="publish-path", cast=Path, required=False, default=Path("./publish"))
+    "a Path to the folder where all stub publication artefacts are stored"
+
+    template_path = key(key_name="template-path", cast=Path, required=False, default=Path("./publish/template"))
+    "a Path to the publication folder that has the template files"
 
     def post_read_hook(self) -> dict:
         config_updates = dict()

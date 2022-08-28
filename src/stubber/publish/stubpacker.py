@@ -1,6 +1,7 @@
 import hashlib
 import shutil
 import subprocess
+from distutils.command.config import config
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -8,6 +9,7 @@ import tomli
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
+from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 from typing_extensions import Self
 
@@ -85,6 +87,7 @@ class StubPackage:
         if json_data is not None:
 
             self.from_json(json_data)
+
         else:
             # store essentials
             # self.package_path = package_path
@@ -289,10 +292,13 @@ class StubPackage:
 
         else:
             # read the template pyproject.toml file from the template folder
-            with open(TEMPLATE_PATH / "pyproject.toml", "rb") as f:
-                _pyproject = tomli.load(f)
-            _pyproject["tool"]["poetry"]["version"] = self.mpy_version
-
+            try:
+                with open(TEMPLATE_PATH / "pyproject.toml", "rb") as f:
+                    _pyproject = tomli.load(f)
+                _pyproject["tool"]["poetry"]["version"] = self.mpy_version
+            except FileNotFoundError as e:
+                log.error(f"Could not find template pyproject.toml file {e}")
+                raise (e)
         # # check if version number of the package matches the version number of the stubs
         # ver_pkg = parse(_pyproject["tool"]["poetry"]["version"])
         # ver_stubs = parse(self.mpy_version)
