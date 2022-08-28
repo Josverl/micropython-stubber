@@ -8,14 +8,14 @@ name: pytest
 on:
   workflow_dispatch:
   push:
-    paths:
-      - 'board/**'
-      - "src/**"
-      - "tests/**"
-      - "snippets/**"
-      - "pyproject.toml"
-      - "poetry.lock"
-      - "pyrightconfig.json"
+    # paths:
+    #   - 'board/**'
+    #   - "src/**"
+    #   - "tests/**"
+    #   - "snippets/**"
+    #   - "pyproject.toml"
+    #   - "poetry.lock"
+    #   - "pyrightconfig.json"
     
   pull_request:
     branches: [ main ]
