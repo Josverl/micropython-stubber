@@ -94,7 +94,8 @@ def publish(
             family=family,
             pkg_type=pkg_type,
         )
-    log.info(f"{package.package_path.as_posix()}")
+    log.debug(f"{package.package_path.as_posix()}")
+    status["version"] = package.pkg_version
     # check if the sources exist
     OK = True
     for (name, path) in package.stub_sources:
@@ -123,13 +124,15 @@ def publish(
         if not force:  # pragma: no cover
             log.info(f"Found changes to package : {package.package_name} {package.pkg_version} {package.hash} != {package.create_hash()}")
         ## TODO: get last published version.postXXX from PyPI and update version if different
+        if not dryrun:
+            # only bump version if we are going to publish
+            new_ver = package.bump()
+            log.info(f"{pkg_name}: new version {new_ver}")
         # Update hashes
         package.update_hashes()
         package.write_package_json()
-        new_ver = package.bump()
 
-        log.info(f"{pkg_name}: new version {new_ver}")
-        status["version"] = new_ver
+        status["version"] = package.pkg_version
 
         log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
         result = package.build()
@@ -161,7 +164,7 @@ def publish(
     return status
 
 
-def publish_multiple(production=False, frozen: bool = False, dryrun: bool = False):
+def publish_multiple(frozen: bool = False, production=False,  dryrun: bool = False, clean: bool = False, force: bool = False):
     "Publish a bunch of stub packages"
     db = get_database(CONFIG.publish_path, production=production)
 
@@ -170,16 +173,20 @@ def publish_multiple(production=False, frozen: bool = False, dryrun: bool = Fals
     if frozen:
         worklist += list(
             chain(
-                frozen_candidates(family="micropython", versions="v1.18", ports="auto", boards="auto"),
+                # frozen_candidates(family="micropython", versions="v1.18", ports="auto", boards="auto"),
+                frozen_candidates(family="micropython", versions="v1.18", ports="esp32", boards="GENERIC"),
                 # frozen_candidates(family="micropython", versions="v1.19.1", ports="auto", boards="auto"),
             )
         )
     for todo in worklist:
-        todo["dryrun"] = dryrun  # don't publish , dont save to the database
-        todo["force"] = False  # publish even if no changes
-        todo["clean"] = False  # clean up afterards
 
-        result = publish(db=db, **todo)
+        result = publish(
+            db=db,
+            dryrun=dryrun,
+            clean=clean,
+            force=force,
+            **todo,
+        )
         results.append(result)
 
     print(tabulate(results, headers="keys"))

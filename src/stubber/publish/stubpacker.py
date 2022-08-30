@@ -425,17 +425,29 @@ class StubPackage:
         if not (self.package_path / "pyproject.toml").exists():  # pragma: no cover
             log.error(f"No pyproject.toml file found in {self.package_path}")
             return False
+        # todo: call poetry directly to improve error handling
         try:
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
                 check=True,
+                # stdout=subprocess.PIPE,
+                stdout=subprocess.PIPE,  # interestingly: errors on stdout , output on stderr .....
+                universal_newlines=True,
             )
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
             log.error("Exception on process, {}".format(e))
             return False
         except subprocess.CalledProcessError as e:  # pragma: no cover
-            log.error("Exception on process, {}".format(e))
+            # Detect and log  error detection om upload
+            #   UploadError
+            #   HTTP Error 400: File already exists. See https://test.pypi.org/help/#file-name-reuse for more information.
+            # TODO: how to return the state so it can be handled
+            errors = [l for l in e.stdout.splitlines()[1:7] if "Error" in l]
+            for e in errors:
+                log.error(e)
+
+            # log.error("Exception on process, {}".format(e))
             return False
         return True
 
