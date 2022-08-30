@@ -15,20 +15,20 @@ def update_db(source: Path, production: bool):
     assert isinstance(db_keys, list)
     if len(db_keys) == 0:
         raise Exception(f"no keys in database, or empty database '{db.filename}'")
-    if not "stubhash" in db_keys:
-        db.add_new_key("stubhash", "")
+    if not "stub_hash" in db_keys:
+        db.add_new_key("stub_hash", "")
 
     db = get_database(source, production=False)
     db_keys = db._load_file()["keys"]
     print(db_keys)
     assert isinstance(db_keys, list)
-    assert "stubhash" in db_keys
+    assert "stub_hash" in db_keys
 
 
 # test - test-PyPi
 update_db(Path("./tests/publish/data"), False)
 
 # publish - test-PyPi
-update_db(Path("./"), False)
+update_db(Path("./repos/micropython-stubs/publish"), False)
 # publish - PyPi
-update_db(Path("./"), True)
+update_db(Path("./repos/micropython-stubs/publish"), True)

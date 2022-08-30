@@ -29,22 +29,19 @@ NOTE: stubs and publish paths can be located in different locations and reposito
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
 
-import sys
 from itertools import chain
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict
 
 from loguru import logger as log
-from packaging.version import parse
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
+from tabulate import tabulate
 
 from . import stubpacker
-from .package import COMBO_STUBS, CORE_STUBS, DOC_STUBS, create_package, get_package_info, package_name
-from .stubpacker import StubPackage
+from .package import create_package, get_package_info, package_name
 
 
 # ######################################
@@ -63,7 +60,7 @@ def publish(
     clean: bool = False,  # clean up afterards
     port: str = "",
     board: str = "",
-):
+) -> Dict[str, Any]:
     """
     Publish a package to PyPi
     look up the previous package version in the dabase, and only publish if there are changes to the package
@@ -72,9 +69,9 @@ def publish(
     """
     # semver, no prefix
     version = clean_version(version, drop_v=True, flat=False)
-
     # package name for firmware package
     pkg_name = package_name(pkg_type=pkg_type, port=port, board=board, family=family)
+    status: Dict[str, Any] = {"result": "-", "name": pkg_name, "version": version, "error": None}
     log.info("=" * 40)
 
     package_info = get_package_info(
@@ -88,7 +85,7 @@ def publish(
         package = stubpacker.StubPackage(pkg_name, version=version, json_data=package_info)
 
     else:
-        log.warning(f"No package found for {pkg_name}")
+        log.info(f"No package found for {pkg_name} in database, creating new package")
         package = create_package(
             pkg_name,
             mpy_version=version,
@@ -97,48 +94,61 @@ def publish(
             family=family,
             pkg_type=pkg_type,
         )
-
+    log.info(f"{package.package_path.as_posix()}")
     # check if the sources exist
     OK = True
     for (name, path) in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
             log.warning(f"{pkg_name}: source {name} does not exist: {CONFIG.stub_path / path}")
+            status["error"] = f"source {name} does not exist: {CONFIG.stub_path / path}"
             OK = False
     if not OK:
         log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
         package._publish = False
         # TODO Save ?
-        return None
+        return status
     try:
         package.update_package_files()
         package.update_included_stubs()
         package.check()
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         log.error(f"{pkg_name}: {e}")
-        return None
+        status["error"] = str(e)
+        return status
 
     # If there are changes to the package, then publish it
     if not (package.is_changed() or force):
         log.info(f"No changes to package : {package.package_name} {package.pkg_version}")
     else:
-        if not force:
+        if not force:  # pragma: no cover
             log.info(f"Found changes to package : {package.package_name} {package.pkg_version} {package.hash} != {package.create_hash()}")
         ## TODO: get last published version.postXXX from PyPI and update version if different
-        package.bump()
-        package.hash = package.create_hash()
+        # Update hashes
+        package.update_hashes()
+        package.write_package_json()
+        new_ver = package.bump()
+
+        log.info(f"{pkg_name}: new version {new_ver}")
+        status["version"] = new_ver
+
         log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
-        if dryrun:
-            log.warning("Dryrun: Updated package is NOT published.")
+        result = package.build()
+        if not result:
+            log.warning(f"{pkg_name}: skipping as build failed")
+            status["error"] = "Build failed"
+            return status
+
+        if dryrun:  # pragma: no cover
+            log.info("Dryrun: Updated package is NOT published.")
+            status["result"] = "DryRun successful"
         else:
-            result = package.build()
-            if not result:
-                log.warning(f"{pkg_name}: skipping as build failed")
-                return None
             result = package.publish(production=production)
             if not result:
                 log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
-                return None
-            db.add(package.to_json())
+                status["error"] = "Publish failed"
+                return status
+            status["result"] = "Published"
+            db.add(package.to_dict())
             db.commit()
             # TODO: push to github
             # git add tests\publish\data\package_data_test.jsondb
@@ -148,27 +158,29 @@ def publish(
 
     if clean:
         package.clean()
-    return package.package_name
+    return status
 
 
-def publish_multiple(production=False, frozen: bool = False):
-
+def publish_multiple(production=False, frozen: bool = False, dryrun: bool = False):
+    "Publish a bunch of stub packages"
     db = get_database(CONFIG.publish_path, production=production)
 
     worklist = []
+    results = []
     if frozen:
         worklist += list(
             chain(
-                frozen_candidates(family="micropython", versions="v1.18", ports="auto", boards="GENERIC"),
+                frozen_candidates(family="micropython", versions="v1.18", ports="auto", boards="auto"),
+                # frozen_candidates(family="micropython", versions="v1.19.1", ports="auto", boards="auto"),
             )
         )
     for todo in worklist:
-        todo["production"] = False
-        todo["dryrun"] = True  # don't publish , dont save to the database
+        todo["dryrun"] = dryrun  # don't publish , dont save to the database
         todo["force"] = False  # publish even if no changes
         todo["clean"] = False  # clean up afterards
 
-        print(todo)
         result = publish(db=db, **todo)
-        if result:
-            log.info(f"Published {result}")
+        results.append(result)
+
+    print(tabulate(results, headers="keys"))
+    return results
