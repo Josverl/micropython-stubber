@@ -1,4 +1,5 @@
 import hashlib
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -80,15 +81,18 @@ class StubPackage:
         # package_path.mkdir(parents=True, exist_ok=True)
         if json_data is not None:
 
-            self.from_json(json_data)
+            self.from_dict(json_data)
 
         else:
             # store essentials
             # self.package_path = package_path
             self.package_name = package_name
             self.description = description
-            self.mpy_version = str(parse(version.replace("_", ".")))  # Initial version
+            self.mpy_version = clean_version(version, drop_v=True)  # Initial version
             self.hash = None  # intial hash
+            """Hash of all the files in the package"""
+            self.stub_hash = None  # intial hash
+            """hash of the the stub files"""
             self.create_update_pyproject_toml()
 
             # save the stub sources
@@ -101,7 +105,9 @@ class StubPackage:
     @property
     def package_path(self) -> Path:
         "package path based on the package name and version and relative to the publish folder"
-        return CONFIG.publish_path / f"{self.package_name}-{clean_version(self.mpy_version, flat=True)}"
+        parts = self.package_name.split("-")
+        parts[1:1] = [clean_version(self.mpy_version, flat=True)]
+        return CONFIG.publish_path / "-".join(parts)
 
     @property
     def toml_path(self) -> Path:
@@ -162,8 +168,8 @@ class StubPackage:
 
     # -----------------------------------------------
 
-    def to_json(self):
-        """return the package as json
+    def to_dict(self):
+        """return the package as a dict to store in the jsondb
 
         need to simplify some of the Objects to allow serialisation to json
         - the paths to posix paths
@@ -180,16 +186,18 @@ class StubPackage:
             "stub_sources": [(name, Path(path).as_posix()) for (name, path) in self.stub_sources],
             "description": self.description,
             "hash": self.hash,
+            "stub_hash": self.stub_hash,
         }
 
-    def from_json(self, json_data):
-        """load the package from json"""
+    def from_dict(self, json_data):
+        """load the package from a dict (from the jsondb)"""
         self.package_name = json_data["name"]
         # self.package_path = Path(json_data["path"])
         self.description = json_data["description"]
         self.mpy_version = json_data["mpy_version"]
         self._publish = json_data["publish"]
         self.hash = json_data["hash"]
+        self.stub_hash = json_data["stub_hash"]
         # create folder
         if not self.package_path.exists():
             self.package_path.mkdir(parents=True, exist_ok=True)
@@ -231,7 +239,7 @@ class StubPackage:
         for name, folder in self.stub_sources:
             try:
                 log.debug(f"Copying {name} from {folder}")
-                shutil.copytree(CONFIG.stub_path / folder, CONFIG.publish_path / self.package_path, symlinks=True, dirs_exist_ok=True)
+                shutil.copytree(CONFIG.stub_path / folder, self.package_path, symlinks=True, dirs_exist_ok=True)
             except OSError as e:
                 log.error(f"Error copying stubs from : {CONFIG.stub_path / folder}, {e}")
                 raise (e)
@@ -249,7 +257,7 @@ class StubPackage:
         # add a readme with the names of the stub-folders
 
         # Prettify this by merging with template text
-        with open(CONFIG.publish_path / self.package_path / "README.md", "w") as f:
+        with open(self.package_path / "README.md", "w") as f:
             f.write(f"# {self.package_name}\n\n")
             f.write(TEMPLATE_README)
             f.write(f"Included stubs:\n")
@@ -263,7 +271,7 @@ class StubPackage:
         """
         # copy the license file from the template to the package folder
         # option : append other license files
-        shutil.copy(CONFIG.template_path / "LICENSE.md", CONFIG.publish_path / self.package_path)
+        shutil.copy(CONFIG.template_path / "LICENSE.md", self.package_path)
 
     def create_update_pyproject_toml(
         self,
@@ -318,14 +326,14 @@ class StubPackage:
         # find packages using __init__ files
         # take care no to include a module twice
         modules = set({})
-        for p in (CONFIG.publish_path / self.package_path).rglob("**/__init__.py*"):
+        for p in (self.package_path).rglob("**/__init__.py*"):
             # add the module to the package
             # fixme : only accounts for one level of packages
             modules.add(p.parent.name)
         for module in sorted(modules):
             _pyproject["tool"]["poetry"]["packages"] += [{"include": module}]
         # now find other stub files directly in the folder
-        for p in sorted((CONFIG.publish_path / self.package_path).glob("*.py*")):
+        for p in sorted((self.package_path).glob("*.py*")):
             if p.suffix in (".py", ".pyi"):
                 _pyproject["tool"]["poetry"]["packages"] += [{"include": p.name}]
 
@@ -346,13 +354,14 @@ class StubPackage:
         """
         # remove all *.py and *.pyi files in the folder
         for wc in ["*.py", "*.pyi", "modules.json"]:
-            for f in (CONFIG.publish_path / self.package_path).rglob(wc):
+            for f in (self.package_path).rglob(wc):
                 f.unlink()
 
-    def create_hash(self) -> str:
+    def create_hash(self, include_md=True) -> str:
         """
         Create a SHA1 hash of all files in the package, excluding the pyproject.toml file itself.
-        tha hash is based on the content of the files only.
+        the hash is based on the content of the .py/.pyi and .md files in the package.
+        if include_md is False , the .md files are not hased, allowing the files in the packeges to be compared simply
         As a single has is created across all files, the files are sorted prior to hashing to ensure that the hash is stable.
 
         A changed hash will not indicate which of the files in the package have been changed.
@@ -361,13 +370,13 @@ class StubPackage:
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
         hash = hashlib.sha1()
-        files = (
-            list((CONFIG.publish_path / self.package_path).rglob("**/*.py"))
-            + list((CONFIG.publish_path / self.package_path).rglob("**/*.pyi"))
-            + [CONFIG.publish_path / self.package_path / "LICENSE.md"]
-            + [CONFIG.publish_path / self.package_path / "README.md"]
-            # do not include [self.toml_file]
-        )
+        files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
+        if include_md:
+            files += (
+                [self.package_path / "LICENSE.md"]
+                + [self.package_path / "README.md"]
+                # do not include [self.toml_file]
+            )
 
         for file in sorted(files):
             with open(file, "rb") as f:
@@ -378,6 +387,11 @@ class StubPackage:
                     hash.update(data)
 
         return hash.hexdigest()
+
+    def update_hashes(self):
+        "Update the pachage hashes"
+        self.hash = self.create_hash()
+        self.stub_hash = self.create_hash(include_md=False)
 
     def is_changed(self) -> bool:
         "Check if the package has changed, based on the current and the stored hash"
@@ -404,13 +418,17 @@ class StubPackage:
         return new_version
 
     def run_poetry(self, parameters: List[str]) -> bool:
-        """check if the package is valid by running `poetry check`
-        Note: this will write some output to the console ('All set!')
+        """Run a poetry commandline in the package folder.
+        Note: this may write some output to the console ('All set!')
         """
+        # check for pyproject.toml in folder
+        if not (self.package_path / "pyproject.toml").exists():  # pragma: no cover
+            log.error(f"No pyproject.toml file found in {self.package_path}")
+            return False
         try:
             subprocess.run(
                 ["poetry"] + parameters,
-                cwd=CONFIG.publish_path / self.package_path,
+                cwd=self.package_path,
                 check=True,
             )
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
@@ -421,6 +439,11 @@ class StubPackage:
             return False
         return True
 
+    def write_package_json(self):
+        # write the json to a file
+        with open(self.package_path / "package.json", "w") as f:
+            json.dump(self.to_dict(), f, indent=4)
+
     def check(self) -> bool:
         """check if the package is valid by running `poetry check`
         Note: this will write some output to the console ('All set!')
@@ -428,12 +451,15 @@ class StubPackage:
         return self.run_poetry(["check", "-vvv"])
 
     def build(self) -> bool:
+        """build the package by running `poetry build`"""
         return self.run_poetry(["build"])  # ,"-vvv"
 
     def publish(self, production=False) -> bool:
         if not self._publish:
             log.warning(f"Publishing is disabled for {self.package_name}")
             return False
+        # update the package info
+        self.write_package_json()
         if production:
             log.info(f"Publishing to PRODUCTION  https://pypy.org")
             params = ["publish"]
