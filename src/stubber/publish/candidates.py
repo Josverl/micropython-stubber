@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any, Generator, List, Union
 
 from stubber.publish.package import COMBO_STUBS, CORE_STUBS, DOC_STUBS
-from stubber.utils.versions import clean_version
 from stubber.utils.config import CONFIG
+from stubber.utils.versions import clean_version
+
 
 def subfolder_names(path: Path):
     "returns a list of names of the subfolders of the given path"
@@ -32,11 +33,14 @@ def frozen_candidates(
     boards: Union[str, List[str]] = "auto",
     *,
     path=CONFIG.stub_path,
-) -> Generator[dict[str,Any], None, None]:
+) -> Generator[dict[str, Any], None, None]:
     """
     generate a list of possible firmware stubs for the given family (, version port and board) ?
     - family = micropython
         board and port are ignored, they are looked up from the available frozen stubs
+    - versions = 'latest' , 'auto' or a list of versions
+    - port = 'auto' or a specific port
+    - board = 'auto' or a specific board, 'GENERIC' shoould be specifid in CAPS
     """
     auto_port = isinstance(ports, str) and "auto" == ports
     auto_board = isinstance(boards, str) and "auto" == boards
@@ -74,6 +78,11 @@ def frozen_candidates(
                     # lookup the (frozen) micropython ports
                     boards_path = path / f"{family}-{version}-frozen" / port
                     boards = list(subfolder_names(boards_path))
+                    # TODO: remove non-relevant boards
+                    # - release - used in release testing
+                    # generic_512 - small memory footprint
+                    #
+
                 else:
                     raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
                 # elif family == "pycom":
@@ -81,7 +90,7 @@ def frozen_candidates(
             # ---------------------------------------------------------------------------
             for board in boards:
                 if (path / f"{family}-{version}-frozen" / port / board).exists():
-                    yield {"family": family, "version": version , "port": port, "board": board, "pkg_type": COMBO_STUBS}
+                    yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
 
 
 def docstub_candidates(

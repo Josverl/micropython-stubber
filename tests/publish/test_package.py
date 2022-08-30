@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from stubber.publish.package import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, create_package, get_package_info, package_name
+from stubber.publish.package import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
+                                     DOC_STUBS, create_package,
+                                     get_package_info, package_name)
 from stubber.publish.stubpacker import StubPackage, Version
 from stubber.utils.config import CONFIG, readconfig
-
 
 from .fakeconfig import FakeConfig
 
@@ -96,6 +97,7 @@ read_db_data = [
         ],
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
+        "stub_hash": "",
     },
     {
         "name": "foo-bar-stubs",
@@ -110,6 +112,7 @@ read_db_data = [
         ],
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
+        "stub_hash": "",
     },
     {
         "name": "foo-bar-stubs",
@@ -122,6 +125,7 @@ read_db_data = [
         ],
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
+        "stub_hash": "1234567890",
     },
 ]
 

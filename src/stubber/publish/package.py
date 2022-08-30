@@ -25,7 +25,7 @@ DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
 
 
-def package_name(pkg_type, port: str = "", board: str = "",  family="micropython") -> str:
+def package_name(pkg_type, port: str = "", board: str = "", family="micropython") -> str:
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
@@ -90,10 +90,12 @@ def create_package(
         assert port != ""
         assert board != ""
         ver_flat = clean_version(mpy_version, flat=True)
-
         stubs: List[Tuple[str, Path]] = [
             (
                 "Firmware stubs",
+                # TODO: look for the most specific firmware stub folder that is available ?
+                # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
+                # that would also require the port - board - variant to be discoverable runtime
                 Path(f"{family}-{ver_flat}-{port}"),
             ),
             (
@@ -125,4 +127,3 @@ def create_package(
         raise NotImplementedError(type)
 
     return package
-
