@@ -170,6 +170,33 @@ def publish(
     return status
 
 
+def publish_one(
+    family="micropython",
+    versions: Union[str, List[str]] = "v1.18",
+    ports: Union[str, List[str]] = "auto",
+    boards: Union[str, List[str]] = "GENERIC",
+    frozen: bool = False,
+    production=False,
+    dryrun: bool = False,
+    clean: bool = False,
+    force: bool = False,
+):
+    "Publish a bunch of stub packages"
+    db = get_database(CONFIG.publish_path, production=production)
+    l = list(frozen_candidates(family=family, versions=versions, ports=ports, boards=boards))
+    result = None
+    if len(l) > 0:
+        todo = l[0]
+        result = publish(
+            db=db,
+            dryrun=dryrun,
+            clean=clean,
+            force=force,
+            **todo,
+        )
+    return result
+
+
 def publish_multiple(
     family="micropython",
     versions: Union[str, List[str]] = ["v1.18", "v1.19"],
