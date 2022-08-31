@@ -1,11 +1,14 @@
 import re
-from itertools import chain
 from pathlib import Path
 from typing import Any, Generator, List, Union
 
+from packaging.version import parse
 from stubber.publish.package import COMBO_STUBS, CORE_STUBS, DOC_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
+
+OLDEST_VERSION = "1.16"
+"oldest versions of the stubs"
 
 
 def subfolder_names(path: Path):
@@ -16,14 +19,16 @@ def subfolder_names(path: Path):
                 yield child.name
 
 
-def version_cadidates(suffix: str, prefix=r".*", *, path=Path("stubs")):
+def version_cadidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldest=OLDEST_VERSION) -> Generator[str, None, None]:
     "get a list of versions for the given family and suffix"
     if path.exists():
         folder_re = prefix + "-(.*)-" + suffix
         for name in subfolder_names(path):
             match = re.match(folder_re, name)
             if match:
-                yield clean_version(match.group(1))
+                folder_ver = clean_version(match.group(1))
+                if parse(folder_ver) >= parse(oldest):
+                    yield folder_ver
 
 
 def frozen_candidates(
@@ -48,7 +53,7 @@ def frozen_candidates(
 
     if isinstance(versions, str):
         if auto_version:
-            versions = list(version_cadidates(suffix="frozen", prefix=family, path=path))
+            versions = list(version_cadidates(suffix="frozen", prefix=family, path=path)) + ["latest"]
         else:
             versions = [versions]
     versions = [clean_version(v, flat=True) for v in versions]
@@ -73,6 +78,7 @@ def frozen_candidates(
             #     ports = ["esp32"]
         # ---------------------------------------------------------------------------
         for port in ports:
+            yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": COMBO_STUBS}
             if auto_board:
                 if family == "micropython":
                     # lookup the (frozen) micropython ports
@@ -89,14 +95,20 @@ def frozen_candidates(
                 #     boards = ["wipy", "lopy", "gpy", "fipy"]
             # ---------------------------------------------------------------------------
             for board in boards:
-                if (path / f"{family}-{version}-frozen" / port / board).exists():
+                assert isinstance(board, str)
+                # prozen stubs found , and not excluded, generic is already explicitly included
+                if (path / f"{family}-{version}-frozen" / port / board).exists() and board.upper() not in [
+                    "GENERIC",
+                    "RELEASE",
+                    "GENERIC_512K",
+                ]:
                     yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
 
 
 def docstub_candidates(
     family: str = "micropython",
     versions: Union[str, List[str]] = "latest",
-    path=Path("stubs"),
+    path=CONFIG.stub_path,
 ):
     """generate a list of possible documentation stub candidates for the given family and version.
 
