@@ -12,6 +12,9 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 #   part of the MicroPython project, http://micropython.org/
 #   Copyright (c) 2019 Damien P. George
 
+import csv
+import glob
+import logging
 # locating frozen modules :
 # tested on MicroPython v1.12 - v1.13
 # - 1.16 - using manifests.py, include can specify kwargs
@@ -19,26 +22,20 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
 import os
-import glob
+import pkgutil
 import re
 import shutil
-from typing import Optional
+import tempfile
 import warnings
-import logging
-from . import basicgit as git
-from . import utils
-from .utils.config import CONFIG 
-
-import csv
 from collections import defaultdict
-
 from pathlib import Path  # start moving from os & glob to pathlib
+from typing import Optional
 
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
+from . import basicgit as git
 from . import makemanifest_2 as makemanifest
-
-import pkgutil
-import tempfile
+from . import utils
+from .utils.config import CONFIG
 
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -273,5 +270,14 @@ def get_frozen_from_manifest(
         except makemanifest.FreezeError as er:
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
+        # NOTE: compensate for expicitly omittest task.py from freeze manifest 
+        if (freeze_path / "uasyncio").exists():
+            # copy task.py from micropython\extmod\uasyncio\task.py to stub_folder
+            log.info(f"add missing : uasyncio/task.py to {freeze_path}")
+            shutil.copy(str(Path(mpy_folder) / "extmod" / "uasyncio" / "task.py"), str(freeze_path / "uasyncio"))
+
+
         # make a module manifest
         utils.make_manifest(Path(makemanifest.stub_dir), FAMILY, port=port_name, board=board_name, version=version, stubtype="frozen")
+
+

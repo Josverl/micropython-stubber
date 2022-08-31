@@ -173,7 +173,7 @@ def freeze_internal(path: str, script: str, opt=None):
     opt (Any): freeze option (ignored)
     """
 
-    log.debug(" - freeze_internal({},{})".format(path, script))
+    log.debug(f" - freeze_internal({path},{script})")
 
     _path = Path(convert_path(path))
     source_path = _path / script
@@ -184,7 +184,7 @@ def freeze_internal(path: str, script: str, opt=None):
     if not stub_dir or stub_dir == "":  # pragma: no cover
         raise FreezeError("Stub folder not set")
 
-    log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
+    log.info(f"freeze_internal : {script:<30} to {stub_dir}")
     # ensure folder, including possible path prefix for script
     os.makedirs(dest_path.parent, exist_ok=True)
     # copy file
