@@ -111,11 +111,12 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     checkout a specific git tag
     """
     cmd = ["git", "checkout", "tags/" + tag, "--detach", "--quiet", "--force"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    result = _run_git(cmd, repo=repo, expect_stderr=True, capture_output=True)
     if not result:
         return False
     # actually a good result
     print(result.stderr.decode("utf-8"))
+    print(result.stdout.decode("utf-8"))
     return True
 
 
