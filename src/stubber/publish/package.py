@@ -3,7 +3,6 @@ prepare a set of stub files for publishing to PyPi
 
 """
 
-from enum import Enum
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
@@ -13,7 +12,7 @@ from packaging.version import parse
 from pysondb import PysonDB
 from stubber.utils.versions import clean_version
 
-from . import stubpacker
+from .enums import StubSource
 from .stubpacker import StubPackage
 
 # replace std log handler with a custom one capped on INFO level
@@ -24,11 +23,6 @@ ALL_TYPES = ["combo", "doc", "core"]
 COMBO_STUBS = ALL_TYPES[0]
 DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
-
-class StubSource(str,Enum):
-    FROZEN = "Frozen stubs"
-    FIRMWARE = "Firmware stubs"
-    CORE = "Core stubs"
 
 
 def package_name(pkg_type, port: str = "", board: str = "", family="micropython", **kwargs) -> str:

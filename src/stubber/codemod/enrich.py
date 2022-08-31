@@ -51,7 +51,7 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
     if docstub_file is None:
         raise FileNotFoundError(f"No doc-stub file found for {source_path}")
 
-    log.info(f"Augment {source_path} from {docstub_file}")
+    log.info(f"Merge {source_path} with info from {docstub_file}")
     # read source file
     oldcode = source_path.read_text()
 
