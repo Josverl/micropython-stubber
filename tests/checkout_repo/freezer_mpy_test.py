@@ -73,7 +73,7 @@ def test_extract_target_names(path, port, board):
 
 def test_one_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if task.py is included with the uasyncio frozen module"
-    mpy_version = "1.18"
+    mpy_version = "v1.18"
     mpy_folder = testrepo_micropython.absolute().as_posix()
     lib_folder = testrepo_micropython_lib.absolute().as_posix()
     stub_folder = tmp_path.absolute().as_posix()
@@ -88,7 +88,7 @@ def test_one_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrep
 
 
 @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
-@pytest.mark.slow
+# @pytest.mark.slow
 @pytest.mark.parametrize("mpy_version", ["v1.16", "v1.18", "master"])  # "v1.12", "v1.13", "v1.15",
 def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if we can freeze source using manifest.py files"
@@ -105,8 +105,8 @@ def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropy
     assert scripts is not None, "can freeze scripts from manifest"
     assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
 
-    result = utils.generate_pyi_files(tmp_path)
-    assert result == True
+    # result = utils.generate_pyi_files(tmp_path)
+    # assert result == True
 
 
 # Some mocked tests to improve the coverage
@@ -162,11 +162,17 @@ def test_freezer_mpy_manifest_mocked(
 #     assert mock_glob.called
 
 
-@pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
+# @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
 # @pytest.mark.basicgit
-@pytest.mark.slow
+# @pytest.mark.slow
 @pytest.mark.parametrize("mpy_version", ["v1.10", "v1.9.4"])
-def test_freezer_mpy_folders(mpy_version, tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
+def test_freezer_mpy_folders(
+    mpy_version,
+    tmp_path,
+    testrepo_micropython: Path,
+    testrepo_micropython_lib: Path,
+    mocker: MockerFixture,
+):
     "test if we can freeze source using modules folders"
     mpy_folder = testrepo_micropython.as_posix()
     lib_folder = testrepo_micropython_lib.as_posix()
@@ -176,5 +182,10 @@ def test_freezer_mpy_folders(mpy_version, tmp_path, testrepo_micropython: Path, 
 
     get_mpy.get_frozen_folders(stub_path, mpy_folder, lib_folder=testrepo_micropython_lib.as_posix(), version=mpy_version)
 
-    result = utils.generate_pyi_files(tmp_path)
-    assert result == True
+    scripts = list(tmp_path.rglob("*.py"))
+    assert scripts is not None, "can freeze scripts from manifest"
+    assert len(scripts) > 10, "expect at least 10 files, only found {}".format(len(scripts))
+
+    # TODO: add seperate tests for generate_pyi_files
+    # result = utils.generate_pyi_files(tmp_path)
+    # assert result == True
