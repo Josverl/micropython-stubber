@@ -30,7 +30,7 @@ NOTE: stubs and publish paths can be located in different locations and reposito
 """
 
 from itertools import chain
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 from loguru import logger as log
 from pysondb import PysonDB
@@ -40,8 +40,8 @@ from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 from tabulate import tabulate
 
-from . import stubpacker
-from .package import create_package, get_package_info, package_name
+from .package import StubSource, create_package, get_package_info, package_name
+from .stubpacker import StubPackage
 
 
 # ######################################
@@ -82,7 +82,7 @@ def publish(
     )
     if package_info:
         # create package from the information retrieved from the database
-        package = stubpacker.StubPackage(pkg_name, version=version, json_data=package_info)
+        package = StubPackage(pkg_name, version=version, json_data=package_info)
 
     else:
         log.info(f"No package found for {pkg_name} in database, creating new package")
@@ -100,9 +100,15 @@ def publish(
     OK = True
     for (name, path) in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
-            log.warning(f"{pkg_name}: source {name} does not exist: {CONFIG.stub_path / path}")
-            status["error"] = f"source {name} does not exist: {CONFIG.stub_path / path}"
-            OK = False
+            msg = f"{pkg_name}: source {name} does not exist: {CONFIG.stub_path / path}"
+            if not name == StubSource.FROZEN:
+                log.warning(msg)
+                log.warning(msg)
+                status["error"] = f"source {name} does not exist: {CONFIG.stub_path / path}"
+                OK = False
+            else:
+                # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
+                log.warning(msg)
     if not OK:
         log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
         package._publish = False
@@ -154,7 +160,7 @@ def publish(
             db.add(package.to_dict())
             db.commit()
             # TODO: push to github
-            # git add tests\publish\data\package_data_test.jsondb
+            # git add <Publish folder>
             # git commit -m "Publish micropython-esp32-stubs (1.18.post24)"
             # git push
             # add tag ?
@@ -164,7 +170,17 @@ def publish(
     return status
 
 
-def publish_multiple(frozen: bool = False, production=False,  dryrun: bool = False, clean: bool = False, force: bool = False):
+def publish_multiple(
+    family="micropython",
+    versions: Union[str, List[str]] = ["v1.18", "v1.19"],
+    ports: Union[str, List[str]] = "auto",
+    boards: Union[str, List[str]] = "GENERIC",
+    frozen: bool = False,
+    production=False,
+    dryrun: bool = False,
+    clean: bool = False,
+    force: bool = False,
+):
     "Publish a bunch of stub packages"
     db = get_database(CONFIG.publish_path, production=production)
 
@@ -173,8 +189,7 @@ def publish_multiple(frozen: bool = False, production=False,  dryrun: bool = Fal
     if frozen:
         worklist += list(
             chain(
-                # frozen_candidates(family="micropython", versions="v1.18", ports="auto", boards="auto"),
-                frozen_candidates(family="micropython", versions="v1.18", ports="esp32", boards="GENERIC"),
+                frozen_candidates(family=family, versions=versions, ports=ports, boards=boards),
                 # frozen_candidates(family="micropython", versions="v1.19.1", ports="auto", boards="auto"),
             )
         )

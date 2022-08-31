@@ -10,6 +10,8 @@ from stubber.utils.versions import clean_version
 OLDEST_VERSION = "1.16"
 "oldest versions of the stubs"
 
+V_LATEST = "latest"
+
 
 def subfolder_names(path: Path):
     "returns a list of names of the subfolders of the given path"
@@ -27,13 +29,13 @@ def version_cadidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldes
             match = re.match(folder_re, name)
             if match:
                 folder_ver = clean_version(match.group(1))
-                if parse(folder_ver) >= parse(oldest):
+                if folder_ver == V_LATEST or parse(folder_ver) >= parse(oldest):
                     yield folder_ver
 
 
 def frozen_candidates(
     family: str = "micropython",
-    versions: Union[str, List[str]] = "latest",
+    versions: Union[str, List[str]] = V_LATEST,
     ports: Union[str, List[str]] = "auto",
     boards: Union[str, List[str]] = "auto",
     *,
@@ -53,7 +55,7 @@ def frozen_candidates(
 
     if isinstance(versions, str):
         if auto_version:
-            versions = list(version_cadidates(suffix="frozen", prefix=family, path=path)) + ["latest"]
+            versions = list(version_cadidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
         else:
             versions = [versions]
     versions = [clean_version(v, flat=True) for v in versions]
@@ -78,11 +80,12 @@ def frozen_candidates(
             #     ports = ["esp32"]
         # ---------------------------------------------------------------------------
         for port in ports:
-            yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": COMBO_STUBS}
+            boards_path = path / f"{family}-{version}-frozen" / port
+            if boards_path.exists():
+                yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": COMBO_STUBS}
             if auto_board:
                 if family == "micropython":
                     # lookup the (frozen) micropython ports
-                    boards_path = path / f"{family}-{version}-frozen" / port
                     boards = list(subfolder_names(boards_path))
                     # TODO: remove non-relevant boards
                     # - release - used in release testing
@@ -90,7 +93,8 @@ def frozen_candidates(
                     #
 
                 else:
-                    raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
+                    # raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
+                    raise Exception(f"auto boards not implemented for family {family}")  # pragma: no cover
                 # elif family == "pycom":
                 #     boards = ["wipy", "lopy", "gpy", "fipy"]
             # ---------------------------------------------------------------------------
@@ -107,7 +111,7 @@ def frozen_candidates(
 
 def docstub_candidates(
     family: str = "micropython",
-    versions: Union[str, List[str]] = "latest",
+    versions: Union[str, List[str]] = V_LATEST,
     path=CONFIG.stub_path,
 ):
     """generate a list of possible documentation stub candidates for the given family and version.

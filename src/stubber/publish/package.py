@@ -3,6 +3,7 @@ prepare a set of stub files for publishing to PyPi
 
 """
 
+from enum import Enum
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
@@ -24,8 +25,13 @@ COMBO_STUBS = ALL_TYPES[0]
 DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
 
+class StubSource(str,Enum):
+    FROZEN = "Frozen stubs"
+    FIRMWARE = "Firmware stubs"
+    CORE = "Core stubs"
 
-def package_name(pkg_type, port: str = "", board: str = "", family="micropython") -> str:
+
+def package_name(pkg_type, port: str = "", board: str = "", family="micropython", **kwargs) -> str:
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
@@ -75,7 +81,6 @@ def create_package(
     pkg_name: str,
     mpy_version: str,
     *,
-    publish_path: Path = stubpacker.CONFIG.publish_path,  # TODO: remove unused parameter
     port: str = "",
     board: str = "",
     family: str = "micropython",
@@ -92,18 +97,18 @@ def create_package(
         ver_flat = clean_version(mpy_version, flat=True)
         stubs: List[Tuple[str, Path]] = [
             (
-                "Firmware stubs",
+                StubSource.FIRMWARE,
                 # TODO: look for the most specific firmware stub folder that is available ?
                 # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
                 # that would also require the port - board - variant to be discoverable runtime
                 Path(f"{family}-{ver_flat}-{port}"),
             ),
             (
-                "Frozen stubs",
+                StubSource.FROZEN,
                 Path(f"{family}-{ver_flat}-frozen") / port / board,
             ),
             (
-                "Core Stubs",
+                StubSource.CORE,
                 Path("cpython_core-pycopy"),
             ),
         ]
