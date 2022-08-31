@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from stubber.enrich import enrich_folder, enrich_file
+from stubber.codemod.enrich import enrich_folder, enrich_file
 
 # mark all tests
 pytestmark = pytest.mark.codemod

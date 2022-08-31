@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
+from libcst.codemod import (CodemodContext, diff_code,
+                            exec_transform_with_prettyprint)
 from libcst.tool import _default_config
 
 # from stubber.codemod.merge_docstub import MergeCommand
@@ -75,7 +76,7 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
         return None
 
 
-def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False, require_docsub=False) -> int:
+def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False, require_docstub=False) -> int:
     """\
         Enrich a folder with containing firmware stubs using the doc-stubs in another folder.
         
@@ -93,6 +94,6 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
                     print(diff)
         except FileNotFoundError:
             # no docstub to enrich with
-            if require_docsub:
+            if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub file found for {source_file}"))
     return count

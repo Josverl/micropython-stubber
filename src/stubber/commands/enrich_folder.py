@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Union
 
 import click
-from stubber.enrich import enrich_folder
+from stubber.codemod.enrich import enrich_folder
 from stubber.utils.config import CONFIG
 
 from .stubber_cli import stubber_cli
@@ -42,4 +42,4 @@ def cli_enrich_folder(
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
     """
     write_back = not dry_run
-    count = enrich_folder(Path(stubs_folder), Path(docstubs_folder), show_diff=diff, write_back=write_back, require_docsub=False)
+    count = enrich_folder(Path(stubs_folder), Path(docstubs_folder), show_diff=diff, write_back=write_back, require_docstub=False)
