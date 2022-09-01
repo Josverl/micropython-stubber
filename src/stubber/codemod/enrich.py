@@ -68,7 +68,7 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
     if newcode:
         if write_back:
             # write updated code to file
-            source_path.write_text(newcode)
+            source_path.write_text(newcode, encoding="utf-8")
         if diff:
             return diff_code(oldcode, newcode, 5, filename=source_path.name)
         return newcode
