@@ -251,9 +251,12 @@ class StubPackage:
             except OSError as e:
                 log.error(f"Error copying stubs from : {CONFIG.stub_path / folder}, {e}")
                 raise (e)
+
         # 1.B - clean up a little bit
         # delete all the .py files in the package folder if there is a corresponding .pyi file
-        for f in self.package_path.glob("**/*.py"):
+        # FIXME: Leave *.py on the module foldedels to avoid poetry packaging issues
+        # ValueError  umqtt is not a package.
+        for f in self.package_path.glob("*.py"):
             if f.with_suffix(".pyi").exists():
                 f.unlink()
         # delete buitins.pyi and pycopy_imphook.py in the package folder
@@ -265,6 +268,7 @@ class StubPackage:
         ver = clean_version(self.mpy_version, flat=True)
         docstub_path = CONFIG.stub_path / f"micropython-{ver}-docstubs"
         result = enrich_folder(self.package_path, docstub_path=docstub_path, write_back=True)
+
         # 3 - copy the remaining stubs to the package folder
         for name, folder in [s for s in self.stub_sources if s[0] != StubSource.FIRMWARE]:
             try:

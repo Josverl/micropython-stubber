@@ -157,10 +157,10 @@ def test_package_from_json(tmp_path, pytestconfig, mocker, json):
 
     package = StubPackage(pkg_name, version=mpy_version, json_data=json)
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, publish_path, stub_path=stub_path, pkg_type=None)
+    run_common_package_tests(package, pkg_name, publish_path, stub_path=stub_path, pkg_type=None, test_build=False)
 
 
-def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type):
+def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build = True):
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
@@ -208,12 +208,12 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     new_version = package.bump()
     assert new_version
     assert isinstance(new_version, Version)
-
-    built = package.build()
-    assert built
-    assert (package.package_path / "dist").exists(), "Distribution folder should exist"
-    filelist = list((package.package_path / "dist").glob("*.whl")) + list((package.package_path / "dist").glob("*.tar.gz"))
-    assert len(filelist) >= 2
+    if test_build:
+        built = package.build()
+        assert built
+        assert (package.package_path / "dist").exists(), "Distribution folder should exist"
+        filelist = list((package.package_path / "dist").glob("*.whl")) + list((package.package_path / "dist").glob("*.tar.gz"))
+        assert len(filelist) >= 2
 
     package.clean()
     filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
