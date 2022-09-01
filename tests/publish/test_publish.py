@@ -19,32 +19,49 @@ from .fakeconfig import FakeConfig
 # )
 
 
-def test_publish_one(mocker):
+@pytest.mark.parametrize(
+    "production, dryrun, check_cnt, build_cnt, publish_cnt",
+    [
+        (True, True, 1, 1, 0),
+        (True, False, 1, 1, 1),
+        (False, True, 1, 1, 0),
+        (False, False, 1, 1, 1),
+    ],
+)
+def test_publish_one(mocker, tmp_path, pytestconfig, production: bool, dryrun: bool, check_cnt: int, build_cnt: int, publish_cnt: int):
     """Test publish_multiple"""
-    from stubber.publish.publish import StubPackage
+    # use the test config
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
+    # need to use fake config in two places
+    mocker.patch("stubber.publish.publish.CONFIG", config)
+    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
-    # m_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.build", autospec=True, return_value=True)
-    m_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.publish", autospec=True, return_value=True)
+    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)
+    m_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.build", autospec=True, return_value=True)
+    m_publish: MagicMock = mocker.patch("stubber.publish.stubpacker.StubPackage.publish", autospec=True, return_value=True)
 
-    result = publish_one(production=False, frozen=True, dryrun=True, ports="esp32", boards="GENERIC", versions="1.18")
+    result = publish_one(production=production, dryrun=dryrun, frozen=True, ports="esp32", boards="GENERIC", versions="1.18")
     assert result
-    # assert m_build.call_count == 2
-    assert m_publish.call_count == 2
+    assert m_check.call_count == check_cnt
+    assert m_build.call_count == build_cnt
+    assert m_publish.call_count == publish_cnt
     # TODO: add return and tests
     # #assert result != None , "Publish failed"
 
 
-def test_publish_multiple(mocker):
+def test_publish_multiple(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
-    from stubber.publish.publish import StubPackage
+    # use the test config
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
+    mocker.patch("stubber.publish.publish.CONFIG", config)
+    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
+    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)
     m_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.build", autospec=True, return_value=True)
     m_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.publish", autospec=True, return_value=True)
 
     result = publish_multiple(production=False, frozen=True, dryrun=True)
     result = publish_multiple(production=False, frozen=True, dryrun=False)
 
-    assert m_build.call_count == 2
-    assert m_publish.call_count == 2
-    # TODO: add return and tests
-    # #assert result != None , "Publish failed"
+    assert m_build.call_count >= 2
+    assert m_publish.call_count >= 2

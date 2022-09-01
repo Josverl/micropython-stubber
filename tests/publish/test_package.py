@@ -2,9 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from stubber.publish.package import (ALL_TYPES, COMBO_STUBS, CORE_STUBS,
-                                     DOC_STUBS, create_package,
-                                     get_package_info, package_name)
+from stubber.publish.package import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, create_package, get_package_info, package_name
 from stubber.publish.stubpacker import StubPackage, Version
 from stubber.utils.config import CONFIG, readconfig
 
@@ -27,9 +25,6 @@ from .fakeconfig import FakeConfig
 def test_package_name(family, pkg, port, board, expected):
     x = package_name(family=family, pkg_type=pkg, port=port, board=board)
     assert x == expected
-
-
-
 
 
 # test creating a DOC_STUBS package
@@ -132,21 +127,8 @@ read_db_data = [
 
 @pytest.mark.parametrize("json", read_db_data)
 def test_package_from_json(tmp_path, pytestconfig, mocker, json):
-    # test data
-    source = pytestconfig.rootpath / "tests/publish/data"
-    publish_path = tmp_path / "publish"
-    publish_path.mkdir(parents=True)
-
-    # TODO: need to ensure that the stubs are avaialble in GHA testing
-    stub_path = Path("./repos/micropython-stubs/stubs")
-    template_path = pytestconfig.rootpath / "tests/publish/data/template"
-
-    config = FakeConfig(
-        publish_path=publish_path,
-        stub_path=stub_path,
-        template_path=template_path,
-    )
-
+    # setup test configuration
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
     mpy_version = "v1.18"
@@ -157,10 +139,10 @@ def test_package_from_json(tmp_path, pytestconfig, mocker, json):
 
     package = StubPackage(pkg_name, version=mpy_version, json_data=json)
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, publish_path, stub_path=stub_path, pkg_type=None, test_build=False)
+    run_common_package_tests(package, pkg_name, config.publish_path, stub_path=config.stub_path, pkg_type=None, test_build=False)
 
 
-def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build = True):
+def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
@@ -170,11 +152,13 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     assert (package.package_path / "pyproject.toml").exists()
 
     assert len(package.stub_sources) >= 1
-    for s in package.stub_sources:
-        folder = stub_path / s[1]
-        assert folder.is_dir(), "stub source should be folder"
-        assert folder.exists(), "stubs source should exists"
-    #        assert not s[1].is_absolute(), "should be a relative path"
+
+    if stub_path.exists():
+        for s in package.stub_sources:
+            folder = stub_path / s[1]
+            assert folder.is_dir(), "stub source should be folder"
+            assert folder.exists(), "stubs source should exists"
+            assert not s[1].is_absolute(), "should be a relative path"
     # update existing pyproject.toml
     package.create_update_pyproject_toml()
     assert (package.package_path / "pyproject.toml").exists()
@@ -183,6 +167,14 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     assert (package.package_path / "README.md").exists()
     package.create_license()
     assert (package.package_path / "LICENSE.md").exists()
+
+    new_version = package.bump()
+    assert new_version
+    assert isinstance(new_version, Version)
+
+    if not stub_path.exists():
+        # withouth sources there is nothing to build
+        return
     package.copy_stubs()
     filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1
@@ -205,9 +197,6 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     result = package.check()
     assert result == True
 
-    new_version = package.bump()
-    assert new_version
-    assert isinstance(new_version, Version)
     if test_build:
         built = package.build()
         assert built
