@@ -7,10 +7,9 @@ from pathlib import Path
 
 from loguru import logger as log
 from stubber.codemod.enrich import enrich_folder
+from stubber.publish.candidates import firmware_candidates
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-
-from .candidates import firmware_candidates
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()

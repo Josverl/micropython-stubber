@@ -10,20 +10,13 @@ from typing import Dict, List, Tuple, Union
 from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
+from stubber.publish.enums import  COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
+from stubber.publish.stubpacker import StubPackage
 from stubber.utils.versions import clean_version
-
-from .enums import StubSource
-from .stubpacker import StubPackage
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
-
-ALL_TYPES = ["combo", "doc", "core", "firmware"]
-COMBO_STUBS = ALL_TYPES[0]
-DOC_STUBS = ALL_TYPES[1]
-CORE_STUBS = ALL_TYPES[2]
-FIRMWARE_STUBS = ALL_TYPES[3]
 
 
 def package_name(pkg_type, port: str = "", board: str = "", family="micropython", **kwargs) -> str:

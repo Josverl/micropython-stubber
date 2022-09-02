@@ -8,7 +8,7 @@
             "name": "Python: file as Module",
             "type": "python",
             "request": "launch",
-            "module": "stubber.${fileBasenameNoExtension}",
+            "module": "stubber.publish.${fileBasenameNoExtension}",
             "justMyCode": false
         },
         {

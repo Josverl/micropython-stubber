@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from stubber.publish.package import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS, create_package, get_package_info, package_name
+from stubber.publish.enums import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS
+from stubber.publish.package import create_package, get_package_info, package_name
 from stubber.publish.stubpacker import StubPackage, Version
 from stubber.utils.config import CONFIG, readconfig
 
