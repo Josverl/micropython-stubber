@@ -16,6 +16,7 @@ from stubber.utils.versions import clean_version
 
 from .bump import bump_postrelease
 from .enums import StubSource
+from .merge_docstubs import copy_merge_docstubs
 
 # TODO: Get git tag and store in DB for reference
 # import stubber.basicgit as git
@@ -238,45 +239,32 @@ class StubPackage:
         Copy files from all listed stub folders to the package folder
         the order of the stub folders is relevant as "last copy wins"
 
-         - 1 - Copy all firmware stubs to the package folder
-         - 2 - Enrich the firmware stubs with the document stubs
-         - 3 - copy the remaining stubs to the package folder
+         - 1 - Copy all firmware stubs/merged to the package folder
+         - 2 - copy the remaining stubs to the package folder
 
         """
+
         # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
-        for name, folder in [s for s in self.stub_sources if s[0] == StubSource.FIRMWARE]:
-            try:
-                log.debug(f"Copying {name} from {folder}")
-                shutil.copytree(CONFIG.stub_path / folder, self.package_path, symlinks=True, dirs_exist_ok=True)
-            except OSError as e:
-                log.error(f"Error copying stubs from : {CONFIG.stub_path / folder}, {e}")
-                raise (e)
-
-        # 1.B - clean up a little bit
-        # delete all the .py files in the package folder if there is a corresponding .pyi file
-        # FIXME: Leave *.py on the module foldedels to avoid poetry packaging issues
-        # ValueError  umqtt is not a package.
-        for f in self.package_path.glob("*.py"):
-            if f.with_suffix(".pyi").exists():
-                f.unlink()
-        # delete buitins.pyi and pycopy_imphook.py in the package folder
-        for name in ["builtins.pyi", "pycopy_imphook.pyi"]:
-            if (self.package_path / name).exists():
-                (self.package_path / name).unlink()
-
-        # 2 - Enrich the firmware stubs with the document stubs
-        ver = clean_version(self.mpy_version, flat=True)
-        docstub_path = CONFIG.stub_path / f"micropython-{ver}-docstubs"
-        result = enrich_folder(self.package_path, docstub_path=docstub_path, write_back=True)
-
-        # 3 - copy the remaining stubs to the package folder
-        for name, folder in [s for s in self.stub_sources if s[0] != StubSource.FIRMWARE]:
-            try:
-                log.debug(f"Copying {name} from {folder}")
-                shutil.copytree(CONFIG.stub_path / folder, self.package_path, symlinks=True, dirs_exist_ok=True)
-            except OSError as e:
-                log.error(f"Error copying stubs from : {CONFIG.stub_path / folder}, {e}")
-                raise (e)
+        for stub_type, fw_path in [s for s in self.stub_sources]:
+            if stub_type == StubSource.FIRMWARE:
+                # Check if -merged folder exists and copy that instead
+                merged_path = fw_path.with_name(f"{fw_path.name}-merged")
+                source = fw_path
+                if merged_path.exists():
+                    source = merged_path
+                try:
+                    log.debug(f"Copying {stub_type} from {source}")
+                    shutil.copytree(CONFIG.stub_path / source, self.package_path, symlinks=True, dirs_exist_ok=True)
+                except OSError as e:
+                    log.error(f"Error copying stubs from : {CONFIG.stub_path / source}, {e}")
+                    raise (e)
+            else:
+                try:
+                    log.debug(f"Copying {stub_type} from {fw_path}")
+                    shutil.copytree(CONFIG.stub_path / fw_path, self.package_path, symlinks=True, dirs_exist_ok=True)
+                except OSError as e:
+                    log.error(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
+                    raise (e)
 
     def create_readme(self):
         """

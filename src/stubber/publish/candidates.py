@@ -4,10 +4,9 @@ from typing import Any, Dict, Generator, List, Union
 
 import stubber.basicgit as git
 from packaging.version import parse
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, FIRMWARE_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version, micropython_versions
-
-from .package import COMBO_STUBS, CORE_STUBS, DOC_STUBS, FIRMWARE_STUBS
 
 OLDEST_VERSION = "1.16"
 "This is the oldest MicroPython version to build the stubs on"
@@ -59,7 +58,7 @@ def list_micropython_ports(
     ports_path = mpy_path / "ports"
     ports = list(subfolder_names(ports_path))
     # remove blocked ports from list
-    for port in ["minimal","bare-arm"]: # CONFIG.blocked_ports:
+    for port in ["minimal", "bare-arm"]:  # CONFIG.blocked_ports:
         if port in ports:
             ports.remove(port)
 

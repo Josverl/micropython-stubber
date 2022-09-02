@@ -11,6 +11,13 @@ class StubSource(str, Enum):
     DOC = "Doc stubs"
     "stubs built by parsing  the RST documentation files"
 
+
+ALL_TYPES = ["combo", "doc", "core", "firmware"]
+COMBO_STUBS = ALL_TYPES[0]
+DOC_STUBS = ALL_TYPES[1]
+CORE_STUBS = ALL_TYPES[2]
+FIRMWARE_STUBS = ALL_TYPES[3]
+
 # # TODO: Combine the type classes ?
 # class StubTypes(str, Enum):
 #     COMBO = "combo"
