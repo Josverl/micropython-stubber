@@ -1,9 +1,8 @@
 {
     "recommendations": [
-        "ms-python.vscode-pylance",
         "ms-python.python",
-        "pycom.pymakr",
-        "ms-vscode.test-adapter-converter",
+        "ms-python.vscode-pylance",
+        // "pycom.pymakr",
         "mhutchie.git-graph"
     ]
 }
