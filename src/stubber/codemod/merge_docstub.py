@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
-from stubber.cst_transformer import StubTypingCollector, update_def_docstr, update_module_docstr, TypeInfo, MODULE_KEY
+from stubber.cst_transformer import MODULE_KEY, StubTypingCollector, TypeInfo, update_def_docstr, update_module_docstr
 
 ##########################################################################################
 log = logging.getLogger(__name__)
@@ -66,8 +66,12 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stub_imports: Dict[str, ImportItem] = {}
         # parse the doc-stub file
         if self.stub_source:
-            # parse the doc-stub file
-            stub_tree = cst.parse_module(self.stub_source)
+            try:
+                # parse the doc-stub file
+                stub_tree = cst.parse_module(self.stub_source)
+            except cst.ParserSyntaxError as e:
+                log.error(f"Error parsing {self.stub_path}: {e}")
+                return
             # create the collectors
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)

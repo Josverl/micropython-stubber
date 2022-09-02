@@ -2,10 +2,12 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Union
 
+import stubber.basicgit as git
 from packaging.version import parse
-from stubber.publish.package import COMBO_STUBS, CORE_STUBS, DOC_STUBS
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version
+from stubber.utils.versions import clean_version, micropython_versions
+
+from .package import COMBO_STUBS, CORE_STUBS, DOC_STUBS, FIRMWARE_STUBS
 
 OLDEST_VERSION = "1.16"
 "This is the oldest MicroPython version to build the stubs on"
@@ -31,6 +33,37 @@ def version_cadidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldes
                 folder_ver = clean_version(match.group(1))
                 if folder_ver == V_LATEST or parse(folder_ver) >= parse(oldest):
                     yield folder_ver
+
+
+def list_frozen_ports(
+    family: str = "micropython",
+    version: str = V_LATEST,
+    path=CONFIG.stub_path,
+):
+    "get list of ports with frozen stubs for a given family and version"
+    ports_path = path / f"{family}-{version}-frozen"
+    ports = list(subfolder_names(ports_path))
+    return ports
+
+
+def list_micropython_ports(
+    family: str = "micropython",
+    version: str = V_LATEST[0],
+    mpy_path=CONFIG.mpy_path,
+):
+    "get list of micropython ports for a given family and version"
+    mpy_path = Path("./repos/micropython")
+    # chechouth the micopthon repo for this version
+    if not git.checkout_tag(version, mpy_path):
+        return []
+    ports_path = mpy_path / "ports"
+    ports = list(subfolder_names(ports_path))
+    # remove blocked ports from list
+    for port in ["minimal","bare-arm"]: # CONFIG.blocked_ports:
+        if port in ports:
+            ports.remove(port)
+
+    return ports
 
 
 def frozen_candidates(
@@ -70,8 +103,7 @@ def frozen_candidates(
         if auto_port:
             if family == "micropython":
                 # lookup the (frozen) micropython ports
-                ports_path = path / f"{family}-{version}-frozen"
-                ports = list(subfolder_names(ports_path))
+                ports = list_frozen_ports(family, version, path=path)
             else:
                 raise NotImplementedError(f"auto ports not implemented for family {family}")  # pragma: no cover
             # elif family == "pycom":
@@ -116,7 +148,7 @@ def docstub_candidates(
 ):
     """generate a list of possible documentation stub candidates for the given family and version.
 
-    Note that the folders do not need to exist, with the exaption of auto which will scan the stubs folder for versions of docstubs
+    Note that the folders do not need to exist, with the exeption of auto which will scan the stubs folder for versions of docstubs
     """
     if isinstance(versions, str):
         if "auto" == versions:  # auto with vprefix ...
@@ -127,3 +159,23 @@ def docstub_candidates(
 
     for version in versions:
         yield {"family": family, "version": version, "pkg_type": DOC_STUBS}
+
+
+def firmware_candidates(
+    family: str = "micropython",
+    versions: Union[str, List[str]] = V_LATEST,
+    *,
+    mpy_path=CONFIG.mpy_path,
+):
+    """generate a list of possible firmware stub candidates for the given family and version."""
+    if isinstance(versions, str):
+        if "auto" == versions:  # auto with vprefix ...
+            versions = list(micropython_versions(start=OLDEST_VERSION))
+        else:
+            versions = [versions]
+    versions = [clean_version(v, flat=False) for v in versions]
+
+    for version in versions:
+        ports = list_micropython_ports(family, version, mpy_path=mpy_path)
+        for port in ports:
+            yield {"family": family, "version": version, "port": port, "board": "", "pkg_type": FIRMWARE_STUBS}
