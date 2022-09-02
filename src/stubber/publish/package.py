@@ -19,10 +19,11 @@ from .stubpacker import StubPackage
 log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
-ALL_TYPES = ["combo", "doc", "core"]
+ALL_TYPES = ["combo", "doc", "core", "firmware"]
 COMBO_STUBS = ALL_TYPES[0]
 DOC_STUBS = ALL_TYPES[1]
 CORE_STUBS = ALL_TYPES[2]
+FIRMWARE_STUBS = ALL_TYPES[3]
 
 
 def package_name(pkg_type, port: str = "", board: str = "", family="micropython", **kwargs) -> str:

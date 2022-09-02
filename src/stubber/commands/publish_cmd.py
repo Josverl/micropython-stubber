@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import click
 from stubber.publish.database import get_database
@@ -15,6 +15,7 @@ from .stubber_cli import stubber_cli
 log = logging.getLogger("stubber")
 ###########
 
+# TODO: make the VERSION AND PORTS dynamic ( move into simpler Config class)
 LAST_VERSION = "1.19.1"
 ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]  # "1.14", "1.15", "1.16","1.17",
 ALL_PORTS = ["stm32", "esp32", "esp8266", "rp2"]
@@ -93,9 +94,9 @@ ALL_BOARDS = ["GENERIC"]
 #
 def cli_publish(
     family: str,
-    versions: List[str],
-    ports: List[str],
-    boards: List[str],
+    versions: Union[str, List[str]],
+    ports: Union[str, List[str]],
+    boards: Union[str, List[str]],
     production: bool,
     dryrun: bool,
     force: bool,
