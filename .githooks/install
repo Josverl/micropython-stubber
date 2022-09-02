@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# Setup micropython-stubber git hooks
-
-git config core.hooksPath .githooks
-
-echo "Hooks are setup!"
