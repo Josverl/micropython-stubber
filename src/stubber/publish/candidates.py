@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, Generator, List, Union
+from typing import Any, Dict, Generator, List, Union
 
 from packaging.version import parse
 from stubber.publish.package import COMBO_STUBS, CORE_STUBS, DOC_STUBS
@@ -8,7 +8,7 @@ from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
 OLDEST_VERSION = "1.16"
-"oldest versions of the stubs"
+"This is the oldest MicroPython version to build the stubs on"
 
 V_LATEST = "latest"
 
@@ -40,7 +40,7 @@ def frozen_candidates(
     boards: Union[str, List[str]] = "auto",
     *,
     path=CONFIG.stub_path,
-) -> Generator[dict[str, Any], None, None]:
+) -> Generator[Dict[str, Any], None, None]:
     """
     generate a list of possible firmware stubs for the given family (, version port and board) ?
     - family = micropython
