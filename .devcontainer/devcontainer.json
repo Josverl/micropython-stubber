@@ -33,7 +33,11 @@
 	"extensions": [
 		"ms-python.python",
 		"ms-python.vscode-pylance",
-		"mhutchie.git-graph"
+		"mhutchie.git-graph",
+		"tamasfe.even-better-toml",
+		"markis.code-coverage",
+		"GitHub.copilot",
+		"bierner.markdown-mermaid"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
