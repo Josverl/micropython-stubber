@@ -2,8 +2,13 @@
 
 queries:
   - uses: security-and-quality
-paths-ignore:
-  - "tests/**/*"
-  - ".venv/**/*"
-  - "snippets/**/*"
+
+paths:
+  - "src/**/*.{py,pyi}"
+  - "board/**/*.{py,pyi}"
+# paths-ignore:
+#   - "tests/**/*"
+#   - ".venv/**/*"
+#   - ".venv"
+#   - "snippets/**/*"
   
