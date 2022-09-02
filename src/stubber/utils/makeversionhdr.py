@@ -8,7 +8,7 @@ from __future__ import print_function
 
 import subprocess
 from pathlib import Path
-
+from packaging.version import Version, parse
 
 def get_version_info_from_git(path:Path = Path.cwd()):
     """return the version info from the git repository specified.
@@ -64,6 +64,13 @@ def get_version_info_from_git(path:Path = Path.cwd()):
 
     return git_tag, git_hash
 
+def get_version_build_from_git(path:Path = Path.cwd()):
+    git_tag, short_hash = get_version_info_from_git(path) # type: ignore
+    assert git_tag is not None
+    parts = git_tag.split("-")
+    assert len(parts) >= 2
+    ver = parse(parts[0])
+    return ver, int(parts[1])
 
 # def get_version_info_from_docs_conf():
 #     with open(os.path.join(os.path.dirname(sys.argv[0]), "..", "docs", "conf.py")) as f:

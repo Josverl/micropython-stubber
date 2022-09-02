@@ -1,5 +1,3 @@
-from enum import Enum
-
 from packaging.version import Version, parse
 
 
