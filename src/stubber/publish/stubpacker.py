@@ -241,6 +241,7 @@ class StubPackage:
 
          - 1 - Copy all firmware stubs/merged to the package folder
          - 2 - copy the remaining stubs to the package folder
+         - 3 - remove *.py files from the package folder
 
         """
 
@@ -265,6 +266,13 @@ class StubPackage:
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
                     raise (e)
+        # 3 - clean up a little bit
+        # delete all the .py files in the package folder if there is a corresponding .pyi file
+        # FIXME: Leave *.py on the module folders to avoid poetry packaging issues
+        # >      ValueError  umqtt is not a package.
+        for f in self.package_path.glob("*.py"):
+            if f.with_suffix(".pyi").exists():
+                f.unlink()
 
     def create_readme(self):
         """
