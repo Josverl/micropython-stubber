@@ -2,12 +2,11 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+# from stubber.codemod.merge_docstub import MergeCommand
+import stubber.codemod.merge_docstub as merge_docstub
 from libcst.codemod import (CodemodContext, diff_code,
                             exec_transform_with_prettyprint)
 from libcst.tool import _default_config
-
-# from stubber.codemod.merge_docstub import MergeCommand
-import stubber.codemod.merge_docstub as merge_docstub
 
 ##########################################################################################
 log = logging.getLogger(__name__)
@@ -69,7 +68,7 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
         if write_back:
             # write updated code to file
             source_path.write_text(newcode, encoding="utf-8")
-        if diff:
+        if diff: # pragma: no cover
             return diff_code(oldcode, newcode, 5, filename=source_path.name)
         return newcode
     else:

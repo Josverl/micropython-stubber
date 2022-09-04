@@ -38,7 +38,7 @@ if __name__ == "__main__":
     stubber_cli.add_command(cli_get_lobo)
     stubber_cli.add_command(cli_stub)
     stubber_cli.add_command(cli_update_fallback)
-    # stubber_cli.add_command(cli_enrich_folder)
+    stubber_cli.add_command(cli_enrich_folder)
     stubber_cli.add_command(cli_minify)
     stubber_cli.add_command(cli_publish)
     stubber_cli.add_command(cli_merge_docstubs)
