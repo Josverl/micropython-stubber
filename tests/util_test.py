@@ -8,10 +8,6 @@ from types import SimpleNamespace
 # SOT
 import stubber.utils as utils
 
-do_profiling = False
-if do_profiling:
-    import cProfile
-    from pstats import Stats, SortKey
 
 
 @pytest.mark.parametrize(
