@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 from packaging.version import Version, parse
-from stubber.utils.makeversionhdr import get_version_build_from_git, get_version_info_from_git
+from stubber.utils.makeversionhdr import (get_version_build_from_git,
+                                          get_version_info_from_git)
 
 
 @pytest.mark.parametrize("path", [Path.cwd(), Path("./repos/micropython")])
@@ -15,12 +16,14 @@ def test_get_version(path):
     assert git_tag[0] == "v"
     parts = git_tag.split("-")
     # tag should have at least 3 parts
-    assert len(parts) >= 3
-    # first partmust be parsed to a Version Type
-    ver = parse(parts[0])
-    assert isinstance(ver, Version)
-    # second part is an integer
-    assert int(parts[1])
+    assert len(parts) >= 2
+    if len(parts) >= 1:
+        # first partmust be parsed to a Version Type
+        ver = parse(parts[0])
+        assert isinstance(ver, Version)
+    if len(parts) >= 3:
+        # second part must be an integer
+        assert parts[1].isnumeric()
 
     assert True
 
