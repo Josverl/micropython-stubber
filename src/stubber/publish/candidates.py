@@ -4,7 +4,7 @@ from typing import Any, Dict, Generator, List, Union
 
 import stubber.basicgit as git
 from packaging.version import parse
-from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, FIRMWARE_STUBS
+from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version, micropython_versions
 
@@ -51,8 +51,11 @@ def list_micropython_ports(
     mpy_path=CONFIG.mpy_path,
 ):
     "get list of micropython ports for a given family and version"
+    if family != "micropython":
+        # todo: add support for other families
+        return []
     mpy_path = Path("./repos/micropython")
-    # chechouth the micopthon repo for this version
+    # check out the micropthon repo for this version
     if not git.checkout_tag(version, mpy_path):
         return []
     ports_path = mpy_path / "ports"
@@ -61,7 +64,6 @@ def list_micropython_ports(
     for port in ["minimal", "bare-arm"]:  # CONFIG.blocked_ports:
         if port in ports:
             ports.remove(port)
-
     return ports
 
 
@@ -81,9 +83,9 @@ def frozen_candidates(
     - port = 'auto' or a specific port
     - board = 'auto' or a specific board, 'GENERIC' shoould be specifid in CAPS
     """
-    auto_port = isinstance(ports, str) and "auto" == ports
-    auto_board = isinstance(boards, str) and "auto" == boards
-    auto_version = isinstance(versions, str) and "auto" == versions
+    auto_port = isinstance(ports, str) and "auto" == ports or isinstance(ports, list) and "auto" in ports
+    auto_board = isinstance(boards, str) and "auto" == boards or isinstance(boards, list) and "auto" in boards
+    auto_version = isinstance(versions, str) and "auto" == versions or isinstance(versions, list) and "auto" in versions
 
     if isinstance(versions, str):
         if auto_version:

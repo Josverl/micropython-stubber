@@ -38,7 +38,8 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
     else:
         mpy_path = CONFIG.mpy_path
         mpy_lib_path = CONFIG.mpy_lib_path
-        mpy_stubs_path = CONFIG.mpy_stubs_repo_path
+        
+        mpy_stubs_path = CONFIG.stub_path.parent
 
     repos = [
         (mpy_path, "https://github.com/micropython/micropython.git", "master"),

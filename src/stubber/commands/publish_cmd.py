@@ -40,8 +40,8 @@ ALL_BOARDS = ["GENERIC"]
     "-p",
     "ports",
     multiple=True,
-    default=ALL_PORTS,
-    type=click.Choice(ALL_PORTS),
+    default=["auto"],
+    #    type=click.Choice(ALL_PORTS),
     show_default=True,
     help="multiple: ",
 )
@@ -50,8 +50,8 @@ ALL_BOARDS = ["GENERIC"]
     "-b",
     "boards",
     multiple=True,
-    default=ALL_BOARDS,
-    type=click.Choice(ALL_BOARDS),
+    default=["GENERIC"],  # or "auto" ?
+    #    type=click.Choice(ALL_BOARDS),
     show_default=True,
     help="multiple: ",
 )
@@ -60,6 +60,7 @@ ALL_BOARDS = ["GENERIC"]
     "production",
     is_flag=True,
     default=False,
+    show_default=True,
     prompt="Publish to PYPI (y) or Test-PYPI (n)",
     help="publish to PYPI or Test-PYPI",
 )
@@ -87,6 +88,7 @@ ALL_BOARDS = ["GENERIC"]
     "-t",
     "stub_type",
     default=ALL_TYPES[0],
+    show_default=True,
     type=click.Choice(ALL_TYPES),
     help="stub type to publish",
 )
@@ -115,10 +117,19 @@ def cli_publish(
     ports = list(ports)
     boards = list(boards)
 
-    root_path: Path = Path("./publish")
-    root_path: Path = Path("/develop/MyPython/micropython-stubs")
+    # db = get_database(publish_path=CONFIG.publish_path, production=production)
 
-    db = get_database(root_path=root_path, production=False)
+    result = publish_multiple(
+        frozen=True,
+        family=family,
+        versions=versions,
+        ports=ports,
+        boards=boards,
+        production=production,
+        dryrun=dryrun,
+        force=force,
+        clean=clean,
+    )
 
     # if stub_type == "combo":
     #     publish_combo_stubs(
