@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
 
-from .typed_config_toml import (Config, EnvironmentConfigSource,
-                                TomlConfigSource, key, section)
+from .typed_config_toml import Config, EnvironmentConfigSource, TomlConfigSource, key, section
 
 log = logging.getLogger(__name__)
 
@@ -27,8 +26,8 @@ class StubberConfig(Config):
     mpy_lib_path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
     "a Path to the micropython-lib folder in the repos directory"
 
-    mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("micropython-stubs"))
-    "a Path to the micropython-stubs folder in the repos directory"
+    # mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("./micropython-stubs"))
+    # "a Path to the micropython-stubs folder in the repos directory"
 
     publish_path = key(key_name="publish-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish"))
     "a Path to the folder where all stub publication artefacts are stored"
@@ -44,7 +43,7 @@ class StubberConfig(Config):
         # relative to repo path
         config_updates.update(mpy_path=self.repo_path / self.mpy_path)
         config_updates.update(mpy_lib_path=self.repo_path / self.mpy_lib_path)
-        config_updates.update(mpy_stubs_repo_path=self.repo_path / self.mpy_stubs_repo_path)
+        # config_updates.update(mpy_stubs_repo_path=self.repo_path / self.mpy_stubs_repo_path)
         return config_updates
 
 

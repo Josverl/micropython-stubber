@@ -100,11 +100,11 @@ def publish(
     OK = True
     for (name, path) in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
-            msg = f"{pkg_name}: source {name} does not exist: {CONFIG.stub_path / path}"
+            msg = f"{pkg_name}: source '{name}' not found: {CONFIG.stub_path / path}"
             if not name == StubSource.FROZEN:
                 log.warning(msg)
                 log.warning(msg)
-                status["error"] = f"source {name} does not exist: {CONFIG.stub_path / path}"
+                status["error"] = msg
                 OK = False
             else:
                 # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any

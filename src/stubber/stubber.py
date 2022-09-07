@@ -7,6 +7,7 @@
 import logging
 
 from stubber.commands.clone import cli_clone
+from stubber.commands.config_cli import cli_config
 from stubber.commands.enrich_folder import cli_enrich_folder
 from stubber.commands.get_core import cli_get_core
 from stubber.commands.get_docstubs import cli_docstubs
@@ -30,6 +31,7 @@ log = logging.getLogger("stubber")
 
 if __name__ == "__main__":
     # add all commands to the CLI
+    stubber_cli.add_command(cli_config)
     stubber_cli.add_command(cli_clone)
     stubber_cli.add_command(cli_switch)
     stubber_cli.add_command(cli_docstubs)
