@@ -7,6 +7,7 @@ from stubber.publish.database import get_database
 from stubber.publish.enums import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS
 from stubber.publish.publish import publish, publish_multiple, publish_one
 from stubber.utils.config import CONFIG, readconfig
+from packaging.version import Version
 
 from .fakeconfig import FakeConfig
 
@@ -45,6 +46,8 @@ def test_publish_one(mocker, tmp_path, pytestconfig, production: bool, dryrun: b
     assert m_check.call_count == check_cnt
     assert m_build.call_count == build_cnt
     assert m_publish.call_count == publish_cnt
+    assert result["result"] in ["Published", "DryRun successful"]
+    assert Version(result["version"]).base_version == Version("1.18").base_version 
     # TODO: add return and tests
     # #assert result != None , "Publish failed"
 

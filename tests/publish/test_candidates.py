@@ -3,10 +3,7 @@ from pprint import pprint
 from typing import Generator
 
 import pytest
-from stubber.publish.candidates import (COMBO_STUBS, CORE_STUBS, DOC_STUBS,
-                                        docstub_candidates, frozen_candidates,
-                                        subfolder_names, version_cadidates)
-
+from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_cadidates
 
 def test_subfoldernames(tmp_path, pytestconfig):
     # test data
@@ -77,8 +74,7 @@ def test_docstub_candidates(pytestconfig, family, versions, count):
         ("micropython", "v1.18", "stm32", "auto", 2),
         # list all ports / boards for a version
         ("micropython", "v1.18", "auto", "auto", 5),
-
-        ("micropython", "v1.18", "stm32", "PYBD_SF2", 2), # Self + Generic
+        ("micropython", "v1.18", "stm32", "PYBD_SF2", 2),  # Self + Generic
     ],
 )
 def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count):
