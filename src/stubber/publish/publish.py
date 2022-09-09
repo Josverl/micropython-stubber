@@ -36,6 +36,7 @@ from loguru import logger as log
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
+from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 from tabulate import tabulate
@@ -133,6 +134,14 @@ def publish(
         if not dryrun:
             # only bump version if we are going to publish
             new_ver = package.bump()
+            # check that new version is not already published
+            pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version) ) 
+            if pypi_versions and pypi_versions[-1] >= Version(new_ver):
+                package.pkg_version = str(pypi_versions[-1])
+                log.warning(f"Version {new_ver} already published to PyPi, skipping past {package.pkg_version}")
+                # bump again to get the next version
+                new_ver = package.bump()
+
             log.info(f"{pkg_name}: new version {new_ver}")
         # Update hashes
         package.update_hashes()

@@ -10,13 +10,11 @@ import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
 from stubber.codemod.enrich import enrich_folder
+from stubber.publish.bump import bump_postrelease
+from stubber.publish.enums import StubSource
 from stubber.publish.package import StubSource
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-
-from .bump import bump_postrelease
-from .enums import StubSource
-from .merge_docstubs import copy_merge_docstubs
 
 # TODO: Get git tag and store in DB for reference
 # import stubber.basicgit as git
@@ -132,8 +130,9 @@ class StubPackage:
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
     @pkg_version.setter
-    def pkg_version(self, version):
+    def pkg_version(self, version: str):
         "set the version of the package"
+        if not isinstance(version, str): version = str(version)
         # read the current file
         _toml = self.toml_path
         with open(_toml, "rb") as f:
@@ -429,23 +428,18 @@ class StubPackage:
         log.debug(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
         return self.hash != current
 
-    def bump(self):
+    def bump(self) -> str:
         """
         bump the postrelease version of the package, and write the change to disk
         """
         try:
-            pyproject = self.pyproject
-            assert pyproject is not None, "No pyproject.toml file found"
-            current = parse(pyproject["tool"]["poetry"]["version"])
+            current = Version(self.pkg_version)
             assert isinstance(current, Version)
             # bump the version
-            new_version = bump_postrelease(current)
-            pyproject["tool"]["poetry"]["version"] = str(new_version)
-            self.pyproject = pyproject
+            self.pkg_version = str(bump_postrelease(current))
         except Exception as e:  # pragma: no cover
             log.error(f"Error: {e}")
-            return None
-        return new_version
+        return self.pkg_version
 
     def run_poetry(self, parameters: List[str]) -> bool:
         """Run a poetry commandline in the package folder.

@@ -171,7 +171,7 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
 
     new_version = package.bump()
     assert new_version
-    assert isinstance(new_version, Version)
+    assert isinstance(new_version, str)
 
     if not stub_path.exists():
         # withouth sources there is nothing to build
