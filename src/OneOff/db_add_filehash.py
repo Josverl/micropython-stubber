@@ -5,6 +5,7 @@ from pathlib import Path
 
 from pysondb.db import PysonDB
 from stubber.publish.database import get_database
+from stubber.utils.config import CONFIG
 
 
 def update_db(source: Path, production: bool):
@@ -25,10 +26,15 @@ def update_db(source: Path, production: bool):
     assert "stub_hash" in db_keys
 
 
-# test - test-PyPi
-update_db(Path("./tests/publish/data"), False)
+# # test - test-PyPi
+# update_db(Path("./tests/publish/data"), False)
+
+# # publish - test-PyPi
+# update_db(Path("./repos/micropython-stubs/publish"), False)
+# # publish - PyPi
+# update_db(Path("./repos/micropython-stubs/publish"), True)
 
 # publish - test-PyPi
-update_db(Path("./repos/micropython-stubs/publish"), False)
+update_db(CONFIG.publish_path, production=False)
 # publish - PyPi
-update_db(Path("./repos/micropython-stubs/publish"), True)
+update_db(CONFIG.publish_path, production=True)
