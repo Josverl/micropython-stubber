@@ -89,7 +89,7 @@ def test_one_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrep
 
 @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
 # @pytest.mark.slow
-@pytest.mark.parametrize("mpy_version", ["v1.16", "v1.18", "master"])  # "v1.12", "v1.13", "v1.15",
+@pytest.mark.parametrize("mpy_version", ["v1.16", "v1.18", "master","latest"])  # "v1.12", "v1.13", "v1.15",
 def test_freezer_mpy_manifest(mpy_version: str, tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if we can freeze source using manifest.py files"
     # mpy_path = Path(testrepo_micropython)

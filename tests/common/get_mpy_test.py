@@ -1,9 +1,11 @@
-from pathlib import Path
 import sys
+from pathlib import Path
+
 import pytest
 
 if not sys.warnoptions:
-    import os, warnings
+    import os
+    import warnings
 
     warnings.simplefilter("default")  # Change the filter in this process
     os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
@@ -11,22 +13,25 @@ if not sys.warnoptions:
 
 # Dependencies
 import stubber.basicgit as git
-from stubber.utils import clean_version
-
-# Module Under Test
 import stubber.get_mpy as get_mpy
+from packaging.version import Version, parse
+from stubber.utils.repos import read_micropython_lib_commits, switch
+from stubber.utils.versions import clean_version
 
 
-def test_get_mpy(tmp_path,testrepo_micropython:Path, testrepo_micropython_lib:Path):
+@pytest.mark.parametrize("tag, manifest_count, frozen_count", [("v1.9.4",4,10)])
+def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path, tag: str, manifest_count, frozen_count):
+    # set state of repos 
+    switch(tag=tag, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
     # Use Submodules
     mpy_path = testrepo_micropython.as_posix()
     lib_path = testrepo_micropython_lib.as_posix()
     try:
-        version = clean_version(git.get_tag(mpy_path) or "0.0")
+        version = clean_version(git.get_tag(mpy_path) or "v1")
     except Exception:
         warnings.warn("Could not find the micropython version Tag - assuming v1.x")
-        version = "v1.x"
+        version = "v1"
 
     assert version, "could not find micropython version"
     print("found micropython version : {}".format(version))
@@ -35,19 +40,17 @@ def test_get_mpy(tmp_path,testrepo_micropython:Path, testrepo_micropython_lib:Pa
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
     get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_folder=mpy_path, lib_folder=lib_path)
 
-    modules_count = len(list((tmp_path / stub_path).glob("**/modules.json")))
-    stub_count = len(list((tmp_path / stub_path).glob("**/*.py")))
-    if version == "v1.x":
-        assert modules_count >= 4, "there should at least 4 module manifests"
-        assert stub_count >= 10, "there should > 10 frozen modules"
+    modules = list((tmp_path / stub_path).glob("**/modules.json"))
+    stubs = list((tmp_path / stub_path).glob("**/*.py"))
 
-    elif version >= "v1.15":
-        assert modules_count >= 7, "there should at least 7 module manifests"
-        assert stub_count >= 100, "there should > 100 frozen modules"
+
+    assert len(modules) >= manifest_count, f"there should be => {manifest_count} module manifests"
+    assert len(stubs) >=frozen_count, f"there should be >= {frozen_count} frozen modules"
+
 
 
 def test_get_version_commits():
-    commits = get_mpy.read_micropython_lib_commits()
+    commits = read_micropython_lib_commits()
     assert commits
     assert len(commits) > 0
     # default should be "master"

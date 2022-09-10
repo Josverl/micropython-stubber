@@ -200,7 +200,7 @@ def pull(repo: Union[Path, str], branch="main") -> bool:
         print("error during git checkout main", result)
         return False
 
-    cmd = ["git", "pull", "origin", branch, "--quiet"]
+    cmd = ["git", "pull", "origin", branch, "--quiet", "--auto-stash"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         print("error durign pull", result)

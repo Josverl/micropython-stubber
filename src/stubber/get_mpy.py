@@ -12,7 +12,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 #   part of the MicroPython project, http://micropython.org/
 #   Copyright (c) 2019 Damien P. George
 
-import csv
+
 import glob
 import logging
 # locating frozen modules :
@@ -22,12 +22,10 @@ import logging
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
 import os
-import pkgutil
+
 import re
 import shutil
-import tempfile
 import warnings
-from collections import defaultdict
 from pathlib import Path  # start moving from os & glob to pathlib
 from typing import Optional
 
@@ -35,7 +33,8 @@ from typing import Optional
 from . import basicgit as git
 from . import makemanifest_2 as makemanifest
 from . import utils
-from .utils.config import CONFIG
+from stubber.utils.config import CONFIG
+from stubber.utils.repos import match_lib_with_mpy
 
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -155,38 +154,6 @@ def get_target_names(path: str) -> tuple:
             mpy_port = matches.group("port") or None
     return mpy_port, mpy_board
 
-
-def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
-    """
-    Read a csv with the micropython version and matchin micropython-lib commit-hashes
-    these can be used to make sure that the correct micropython-lib version is checked out.
-
-    TODO: it would be nice if micropython-lib had matching commit-tags
-    
-        git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
-    """
-    data = pkgutil.get_data(__name__, filename)
-    if not data:
-        raise Exception(f"Resource {filename} not found")
-    version_commit = defaultdict()  # lgtm [py/multiple-definition]
-    with tempfile.NamedTemporaryFile(prefix="tags", suffix=".csv", mode="w+t") as ntf:
-        ntf.file.write(data.decode(encoding="utf8"))
-        ntf.file.seek(0)
-        # read the csv file using DictReader
-        reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
-        rows = list(reader)
-        # create a dict version --> commit_hash
-        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
-    # add default
-    version_commit = defaultdict(lambda: "master", version_commit)
-    return version_commit
-
-
-def match_lib_with_mpy(version_tag: str, lib_folder: str):
-    micropython_lib_commits = read_micropython_lib_commits()
-    # Make sure that the correct micropython-lib release is checked out
-    log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
-    return git.checkout_commit(micropython_lib_commits[version_tag], lib_folder)
 
 
 def get_frozen_from_manifest(

@@ -60,6 +60,7 @@ tomli-w = "1.0.0"
 loguru = "0.6.0"
 PyGithub = "1.55"
 tabulate = "0.8.10"
+pypi-simple = "0.10.0"
 [tool.poetry.extras]
 tools = ["rshell", "esptool", "pyserial"]
 
