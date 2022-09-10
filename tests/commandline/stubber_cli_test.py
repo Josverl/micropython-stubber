@@ -2,11 +2,13 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 # module under test :
 import stubber.stubber as stubber
 from click.testing import CliRunner
 from mock import MagicMock
 from pytest_mock import MockerFixture
+from stubber.commands.switch import VERSION_LIST
 
 # mark all tests
 pytestmark = pytest.mark.cli
@@ -77,11 +79,10 @@ def test_stubber_switch(mocker: MockerFixture, params: List[str]):
     m_clone: MagicMock = mocker.patch("stubber.commands.clone.git.clone", autospec=True, return_value=0)
     m_fetch: MagicMock = mocker.patch("stubber.commands.clone.git.fetch", autospec=True, return_value=0)
 
-    
     m_switch: MagicMock = mocker.patch("stubber.commands.clone.git.switch_branch", autospec=True, return_value=0)
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone.git.checkout_tag", autospec=True, return_value=0)
     m_get_tag: MagicMock = mocker.patch("stubber.commands.clone.git.get_tag", autospec=True, return_value="v1.42")
-    
+
     m_match = mocker.patch("stubber.get_mpy.match_lib_with_mpy", autospec=True)
 
     m_exists = mocker.patch("stubber.commands.clone.Path.exists", return_value=True)
@@ -105,10 +106,7 @@ def test_stubber_switch(mocker: MockerFixture, params: List[str]):
         m_checkout.assert_called_once()
 
 
-from stubber.commands.switch import VERSION_LIST
-
-
-@pytest.mark.parametrize( "version", VERSION_LIST)
+@pytest.mark.parametrize("version", VERSION_LIST)
 def test_stubber_switch_version(mocker: MockerFixture, version: str):
     runner = CliRunner()
     # Mock Path.exists
@@ -118,7 +116,7 @@ def test_stubber_switch_version(mocker: MockerFixture, version: str):
     m_switch: MagicMock = mocker.patch("stubber.commands.clone.git.switch_branch", autospec=True, return_value=0)
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone.git.checkout_tag", autospec=True, return_value=0)
     m_get_tag: MagicMock = mocker.patch("stubber.commands.clone.git.get_tag", autospec=True, return_value="v1.42")
-    
+
     m_match = mocker.patch("stubber.get_mpy.match_lib_with_mpy", autospec=True)
 
     m_exists = mocker.patch("stubber.commands.clone.Path.exists", return_value=True)
@@ -131,16 +129,6 @@ def test_stubber_switch_version(mocker: MockerFixture, version: str):
     m_fetch.assert_any_call(Path("repos/micropython"))
     m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
-
-from stubber.get_mpy import read_micropython_lib_commits
-
-
-@pytest.mark.parametrize( "version", VERSION_LIST)
-def test_stubber_switch_version_commit_list(version:str):
-    mpy_lib_commits = read_micropython_lib_commits()
-    if version != "latest":
-        assert len(mpy_lib_commits) > 0
-        assert version in mpy_lib_commits ,"match"
 
 ##########################################################################################
 # minify
@@ -282,7 +270,7 @@ def test_stubber_get_docstubs(mocker: MockerFixture, tmp_path: Path):
 def test_stubber_fallback(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
-    
+
     mock: MagicMock = mocker.patch("stubber.commands.update_fallback.update_fallback", autospec=True)
     # mock2: MagicMock = mocker.patch("stubber.update_fallback.update_fallback", autospec=True)
     # from .update_fallback import update_fallback,
