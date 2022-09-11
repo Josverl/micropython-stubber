@@ -11,7 +11,9 @@ Will need to be updated after new_output has been implemented.
 import json
 from pathlib import Path
 from typing import List, Tuple
+
 import stubber.utils as utils
+from loguru import logger as log
 
 
 def process(folder: Path, pattern: str):
@@ -50,11 +52,11 @@ def process(folder: Path, pattern: str):
                     if isBad:
                         context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
-                            print(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
+                            log.info(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
                         except Exception:
-                            print(f"{context:40} {r['type']:<15} - {r['confidence']} ")
+                            log.info(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 
-                        # print(r)
+                        log.debug(r)
     if len(report) > 0:
         filename = folder / "report.json"
         with open(filename, mode="w", encoding="utf8") as fp:

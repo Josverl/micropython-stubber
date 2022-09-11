@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 #
 import argparse
-import logging
+from loguru import logger as log
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -14,7 +14,7 @@ from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, Imp
 from stubber.cst_transformer import MODULE_KEY, StubTypingCollector, TypeInfo, update_def_docstr, update_module_docstr
 
 ##########################################################################################
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 #########################################################################################
 
 

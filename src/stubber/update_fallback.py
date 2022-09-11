@@ -5,9 +5,9 @@ from typing import List, Optional, Tuple
 from distutils.dir_util import copy_tree
 import shutil
 
-import logging
+from loguru import logger as log
 
-log = logging.getLogger()
+# log = logging.getLogger()
 
 RELEASED = "v1_18"
 
@@ -53,7 +53,7 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
         # esp
         ("esp.py*", f"micropython-{version}-docstubs"),  # 8266 fw stub has most functions
         ("esp32.py*", f"micropython-{version}-docstubs"),  # esp32"),
-        # pyboard == stm32 
+        # pyboard == stm32
         ("pyb.py*", f"micropython-{fw_version}-stm32"),
         ("framebuf.py*", f"micropython-{fw_version}-stm32"),
         # rp2

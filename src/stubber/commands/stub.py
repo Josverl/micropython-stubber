@@ -2,7 +2,7 @@
 # stub
 ##########################################################################################
 
-import logging
+from loguru import logger as log
 from pathlib import Path
 from typing import Union
 
@@ -13,7 +13,7 @@ from stubber.utils.my_version import __version__
 from .stubber_cli import stubber_cli
 
 ##########################################################################################
-log = logging.getLogger("stubber")
+# log = logging.getLogger("stubber")
 #########################################################################################
 
 

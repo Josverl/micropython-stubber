@@ -7,7 +7,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # pylint: disable= line-too-long
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-import logging
+from loguru import logger as log
 from pathlib import Path
 
 from . import downloader, utils
@@ -17,7 +17,7 @@ FAMILY = "loboris"
 PORT = "esp32_lobo"
 
 
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.INFO)
 # log.setLevel(level=logging.DEBUG)
 
@@ -65,5 +65,5 @@ def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
+    # logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
     get_frozen(version="3.2.24")

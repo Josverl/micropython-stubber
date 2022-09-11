@@ -133,14 +133,12 @@ def publish(
         ## TODO: get last published version.postXXX from PyPI and update version if different
         if not dryrun:
             # only bump version if we are going to publish
-            new_ver = package.bump()
-            # check that new version is not already published
-            pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version) ) 
-            if pypi_versions and pypi_versions[-1] >= Version(new_ver):
+            # try to get version from PyPi and increase past that
+            pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version))
+            if pypi_versions:
                 package.pkg_version = str(pypi_versions[-1])
-                log.warning(f"Version {new_ver} already published to PyPi, skipping past {package.pkg_version}")
-                # bump again to get the next version
-                new_ver = package.bump()
+            # to get the next version
+            new_ver = package.bump()
 
             log.info(f"{pkg_name}: new version {new_ver}")
         # Update hashes
@@ -240,5 +238,5 @@ def publish_multiple(
         )
         results.append(result)
 
-    print(tabulate(results, headers="keys"))
+    log.info(tabulate(results, headers="keys"))
     return results

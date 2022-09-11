@@ -3,11 +3,12 @@
 # MIT license
 # pylint: disable= invalid-name
 import os
-import requests
-import logging
 
-log = logging.getLogger(__name__)
-log.setLevel(level=logging.INFO)
+import requests
+from loguru import logger as log
+
+# # log = logging.getLogger(__name__)
+# log.setLevel(level=logging.INFO)
 
 
 def download_file(url: str, module: str, folder: str = "./"):

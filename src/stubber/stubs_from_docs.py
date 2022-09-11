@@ -64,12 +64,13 @@ Note: black on python 3.7 does not like some function defs
 """
 
 import json
-import logging
 import os
 import re
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
+
+from loguru import logger as log
 
 from . import __version__, utils
 from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
@@ -79,7 +80,7 @@ from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
 from .utils.config import CONFIG
 
 # logging
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 
 NEW_OUTPUT = True
 #: self.gather_docs = True
@@ -813,7 +814,8 @@ def generate_from_rst(
         "-v",
         "-v",  # show some feedback
     ]
-    subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+    subprocess.run(cmd, capture_output=True)
 
     # Also generate a module manifest
     utils.make_manifest(

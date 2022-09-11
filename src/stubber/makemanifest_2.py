@@ -2,11 +2,11 @@
 Classes and functions copied & adapted from micropypythons makemanifest.py to ensure that the manifest.py files can be processed
 """
 import os
-import logging
+from loguru import logger as log
 from pathlib import Path
 import shutil
 
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
 
 path_vars = {"MPY_DIR": "", "MPY_LIB_DIR": "", "PORT_DIR": "", "BOARD_DIR": ""}

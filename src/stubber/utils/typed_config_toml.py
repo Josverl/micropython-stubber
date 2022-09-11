@@ -17,9 +17,7 @@ except ModuleNotFoundError:
 from typedconfig.config import Config, key, section# type: ignore
 from typedconfig.source import ConfigSource, EnvironmentConfigSource# type: ignore
 
-import logging
-
-log = logging.getLogger(__name__)
+from loguru import logger as log
 
 
 class TomlConfigSource(ConfigSource):
@@ -81,34 +79,3 @@ class TomlConfigSource(ConfigSource):
         if section is None:
             return None
         return section.get(key_name.lower(), None)
-
-
-# pyproject.toml
-# """
-# [tool.deadparrot]
-# species = "Norwegian Blue"
-# state = "resting"
-# details = ["pinging","Lovely plumage","3",4]
-# store_owner = "Michael Palin"
-# interval = 5
-# """
-
-# @section("deadparrot")
-# class ParrotConfig(Config):
-#     name = key(cast=str, default="polly", required=False)
-#     species = key(cast=str, default="bird")
-#     state = key(cast=str)
-#     details = key(cast=list[str])
-#     store_owner = key(cast=str)
-
-
-# # One Step
-
-# config = ParrotConfig()
-# config.add_source(EnvironmentConfigSource())
-# config.add_source(TomlConfigSource("pyproject.toml", prefix="tool.", must_exist=False))  # ,"tools.micropython-stubber"))
-# config.read()
-# print(config)
-
-# for x in config.details:
-#     print(x)

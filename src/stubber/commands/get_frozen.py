@@ -1,7 +1,7 @@
 ##########################################################################################
 # get-frozen
 ##########################################################################################
-import logging
+from loguru import logger as log
 from pathlib import Path
 from typing import List
 
@@ -16,7 +16,7 @@ from stubber.utils.my_version import __version__
 from .stubber_cli import stubber_cli
 
 ##########################################################################################
-log = logging.getLogger("stubber")
+# log = logging.getLogger("stubber")
 #########################################################################################
 
 

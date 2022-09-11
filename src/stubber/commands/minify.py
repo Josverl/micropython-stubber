@@ -1,7 +1,6 @@
 ##########################################################################################
 # minify
 ##########################################################################################
-import logging
 from pathlib import Path
 from typing import Union
 
@@ -10,10 +9,7 @@ from stubber.minify import minify
 from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
-
-##########################################################################################
-log = logging.getLogger("stubber")
-#########################################################################################
+from loguru import logger as log
 
 
 @stubber_cli.command(name="minify")
@@ -53,8 +49,8 @@ def cli_minify(
         sources = [source]
 
     for source in sources:
-        print(f"\nMinifying {source}...")
+        log.info(f"\nMinifying {source}...")
         result = minify(source, target, keep_report, diff, cross_compile)
 
-    print("\nDone!")
+    log.info("\nDone!")
     return 0

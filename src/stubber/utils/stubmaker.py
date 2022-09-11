@@ -1,5 +1,3 @@
-import logging
-import shutil
 import sys
 from pathlib import Path
 
@@ -7,10 +5,7 @@ import mypy.stubgen as stubgen
 from mypy.errors import CompileError
 
 from .my_version import __version__
-
-log = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
-
+from loguru import logger as log
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(
@@ -42,7 +37,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     sg_opt.files = [str(file)]
     sg_opt.output_dir = str(file.parent)
     try:
-        print(f"Calling stubgen on {str(file)}")
+        log.info(f"Calling stubgen on {str(file)}")
         # TDOD: Stubgen.generate_stubs does not provide a way to return the errors
         # such as `cannot perform relative import`
 
@@ -69,7 +64,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         return r
     else:  # one or less module manifests
         ## generate fyi files for folder
-        print("::group::[stubgen] running stubgen on {0}".format(modules_folder))
+        log.info("::group::[stubgen] running stubgen on {0}".format(modules_folder))
 
         Error_Found = False
         sg_opt = STUBGEN_OPT
@@ -87,7 +82,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         if Error_Found:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
-            print("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
+            log.info("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
             py_files = list(modules_folder.rglob("*.py"))
             for py in py_files:
                 generate_pyi_from_file(py)

@@ -132,7 +132,8 @@ class StubPackage:
     @pkg_version.setter
     def pkg_version(self, version: str):
         "set the version of the package"
-        if not isinstance(version, str): version = str(version)
+        if not isinstance(version, str):
+            version = str(version)
         # read the current file
         _toml = self.toml_path
         with open(_toml, "rb") as f:
@@ -502,4 +503,6 @@ class StubPackage:
         else:
             log.info(f"Publishing to TEST-PyPi https://test.pypy.org")
             params = ["publish", "-r", "test-pypi"]
-        return self.run_poetry(params)
+        r = self.run_poetry(params)
+        print("")  # add a newline after the output
+        return r

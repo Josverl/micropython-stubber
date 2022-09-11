@@ -1,5 +1,5 @@
 import csv
-import logging
+from loguru import logger as log
 import pkgutil
 import tempfile
 from collections import defaultdict
@@ -8,7 +8,7 @@ from pathlib import Path
 import stubber.basicgit as git
 from stubber.utils.my_version import __version__
 
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 
 
 def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):

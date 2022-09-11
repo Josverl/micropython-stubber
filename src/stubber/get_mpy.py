@@ -14,7 +14,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 
 
 import glob
-import logging
+from loguru import logger as log
 
 # locating frozen modules :
 # tested on MicroPython v1.12 - v1.13
@@ -37,7 +37,7 @@ from . import makemanifest_2 as makemanifest
 from . import utils
 from packaging.version import parse, Version
 
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
 
 # globals
@@ -74,7 +74,7 @@ def get_frozen(stub_folder: str, version: str, mpy_path: Optional[Union[Path, st
     # and skip the manifest used for coverage tests
     manifests = [m for m in manifests if not "venv" in str(m) and Path(m).parent.name != "coverage"]
     # FIXME check vor version , not count of manifests
-    if version in ["latest","master"] or Version(version) >= Version("1.12"):
+    if version in ["latest", "master"] or Version(version) >= Version("1.12"):
         log.info("MicroPython v1.12 and newer")
         get_frozen_from_manifest(manifests, stub_folder, mpy_path, lib_path, version)
     else:
@@ -115,7 +115,7 @@ def get_frozen_folders(stub_folder: str, mpy_folder: str, lib_folder: str, versi
                 targets.append(dest_path)
         except OSError as e:
             ## Ignore errors that are caused by reorganisation of Micropython-lib
-            # print(e)
+            # log.exception(e)
             warnings.warn("unable to freeze {} due to error {}".format(e.filename, str(e)))
 
     for dest_path in targets:

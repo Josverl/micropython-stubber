@@ -4,8 +4,10 @@ note that this does not take multiple inheritance into account
 ref : https://stackoverflow.com/questions/34964878/python-generate-a-dictionarytree-from-a-list-of-tuples/35049729#35049729
 with modification 
 """
-from typing import List
 import re
+from typing import List
+
+from loguru import logger as log
 
 __all__ = ['sort_classes']
 RE_CLASS = re.compile(r"class\s+(?P<class>\w+)(\((?P<parent>\w*)\))?")
@@ -60,11 +62,11 @@ def sort_classes(classes: List[str]):
     def list_node(node, sorted: List[str]):
         try:
             sorted.append(node["class"])
-            # print(node["id"], node["class"])
+            log.debug(node["id"], node["class"])
         except KeyError:
-            # print(node["id"])
+            log.debug(node["id"])
             pass
-        # print(node["id"])
+        log.debug(node["id"])
         if node.get("children", False):
             for child in node["children"]:
                 list_node(child, sorted)

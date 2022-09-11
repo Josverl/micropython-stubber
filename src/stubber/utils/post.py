@@ -1,12 +1,14 @@
 """Pre/Post Processing for createstubs.py"""
-from typing import List
-from pathlib import Path
-import sys
 import subprocess
-import logging
+import sys
+from pathlib import Path
+from typing import List
+
+from loguru import logger as log
+
 from .stubmaker import generate_pyi_files
 
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 
 
 def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
@@ -28,7 +30,8 @@ def run_black(path: Path):
             # def sizeof(struct, layout_type=NATIVE, /) -> int:
             cmd += ["--fast"]
         # capture to suppress based on log level
-        result = subprocess.run(cmd, capture_output=log.level >= logging.INFO, check=True, shell=False, cwd=path)
+        # result = subprocess.run(cmd, capture_output=log.level >= logging.INFO, check=True, shell=False, cwd=path)
+        result = subprocess.run(cmd, capture_output=True, check=True, shell=False, cwd=path)
         if result.returncode != 0:  # pragma: no cover
             raise Exception(result.stderr.decode("utf-8"))
     except subprocess.SubprocessError:  # pragma: no cover

@@ -2,7 +2,6 @@
 switch 
 """
 
-import logging
 import os
 from pathlib import Path
 from typing import Optional, Union
@@ -10,13 +9,14 @@ from typing import Optional, Union
 import click
 import stubber.basicgit as git
 import stubber.get_mpy as get_mpy
+from loguru import logger as log
 from stubber.utils.config import CONFIG
 from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
 
 ##########################################################################################
-log = logging.getLogger("stubber")
+# log = logging.getLogger("stubber")
 #########################################################################################
 
 
