@@ -6,6 +6,7 @@ from typing import Union
 import itertools
 import subprocess
 from pathlib import Path
+from loguru import logger as log
 
 try:
     import python_minifier
@@ -166,7 +167,7 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
 
     edits = [
         ("comment", "print"),
-        ("comment", "import logging"),
+        ("comment", "from loguru import logger as log"),
         # first full
         ("comment", "self._log ="),
         ("comment", "self._log("),
@@ -225,9 +226,9 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
             # remove_pass=True,  # no dead code
             # convert_posargs_to_args=True, # Does not save any space
         )
-    print(f"Original length : {len(content)}")
-    print(f"Minified length : {len(source)}")
-    print(f"Reduced by      : {len(content)-len(source)} ")
+    log.info(f"Original length : {len(content)}")
+    log.info(f"Minified length : {len(source)}")
+    log.info(f"Reduced by      : {len(content)-len(source)} ")
     return source
 
 
@@ -249,13 +250,13 @@ def minify(
             minified = minify_script(source_script=source, keep_report=keep_report, diff=diff)
             f.write(minified)
     except Exception as e:  # pragma: no cover
-        print(e)
+        log.exception(e)
 
-    print("Minified file written to :", target)
+    log.info("Minified file written to :", target)
     if cross_compile:
         result = subprocess.run(["mpy-cross", "-O2", str(target)])
         if result.returncode == 0:
-            print("mpy-cross compiled to    :", target.with_suffix(".mpy"))
+            log.info("mpy-cross compiled to    :", target.with_suffix(".mpy"))
         return result.returncode
     else:
         return 0

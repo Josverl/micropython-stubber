@@ -2,7 +2,6 @@
 """
 
 import shutil
-import sys
 from pathlib import Path
 
 from loguru import logger as log
@@ -11,9 +10,6 @@ from stubber.publish.candidates import firmware_candidates
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
-# replace std log handler with a custom one capped on INFO level
-log.remove()
-log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 
 def copy_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):

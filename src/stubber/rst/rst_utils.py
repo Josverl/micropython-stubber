@@ -35,7 +35,7 @@ to do:
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/Ni8g2z/2
 
-import logging
+from loguru import logger as log
 import re
 from typing import Dict, List, Union
 
@@ -54,7 +54,7 @@ __all__ = [
 
 
 # logging
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 
 # all possible Types needed
 TYPING_IMPORT: List[str] = [

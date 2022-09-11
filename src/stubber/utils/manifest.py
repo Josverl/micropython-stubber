@@ -1,5 +1,5 @@
 import json
-import logging
+from loguru import logger as log
 
 from pathlib import Path
 from .my_version import __version__
@@ -7,8 +7,9 @@ from typing import Optional
 from .versions import clean_version
 
 
-log = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
+# # log = logging.getLogger(__name__)
+# # logging.basicConfig(level=logging.INFO)
+
 
 def manifest(
     family: str = "micropython",

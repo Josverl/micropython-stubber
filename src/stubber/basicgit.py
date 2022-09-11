@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Optional, Union
 
+from loguru import logger as log
 from packaging.version import parse
 
 
@@ -27,13 +28,13 @@ def _run_git(
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
         # add some logging for github actions
-        print("Exception on process, rc=", e.returncode, "output=", e.output, "stderr=", e.stderr)
+        log.error("Exception on process, rc=", e.returncode, "output=", e.output, "stderr=", e.stderr)
         return None
     if result.stderr != b"":
         if not expect_stderr:
             raise Exception(result.stderr.decode("utf-8"))
         if capture_output and echo_output:  # pragma: no cover
-            print(result.stderr.decode("utf-8"))
+            log.error(result.stderr.decode("utf-8"))
 
     if result.returncode < 0:
         raise Exception(result.stderr.decode("utf-8"))
@@ -115,25 +116,25 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    print(result.stderr.decode("utf-8"))
-    print(result.stdout.decode("utf-8"))
+    log.info(result.stderr.decode("utf-8"))
+    log.info(result.stdout.decode("utf-8"))
     return True
 
 
-def synch_submodules( repo: Optional[Union[Path, str]] = None) -> bool:
+def synch_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
     """
     make sure any submodules are in syncj
     """
     cmds = [
-            ["git", "submodule", "sync", "--quiet", "--force"],
-            ["git", "submodule", "update", "--quiet", "--force"],
+        ["git", "submodule", "sync", "--quiet"],
+        ["git", "submodule", "update", "--quiet"],
     ]
     for cmd in cmds:
         result = _run_git(cmd, repo=repo, expect_stderr=True)
         if not result:
             return False
         # actually a good result
-        print(result.stderr.decode("utf-8"))
+        log.info(result.stderr.decode("utf-8"))
     return True
 
 
@@ -146,7 +147,7 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
     if not result:
         return False
     # actually a good result
-    print(result.stderr.decode("utf-8"))
+    log.info(result.stderr.decode("utf-8"))
     synch_submodules(repo)
     return True
 
@@ -164,7 +165,7 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    print(result.stderr.decode("utf-8"))
+    log.info(result.stderr.decode("utf-8"))
     synch_submodules(repo)
     return True
 
@@ -181,7 +182,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    print(result.stderr.decode("utf-8"))
+    log.info(result.stderr.decode("utf-8"))
     synch_submodules(repo)
     return True
 
@@ -217,12 +218,12 @@ def pull(repo: Union[Path, str], branch="main") -> bool:
     cmd = ["git", "checkout", branch, "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
-        print("error during git checkout main", result)
+        log.error("error during git checkout main", result)
         return False
 
-    cmd = ["git", "pull", "origin", branch, "--quiet", "--auto-stash"]
+    cmd = ["git", "pull", "origin", branch, "--quiet", "--autostash"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
     if not result:
-        print("error durign pull", result)
+        log.error("error durign pull", result)
         return False
     return result.returncode == 0

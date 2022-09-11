@@ -3,7 +3,7 @@ Download or update the micropyton compatibility modules from pycopy and stores t
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
 import json
-import logging
+from loguru import logger as log
 import os
 import pkgutil
 import shutil
@@ -14,7 +14,7 @@ from pathlib import Path
 from . import __version__, utils
 from .utils.config import CONFIG
 
-log = logging.getLogger(__name__)
+# # log = logging.getLogger(__name__)
 
 
 def get_core(requirements, stub_path=None, family: str = "core"):
@@ -88,5 +88,5 @@ def get_core(requirements, stub_path=None, family: str = "core"):
 
 if __name__ == "__main__":
     # just run a quick test
-    logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
+    # logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
     get_core(requirements="requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")

@@ -1,7 +1,7 @@
 ##########################################################################################
 # clone
 ##########################################################################################
-import logging
+from loguru import logger as log
 import os
 from pathlib import Path
 from typing import Union
@@ -14,7 +14,7 @@ from stubber.utils.my_version import __version__
 from .stubber_cli import stubber_cli
 
 ##########################################################################################
-log = logging.getLogger("stubber")
+# log = logging.getLogger("stubber")
 #########################################################################################
 
 
@@ -38,7 +38,7 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
     else:
         mpy_path = CONFIG.mpy_path
         mpy_lib_path = CONFIG.mpy_lib_path
-        
+
         mpy_stubs_path = CONFIG.stub_path.parent
 
     repos = [
