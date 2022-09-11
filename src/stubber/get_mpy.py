@@ -15,6 +15,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 
 import glob
 import logging
+
 # locating frozen modules :
 # tested on MicroPython v1.12 - v1.13
 # - 1.16 - using manifests.py, include can specify kwargs
@@ -22,19 +23,19 @@ import logging
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
 import os
-
 import re
 import shutil
 import warnings
 from pathlib import Path  # start moving from os & glob to pathlib
-from typing import Optional
+from typing import Optional, Union
 
-# Classes and functions from makemanifest to ensure that the manifest.py files can be processed
-from . import basicgit as git
-from . import makemanifest_2 as makemanifest
-from . import utils
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import match_lib_with_mpy
+
+# Classes and functions from makemanifest to ensure that the manifest.py files can be processed
+from . import makemanifest_2 as makemanifest
+from . import utils
+from packaging.version import parse, Version
 
 log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -43,7 +44,7 @@ log = logging.getLogger(__name__)
 FAMILY = "micropython"
 
 
-def get_frozen(stub_folder: str, version: str, mpy_folder: Optional[str] = None, lib_folder: Optional[str] = None):
+def get_frozen(stub_folder: str, version: str, mpy_path: Optional[Union[Path, str]] = None, lib_path: Optional[Union[Path, str]] = None):
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
@@ -51,35 +52,35 @@ def get_frozen(stub_folder: str, version: str, mpy_folder: Optional[str] = None,
     """
 
     current_dir = os.getcwd()
-    if not mpy_folder:
-        mpy_folder = "./micropython"
-    if not lib_folder:
-        lib_folder = "./micropython-lib"
+    if not mpy_path:
+        mpy_path = "./micropython"
+    if not lib_path:
+        lib_path = "./micropython-lib"
     if not stub_folder:
         stub_folder = "{}/{}_{}_frozen".format(CONFIG.stub_path, FAMILY, utils.clean_version(version, flat=True))
     # get the manifests of the different ports and boards
-    mpy_folder = Path(mpy_folder).absolute().as_posix()
-    lib_folder = Path(lib_folder).absolute().as_posix()
+    mpy_path = Path(mpy_path).absolute().as_posix()
+    lib_path = Path(lib_path).absolute().as_posix()
     stub_folder = Path(stub_folder).absolute().as_posix()
 
     # manifest.py is used for board specific and daily builds
     # manifest_release.py is used for the release builds
-    manifests = glob.glob(mpy_folder + "/ports/**/manifest.py", recursive=True) + glob.glob(
-        mpy_folder + "/ports/**/manifest_release.py", recursive=True
+    manifests = glob.glob(mpy_path + "/ports/**/manifest.py", recursive=True) + glob.glob(
+        mpy_path + "/ports/**/manifest_release.py", recursive=True
     )
 
     # remove any manifests  that are below one of the virtual environments (venv) \
     # 'C:\\develop\\MyPython\\micropython\\ports\\esp32\\build-venv\\lib64\\python3.6\\site-packages\\pip\\_vendor\\distlib\\manifest.py'
     # and skip the manifest used for coverage tests
     manifests = [m for m in manifests if not "venv" in str(m) and Path(m).parent.name != "coverage"]
-
-    if len(manifests) > 0:
+    # FIXME check vor version , not count of manifests
+    if version in ["latest","master"] or Version(version) >= Version("1.12"):
         log.info("MicroPython v1.12 and newer")
-        get_frozen_from_manifest(manifests, stub_folder, mpy_folder, lib_folder, version)
+        get_frozen_from_manifest(manifests, stub_folder, mpy_path, lib_path, version)
     else:
         log.info("MicroPython v1.11, older or other")
         # others
-        get_frozen_folders(stub_folder, mpy_folder, lib_folder, version)
+        get_frozen_folders(stub_folder, mpy_path, lib_path, version)
     # restore cwd
     os.chdir(current_dir)
 
@@ -155,7 +156,6 @@ def get_target_names(path: str) -> tuple:
     return mpy_port, mpy_board
 
 
-
 def get_frozen_from_manifest(
     manifests,
     stub_folder: str,
@@ -190,34 +190,36 @@ def get_frozen_from_manifest(
     # Include top-level inputs, to generate the manifest
     for manifest in manifests:
         log.info("Manifest: {}".format(manifest))
-        makemanifest.path_vars["PORT_DIR"] = ""
-        makemanifest.path_vars["BOARD_DIR"] = ""
+        port_dir = board_dir = ""
 
         # check BOARD AND PORT pattern
         matches = re.search(regex_port_board, manifest)
         if matches:
             # port and board
-            makemanifest.path_vars["PORT_DIR"] = matches.group("port") or ""
-            makemanifest.path_vars["BOARD_DIR"] = matches.group("board") or ""
+            port_dir = matches.group("port") or ""
+            board_dir = matches.group("board") or ""
             if os.path.basename(matches.group("board")) == "manifest":
-                makemanifest.path_vars["BOARD_DIR"] = ""
+                board_dir = ""
         else:
             # TODO: Variants
             matches = re.search(regex_port_board, manifest)  # BOARD AND VARIANT
             if matches:
                 # port and variant
-                makemanifest.path_vars["PORT_DIR"] = matches.group("port") or ""
-                makemanifest.path_vars["BOARD_DIR"] = matches.group("board") or ""
+                port_dir = matches.group("port") or ""
+                board_dir = matches.group("board") or ""
                 if os.path.basename(matches.group("board")) == "manifest":
-                    makemanifest.path_vars["BOARD_DIR"] = ""
+                    board_dir = ""
             else:
                 # just port
                 matches = re.search(regex_port, manifest)
                 if matches:
-                    makemanifest.path_vars["PORT_DIR"] = matches.group("port") or ""
+                    port_dir = matches.group("port") or ""
 
-        port_name = os.path.basename(makemanifest.path_vars["PORT_DIR"])
-        board_name = os.path.basename(makemanifest.path_vars["BOARD_DIR"])
+        makemanifest.path_vars["PORT_DIR"] = port_dir
+        makemanifest.path_vars["BOARD_DIR"] = board_dir
+
+        port_name = Path(port_dir).name
+        board_name = Path(board_dir).name
 
         if board_name == "":
             board_name = "GENERIC"
@@ -237,14 +239,11 @@ def get_frozen_from_manifest(
         except makemanifest.FreezeError as er:
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
-        # NOTE: compensate for expicitly omittest task.py from freeze manifest 
+        # NOTE: compensate for expicitly omittest task.py from freeze manifest
         if (freeze_path / "uasyncio").exists():
             # copy task.py from micropython\extmod\uasyncio\task.py to stub_folder
             log.info(f"add missing : uasyncio/task.py to {freeze_path}")
             shutil.copy(str(Path(mpy_folder) / "extmod" / "uasyncio" / "task.py"), str(freeze_path / "uasyncio"))
 
-
         # make a module manifest
         utils.make_manifest(Path(makemanifest.stub_dir), FAMILY, port=port_name, board=board_name, version=version, stubtype="frozen")
-
-

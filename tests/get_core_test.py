@@ -3,7 +3,9 @@ import pytest
 # Module Under Test
 import stubber.get_cpython as get_cpython
 
+
 # No Mocks, does actual extraction using pip-install
+@pytest.mark.skip(reason="Does actual extraction using pip-install")
 @pytest.mark.parametrize(
     "requirements",
     [

@@ -27,7 +27,7 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
 
-    if not tag or tag == "":
+    if not tag or tag in ["master", ""]:
         tag = "latest"
     if tag == "latest":
         git.switch_branch(repo=mpy_path, branch="master")

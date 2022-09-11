@@ -76,7 +76,7 @@ def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo, testre
 ###################################################################################################
 
 
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 @pytest.mark.docfix
 def test_rst_all(tmp_path, micropython_repo, testrepo_micropython: Path):
     v_tag = micropython_repo
@@ -248,7 +248,7 @@ import json
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_Non_default_follows_default(pyright_results, capsys):
     """use pyright to check the validity of the generated stubs
     - Non-default argument follows default argument
@@ -275,6 +275,19 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
 # C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined
 # C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined
 # C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined
+# TODO DOCFIX: 
+    # wm8960.py
+    # SWAP_NONE = 0
+    # ROUTE_PLAYBACK_RECORD = 0
+    # INPUT_MIC3 = 0
+    # INPUT_MIC2 = 0
+    # INPUT_MIC2 = 0
+    # SYSCLK_MCLK = 0
+    # SYNC_DAC = 0
+    # BUS_I2S = 1
+    # WM8960_I2C_ADDR = 0x1A
+    # MUTE_FAST = 0
+    # ALC_MODE = 0
 @pytest.mark.docfix
 @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_undefined_variable(pyright_results, capsys):
@@ -287,7 +300,7 @@ def test_pyright_undefined_variable(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs - reportGeneralTypeIssues"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -307,7 +320,7 @@ def test_pyright_reportGeneralTypeIssues(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_invalid_strings(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
@@ -321,7 +334,7 @@ def test_pyright_invalid_strings(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_pyright_obscured_definitions(pyright_results, capsys):
 
     "use pyright to check the validity of the generated stubs"
@@ -341,7 +354,7 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
 
 
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs, "machine.py")
@@ -352,7 +365,7 @@ def test_doc_deepsleep_stub(rst_stubs):
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_socket_class_def(rst_stubs: Path):
     "make sense of `usocket.socket` class documented as a function - Upstream Docfix needed"
     content = read_stub(rst_stubs, "usocket.py")
@@ -379,7 +392,7 @@ def test_doc_socket_class_def(rst_stubs: Path):
     ],
 )
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname: str):
     "verify `collections.deque` class documented as a function - Upstream Docfix pending"
     filename = modulename + ".py"
@@ -409,7 +422,7 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
     ],
 )
 @pytest.mark.docfix
-@pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
+# @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_CONSTANTS(error, modulename, pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]

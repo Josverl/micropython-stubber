@@ -120,6 +120,23 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     return True
 
 
+def synch_submodules( repo: Optional[Union[Path, str]] = None) -> bool:
+    """
+    make sure any submodules are in syncj
+    """
+    cmds = [
+            ["git", "submodule", "sync", "--quiet", "--force"],
+            ["git", "submodule", "update", "--quiet", "--force"],
+    ]
+    for cmd in cmds:
+        result = _run_git(cmd, repo=repo, expect_stderr=True)
+        if not result:
+            return False
+        # actually a good result
+        print(result.stderr.decode("utf-8"))
+    return True
+
+
 def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -> bool:
     """
     Checkout a specific commit
@@ -130,6 +147,7 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
         return False
     # actually a good result
     print(result.stderr.decode("utf-8"))
+    synch_submodules(repo)
     return True
 
 
@@ -147,6 +165,7 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
         return False
     # actually a good result
     print(result.stderr.decode("utf-8"))
+    synch_submodules(repo)
     return True
 
 
@@ -163,6 +182,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
         return False
     # actually a good result
     print(result.stderr.decode("utf-8"))
+    synch_submodules(repo)
     return True
 
 
