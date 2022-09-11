@@ -19,6 +19,7 @@ from .stubber_cli import stubber_cli
 log = logging.getLogger("stubber")
 #########################################################################################
 
+
 @stubber_cli.command(name="get-frozen")
 @click.option(
     "--stub-folder",
@@ -55,7 +56,7 @@ def cli_get_frozen(
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
         get_mpy.get_frozen(
-            stub_path.as_posix(), version=version, mpy_folder=CONFIG.mpy_path.as_posix(), lib_folder=CONFIG.mpy_lib_path.as_posix()
+            stub_path.as_posix(), version=version, mpy_path=CONFIG.mpy_path.as_posix(), lib_path=CONFIG.mpy_lib_path.as_posix()
         )
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
