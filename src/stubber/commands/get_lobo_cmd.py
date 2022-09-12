@@ -8,15 +8,9 @@ from typing import List
 import click
 import stubber.get_lobo as get_lobo
 import stubber.utils as utils
+from loguru import logger as log
+from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
-
-# from stubber.utils.my_version import __version__
-
-from .stubber_cli import stubber_cli
-
-##########################################################################################
-# log = logging.getLogger("stubber")
-#########################################################################################
 
 
 @stubber_cli.command(name="get-lobo")
@@ -37,8 +31,8 @@ def cli_get_lobo(
     """
     Get the frozen stubs for Lobo-esp32.
 
-    Get the frozen modules for the Loboris v3.2.24 fork of MicroPython
     """
+    log.info("Get the frozen modules Loboris v3.2.24")
 
     stub_paths: List[Path] = []
 
@@ -49,4 +43,6 @@ def cli_get_lobo(
     get_lobo.get_frozen(str(stub_path))
     stub_paths = [stub_path]
 
+    log.info(f"::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
+    log.info(f"::group:: Done")

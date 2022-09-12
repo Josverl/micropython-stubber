@@ -9,7 +9,7 @@ from typing import Union
 import click
 import stubber.utils as utils
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")

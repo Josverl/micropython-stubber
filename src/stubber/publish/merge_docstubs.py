@@ -11,7 +11,6 @@ from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
 
-
 def copy_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     """
     Parameters:
@@ -32,7 +31,7 @@ def copy_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
 
     # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
     try:
-        log.debug(f"Copying firmware stubs from {fw_path}")
+        log.trace(f"Copying firmware stubs from {fw_path}")
         shutil.copytree(fw_path, dest_path, symlinks=True, dirs_exist_ok=True)
     except OSError as e:
         log.error(f"Error copying stubs from : { fw_path}, {e}")

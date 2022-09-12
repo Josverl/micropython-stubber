@@ -9,7 +9,7 @@ from typing import List
 
 from loguru import logger as log
 
-__all__ = ['sort_classes']
+__all__ = ["sort_classes"]
 RE_CLASS = re.compile(r"class\s+(?P<class>\w+)(\((?P<parent>\w*)\))?")
 
 
@@ -62,10 +62,10 @@ def sort_classes(classes: List[str]):
     def list_node(node, sorted: List[str]):
         try:
             sorted.append(node["class"])
-            log.debug(node["id"], node["class"])
+            log.trace(node["id"], node["class"])
         except KeyError:
-            log.debug(node["id"])
-        log.debug(node["id"])
+            log.trace(node["id"])
+        log.trace(node["id"])
         if node.get("children", False):
             for child in node["children"]:
                 list_node(child, sorted)

@@ -5,20 +5,20 @@
 
 
 
-from stubber.commands.clone import cli_clone
-from stubber.commands.config_cli import cli_config
-from stubber.commands.enrich_folder import cli_enrich_folder
-from stubber.commands.get_core import cli_get_core
-from stubber.commands.get_docstubs import cli_docstubs
-from stubber.commands.get_frozen import cli_get_frozen
-from stubber.commands.get_lobo import cli_get_lobo
-from stubber.commands.merge import cli_merge_docstubs
-from stubber.commands.minify import cli_minify
+from stubber.commands.clone_cmd import cli_clone
+from stubber.commands.config_cmd import cli_config
+from stubber.commands.enrich_folder_cmd import cli_enrich_folder
+from stubber.commands.get_core_cmd import cli_get_core
+from stubber.commands.get_docstubs_cmd import cli_docstubs
+from stubber.commands.get_frozen_cmd import cli_get_frozen
+from stubber.commands.get_lobo_cmd import cli_get_lobo
+from stubber.commands.merge_cmd import cli_merge_docstubs
+from stubber.commands.minify_cmd import cli_minify
 from stubber.commands.publish_cmd import cli_publish
-from stubber.commands.stub import cli_stub
-from stubber.commands.stubber_cli import stubber_cli
-from stubber.commands.switch import cli_switch
-from stubber.commands.update_fallback import cli_update_fallback
+from stubber.commands.stub_cmd import cli_stub
+from stubber.commands.cli import stubber_cli
+from stubber.commands.switch_cmd import cli_switch
+from stubber.commands.upd_fallback_cmd import cli_update_fallback
 
 ##########################################################################################
 # log = logging.getLogger("stubber")

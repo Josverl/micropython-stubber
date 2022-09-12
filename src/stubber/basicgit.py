@@ -116,8 +116,8 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.info(result.stderr.decode("utf-8"))
-    log.info(result.stdout.decode("utf-8"))
+    log.debug(result.stderr.decode("utf-8"))
+    log.debug(result.stdout.decode("utf-8"))
     return True
 
 
@@ -134,7 +134,7 @@ def synch_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
         if not result:
             return False
         # actually a good result
-        log.info(result.stderr.decode("utf-8"))
+        log.debug(result.stderr.decode("utf-8"))
     return True
 
 
@@ -147,7 +147,7 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
     if not result:
         return False
     # actually a good result
-    log.info(result.stderr.decode("utf-8"))
+    log.debug(result.stderr.decode("utf-8"))
     synch_submodules(repo)
     return True
 
@@ -165,7 +165,7 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.info(result.stderr.decode("utf-8"))
+    log.debug(result.stderr.decode("utf-8"))
     synch_submodules(repo)
     return True
 
@@ -182,7 +182,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.info(result.stderr.decode("utf-8"))
+    log.debug(result.stderr.decode("utf-8"))
     synch_submodules(repo)
     return True
 

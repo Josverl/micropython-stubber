@@ -1,7 +1,7 @@
 
 import pytest
 # module under test :
-from stubber.commands.switch import VERSION_LIST
+from stubber.commands.switch_cmd import VERSION_LIST
 from stubber.utils.repos import read_micropython_lib_commits
 
 

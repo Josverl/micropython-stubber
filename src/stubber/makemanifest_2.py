@@ -32,13 +32,13 @@ class IncludeOptions:  # pragma: no cover
 # do not change method name
 # freeze_as_mpy is only used by the unix port.
 def freeze_as_mpy(path, script=None, opt=0):
-    log.debug(" - freeze_as_mpy({},script={},opt={})".format(path, script, opt))
+    log.trace(" - freeze_as_mpy({},script={},opt={})".format(path, script, opt))
     freeze(path, script, opt)
 
 
 # do not change method name
 def freeze_as_str(path):  # pragma: no cover
-    log.debug(" - freeze_as_str({})".format(path))
+    log.trace(" - freeze_as_str({})".format(path))
     freeze(path)
 
 
@@ -47,7 +47,7 @@ def freeze_mpy(path, script=None, opt=0):  # pragma: no cover
     """Freeze the input (see above), which must be .mpy files that are
     frozen directly.
     """
-    log.debug(" - freeze_as_mpy({})".format(path))
+    log.trace(" - freeze_as_mpy({})".format(path))
     freeze(path, script)
 
 
@@ -80,7 +80,7 @@ def freeze(path, script=None, opt=0):  # pragma: no cover
     `opt` is the optimisation level to pass to mpy-cross when compiling .py
     to .mpy. (ignored in this implementation)
     """
-    log.debug(" - freeze(({},script={},opt={})".format(path, script, opt))
+    log.trace(" - freeze(({},script={},opt={})".format(path, script, opt))
     path = convert_path(path)
     if script is None:
         # folder of scripts.
@@ -173,7 +173,7 @@ def freeze_internal(path: str, script: str, opt=None):
     opt (Any): freeze option (ignored)
     """
 
-    log.debug(f" - freeze_internal({path},{script})")
+    log.trace(f" - freeze_internal({path},{script})")
 
     _path = Path(convert_path(path))
     source_path = _path / script
@@ -184,7 +184,7 @@ def freeze_internal(path: str, script: str, opt=None):
     if not stub_dir or stub_dir == "":  # pragma: no cover
         raise FreezeError("Stub folder not set")
 
-    log.info(f"freeze_internal : {script:<30} to {stub_dir}")
+    log.debug(f"freeze_internal : {script:<30} to {stub_dir}")
     # ensure folder, including possible path prefix for script
     os.makedirs(dest_path.parent, exist_ok=True)
     # copy file
@@ -212,7 +212,7 @@ def freeze_internal(path: str, script: str, opt=None):
 #     Copy {path}/{script} to {stub_dir}/{script}
 #     """
 
-#     log.debug(" - freeze_internal({},{})".format(path, script))
+#     log.trace(" - freeze_internal({},{})".format(path, script))
 #     src_path: Path = Path(convert_path(path))
 #     if not src_path.is_dir():
 #         raise FreezeError("freeze path must be a directory")
@@ -222,7 +222,7 @@ def freeze_internal(path: str, script: str, opt=None):
 #     src_path = src_path / convert_path(script)
 #     dst_path = Path(stub_dir) / convert_path(script)
 
-#     log.info("freeze_internal : {:<30} to {}".format(script, stub_dir))
+#     log.debug("freeze_internal : {:<30} to {}".format(script, stub_dir))
 #     # ensure folder, including possible path prefix for script
 #     os.makedirs(dst_path.parent.as_posix(), exist_ok=True)
 #     # copy file

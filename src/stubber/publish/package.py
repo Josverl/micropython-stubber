@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
-from stubber.publish.enums import  COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.versions import clean_version
 
@@ -52,14 +52,14 @@ def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version:
     packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
 
     # [
-    #     log.debug(
+    #     log.trace(
     #         f"{x['data']['name']} - {x['data']['mpy_version']} - {x['data']['pkg_version']}"
     #     )
     #     for x in packages
     # ]
     if len(packages) > 0:
         pkg_from_db = packages[-1]["data"]
-        log.info(f"Found latest {pkg_name} == {pkg_from_db['pkg_version']}")
+        log.debug(f"Found latest {pkg_name} == {pkg_from_db['pkg_version']}")
         return pkg_from_db
     else:
         return None

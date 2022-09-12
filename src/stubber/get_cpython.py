@@ -67,7 +67,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
     # copy *.py files in build folder to stub_path
     # sort by filename to reduce churn in the repo
     for filename in sorted(build_path.rglob("*.py")):
-        log.info("pipped : {}".format(filename.name))
+        log.debug("pipped : {}".format(filename.name))
         # f_name, f_ext = os.path.splitext(os.path.basename(filename))  # pylint: disable=unused-variable
         modlist.append({"file": filename.name, "module": filename.stem})
         try:

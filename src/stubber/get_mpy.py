@@ -14,8 +14,6 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 
 
 import glob
-from loguru import logger as log
-
 # locating frozen modules :
 # tested on MicroPython v1.12 - v1.13
 # - 1.16 - using manifests.py, include can specify kwargs
@@ -29,13 +27,15 @@ import warnings
 from pathlib import Path  # start moving from os & glob to pathlib
 from typing import Optional, Union
 
+from loguru import logger as log
+from packaging.version import Version
+
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import match_lib_with_mpy
 
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
 from . import makemanifest_2 as makemanifest
 from . import utils
-from packaging.version import Version
 
 # # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -75,10 +75,10 @@ def get_frozen(stub_folder: str, version: str, mpy_path: Optional[Union[Path, st
     manifests = [m for m in manifests if not "venv" in str(m) and Path(m).parent.name != "coverage"]
     # FIXME check vor version , not count of manifests
     if version in ["latest", "master"] or Version(version) >= Version("1.12"):
-        log.info("MicroPython v1.12 and newer")
+        log.debug("MicroPython v1.12 and newer")
         get_frozen_from_manifest(manifests, stub_folder, mpy_path, lib_path, version)
     else:
-        log.info("MicroPython v1.11, older or other")
+        log.debug("MicroPython v1.11, older or other")
         # others
         get_frozen_folders(stub_folder, mpy_path, lib_path, version)
     # restore cwd
@@ -105,7 +105,7 @@ def get_frozen_folders(stub_folder: str, mpy_folder: str, lib_folder: str, versi
             mpy_board = "GENERIC"
 
         dest_path = os.path.join(stub_folder, mpy_port, mpy_board)
-        log.info("freeze_internal : {:<30} to {}".format(script, dest_path))
+        log.debug("freeze_internal : {:<30} to {}".format(script, dest_path))
         # ensure folder, including possible path prefix for script
         os.makedirs(dest_path, exist_ok=True)
         # copy file
@@ -189,7 +189,7 @@ def get_frozen_from_manifest(
 
     # Include top-level inputs, to generate the manifest
     for manifest in manifests:
-        log.info("Manifest: {}".format(manifest))
+        log.debug("Manifest: {}".format(manifest))
         port_dir = board_dir = ""
 
         # check BOARD AND PORT pattern
@@ -236,13 +236,13 @@ def get_frozen_from_manifest(
 
         try:
             makemanifest.include(manifest)
-        except makemanifest.FreezeError as er:
+        except (makemanifest.FreezeError, NameError) as er:
             log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
 
         # NOTE: compensate for expicitly omittest task.py from freeze manifest
         if (freeze_path / "uasyncio").exists():
             # copy task.py from micropython\extmod\uasyncio\task.py to stub_folder
-            log.info(f"add missing : uasyncio/task.py to {freeze_path}")
+            log.debug(f"add missing : uasyncio/task.py to {freeze_path}")
             shutil.copy(str(Path(mpy_folder) / "extmod" / "uasyncio" / "task.py"), str(freeze_path / "uasyncio"))
 
         # make a module manifest

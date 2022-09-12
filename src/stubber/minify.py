@@ -185,11 +185,11 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
     if keep_report:
         report = (
             "rprint",
-            ('self._log.info("Stub module: {:<20} to file:' ' {:<55} mem:{:>5}".' "format(module_name, file_name, m1))"),
+            ('self._log.debug("Stub module: {:<20} to file:' ' {:<55} mem:{:>5}".' "format(module_name, file_name, m1))"),
         )
         clean = (
             "rprint",
-            'self._log.info("Clean/remove files in folder: {}".format(path))',
+            'self._log.debug("Clean/remove files in folder: {}".format(path))',
         )
         edits.insert(0, report)
         edits.insert(1, clean)
@@ -226,9 +226,9 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
             # remove_pass=True,  # no dead code
             # convert_posargs_to_args=True, # Does not save any space
         )
-    log.info(f"Original length : {len(content)}")
-    log.info(f"Minified length : {len(source)}")
-    log.info(f"Reduced by      : {len(content)-len(source)} ")
+    log.debug(f"Original length : {len(content)}")
+    log.debug(f"Minified length : {len(source)}")
+    log.debug(f"Reduced by      : {len(content)-len(source)} ")
     return source
 
 
@@ -252,11 +252,11 @@ def minify(
     except Exception as e:  # pragma: no cover
         log.exception(e)
 
-    log.info("Minified file written to :", target)
+    log.debug("Minified file written to :", target)
     if cross_compile:
         result = subprocess.run(["mpy-cross", "-O2", str(target)])
         if result.returncode == 0:
-            log.info("mpy-cross compiled to    :", target.with_suffix(".mpy"))
+            log.debug("mpy-cross compiled to    :", target.with_suffix(".mpy"))
         return result.returncode
     else:
         return 0

@@ -1,18 +1,17 @@
 ##########################################################################################
 # get-frozen
 ##########################################################################################
-from loguru import logger as log
 from pathlib import Path
 from typing import List
 
 import click
-import stubber.get_mpy as get_mpy
 import stubber.basicgit as git
+import stubber.get_mpy as get_mpy
 import stubber.utils as utils
-
+from loguru import logger as log
 from stubber.utils.config import CONFIG
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -59,4 +58,6 @@ def cli_get_frozen(
         )
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
+    log.info(f"::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
+    log.info(f"::group:: Done")

@@ -11,7 +11,7 @@ import stubber.get_cpython as get_cpython
 import stubber.utils as utils
 from stubber.utils.config import CONFIG
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -49,4 +49,6 @@ def cli_get_core(
         get_cpython.get_core(stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type)
         stub_paths.append(stub_path)
 
+    log.info(f"::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
+    log.info(f"::group:: Done")

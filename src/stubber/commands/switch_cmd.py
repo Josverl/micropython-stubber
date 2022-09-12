@@ -12,7 +12,7 @@ import stubber.get_mpy as get_mpy
 from loguru import logger as log
 from stubber.utils.config import CONFIG
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -70,17 +70,25 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
         return -1
 
     # fetch then switch
+    log.info(f"fetch updates")
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
+    try:
+        git.fetch(CONFIG.stub_path.parent)
+    except Exception:
+        log.trace("no stubs repo found : {CONFIG.stub_path.parent}")
+        pass
 
     if not tag or tag == "":
         tag = "latest"
+
+    log.info(f"Switching to {tag}")
     if tag == "latest":
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
     get_mpy.match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
 
-    click.echo(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
-    click.echo(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
+    log.info(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
+    log.info(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
     return 0

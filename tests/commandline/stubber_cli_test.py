@@ -8,7 +8,7 @@ import stubber.stubber as stubber
 from click.testing import CliRunner
 from mock import MagicMock
 from pytest_mock import MockerFixture
-from stubber.commands.switch import VERSION_LIST
+from stubber.commands.switch_cmd import VERSION_LIST
 
 # mark all tests
 pytestmark = pytest.mark.cli

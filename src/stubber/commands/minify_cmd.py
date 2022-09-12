@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Union
 
 import click
+from loguru import logger as log
 from stubber.minify import minify
 
-from .stubber_cli import stubber_cli
-from loguru import logger as log
+from .cli import stubber_cli
 
 
 @stubber_cli.command(name="minify")
@@ -17,8 +17,8 @@ from loguru import logger as log
 )
 @click.option("--target", "-t", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True), show_default=True)
 @click.option("--diff", "-d", help="Show the functional changes made to the source script.", default=False, is_flag=True)
-@click.option("--compile", "-c", "-xc", "cross_compile", help="Cross compile after minification.", default=False, is_flag=True)
-@click.option("--all", "-a", help="Minify all variants (normal, _mem and _db).", default=False, is_flag=True)
+@click.option("--compile", "-c", "-xc", "cross_compile", help="Cross compile after minification.", default=True, is_flag=True)
+@click.option("--all", "-a", help="Minify all variants (normal, _mem and _db).", default=True, is_flag=True)
 @click.option(
     "--report/--no-report",
     "keep_report",
@@ -46,10 +46,10 @@ def cli_minify(
         sources = ["board/createstubs.py", "board/createstubs_mem.py", "board/createstubs_db.py"]
     else:
         sources = [source]
-
+    log.trace(f"sources: {sources}")
     for source in sources:
         log.info(f"\nMinifying {source}...")
-        result = minify(source, target, keep_report, diff, cross_compile) # noqa
+        minify(source, target, keep_report, diff, cross_compile)  # noqa
 
     log.info("\nDone!")
     return 0
