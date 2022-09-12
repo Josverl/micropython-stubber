@@ -2,7 +2,6 @@ from typing import Optional
 
 from packaging.version import Version, parse
 from pypi_simple import PyPISimple
-from stubber.utils.config import CONFIG
 
 
 def get_pypy_versions( package_name:str, base : Optional[Version] = None, production:bool = True):

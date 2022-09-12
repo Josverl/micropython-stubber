@@ -4,7 +4,6 @@ update-fallback folder with common set of stubs that cater for most of the devic
 
 import click
 from pathlib import Path
-from typing import Union
 from stubber.update_fallback import update_fallback, RELEASED
 from stubber.utils.config import CONFIG
 

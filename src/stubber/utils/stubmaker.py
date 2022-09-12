@@ -4,7 +4,6 @@ from pathlib import Path
 import mypy.stubgen as stubgen
 from mypy.errors import CompileError
 
-from .my_version import __version__
 from loguru import logger as log
 
 # default stubgen options

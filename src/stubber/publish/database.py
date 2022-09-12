@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Union
 
-from loguru import logger as log
 from pysondb import PysonDB
 
 

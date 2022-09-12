@@ -3,7 +3,6 @@ update all databases in the project with a new key "stubhash"
 """
 from pathlib import Path
 
-from pysondb.db import PysonDB
 from stubber.publish.database import get_database
 from stubber.utils.config import CONFIG
 

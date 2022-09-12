@@ -9,7 +9,6 @@ from typing import Union
 import click
 import stubber.basicgit as git
 from stubber.utils.config import CONFIG
-from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
 

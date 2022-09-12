@@ -2,7 +2,6 @@
 get-lobo (frozen)
 """
 
-from loguru import logger as log
 from pathlib import Path
 from typing import List
 

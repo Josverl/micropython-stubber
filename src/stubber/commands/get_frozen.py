@@ -11,7 +11,6 @@ import stubber.basicgit as git
 import stubber.utils as utils
 
 from stubber.utils.config import CONFIG
-from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
 

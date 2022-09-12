@@ -1,8 +1,6 @@
 from stubber.publish.candidates import *
-from pathlib import Path
 
-from stubber.publish.package import package_name, COMBO_STUBS
-from tabulate import tabulate
+from stubber.publish.package import package_name
 
 # # latest
 # for c in frozen_candidates(boards="GENERIC", versions="auto"):

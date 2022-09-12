@@ -65,7 +65,6 @@ def sort_classes(classes: List[str]):
             log.debug(node["id"], node["class"])
         except KeyError:
             log.debug(node["id"])
-            pass
         log.debug(node["id"])
         if node.get("children", False):
             for child in node["children"]:

@@ -1,13 +1,8 @@
-from loguru import logger as log
-from pathlib import Path
 from typing import List, Union
 
 import click
-from stubber.publish.database import get_database
 from stubber.publish.enums import ALL_TYPES
-from stubber.publish.publish import publish, publish_multiple
-from stubber.utils.config import CONFIG
-from stubber.utils.my_version import __version__
+from stubber.publish.publish import publish_multiple
 
 from .stubber_cli import stubber_cli
 

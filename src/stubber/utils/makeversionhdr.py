@@ -7,7 +7,7 @@ from __future__ import print_function
 import subprocess
 from pathlib import Path
 
-from packaging.version import Version, parse
+from packaging.version import parse
 
 
 def get_version_info_from_git(path: Path = Path.cwd()):
