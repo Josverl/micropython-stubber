@@ -4,10 +4,11 @@ enrich machinestubs with docstubs
 from typing import List, Union
 
 import click
+from loguru import logger as log
 from stubber.publish.merge_docstubs import merge_docstubs
 from stubber.utils.config import CONFIG
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 
 @stubber_cli.command(name="merge")
@@ -33,5 +34,5 @@ def cli_merge_docstubs(
     # single version should be a string
     if len(versions) == 1:
         versions = versions[0]
-
+    log.info(f"Merge docstubs for {family} {versions}")
     result = merge_docstubs(versions=versions, family=family, mpy_path=CONFIG.mpy_path)

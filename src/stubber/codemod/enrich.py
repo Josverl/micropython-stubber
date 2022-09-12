@@ -50,7 +50,7 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
     if docstub_file is None:
         raise FileNotFoundError(f"No doc-stub file found for {source_path}")
 
-    log.info(f"Merge {source_path} with info from {docstub_file}")
+    log.debug(f"Merge {docstub_file} from {source_path}")
     # read source file
     oldcode = source_path.read_text()
 
@@ -66,6 +66,7 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
     )
     if newcode:
         if write_back:
+            log.trace(f"Write back enriched file {source_path}")
             # write updated code to file
             source_path.write_text(newcode, encoding="utf-8")
         if diff:  # pragma: no cover

@@ -253,14 +253,14 @@ class StubPackage:
                 if merged_path.exists():
                     source = merged_path
                 try:
-                    log.debug(f"Copying {stub_type} from {source}")
+                    log.trace(f"Copying {stub_type} from {source}")
                     shutil.copytree(CONFIG.stub_path / source, self.package_path, symlinks=True, dirs_exist_ok=True)
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / source}, {e}")
                     raise (e)
             else:
                 try:
-                    log.debug(f"Copying {stub_type} from {fw_path}")
+                    log.trace(f"Copying {stub_type} from {fw_path}")
                     shutil.copytree(CONFIG.stub_path / fw_path, self.package_path, symlinks=True, dirs_exist_ok=True)
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
@@ -425,7 +425,7 @@ class StubPackage:
     def is_changed(self) -> bool:
         "Check if the package has changed, based on the current and the stored hash"
         current = self.create_hash()
-        log.debug(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
+        log.trace(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
         return self.hash != current
 
     def bump(self) -> str:
@@ -467,7 +467,7 @@ class StubPackage:
             #   UploadError
             #   HTTP Error 400: File already exists. See https://test.pypi.org/help/#file-name-reuse for more information.
             # TODO: how to return the state so it can be handled
-            print() # linefeed after output
+            print()  # linefeed after output
             errors = [l for l in e.stdout.splitlines()[1:7] if "Error" in l]
             for e in errors:
                 log.error(e)
@@ -498,10 +498,10 @@ class StubPackage:
         # update the package info
         self.write_package_json()
         if production:
-            log.info(f"Publishing to PRODUCTION  https://pypy.org")
+            log.debug(f"Publishing to PRODUCTION  https://pypy.org")
             params = ["publish"]
         else:
-            log.info(f"Publishing to TEST-PyPi https://test.pypy.org")
+            log.debug(f"Publishing to TEST-PyPi https://test.pypy.org")
             params = ["publish", "-r", "test-pypi"]
         r = self.run_poetry(params)
         print("")  # add a newline after the output

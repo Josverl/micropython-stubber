@@ -1,10 +1,11 @@
 from typing import List, Union
 
 import click
+from loguru import logger as log
+from stubber.commands.cli import stubber_cli
 from stubber.publish.enums import ALL_TYPES
 from stubber.publish.publish import publish_multiple
-
-from .stubber_cli import stubber_cli
+from tabulate import tabulate
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -78,17 +79,18 @@ ALL_BOARDS = ["GENERIC"]
     default=False,
     help="clean folders after processing and publishing",
 )
-@click.option(
-    "--type",
-    "-t",
-    "stub_type",
-    default=ALL_TYPES[0],
-    show_default=True,
-    type=click.Choice(ALL_TYPES),
-    help="stub type to publish",
-)
-@click.option("-v", "--verbose", count=True)
-#
+
+# @click.option(
+#     "--type",
+#     "-t",
+#     "stub_type",
+#     default=ALL_TYPES[0],
+#     show_default=True,
+#     type=click.Choice(ALL_TYPES),
+#     help="stub type to publish",
+# )
+
+
 def cli_publish(
     family: str,
     versions: Union[str, List[str]],
@@ -97,9 +99,8 @@ def cli_publish(
     production: bool,
     dryrun: bool,
     force: bool,
-    verbose,
     clean: bool,
-    stub_type: str,
+    # stub_type: str,
 ):
     """
     Commandline interface to publish stubs.
@@ -113,8 +114,10 @@ def cli_publish(
     boards = list(boards)
 
     # db = get_database(publish_path=CONFIG.publish_path, production=production)
+    destination = "pypi" if production else "test-pypi"
+    log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
 
-    result = publish_multiple(
+    results = publish_multiple(
         frozen=True,
         family=family,
         versions=versions,
@@ -125,32 +128,4 @@ def cli_publish(
         force=force,
         clean=clean,
     )
-
-    # if stub_type == "combo":
-    #     publish_combo_stubs(
-    #         versions=versions,
-    #         ports=ports,
-    #         boards=boards,
-    #         db=db,
-    #         pub_path=root_path / "publish",
-    #         family=family,
-    #         production=production,
-    #         dryrun=dryrun,
-    #         clean=clean,
-    #     )
-    # elif stub_type == "doc":
-    #     publish_doc_stubs(
-    #         versions=versions,
-    #         db=db,
-    #         pub_path=root_path / "publish",
-    #         family=family,
-    #         production=production,
-    #         dryrun=dryrun,
-    #         clean=clean,
-    #     )
-    #     pass
-    # # elif stub_type == "core":
-    # #     pass
-    # else:
-    #     log.warning("unknown stub type :", stub_type)
-    #     raise ValueError
+    log.info(tabulate(results, headers="keys"))

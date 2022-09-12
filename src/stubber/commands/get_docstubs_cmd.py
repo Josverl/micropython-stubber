@@ -3,17 +3,17 @@ get-docstubs
 
 """
 
-from loguru import logger as log
 from pathlib import Path
 
 import click
 import stubber.basicgit as git
 import stubber.utils as utils
+from loguru import logger as log
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG
 from stubber.utils.my_version import __version__
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -34,11 +34,11 @@ from .stubber_cli import stubber_cli
 )
 @click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
-@click.option("--verbose", "-v", is_flag=True, default=False)  # todo: extra verbose / extra debug ?
+@click.pass_context
 def cli_docstubs(
+    ctx,
     path: str = CONFIG.repo_path.as_posix(),
     target: str = CONFIG.stub_path.as_posix(),
-    verbose: bool = False,
     black: bool = True,
     basename="micropython",
 ):
@@ -47,8 +47,7 @@ def cli_docstubs(
 
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
     """
-    if verbose:  # pragma: no cover
-        log.setLevel(logging.DEBUG)
+
     log.info(f"stubs_from_docs version {__version__}\n")
 
     if path == CONFIG.repo_path.as_posix():
@@ -68,7 +67,12 @@ def cli_docstubs(
 
     dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 
+    # get verbose from the parent context
+    verbose = ctx.obj["verbose"] != 0
+
     generate_from_rst(rst_path, dst_path, v_tag, release=release, verbose=verbose, suffix=".pyi")
 
     # no need to generate .pyi in post processing
+    log.info(f"::group:: start post processing of retrieved stubs")
     utils.do_post_processing([dst_path], False, black)
+    log.info(f"::group:: Done")

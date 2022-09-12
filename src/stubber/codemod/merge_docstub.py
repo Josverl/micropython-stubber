@@ -90,7 +90,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
             _imp = self.stub_imports[k]
-            log.debug(f"import {k} = {_imp}")
+            log.trace(f"import {k} = {_imp}")
             AddImportsVisitor.add_needed_import(
                 self.context,
                 module=_imp.module_name,

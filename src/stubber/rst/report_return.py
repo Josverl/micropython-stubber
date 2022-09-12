@@ -52,11 +52,11 @@ def process(folder: Path, pattern: str):
                     if isBad:
                         context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
-                            log.info(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
+                            log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
                         except Exception:
-                            log.info(f"{context:40} {r['type']:<15} - {r['confidence']} ")
+                            log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 
-                        log.debug(r)
+                        log.trace(r)
     if len(report) > 0:
         filename = folder / "report.json"
         with open(filename, mode="w", encoding="utf8") as fp:

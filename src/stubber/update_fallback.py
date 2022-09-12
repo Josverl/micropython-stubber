@@ -74,7 +74,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
         os.makedirs(fallback_path)
     else:
         oldstubs = list(fallback_path.rglob("*.py")) + list(fallback_path.rglob("*.pyi"))
-        log.info(f"deleting {len(oldstubs)} stubs from {fallback_path.as_posix()}")
+        log.debug(f"deleting {len(oldstubs)} stubs from {fallback_path.as_posix()}")
         for f in oldstubs:
             try:
                 os.remove(f)
@@ -84,7 +84,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
     for (name, source) in fallback_sources(version):
         if not "." in name:
             # copy folder
-            log.info(f"add {source} folder")
+            log.debug(f"add {source} folder")
             try:
                 copy_tree(
                     (stubpath / source / name).as_posix(),
@@ -95,7 +95,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
                 log.warning(f"{(stubpath / source / name).as_posix()} not found")
         else:
             # copy file(s)
-            log.info(f"add {source}")
+            log.debug(f"add {source}")
             for f in (stubpath / source).glob(name):
                 shutil.copyfile(f, fallback_path / f.name)
                 added += 1

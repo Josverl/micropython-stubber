@@ -15,7 +15,7 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
     "Common post processing"
     for pth in stub_paths:
         if pyi:
-            log.info("Generate type hint files (pyi) in folder: {}".format(pth))
+            log.debug("Generate type hint files (pyi) in folder: {}".format(pth))
             generate_pyi_files(pth)
         if black:
             run_black(pth)

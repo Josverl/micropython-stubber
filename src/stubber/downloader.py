@@ -14,7 +14,7 @@ from loguru import logger as log
 def download_file(url: str, module: str, folder: str = "./"):
     "dowload a file from a public github repo"
     local_filename = os.path.abspath(os.path.join(folder, module))
-    log.info("Downloading {:<20} to {}".format(module, local_filename))
+    log.debug("Downloading {:<20} to {}".format(module, local_filename))
     # NOTE the stream=True parameter below
     with requests.get(url, stream=True) as r:
         r.raise_for_status()

@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Optional, Set, List, Union
 from loguru import logger as log
 
+
 def read_modules(path: Optional[Path] = None) -> Set:
     """
     read text files with modules per firmware.
@@ -32,22 +33,22 @@ def read_modules(path: Optional[Path] = None) -> Set:
     assert path
     all_modules = set()
     for file in path.glob("*.txt"):
-        log.info("processing:", file)
+        log.debug("processing:", file)
         with file.open("r") as f:
             line = f.readline()
             while line:
                 if len(line) > 1 and line[0] != "#":
 
                     file_mods = line.split()
-                    log.debug(line[0:-1])
-                    log.debug( set(file_mods))
+                    log.trace(line[0:-1])
+                    log.trace(set(file_mods))
                     # remove modules ending in _test
                     file_mods = [m for m in file_mods if not m.endswith("_test")]
                     all_modules = set(all_modules | set(file_mods))
                 # next
                 line = f.readline()
 
-    log.debug(">" * 40)
+    log.trace(">" * 40)
 
     return all_modules
 
@@ -118,8 +119,8 @@ def main():
     # remove pycom MQTT* from defaults
     modules_to_stub = sorted({m for m in modules_to_stub if not m.startswith("MQTT")})
 
-    log.debug("modules to stub :", len(modules_to_stub))
-    log.debug(wrapped(modules_to_stub))
+    log.trace("modules to stub :", len(modules_to_stub))
+    log.trace(wrapped(modules_to_stub))
 
     # update modules.txt
     modules_txt = Path("board/modulelist.txt")

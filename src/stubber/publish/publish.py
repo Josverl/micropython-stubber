@@ -42,7 +42,6 @@ from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-from tabulate import tabulate
 
 
 # ######################################
@@ -73,7 +72,7 @@ def publish(
     # package name for firmware package
     pkg_name = package_name(pkg_type=pkg_type, port=port, board=board, family=family)
     status: Dict[str, Any] = {"result": "-", "name": pkg_name, "version": version, "error": None}
-    log.info("=" * 40)
+    log.debug("=" * 40)
 
     package_info = get_package_info(
         db,
@@ -86,7 +85,7 @@ def publish(
         package = StubPackage(pkg_name, version=version, json_data=package_info)
 
     else:
-        log.info(f"No package found for {pkg_name} in database, creating new package")
+        log.debug(f"No package found for {pkg_name} in database, creating new package")
         package = create_package(
             pkg_name,
             mpy_version=version,
@@ -95,7 +94,8 @@ def publish(
             family=family,
             pkg_type=pkg_type,
         )
-    log.debug(f"{package.package_path.as_posix()}")
+    log.info(f"Processing {package.package_path.name}")
+    log.trace(f"{package.package_path.as_posix()}")
     status["version"] = package.pkg_version
     # check if the sources exist
     OK = True
@@ -126,7 +126,7 @@ def publish(
 
     # If there are changes to the package, then publish it
     if not (package.is_changed() or force):
-        log.info(f"No changes to package : {package.package_name} {package.pkg_version}")
+        log.debug(f"No changes to package : {package.package_name} {package.pkg_version}")
     else:
         if not force:  # pragma: no cover
             log.info(f"Found changes to package : {package.package_name} {package.pkg_version} {package.hash} != {package.create_hash()}")
@@ -141,14 +141,14 @@ def publish(
             # to get the next version
             new_ver = package.bump()
 
-            log.info(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
+            log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
         # Update hashes
         package.update_hashes()
         package.write_package_json()
 
         status["version"] = package.pkg_version
 
-        log.debug(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
+        log.trace(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
         result = package.build()
         if not result:
             log.warning(f"{pkg_name}: skipping as build failed")
@@ -156,7 +156,7 @@ def publish(
             return status
 
         if dryrun:  # pragma: no cover
-            log.info("Dryrun: Updated package is NOT published.")
+            log.warning("Dryrun: Updated package is NOT published.")
             status["result"] = "DryRun successful"
         else:
             result = package.publish(production=production)
@@ -241,5 +241,4 @@ def publish_multiple(
         )
         results.append(result)
 
-    log.info(tabulate(results, headers="keys"))
     return results

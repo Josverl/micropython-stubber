@@ -7,7 +7,7 @@ from pathlib import Path
 from stubber.update_fallback import update_fallback, RELEASED
 from stubber.utils.config import CONFIG
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 @stubber_cli.command(name="update-fallback")
 @click.option("--version", default=RELEASED, type=str, help="Version number to use", show_default=True)

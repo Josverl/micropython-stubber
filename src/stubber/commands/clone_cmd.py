@@ -1,16 +1,16 @@
 ##########################################################################################
 # clone
 ##########################################################################################
-from loguru import logger as log
 import os
 from pathlib import Path
 from typing import Union
 
 import click
 import stubber.basicgit as git
+from loguru import logger as log
 from stubber.utils.config import CONFIG
 
-from .stubber_cli import stubber_cli
+from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -48,16 +48,17 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
         repos.append((mpy_stubs_path, "https://github.com/josverl/micropython-stubs.git", "main"))
 
     for _path, remote, branch in repos:
+        log.info(f"Cloning {remote} branch {branch} to {_path}")
         if not (_path / ".git").exists():
-            log.info(f"Cloning {_path.name}...")
+            log.debug(f"Cloning {_path.name}...")
             git.clone(remote_repo=remote, path=_path)
         else:
-            log.info(f"{_path.name} already exists, fetching...")
+            log.debug(f"{_path.name} already exists, fetching...")
             git.fetch(
                 _path,
             )
             git.pull(_path, branch=branch)  # DEFAULT
 
-    click.echo(f"{mpy_path} {git.get_tag(mpy_path)}")
-    click.echo(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
+    log.info(f"{mpy_path} {git.get_tag(mpy_path)}")
+    log.info(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
     # click.echo(f"{mpy_stubs_path} {git.get_tag(mpy_stubs_path)}")

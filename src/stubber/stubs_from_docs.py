@@ -73,10 +73,19 @@ from typing import List, Optional, Tuple
 from loguru import logger as log
 
 from . import utils
-from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
-                  RST_DOC_FIXES, TYPING_IMPORT, U_MODULES, ClassSourceDict,
-                  FunctionSourceDict, ModuleSourceDict,
-                  return_type_from_context)
+from .rst import (
+    CHILD_PARENT_CLASS,
+    DOCSTUB_SKIP,
+    MODULE_GLUE,
+    PARAM_FIXES,
+    RST_DOC_FIXES,
+    TYPING_IMPORT,
+    U_MODULES,
+    ClassSourceDict,
+    FunctionSourceDict,
+    ModuleSourceDict,
+    return_type_from_context,
+)
 from .utils.config import CONFIG
 
 # logging
@@ -194,7 +203,7 @@ class RSTReader:
             self.current_class = ""
 
     def read_file(self, filename: Path):
-        log.debug(f"Reading : {filename}")
+        log.trace(f"Reading : {filename}")
         # ignore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
@@ -220,14 +229,14 @@ class RSTReader:
     def write_file(self, filename: Path) -> bool:
         self.prepare_output()
         try:
-            log.info(f" - Writing to: {filename}")
+            log.debug(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
         except OSError as e:
             log.error(e)
             return False
         if self.gather_docs:
-            log.info(f" - Writing to: {filename.with_suffix('json')}")
+            log.debug(f" - Writing to: {filename.with_suffix('json')}")
             with open(filename.with_suffix(".json"), mode="w", encoding="utf8") as file:
                 json.dump(self.return_info, file, ensure_ascii=False, indent=4)
             self.return_info = []
@@ -401,7 +410,7 @@ class RSTReader:
 
     def parse_toc(self):
         "process table of content with additional rst files, and add / include them in the current module"
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         self.line_no += 1  # skip one line
         toctree = self.parse_docstring()
         # cleanup toctree
@@ -418,7 +427,7 @@ class RSTReader:
 
     def parse_module(self):
         "parse a module tag and set the module's docstring"
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         module_name = self.line.split(SEPERATOR)[-1].strip()
 
         self.current_module = module_name
@@ -444,12 +453,12 @@ class RSTReader:
             self.output_dict.add_import(MODULE_GLUE[module_name])
 
     def parse_current_module(self):
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         module_name = self.line.split(SEPERATOR)[-1].strip()
         mod_comment = f"# + module: {self.current_module}.rst"
         self.current_module = module_name
         self.current_function = self.current_class = ""
-        log.info(mod_comment)
+        log.debug(mod_comment)
         if NEW_OUTPUT:  # new output
             self.output_dict.name = module_name
             self.output_dict.add_comment(mod_comment)
@@ -458,7 +467,7 @@ class RSTReader:
         # todo: read first block and do something with it ( for a submodule)
 
     def parse_function(self):
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         # this_function = self.line.split(SEPERATOR)[-1].strip()
         # name = this_function
 
@@ -508,7 +517,7 @@ class RSTReader:
                 self.output_dict += fn_def
 
     def parse_class(self):
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         this_class = self.line.split(SEPERATOR)[-1].strip()  # raw
         if "(" in this_class:
             name, params = this_class.split("(", 2)
@@ -519,14 +528,14 @@ class RSTReader:
         self.current_class = name
         self.current_function = ""
 
-        log.debug(f"# class:: {name} - {this_class}")
+        log.trace(f"# class:: {name} - {this_class}")
         # fixup parameters
         params = self.fix_parameters(params)
         docstr = self.parse_docstring()
 
         if any(":noindex:" in line for line in docstr):
             # if the class docstring contains ':noindex:' on any line then skip
-            log.debug(f"# Skip :noindex: class {name}")
+            log.trace(f"# Skip :noindex: class {name}")
         else:
             # write a class header
             self.create_update_class(name, params, docstr)
@@ -545,7 +554,7 @@ class RSTReader:
         # params = ")"
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         if not is_balanced(self.line):
             self.extend_and_balance_line()
 
@@ -631,7 +640,7 @@ class RSTReader:
                 parent_class += method
 
     def parse_exception(self):
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         name = self.line.split(SEPERATOR)[1].strip()
         if name == "Exception":
             # no need to redefine Exception
@@ -679,7 +688,7 @@ class RSTReader:
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
             if self.verbose:  # pragma: no cover
-                log.debug("Sequence detected")
+                log.trace("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
         # now advance the linecounter
@@ -688,7 +697,7 @@ class RSTReader:
         return [n.strip() for n in names if n.strip() != "etc."]
 
     def parse_data(self):
-        log.debug(f"# {self.line.rstrip()}")
+        log.trace(f"# {self.line.rstrip()}")
         # Get one or more names
         names = self.parse_names()
 
@@ -733,7 +742,7 @@ class RSTReader:
             elif len(rst_hint) > 0:
                 # something new / not yet parsed
                 self.line_no += 1
-                log.debug(f"# {line.rstrip()}")
+                log.trace(f"# {line.rstrip()}")
             else:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
@@ -789,7 +798,7 @@ def generate_from_rst(
         reader = RSTReader(v_tag)
         reader.source_release = release
         reader.verbose = verbose
-        log.info(f"Reading: {file}")
+        log.debug(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()
         if file.stem in U_MODULES:

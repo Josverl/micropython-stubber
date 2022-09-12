@@ -36,7 +36,7 @@ def generate_pyi_from_file(file: Path) -> bool:
     sg_opt.files = [str(file)]
     sg_opt.output_dir = str(file.parent)
     try:
-        log.info(f"Calling stubgen on {str(file)}")
+        log.debug(f"Calling stubgen on {str(file)}")
         # TDOD: Stubgen.generate_stubs does not provide a way to return the errors
         # such as `cannot perform relative import`
 
@@ -63,7 +63,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         return r
     else:  # one or less module manifests
         ## generate fyi files for folder
-        log.info("::group::[stubgen] running stubgen on {0}".format(modules_folder))
+        log.debug("::group::[stubgen] running stubgen on {0}".format(modules_folder))
 
         Error_Found = False
         sg_opt = STUBGEN_OPT
@@ -81,7 +81,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         if Error_Found:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
-            log.info("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
+            log.debug("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
             py_files = list(modules_folder.rglob("*.py"))
             for py in py_files:
                 generate_pyi_from_file(py)
@@ -98,7 +98,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
                 py_files.remove(pyi.with_suffix(".py"))
                 pyi_files.remove(pyi)
             except ValueError:
-                log.info(f"no matching py for : {str(pyi)}")
+                log.debug(f"no matching py for : {str(pyi)}")
 
         # now stub the rest
         # note in some cases this will try a file twice
