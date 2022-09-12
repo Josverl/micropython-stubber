@@ -467,6 +467,7 @@ class StubPackage:
             #   UploadError
             #   HTTP Error 400: File already exists. See https://test.pypi.org/help/#file-name-reuse for more information.
             # TODO: how to return the state so it can be handled
+            print() # linefeed after output
             errors = [l for l in e.stdout.splitlines()[1:7] if "Error" in l]
             for e in errors:
                 log.error(e)
