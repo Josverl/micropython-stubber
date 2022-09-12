@@ -18,7 +18,7 @@ from .cli import stubber_cli
 @click.option("--target", "-t", default="./minified", type=click.Path(exists=True, file_okay=True, dir_okay=True), show_default=True)
 @click.option("--diff", "-d", help="Show the functional changes made to the source script.", default=False, is_flag=True)
 @click.option("--compile", "-c", "-xc", "cross_compile", help="Cross compile after minification.", default=True, is_flag=True)
-@click.option("--all", "-a", help="Minify all variants (normal, _mem and _db).", default=True, is_flag=True)
+@click.option("--all", "-a", help="Minify all variants (normal, _mem and _db).", default=False, is_flag=True)
 @click.option(
     "--report/--no-report",
     "keep_report",
