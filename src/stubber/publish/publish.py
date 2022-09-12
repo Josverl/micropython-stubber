@@ -36,13 +36,12 @@ from loguru import logger as log
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
+from stubber.publish.package import StubSource, create_package, get_package_info, package_name
 from stubber.publish.pypi import Version, get_pypy_versions
+from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 from tabulate import tabulate
-
-from .package import StubSource, create_package, get_package_info, package_name
-from .stubpacker import StubPackage
 
 
 # ######################################
@@ -55,7 +54,7 @@ def publish(
     pkg_type,
     version: str,
     family="micropython",
-    production=False,  # PyPI or Test-PyPi
+    production,  # PyPI or Test-PyPi
     dryrun=False,  # don't publish , dont save to the database
     force=False,  # publish even if no changes
     clean: bool = False,  # clean up afterards
@@ -134,13 +133,14 @@ def publish(
         if not dryrun:
             # only bump version if we are going to publish
             # try to get version from PyPi and increase past that
+            old_ver = package.pkg_version
             pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version))
             if pypi_versions:
                 package.pkg_version = str(pypi_versions[-1])
             # to get the next version
             new_ver = package.bump()
 
-            log.info(f"{pkg_name}: new version {new_ver}")
+            log.info(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
         # Update hashes
         package.update_hashes()
         package.write_package_json()
@@ -199,6 +199,7 @@ def publish_one(
             dryrun=dryrun,
             clean=clean,
             force=force,
+            production=production,
             **todo,
         )
     return result
