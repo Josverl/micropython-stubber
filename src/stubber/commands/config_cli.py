@@ -1,13 +1,9 @@
 ##########################################################################################
 # clone
 ##########################################################################################
-from loguru import logger as log
-import os
-from pathlib import Path
 
 import click
 from stubber.utils.config import CONFIG
-from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
 

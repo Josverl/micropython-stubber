@@ -1,5 +1,4 @@
 import json
-from loguru import logger as log
 
 from pathlib import Path
 from .my_version import __version__

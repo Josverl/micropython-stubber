@@ -7,7 +7,6 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # pylint: disable= line-too-long
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
-from loguru import logger as log
 from pathlib import Path
 
 from . import downloader, utils

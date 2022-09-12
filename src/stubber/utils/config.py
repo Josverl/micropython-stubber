@@ -1,4 +1,3 @@
-from loguru import logger as log
 from pathlib import Path
 
 from .typed_config_toml import Config, EnvironmentConfigSource, TomlConfigSource, key, section

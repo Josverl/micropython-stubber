@@ -35,7 +35,7 @@ from stubber.utils.repos import match_lib_with_mpy
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
 from . import makemanifest_2 as makemanifest
 from . import utils
-from packaging.version import parse, Version
+from packaging.version import Version
 
 # # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)

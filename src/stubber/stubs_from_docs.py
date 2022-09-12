@@ -72,7 +72,7 @@ from typing import List, Optional, Tuple
 
 from loguru import logger as log
 
-from . import __version__, utils
+from . import utils
 from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
                   RST_DOC_FIXES, TYPING_IMPORT, U_MODULES, ClassSourceDict,
                   FunctionSourceDict, ModuleSourceDict,

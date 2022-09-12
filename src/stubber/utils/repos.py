@@ -6,7 +6,6 @@ from collections import defaultdict
 from pathlib import Path
 
 import stubber.basicgit as git
-from stubber.utils.my_version import __version__
 
 # # log = logging.getLogger(__name__)
 

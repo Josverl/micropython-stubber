@@ -8,7 +8,6 @@ from typing import Union
 
 import click
 import stubber.utils as utils
-from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
 

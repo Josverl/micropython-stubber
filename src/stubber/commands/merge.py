@@ -1,14 +1,12 @@
 """
 enrich machinestubs with docstubs
 """
-from pathlib import Path
 from typing import List, Union
 
 import click
 from stubber.publish.merge_docstubs import merge_docstubs
 from stubber.utils.config import CONFIG
 
-from .publish_cmd import LAST_VERSION
 from .stubber_cli import stubber_cli
 
 

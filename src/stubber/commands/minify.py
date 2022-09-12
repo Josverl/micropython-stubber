@@ -6,7 +6,6 @@ from typing import Union
 
 import click
 from stubber.minify import minify
-from stubber.utils.my_version import __version__
 
 from .stubber_cli import stubber_cli
 from loguru import logger as log
@@ -50,7 +49,7 @@ def cli_minify(
 
     for source in sources:
         log.info(f"\nMinifying {source}...")
-        result = minify(source, target, keep_report, diff, cross_compile)
+        result = minify(source, target, keep_report, diff, cross_compile) # noqa
 
     log.info("\nDone!")
     return 0

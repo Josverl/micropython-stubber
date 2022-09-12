@@ -9,7 +9,6 @@ import tomli
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
-from stubber.codemod.enrich import enrich_folder
 from stubber.publish.bump import bump_postrelease
 from stubber.publish.enums import StubSource
 from stubber.publish.package import StubSource

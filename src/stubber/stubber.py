@@ -4,7 +4,6 @@
 """Create, Process, and Maintain stubs ✏️  for MicroPython"""
 
 
-from loguru import logger as log
 
 from stubber.commands.clone import cli_clone
 from stubber.commands.config_cli import cli_config
@@ -20,7 +19,6 @@ from stubber.commands.stub import cli_stub
 from stubber.commands.stubber_cli import stubber_cli
 from stubber.commands.switch import cli_switch
 from stubber.commands.update_fallback import cli_update_fallback
-from stubber.utils.my_version import __version__
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
