@@ -36,7 +36,8 @@ from loguru import logger as log
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
-from stubber.publish.package import StubSource, create_package, get_package_info, package_name
+from stubber.publish.package import (StubSource, create_package,
+                                     get_package_info, package_name)
 from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
@@ -235,6 +236,7 @@ def publish_multiple(
             dryrun=dryrun,
             clean=clean,
             force=force,
+            production=production,
             **todo,
         )
         results.append(result)
