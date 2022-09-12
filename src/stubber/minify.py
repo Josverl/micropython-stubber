@@ -2,10 +2,11 @@
  Processing for createstubs.py
  minimizes and cross-compiles a micropyton file.
 """
-from typing import Union
 import itertools
 import subprocess
 from pathlib import Path
+from typing import Union
+
 from loguru import logger as log
 
 try:
@@ -167,7 +168,7 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
 
     edits = [
         ("comment", "print"),
-        ("comment", "from loguru import logger as log"),
+        ("comment", "import logging"),
         # first full
         ("comment", "self._log ="),
         ("comment", "self._log("),
@@ -185,11 +186,11 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
     if keep_report:
         report = (
             "rprint",
-            ('self._log.debug("Stub module: {:<20} to file:' ' {:<55} mem:{:>5}".' "format(module_name, file_name, m1))"),
+            ('self._log.info("Stub module: {:<20} to file:' ' {:<55} mem:{:>5}".' "format(module_name, file_name, m1))"),
         )
         clean = (
             "rprint",
-            'self._log.debug("Clean/remove files in folder: {}".format(path))',
+            'self._log.info("Clean/remove files in folder: {}".format(path))',
         )
         edits.insert(0, report)
         edits.insert(1, clean)
