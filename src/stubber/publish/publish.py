@@ -36,8 +36,7 @@ from loguru import logger as log
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
-from stubber.publish.package import (StubSource, create_package,
-                                     get_package_info, package_name)
+from stubber.publish.package import StubSource, create_package, get_package_info, package_name
 from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
@@ -129,7 +128,8 @@ def publish(
         log.debug(f"No changes to package : {package.package_name} {package.pkg_version}")
     else:
         if not force:  # pragma: no cover
-            log.info(f"Found changes to package : {package.package_name} {package.pkg_version} {package.hash} != {package.create_hash()}")
+            log.info(f"Found changes to package : {package.package_name} {package.pkg_version}")
+            log.debug(f"Old hash {package.hash} != New hash {package.create_hash()}")
         ## TODO: get last published version.postXXX from PyPI and update version if different
         if not dryrun:
             # only bump version if we are going to publish
