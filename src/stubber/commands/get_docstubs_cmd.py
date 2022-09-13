@@ -48,8 +48,6 @@ def cli_docstubs(
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
     """
 
-    log.info(f"stubs_from_docs version {__version__}\n")
-
     if path == CONFIG.repo_path.as_posix():
         # default
         rst_path = CONFIG.mpy_path / "docs" / "library"
