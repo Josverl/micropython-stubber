@@ -245,13 +245,18 @@ class StubPackage:
         """
 
         # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
-        for stub_type, fw_path in [s for s in self.stub_sources]:
+        # for stub_type, fw_path in [s for s in self.stub_sources]:
+        for n in range(len(self.stub_sources)):
+            stub_type, fw_path = self.stub_sources[n]
             if stub_type == StubSource.FIRMWARE:
                 # Check if -merged folder exists and copy that instead
                 merged_path = fw_path.with_name(f"{fw_path.name}-merged")
                 source = fw_path
-                if merged_path.exists():
+                if (CONFIG.stub_path / merged_path).exists():
+                    stub_type = StubSource.MERGED
                     source = merged_path
+                    # Update the source list
+                    self.stub_sources[n] = (stub_type, source)
                 try:
                     log.trace(f"Copying {stub_type} from {source}")
                     shutil.copytree(CONFIG.stub_path / source, self.package_path, symlinks=True, dirs_exist_ok=True)

@@ -9,7 +9,9 @@ class StubSource(str, Enum):
     CORE = "Core stubs"
     "stubs that allow (some) MicroPython code to be run by CPython"
     DOC = "Doc stubs"
-    "stubs built by parsing  the RST documentation files"
+    "stubs built by parsing the micropython RST documentation files"
+    MERGED = "Merged stubs"
+    "stubs built by merging the information from doc-stubs and firmware-stubs"
 
 
 ALL_TYPES = ["combo", "doc", "core", "firmware"]
