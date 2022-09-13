@@ -74,5 +74,5 @@ def merge_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy
             continue
         if not doc_path.exists():
             print(f"Warning: no docstubs for {fw['version']}")
-        print(fw)
+        log.info(f"Merge docstubs for {fw['family']} {fw['version']} {fw['port']} {fw['board']}")
         copy_merge_docstubs(fw_path, mrg_path, doc_path)

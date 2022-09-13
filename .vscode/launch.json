@@ -12,13 +12,21 @@
             "justMyCode": false
         },
         {
-            "name": "Python: stubber - Args",
+            "name": "Python: stubber - publish",
             "type": "python",
             "request": "launch",
             "module": "stubber.stubber",
+            // "cwd": "${workspaceFolder}/../micropython-stubs",
             "args": [
+                "publish",
+                "--test-pypi",
+                "--version",
+                "1.18",
+                "--port",
+                "esp32",
+                "--force",
                 // "clone"
-                "${input:cmdlineParams}"
+                // "${input:cmdlineParams}"
             ]
         },
         {
