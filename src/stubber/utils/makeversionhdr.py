@@ -67,7 +67,7 @@ def get_version_build_from_git(path: Path = Path.cwd()):
     parts = git_tag.split("-")
     assert len(parts) >= 2
     ver = parse(parts[0])
-    return ver, int(parts[1])
+    return ver, parts[1]
 
 
 # def get_version_info_from_docs_conf():
