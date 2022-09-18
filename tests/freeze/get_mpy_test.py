@@ -13,7 +13,7 @@ if not sys.warnoptions:
 
 # Dependencies
 import stubber.basicgit as git
-import stubber.get_mpy as get_mpy
+import stubber.freeze.get_frozen as get_frozen
 from packaging.version import Version, parse
 from stubber.utils.repos import read_micropython_lib_commits, switch
 from stubber.utils.versions import clean_version
@@ -38,7 +38,7 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
+    get_frozen.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
 
     modules = list((tmp_path / stub_path).glob("**/modules.json"))
     stubs = list((tmp_path / stub_path).glob("**/*.py"))

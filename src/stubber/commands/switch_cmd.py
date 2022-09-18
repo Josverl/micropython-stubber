@@ -8,7 +8,7 @@ from typing import Optional, Union
 
 import click
 import stubber.basicgit as git
-import stubber.get_mpy as get_mpy
+import stubber.freeze.get_frozen as get_frozen
 from loguru import logger as log
 from stubber.utils.config import CONFIG
 
@@ -87,7 +87,7 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
-    get_mpy.match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
+    get_frozen.match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
 
     log.info(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
     log.info(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")

@@ -6,7 +6,7 @@ from typing import List
 
 import click
 import stubber.basicgit as git
-import stubber.get_mpy as get_mpy
+import stubber.freeze.get_frozen as get_frozen
 import stubber.utils as utils
 from loguru import logger as log
 from stubber.utils.config import CONFIG
@@ -14,9 +14,6 @@ from stubber.utils.config import CONFIG
 from .cli import stubber_cli
 
 ##########################################################################################
-# log = logging.getLogger("stubber")
-#########################################################################################
-
 
 @stubber_cli.command(name="get-frozen")
 @click.option(
@@ -53,7 +50,7 @@ def cli_get_frozen(
         family = "micropython"
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
-        get_mpy.get_frozen(
+        get_frozen.get_frozen(
             stub_path.as_posix(), version=version, mpy_path=CONFIG.mpy_path.as_posix(), lib_path=CONFIG.mpy_lib_path.as_posix()
         )
     else:

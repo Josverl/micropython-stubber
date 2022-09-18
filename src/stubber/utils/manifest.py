@@ -1,10 +1,9 @@
 import json
-
 from pathlib import Path
-from .my_version import __version__
 from typing import Optional
-from .versions import clean_version
 
+from .my_version import __version__
+from .versions import clean_version
 
 # # log = logging.getLogger(__name__)
 # # logging.basicConfig(level=logging.INFO)
@@ -70,7 +69,12 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
 
         # sort the list
         for file in sorted(files):
-            mod_manifest["modules"].append({"file": str(file.relative_to(folder).as_posix()), "module": file.stem})
+            mod_manifest["modules"].append(
+                {
+                    "file": str(file.relative_to(folder).as_posix()),
+                    "module": file.stem,
+                }
+            )
 
         # write the the module manifest
         with open(folder / "modules.json", "w") as outfile:
