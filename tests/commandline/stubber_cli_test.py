@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 # module under test :
 import stubber.stubber as stubber
 from click.testing import CliRunner
@@ -82,7 +83,7 @@ def test_stubber_switch(mocker: MockerFixture, params: List[str]):
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
     m_get_tag: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
 
-    m_match = mocker.patch("stubber.get_mpy.match_lib_with_mpy", autospec=True)
+    m_match = mocker.patch("stubber.commands.switch_cmd.match_lib_with_mpy", autospec=True)
 
     m_exists = mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
     result = runner.invoke(stubber.stubber_cli, params)
@@ -116,7 +117,7 @@ def test_stubber_switch_version(mocker: MockerFixture, version: str):
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
     m_get_tag: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
 
-    m_match = mocker.patch("stubber.get_mpy.match_lib_with_mpy", autospec=True)
+    m_match = mocker.patch("stubber.commands.switch_cmd.match_lib_with_mpy", autospec=True)
 
     m_exists = mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
     result = runner.invoke(stubber.stubber_cli, ["switch", "--version", version])
