@@ -184,17 +184,17 @@ def test_stubber_get_frozen(mocker: MockerFixture, tmp_path: Path):
 
     mock_version: MagicMock = mocker.patch("stubber.basicgit.get_tag", autospec=True, return_value="v1.42")
 
-    mock: MagicMock = mocker.patch("stubber.get_mpy.get_frozen", autospec=True)
-    mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
+    m_get_frozen: MagicMock = mocker.patch("stubber.freeze.get_frozen.get_frozen", autospec=True)
+    m_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
 
     # fake run - need to ensure that there is a destination folder
     result = runner.invoke(stubber.stubber_cli, ["get-frozen", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
     # FIXME : test failes in CI
-    mock.assert_called_once()
+    m_get_frozen.assert_called_once()
     mock_version.assert_called_once()
 
-    mock_post.assert_called_once_with([tmp_path / "micropython-v1_42-frozen"], True, True)
+    m_post.assert_called_once_with([tmp_path / "micropython-v1_42-frozen"], True, True)
 
 
 ##########################################################################################
