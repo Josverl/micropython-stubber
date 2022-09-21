@@ -19,14 +19,12 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.12 - using manifests.py, possible also include content of /port/modules folder ?
 # - 1.11 and older - include content of /port/modules folder if it exists
 import os
-import re
 import shutil
 from pathlib import Path  # start moving from os & glob to pathlib
 
 from loguru import logger as log
 from stubber.freeze.common import apply_frozen_module_fixes, get_freeze_path, get_portboard
 from stubber.freeze.freeze_manifest_2 import make_path_vars
-from stubber.utils.config import CONFIG
 from stubber.utils.repos import match_lib_with_mpy
 
 from .. import utils
