@@ -29,7 +29,8 @@ from .fakeconfig import FakeConfig
         (False, False, 1, 1, 1),
     ],
 )
-def test_publish_one(mocker, tmp_path, pytestconfig, production: bool, dryrun: bool, check_cnt: int, build_cnt: int, publish_cnt: int):
+@pytest.mark.mocked
+def test_publish_one(mocker:MockerFixture, tmp_path, pytestconfig, production: bool, dryrun: bool, check_cnt: int, build_cnt: int, publish_cnt: int):
     """Test publish_multiple"""
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
@@ -49,7 +50,7 @@ def test_publish_one(mocker, tmp_path, pytestconfig, production: bool, dryrun: b
     assert result["result"] in ["Published", "DryRun successful"]
     assert Version(result["version"]).base_version == Version("1.18").base_version
 
-
+@pytest.mark.mocked
 def test_publish_multiple(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
     # use the test config
@@ -68,6 +69,7 @@ def test_publish_multiple(mocker, tmp_path, pytestconfig):
     assert m_publish.call_count >= 2
 
 
+@pytest.mark.mocked
 def test_publish_prod(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
 

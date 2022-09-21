@@ -77,6 +77,7 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
 
 # post processing
 # 
+@pytest.mark.mocked
 def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     # source = pytestconfig.rootpath / "tests/data/stubs-ok"
     dest = tmp_path / "stubs"

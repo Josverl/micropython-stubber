@@ -113,6 +113,8 @@ addopts = "-v -sv  -m 'not basicgit'"
 markers = [
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",
   "basicgit: marks tests in the basicgit module that manipulate the checkout",
+  "mocked: to replace/compensate for most of the slow and git tests",
+  #
   "minified: marks test of the minified version of createstubs",
   "docfix: upstream documentation fix needed",
   "micropython: tests of MicroPython code on Cpython with mocks",
