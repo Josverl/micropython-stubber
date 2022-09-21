@@ -37,7 +37,7 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_frozen.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
+    get_frozen.get_frozen((tmp_path / stub_path), version=version, mpy_path=mpy_path, mpy_lib_path=lib_path)
 
     modules = list((tmp_path / stub_path).glob("**/modules.json"))
     stubs = list((tmp_path / stub_path).glob("**/*.py"))

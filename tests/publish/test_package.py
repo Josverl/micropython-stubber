@@ -133,7 +133,6 @@ def test_package_from_json(tmp_path, pytestconfig, mocker:MockerFixture, json):
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
     mpy_version = "v1.18"
-    family = "micropython"
     pkg_name = "foo-bar-stubs"
     # todo: include stubs in the test data
     # note uses `stubs` relative to the stubs_folder

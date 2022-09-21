@@ -35,4 +35,4 @@ def cli_merge_docstubs(
     if len(versions) == 1:
         versions = versions[0]
     log.info(f"Merge docstubs for {family} {versions}")
-    result = merge_docstubs(versions=versions, family=family, mpy_path=CONFIG.mpy_path)
+    _ = merge_docstubs(versions=versions, family=family, mpy_path=CONFIG.mpy_path)

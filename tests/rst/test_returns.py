@@ -62,7 +62,7 @@ def make_ids(val):
 def test_returns(module, signature, docstring, expected_type):
     # return type should be included in the signature
     # except for classes
-    confidence = 0.1
+    # confidence = 0.1
     r = _type_from_context(docstring=docstring, signature=signature, module=module)
     assert r["type"] == expected_type
     # assert r["confidence"] >= confidence
