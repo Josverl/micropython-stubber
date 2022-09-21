@@ -1,20 +1,15 @@
 import glob
 import os
-import re
 import shutil
 import warnings
 from pathlib import Path  # start moving from os & glob to pathlib
-from typing import Optional, Union
 
 from loguru import logger as log
-from packaging.version import Version
-from stubber.utils.config import CONFIG
 from stubber.utils.repos import match_lib_with_mpy
 
 from .. import utils
 
 # Classes and functions from makemanifest to ensure that the manifest.py files can be processed
-from . import makemanifest_1 as makemanifest
 from .common import get_freeze_path, get_portboard
 
 # globals
