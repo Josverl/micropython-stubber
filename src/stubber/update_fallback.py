@@ -1,9 +1,9 @@
-from distutils.errors import DistutilsFileError
 import os
+import shutil
+from distutils.dir_util import copy_tree
+from distutils.errors import DistutilsFileError
 from pathlib import Path
 from typing import List, Optional, Tuple
-from distutils.dir_util import copy_tree
-import shutil
 
 from loguru import logger as log
 
@@ -103,10 +103,10 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
 
 
 if __name__ == "__main__":
-    from . import config
+    from stubber.utils.config import CONFIG
 
     update_fallback(
-        config.stub_path,
-        config.fallback_path,
+        CONFIG.stub_path,
+        CONFIG.fallback_path,
         version=RELEASED,
     )

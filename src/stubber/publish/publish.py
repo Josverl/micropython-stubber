@@ -36,7 +36,8 @@ from loguru import logger as log
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
-from stubber.publish.package import StubSource, create_package, get_package_info, package_name
+from stubber.publish.package import (StubSource, create_package,
+                                     get_package_info, package_name)
 from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
@@ -97,7 +98,7 @@ def publish(
     log.trace(f"{package.package_path.as_posix()}")
     status["version"] = package.pkg_version
     # check if the sources exist
-    OK = True
+    ok = True
     for (name, path) in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
             msg = f"{pkg_name}: source '{name}' not found: {CONFIG.stub_path / path}"
@@ -105,11 +106,11 @@ def publish(
                 log.warning(msg)
                 log.warning(msg)
                 status["error"] = msg
-                OK = False
+                ok = False
             else:
                 # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
                 log.warning(msg)
-    if not OK:
+    if not ok:
         log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
         package._publish = False
         # TODO Save ?

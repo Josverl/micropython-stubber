@@ -24,11 +24,12 @@ def get_portboard(manifest_path: Path):
     log.error(f"no port or board found in {manifest_path}")
     raise (ValueError("Neither port or board found in path"))
 
-def get_freeze_path(stub_path:Path, port:str,board:str)->Tuple[Path, str]:
+
+def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
     """
     get path to a folder to store the frozen stubs for the given port/board
     """
-    if port == None or port == "":
+    if port == "":
         raise ValueError("port must be provided")
 
     if board == "":

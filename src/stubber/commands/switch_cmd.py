@@ -8,9 +8,9 @@ from typing import Optional, Union
 
 import click
 import stubber.basicgit as git
-from stubber.utils.repos import match_lib_with_mpy
 from loguru import logger as log
 from stubber.utils.config import CONFIG
+from stubber.utils.repos import match_lib_with_mpy
 
 from .cli import stubber_cli
 
@@ -23,7 +23,7 @@ from .cli import stubber_cli
 try:
     VERSION_LIST = git.get_tags(CONFIG.mpy_path, minver="v1.10") + ["v1.9.3", "v1.9.4", "latest"]
 except Exception:
-    VERSION_LIST = ["latest"]
+    VERSION_LIST = ["latest"] # type: ignore
 
 
 @stubber_cli.command(name="switch")
