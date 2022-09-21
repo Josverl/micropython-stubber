@@ -1,17 +1,18 @@
 # others
-from typing import Dict, List
-import pytest
-from pathlib import Path
-import stubber.basicgit as git
+import json
 import subprocess
+from pathlib import Path
+from typing import Dict, List
 
-from helpers import load_rst, read_stub
+import pytest
+import stubber.basicgit as git
+
+from helpers import read_stub
 
 pytestmark = pytest.mark.doc_stubs
 
 # SOT
-from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
-
+from stubber.stubs_from_docs import TYPING_IMPORT, RSTReader, generate_from_rst
 
 TEST_DOCFIX = False  # run the tests agains the doc_fix_branch
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
@@ -241,11 +242,6 @@ def test_fix_param_dynamic():
     result = r.fix_parameters(param_in)
     assert result != param_out
     assert result == param_in
-
-
-import subprocess
-import json
-
 
 @pytest.mark.docfix
 # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)

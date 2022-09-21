@@ -128,19 +128,20 @@ class ManifestFile:
                 "MPY_DIR": (str) path to the micropython repo,
                 "MPY_LIB_DIR": (str) path to the micropython-lib (sub)repo,
                 "PORT_DIR": (str) full path to the port directory,
-                "BOARD_DIR": (str) full path to the board directory, 
+                "BOARD_DIR": (str) full path to the board directory,
                             or the same as PORT_DIR if no port,
                             or the location of a variant's manifest file
             }
-    
+
     """
-    def __init__(self, mode:int, path_vars:Optional[Dict[str,str]]=None):
+
+    def __init__(self, mode: int, path_vars: Optional[Dict[str, str]] = None):
         # Either MODE_FREEZE or MODE_COMPILE.
         self._mode = mode
         # Path substition variables.
         self._path_vars = path_vars or {}
         # List of files (as ManifestFileResult) references by this manifest.
-        self._manifest_files : List[ManifestOutput]= []
+        self._manifest_files: List[ManifestOutput] = []
         # Don't allow including the same file twice.
         self._visited = set()
         # Stack of metadata for each level.
@@ -168,7 +169,7 @@ class ManifestFile:
             "options": IncludeOptions(**kwargs),
         }
 
-    def files(self) :
+    def files(self):
         return self._manifest_files
 
     def execute(self, manifest_file):
@@ -208,11 +209,7 @@ class ManifestFile:
                 raise ManifestFileError("Expected .py file")
             kind = KIND_COMPILE_AS_MPY
 
-        self._manifest_files.append(
-            ManifestOutput(
-                FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt
-            )
-        )
+        self._manifest_files.append(ManifestOutput(FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt))
 
     def _search(self, base_path, package_path, files, exts, kind, opt=None, strict=False):
         base_path = self._resolve_path(base_path)
@@ -244,7 +241,7 @@ class ManifestFile:
                         raise ManifestFileError("Unexpected file type")
 
             if base_path:
-                os.chdir(prev_cwd)
+                os.chdir(prev_cwd)  # type: ignore
 
     def metadata(self, description=None, version=None, license=None):
         """
@@ -305,9 +302,7 @@ class ManifestFile:
                 try:
                     exec(f.read(), self._manifest_globals(kwargs))
                 except Exception as er:
-                    raise ManifestFileError(
-                        "Error in manifest file: {}: {}".format(manifest_path, er)
-                    )
+                    raise ManifestFileError("Error in manifest file: {}: {}".format(manifest_path, er))
                 os.chdir(prev_cwd)
             if not top_level:
                 self._metadata.pop()
@@ -327,9 +322,7 @@ class ManifestFile:
 
             for lib_dir in lib_dirs:
                 for manifest_path in glob.glob(
-                    os.path.join(
-                        self._path_vars["MPY_LIB_DIR"], lib_dir, "**", name, "manifest.py"
-                    ),
+                    os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir, "**", name, "manifest.py"),
                     recursive=True,
                 ):
                     self.include(manifest_path, **kwargs)
@@ -491,7 +484,7 @@ def main():
         print("Error: No mode specified.", file=sys.stderr)
         exit(1)
 
-    m = ManifestFile(mode, path_vars)
+    m = ManifestFile(mode, path_vars)  # type: ignore
     for manifest_file in args.files:
         try:
             m.execute(manifest_file)

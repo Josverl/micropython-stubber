@@ -1,9 +1,11 @@
+# type: ignore
 """ Work in Progress  
 
 build test and  % report 
 Will need to be updated after new_output has been implemented.
 
 """
+
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/D5ddB2/1
 
