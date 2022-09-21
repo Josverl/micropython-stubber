@@ -20,21 +20,21 @@ def make_path_vars(
     port: Optional[str] = None,
     board: Optional[str] = None,
 ):
-    if port == None or port == "":
+    if port == None or port == "": # pragma: no cover
         port_path = mpy_path
     else:
         port_path = mpy_path / "ports" / port
 
-    if board == None or board == "":
+    if board == None or board == "": # pragma: no cover
         board_path = port_path
     else:
         board_path = port_path / "boards" / board
 
     log.trace(f"port_path : {port_path}")
     log.trace(f"board_path: {board_path}")
-    if not port_path.exists():
+    if not port_path.exists(): # pragma: no cover
         raise ValueError("port board path not found")
-    if not board_path.exists():
+    if not board_path.exists(): # pragma: no cover
         raise ValueError("board path not found")
 
     # VARS must be absolute paths

@@ -149,6 +149,7 @@ omit = [
   # not my code 
   "*/logging.py",
   "*/make_stub_files.py",
+  "*/stubber/tools/*.py",
 
 
 ]
