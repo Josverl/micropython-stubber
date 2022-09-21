@@ -148,6 +148,7 @@ def test_freeze_manifest_1(
 
 
 # Some mocked tests to improve the coverage
+@pytest.mark.mocked
 def test_freeze_manifest_1_mocked(
     tmp_path: Path,
     testrepo_micropython: Path,

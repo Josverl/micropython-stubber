@@ -35,6 +35,7 @@ def test_get_cpython(requirements, tmp_path):
         "requirements-core-pycopy.txt",
     ],
 )
+@pytest.mark.mocked
 def test_get_cpython_mocked(
     requirements,
     tmp_path: Path,

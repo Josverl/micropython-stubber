@@ -28,7 +28,7 @@ def test_cmd_help():
 ##########################################################################################
 
 
-def test_cmd_get_config(mocker: MockerFixture, tmp_path: Path):
+def test_cmd_get_config():
     runner = CliRunner()
     # from stubber.commands.clone import git
     result = runner.invoke(stubber.stubber_cli, ["show-config"])
@@ -38,6 +38,7 @@ def test_cmd_get_config(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 # clone
 ##########################################################################################
+@pytest.mark.mocked
 def test_cmd_clone(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
     # from stubber.commands.clone import git
@@ -55,7 +56,7 @@ def test_cmd_clone(mocker: MockerFixture, tmp_path: Path):
         m_fetch.assert_any_call(Path("repos/micropython"))
         m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
-
+@pytest.mark.mocked
 def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
     m_clone: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
@@ -85,6 +86,7 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
         pytest.param(["switch", "--version", "v1.9.4", "--path", "foobar"], id="v1.9.4"),
     ],
 )
+@pytest.mark.mocked
 def test_cmd_switch(mocker: MockerFixture, params: List[str]):
     runner = CliRunner()
     # Mock Path.exists
@@ -119,6 +121,7 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
 
 
 @pytest.mark.parametrize("version", VERSION_LIST)
+@pytest.mark.mocked
 def test_cmd_switch_version(mocker: MockerFixture, version: str):
     runner = CliRunner()
     # Mock Path.exists
@@ -145,6 +148,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
 ##########################################################################################
 # minify
 ##########################################################################################
+@pytest.mark.mocked
 def test_cmd_minify(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -156,6 +160,7 @@ def test_cmd_minify(mocker: MockerFixture):
     mock_minify.assert_called_once_with("board/createstubs.py", "./minified", True, False, True)
 
 
+@pytest.mark.mocked
 def test_cmd_minify_all(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -173,6 +178,7 @@ def test_cmd_minify_all(mocker: MockerFixture):
 ##########################################################################################
 # stub
 ##########################################################################################
+@pytest.mark.mocked
 def test_cmd_stub(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -188,8 +194,7 @@ def test_cmd_stub(mocker: MockerFixture):
 ##########################################################################################
 # get-frozen
 ##########################################################################################
-
-
+@pytest.mark.mocked
 def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -212,6 +217,7 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 # get-lobo
 ##########################################################################################
+@pytest.mark.mocked
 def test_cmd_get_lobo(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -230,8 +236,7 @@ def test_cmd_get_lobo(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 # get-core
 ##########################################################################################
-
-
+@pytest.mark.mocked
 def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -251,8 +256,7 @@ def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 # get-docstubs
 ##########################################################################################
-
-
+@pytest.mark.mocked
 def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -279,6 +283,7 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 # get-lobo
 ##########################################################################################
+@pytest.mark.mocked
 def test_cmd_fallback(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
@@ -302,6 +307,7 @@ def test_cmd_fallback(mocker: MockerFixture, tmp_path: Path):
         ["merge", "--version", "latest" ],
     ],
 )
+@pytest.mark.mocked
 def test_cmd_merge(mocker: MockerFixture, cmdline: List[str]):
     runner = CliRunner()
     # from stubber.commands.clone import git
@@ -319,6 +325,7 @@ def test_cmd_merge(mocker: MockerFixture, cmdline: List[str]):
         ["publish", "--pypi", "--force"],
     ],
 )
+@pytest.mark.mocked
 def test_cmd_publish(mocker: MockerFixture, cmdline: List[str]):
     runner = CliRunner()
     # from stubber.commands.clone import git

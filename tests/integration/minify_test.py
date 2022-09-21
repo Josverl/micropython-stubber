@@ -26,6 +26,7 @@ def test_minification_py(tmp_path: Path, source: str):
 
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
+@pytest.mark.mocked
 def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture):
     "testthe rest of the minification functions using mocks to reduce the time needed"
     # load process.py in the same python environment
