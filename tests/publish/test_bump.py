@@ -1,5 +1,5 @@
 import pytest
-from packaging.version import Version, parse
+from packaging.version import Version
 from stubber.publish.bump import bump_postrelease
 
 

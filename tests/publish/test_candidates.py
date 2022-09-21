@@ -1,5 +1,4 @@
 from pathlib import Path
-from pprint import pprint
 from typing import Generator
 
 import pytest
@@ -104,5 +103,5 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
     # test data
     path = pytestconfig.rootpath / "tests/publish/data/stub-version"
     with pytest.raises(Exception) as exc_info:
-        frozen = frozen_candidates(path=path, family=family, versions=versions, ports=ports, boards=boards)
+        _ = frozen_candidates(path=path, family=family, versions=versions, ports=ports, boards=boards)
     assert exc_info.type == NotImplementedError

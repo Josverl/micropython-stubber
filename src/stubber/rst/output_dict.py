@@ -32,7 +32,8 @@ SourceDict is the 'base class'
 """
 from __future__ import annotations
 
-from typing import OrderedDict, List, Union
+from typing import List, OrderedDict, Union
+
 from .classsort import sort_classes
 
 # These are shown to import
@@ -54,7 +55,7 @@ class SourceDict(OrderedDict):
     def __init__(self, base: List, indent: int = 0, body: int = 0, lf: str = "\n"):
         super().__init__(base)
         self.lf = lf  #  add linefeed
-        self._indent = indent  # current base indent
+        self.indent = indent  # current base indent
         self._body = body  # for source body is level
         self._nr = 0  # generate incrementing line numbers
         self.name = ""
@@ -96,23 +97,23 @@ class SourceDict(OrderedDict):
             _docstr.insert(0, quotes)
             _docstr.append(quotes)
         # add indent + extra
-        _docstr = [spaces(self._indent + extra) + l for l in _docstr]
+        _docstr = [spaces(self.indent + extra) + l for l in _docstr]
         self.update({"docstr": _docstr})
 
     def add_comment(self, line: Union[str, List[str]]):
         "Add a comment, or list of comments, to this block."
         _c = self["comment"] or []
         if isinstance(line, str):
-            _c += [spaces(self._indent + self._body) + line]
+            _c += [spaces(self.indent + self._body) + line]
         elif isinstance(line, list):
             for l in line:
-                _c += [spaces(self._indent + self._body) + l]
+                _c += [spaces(self.indent + self._body) + l]
         self.update({"comment": _c})
 
     def add_constant(self, line: str, autoindent: bool = True):
         "add constant to the constant scope of this block"
         if autoindent:
-            line = spaces(self._indent + self._body) + line
+            line = spaces(self.indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
     def add_constant_smart(self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True):
@@ -141,17 +142,17 @@ class SourceDict(OrderedDict):
 
             _docstr = docstr
             if autoindent:
-                line = spaces(self._indent + self._body) + line
+                line = spaces(self.indent + self._body) + line
                 if len(_docstr):
                     if len(_docstr) == 1:
                         #  - if len = 1 add triple quotes before & after, respecting indentaion
-                        _docstr = [spaces(self._indent + self._body) + '"""' + _docstr[0].lstrip() + '"""']
+                        _docstr = [spaces(self.indent + self._body) + '"""' + _docstr[0].lstrip() + '"""']
                     else:
                         #  - if len > 1 add triple quotes on sep lines before & after,respecting indentaion
                         _docstr = (
-                            [spaces(self._indent + self._body) + '"""\\']
-                            + [spaces(self._indent + self._body) + l.lstrip() for l in _docstr]
-                            + [spaces(self._indent + self._body) + '"""']
+                            [spaces(self.indent + self._body) + '"""\\']
+                            + [spaces(self.indent + self._body) + l.lstrip() for l in _docstr]
+                            + [spaces(self.indent + self._body) + '"""']
                         )
             if len(_docstr):
                 #  - add docstring after defining constant
@@ -165,7 +166,7 @@ class SourceDict(OrderedDict):
     def add_line(self, line: str, autoindent: bool = True):
         self._nr += 1
         if autoindent:
-            line = spaces(self._indent + self._body) + line
+            line = spaces(self.indent + self._body) + line
         id = str(self._nr)
         self.update({id: line})
         return id
@@ -194,7 +195,7 @@ class ModuleSourceDict(SourceDict):
     def sort(self):
         "make sure all classdefs are in order"
         # new empty one
-        new = ModuleSourceDict(self.name, self._indent, self.lf)
+        new = ModuleSourceDict(self.name, self.indent, self.lf)
         # add the standard stuff using a dict comprehension
         new.update(
             {

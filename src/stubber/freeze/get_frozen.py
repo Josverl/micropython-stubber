@@ -30,7 +30,7 @@ from stubber.utils.config import CONFIG
 
 from .. import utils
 from .freeze_folder import freeze_folders  # Micropython < v1.12
-from .freeze_manifest_1 import freeze_all_manifests_1 , freeze_one_manifest_1 # Micropython v1.12 - 1.19.1
+from .freeze_manifest_1 import freeze_all_manifests_1  # Micropython v1.12 - 1.19.1
 
 # globals
 FAMILY = "micropython"

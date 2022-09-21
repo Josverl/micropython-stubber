@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-import pytest
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test

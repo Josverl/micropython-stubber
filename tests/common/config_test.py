@@ -1,8 +1,6 @@
 from pathlib import Path
-from typing import Dict
 
 import pytest
-import stubber
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 

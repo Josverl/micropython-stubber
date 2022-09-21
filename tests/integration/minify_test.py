@@ -1,10 +1,7 @@
-import sys
 from pathlib import Path
-import subprocess
 from types import SimpleNamespace
 import pytest
 from pytest_mock import MockerFixture
-from mock import MagicMock
 
 import stubber.minify as minify
 

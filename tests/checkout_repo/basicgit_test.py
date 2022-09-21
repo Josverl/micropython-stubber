@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 from pytest_mock import MockerFixture
 from mock import MagicMock
-from typing import List
 from subprocess import CompletedProcess
 
 # make sure that the source can be found

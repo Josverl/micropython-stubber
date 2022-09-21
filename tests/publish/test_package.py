@@ -1,12 +1,10 @@
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
-from stubber.publish.enums import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS
-from stubber.publish.package import create_package, get_package_info, package_name
-from stubber.publish.stubpacker import StubPackage, Version
-from stubber.utils.config import CONFIG, readconfig
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS
+from stubber.publish.package import create_package, package_name
+from stubber.publish.stubpacker import StubPackage
 
 from .fakeconfig import FakeConfig
 
