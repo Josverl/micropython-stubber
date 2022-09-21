@@ -60,6 +60,7 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
     dest = tmp_path / "stubs"
     shutil.copytree(source, dest)
     result = utils.generate_pyi_files(dest)
+    assert result == True
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
     assert py_count == pyi_count, "1:1 py:pyi"
@@ -89,7 +90,7 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     mock_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
 
     result = utils.do_post_processing([dest], pyi=True, black=True)
-
+    assert result == True
     mock.assert_called_once()
     mock_spr.assert_called_once()
 
@@ -124,7 +125,7 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
     PROBLEMATIC = 1  # number of files with issues
 
     result = utils.generate_pyi_files(dest)
-
+    assert result == True
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
 

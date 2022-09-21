@@ -205,8 +205,6 @@ def test_import_typing():
     "always include typing"
     r = RSTReader()
     r.prepare_output()
-    lines = r.output
-    #    lines =
     for line in TYPING_IMPORT:
         assert line.strip() in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
 
@@ -243,6 +241,7 @@ def test_fix_param_dynamic():
     assert result != param_out
     assert result == param_in
 
+
 @pytest.mark.docfix
 # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_Non_default_follows_default(pyright_results, capsys):
@@ -271,19 +270,19 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
 # C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:567:46 - "NORMAL" is not defined
 # C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:1398:47 - "UP" is not defined
 # C:\Users\josverl\AppData\Local\Temp\pytest-of-josverl\pytest-143\stubs0\latest\pyb.py:2244:8 - "hid_mouse" is not defined
-# TODO DOCFIX: 
-    # wm8960.py
-    # SWAP_NONE = 0
-    # ROUTE_PLAYBACK_RECORD = 0
-    # INPUT_MIC3 = 0
-    # INPUT_MIC2 = 0
-    # INPUT_MIC2 = 0
-    # SYSCLK_MCLK = 0
-    # SYNC_DAC = 0
-    # BUS_I2S = 1
-    # WM8960_I2C_ADDR = 0x1A
-    # MUTE_FAST = 0
-    # ALC_MODE = 0
+# TODO DOCFIX:
+# wm8960.py
+# SWAP_NONE = 0
+# ROUTE_PLAYBACK_RECORD = 0
+# INPUT_MIC3 = 0
+# INPUT_MIC2 = 0
+# INPUT_MIC2 = 0
+# SYSCLK_MCLK = 0
+# SYNC_DAC = 0
+# BUS_I2S = 1
+# WM8960_I2C_ADDR = 0x1A
+# MUTE_FAST = 0
+# ALC_MODE = 0
 @pytest.mark.docfix
 @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_pyright_undefined_variable(pyright_results, capsys):

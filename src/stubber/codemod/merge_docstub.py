@@ -85,7 +85,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
     # ------------------------------------------------------------------------
 
-    def leave_Module(self, node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
         "Update the Module docstring"
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
@@ -115,7 +115,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(self, node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
         if not stack_id in self.annotations:
@@ -143,7 +143,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(self, node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
 
         stack_id = tuple(self.stack)

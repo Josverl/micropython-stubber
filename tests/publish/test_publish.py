@@ -59,10 +59,14 @@ def test_publish_multiple(mocker, tmp_path, pytestconfig):
     m_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.publish", autospec=True, return_value=True)
 
     result = publish_multiple(production=False, frozen=True, dryrun=True)
+    assert len(result) > 0
     result = publish_multiple(production=False, frozen=True, dryrun=False)
+    assert len(result) > 0
 
     assert m_build.call_count >= 2
     assert m_publish.call_count >= 2
+    assert m_check.call_count >= 2
+    
 
 
 @pytest.mark.mocked
@@ -91,3 +95,7 @@ def test_publish_prod(mocker, tmp_path, pytestconfig):
     assert Version(result["version"]).base_version == Version("1.18").base_version
 
     assert Version(result["version"]) == Version("1.18.post43")
+    assert m_check.call_count == 1
+    assert m_build.call_count == 1
+    assert m_publish.call_count == 1
+    assert m_pypi.call_count == 1

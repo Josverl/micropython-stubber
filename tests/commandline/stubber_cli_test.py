@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
 # module under test :
 import stubber.stubber as stubber
 from click.testing import CliRunner
@@ -56,13 +55,14 @@ def test_cmd_clone(mocker: MockerFixture, tmp_path: Path):
         m_fetch.assert_any_call(Path("repos/micropython"))
         m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
+
 @pytest.mark.mocked
 def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
     m_clone: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
 
     m_tag = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True)
-    m_dir = mocker.patch("stubber.commands.clone_cmd.os.mkdir", autospec=True)
+    m_dir = mocker.patch("stubber.commands.clone_cmd.os.mkdir", autospec=True)  # type: ignore
 
     # now test with path specified
     result = runner.invoke(stubber.stubber_cli, ["clone", "--path", "foobar"])
@@ -90,16 +90,16 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
 def test_cmd_switch(mocker: MockerFixture, params: List[str]):
     runner = CliRunner()
     # Mock Path.exists
-    m_clone: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
+    mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
     m_fetch: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.fetch", autospec=True, return_value=0)
 
     m_switch: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.switch_branch", autospec=True, return_value=0)
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
-    m_get_tag: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
+    mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
 
     m_match = mocker.patch("stubber.commands.switch_cmd.match_lib_with_mpy", autospec=True)
 
-    m_exists = mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
+    mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
     result = runner.invoke(stubber.stubber_cli, params)
     assert result.exit_code == 0
 
@@ -144,6 +144,14 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
     m_fetch.assert_any_call(Path("repos/micropython"))
     m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
+    # should be called
+    assert m_get_tag.called
+    assert m_match.called
+    assert m_exists.called
+    # may/may not not be called
+    assert m_clone.call_count >= 0
+    assert m_switch.call_count >= 0
+    assert m_checkout.call_count >= 0
 
 ##########################################################################################
 # minify
@@ -303,8 +311,8 @@ def test_cmd_fallback(mocker: MockerFixture, tmp_path: Path):
 @pytest.mark.parametrize(
     "cmdline",
     [
-        ["merge", "-V", "1.18",  "-V", "1.19"],
-        ["merge", "--version", "latest" ],
+        ["merge", "-V", "1.18", "-V", "1.19"],
+        ["merge", "--version", "latest"],
     ],
 )
 @pytest.mark.mocked
@@ -313,7 +321,9 @@ def test_cmd_merge(mocker: MockerFixture, cmdline: List[str]):
     # from stubber.commands.clone import git
     m_merge_docstubs: MagicMock = mocker.patch("stubber.commands.merge_cmd.merge_docstubs", autospec=True, return_value={})
     result = runner.invoke(stubber.stubber_cli, cmdline)
-    m_merge_docstubs .assert_called_once()
+    assert result.exit_code == 0    
+    m_merge_docstubs.assert_called_once()
+
 
 ##########################################################################################
 # publish
@@ -331,4 +341,6 @@ def test_cmd_publish(mocker: MockerFixture, cmdline: List[str]):
     # from stubber.commands.clone import git
     m_publish_multiple: MagicMock = mocker.patch("stubber.commands.publish_cmd.publish_multiple", autospec=True, return_value={})
     result = runner.invoke(stubber.stubber_cli, cmdline)
+    assert result.exit_code == 0
     m_publish_multiple.assert_called_once()
+

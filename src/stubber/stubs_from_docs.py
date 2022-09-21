@@ -160,7 +160,7 @@ class RSTReader:
         # only update line if things balanced out correctly
         if is_balanced(newline):
             self.rst_text[self.line_no] = newline
-            for i in range(append):
+            for _ in range(append):
                 self.rst_text.pop(self.line_no + 1)
                 self.max_line -= 1
         # reprocess line
