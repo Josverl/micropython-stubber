@@ -79,7 +79,7 @@ class StubTypingCollector(cst.CSTVisitor):
         )
         self.annotations[tuple(self.stack)] = ti
 
-    def leave_ClassDef(self, node: cst.ClassDef) -> None:
+    def leave_ClassDef(self, original_node: cst.ClassDef) -> None:
         self.stack.pop()
 
     # ------------------------------------------------------------
@@ -104,7 +104,7 @@ class StubTypingCollector(cst.CSTVisitor):
         )
         self.annotations[tuple(self.stack)] = ti
 
-    def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
+    def leave_FunctionDef(self, original_node: cst.FunctionDef) -> None:
         self.stack.pop()
 
 
