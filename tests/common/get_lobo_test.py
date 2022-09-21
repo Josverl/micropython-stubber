@@ -1,7 +1,3 @@
-import os
-import pytest
-
-# pylint: disable=wrong-import-position,import-error
 # Module Under Test
 import stubber.get_lobo as get_lobo
 

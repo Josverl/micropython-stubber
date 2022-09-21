@@ -1,5 +1,4 @@
 import os
-import pytest
 
 # SOT
 import stubber.downloader as downloader

@@ -1,8 +1,7 @@
-import os
 import subprocess
-from packaging import version
-import pytest
 
+import pytest
+from packaging import version
 
 # def test_os_path():
 #     "Only needed to debug venv installation issues"

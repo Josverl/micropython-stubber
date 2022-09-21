@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 # pylint: disable=wrong-import-position,import-error
-import stubber.basicgit as git
 
 # Module Under Test
 import stubber.freeze.get_frozen as get_frozen

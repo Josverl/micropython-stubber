@@ -23,7 +23,6 @@ class FakeConfig:
 
     def __post_init__(self, tmp_path: Optional[Path] = None, rootpath: Optional[Path] = None):
         if tmp_path and rootpath:
-            source = rootpath / "tests/publish/data"
             self.publish_path = tmp_path / "publish"
             self.stub_path = rootpath / "repos/micropython-stubs/stubs"
             self.template_path = rootpath / "tests/publish/data/template"
