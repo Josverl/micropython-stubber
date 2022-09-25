@@ -2,11 +2,9 @@ import os
 from pathlib import Path
 
 import pytest
-
 # Module Under Test
 import stubber.freeze.get_frozen as get_frozen
 from mock import MagicMock
-
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
 from stubber.freeze.common import get_portboard
@@ -247,9 +245,13 @@ def test_freeze_any_mocked(
     m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
     m_freeze_one_manifest_2: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
     x = get_frozen.freeze_any(tmp_path, version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-    assert x >= 1, "expect >= 1 stubs"
     calls = m_freeze_folders.call_count + m_freeze_one_manifest_1.call_count + m_freeze_one_manifest_2.call_count
     assert calls >= 1
+    print(f" m_freeze_folders.call_count {m_freeze_folders.call_count}")
+    print(f" m_freeze_one_manifest_1.call_count {m_freeze_one_manifest_1.call_count}")
+    print(f" m_freeze_one_manifest_2.call_count {m_freeze_one_manifest_2.call_count}")
+
+    assert x >= 1, "expect >= 1 stubs"
 
 
 def test_freeze_manifest2_error_mocked(
