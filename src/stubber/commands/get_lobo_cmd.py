@@ -40,7 +40,7 @@ def cli_get_lobo(
     version = "v3.2.24"
     stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
     stub_paths.append(stub_path)
-    get_lobo.get_frozen(str(stub_path))
+    get_lobo.get_frozen(stub_path)
     stub_paths = [stub_path]
 
     log.info(f"::group:: start post processing of retrieved stubs")

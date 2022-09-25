@@ -91,7 +91,8 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
         if len(all_manifests) > 0:
             log.info(f"manifests: {len(all_manifests)}")
             shutil.rmtree(frozen_stub_path, ignore_errors=True)
-
+        else:
+            log.warning("no manifests found")
         for manifest in all_manifests:
             # TODO: try processing older version with new algoritm (1.12 - 1.19.1)
             if version in ["latest", "master"] or Version(version) >= Version("1.12"):
