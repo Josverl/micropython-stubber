@@ -1,13 +1,14 @@
 # others
-import pytest
-from pathlib import Path
 import shutil
-from pytest_mock import MockerFixture
-from mock import MagicMock
+from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
+from mock import MagicMock
+from pytest_mock import MockerFixture
+
 # SOT
 import stubber.utils as utils
-
 
 
 @pytest.mark.parametrize(
@@ -84,15 +85,15 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     dest = tmp_path / "stubs"
     # shutil.copytree(source, dest)
 
-    mock: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
+    m_generate_pyi_files: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
     return_val = SimpleNamespace()
     return_val.returncode = 0
-    mock_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
+    m_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
 
-    result = utils.do_post_processing([dest], pyi=True, black=True)
-    assert result == True
-    mock.assert_called_once()
-    mock_spr.assert_called_once()
+    utils.do_post_processing([dest], pyi=True, black=True)
+
+    m_generate_pyi_files.assert_called_once()
+    m_spr.assert_called_once()
 
 
 
