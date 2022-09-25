@@ -26,7 +26,8 @@ from loguru import logger as log
 from packaging.version import Version
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
-from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
+from stubber.freeze.freeze_manifest_1 import \
+    freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 from stubber.utils.config import CONFIG
 
@@ -36,12 +37,13 @@ FAMILY = "micropython"
 
 def get_manifests(mpy_path: Path) -> List[Path]:
     """return a list of all manifests.py files found in the ports folder"""
+    log.info(f"looking for manifests in  {mpy_path}")
     all_manifests = [
         m.absolute()
         for m in (mpy_path / "ports").rglob("manifest.py")
         if Path(m).parent.name != "coverage" and not "venv" in m.parts and not ".venv" in m.parts
     ]
-    log.debug(f"manifests found: {len(all_manifests)}")
+    log.info(f"manifests found: {len(all_manifests)}")
     return all_manifests
 
 
