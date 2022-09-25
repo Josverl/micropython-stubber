@@ -8,6 +8,7 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
 from pathlib import Path
+from typing import Optional
 
 from . import downloader, utils
 from .utils.config import CONFIG
@@ -21,7 +22,7 @@ PORT = "esp32_lobo"
 # log.setLevel(level=logging.DEBUG)
 
 
-def get_frozen(stub_path=None, *, repo=None, version="3.2.24"):
+def get_frozen(stub_path:Optional[Path]=None, *, repo:Optional[Path]=None, version="3.2.24"):
     "Loboris frozen modules"
     if stub_path is None:
         stub_path = CONFIG.stub_path / "{}-{}-frozen".format(FAMILY, utils.clean_version(version, flat=True))

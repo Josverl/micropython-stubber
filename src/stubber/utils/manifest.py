@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -70,8 +71,11 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
         # sort the list
         for file in sorted(files):
             # if file is in folder, then use relative path only
-            if file.is_relative_to(folder):
-                file = file.relative_to(folder)
+            # use old style relative path determination to support # python 3.8
+            file = Path(os.path.relpath(file, start=folder))
+            # if file.is_relative_to(folder):
+            #     file = file.relative_to(folder)
+
             mod_manifest["modules"].append(
                 {
                     "file": file.as_posix(),
