@@ -51,9 +51,7 @@ def cli_get_frozen(
         family = "micropython"
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
-        get_frozen.get_frozen(
-            stub_path, version=version, mpy_path=CONFIG.mpy_path.as_posix(), mpy_lib_path=CONFIG.mpy_lib_path.as_posix()
-        )
+        get_frozen.freeze_any(stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
     log.info(f"::group:: start post processing of retrieved stubs")
