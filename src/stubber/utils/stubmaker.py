@@ -31,8 +31,8 @@ def generate_pyi_from_file(file: Path) -> bool:
 
     sg_opt = STUBGEN_OPT
     # Deal with generator passed in
-    if not isinstance(file, Path):
-        raise TypeError
+    assert isinstance(file, Path)
+
     sg_opt.files = [str(file)]
     sg_opt.output_dir = str(file.parent)
     try:

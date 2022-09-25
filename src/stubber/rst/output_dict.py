@@ -87,7 +87,7 @@ class SourceDict(OrderedDict):
         # indent +4,  add triple " to  docstring
         if isinstance(docstr, str):
             _docstr = [docstr]
-        elif isinstance(docstr, List):
+        elif isinstance(docstr, List): #type: ignore
             _docstr = docstr.copy()
         else:
             raise TypeError
@@ -105,7 +105,7 @@ class SourceDict(OrderedDict):
         _c = self["comment"] or []
         if isinstance(line, str):
             _c += [spaces(self.indent + self._body) + line]
-        elif isinstance(line, list):
+        elif isinstance(line, list): #type: ignore
             for l in line:
                 _c += [spaces(self.indent + self._body) + l]
         self.update({"comment": _c})
