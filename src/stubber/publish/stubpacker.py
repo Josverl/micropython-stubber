@@ -131,7 +131,7 @@ class StubPackage:
     @pkg_version.setter
     def pkg_version(self, version: str):
         "set the version of the package"
-        if not isinstance(version, str):
+        if not isinstance(version, str):  # type: ignore
             version = str(version)
         # read the current file
         _toml = self.toml_path

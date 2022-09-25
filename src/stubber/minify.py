@@ -5,7 +5,8 @@
 import itertools
 import subprocess
 from pathlib import Path
-from typing import Union
+from typing import Tuple, Union, List
+
 
 from loguru import logger as log
 
@@ -166,7 +167,7 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
         str: minified source text
     """
 
-    edits = [
+    edits:List[Tuple[str,str]] = [
         ("comment", "print"),
         ("comment", "import logging"),
         # first full

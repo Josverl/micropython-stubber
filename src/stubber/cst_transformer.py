@@ -133,10 +133,10 @@ def update_def_docstr(
     # just checking
     if not isinstance(dest_node.body, cst.IndentedBlock):
         raise TransformError("Expected Def with Indented body")
-    if not isinstance(dest_node.body.body, Sequence):
-        # this is likely a .pyi file or a type declaration with a trailing ...
-        # no changes
-        return dest_node
+    # if not isinstance(dest_node.body.body, Sequence):
+    #     # this is likely a .pyi file or a type declaration with a trailing ...
+    #     # no changes
+    #     return dest_node
 
     # classdef of functiondef with an indented body
     # need some funcky casting to avoid issues with changing the body
@@ -156,9 +156,9 @@ def update_module_docstr(node: cst.Module, doc_tree: Optional[cst.SimpleStatemen
     "Update the docstring of a module"
     if not doc_tree:
         return node
-    # just checking
-    if not (isinstance(node.body, Sequence)):
-        raise TransformError("Expected module with body")
+    # # just checking
+    # if not (isinstance(node.body, Sequence)):
+    #     raise TransformError("Expected module with body")
 
     # need some funcky casting to avoid issues with changing the body
     if node.get_docstring() != None:
