@@ -41,6 +41,7 @@ def get_manifests(mpy_path: Path) -> List[Path]:
         for m in (mpy_path / "ports").rglob("manifest.py")
         if Path(m).parent.name != "coverage" and not "venv" in m.parts and not ".venv" in m.parts
     ]
+    log.debug(f"manifests found: {len(all_manifests)}")
     return all_manifests
 
 
@@ -49,7 +50,7 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
      - repos should be cloned side-by-side as some of the manifests refer to micropython-lib scripts using a relative path
-    
+
     the repos should be checked out to the version
 
     """
