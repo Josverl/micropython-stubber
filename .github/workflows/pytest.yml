@@ -7,18 +7,18 @@
 name: pytest
 on:
   workflow_dispatch:
-  push:
-    # paths:
-    #   - 'board/**'
-    #   - "src/**"
-    #   - "tests/**"
-    #   - "snippets/**"
-    #   - "pyproject.toml"
-    #   - "poetry.lock"
-    #   - "pyrightconfig.json"
-    
+  # push:
+  # paths:
+  #   - 'board/**'
+  #   - "src/**"
+  #   - "tests/**"
+  #   - "snippets/**"
+  #   - "pyproject.toml"
+  #   - "poetry.lock"
+  #   - "pyrightconfig.json"
+
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   run_tests:
@@ -59,7 +59,7 @@ jobs:
           installer-parallel: true
 
       #----------------------------------------------
-      # install dependencies 
+      # install dependencies
       #----------------------------------------------
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
@@ -69,14 +69,13 @@ jobs:
       #----------------------------------------------
       - name: Install library
         run: poetry install --no-interaction
-      
+
       #----------------------------------------------
-      # stubber clone 
-      # repos needed for tests 
+      # stubber clone
+      # repos needed for tests
       #----------------------------------------------
       - name: stubber clone
         run: poetry run stubber clone --add-stubs
-
 
       - name: flag tools executable (on linux)
         if: runner.os == 'Linux'
@@ -86,7 +85,7 @@ jobs:
 
       - name: create or update minified version
         run: |
-          poetry run stubber minify --all --compile 
+          poetry run stubber minify --all --compile
 
       - name: Test with pytest
         if: always()
@@ -101,7 +100,7 @@ jobs:
 
       #----------------------------------------------
       # upload coverage stats
-      # .lcov to  artefacts (available for download) 
+      # .lcov to  artefacts (available for download)
       # .XML  to Codecov
       #----------------------------------------------
       - uses: actions/upload-artifact@v3
