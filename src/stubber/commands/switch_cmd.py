@@ -23,7 +23,7 @@ from .cli import stubber_cli
 try:
     VERSION_LIST = git.get_tags(CONFIG.mpy_path, minver="v1.10") + ["v1.9.3", "v1.9.4", "latest"]
 except Exception:
-    VERSION_LIST = ["latest"] # type: ignore
+    VERSION_LIST = ["latest"]  # type: ignore
 
 
 @stubber_cli.command(name="switch")
@@ -86,7 +86,7 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
-    match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
+    match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
 
     log.info(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
     log.info(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")

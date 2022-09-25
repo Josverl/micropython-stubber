@@ -1,29 +1,28 @@
 import os
-import sys
 from pathlib import Path
 
 import pytest
 
-# pylint: disable=wrong-import-position,import-error
-
 # Module Under Test
 import stubber.freeze.get_frozen as get_frozen
-from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1
-from stubber.freeze.freeze_manifest_2 import apply_frozen_module_fixes, freeze_all_port_manifest_2
-from stubber.freeze.common import get_portboard
-from stubber.utils.repos import switch
-
-if not sys.warnoptions:
-    import os
-    import warnings
-
-    warnings.simplefilter("default")  # Change the filter in this process
-    os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
-
 from mock import MagicMock
 
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
+from stubber.freeze.common import get_portboard
+from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1
+from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
+from stubber.utils.repos import switch
+
+# pylint: disable=wrong-import-position,import-error
+
+
+# if not sys.warnoptions:
+#     import os
+#     import warnings
+
+#     warnings.simplefilter("default")  # Change the filter in this process
+#     os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
 
 
 @pytest.mark.parametrize(
@@ -66,18 +65,22 @@ def test_get_portboard(path: str, port: str, board: str):
 def test_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if task.py is included with the uasyncio frozen module"
     mpy_version = "v1.18"
-    mpy_folder = testrepo_micropython.absolute().as_posix()
-    lib_folder = testrepo_micropython_lib.absolute().as_posix()
-    stub_folder = tmp_path.absolute().as_posix()
+    mpy_folder = testrepo_micropython.absolute()
+    lib_folder = testrepo_micropython_lib.absolute()
+    stub_folder = tmp_path.absolute()
 
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
-    manifest = Path(mpy_folder + "/ports/esp32/boards/manifest.py")
-    freeze_one_manifest_1(manifest.as_posix(), stub_folder, mpy_folder, lib_folder, mpy_version)
+    manifest = mpy_folder / "ports/esp32/boards/manifest.py"
+    freeze_one_manifest_1(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
 
     assert (tmp_path / "esp32/GENERIC" / "uasyncio/task.py").exists()
     # check if the task.py is included
 
+
+#######################################################################################################################
+# frozen files in folders < v1.12
+#######################################################################################################################
 
 # @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
 # @pytest.mark.basicgit
@@ -96,7 +99,7 @@ def test_freeze_folders(
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
     get_frozen.freeze_folders(
-        stub_path,
+        stub_path.as_posix(),
         testrepo_micropython.as_posix(),
         lib_folder=testrepo_micropython_lib.as_posix(),
         version=mpy_version,
@@ -111,102 +114,163 @@ def test_freeze_folders(
     # assert result == True
 
 
+#######################################################################################################################
+# manifest v1 , micropython v1.12 - v1.19
+#######################################################################################################################
 @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
 # @pytest.mark.slow
 @pytest.mark.parametrize(
     "mpy_version",
     [
+        "v1.12",
+        "v1.16",
+        "v1.18",
+        "v1.19",
+    ],
+)
+# @pytest.mark.slow
+def test_freeze_one_manifest_v1(
+    mpy_version: str,
+    testrepo_micropython: Path,
+    testrepo_micropython_lib: Path,
+    tmp_path: Path,
+):
+    "test if task.py is included with the uasyncio frozen module"
+    mpy_folder = testrepo_micropython.absolute()
+    lib_folder = testrepo_micropython_lib.absolute()
+    stub_folder = tmp_path.absolute()
+
+    switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+
+    manifest = mpy_folder / "ports/esp32/boards/manifest.py"
+    freeze_one_manifest_1(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
+    # todo : add more checks
+
+
+#######################################################################################################################
+# manifest v2 ,
+#######################################################################################################################
+@pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
+# @pytest.mark.slow
+@pytest.mark.parametrize(
+    "mpy_version,port",
+    [
+        ("v1.12", "esp32"),
+        ("v1.16", "esp32"),
+        ("v1.18", "esp32"),
+        ("v1.18", "esp8266"),
+        ("v1.19", "esp32"),
+    ],
+)
+# @pytest.mark.slow
+def test_freeze_one_manifest_v2(
+    mpy_version: str,
+    port: str,
+    testrepo_micropython: Path,
+    testrepo_micropython_lib: Path,
+    tmp_path: Path,
+):
+    "Test freezing with manifest v2"
+    mpy_folder = testrepo_micropython.absolute()
+    lib_folder = testrepo_micropython_lib.absolute()
+    stub_folder = tmp_path.absolute()
+
+    switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+
+    manifest = mpy_folder / "ports" / port / "boards/manifest.py"
+    freeze_one_manifest_2(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
+    # todo : add more checks
+
+
+#######################################################################################################################
+# ANY
+#######################################################################################################################
+
+
+@pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
+# @pytest.mark.slow
+@pytest.mark.parametrize(
+    "mpy_version",
+    [
+        "v1.12",
         "v1.16",
         "v1.18",
         "v1.19",
         "v1.19.1",
-        "master",
-        "latest",
     ],
 )
-def test_freeze_manifest_1(
+def test_freeze_any(
     mpy_version: str,
     testrepo_micropython: Path,
     testrepo_micropython_lib: Path,
     tmp_path: Path,
 ):
     "test if we can freeze source using manifest.py files"
-    print(f"Testing {mpy_version} in {tmp_path}")
+    # print(f"Testing {mpy_version} in {tmp_path}")
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
     if mpy_version in ["master", "latest"]:
         pytest.skip("TODO: need update for new manifest processing")
 
-    get_frozen.get_frozen(str(tmp_path), version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+    get_frozen.freeze_any(tmp_path, version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
     scripts = list(tmp_path.rglob("*.py"))
 
     assert scripts is not None, "can freeze scripts from manifest"
     assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
 
-    # result = utils.generate_pyi_files(tmp_path)
-    # assert result == True
 
+#######################################################################################################################
+#######################################################################################################################
 
 # Some mocked tests to improve the coverage
+@pytest.mark.parametrize(
+    "mpy_version",
+    [
+        "master",
+        "v1.19",
+        "v1.18",
+        "v1.16",
+        "v1.12",
+        "v1.10",
+    ],
+)
 @pytest.mark.mocked
-def test_freeze_manifest_1_mocked(
+def test_freeze_any_mocked(
     tmp_path: Path,
     testrepo_micropython: Path,
     testrepo_micropython_lib: Path,
     mocker: MockerFixture,
+    mpy_version: str,
 ):
     "mocked test if we can freeze source using manifest.py files"
-    mpy_version: str = "master"
 
-    m_freeze_all_manifests_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_all_manifests_1", autospec=True, return_value=0)
-    m_freeze_folders: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True)
-    mpy_folder = testrepo_micropython.as_posix()
-    lib_folder = testrepo_micropython_lib.as_posix()
+    m_freeze_folders: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
+    m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
+    m_freeze_one_manifest_2: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
+    x = get_frozen.freeze_any(tmp_path, version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+    assert x >= 1, "expect >= 1 stubs"
+    calls = m_freeze_folders.call_count + m_freeze_one_manifest_1.call_count + m_freeze_one_manifest_2.call_count
+    assert calls >= 1
 
-    # call with folders
-    m_glob: MagicMock = mocker.patch(
-        "stubber.freeze.get_frozen.glob.glob",
-        autospec=True,
-        return_value=[Path("./repos/micropython/ports\\esp32\\boards\\manifest.py")],
-    )
 
-    get_frozen.get_frozen(str(tmp_path), version=mpy_version, mpy_path=mpy_folder, mpy_lib_path=lib_folder)
-    assert m_freeze_folders.called == 0
-    assert m_freeze_all_manifests_1.called
-    assert m_glob.called
+def test_freeze_manifest2_error_mocked(
+    tmp_path: Path,
+    testrepo_micropython: Path,
+    testrepo_micropython_lib: Path,
+    mocker: MockerFixture,
+    mpy_version: str = "v1.19",
+):
+    "mocked test if we can freeze source using manifest.py files"
+
+    m_freeze_folders: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
+    m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
+    m_freeze_one_manifest_2: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
+    # get the correct version to test
+    switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+    x = get_frozen.freeze_any(tmp_path, version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+    assert x >= 1, "expect >= 1 stubs"
+    assert m_freeze_folders.call_count == 0, "expect no calls to freeze_folders"
+    assert m_freeze_one_manifest_2.call_count == 34, "34 calls to freeze_one_manifest_2"
+    assert m_freeze_one_manifest_1.call_count == 0
 
 
 ##########################################################################
-
-
-@pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
-# @pytest.mark.slow
-@pytest.mark.parametrize(
-    "mpy_version",
-    [
-        # "v1.16",
-        "v1.18",
-        "v1.19",
-        "master",
-        "latest",
-    ],
-)
-def test_freeze_all_manifest_2(
-    mpy_version: str,
-    testrepo_micropython: Path,
-    testrepo_micropython_lib: Path,
-    tmp_path: Path,
-):
-    "test if we can freeze source using manifest.py files"
-    print(f"Testing {mpy_version} in {tmp_path}")
-    switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-    # if mpy_version in ["master", "latest"]:
-    #     pytest.skip("TODO: need update for new manifest processing")
-
-    get_frozen.get_frozen(str(tmp_path), version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-    scripts = list(tmp_path.rglob("*.py"))
-
-    assert scripts is not None, "can freeze scripts from manifest"
-    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
-
-    # result = utils.generate_pyi_files(tmp_path)
-    # assert result == True

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 # module under test :
 import stubber.stubber as stubber
 from click.testing import CliRunner
@@ -152,6 +153,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
     assert m_clone.call_count >= 0
     assert m_switch.call_count >= 0
     assert m_checkout.call_count >= 0
+
 
 ##########################################################################################
 # minify
@@ -321,7 +323,7 @@ def test_cmd_merge(mocker: MockerFixture, cmdline: List[str]):
     # from stubber.commands.clone import git
     m_merge_docstubs: MagicMock = mocker.patch("stubber.commands.merge_cmd.merge_docstubs", autospec=True, return_value={})
     result = runner.invoke(stubber.stubber_cli, cmdline)
-    assert result.exit_code == 0    
+    assert result.exit_code == 0
     m_merge_docstubs.assert_called_once()
 
 
@@ -343,4 +345,3 @@ def test_cmd_publish(mocker: MockerFixture, cmdline: List[str]):
     result = runner.invoke(stubber.stubber_cli, cmdline)
     assert result.exit_code == 0
     m_publish_multiple.assert_called_once()
-

@@ -69,9 +69,12 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
 
         # sort the list
         for file in sorted(files):
+            # if file is in folder, then use relative path only
+            if file.is_relative_to(folder):
+                file = file.relative_to(folder)
             mod_manifest["modules"].append(
                 {
-                    "file": str(file.relative_to(folder).as_posix()),
+                    "file": file.as_posix(),
                     "module": file.stem,
                 }
             )
