@@ -44,4 +44,4 @@ def cli_enrich_folder(
     """
     write_back = not dry_run
     log.info(f"Enriching {stubs_folder} with {docstubs_folder}")
-    count = enrich_folder(Path(stubs_folder), Path(docstubs_folder), show_diff=diff, write_back=write_back, require_docstub=False)
+    _ = enrich_folder(Path(stubs_folder), Path(docstubs_folder), show_diff=diff, write_back=write_back, require_docstub=False)

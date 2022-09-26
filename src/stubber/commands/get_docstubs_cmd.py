@@ -11,7 +11,6 @@ import stubber.utils as utils
 from loguru import logger as log
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG
-from stubber.utils.my_version import __version__
 
 from .cli import stubber_cli
 
@@ -47,8 +46,6 @@ def cli_docstubs(
 
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
     """
-
-    log.info(f"stubs_from_docs version {__version__}\n")
 
     if path == CONFIG.repo_path.as_posix():
         # default

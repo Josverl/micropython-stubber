@@ -1,14 +1,13 @@
 # run createstubs in the unix version of micropython
 import json
-import sys
 import os
 import subprocess
+import sys
 from pathlib import Path
-from typing import List
+
+import distro
 import pytest
 from _pytest.config import Config
-import distro
-
 
 # "list of avaialble micropython versions on the current platfor"
 fw_list = []  # no tests on mac

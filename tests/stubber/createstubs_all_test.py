@@ -1,13 +1,14 @@
 # type: ignore reportGeneralTypeIssues
 import sys
 from collections import namedtuple
-from typing import List
-import pytest
-from pytest_mock import MockerFixture
 from importlib import import_module
 from pathlib import Path
-from packaging.version import parse
+from typing import List
+
+import pytest
 from mock import MagicMock
+from packaging.version import parse
+from pytest_mock import MockerFixture
 
 try:
     import tomllib  # type: ignore
@@ -116,6 +117,7 @@ from testcases import fwid_test_cases
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 @pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname, mock_modules", fwid_test_cases)
+@pytest.mark.mocked
 def test_stubber_fwid(
     mock_micropython_path,
     location,

@@ -3,7 +3,6 @@ from typing import List, Union
 import click
 from loguru import logger as log
 from stubber.commands.cli import stubber_cli
-from stubber.publish.enums import ALL_TYPES
 from stubber.publish.publish import publish_multiple
 from tabulate import tabulate
 

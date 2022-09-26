@@ -46,7 +46,7 @@ class AddComment(VisitorBasedCodemodCommand):
         if self._regex_pattern.search(node.value):
             self.needs_add = False
 
-    def leave_Module(self, node: Module, updated_node: Module) -> Module:
+    def leave_Module(self, original_node: Module, updated_node: Module) -> Module:
         # If the tag already exists, don't modify the file.
         if not self.needs_add:
             return updated_node

@@ -3,7 +3,7 @@
 ##########################################################################################
 import os
 from pathlib import Path
-from typing import Union
+from typing import List, Tuple, Union
 
 import click
 import stubber.basicgit as git
@@ -40,7 +40,7 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
 
         mpy_stubs_path = CONFIG.stub_path.parent
 
-    repos = [
+    repos :List[Tuple[Path,str,str]]= [
         (mpy_path, "https://github.com/micropython/micropython.git", "master"),
         (mpy_lib_path, "https://github.com/micropython/micropython-lib.git", "master"),
     ]

@@ -63,13 +63,14 @@
             "label": "coverage",
             "detail": "run coverage for all tests",
             "type": "shell",
-            "command": "poetry run coverage run -m pytest tests -m 'not basicgit' --junitxml=results/test-results.xml",
+            "command": "poetry run coverage run -m pytest tests -m 'not basicgit' --junitxml=results/test-results.xml"
         },
         {
             "label": "coverage html",
             "detail": "update coverage html report",
             "type": "shell",
             "command": "poetry run coverage html",
+            "problemMatcher": []
         },
         {
             "label": "coverage ALL",
@@ -81,6 +82,12 @@
                 "coverage html"
             ],
             "dependsOrder": "sequence"
+        },
+        {
+            "label": "Autoflake",
+            "detail": "remove unused imports",
+            "type": "shell",
+            "command": "autoflake src -r --in-place --remove-all-unused-imports --ignore-init-module-import"
         }
     ]
 }

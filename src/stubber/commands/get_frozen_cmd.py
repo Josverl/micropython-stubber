@@ -6,7 +6,7 @@ from typing import List
 
 import click
 import stubber.basicgit as git
-import stubber.get_mpy as get_mpy
+from stubber.freeze.get_frozen import freeze_any
 import stubber.utils as utils
 from loguru import logger as log
 from stubber.utils.config import CONFIG
@@ -14,8 +14,6 @@ from stubber.utils.config import CONFIG
 from .cli import stubber_cli
 
 ##########################################################################################
-# log = logging.getLogger("stubber")
-#########################################################################################
 
 
 @stubber_cli.command(name="get-frozen")
@@ -53,9 +51,7 @@ def cli_get_frozen(
         family = "micropython"
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
-        get_mpy.get_frozen(
-            stub_path.as_posix(), version=version, mpy_path=CONFIG.mpy_path.as_posix(), lib_path=CONFIG.mpy_lib_path.as_posix()
-        )
+        freeze_any(stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
     log.info(f"::group:: start post processing of retrieved stubs")

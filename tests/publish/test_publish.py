@@ -1,13 +1,9 @@
-from pathlib import Path
 
 import pytest
 from mock import MagicMock
 from packaging.version import Version
 from pytest_mock import MockerFixture
-from stubber.publish.database import get_database
-from stubber.publish.enums import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS
-from stubber.publish.publish import publish, publish_multiple, publish_one
-from stubber.utils.config import CONFIG, readconfig
+from stubber.publish.publish import publish_multiple, publish_one
 
 from .fakeconfig import FakeConfig
 
@@ -29,7 +25,8 @@ from .fakeconfig import FakeConfig
         (False, False, 1, 1, 1),
     ],
 )
-def test_publish_one(mocker, tmp_path, pytestconfig, production: bool, dryrun: bool, check_cnt: int, build_cnt: int, publish_cnt: int):
+@pytest.mark.mocked
+def test_publish_one(mocker:MockerFixture, tmp_path, pytestconfig, production: bool, dryrun: bool, check_cnt: int, build_cnt: int, publish_cnt: int):
     """Test publish_multiple"""
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
@@ -49,7 +46,7 @@ def test_publish_one(mocker, tmp_path, pytestconfig, production: bool, dryrun: b
     assert result["result"] in ["Published", "DryRun successful"]
     assert Version(result["version"]).base_version == Version("1.18").base_version
 
-
+@pytest.mark.mocked
 def test_publish_multiple(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
     # use the test config
@@ -62,12 +59,17 @@ def test_publish_multiple(mocker, tmp_path, pytestconfig):
     m_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.publish", autospec=True, return_value=True)
 
     result = publish_multiple(production=False, frozen=True, dryrun=True)
+    assert len(result) > 0
     result = publish_multiple(production=False, frozen=True, dryrun=False)
+    assert len(result) > 0
 
     assert m_build.call_count >= 2
     assert m_publish.call_count >= 2
+    assert m_check.call_count >= 2
+    
 
 
+@pytest.mark.mocked
 def test_publish_prod(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
 
@@ -93,3 +95,7 @@ def test_publish_prod(mocker, tmp_path, pytestconfig):
     assert Version(result["version"]).base_version == Version("1.18").base_version
 
     assert Version(result["version"]) == Version("1.18.post43")
+    assert m_check.call_count == 1
+    assert m_build.call_count == 1
+    assert m_publish.call_count == 1
+    assert m_pypi.call_count == 1

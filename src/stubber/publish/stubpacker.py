@@ -131,7 +131,7 @@ class StubPackage:
     @pkg_version.setter
     def pkg_version(self, version: str):
         "set the version of the package"
-        if not isinstance(version, str):
+        if not isinstance(version, str):  # type: ignore
             version = str(version)
         # read the current file
         _toml = self.toml_path
@@ -456,6 +456,7 @@ class StubPackage:
             return False
         # todo: call poetry directly to improve error handling
         try:
+            log.trace(f"poetry {parameters} starting")
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
@@ -464,6 +465,7 @@ class StubPackage:
                 stdout=subprocess.PIPE,  # interestingly: errors on stdout , output on stderr .....
                 universal_newlines=True,
             )
+            log.trace(f"poetry {parameters} completed")
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
             log.error("Exception on process, {}".format(e))
             return False

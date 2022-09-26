@@ -1,6 +1,4 @@
-import pytest
-import stubber.publish.pypi as pypi
-from packaging.version import Version, parse
+from packaging.version import Version
 from stubber.publish.pypi import get_pypy_versions
 
 

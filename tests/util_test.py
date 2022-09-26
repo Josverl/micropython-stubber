@@ -1,13 +1,14 @@
 # others
-import pytest
-from pathlib import Path
 import shutil
-from pytest_mock import MockerFixture
-from mock import MagicMock
+from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
+from mock import MagicMock
+from pytest_mock import MockerFixture
+
 # SOT
 import stubber.utils as utils
-
 
 
 @pytest.mark.parametrize(
@@ -60,6 +61,7 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
     dest = tmp_path / "stubs"
     shutil.copytree(source, dest)
     result = utils.generate_pyi_files(dest)
+    assert result == True
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
     assert py_count == pyi_count, "1:1 py:pyi"
@@ -77,20 +79,21 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
 
 # post processing
 # 
+@pytest.mark.mocked
 def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     # source = pytestconfig.rootpath / "tests/data/stubs-ok"
     dest = tmp_path / "stubs"
     # shutil.copytree(source, dest)
 
-    mock: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
+    m_generate_pyi_files: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
     return_val = SimpleNamespace()
     return_val.returncode = 0
-    mock_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
+    m_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
 
-    result = utils.do_post_processing([dest], pyi=True, black=True)
+    utils.do_post_processing([dest], pyi=True, black=True)
 
-    mock.assert_called_once()
-    mock_spr.assert_called_once()
+    m_generate_pyi_files.assert_called_once()
+    m_spr.assert_called_once()
 
 
 
@@ -123,7 +126,7 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
     PROBLEMATIC = 1  # number of files with issues
 
     result = utils.generate_pyi_files(dest)
-
+    assert result == True
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
 

@@ -1,12 +1,9 @@
 # others
-from typing import Dict, List, Union
 import pytest
-from pathlib import Path
-import stubber.basicgit as git
 
 # SOT
-from stubber.stubs_from_docs import generate_from_rst, RSTReader, TYPING_IMPORT
-from helpers import load_rst, read_stub
+from stubber.stubs_from_docs import RSTReader
+from helpers import load_rst
 # mark all tests 
 pytestmark = pytest.mark.doc_stubs
 

@@ -23,7 +23,7 @@ def clean_version(
             nibbles[0] = nibbles[0][0:-2]
     if len(nibbles) == 1:
         version = nibbles[0]
-    elif build and build != "dirty":
+    elif build:
         if not commit:
             version = "-".join(nibbles[0:-1])
         else:

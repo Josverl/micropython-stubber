@@ -160,7 +160,7 @@ class RSTReader:
         # only update line if things balanced out correctly
         if is_balanced(newline):
             self.rst_text[self.line_no] = newline
-            for i in range(append):
+            for _ in range(append):
                 self.rst_text.pop(self.line_no + 1)
                 self.max_line -= 1
         # reprocess line
@@ -399,7 +399,7 @@ class RSTReader:
         if len(params) > 0:
             method = FunctionSourceDict(
                 name="__init__",
-                indent=class_def._indent + 4,
+                indent=class_def.indent + 4,
                 definition=[f"def __init__(self, {params} -> None:"],
                 docstr=[],  # todo: check if twice is needed
             )
@@ -606,7 +606,7 @@ class RSTReader:
             if name == "__init__":
                 method = FunctionSourceDict(
                     name=f"def {name}",
-                    indent=parent_class._indent + 4,
+                    indent=parent_class.indent + 4,
                     definition=[f"def __init__(self, {params} -> None:"],
                     docstr=docstr,
                 )
@@ -615,7 +615,7 @@ class RSTReader:
                 method = FunctionSourceDict(
                     decorators=["@classmethod"],
                     name=f"def {name}",
-                    indent=parent_class._indent + 4,
+                    indent=parent_class.indent + 4,
                     definition=[f"def {name}(cls, {params} -> {ret_type}:"],
                     docstr=docstr,
                 )
@@ -625,7 +625,7 @@ class RSTReader:
                 method = FunctionSourceDict(
                     decorators=["@staticmethod"],
                     name=f"def {name}",
-                    indent=parent_class._indent + 4,
+                    indent=parent_class.indent + 4,
                     definition=[f"def {name}({params} -> {ret_type}:"],
                     docstr=docstr,
                 )
@@ -633,7 +633,7 @@ class RSTReader:
             else:  # just plain method
                 method = FunctionSourceDict(
                     name=f"def {name}",
-                    indent=parent_class._indent + 4,
+                    indent=parent_class.indent + 4,
                     definition=[f"def {name}(self, {params} -> {ret_type}:"],
                     docstr=docstr,
                 )

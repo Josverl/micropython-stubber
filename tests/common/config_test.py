@@ -1,8 +1,6 @@
 from pathlib import Path
-from typing import Dict
 
 import pytest
-import stubber
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 
@@ -23,7 +21,7 @@ def test_toplevel_config():
 def test_bad_config_source():
     # throws error if file not found
     with pytest.raises(FileNotFoundError) as exc_info:
-        source = TomlConfigSource("test/data/no_config.toml", must_exist=True)
+        _ = TomlConfigSource("test/data/no_config.toml", must_exist=True)
     exception_raised = exc_info.value
     assert exception_raised.args[0] == "Could not find config file test/data/no_config.toml"
 

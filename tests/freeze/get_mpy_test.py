@@ -13,8 +13,7 @@ if not sys.warnoptions:
 
 # Dependencies
 import stubber.basicgit as git
-import stubber.get_mpy as get_mpy
-from packaging.version import Version, parse
+import stubber.freeze.get_frozen as get_frozen
 from stubber.utils.repos import read_micropython_lib_commits, switch
 from stubber.utils.versions import clean_version
 
@@ -24,11 +23,8 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
     # set state of repos
     switch(tag=tag, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
-    # Use Submodules
-    mpy_path = testrepo_micropython.as_posix()
-    lib_path = testrepo_micropython_lib.as_posix()
     try:
-        version = clean_version(git.get_tag(mpy_path) or "v1")
+        version = clean_version(git.get_tag(testrepo_micropython) or "v1")
     except Exception:
         warnings.warn("Could not find the micropython version Tag - assuming v1.x")
         version = "v1"
@@ -38,7 +34,7 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_mpy.get_frozen(str(tmp_path / stub_path), version=version, mpy_path=mpy_path, lib_path=lib_path)
+    get_frozen.freeze_any((tmp_path / stub_path), version=version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
     modules = list((tmp_path / stub_path).glob("**/modules.json"))
     stubs = list((tmp_path / stub_path).glob("**/*.py"))

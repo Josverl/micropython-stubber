@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from stubber.publish.enums import ALL_TYPES, COMBO_STUBS, CORE_STUBS, DOC_STUBS
-from stubber.publish.package import create_package, get_package_info, package_name
-from stubber.publish.stubpacker import StubPackage, Version
-from stubber.utils.config import CONFIG, readconfig
+from pytest_mock import MockerFixture
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS
+from stubber.publish.package import create_package, package_name
+from stubber.publish.stubpacker import StubPackage
 
 from .fakeconfig import FakeConfig
 
@@ -127,13 +126,13 @@ read_db_data = [
 
 
 @pytest.mark.parametrize("json", read_db_data)
-def test_package_from_json(tmp_path, pytestconfig, mocker, json):
+@pytest.mark.mocked
+def test_package_from_json(tmp_path, pytestconfig, mocker:MockerFixture, json):
     # setup test configuration
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
     mpy_version = "v1.18"
-    family = "micropython"
     pkg_name = "foo-bar-stubs"
     # todo: include stubs in the test data
     # note uses `stubs` relative to the stubs_folder

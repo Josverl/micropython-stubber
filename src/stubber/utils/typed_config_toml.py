@@ -66,7 +66,7 @@ class TomlConfigSource(ConfigSource):
         for k, v in self.data.items():
             assert isinstance(k, str)
             assert isinstance(v, Dict)
-            for v_k, v_v in v.items():
+            for v_k, v_v in v.items(): # type: ignore
                 assert isinstance(v_k, str)
                 # do not assume/require that all values are strings
                 # assert isinstance(v_v, str)

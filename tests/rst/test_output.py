@@ -1,5 +1,6 @@
 # others
 import pytest
+
 # SOT
 from stubber.rst import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
 
@@ -211,7 +212,7 @@ def test_add_class_simple():
 
     method = FunctionSourceDict(
         name="def spam",
-        indent=class_1._indent + 4,
+        indent=class_1.indent + 4,
         definition=["def spam(foo:int, bar:str)->None:"],
         docstr=['"Spam docstring"'],
     )
@@ -227,7 +228,7 @@ def test_add_class_simple():
 
     method = FunctionSourceDict(
         name="def parrot",
-        indent=class_1._indent + 4,
+        indent=class_1.indent + 4,
         definition=["def parrot(foo:int, bar:str)->None:"],
         docstr=['"Parrot docstring"'],
     )
@@ -262,14 +263,14 @@ def test_method_decorator():
     method_1 = FunctionSourceDict(
         decorators=["@classmethod"],
         name="def spam",
-        indent=class_1._indent + 4,
+        indent=class_1.indent + 4,
         definition=["def spam()->None:"],
         docstr=["Spam docstring"],
     )
     method_2 = FunctionSourceDict(
         decorators=["@staticmethod", "@decorator"],
         name="def bar",
-        indent=class_1._indent + 4,
+        indent=class_1.indent + 4,
         definition=["def bar()->None:"],
         docstr=["bar docstring"],
     )

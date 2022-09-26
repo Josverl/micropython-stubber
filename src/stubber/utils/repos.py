@@ -32,7 +32,7 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
-    match_lib_with_mpy(version_tag=tag, lib_folder=mpy_lib_path.as_posix())
+    match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
 
 
 def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
@@ -63,8 +63,8 @@ def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
     return version_commit
 
 
-def match_lib_with_mpy(version_tag: str, lib_folder: str):
+def match_lib_with_mpy(version_tag: str, lib_path: Path):
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
-    return git.checkout_commit(micropython_lib_commits[version_tag], lib_folder)
+    return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)

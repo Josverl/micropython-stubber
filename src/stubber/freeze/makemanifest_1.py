@@ -2,9 +2,11 @@
 Classes and functions copied & adapted from micropypythons makemanifest.py to ensure that the manifest.py files can be processed
 """
 import os
-from loguru import logger as log
-from pathlib import Path
 import shutil
+from pathlib import Path
+from typing import List, Union
+
+from loguru import logger as log
 
 # # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.DEBUG)
@@ -87,7 +89,7 @@ def freeze(path, script=None, opt=0):  # pragma: no cover
         # for s in os.listdir(path):
         #     freeze_internal(path, s)
 
-        for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
+        for dirpath, dirnames, filenames in os.walk(path, followlinks=True):  # type: ignore
             for script in filenames:
                 # can recurse folder, so add relative path to script.
                 freeze_internal(path, (dirpath + "/" + script)[len(path) + 1 :], opt)
@@ -101,7 +103,7 @@ def freeze(path, script=None, opt=0):  # pragma: no cover
 
 
 # do not change method name
-def include(manifest, **kwargs):
+def include(manifest: Union[str,List[str]], **kwargs):
     """
     Include another manifest.
 
@@ -124,7 +126,7 @@ def include(manifest, **kwargs):
         if options.extra_features:
             # freeze extra modules.
     """
-    if not isinstance(manifest, str):
+    if not isinstance(manifest, Path) and not isinstance(manifest, str): # type: ignore
         for m in manifest:
             include(m)
     else:
@@ -196,39 +198,3 @@ def freeze_internal(path: str, script: str, opt=None):
         log.exception(e)
 
 
-###### TODO: Update to freeze_Internal_2
-
-
-# def freeze_internal_2(path: str, script: str, opt=None):
-#     """
-#     micropython-stubber implementation to 'freeze' a single micropython file for stubbing, called by freeze.
-#     Copy the to-be-frozen module to the destination folder to be stubbed.
-
-#     Parameters:
-#     path (str)  : a relative source path, optionally with placeholders
-#     script (str): the source script to be frozen, may have a relative path prefix
-#     opt (Any): freeze option (ignored)
-
-#     Copy {path}/{script} to {stub_dir}/{script}
-#     """
-
-#     log.trace(" - freeze_internal({},{})".format(path, script))
-#     src_path: Path = Path(convert_path(path))
-#     if not src_path.is_dir():
-#         raise FreezeError("freeze path must be a directory")
-#     if stub_dir == "":
-#         raise FreezeError("Stub folder not set")
-
-#     src_path = src_path / convert_path(script)
-#     dst_path = Path(stub_dir) / convert_path(script)
-
-#     log.debug("freeze_internal : {:<30} to {}".format(script, stub_dir))
-#     # ensure folder, including possible path prefix for script
-#     os.makedirs(dst_path.parent.as_posix(), exist_ok=True)
-#     # copy file
-#     try:
-#         shutil.copy2(src_path.as_posix(), dst_path.as_posix())
-#     except (FileNotFoundError) as e:
-#         log.warning(f"File {src_path.as_posix()} not found")
-#     except (OSError, FileNotFoundError) as e:
-#         log.exception(e)

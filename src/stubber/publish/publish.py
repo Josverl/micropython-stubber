@@ -98,7 +98,7 @@ def publish(
     log.trace(f"{package.package_path.as_posix()}")
     status["version"] = package.pkg_version
     # check if the sources exist
-    OK = True
+    ok = True
     for (name, path) in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
             msg = f"{pkg_name}: source '{name}' not found: {CONFIG.stub_path / path}"
@@ -106,11 +106,11 @@ def publish(
                 log.warning(msg)
                 log.warning(msg)
                 status["error"] = msg
-                OK = False
+                ok = False
             else:
                 # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
                 log.warning(msg)
-    if not OK:
+    if not ok:
         log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
         package._publish = False
         # TODO Save ?
@@ -129,7 +129,8 @@ def publish(
         log.debug(f"No changes to package : {package.package_name} {package.pkg_version}")
     else:
         if not force:  # pragma: no cover
-            log.info(f"Found changes to package : {package.package_name} {package.pkg_version} {package.hash} != {package.create_hash()}")
+            log.info(f"Found changes to package : {package.package_name} {package.pkg_version}")
+            log.debug(f"Old hash {package.hash} != New hash {package.create_hash()}")
         ## TODO: get last published version.postXXX from PyPI and update version if different
         if not dryrun:
             # only bump version if we are going to publish
