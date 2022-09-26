@@ -3,10 +3,10 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-import stubber.tools.manifestfile as manifestfile
 from loguru import logger as log
 from stubber import utils
-from stubber.tools.manifestfile import ManifestOutput
+from stubber.tools.manifestfile import (MODE_FREEZE, ManifestFile,
+                                        ManifestFileError, ManifestOutput)
 from stubber.utils.config import CONFIG
 
 from .common import apply_frozen_module_fixes, get_freeze_path, get_portboard
@@ -19,12 +19,12 @@ def make_path_vars(
     port: Optional[str] = None,
     board: Optional[str] = None,
 ):
-    if port == None or port == "":  # pragma: no cover
+    if port is None or port == "":  # pragma: no cover
         port_path = mpy_path
     else:
         port_path = mpy_path / "ports" / port
 
-    if board == None or board == "":  # pragma: no cover
+    if board is None or board == "":  # pragma: no cover
         board_path = port_path
     else:
         board_path = port_path / "boards" / board
@@ -56,12 +56,12 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
     log.info(f"port-board: '{port}-{board}'")
 
     path_vars = make_path_vars(port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
-    upy_manifest = manifestfile.ManifestFile(manifestfile.MODE_FREEZE, path_vars)
+    upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
     try:
         # assume manifestneeds to be run from the port's folder
         os.chdir(path_vars["PORT_DIR"])
         upy_manifest.execute(manifest.as_posix())
-    except manifestfile.ManifestFileError as er:
+    except ManifestFileError as er:
         log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
         raise er
     log.info(f"total {len(upy_manifest.files())} files")
