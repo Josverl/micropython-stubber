@@ -456,7 +456,7 @@ class StubPackage:
             return False
         # todo: call poetry directly to improve error handling
         try:
-            print(f"poetry {parameters} strating")
+            log.trace(f"poetry {parameters} starting")
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
@@ -465,7 +465,7 @@ class StubPackage:
                 stdout=subprocess.PIPE,  # interestingly: errors on stdout , output on stderr .....
                 universal_newlines=True,
             )
-            print(f"poetry {parameters} completed")
+            log.trace(f"poetry {parameters} completed")
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
             log.error("Exception on process, {}".format(e))
             return False
