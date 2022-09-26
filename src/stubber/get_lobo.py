@@ -17,13 +17,8 @@ FAMILY = "loboris"
 PORT = "esp32_lobo"
 
 
-# # log = logging.getLogger(__name__)
-# log.setLevel(level=logging.INFO)
-# log.setLevel(level=logging.DEBUG)
-
-
-def get_frozen(stub_path:Optional[Path]=None, *, repo:Optional[Path]=None, version="3.2.24"):
-    "Loboris frozen modules"
+def get_frozen(stub_path: Optional[Path] = None, *, repo: Optional[str] = None, version="3.2.24"):
+    "Download Loboris frozen modules direct from github repo"
     if stub_path is None:
         stub_path = CONFIG.stub_path / "{}-{}-frozen".format(FAMILY, utils.clean_version(version, flat=True))
     else:
@@ -62,8 +57,3 @@ def get_frozen(stub_path:Optional[Path]=None, *, repo:Optional[Path]=None, versi
         version=version,
         stubtype="frozen",
     )
-
-
-if __name__ == "__main__":
-    # logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_frozen(version="3.2.24")
