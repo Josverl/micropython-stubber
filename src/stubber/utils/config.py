@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from loguru import logger as log
-
-from .typed_config_toml import Config, EnvironmentConfigSource, TomlConfigSource, key, section
+from .typed_config_toml import (Config, EnvironmentConfigSource,
+                                TomlConfigSource, key, section)
 
 
 @section("micropython-stubber")
