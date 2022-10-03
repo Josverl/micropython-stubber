@@ -30,7 +30,7 @@ def _run_git(
         # add some logging for github actions
         log.error("Exception on process, rc=", e.returncode, "output=", e.output.decode("utf-8"), "\nstderr=", e.stderr.decode("utf-8"))
         return None
-    if result.stderr != b"":
+    if result.stderr and result.stderr != b"":
         stderr = result.stderr.decode("utf-8")
         if "warning" in stderr.lower():
             log.warning(stderr)

@@ -40,7 +40,7 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
 
         mpy_stubs_path = CONFIG.stub_path.parent
 
-    repos :List[Tuple[Path,str,str]]= [
+    repos: List[Tuple[Path, str, str]] = [
         (mpy_path, "https://github.com/micropython/micropython.git", "master"),
         (mpy_lib_path, "https://github.com/micropython/micropython-lib.git", "master"),
     ]

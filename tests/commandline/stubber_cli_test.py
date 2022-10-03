@@ -83,8 +83,8 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
 @pytest.mark.parametrize(
     "params",
     [
-        pytest.param(["switch", "--version", "latest", "--path", "foobar"], id="latest"),
-        pytest.param(["switch", "--version", "v1.9.4", "--path", "foobar"], id="v1.9.4"),
+        pytest.param(["switch", "latest"], id="latest"),
+        pytest.param(["switch", "v1.9.4"], id="v1.9.4"),
     ],
 )
 @pytest.mark.mocked
@@ -106,9 +106,9 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
 
     # fetch latest
     assert m_fetch.call_count == 3
-    # "foobar" from params is used as the path
-    m_fetch.assert_any_call(Path("foobar/micropython"))
-    m_fetch.assert_any_call(Path("foobar/micropython-lib"))
+    # TODO: Use Fakeconfig to test path
+    m_fetch.assert_any_call(Path("repos/micropython"))
+    m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
     # core
     m_match.assert_called_once()
@@ -136,7 +136,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
     m_match = mocker.patch("stubber.commands.switch_cmd.match_lib_with_mpy", autospec=True)
 
     m_exists = mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
-    result = runner.invoke(stubber.stubber_cli, ["switch", "--version", version])
+    result = runner.invoke(stubber.stubber_cli, ["switch", version])
     assert result.exit_code == 0
 
     # fetch latest
@@ -167,7 +167,7 @@ def test_cmd_minify(mocker: MockerFixture):
 
     result = runner.invoke(stubber.stubber_cli, ["minify"])
     assert result.exit_code == 0
-    mock_minify.assert_called_once_with("board/createstubs.py", "./minified", True, False, True)
+    mock_minify.assert_called_once_with("board/createstubs.py", "./minified", True, False, False)
 
 
 @pytest.mark.mocked
@@ -180,9 +180,9 @@ def test_cmd_minify_all(mocker: MockerFixture):
     result = runner.invoke(stubber.stubber_cli, ["minify", "--all"])
     assert result.exit_code == 0
     assert mock_minify.call_count == 3
-    mock_minify.assert_any_call("board/createstubs.py", "./minified", True, False, True)
-    mock_minify.assert_any_call("board/createstubs_db.py", "./minified", True, False, True)
-    mock_minify.assert_any_call("board/createstubs_mem.py", "./minified", True, False, True)
+    mock_minify.assert_any_call("board/createstubs.py", "./minified", True, False, False)
+    mock_minify.assert_any_call("board/createstubs_db.py", "./minified", True, False, False)
+    mock_minify.assert_any_call("board/createstubs_mem.py", "./minified", True, False, False)
 
 
 ##########################################################################################
