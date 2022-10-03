@@ -28,15 +28,16 @@ def _run_git(
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
         # add some logging for github actions
-        log.error("Exception on process, rc=", e.returncode, "output=", e.output, "stderr=", e.stderr)
+        log.error("Exception on process, rc=", e.returncode, "output=", e.output.decode("utf-8"), "\nstderr=", e.stderr.decode("utf-8"))
         return None
     if result.stderr != b"":
         stderr = result.stderr.decode("utf-8")
-        if capture_output and echo_output:  # pragma: no cover
-            log.error(stderr)
         if "warning" in stderr.lower():
             log.warning(stderr)
-        elif not expect_stderr:
+            expect_stderr = True
+        elif capture_output and echo_output:  # pragma: no cover
+            log.error(stderr)
+        if not expect_stderr:
             raise Exception(stderr)
 
     if result.returncode < 0:
