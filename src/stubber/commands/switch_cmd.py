@@ -29,16 +29,6 @@ except Exception:
 @stubber_cli.command(name="switch")
 # WIP: Transition from Option to  Argument, currently supports both
 @click.argument("tag", required=False, type=click.Choice(VERSION_LIST, case_sensitive=False))
-@click.option(
-    "-t",
-    "--tag",
-    "--version",
-    default="latest",
-    type=click.Choice(VERSION_LIST, case_sensitive=False),
-    prompt=True,
-    prompt_required=False,
-    help="The version of MicroPython to checkout",
-)
 @click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
 def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
     """
