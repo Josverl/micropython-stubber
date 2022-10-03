@@ -31,10 +31,13 @@ def _run_git(
         log.error("Exception on process, rc=", e.returncode, "output=", e.output, "stderr=", e.stderr)
         return None
     if result.stderr != b"":
-        if not expect_stderr:
-            raise Exception(result.stderr.decode("utf-8"))
+        stderr = result.stderr.decode("utf-8")
         if capture_output and echo_output:  # pragma: no cover
-            log.error(result.stderr.decode("utf-8"))
+            log.error(stderr)
+        if "warning" in stderr.lower():
+            log.warning(stderr)
+        elif not expect_stderr:
+            raise Exception(stderr)
 
     if result.returncode < 0:
         raise Exception(result.stderr.decode("utf-8"))
