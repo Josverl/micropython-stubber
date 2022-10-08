@@ -6,18 +6,17 @@ Extend typed-config to read configuration from .toml files
 """
 # TODO : extend support for . notation in section names
 
-from typing import Dict, Optional
 from pathlib import Path
+from typing import Dict, Optional
 
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
     import tomli as tomllib
-
-from typedconfig.config import Config, key, section# type: ignore
-from typedconfig.source import ConfigSource, EnvironmentConfigSource# type: ignore
+assert tomllib
 
 from loguru import logger as log
+from typedconfig.source import ConfigSource
 
 
 class TomlConfigSource(ConfigSource):
@@ -33,9 +32,9 @@ class TomlConfigSource(ConfigSource):
     state = "resting"
     details = ["pinging","Lovely plumage","3"]
     ```
-    The use the below code to retrieve:
+    Use the below code to retrieve:
     ```
-    # TODO
+    # TODO sample code
     ```
     """
 
@@ -66,7 +65,7 @@ class TomlConfigSource(ConfigSource):
         for k, v in self.data.items():
             assert isinstance(k, str)
             assert isinstance(v, Dict)
-            for v_k, v_v in v.items(): # type: ignore
+            for v_k, v_v in v.items():  # type: ignore
                 assert isinstance(v_k, str)
                 # do not assume/require that all values are strings
                 # assert isinstance(v_v, str)

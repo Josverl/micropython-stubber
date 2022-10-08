@@ -1,7 +1,9 @@
 from pathlib import Path
 
-from .typed_config_toml import (Config, EnvironmentConfigSource,
-                                TomlConfigSource, key, section)
+from typedconfig.config import Config, key, section
+from typedconfig.source import EnvironmentConfigSource
+
+from .typed_config_toml import TomlConfigSource
 
 
 @section("micropython-stubber")
