@@ -157,6 +157,7 @@ class ManifestFile:
     def _manifest_globals(self, kwargs):
         # This is the "API" available to a manifest file.
         return {
+            "os": os,
             "metadata": self.metadata,
             "include": self.include,
             "require": self.require,
