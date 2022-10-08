@@ -187,23 +187,6 @@ def test_stubber_fwid(
 #     assert createstubs.read_path() == ""
 
 
-@pytest.mark.parametrize("variant", VARIANTS)
-@pytest.mark.parametrize("location", LOCATIONS)
-def test_get_obj_attributes(
-    location,
-    variant,
-    mock_micropython_path,
-):
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
-
-    stubber = createstubs.Stubber()  # type: ignore
-    assert stubber is not None, "Can't create Stubber instance"
-    items, errors = stubber.get_obj_attributes(sys)
-    assert items != []
-    assert errors == []
-    assert len(items) > 50
-    for attr in items:
-        assert type(attr) == tuple
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
