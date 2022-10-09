@@ -2,6 +2,7 @@
 Helper module to create stubs for the lvgl modules.
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 """
+import os
 
 try:
     import lvgl  # type: ignore
@@ -10,7 +11,9 @@ except Exception:
 
 import sys
 
-## Note that on MicroPython this will still cause the full stubbing to be automatically started due to the IsMicroPython()
+## prevent the full stubbing to be automatically started due to the IsMicroPython()
+with open("no_auto_stubber.txt", "w") as f:
+    f.write("lvgl")
 from createstubs import Stubber, __version__, isMicroPython, logging
 
 

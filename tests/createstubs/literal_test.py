@@ -1,6 +1,7 @@
 # type: ignore reportGeneralTypeIssues
 import sys
 from collections import namedtuple
+from fileinput import filename
 from importlib import import_module
 from pathlib import Path
 from typing import List
@@ -41,7 +42,7 @@ def test_get_obj_attributes(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-def test_literal_ordering(
+def test_literal_order(
     location,
     variant,
     mock_micropython_path,
@@ -49,13 +50,52 @@ def test_literal_ordering(
     """
     Literals MUST be listed before methods as they can be used in as defaults in method parameters.
     """
-    global FIRST_VERSION
-
+    # location = "board"
+    # variant = "createstubs"
     createstubs = import_module(f"{location}.{variant}")  # type: ignore
-
+    machine = import_module("tests.data.stub_merge.micropython-v1_18-esp32.machine")
     stubber = createstubs.Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
-    items, errors = stubber.get_obj_attributes(sys)
-    assert items != []
 
+    items, errors = stubber.get_obj_attributes(machine.SoftSPI)
+    assert items != []
     # check literals defined before first method
+    assert items[0][4] == 1, "Literals MUST be listed before class methods"
+
+    items, errors = stubber.get_obj_attributes(machine)
+    assert items != []
+    # check literals defined before first method
+    assert items[0][4] == 1, "Literals MUST be listed before functions and classes"
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+def test_literal_init_order(
+    variant,
+    mock_micropython_path,
+    tmp_path,
+):
+    """
+    Literals MUST be listed before methods as they can be used in as defaults in method parameters.
+    """
+    location = "board"  # no need to test on minified versions
+    # variant = "createstubs"
+    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    machine = import_module("tests.data.stub_merge.micropython-v1_18-esp32.machine")
+    stubber = createstubs.Stubber()  # type: ignore
+    assert stubber is not None, "Can't create Stubber instance"
+
+    filename = tmp_path / "test.pyi"
+    with open(filename, "w") as f:
+        stubber.write_object_stub(f, machine, "", "", 0)
+
+    with open(filename, errors="ignore", encoding="utf8") as f:
+        lines = f.readlines()
+
+    lines = [line.rstrip() for line in lines]
+    # check literals defined before first method
+
+    class_line = lines.index("class SoftSPI():")
+    LSB_line = lines.index("    LSB = 1 # type: int", class_line + 1)
+    init_line = lines.index("    def __init__(self, *argv, **kwargs) -> None:", class_line + 1)
+
+    assert class_line < LSB_line < init_line, "Literals MUST be listed before class methods"

@@ -23,23 +23,16 @@ You should find a cross-compiled version located here: `./minified/createstubs_d
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
-import sys
 import gc
 import logging
+import sys
+
 import uos as os
-from utime import sleep_us
 from ujson import dumps
 
-__version__ = "1.7.2"
+__version__ = "1.9.11"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
-# deal with ESP32 firmware specific implementations.
-try:
-    from machine import resetWDT  # type: ignore  - LoBo specific function
-except ImportError:
-    # machine.WDT.feed()
-    def resetWDT():
-        pass
 
 
 class Stubber:
@@ -93,24 +86,37 @@ class Stubber:
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []
 
-    def get_obj_attributes(self, item_instance: object):
+    def get_obj_attributes(self, item_instance: object) -> tuple[list[tuple[str, str, str, object, int]], list[str]]:
         "extract information of the objects members and attributes"
+        # name_, repr_(value), type as text, item_instance
         _result = []
         _errors = []
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
             try:
                 val = getattr(item_instance, name)
-                # name , item_repr(value) , type as text, item_instance
-                _result.append((name, repr(val), repr(type(val)), val))
+                # name , item_repr(value) , type as text, item_instance, order
+                try:
+                    type_text = repr(type(val)).split("'")[1]
+                except IndexError:
+                    type_text = ""
+                if type_text in ("int", "float", "str", "bool", "tuple", "list", "dict"):
+                    order = 1
+                elif type_text in ("function", "method"):
+                    order = 2
+                elif type_text in ("class"):
+                    order = 3
+                else:
+                    order = 4
+                _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
                 _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
         # remove internal __
-        _result = [i for i in _result if not (i[0].startswith("_"))]
+        _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
         gc.collect()
         return _result, _errors
 
-    def add_modules(self, modules: list):
+    def add_modules(self, modules: list[str]):
         "Add additional modules to be exported"
         self.modules = sorted(set(self.modules) | set(modules))
 
@@ -207,16 +213,11 @@ class Stubber:
         if errors:
             self._log.error(errors)
 
-        for item_name, item_repr, item_type_txt, item_instance in items:
-            # name_, repr_(value), type as text, item_instance
+        for item_name, item_repr, item_type_txt, item_instance, _ in items:
+            # name_, repr_(value), type as text, item_instance, order
             # do not create stubs for these primitives
             if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
                 continue
-
-            # allow the scheduler to run on LoBo based FW
-            resetWDT()
-            sleep_us(1)
-
             # Class expansion only on first 3 levels (bit of a hack)
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, item_name))
@@ -237,13 +238,11 @@ class Stubber:
                 # s += indent + "    ''\n"
                 if is_exception:
                     s += indent + "    ...\n"
-                else:
-                    # Add __init__
-                    s += indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
-                    s += indent + "        ...\n\n"
+                    fp.write(s)
+                    return
+                # write classdef
                 fp.write(s)
-                # self._log.debug("\n" + s)
-
+                # first write the class literals and methods
                 self._log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
                     fp,
@@ -252,6 +251,11 @@ class Stubber:
                     indent + "    ",
                     in_class + 1,
                 )
+                # close with the __init__ method to make sure that the literals are defined
+                # Add __init__
+                s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
+                s += indent + "        ...\n\n"
+                fp.write(s)
             # Class Methods and functions
             elif "method" in item_type_txt or "function" in item_type_txt:
                 self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
@@ -311,7 +315,7 @@ class Stubber:
         del items
         del errors
         try:
-            del item_name, item_repr, item_type_txt, item_instance  # pylint: disable=undefined-loop-variable
+            del item_name, item_repr, item_type_txt, item_instance  # type: ignore
         except (OSError, KeyError, NameError):  # lgtm [py/unreachable-statement]
             pass
 
@@ -528,9 +532,17 @@ def get_root() -> str:
         try:
             _ = os.stat(r)
             break
-        except OSError as e:
+        except OSError:
             continue
     return r
+
+
+def file_exists(filename: str):
+    try:
+        os.stat(filename)
+        return True
+    except OSError:
+        return False
 
 
 def show_help():
@@ -564,19 +576,19 @@ def isMicroPython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # lgtm [py/unused-local-variable]
+        b = bytes("abc", encoding="utf8")  # type: ignore # lgtm [py/unused-local-variable]
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = isMicroPython.__module__  # lgtm [py/unused-local-variable]
+        c = isMicroPython.__module__  # type: ignore # lgtm [py/unused-local-variable]
         return False
     except (NotImplementedError, AttributeError):
         return True
 
 
 def main_esp8266():
-    import machine
     import btree
+    import machine
 
     try:
         f = open("modulelist" + ".db", "r+b")
@@ -614,9 +626,9 @@ def main_esp8266():
         # ------------------------------------
         # do epic shit
         # but sometimes things fail
-        OK = False
+        ok = False
         try:
-            OK = stubber.create_one_stub(key.decode("utf8"))
+            ok = stubber.create_one_stub(key.decode("utf8"))
         except MemoryError:
             # RESET AND HOPE THAT IN THE CYCLE WE PROGRESS
             db.close()
@@ -624,7 +636,7 @@ def main_esp8266():
             machine.reset()
 
         # save the (last) result back to the database
-        if OK:
+        if ok:
             result = bytes(repr(stubber._report[-1]), "utf8")
         else:
             result = b"fail"
@@ -650,4 +662,5 @@ if __name__ == "__main__" or isMicroPython():
         # logging.basicConfig(level=logging.DEBUG)
     except NameError:
         pass
-    main_esp8266()
+    if not file_exists("no_auto_stubber.txt"):
+        main_esp8266()
