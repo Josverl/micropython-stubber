@@ -86,7 +86,7 @@ class Stubber:
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []
 
-    def get_obj_attributes(self, item_instance: object) -> tuple[list[tuple[str, str, str, object, int]], list[str]]:
+    def get_obj_attributes(self, item_instance: object) -> tuple:
         "extract information of the objects members and attributes"
         # name_, repr_(value), type as text, item_instance
         _result = []
@@ -116,7 +116,7 @@ class Stubber:
         gc.collect()
         return _result, _errors
 
-    def add_modules(self, modules: list[str]):
+    def add_modules(self, modules):
         "Add additional modules to be exported"
         self.modules = sorted(set(self.modules) | set(modules))
 

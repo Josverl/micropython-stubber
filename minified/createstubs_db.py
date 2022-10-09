@@ -106,7 +106,7 @@ class Stubber:
 				if W:V=N
 				A='\n{}class {}({}):\n'.format(C,D,V)
 				if W:A+=C+'    ...\n';H.write(A);return
-				H.write(A);M.write_object_stub(H,S,'{0}.{1}'.format(obj_name,D),C+'    ',P+1);A=C+'    def __init__(self, *argv, **kwargs) -> None: ##\n';A+=C+'        ...\n\n';H.write(A)
+				H.write(A);M.write_object_stub(H,S,'{0}.{1}'.format(obj_name,D),C+'    ',P+1);A=C+'    def __init__(self, *argv, **kwargs) -> None:\n';A+=C+'        ...\n\n';H.write(A)
 			elif j in F or i in F:
 				X=Z;Y=G
 				if P>0:Y='self, '
