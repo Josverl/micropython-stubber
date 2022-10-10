@@ -4,11 +4,11 @@ queries:
   - uses: security-and-quality
 
 paths:
-  - "src/**/*.{py,pyi}"
-  - "board/**/*.{py,pyi}"
+  - "**/src/stubber/**/*.{py,pyi}"
+  - "**/board/**/*.{py,pyi}"
 # paths-ignore:
 #   - "tests/**/*"
 #   - ".venv/**/*"
 #   - ".venv"
 #   - "snippets/**/*"
-  
+
