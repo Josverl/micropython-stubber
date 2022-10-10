@@ -3,10 +3,10 @@ from typing import Any, Dict, Optional
 
 # from stubber.codemod.merge_docstub import MergeCommand
 import stubber.codemod.merge_docstub as merge_docstub
-from libcst.codemod import (CodemodContext, diff_code,
-                            exec_transform_with_prettyprint)
-from libcst.tool import _default_config
+from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
+from libcst.tool import _default_config  # type: ignore
 from loguru import logger as log
+from stubber.utils.post import run_autoflake, run_black
 
 ##########################################################################################
 # # log = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ from loguru import logger as log
 #########################################################################################
 
 
-def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=False) -> Optional[str]:
+def enrich_file(target_path: Path, docstub_path: Path, diff=False, write_back=False) -> Optional[str]:
     """\
     Enrich a firmware stubs using the doc-stubs in another folder.
     Both (.py or .pyi) files are supported.
@@ -33,26 +33,27 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
 
     # find a matching doc-stub file in the docstub_path
     docstub_file = None
+    candidates = []
     for ext in [".py", ".pyi"]:
-        candidates = list(docstub_path.rglob(source_path.stem + ext))
-        if source_path.stem[0].lower() == "u":
+        candidates = list(docstub_path.rglob(target_path.stem + ext))
+        if target_path.stem[0].lower() == "u":
             # also look for candidates without leading u
-            candidates += list(docstub_path.rglob(source_path.stem[1:] + ext))
+            candidates += list(docstub_path.rglob(target_path.stem[1:] + ext))
         else:
             # also look for candidates with leading u
-            candidates += list(docstub_path.rglob("u" + source_path.stem + ext))
+            candidates += list(docstub_path.rglob("u" + target_path.stem + ext))
 
-        for docstub_file in candidates:
-            if docstub_file.exists():
-                break
-            else:
-                docstub_file = None
+    for docstub_file in candidates:
+        if docstub_file.exists():
+            break
+        else:
+            docstub_file = None
     if docstub_file is None:
-        raise FileNotFoundError(f"No doc-stub file found for {source_path}")
+        raise FileNotFoundError(f"No doc-stub file found for {target_path}")
 
-    log.debug(f"Merge {docstub_file} from {source_path}")
+    log.debug(f"Merge {target_path} from {docstub_file}")
     # read source file
-    oldcode = source_path.read_text()
+    oldcode = target_path.read_text()
 
     codemod_instance = merge_docstub.MergeCommand(context, stub_file=docstub_file)
     newcode = exec_transform_with_prettyprint(
@@ -66,11 +67,11 @@ def enrich_file(source_path: Path, docstub_path: Path, diff=False, write_back=Fa
     )
     if newcode:
         if write_back:
-            log.trace(f"Write back enriched file {source_path}")
+            log.trace(f"Write back enriched file {target_path}")
             # write updated code to file
-            source_path.write_text(newcode, encoding="utf-8")
+            target_path.write_text(newcode, encoding="utf-8")
         if diff:  # pragma: no cover
-            return diff_code(oldcode, newcode, 5, filename=source_path.name)
+            return diff_code(oldcode, newcode, 5, filename=target_path.name)
         return newcode
     else:
         return None
@@ -96,4 +97,8 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
             # no docstub to enrich with
             if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub file found for {source_file}"))
+    # run autoflake and black on the destination folder
+    run_autoflake(source_folder)
+    run_black(source_folder)
+
     return count

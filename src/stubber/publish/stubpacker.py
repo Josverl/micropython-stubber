@@ -214,9 +214,7 @@ class StubPackage:
                 path = path.replace("stubs/", "")
             self.stub_sources.append((name, Path(path)))
 
-    def update_package_files(
-        self,
-    ):
+    def update_package_files(self):
         """
         Update the stub-only package for a specific version of micropython
          - cleans the package folder
@@ -290,13 +288,49 @@ class StubPackage:
 
         # add a readme with the names of the stub-folders
 
+        # read informations from firmware_stubs.json
+        firmware_stubs = {}
+        doc_stubs = {}
+        core_stubs = {}
+        try:
+            with open(self.package_path / "firmware_stubs.json", "r") as f:
+                firmware_stubs = json.load(f)
+            with open(self.package_path / "doc_stubs.json", "r") as f:
+                doc_stubs = json.load(f)
+            with open(self.package_path / "modules.json", "r") as f:
+                core_stubs = json.load(f)
+        except FileNotFoundError:
+            pass
+
         # Prettify this by merging with template text
         with open(self.package_path / "README.md", "w") as f:
             f.write(f"# {self.package_name}\n\n")
             f.write(TEMPLATE_README)
             f.write(f"Included stubs:\n")
             for name, folder in self.stub_sources:
-                f.write(f"* {name} from {Path(folder).as_posix()}\n")
+                f.write(f"* {name} from `stubs/{Path(folder).as_posix()}`\n")
+
+            f.write(f"\n\n")
+            f.write(f"origin | Family | Port | Board | Version\n")
+            f.write(f"-------|--------|------|-------|--------\n")
+            try:
+                f.write(
+                    f"Firmware | {firmware_stubs['firmware']['family']} | {firmware_stubs['firmware']['port']} | {firmware_stubs['firmware']['machine']} | {clean_version(firmware_stubs['firmware']['version'])} \n"
+                )
+            except Exception:
+                pass
+            try:
+                f.write(
+                    f"Documentation | {doc_stubs['firmware']['family']} | {doc_stubs['firmware']['port']} | - | {clean_version(doc_stubs['firmware']['version'])} \n"
+                )
+            except Exception:
+                pass
+            try:
+                f.write(
+                    f"Core | {core_stubs['firmware']['family']} | {core_stubs['firmware']['port']} | - | {clean_version(core_stubs['firmware']['version'])} \n"
+                )
+            except Exception:
+                pass
 
     def create_license(self):
         """
@@ -456,7 +490,7 @@ class StubPackage:
             return False
         # todo: call poetry directly to improve error handling
         try:
-            log.trace(f"poetry {parameters} starting")
+            log.debug(f"poetry {parameters} starting")
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
@@ -496,7 +530,7 @@ class StubPackage:
 
     def build(self) -> bool:
         """build the package by running `poetry build`"""
-        return self.run_poetry(["build"])  # ,"-vvv"
+        return self.run_poetry(["build", "-vvv"])
 
     def publish(self, production=False) -> bool:
         if not self._publish:

@@ -11,7 +11,29 @@ from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
 
-def copy_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
+def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
+    """merge docstubs into firmware stubs"""
+    for fw in firmware_candidates(versions=versions, family=family):
+        # check if we have firmware stubs of this version and port
+        base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
+        fw_folder = base + f"-{fw['port']}"
+        mrg_folder = fw_folder + "-merged"
+        doc_folder = base + f"-docstubs"
+
+        fw_path = CONFIG.stub_path / fw_folder
+        mrg_path = CONFIG.stub_path / mrg_folder
+        doc_path = CONFIG.stub_path / doc_folder
+
+        if not fw_path.exists():
+            # only continue if both folders exist
+            continue
+        if not doc_path.exists():
+            print(f"Warning: no docstubs for {fw['version']}")
+        log.info(f"Merge docstubs for {fw['family']} {fw['version']} {fw['port']} {fw['board']}")
+        copy_docstubs(fw_path, mrg_path, doc_path)
+
+
+def copy_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     """
     Parameters:
         fw_path: Path to firmware stubs (absolute path)
@@ -36,16 +58,24 @@ def copy_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     except OSError as e:
         log.error(f"Error copying stubs from : { fw_path}, {e}")
         raise (e)
+    # rename the module.json file to firmware.json
+    if (dest_path / "modules.json").exists():
+        (dest_path / "modules.json").rename(dest_path / "firmware_stubs.json")
 
     # 1.B - clean up a little bit
-    # delete all the .py files in the package folder if there is a corresponding .pyi file
-    # FIXME: Leave *.py on the module folders to avoid poetry packaging issues
-    # >      ValueError  umqtt is not a package.
-    for f in dest_path.glob("*.py"):
-        if f.with_suffix(".pyi").exists():
-            f.unlink()
+    do_cleanup = False
+    if do_cleanup:
+        # delete all the .py files in the package folder if there is a corresponding .pyi file
+        # FIXME: Leave *.py on the module folders to avoid poetry packaging issues
+        # >      ValueError  umqtt is not a package.
+
+        for f in dest_path.glob("*.py"):
+            if f.with_suffix(".pyi").exists():
+                f.unlink()
+
     # delete buitins.pyi in the package folder
     for name in [
+        "builtins.py",  # creates conflicts, better removed
         "builtins.pyi",  # creates conflicts, better removed
     ]:
         if (dest_path / name).exists():
@@ -53,26 +83,8 @@ def copy_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
 
     # 2 - Enrich the firmware stubs with the document stubs
     result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
+
+    # copy the docstubs manifest.json file to the package folder
+    # if (docstub_path / "modules.json").exists():
+    shutil.copy(docstub_path / "modules.json", dest_path / "doc_stubs.json")
     return result
-
-
-def merge_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
-    """merge docstubs into firmware stubs"""
-    for fw in firmware_candidates(versions=versions, family=family):
-        # check if we have firmware stubs of this version and port
-        base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
-        fw_folder = base + f"-{fw['port']}"
-        mrg_folder = fw_folder + "-merged"
-        doc_folder = base + f"-docstubs"
-
-        fw_path = CONFIG.stub_path / fw_folder
-        mrg_path = CONFIG.stub_path / mrg_folder
-        doc_path = CONFIG.stub_path / doc_folder
-
-        if not fw_path.exists():
-            # only continue if both folders exist
-            continue
-        if not doc_path.exists():
-            print(f"Warning: no docstubs for {fw['version']}")
-        log.info(f"Merge docstubs for {fw['family']} {fw['version']} {fw['port']} {fw['board']}")
-        copy_merge_docstubs(fw_path, mrg_path, doc_path)
