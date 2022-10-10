@@ -72,6 +72,8 @@ from typing import List, Optional, Tuple
 
 from loguru import logger as log
 
+from stubber.utils.post import run_autoflake, run_black
+
 from . import utils
 from .rst import (
     CHILD_PARENT_CLASS,
@@ -813,19 +815,9 @@ def generate_from_rst(
             reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
 
-    # run autoflake to remove unused imports
-    # needs to be run BEFORE black otherwise it does not recognize long import from`s.
-    cmd = [
-        "autoflake",
-        "-r",
-        "--in-place",
-        dst_path.as_posix(),
-        "-v",
-        "-v",  # show some feedback
-    ]
-    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-    subprocess.run(cmd, capture_output=True)
-
+    run_autoflake(dst_path)
+    run_black(dst_path)
+    
     # Also generate a module manifest
     utils.make_manifest(
         folder=dst_path,

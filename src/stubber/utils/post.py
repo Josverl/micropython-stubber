@@ -21,18 +21,34 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
             run_black(pth)
 
 
-def run_black(path: Path):
-    try:
-        cmd = ["black", "."]
+def run_black(path: Path, capture_output=False):
+    """
+    run autoflake to remove unused imports
+    needs to be run BEFORE black otherwise it does not recognize long import from`s.
+    """
+    cmd = [
+        "black",
+        path.as_posix(),
+    ]
+    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+    result = subprocess.run(cmd, capture_output=capture_output)
+    return result.returncode
 
-        if sys.version_info.major == 3 and sys.version_info.minor <= 7:
-            # black on python 3.7 does not like some function defs
-            # def sizeof(struct, layout_type=NATIVE, /) -> int:
-            cmd += ["--fast"]
-        # capture to suppress based on log level
-        # result = subprocess.run(cmd, capture_output=log.level >= logging.INFO, check=True, shell=False, cwd=path)
-        result = subprocess.run(cmd, capture_output=True, check=True, shell=False, cwd=path)
-        if result.returncode != 0:  # pragma: no cover
-            raise Exception(result.stderr.decode("utf-8"))
-    except subprocess.SubprocessError:  # pragma: no cover
-        log.error("some of the files are not in a proper format")
+
+def run_autoflake(path: Path, capture_output=False):
+    """
+    run autoflake to remove unused imports
+    needs to be run BEFORE black otherwise it does not recognize long import from`s.
+    """
+    cmd = [
+        "autoflake",
+        "-r",
+        "--in-place",
+        path.as_posix(),
+        "-v",
+        "-v",  # show some feedback
+    ]
+    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+    result = subprocess.run(cmd, capture_output=capture_output)
+
+    return result.returncode

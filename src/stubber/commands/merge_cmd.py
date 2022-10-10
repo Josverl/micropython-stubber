@@ -5,7 +5,7 @@ from typing import List, Union
 
 import click
 from loguru import logger as log
-from stubber.publish.merge_docstubs import merge_docstubs
+from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.utils.config import CONFIG
 
 from .cli import stubber_cli
@@ -35,4 +35,4 @@ def cli_merge_docstubs(
     if len(versions) == 1:
         versions = versions[0]
     log.info(f"Merge docstubs for {family} {versions}")
-    _ = merge_docstubs(versions=versions, family=family, mpy_path=CONFIG.mpy_path)
+    _ = merge_all_docstubs(versions=versions, family=family, mpy_path=CONFIG.mpy_path)

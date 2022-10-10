@@ -36,8 +36,7 @@ from loguru import logger as log
 from pysondb import PysonDB
 from stubber.publish.candidates import frozen_candidates
 from stubber.publish.database import get_database
-from stubber.publish.package import (StubSource, create_package,
-                                     get_package_info, package_name)
+from stubber.publish.package import StubSource, create_package, get_package_info, package_name
 from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
@@ -116,6 +115,7 @@ def publish(
         # TODO Save ?
         return status
     try:
+
         package.update_package_files()
         package.update_included_stubs()
         package.check()
@@ -131,18 +131,18 @@ def publish(
         if not force:  # pragma: no cover
             log.info(f"Found changes to package : {package.package_name} {package.pkg_version}")
             log.debug(f"Old hash {package.hash} != New hash {package.create_hash()}")
-        ## TODO: get last published version.postXXX from PyPI and update version if different
-        if not dryrun:
-            # only bump version if we are going to publish
-            # try to get version from PyPi and increase past that
-            old_ver = package.pkg_version
-            pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version))
-            if pypi_versions:
-                package.pkg_version = str(pypi_versions[-1])
-            # to get the next version
-            new_ver = package.bump()
+        # if not dryrun:
+        # only bump version if we are going to publish
+        # get last published version.postXXX from PyPI and update version if different
+        # try to get version from PyPi and increase past that
+        old_ver = package.pkg_version
+        pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version))
+        if pypi_versions:
+            package.pkg_version = str(pypi_versions[-1])
+        # to get the next version
+        new_ver = package.bump()
 
-            log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
+        log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
         # Update hashes
         package.update_hashes()
         package.write_package_json()
@@ -168,11 +168,6 @@ def publish(
             status["result"] = "Published"
             db.add(package.to_dict())
             db.commit()
-            # TODO: push to github
-            # git add <Publish folder>
-            # git commit -m "Publish micropython-esp32-stubs (1.18.post24)"
-            # git push
-            # add tag ?
 
     if clean:
         package.clean()
