@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
 # module under test :
 import stubber.stubber as stubber
 from click.testing import CliRunner
@@ -321,7 +320,7 @@ def test_cmd_fallback(mocker: MockerFixture, tmp_path: Path):
 def test_cmd_merge(mocker: MockerFixture, cmdline: List[str]):
     runner = CliRunner()
     # from stubber.commands.clone import git
-    m_merge_docstubs: MagicMock = mocker.patch("stubber.commands.merge_cmd.merge_docstubs", autospec=True, return_value={})
+    m_merge_docstubs: MagicMock = mocker.patch("stubber.commands.merge_cmd.merge_all_docstubs", autospec=True, return_value={})
     result = runner.invoke(stubber.stubber_cli, cmdline)
     assert result.exit_code == 0
     m_merge_docstubs.assert_called_once()
