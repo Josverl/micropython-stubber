@@ -1,6 +1,5 @@
 """Pre/Post Processing for createstubs.py"""
 import subprocess
-import sys
 from pathlib import Path
 from typing import List
 

@@ -1,0 +1,21 @@
+
+uasyncio/tasks
+mip
+_boot
+
+
+bluetooth 
+btree 
+cryptolib 
+framebuf
+machine
+micropython
+neopixel
+network 
+
+uctypes
+
+
+# The following libraries provide drivers for hardware components.
+# – Driver for the WM8960 codec
+WM8960 

@@ -80,6 +80,7 @@ microWebSocket
 microWebSrv
 microWebTemplate
 micropython
+mip
 mpu6500
 mpu9250
 neopixel
@@ -113,6 +114,7 @@ uasyncio/event
 uasyncio/funcs
 uasyncio/lock
 uasyncio/stream
+uasyncio/tasks
 ubinascii
 ubluetooth
 ucollections
