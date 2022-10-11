@@ -613,10 +613,11 @@ def main_esp8266():
     if not was_running or len(list(db.keys())) == 0:
         # load modulelist into database
         _log.info("load modulelist into db")
-        for line in open("modulelist" + ".txt"):
-            key = line.strip()
-            if len(key) and key[0] != "#":
-                db[key] = b"todo"
+        with open("modulelist" + ".txt") as f:
+            for line in f.read().splitlines():
+                if len(line.strip()) and line.strip()[0] != "#":
+                    key = line.strip()
+                    db[key] = b"todo"
         db.flush()
 
     for key in db.keys():
