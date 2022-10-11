@@ -66,7 +66,6 @@ Note: black on python 3.7 does not like some function defs
 import json
 import os
 import re
-import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
 
