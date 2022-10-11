@@ -135,6 +135,7 @@ ulab/poly
 ulab/user
 ulab/vector
 umachine
+umqtt/__init__
 umqtt/robust
 umqtt/simple
 uos

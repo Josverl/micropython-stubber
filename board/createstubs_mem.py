@@ -588,11 +588,12 @@ def main():
     stubber.clean()
     # Read stubs from modulelist
     try:
-        stubber.modules = [line.strip() for line in open("modulelist" + ".txt") if len(line.strip()) and line.strip()[0] != "#"]
+        with open("modulelist" + ".txt") as f:
+            stubber.modules = [line.strip() for line in f.read().splitlines() if len(line.strip()) and line.strip()[0] != "#"]
     except OSError:
         # fall back gracefully
         stubber.modules = ["micropython"]
-        _log.warning("Warning: ./modulelist.txt could not be found.")
+        _log.warning("Warning: modulelist.txt could not be found.")
     # Option: Add your own modules
     # stubber.add_modules(['bluetooth','GPS'])
     gc.collect()
