@@ -228,26 +228,26 @@ def Y():
 	try:B=d('abc',encoding=W);C=Y.__module__;return A
 	except (Z,H):return M
 def o():
-	Q=b'fail';P='.db';I=b'todo';H='modulelist';import btree,machine as R
-	try:D=K(H+P,'r+b');F=M
-	except B:D=K(H+P,'w+b');F=A
+	P=b'fail';O='.db';H=b'todo';G='modulelist';import btree,machine as Q
+	try:D=K(G+O,'r+b');E=M
+	except B:D=K(G+O,'w+b');E=A
 	stubber=Stubber(path=read_path())
-	if not F:stubber.clean()
+	if not E:stubber.clean()
 	C=btree.open(D)
-	if not F or J(list(C.keys()))==0:
-		with K(H+'.txt')as D:
-			for G in D.read().splitlines():
-				if J(G.strip())and G.strip()[0]!='#':E=G.strip();C[E]=I
+	if not E or J(list(C.keys()))==0:
+		with K(G+'.txt')as D:
+			R=[A.strip()for A in D.read().split('\n')if J(A.strip())and A.strip()[0]!='#']
+			for S in R:C[S]=H
 		C.flush()
-	for E in C.keys():
-		if C[E]!=I:continue
-		L=A
-		try:L=stubber.create_one_stub(E.decode(W))
-		except MemoryError:C.close();D.close();R.reset()
-		if L:O=d(N(stubber._report[-1]),W)
-		else:O=Q
-		C[E]=O;C.flush()
-	all=[A for A in C.items()if not A[1]==I and not A[1]==Q]
+	for F in C.keys():
+		if C[F]!=H:continue
+		I=A
+		try:I=stubber.create_one_stub(F.decode(W))
+		except MemoryError:C.close();D.close();Q.reset()
+		if I:L=d(N(stubber._report[-1]),W)
+		else:L=P
+		C[F]=L;C.flush()
+	all=[A for A in C.items()if not A[1]==H and not A[1]==P]
 	if J(all)>0:stubber._report=all;stubber.report()
 	C.close();D.close()
 if __name__=='__main__'or Y():

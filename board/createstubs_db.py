@@ -614,10 +614,10 @@ def main_esp8266():
         # load modulelist into database
         _log.info("load modulelist into db")
         with open("modulelist" + ".txt") as f:
-            for line in f.read().splitlines():
-                if len(line.strip()) and line.strip()[0] != "#":
-                    key = line.strip()
-                    db[key] = b"todo"
+            # not optimal , but works on mpremote and eps8266
+            modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+            for mod in modules:
+                db[mod] = b"todo"
         db.flush()
 
     for key in db.keys():

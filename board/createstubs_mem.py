@@ -589,7 +589,8 @@ def main():
     # Read stubs from modulelist
     try:
         with open("modulelist" + ".txt") as f:
-            stubber.modules = [line.strip() for line in f.read().splitlines() if len(line.strip()) and line.strip()[0] != "#"]
+            # not optimal , but works on mpremote and eps8266
+            stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
     except OSError:
         # fall back gracefully
         stubber.modules = ["micropython"]
