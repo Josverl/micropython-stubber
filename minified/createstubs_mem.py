@@ -229,7 +229,7 @@ def X():
 def main():
 	stubber=Stubber(path=read_path());stubber.clean()
 	try:
-		with Q('modulelist'+'.txt')as C:stubber.modules=[A.strip()for A in C.read().splitlines()if K(A.strip())and A.strip()[0]!='#']
+		with Q('modulelist'+'.txt')as C:stubber.modules=[A.strip()for A in C.read().split('\n')if K(A.strip())and A.strip()[0]!='#']
 	except B:stubber.modules=[j]
 	E.collect();stubber.create_all_stubs();stubber.report()
 if __name__=='__main__'or X():
