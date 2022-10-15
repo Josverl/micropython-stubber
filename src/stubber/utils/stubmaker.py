@@ -2,9 +2,8 @@ import sys
 from pathlib import Path
 
 import mypy.stubgen as stubgen
-from mypy.errors import CompileError
-
 from loguru import logger as log
+from mypy.errors import CompileError
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(
@@ -52,11 +51,16 @@ def generate_pyi_from_file(file: Path) -> bool:
 def generate_pyi_files(modules_folder: Path) -> bool:
     """generate typeshed files for all scripts in a folder using mypy/stubgen"""
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
+    # NOTE: FIX 1 add __init__.py to umqtt
+    if (modules_folder / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
+        log.debug(f"add missing : umqtt/__init__.py")
+        with open(modules_folder / "umqtt" / "__init__.py", "a") as f:
+            f.write("# dummy")
 
     modlist = list(modules_folder.glob("**/modules.json"))
+    r = True
     if len(modlist) > 1:
         # try to process each module seperatlely
-        r = True
         for mod_manifest in modlist:
             ## generate fyi files for folder
             r = r and generate_pyi_files(mod_manifest.parent)
@@ -103,7 +107,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         # now stub the rest
         # note in some cases this will try a file twice
         for py in py_files:
-            generate_pyi_from_file(py)
+            r = r and generate_pyi_from_file(py)
             # todo: report failures by adding to module manifest
-
-        return True
+        return r
