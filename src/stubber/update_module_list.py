@@ -17,7 +17,8 @@ for this :
 """
 
 from pathlib import Path
-from typing import Optional, Set, List, Union
+from typing import List, Optional, Set, Union
+
 from loguru import logger as log
 
 
@@ -33,7 +34,7 @@ def read_modules(path: Optional[Path] = None) -> Set:
     assert path
     all_modules = set()
     for file in path.glob("*.txt"):
-        log.debug("processing:", file)
+        log.debug(f"processing: {file.name}")
         with file.open("r") as f:
             line = f.readline()
             while line:
@@ -53,23 +54,23 @@ def read_modules(path: Optional[Path] = None) -> Set:
     return all_modules
 
 
-def wrapped(modules: Union[Set, List]) -> str:
-    "wrap code line at spaces"
-    long_line = str(modules)
-    _wrapped = "        self.modules = "
-    IDENT = len(_wrapped)
-    MAX_WIDTH = 135
+# def wrapped(modules: Union[Set, List]) -> str:
+#     "wrap code line at spaces"
+#     long_line = str(modules)
+#     _wrapped = "        self.modules = "
+#     IDENT = len(_wrapped)
+#     MAX_WIDTH = 135
 
-    # find seperator
-    while len(long_line) > MAX_WIDTH:
-        p1 = long_line.find("', ", MAX_WIDTH)
-        # drop space
-        p1 += 3
-        short = long_line[0 : p1 - 1]
-        _wrapped += short + "\n" + " " * IDENT
-        long_line = long_line[p1 - 1 :]
-    _wrapped += long_line
-    return _wrapped
+#     # find seperator
+#     while len(long_line) > MAX_WIDTH:
+#         p1 = long_line.find("', ", MAX_WIDTH)
+#         # drop space
+#         p1 += 3
+#         short = long_line[0 : p1 - 1]
+#         _wrapped += short + "\n" + " " * IDENT
+#         long_line = long_line[p1 - 1 :]
+#     _wrapped += long_line
+#     return _wrapped
 
 
 def main():
@@ -119,22 +120,22 @@ def main():
     # remove pycom MQTT* from defaults
     modules_to_stub = sorted({m for m in modules_to_stub if not m.startswith("MQTT")})
 
-    log.trace("modules to stub :", len(modules_to_stub))
-    log.trace(wrapped(modules_to_stub))
-
+    log.info(f"modules to stub : {len(modules_to_stub)}")
+    # log.debug(wrapped(modules_to_stub))
+    lines: List[str] = []
     # update modules.txt
-    modules_txt = Path("board/modulelist.txt")
-    if modules_txt.exists():
-        with open(modules_txt) as f:
-            lines = f.readlines()
-            # only keep comment lines
-            lines = [l for l in lines if l[0] == "#"]
-    else:
-        lines = ["# list of modules to stub."]
-    lines = lines + [m + "\n" for m in modules_to_stub]
-
-    with open(modules_txt, "w") as f:
-        f.writelines(lines)
+    for modules_txt in [Path("board/modulelist.txt"), Path("minified/modulelist.txt")]:
+        if modules_txt.exists():
+            with open(modules_txt) as f:
+                lines = f.readlines()
+                # only keep comment lines
+                lines = [l for l in lines if l[0] == "#"]
+        else:
+            lines = ["# list of modules to stub."]
+        lines = lines + [m + "\n" for m in modules_to_stub]
+        log.info(f"writing module list to {modules_txt}")
+        with open(modules_txt, "w") as f:
+            f.writelines(lines)
 
     # update createstubs.py
     createstubs = Path("board/createstubs.py")
@@ -150,6 +151,7 @@ def main():
     # Plug in the new list of modules
     lines = lines[: l_start + 1] + [f'        "{m}",\n' for m in modules_to_stub] + lines[l_end:]
 
+    log.info(f"writing updated module list to {createstubs}")
     with open(createstubs, "w") as f:
         f.writelines(lines)
 

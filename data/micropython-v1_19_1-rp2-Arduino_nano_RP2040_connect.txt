@@ -1,0 +1,16 @@
+# MicroPython v1.19.1 on 2022-06-18; Arduino Nano RP2040 Connect with RP2040
+_boot             builtins          uasyncio/event    urandom
+_boot_fat         cmath             uasyncio/funcs    ure
+_onewire          dht               uasyncio/lock     uselect
+_rp2              ds18x20           uasyncio/stream   usocket
+_thread           framebuf          ubinascii         ustruct
+_uasyncio         gc                ubluetooth        usys
+_webrepl          lsm6dsox          ucollections      utime
+aioble/__init__   math              ucryptolib        uwebsocket
+aioble/central    micropython       uctypes           uzlib
+aioble/client     neopixel          uerrno            webrepl
+aioble/core       network           uhashlib          webrepl_setup
+aioble/device     onewire           uheapq            websocket_helper
+aioble/l2cap      rp2               uio
+aioble/peripheral uarray            ujson
+aioble/security   uasyncio/__init__ umachine
