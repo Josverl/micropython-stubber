@@ -1,3 +1,4 @@
+umqtt/__init__
 
 uasyncio/tasks
 mip

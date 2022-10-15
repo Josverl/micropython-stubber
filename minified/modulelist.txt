@@ -1,6 +1,8 @@
 # list of modules to stub.
 # used by the memory optimised createstubs_mem.py
+WM8960
 _OTA
+_boot_fat
 _coap
 _flash_control_OTA
 _main_pybytes
@@ -34,15 +36,18 @@ aioble/core
 aioble/device
 aioble/l2cap
 aioble/peripheral
+aioble/security
 aioble/server
 ak8963
 apa102
 apa106
 array
 binascii
+bluetooth
 btree
 cmath
 crypto
+cryptolib
 curl
 dht
 display
