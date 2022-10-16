@@ -130,16 +130,16 @@ class Stubber:
 
     def create_one_stub(self, module_name):
         if module_name in self.problematic:
-            self._log.warning("Skip module: {:<20}        : Known problematic".format(module_name))
+            self._log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
         if module_name in self.excluded:
-            self._log.warning("Skip module: {:<20}        : Excluded".format(module_name))
+            self._log.warning("Skip module: {:<25}        : Excluded".format(module_name))
             return False
 
         file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
         gc.collect()
         m1 = gc.mem_free()  # type: ignore
-        self._log.info("Stub module: {:<20} to file: {:<55} mem:{:>5}".format(module_name, file_name, m1))
+        self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, m1))
         result = False
         try:
             result = self.create_module_stub(module_name, file_name)
@@ -173,7 +173,7 @@ class Stubber:
             new_module = __import__(module_name, None, None, ("*"))
         except ImportError:
             # move one line up to overwrite
-            self._log.warning("{}Skip module: {:<20} to file: {:<55}".format("\u001b[1A", module_name, "Failed to import"))
+            self._log.warning("{}Skip module: {:<25} {:<79}".format("\u001b[1A", module_name, "Module not found."))
             return False
 
         # Start a new file
@@ -419,7 +419,7 @@ def _info():
         "nodename": "unknown",  # ! not on all builds
         "machine": "unknown",  # ! not on all builds
         "family": _n,  # fw families, micropython , pycopy , lobo , pycom
-        "platform": _p,  # port: esp32 / win32 / linux / pyb* --> stm32
+        "platform": _p,  # port: esp32 / win32 / linux
         "port": _p,  # port: esp32 / win32 / linux
         "ver": "",  # short version
     }
