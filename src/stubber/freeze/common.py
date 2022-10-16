@@ -50,7 +50,7 @@ def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
     if (freeze_path / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
         log.debug(f"add missing : umqtt/__init__.py")
         with open(freeze_path / "umqtt" / "__init__.py", "a") as f:
-            f.write("# dummy")
+            f.write("")
 
     # NOTE: FIX 2 compensate for expicitly omited task.py from freeze manifest
     # this is normally implemented as a C module, let's use the .py version to generate a stub for this

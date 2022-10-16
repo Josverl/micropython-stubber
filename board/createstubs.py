@@ -128,7 +128,7 @@ class Stubber:
         file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
         gc.collect()
         m1 = gc.mem_free()  # type: ignore
-        self._log.info("Stub module: {:<25} to file: {:<60} mem:{:>5}".format(module_name, file_name, m1))
+        self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, m1))
         result = False
         try:
             result = self.create_module_stub(module_name, file_name)
@@ -162,7 +162,7 @@ class Stubber:
             new_module = __import__(module_name, None, None, ("*"))
         except ImportError:
             # move one line up to overwrite
-            self._log.warning("{}Skip module: {:<25} {:<69}".format("\u001b[1A", module_name, "Module not found."))
+            self._log.warning("{}Skip module: {:<25} {:<79}".format("\u001b[1A", module_name, "Module not found."))
             return False
 
         # Start a new file

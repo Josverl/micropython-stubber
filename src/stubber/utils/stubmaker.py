@@ -55,7 +55,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     if (modules_folder / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
         log.debug(f"add missing : umqtt/__init__.py")
         with open(modules_folder / "umqtt" / "__init__.py", "a") as f:
-            f.write("# dummy")
+            f.write("")
 
     modlist = list(modules_folder.glob("**/modules.json"))
     r = True

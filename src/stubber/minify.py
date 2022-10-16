@@ -5,8 +5,7 @@
 import itertools
 import subprocess
 from pathlib import Path
-from typing import Tuple, Union, List
-
+from typing import List, Tuple, Union
 
 from loguru import logger as log
 
@@ -37,13 +36,13 @@ def edit_lines(content, edits, diff=False):
     def comment(l, x):
         return l.replace(x, f"# {x}")
 
-    def rprint(l, x): # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable 
+    def rprint(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, f"print")
 
-    def rpass(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable 
+    def rpass(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         return l.replace(x, f"pass")
 
     def get_whitespace_context(content, index):
@@ -167,34 +166,33 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
         str: minified source text
     """
 
-    edits:List[Tuple[str,str]] = [
+    edits: List[Tuple[str, str]] = [
         ("comment", "print"),
         ("comment", "import logging"),
-        # first full
+        # report keepers may be inserted here
+        # do report errors
+        ("rprint", "self._log.error"),
+        ("rprint", "_log.error"),
+        #  remove first full
         ("comment", "self._log ="),
         ("comment", "self._log("),
         ("comment", "self._log.debug"),
-        ("comment", "self._log.warning"),
         ("comment", "self._log.info"),
-        ("comment", "self._log.error"),
+        ("comment", "self._log.warning"),
         # then short versions
         ("comment", "_log ="),
         ("comment", "_log.debug"),
-        ("comment", "_log.warning"),
         ("comment", "_log.info"),
-        ("comment", "_log.error"),
+        ("comment", "_log.warning"),
     ]
     if keep_report:
-        report = (
-            "rprint",
-            ('self._log.info("Stub module: {:<20} to file:' ' {:<55} mem:{:>5}".' "format(module_name, file_name, m1))"),
-        )
-        clean = (
-            "rprint",
-            'self._log.info("Clean/remove files in folder: {}".format(path))',
-        )
-        edits.insert(0, report)
-        edits.insert(1, clean)
+        edits[2:2] = [
+            # keepers
+            ("rprint", 'self._log.info("Stub module: '),
+            ("rprint", 'self._log.warning("{}Skip module:'),
+            ("rprint", 'self._log.info("Clean/remove files in folder:'),
+            ("rprint", 'self._log.info("Created stubs for'),
+        ]
 
     with source_script.open("r") as f:
         if not python_minifier:  # pragma: no cover
@@ -212,9 +210,9 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
             remove_annotations=True,  # not used runtime anyways
             hoist_literals=True,  # remove redundant strings
             rename_locals=True,  # short names save memory
-            preserve_locals=["stubber"],  # names to keep
+            preserve_locals=["stubber", "path"],  # names to keep
             rename_globals=True,  # short names save memory
-            # keep these globals to allow testing/mocking to work agains the minified version
+            # keep these globals to allow testing/mocking to work against the minified version
             preserve_globals=[
                 "main",
                 "Stubber",
@@ -229,8 +227,8 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
             # convert_posargs_to_args=True, # Does not save any space
         )
     log.debug(f"Original length : {len(content)}")
-    log.debug(f"Minified length : {len(source)}")
-    log.debug(f"Reduced by      : {len(content)-len(source)} ")
+    log.info(f"Minified length : {len(source)}")
+    log.info(f"Reduced by      : {len(content)-len(source)} ")
     return source
 
 
