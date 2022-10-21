@@ -63,7 +63,7 @@ jobs:
       #----------------------------------------------
       # install root project
       #----------------------------------------------
-      - name: Install library
+      - name: Install Application
         run: poetry install --no-interaction
 
       #----------------------------------------------

@@ -12,19 +12,52 @@
             "justMyCode": false
         },
         {
-            "name": "Python: stubber - publish",
+            "name": "mpremote",
+            "type": "python",
+            "request": "launch",
+            "module": "mpremote",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "resume",
+                "exec",
+                "print(42)",
+            ]
+        },
+        {
+            "name": "Python: stubber - cmdline",
             "type": "python",
             "request": "launch",
             "module": "stubber.stubber",
-            // "cwd": "${workspaceFolder}/../micropython-stubs",
+            "cwd": "${workspaceFolder}",
             "args": [
-                "publish",
-                "--test-pypi",
+                "-v",
+                "merge",
                 "--version",
-                "1.18",
-                "--port",
-                "esp32",
-                "--force",
+                "v1.19.1"
+                // "get-frozen",
+                // "get-frozen",
+                // "publish",
+                // "--version",
+                // "v1.19.1",
+                // "--port",
+                // "esp32",
+                // "--test-pypi"
+                // "--dry-run",
+                //
+                // "minify",
+                // "--all",
+                // "--compile",
+                //
+                // "show-config",
+                //
+                // "publish",
+                // "--test-pypi",
+                // "--version",
+                // "1.18",
+                // "--port",
+                // "esp32",
+                // "--force",
                 // "clone"
                 // "${input:cmdlineParams}"
             ]
@@ -37,13 +70,6 @@
             "args": [
                 "get-docstubs"
             ]
-        },
-        {
-            "name": "PS1: Current File",
-            "type": "PowerShell",
-            "request": "launch",
-            "script": "${file}",
-            "cwd": "${file}"
         },
         {
             "name": "Python: Current File",
@@ -88,46 +114,27 @@
                 "./temp"
             ]
         },
+        // {
+        //     // disable pytest coverage report as it conflicts with debugging tests
+        //     "name": "Debug pytest tests",
+        //     "type": "python",
+        //     "purpose": [
+        //         "debug-test"
+        //     ],
+        //     "request": "launch",
+        //     "console": "integratedTerminal",
+        //     "justMyCode": false,
+        //     "stopOnEntry": false,
+        //     // false : Avoid debugpy trying to debug micropython
+        //     // but may cause issue with pytest-cov coverage reporting 
+        //     "subProcess": false,
+        // },
         {
-            "name": "Python: Debug process minify",
-            "type": "python",
+            "name": "PowerShell Launch Current File",
+            "type": "PowerShell",
             "request": "launch",
-            "console": "integratedTerminal",
-            "program": "process.py",
-            "subProcess": false, // Avoid debugpy trying to debug micropython
-            "args": [
-                "minify"
-            ]
-        },
-        {
-            "name": "Python: Debug process minify mem",
-            "type": "python",
-            "request": "launch",
-            "console": "integratedTerminal",
-            "program": "process.py",
-            "subProcess": false, // Avoid debugpy trying to debug micropython
-            "args": [
-                "minify",
-                "-s",
-                "board/createstubs_mem.py",
-                "-o",
-                "minified/createstubs_mem.py"
-            ]
-        },
-        {
-            // disable pytest coverage report as it conflicts with debugging tests
-            "name": "Debug pytest tests",
-            "type": "python",
-            "purpose": [
-                "debug-test"
-            ],
-            "request": "launch",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "stopOnEntry": false,
-            // false : Avoid debugpy trying to debug micropython
-            // but may cause issue with pytest-cov coverage reporting 
-            "subProcess": false,
+            "script": "${file}",
+            "cwd": "${file}"
         },
     ],
     "inputs": [

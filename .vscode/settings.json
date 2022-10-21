@@ -3,7 +3,7 @@
     // https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#unresolved-import-warnings
     "python.analysis.autoSearchPaths": true,
     "python.analysis.logLevel": "Trace",
-    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticMode": "openFilesOnly",
     //////////////////////////////////////////////////////////////
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
@@ -121,5 +121,17 @@
         "reportUnknownArgumentType": "none",
         "reportUnknownVariableType": "none",
         "reportMissingParameterType": "none",
+    },
+    "pymakr.ignore": [
+        ".vscode",
+        ".gitignore",
+        ".git",
+        "env",
+        "venv",
+        ".py_cache",
+        "__pycache__"
+    ],
+    "files.watcherExclude": {
+        "**/repos/**": true
     },
 }
