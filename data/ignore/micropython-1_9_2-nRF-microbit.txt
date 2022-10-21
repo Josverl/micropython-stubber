@@ -1,0 +1,8 @@
+# MicroPython v1.9.2-34-gd64154c73 on 2017-09-01; micro:bit v1.1.0 with nRF51822
+__main__          love              os                time
+antigravity       machine           radio             ucollections
+array             math              random            ustruct
+audio             microbit          speech            utime
+builtins          micropython       struct
+collections       music             sys
+gc                neopixel          this
