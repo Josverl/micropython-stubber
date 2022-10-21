@@ -139,12 +139,16 @@ NONE_VERBS = [
     "Writes ",
 ]
 
-# Add additional imports to generated modules to allow one module te refer to another,
-# or to import other supporting modules
+# Add additional imports to generated modules
+# - to allow one module te refer to another,
+# - to import other supporting modules
+# - to add missing abstract classes
+
 MODULE_GLUE = {
     "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
     "collections": ["from queue import Queue"],  # dequeu is a subclass
+    # "machine": ["class AbstractNIC", "    pass"],
 }
 
 # manual fixes needed for parameters ( micropython v.16 & v1.17)
@@ -226,6 +230,9 @@ PARAM_FIXES = [
     # network.LAN.init
     # def __init__(self, id, *, phy_type=<board_default>, phy_addr=<board_default>, phy_clock=<board_default>) -> None:
     ("=<board_default>", "=0"),
+    # ssl
+    # def wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True) -> Any:
+    ("cert_reqs=CERT_NONE", "cert_reqs=None"),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
@@ -241,9 +248,9 @@ CHILD_PARENT_CLASS = {
     "BytesIO": "IO",
     # uzlib
     "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
-    # network
-    "WLAN": "AbstractNIC",
-    "WLANWiPy": "AbstractNIC",
+    # network - AbstractNIC is not definined in machine
+    # "WLAN": "AbstractNIC",
+    # "WLANWiPy": "AbstractNIC",
     # uhashlib
     "md5": "hash",
     "sha1": "hash",

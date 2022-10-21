@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 
 from loguru import logger as log
+
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import firmware_candidates
 from stubber.utils.config import CONFIG
@@ -72,14 +73,22 @@ def copy_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
         for f in dest_path.glob("*.py"):
             if f.with_suffix(".pyi").exists():
                 f.unlink()
+    # avoid duplicate modules : folder - file combinations
+    # prefer folder from frozen stubs, over file from firmware stubs
+    for f in dest_path.glob("*"):
+        if f.is_dir():
+            for suffix in [".py", ".pyi"]:
+                if (dest_path / f.name).with_suffix(suffix).exists():
+                    (dest_path / f.name).with_suffix(suffix).unlink()
 
     # delete buitins.pyi in the package folder
     for name in [
-        "builtins.py",  # creates conflicts, better removed
-        "builtins.pyi",  # creates conflicts, better removed
+        "builtins",  # creates conflicts, better removed
+        "pycopy_imphook",  # is not intended to be used directly, and has an unresolved subclass
     ]:
-        if (dest_path / name).exists():
-            (dest_path / name).unlink()
+        for suffix in [".py", ".pyi"]:
+            if (dest_path / name).with_suffix(suffix).exists():
+                (dest_path / name).with_suffix(suffix).unlink()
 
     # 2 - Enrich the firmware stubs with the document stubs
     result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
