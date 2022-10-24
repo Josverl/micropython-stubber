@@ -17,12 +17,12 @@ for this :
 """
 
 from pathlib import Path
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set
 
 from loguru import logger as log
 
 
-def read_modules(path: Optional[Path] = None) -> Set:
+def read_modules(path: Optional[Path] = None) -> Set[str]:
     """
     read text files with modules per firmware.
     each contains the output of help("modules")

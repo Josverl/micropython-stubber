@@ -58,3 +58,5 @@ tests/codemods/codemod_test_cases/**/output.py
 
 # ignore the typings folders used in testing.
 snippets/*/typings
+typings_test
+typings
