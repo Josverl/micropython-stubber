@@ -60,3 +60,4 @@ tests/codemods/codemod_test_cases/**/output.py
 snippets/*/typings
 typings_test
 typings
+typings2

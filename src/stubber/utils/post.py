@@ -22,13 +22,13 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
 
 def run_black(path: Path, capture_output=False):
     """
-    run autoflake to remove unused imports
-    needs to be run BEFORE black otherwise it does not recognize long import from`s.
+    run black to format the code / stubs
     """
     cmd = [
         "black",
         path.as_posix(),
     ]
+    log.debug("Running black on: {}".format(path))
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
     result = subprocess.run(cmd, capture_output=capture_output)
     return result.returncode
@@ -38,16 +38,26 @@ def run_autoflake(path: Path, capture_output=False):
     """
     run autoflake to remove unused imports
     needs to be run BEFORE black otherwise it does not recognize long import from`s.
+    note: is run file-by-file to include processing .pyi files
     """
-    cmd = [
-        "autoflake",
-        "-r",
-        "--in-place",
-        path.as_posix(),
-        "-v",
-        "-v",  # show some feedback
-    ]
-    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-    result = subprocess.run(cmd, capture_output=capture_output)
+    ret = 0
+    for file in list(path.rglob("*.py")) + list(path.rglob("*.pyi")):
 
-    return result.returncode
+        cmd = [
+            "autoflake",
+            "-r",
+            "--in-place",
+            # "--remove-all-unused-imports",
+            # "--ignore-init-module-imports",
+            file.as_posix(),
+            "-v",
+            "-v",  # show some feedback
+        ]
+        log.debug("Running autoflake on: {}".format(path))
+        # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+        result = subprocess.run(cmd, capture_output=capture_output)
+        if result.returncode != 0:
+            log.warning("autoflake failed on: {}".format(file))
+            ret = result.returncode
+
+    return ret
