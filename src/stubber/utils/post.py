@@ -34,30 +34,48 @@ def run_black(path: Path, capture_output=False):
     return result.returncode
 
 
-def run_autoflake(path: Path, capture_output=False):
+def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
     """
     run autoflake to remove unused imports
     needs to be run BEFORE black otherwise it does not recognize long import from`s.
     note: is run file-by-file to include processing .pyi files
     """
     ret = 0
-    for file in list(path.rglob("*.py")) + list(path.rglob("*.pyi")):
+    cmd = [
+        "autoflake",
+        "-r",
+        "--in-place",
+        # "--remove-all-unused-imports",
+        # "--ignore-init-module-imports",
+        path.as_posix(),
+        "-v",
+        "-v",  # show some feedback
+    ]
+    log.debug("Running autoflake on: {}".format(path))
+    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+    result = subprocess.run(cmd, capture_output=capture_output)
+    if result.returncode != 0:
+        log.warning("autoflake failed on: {}".format(file))
+        ret = result.returncode
 
-        cmd = [
-            "autoflake",
-            "-r",
-            "--in-place",
-            # "--remove-all-unused-imports",
-            # "--ignore-init-module-imports",
-            file.as_posix(),
-            "-v",
-            "-v",  # show some feedback
-        ]
-        log.debug("Running autoflake on: {}".format(path))
-        # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-        result = subprocess.run(cmd, capture_output=capture_output)
-        if result.returncode != 0:
-            log.warning("autoflake failed on: {}".format(file))
-            ret = result.returncode
+    if progress_pyi:
+        for file in list(path.rglob("*.pyi")):
+
+            cmd = [
+                "autoflake",
+                "-r",
+                "--in-place",
+                # "--remove-all-unused-imports",
+                # "--ignore-init-module-imports",
+                file.as_posix(),
+                "-v",
+                "-v",  # show some feedback
+            ]
+            log.debug("Running autoflake on: {}".format(path))
+            # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
+            result = subprocess.run(cmd, capture_output=capture_output)
+            if result.returncode != 0:
+                log.warning("autoflake failed on: {}".format(file))
+                ret = result.returncode
 
     return ret
