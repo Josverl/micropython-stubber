@@ -148,7 +148,7 @@ MODULE_GLUE = {
     "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
     "collections": ["from queue import Queue"],  # dequeu is a subclass
-    "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
+    # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
 }
 
 # manual fixes needed for parameters ( micropython v.16 & v1.17)
