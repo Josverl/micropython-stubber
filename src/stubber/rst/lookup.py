@@ -148,7 +148,7 @@ MODULE_GLUE = {
     "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
     "collections": ["from queue import Queue"],  # dequeu is a subclass
-    # "machine": ["class AbstractNIC", "    pass"],
+    "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
 }
 
 # manual fixes needed for parameters ( micropython v.16 & v1.17)
@@ -249,8 +249,10 @@ CHILD_PARENT_CLASS = {
     # uzlib
     "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # network - AbstractNIC is not definined in machine
-    # "WLAN": "AbstractNIC",
-    # "WLANWiPy": "AbstractNIC",
+    "WLAN": "AbstractNIC",
+    "WLANWiPy": "AbstractNIC",
+    "CC3K": "AbstractNIC",
+    "WIZNET5K": "AbstractNIC",
     # uhashlib
     "md5": "hash",
     "sha1": "hash",
