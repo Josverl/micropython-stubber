@@ -74,19 +74,10 @@ from loguru import logger as log
 from stubber.utils.post import run_autoflake, run_black
 
 from . import utils
-from .rst import (
-    CHILD_PARENT_CLASS,
-    DOCSTUB_SKIP,
-    MODULE_GLUE,
-    PARAM_FIXES,
-    RST_DOC_FIXES,
-    TYPING_IMPORT,
-    U_MODULES,
-    ClassSourceDict,
-    FunctionSourceDict,
-    ModuleSourceDict,
-    return_type_from_context,
-)
+from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
+                  RST_DOC_FIXES, TYPING_IMPORT, U_MODULES, ClassSourceDict,
+                  FunctionSourceDict, ModuleSourceDict,
+                  return_type_from_context)
 from .utils.config import CONFIG
 
 # logging
@@ -814,7 +805,7 @@ def generate_from_rst(
             reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
 
-    run_autoflake(dst_path)
+    run_autoflake(dst_path, progress_pyi=True)
     run_black(dst_path)
     
     # Also generate a module manifest
