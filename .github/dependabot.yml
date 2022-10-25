@@ -7,6 +7,9 @@ updates:
     directory: "/src"
     schedule:
       interval: "weekly"
+    assignees:
+      - "josverl"      
+     
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
@@ -15,6 +18,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    assignees:
+      - "josverl"      
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -23,3 +28,5 @@ updates:
     # Check for updates once a week
     schedule:
       interval: "weekly"
+    assignees:
+      - "josverl"      
