@@ -1,7 +1,8 @@
 {
     "include": [
         "src",
-        "tests"
+        "tests",
+        "typings2"
     ],
     "exclude": [
         "**/all-stubs",
@@ -33,6 +34,8 @@
     // reduce noise 
     "reportOptionalMemberAccess": "none", // "read" is not a known member of "None" - occurs often in frozen code
     "reportWildcardImportFromLibrary": "none",
+    "reportUnknownArgumentType": "none",
+    "reportSelfClsParameterName": "none",
     // 
     // section
     "executionEnvironments": [
@@ -45,7 +48,7 @@
         {
             "root": "board",
             "extraPaths": [
-                "typings_test/esp2"
+                "typings"
             ],
         },
         {
@@ -56,6 +59,12 @@
             "extraPaths": [
                 "src",
             ]
+        },
+        {
+            "root": ".",
+            "extraPaths": [
+                "typings"
+            ],
         }
     ]
 }
