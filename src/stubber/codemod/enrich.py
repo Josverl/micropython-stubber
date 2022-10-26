@@ -1,12 +1,14 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-# from stubber.codemod.merge_docstub import MergeCommand
-import stubber.codemod.merge_docstub as merge_docstub
-from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
+from libcst.codemod import (CodemodContext, diff_code,
+                            exec_transform_with_prettyprint)
 from libcst.tool import _default_config  # type: ignore
 from loguru import logger as log
-from stubber.utils.post import run_autoflake, run_black
+
+# from stubber.codemod.merge_docstub import MergeCommand
+import stubber.codemod.merge_docstub as merge_docstub
+from stubber.utils.post import run_black
 
 ##########################################################################################
 # # log = logging.getLogger(__name__)
@@ -97,8 +99,8 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
             # no docstub to enrich with
             if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub file found for {source_file}"))
-    # run autoflake and black on the destination folder
-    run_autoflake(source_folder)
+    # run black on the destination folder
+    # no Autoflake as this removes some relevan (unused) imports
     run_black(source_folder)
 
     return count
