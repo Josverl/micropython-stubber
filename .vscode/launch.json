@@ -92,6 +92,8 @@
         {
             "name": "Micro-CPython: Current File",
             "type": "python",
+            "subProcess": false,
+            "justMyCode": true,
             "request": "launch",
             "program": "${file}",
             "cwd": "${fileDirname}",
@@ -101,7 +103,7 @@
                 //"PYTHONPATH": "all-stubs/cpython_core"
                 //"PYTHONPATH": "${workspaceFolder}/tests/mocks/pycopy-cpython_core"
                 "PYTHONPATH": "${workspaceFolder}/tests/mocks/micropython-cpython_core;${workspaceFolder}/tests/mocks/machine"
-            }
+            },
         },
         {
             "name": "Python: Debug process --path",
@@ -114,21 +116,20 @@
                 "./temp"
             ]
         },
-        // {
-        //     // disable pytest coverage report as it conflicts with debugging tests
-        //     "name": "Debug pytest tests",
-        //     "type": "python",
-        //     "purpose": [
-        //         "debug-test"
-        //     ],
-        //     "request": "launch",
-        //     "console": "integratedTerminal",
-        //     "justMyCode": false,
-        //     "stopOnEntry": false,
-        //     // false : Avoid debugpy trying to debug micropython
-        //     // but may cause issue with pytest-cov coverage reporting 
-        //     "subProcess": false,
-        // },
+        {
+            "name": "Debug pytest tests",
+            "purpose": [
+                "debug-test"
+            ],
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false,
+            // false : Avoid debugpy trying to debug micropython
+            // but may cause issue with pytest-cov coverage reporting 
+            "subProcess": false,
+        },
         {
             "name": "PowerShell Launch Current File",
             "type": "PowerShell",

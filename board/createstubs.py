@@ -174,7 +174,7 @@ class Stubber:
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append('{{"module": {}, "file": {}}}'.format(module_name, file_name))
+        self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it

@@ -44,7 +44,7 @@ elif sys.platform == "win32":
     [
         pytest.param("createstubs"),
         pytest.param("createstubs_mem"),
-        pytest.param("createstubs_db", marks=pytest.mark.linux),  # no btree on windows build
+        pytest.param("createstubs_db"),
     ],
 )
 # specify the minified tests using a marker
@@ -71,7 +71,7 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
     script_path = Path(script_folder).absolute()
     # other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
-    cmd = [fw_filename, variant + ".py", "--path", str(tmp_path)]
+    cmd = [fw_filename.as_posix(), variant + ".py", "--path", str(tmp_path)]
 
     # Delete database before the test
     if variant == "createstubs_db":
@@ -79,12 +79,14 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
             pytest.skip(reason="v1.11 has no  machine module")  # type: ignore
         if (Path(script_folder) / "modulelist.db").exists():
             os.remove(Path(script_folder) / "modulelist.db")
+        if (Path(script_folder) / "modulelist.done").exists():
+            os.remove(Path(script_folder) / "modulelist.done")
     try:
         subproc = subprocess.run(
             cmd,
             cwd=script_path,
             timeout=100000,
-            capture_output=True,
+            capture_output=False,
         )
         print(subproc.stdout)
         assert subproc.returncode == 0, "createstubs ran with an error :" + str(subproc.stdout)

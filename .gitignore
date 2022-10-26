@@ -46,9 +46,11 @@ node_modules
 
 scripts/bulk_stubber.json
 
-# ignore databases 
+# ignore databases - status files
 board/modulelist.db
 minified/modulelist.db
+board/modulelist.done
+minified/modulelist.done
 
 # no poetry packaging 
 dist/
@@ -60,4 +62,3 @@ tests/codemods/codemod_test_cases/**/output.py
 snippets/*/typings
 typings_test
 typings
-typings2

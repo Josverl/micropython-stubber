@@ -19,7 +19,7 @@
             "label": "minify",
             "detail": "minify for esp8622",
             "type": "shell",
-            "command": "stubber minify -all -complile",
+            "command": "poetry run stubber minify --all --compile",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
