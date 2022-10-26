@@ -35,7 +35,7 @@ class Stubber:
             pass
 
         self._log = logging.getLogger("stubber")
-        self._report = []
+        self._report = []  # type: list[str]
         self.info = _info()
         gc.collect()
         if firmware_id:
@@ -75,7 +75,7 @@ class Stubber:
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []
 
-    def get_obj_attributes(self, item_instance: object) -> tuple:
+    def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
         # name_, repr_(value), type as text, item_instance
         _result = []
@@ -138,7 +138,7 @@ class Stubber:
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
         """Create a Stub of a single python module
 
         Args:
@@ -174,7 +174,7 @@ class Stubber:
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append({"module": module_name, "file": file_name})
+        self._report.append('{{"module": {}, "file": {}}}'.format(module_name, file_name))
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
@@ -318,12 +318,13 @@ class Stubber:
             s = s.replace(c, "_")
         return s
 
-    def clean(self, path: str = None):
+    def clean(self, path: str = None):  # type: ignore
         "Remove all files from the stub folder"
         if path is None:
             path = self.path
         self._log.info("Clean/remove files in folder: {}".format(path))
         try:
+            os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
         except (OSError, AttributeError):  # lgtm [py/unreachable-statement]
             # os.listdir fails on unix
@@ -359,7 +360,7 @@ class Stubber:
                         start = False
                     else:
                         f.write(",\n")
-                    f.write(dumps(n))
+                    f.write(n)
                 f.write("\n]}")
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
@@ -416,20 +417,20 @@ def _info():
         info["release"] = ".".join([str(n) for n in sys.implementation.version])
         info["version"] = info["release"]
         info["name"] = sys.implementation.name
-        info["mpy"] = sys.implementation.mpy  # type: ignore
+        info["mpy"] = sys.implementation.mpy
     except AttributeError:
         pass
 
     if sys.platform not in ("unix", "win32"):
         try:
             u = os.uname()
-            info["sysname"] = u.sysname
-            info["nodename"] = u.nodename
-            info["release"] = u.release
-            info["machine"] = u.machine
+            info["sysname"] = u[0]  # u.sysname
+            info["nodename"] = u[1]  #  u.nodename
+            info["release"] = u[2]  # u.release
+            info["machine"] = u[4]  #  u.machine
             # parse micropython build info
-            if " on " in u.version:
-                s = u.version.split(" on ")[0]
+            if " on " in u[3]:  # version
+                s = u[3].split(" on ")[0]
                 if info["sysname"] == "esp8266":
                     # esp8266 has no usable info on the release
                     if "-" in s:
