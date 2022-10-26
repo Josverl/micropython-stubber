@@ -25,8 +25,8 @@ K=len
 I=AttributeError
 F=False
 H=''
-D='/'
 G=print
+D='/'
 C=None
 B=OSError
 import gc as E,sys,uos as os
@@ -87,7 +87,7 @@ class Stubber:
 		except N:G('{}Skip module: {:<25} {:<79}'.format('\x1b[1A',A,'Module not found.'));return F
 		X(K)
 		with Q(K,'w')as P:R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(A,I._fwid,I.info,__version__);P.write(R);P.write('from typing import Any\n\n');I.write_object_stub(P,O,A,H)
-		I._report.append('{{"module": {}, "file": {}}}'.format(A,K))
+		I._report.append('{{"module": "{}", "file": "{}"}}'.format(A,K.replace('\\',D)))
 		if not A in['os','sys','logging','gc']:
 			try:del O
 			except (B,L):pass
