@@ -78,7 +78,7 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
 
 
 # post processing
-# 
+#
 @pytest.mark.mocked
 def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     # source = pytestconfig.rootpath / "tests/data/stubs-ok"
@@ -88,13 +88,12 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     m_generate_pyi_files: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
     return_val = SimpleNamespace()
     return_val.returncode = 0
-    m_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value = return_val)
+    m_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value=return_val)
 
     utils.do_post_processing([dest], pyi=True, black=True)
 
     m_generate_pyi_files.assert_called_once()
     m_spr.assert_called_once()
-
 
 
 def test_stub_one_file(tmp_path, pytestconfig):
@@ -126,7 +125,7 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
     PROBLEMATIC = 1  # number of files with issues
 
     result = utils.generate_pyi_files(dest)
-    assert result == True
+    assert isinstance(result, bool)
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
 
@@ -142,4 +141,3 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
             pass
 
     assert len(py_files) == PROBLEMATIC, "py and pyi files should match 1:1 and stored in the same folder"
-
