@@ -45,7 +45,7 @@ class Stubber:
             pass
 
         self._log = logging.getLogger("stubber")
-        self._report = []
+        self._report = []  # type: list[str]
         self.info = _info()
         gc.collect()
         if firmware_id:
@@ -85,7 +85,7 @@ class Stubber:
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []
 
-    def get_obj_attributes(self, item_instance: object) -> tuple:
+    def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
         # name_, repr_(value), type as text, item_instance
         _result = []
@@ -127,7 +127,7 @@ class Stubber:
             self.create_one_stub(module_name)
         self._log.info("Finally done")
 
-    def create_one_stub(self, module_name):
+    def create_one_stub(self, module_name: str):
         if module_name in self.problematic:
             self._log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
@@ -184,7 +184,7 @@ class Stubber:
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append({"module": module_name, "file": file_name})
+        self._report.append('{{"module": {}, "file": {}}}'.format(module_name, file_name))
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
@@ -334,6 +334,7 @@ class Stubber:
             path = self.path
         self._log.info("Clean/remove files in folder: {}".format(path))
         try:
+            os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
         except (OSError, AttributeError):  # lgtm [py/unreachable-statement]
             # os.listdir fails on unix
@@ -369,7 +370,7 @@ class Stubber:
                         start = False
                     else:
                         f.write(",\n")
-                    f.write(dumps(n))
+                    f.write(n)
                 f.write("\n]}")
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
@@ -423,10 +424,10 @@ def _info():
         "ver": "",  # short version
     }
     try:
-        info["release"] = ".".join([str(n) for n in sys.implementation.version])  # type: ignore
+        info["release"] = ".".join([str(n) for n in sys.implementation.version])
         info["version"] = info["release"]
-        info["name"] = sys.implementation.name  # type: ignore
-        info["mpy"] = sys.implementation.mpy  # type: ignore
+        info["name"] = sys.implementation.name
+        info["mpy"] = sys.implementation.mpy
     except AttributeError:
         pass
 
@@ -586,7 +587,7 @@ def isMicroPython() -> bool:
 
 
 def main_esp8266():
-    import machine
+    import machine  # type: ignore
 
     try:
         f = open("modulelist" + ".done", "r+b")
@@ -608,11 +609,22 @@ def main_esp8266():
         modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
     gc.collect()
     # remove the ones that are already done
-    with open("modulelist" + ".done") as f:
-        # not optimal , but works on mpremote and esp8266
-        modules_done = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+    modules_done = {}  # type: dict[str, str]
+    try:
+        with open("modulelist" + ".done") as f:
+            # not optimal , but works on mpremote and esp8266
+            for line in f.read().split("\n"):
+                line = line.strip()
+                gc.collect()
+                if len(line) > 0:
+                    key, value = line.split("=", 1)
+                    modules_done[key] = value
+
+    except (OSError, SyntaxError):
+        pass
+
     gc.collect()
-    modules = [m for m in modules if m not in modules_done]
+    modules = [m for m in modules if m not in modules_done.keys()]
     gc.collect()
 
     for modulename in modules:
@@ -626,22 +638,19 @@ def main_esp8266():
             # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
             machine.reset()
 
-        # save the (last) result back to the database
+        # save the (last) result back to the database/result file
         if ok:
-            result = bytes(repr(stubber._report[-1]), "utf8")
+            result = stubber._report[-1]
         else:
-            result = b"fail"
+            result = "failed"
         # -------------------------------------
-        modules_done.append(modulename)
-        with open("modulelist" + ".done", "w") as f:
-            f.write("\n".join(modules_done))
+        modules_done[modulename] = str(result)
+        with open("modulelist" + ".done", "a") as f:
+            f.write("{}={}\n".format(modulename, result))
 
-    # Finished processing - load all the results from the db
-    with open("modulelist" + ".done") as f:
-        # not optimal , but works on mpremote and esp8266
-        modules_done = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+    # Finished processing - load all the results , and remove the failed ones
     if len(modules_done) > 0:
-        stubber._report = modules_done
+        stubber._report = [v for k, v in modules_done.items() if v != "failed"]
         stubber.report()
 
 

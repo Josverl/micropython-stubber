@@ -100,7 +100,7 @@
                 // patch python path with CPYTHON replacements
                 //"PYTHONPATH": "all-stubs/cpython_core"
                 //"PYTHONPATH": "${workspaceFolder}/tests/mocks/pycopy-cpython_core"
-                "PYTHONPATH": "all-stubs/typings/fallback;${workspaceFolder}/tests/mocks/micropython-cpython_core"
+                "PYTHONPATH": "${workspaceFolder}/tests/mocks/micropython-cpython_core;${workspaceFolder}/tests/mocks/machine"
             }
         },
         {
