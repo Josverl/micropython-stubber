@@ -1,10 +1,13 @@
 # others
+from pathlib import Path
+
 import pytest
+from helpers import load_rst
 
 # SOT
 from stubber.stubs_from_docs import RSTReader
-from helpers import load_rst
-# mark all tests 
+
+# mark all tests
 pytestmark = pytest.mark.doc_stubs
 
 
@@ -145,3 +148,31 @@ def test_class_constants():
     lines = [l.rstrip() for l in r.output]
     for l in expected:
         assert l in lines, f"{l} not found"
+
+
+def test_timer_constants(pytestconfig: pytest.Config):
+    """
+        2. the description of constants in not picked up correctly ( for the last one in a .rst file ?)
+    rst
+    Constants
+    Timer.ONE_SHOT
+    Timer.PERIODIC
+    Timer operating mode.
+    """
+    r = RSTReader()
+
+    r.read_file(pytestconfig.rootpath / "tests/rst/data/machine.Timer.rst")
+    r.current_module = "machine"
+    # process
+    r.parse()
+    # check
+    assert len(r.output) > 1
+    list = r.output_dict["class Timer():"]["constants"]
+
+    doc_list = [c for c in list if c.lstrip().startswith('"""')]
+    const_list = [c for c in list if not c.lstrip().startswith('"""')]
+    # should have 2 constants
+    assert len(const_list) == 2
+    # and 11 single line comments for docstrings
+    assert len(doc_list) == 2
+    assert '    """Timer operating mode."""' in doc_list

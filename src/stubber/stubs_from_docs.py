@@ -807,7 +807,7 @@ def generate_from_rst(
 
     run_autoflake(dst_path, progress_pyi=True)
     run_black(dst_path)
-    
+
     # Also generate a module manifest
     utils.make_manifest(
         folder=dst_path,
