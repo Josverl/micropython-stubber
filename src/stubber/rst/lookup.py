@@ -233,6 +233,9 @@ PARAM_FIXES = [
     # ssl
     # def wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True) -> Any:
     ("cert_reqs=CERT_NONE", "cert_reqs=None"),
+    # struct
+    # def pack(fmt, v1, v2, *args) -> bytes:
+    (", v1, v2,", ", v1,"),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
