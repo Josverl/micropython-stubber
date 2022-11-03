@@ -74,10 +74,19 @@ from loguru import logger as log
 from stubber.utils.post import run_autoflake, run_black
 
 from . import utils
-from .rst import (CHILD_PARENT_CLASS, DOCSTUB_SKIP, MODULE_GLUE, PARAM_FIXES,
-                  RST_DOC_FIXES, TYPING_IMPORT, U_MODULES, ClassSourceDict,
-                  FunctionSourceDict, ModuleSourceDict,
-                  return_type_from_context)
+from .rst import (
+    CHILD_PARENT_CLASS,
+    DOCSTUB_SKIP,
+    MODULE_GLUE,
+    PARAM_FIXES,
+    RST_DOC_FIXES,
+    TYPING_IMPORT,
+    U_MODULES,
+    ClassSourceDict,
+    FunctionSourceDict,
+    ModuleSourceDict,
+    return_type_from_context,
+)
 from .utils.config import CONFIG
 
 # logging
@@ -321,8 +330,10 @@ class RSTReader:
             block[i] = _l
         return block
 
-    def fix_parameters(self, params: str):
-        "change documentation parameter notation to a supported format that works for linting"
+    def fix_parameters(self, params: str, name: str = "") -> str:
+        """Patch / correct the documentation parameter notation to a supported format that works for linting.
+        - name is the name of the function or method or Class
+        """
         params = params.strip()
         if not params.endswith(")"):
             # remove all after the closing bracket
@@ -358,6 +369,8 @@ class RSTReader:
         params = self.strip_prefixes(params, strip_mod=True, strip_class=True)
 
         for fix in PARAM_FIXES:
+            if len(fix) > 2 and fix[2] != name:
+                continue
             if fix[0] in params:
                 params = params.replace(fix[0], fix[1])
 
@@ -490,7 +503,7 @@ class RSTReader:
                     # remove module name from the start of the function name
                     name = name[len(f"{mod}.") :]
             # fixup parameters
-            params = self.fix_parameters(params)
+            params = self.fix_parameters(params, name)
             # assume no functions in classes
             self.leave_class()
             # if function name is the same as the module
@@ -522,7 +535,7 @@ class RSTReader:
 
         log.trace(f"# class:: {name} - {this_class}")
         # fixup parameters
-        params = self.fix_parameters(params)
+        params = self.fix_parameters(params, f"{name}.__init__")
         docstr = self.parse_docstring()
 
         if any(":noindex:" in line for line in docstr):
@@ -576,9 +589,6 @@ class RSTReader:
                 class_name = self.current_class
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-            # fixup optional [] parameters and other notations
-            params = self.fix_parameters(params)
-
             # get or create the parent class
             full_name = self.output_dict.find(f"class {class_name}")
             if full_name:
@@ -587,6 +597,9 @@ class RSTReader:
                 # not found, create and add new class to the output dict
                 parent_class = ClassSourceDict(f"class {class_name}():")
                 self.output_dict += parent_class
+
+            # fixup optional [] parameters and other notations
+            params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
             ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
