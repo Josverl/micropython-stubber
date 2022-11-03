@@ -117,7 +117,7 @@ class SourceDict(OrderedDict):
         self.update({"constants": self["constants"] + [line]})
 
     def add_constant_smart(self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True):
-        """add constant to the constant scope of this block, or a class in this block"""
+        """add literal / constant to the constant scope of this block, or a class in this block"""
         if "." in name and isinstance(self, ModuleSourceDict):
             classname, const_name = name.split(".", 1)
             classfullname = self.find(classname.replace("# ", ""))  # Wildcards are
