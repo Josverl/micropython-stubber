@@ -1,6 +1,6 @@
 # ref : https://docs.micropython.org/en/latest/rp2/quickref.html
 
-import time
+import utime as time
 
 time.sleep(1)           # sleep for 1 second
 time.sleep_ms(500)      # sleep for 500 milliseconds

@@ -108,9 +108,10 @@ def main():
             "uasyncio",  # can create better stubs from frozen python modules.
             "builtins",  # conflicts with static type checking , has very little information anyway
             "re",  # regex is too complex
-            "collections",
-            "io",
-            "uio",
+            # when using only .pyi files, these are safe to use
+            # "collections",
+            # "io",
+            # "uio",
         ]
     )
 
