@@ -18,13 +18,12 @@
     // section 1
     "pythonVersion": "3.8",
     "pythonPlatform": "All",
-    "verboseOutput": true,
+    "verboseOutput": false,
     "typeCheckingMode": "basic", // ["off", "basic", "strict"]: Specifies the default rule set to use
     // section 2
     "reportMissingImports": "error",
     "reportGeneralTypeIssues": "error", // interesting
     "reportUndefinedVariable": "warning", // "_WHO_AM_I_REG" is not defined - Not a showstopper
-    "reportMissingModuleSource": "information", // need to fix sometime
     "reportMissingTypeStubs": "information",
     "reportOptionalCall": "information", //  Object of type "None" cannot be called
     "reportInvalidStringEscapeSequence": "information",
@@ -36,13 +35,32 @@
     "reportWildcardImportFromLibrary": "none",
     "reportUnknownArgumentType": "none",
     "reportSelfClsParameterName": "none",
+    "reportMissingModuleSource": "none",
     // 
     // section
     "executionEnvironments": [
         {
-            "root": "typings2",
+            "root": "snippets/stm32",
             "extraPaths": [
-                "typings"
+                "snippets/stm32/typings"
+            ],
+        },
+        {
+            "root": "snippets/esp32",
+            "extraPaths": [
+                "snippets/esp32/typings"
+            ],
+        },
+        {
+            "root": "snippets/esp8266",
+            "extraPaths": [
+                "snippets/esp8266/typings"
+            ],
+        },
+        {
+            "root": "snippets/rp2",
+            "extraPaths": [
+                "snippets/rp2/typings"
             ],
         },
         {
