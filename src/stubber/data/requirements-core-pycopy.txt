@@ -9,7 +9,7 @@ pycopy-cpython-ucollections
 pycopy-cpython-uctypes
 pycopy-cpython-uerrno
 pycopy-cpython-uhashlib
-pycopy-cpython-uio
+# pycopy-cpython-uio # does not have the IOBase abstract class 
 pycopy-cpython-ujson
 pycopy-cpython-ulogging
 pycopy-cpython-uos
