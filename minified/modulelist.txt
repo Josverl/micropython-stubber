@@ -46,6 +46,7 @@ binascii
 bluetooth
 btree
 cmath
+collections
 crypto
 cryptolib
 curl
@@ -70,6 +71,7 @@ ili9341
 ili9XXX
 imagetools
 inisetup
+io
 json
 lcd160cr
 lodepng
@@ -130,6 +132,7 @@ uerrno
 uftpd
 uhashlib
 uheapq
+uio
 ujson
 ulab
 ulab/approx
