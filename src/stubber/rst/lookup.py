@@ -288,6 +288,10 @@ PARAM_FIXES = [
     #     #    def __init__(self, id, *args) -> None: ...
     #     def __init__(self, id, *args, **kwargs) -> None: ...
     ("id, ...", "id, *args, **kwargs", "SPI.__init__"),
+    # machine.Signal
+    # def __init__(self, pin_obj, invert=False) -> None: ...
+    # def __init__(self, pin_obj, *args, invert=False) -> None: ...
+    ("pin_obj, invert", "pin_obj, *args, invert", "Signal.__init__"),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
@@ -303,11 +307,13 @@ CHILD_PARENT_CLASS = {
     "BytesIO": "IO",
     # uzlib
     "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
-    # network - AbstractNIC is not definined in machine
-    "WLAN": "AbstractNIC",
-    "WLANWiPy": "AbstractNIC",
-    "CC3K": "AbstractNIC",
-    "WIZNET5K": "AbstractNIC",
+    # -------------------------------------------------------------------------------------
+    # network - AbstractNIC is definined in docstub network.pyi , but not actually used
+    # "WLAN": "AbstractNIC",
+    # "WLANWiPy": "AbstractNIC",
+    # "CC3K": "AbstractNIC",
+    # "WIZNET5K": "AbstractNIC",
+    # -------------------------------------------------------------------------------------
     # uhashlib
     "md5": "hash",
     "sha1": "hash",

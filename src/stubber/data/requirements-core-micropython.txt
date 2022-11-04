@@ -9,7 +9,7 @@ micropython-cpython-ucollections
 micropython-cpython-uctypes
 micropython-cpython-uerrno
 micropython-cpython-uhashlib
-micropython-cpython-uio
+# micropython-cpython-uio # does not have the IOBase abstract class 
 micropython-cpython-ujson
 micropython-cpython-ulogging
 micropython-cpython-uos
