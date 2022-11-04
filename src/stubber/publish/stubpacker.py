@@ -270,9 +270,7 @@ class StubPackage:
                     raise (e)
         # 3 - clean up a little bit
         # delete all the .py files in the package folder if there is a corresponding .pyi file
-        # FIXME: Leave *.py on the module folders to avoid poetry packaging issues
-        # >      ValueError  umqtt is not a package.
-        for f in self.package_path.glob("*.py"):
+        for f in self.package_path.rglob("*.py"):
             if f.with_suffix(".pyi").exists():
                 f.unlink()
 
@@ -369,16 +367,6 @@ class StubPackage:
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
                 raise (e)
-        # # check if version number of the package matches the version number of the stubs
-        # ver_pkg = parse(_pyproject["tool"]["poetry"]["version"])
-        # ver_stubs = parse(self.mpy_version)
-        # if isinstance(ver_stubs, LegacyVersion) or isinstance(ver_pkg, LegacyVersion):
-        #     raise ValueError(f"Legacy version not supported: {ver_pkg} || {ver_stubs}")
-
-        # if not (ver_pkg.major == ver_stubs.major and ver_pkg.minor == ver_stubs.minor):
-
-        #     log.warning(f"Package version:{ver_pkg.public} does not match the version of the stubs: {ver_stubs.public}")
-        #     _pyproject["tool"]["poetry"]["version"] = self.mpy_version
 
         # update the name , version and description of the package
         _pyproject["tool"]["poetry"]["name"] = self.package_name
@@ -391,19 +379,10 @@ class StubPackage:
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
         _pyproject["tool"]["poetry"]["packages"] = []
-        # find packages using __init__ files
-        # take care no to include a module twice
-        modules = set({})
-        for p in (self.package_path).rglob("**/__init__.py*"):
-            # add the module to the package
-            # fixme : only accounts for one level of packages
-            modules.add(p.parent.name)
-        for module in sorted(modules):
-            _pyproject["tool"]["poetry"]["packages"] += [{"include": module}]
-        # now find other stub files directly in the folder
-        for p in sorted((self.package_path).glob("*.py*")):
-            if p.suffix in (".py", ".pyi"):
-                _pyproject["tool"]["poetry"]["packages"] += [{"include": p.name}]
+
+        # Only include .pyi files
+        for p in sorted((self.package_path).rglob("*.pyi")):
+            _pyproject["tool"]["poetry"]["packages"] += [{"include": p.relative_to(self.package_path).as_posix()}]
 
         # write out the pyproject.toml file
         self.pyproject = _pyproject
