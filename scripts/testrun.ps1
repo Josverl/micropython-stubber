@@ -16,6 +16,7 @@ black .\repos\micropython-stubs\stubs\micropython-v1_19_1-frozen\
 stubber merge --version $version
 
 stubber publish --test-pypi --version $version --port auto --dry-run 
+stubber publish --test-pypi --version $version --port esp32 --board um_tinypico --dry-run
 # stubber publish --test-pypi --version $version --dry-run 
 
 
