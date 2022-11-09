@@ -1,5 +1,6 @@
 # include the list exported exported from poetry
 # poetry export -o .\docs\requirements-export.txt --without-hashes 
+# replace == by >= in the requirements-export.txt file
 
 --requirement requirements-export.txt
 
