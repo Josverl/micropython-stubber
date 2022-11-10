@@ -264,6 +264,8 @@ PARAM_FIXES = [
     #     # def write_pulses(self, duration, data=True) -> Any:
     #     def write_pulses(self, duration, data:Union[bool,int]=True) -> Any:
     ("duration, data=True", "duration, data:Union[bool,int]=True"),
+    # --------------------------------------------------------------------
+    # machine 
     # machine.PWM
     #     # def __init__(self, dest, *, freq, duty_u16, duty_ns) -> None: ...
     #     def __init__(self, dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0) -> None: ...
@@ -292,6 +294,32 @@ PARAM_FIXES = [
     # def __init__(self, pin_obj, invert=False) -> None: ...
     # def __init__(self, pin_obj, *args, invert=False) -> None: ...
     ("pin_obj, invert", "pin_obj, *args, invert", "Signal.__init__"),
+    # machine.Timer
+     # def __init__(self, id, /, *args) -> None: ...
+    # def init(self,id, *, mode=PERIODIC, period=-1, callback=None) -> None: ...
+    ("id, /, ...", "id, *args, **kwargs", "Timer.__init__"),   
+
+    # --------------------------------------------------------------------
+    # pyb
+    # def freq(sysclk, hclk, pclk1, pclk2) -> Tuple:
+    # def freq(sysclk=0, hclk=0, pclk1=0, pclk2=0) -> Tuple:
+    ("sysclk, hclk, pclk1, pclk2", "sysclk=0, hclk=0, pclk1=0, pclk2=0"),
+    # Timer.__init__
+    # def __init__(self, id, *args) -> None: ...
+    # def __init__(self, id, *, freq=..., prescaler=..., period=..., mode=UP, div=1, callback=None, deadtime=0) -> None: 
+    ("id, *args", "id, *, freq=-1, prescaler=-1, period=-1, mode=UP, div=1, callback=None, deadtime=0", "Timer.__init__"),
+    # Timer.channel
+    # def channel(self, channel, mode, *args) -> Any:
+    # def channel(self, channel, mode, pin=None, *args) -> Any:
+    ("channel, mode, ...", "channel, mode, pin=None, *args"),
+    # pyb SPI 
+    # def __init__(self, bus, *args) -> None: ...
+    # def __init__(self,bus,  mode, baudrate=328125, *, prescaler=-1, polarity=1, phase=0, bits=8, firstbit=MSB, ti=False, crc=None) -> None:
+    ("bus, ...", "bus,  mode, baudrate=328125, *, prescaler=-1, polarity=1, phase=0, bits=8, firstbit=MSB, ti=False, crc=None"),
+    # PYB CAN.setfiler
+    # def setfilter(self, bank, mode, fifo, params, *, rtr, extframe=False) -> None:
+    # def setfilter(self, bank, mode, fifo, params, *, rtr=..., extframe=False) -> None:
+    ("bank, mode, fifo, params, *, rtr, extframe=False","bank, mode, fifo, params, *, rtr=None, extframe=False")
 ]
 
 # List of classes and their parent classes that should be added to the class definition
