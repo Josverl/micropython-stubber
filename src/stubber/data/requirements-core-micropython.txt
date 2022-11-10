@@ -11,7 +11,7 @@ micropython-cpython-uerrno
 micropython-cpython-uhashlib
 # micropython-cpython-uio # does not have the IOBase abstract class 
 micropython-cpython-ujson
-micropython-cpython-ulogging
+# micropython-cpython-ulogging
 micropython-cpython-uos
 # micropython-cpython-upip  # not really part of the core 
 micropython-cpython-ure
