@@ -40,6 +40,12 @@
     // section
     "executionEnvironments": [
         {
+            "root": "snippets/core",
+            "extraPaths": [
+                "snippets/core/typings"
+            ],
+        },
+        {
             "root": "snippets/stm32",
             "extraPaths": [
                 "snippets/stm32/typings"
