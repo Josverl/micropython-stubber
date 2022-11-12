@@ -8,39 +8,6 @@ machine.freq()  # get the current frequency of the CPU
 machine.freq(240000000)  # set the CPU frequency to 240 MHz
 
 
-# The network module:
-
-import network
-
-wlan = network.WLAN(network.STA_IF)  # create station interface
-wlan.active(True)  # activate the interface
-wlan.scan()  # scan for access points
-wlan.isconnected()  # check if the station is connected to an AP
-wlan.connect("essid", "password")  # connect to an AP
-wlan.config("mac")  # get the interface's MAC address
-wlan.ifconfig()  # get the interface's IP/netmask/gw/DNS addresses
-
-ap = network.WLAN(network.AP_IF)  # create access-point interface
-ap.config(essid="ESP-AP")  # set the ESSID of the access point
-ap.config(max_clients=10)  # set how many clients can connect to the network
-ap.active(True)  # activate the interface
-
-
-# A useful function for connecting to your local WiFi network is:
-
-
-def do_connect():
-    import network
-
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        print("connecting to network...")
-        wlan.connect("essid", "password")
-        while not wlan.isconnected():
-            pass
-    print("network config:", wlan.ifconfig())
-
 
 # Pins and GPIO
 # Use the machine.Pin class:
@@ -63,7 +30,7 @@ p5 = Pin(5, Pin.OUT, value=1)  # set pin high on creation
 
 from machine import UART
 
-uart1 = UART(1, baudrate=9600, tx=33, rx=32)
+uart1 = UART(3, baudrate=9600, tx=33, rx=32)
 uart1.write("hello")  # write 5 bytes
 uart1.read(5)  # read up to 5 bytes
 
@@ -146,7 +113,6 @@ i2c.scan()  # scan for devices
 i2c.readfrom(0x3A, 4)  # read 4 bytes from device with address 0x3a
 i2c.writeto(0x3A, "12")  # write '12' to device with address 0x3a
 
-buf = bytearray(10)  # create a buffer with 10 bytes
 
 
 # Hardware I2C bus
@@ -155,6 +121,9 @@ from machine import Pin, I2C
 
 i2c = I2C(0)
 i2c = I2C(1, scl=Pin(5), sda=Pin(4), freq=400000)
+
+# construct an I2C bus
+i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
 
 
 # I2S bus
@@ -170,7 +139,6 @@ i2s.readinto(buf)  # fill buffer with audio samples from I2S device
 # Real time clock (RTC)
 
 from machine import RTC
-
 rtc = RTC()
 rtc.datetime((2017, 8, 23, 1, 12, 48, 0, 0))  # set a specific date and time
 rtc.datetime()  # get date and time
@@ -200,7 +168,7 @@ machine.deepsleep(10000)
 import machine, os
 
 # Slot 2 uses pins sck=18, cs=5, miso=19, mosi=23
-sd = machine.SDCard(slot=2)
+sd = machine.SDCard(slot=1)
 
 os.mount(sd, "/sd")  # mount
 os.listdir('/sd')    # list directory contents
@@ -216,7 +184,7 @@ ow.scan()  # return a list of devices on the bus
 ow.reset()  # reset the bus
 ow.readbyte()  # read a byte
 ow.writebyte(0x12)  # write a byte on the bus
-ow.write("123")  # write bytes on the bus
+ow.write(b"123")  # write bytes on the bus
 ow.select_rom(b"12345678")  # select a specific device by its ROM code
 
 # DS18S20 and DS18B20 devices:

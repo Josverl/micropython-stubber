@@ -1,10 +1,12 @@
-buf = bytes()
+buf = b"00000000"
 
 # I2C bus
 
 from machine import I2C
 
 i2c = I2C("X", freq=400000)  # create hardware I2c object
+
+
 i2c = I2C(scl="X1", sda="X2", freq=100000)  # create software I2C object
 
 i2c.scan()  # returns list of peripheral addresses

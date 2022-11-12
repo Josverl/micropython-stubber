@@ -17,15 +17,17 @@ from pyb import CAN
 from pyb import Accel
 
 # samples need a buffer to store the data
-buf = bytes()
+buf = b"00000000"
 
 
 
-pyb.repl_uart(pyb.UART(1, 9600))  # duplicate REPL on UART(1)
+pyb.repl_uart(pyb.UART(3, 9600))  # duplicate REPL on UART(1)
 pyb.wfi()  # pause CPU, waiting for interrupt
 pyb.freq()  # get CPU and bus frequencies
 pyb.freq(60000000)  # set CPU freq to 60MHz
-pyb.stop()  # stop CPU, waiting for external interrupt
+
+if False:
+    pyb.stop()  # stop CPU, waiting for external interrupt
 
 
 # Internal LEDs
@@ -94,7 +96,7 @@ rtc.datetime()  # get date and time
 
 
 p = Pin("X1")  # X1 has TIM2, CH1
-tim = Timer(2, freq=1000)
+tim = Timer(2, 1000)
 ch = tim.channel(1, Timer.PWM, pin=p)
 ch.pulse_width_percent(50)
 
@@ -116,7 +118,7 @@ dac.write(120)  # output between 0 and 255
 # See pyb.UART.
 
 
-uart = UART(1, 9600)
+uart = UART(3, 9600)
 uart.write("hello")
 uart.read(5)  # read up to 5 bytes
 
