@@ -4,16 +4,15 @@
 
 # ref: https://docs.micropython.org/en/latest/rp2/quickref.html
 
-from typing import Any, Optional
 import utime as time
 from machine import Pin
 
 
 # Blink
 
-led = Pin(6, Pin.OUT)
 # led = Pin()
 led = Pin(1, value=2)
+led = Pin(13, Pin.OUT)
 
 
 for i in range(2):  # no infinite loop
@@ -30,17 +29,10 @@ tim = Timer(period=5000, mode=Timer.ONE_SHOT, callback=lambda t: print(1))
 tim.init(period=2000, mode=Timer.PERIODIC, callback=lambda t: print(2))
 
 
-# Pins and GPIO
-p0 = Pin(0, Pin.OUT)  # create output pin on GPIO0
-p0.on()  # set pin to "on" (high) level
-p0.off()  # set pin to "off" (low) level
-p0.value(1)  # set pin to on/high
+from machine import Timer
 
-p2 = Pin(2, Pin.IN)  # create input pin on GPIO2
-print(p2.value())  # get value, 0 or 1
-
-p4 = Pin(4, Pin.IN, Pin.PULL_UP)  # enable internal pull-up resistor
-p5 = Pin(5, Pin.OUT, value=1)  # set pin high on creation
+tim = Timer(period=5000, mode=Timer.ONE_SHOT, callback=lambda t: print(1))
+tim.init(period=2000, mode=Timer.PERIODIC, callback=lambda t: print(2))
 
 # UART
 from machine import UART, Pin
@@ -124,7 +116,7 @@ ow.scan()  # return a list of devices on the bus
 ow.reset()  # reset the bus
 ow.readbyte()  # read a byte
 ow.writebyte(0x12)  # write a byte on the bus
-ow.write("123")  # write bytes on the bus
+ow.write(b"123")  # write bytes on the bus
 ow.select_rom(b"12345678")  # select a specific device by its ROM code
 
 # DS18S20 and DS18B20 devices:
@@ -146,4 +138,3 @@ np = NeoPixel(pin, 8)  # create NeoPixel driver on GPIO0 for 8 pixels
 np[0] = (255, 255, 255)  # set the first pixel to white
 np.write()  # write data to all pixels
 r, g, b = np[0]  # get first pixel colour
-

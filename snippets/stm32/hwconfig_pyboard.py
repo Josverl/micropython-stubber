@@ -11,3 +11,13 @@ LED3 = Signal("LED_YELLOW", Pin.OUT)
 
 # Blue LED on pin LED_BLUE also known as B4
 LED4 = Signal("LED_BLUE", Pin.OUT)
+
+LED.on()
+LED2.on()
+LED3.on()
+LED4.on()
+
+LED2.off()
+LED3.value()
+LED3.value(1)
+
