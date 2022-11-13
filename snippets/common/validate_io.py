@@ -1,4 +1,4 @@
-import io
+import uio as io
 # from typing import Any, IO, Optional
 
 alloc_size = 512

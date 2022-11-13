@@ -1,3 +1,5 @@
+# type: ignore
+
 # ref : https://docs.micropython.org/en/latest/rp2/quickref.html
 
 import time
