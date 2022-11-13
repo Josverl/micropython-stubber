@@ -34,21 +34,21 @@ micropython.mem_alloc()
 # below functions are not supported yet ##
 ##########################################
 
-x = micropython.opt_level()  # type: ignore # FIXME
-micropython.opt_level(x)  # type: ignore # FIXME
+x = micropython.opt_level()  
+micropython.opt_level(x)  
 
 
-micropython.alloc_emergency_exception_buf(512)  # type: ignore # FIXME
+micropython.alloc_emergency_exception_buf(512)  
 
-micropython.mem_info()  # type: ignore # FIXME
-micropython.qstr_info()  # type: ignore # FIXME
-micropython.stack_use()  # type: ignore # FIXME
-micropython.heap_lock()  # type: ignore # FIXME
-micropython.heap_unlock()  # type: ignore # FIXME
-micropython.heap_locked()  # type: ignore # FIXME
+micropython.mem_info()  
+micropython.qstr_info()  
+micropython.stack_use()  
+micropython.heap_lock()  
+micropython.heap_unlock()  
+micropython.heap_locked()  
 
 
-micropython.kbd_intr()  # type: ignore # FIXME
+micropython.kbd_intr()  
 
 
 # supply params to the function
@@ -58,4 +58,4 @@ def func(a):
 
 arg = "foo"
 
-micropython.schedule(func, arg)  # type: ignore # FIXME
+micropython.schedule(func, arg)  
