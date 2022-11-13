@@ -19,10 +19,10 @@ print( sys.version_info[0],sys.version_info[1],sys.version_info[2])
 print( sys.implementation)
 
 exc = BaseException
-sys.print_exception(exc )
+sys.print_exception(exc ) # type: ignore - BUG https://github.com/Josverl/micropython-stubber/issues/270
 
 
 def byebye():
     print("so long")
 
-sys.atexit(byebye)
+sys.atexit(byebye) # type: ignore - BUG https://github.com/Josverl/micropython-stubber/issues/270

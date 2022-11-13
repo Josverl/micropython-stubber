@@ -1,9 +1,10 @@
 
 $version = "v1.19.1"
 # stubber switch $version
-stubber -v get-docstubs
-stubber merge --version $version
-stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
+
+# stubber -v get-docstubs
+# stubber merge --version $version
+# stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 
 $ports = @("esp32", "esp8266", "stm32", "rp2")
 $results = @()
@@ -12,15 +13,26 @@ foreach ($port in $ports) {
     $snippets_dir = ".\snippets\$port"
     $typings_dir = "$snippets_dir\typings"
     
-    rd $typings_dir -r 
+    # port specifics
+    rd $typings_dir -r  -ea silentlycontinue
     pip install -U $stub_dir --target $typings_dir --no-user 
     $result = pyright $snippets_dir --outputjson | convertfrom-json 
     $results += $result
+
+    # common 
+    $snippets_dir = ".\snippets\common"
+    rd ".\snippets\common\typings" -r -ea silentlycontinue
+    copy $typings_dir ".\snippets\common\typings" -r -ea silentlycontinue
+    # $typings_dir = "$snippets_dir\typings"
+    # pip install -U $stub_dir --target $typings_dir --no-user 
+    $result = pyright $snippets_dir --outputjson | convertfrom-json 
+    $results += $result
+
     $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
 }
 
-$results | select -expand generalDiagnostics | ?{$_.severity -eq "error"}|out-host
-$results | select summary | ft -auto
+$results | select -expand generalDiagnostics | ? { $_.severity -eq "error" } | out-host
+$results | select -expand summary
 
 # foreach ($port in @("esp32", "esp8266", "stm32", "rp2")) {
 #     $stub_dir = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
@@ -66,7 +78,17 @@ $results | select summary | ft -auto
 # @{filesAnalyzed=93; errorCount=6; warningCount=5; informationCount=0; timeInSec=1,667}
 # @{filesAnalyzed=112; errorCount=1; warningCount=3; informationCount=0; timeInSec=1,997}
 
-@{filesAnalyzed=117; errorCount=0; warningCount=0; informationCount=0; timeInSec=1,811}
-@{filesAnalyzed=113; errorCount=0; warningCount=5; informationCount=0; timeInSec=1,496}
-@{filesAnalyzed=93; errorCount=2; warningCount=8; informationCount=0; timeInSec=1,879}
-@{filesAnalyzed=112; errorCount=1; warningCount=3; informationCount=0; timeInSec=1,923}
+# @{filesAnalyzed=117; errorCount=0; warningCount=0; informationCount=0; timeInSec=1,811}
+# @{filesAnalyzed=113; errorCount=0; warningCount=5; informationCount=0; timeInSec=1,496}
+# @{filesAnalyzed=93; errorCount=2; warningCount=8; informationCount=0; timeInSec=1,879}
+# @{filesAnalyzed=112; errorCount=1; warningCount=3; informationCount=0; timeInSec=1,923}
+
+# @{filesAnalyzed=118; errorCount=0; warningCount=2; informationCount=0; timeInSec=2,774}
+# @{filesAnalyzed=114; errorCount=0; warningCount=7; informationCount=0; timeInSec=4,52}
+# @{filesAnalyzed=93; errorCount=4; warningCount=10; informationCount=0; timeInSec=1,876}
+# @{filesAnalyzed=112; errorCount=2; warningCount=5; informationCount=0; timeInSec=1,609}
+
+@{filesAnalyzed = 118; errorCount = 0; warningCount = 0; informationCount = 0; timeInSec = 2, 182 }
+@{filesAnalyzed = 114; errorCount = 0; warningCount = 5; informationCount = 0; timeInSec = 1, 668 }
+@{filesAnalyzed = 93; errorCount = 0; warningCount = 8; informationCount = 0; timeInSec = 2, 459 }
+@{filesAnalyzed = 112; errorCount = 0; warningCount = 3; informationCount = 0; timeInSec = 1, 833 }
