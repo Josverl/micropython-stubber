@@ -377,8 +377,8 @@ class RSTReader:
         # formatting
         # fixme: ... not allowed in .py
         if self.target == ".py":
-            params = params.replace("*, ...", "*args")
-            params = params.replace("...", "*args")
+            params = params.replace("*, ...", "*args, **kwargs")
+            params = params.replace("...", "*args, **kwargs")
 
         return params
 
