@@ -119,7 +119,7 @@ autodoc_mock_imports = ["micropython", "uos", "uio", "utime", "ujson"]
 # a list of builtin themes.
 #
 try:
-    import sphinx_rtd_theme
+    import sphinx_rtd_theme # type: ignore
 
     html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path(), "."]

@@ -5,7 +5,11 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import tomli
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib
+
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
@@ -125,7 +129,7 @@ class StubPackage:
         if not _toml.exists():
             return self.mpy_version
         with open(_toml, "rb") as f:
-            pyproject = tomli.load(f)
+            pyproject = tomllib.load(f)
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
     @pkg_version.setter
@@ -136,7 +140,7 @@ class StubPackage:
         # read the current file
         _toml = self.toml_path
         with open(_toml, "rb") as f:
-            pyproject = tomli.load(f)
+            pyproject = tomllib.load(f)
         pyproject["tool"]["poetry"]["version"] = version
 
         # update the version in the toml file
@@ -151,7 +155,7 @@ class StubPackage:
         _toml = self.toml_path
         if (_toml).exists():
             with open(_toml, "rb") as f:
-                pyproject = tomli.load(f)
+                pyproject = tomllib.load(f)
         return pyproject
 
     @pyproject.setter
@@ -159,8 +163,8 @@ class StubPackage:
         # check if the result is a valid toml file
 
         try:
-            tomli.loads(tomli_w.dumps(pyproject))
-        except tomli.TOMLDecodeError as e:
+            tomllib.loads(tomli_w.dumps(pyproject))
+        except tomllib.TOMLDecodeError as e:
             print("Could not create a valid TOML file")
             raise (e)
         # make sure parent folder exists
@@ -362,7 +366,7 @@ class StubPackage:
             # read the template pyproject.toml file from the template folder
             try:
                 with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
-                    _pyproject = tomli.load(f)
+                    _pyproject = tomllib.load(f)
                 _pyproject["tool"]["poetry"]["version"] = self.mpy_version
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
