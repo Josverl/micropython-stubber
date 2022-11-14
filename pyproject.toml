@@ -18,19 +18,19 @@ documentation = "https://micropython-stubber.readthedocs.io/"
 homepage = "https://github.com/Josverl/micropython-stubber#readme"
 repository = "https://github.com/Josverl/micropython-stubber"
 classifiers = [
-  "Programming Language :: Python :: Implementation :: MicroPython",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Topic :: Text Editors :: Integrated Development Environments (IDE)",
-  "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: Implementation :: MicroPython",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Text Editors :: Integrated Development Environments (IDE)",
+    "Topic :: Software Development :: Build Tools",
 ]
 packages = [{ include = "**/*.*", from = "src" }]
 include = []
 exclude = [
-  "**/tests/**",
-  "**/*-test",
-  "**/samples.py",
-  "**/OneOff",
-  "**/.vscode",
+    "**/tests/**",
+    "**/*-test",
+    "**/samples.py",
+    "**/OneOff",
+    "**/.vscode",
 
 ]
 
@@ -39,8 +39,8 @@ stubber = "stubber.stubber:stubber_cli"
 pyboard = "stubber.tools.pyboard:main"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-python-minifier = "2.6.0"
+python = ">=3.8,<3.12"
+python-minifier = "2.7.0"
 requests = "2.27.0"
 mypy = "0.971"
 mpy-cross = "1.19.1"
@@ -52,8 +52,6 @@ importlib-metadata = { version = "1.0", python = "<3.8" }
 tomli = { version = "2.0.1", python = "<3.11" }
 typed-config = "1.1.0"
 packaging = "21.3"
-esptool = { version = "3.3.1", optional = true }
-rshell = { version = "0.0.31", optional = true }
 pyserial = { version = "3.5", optional = true }
 pysondb-v2 = "2.1.0"
 tomli-w = "1.0.0"
@@ -111,20 +109,20 @@ junit_family = "xunit1"
 addopts = "-v -sv  -m 'not basicgit'"
 
 markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-  "basicgit: marks tests in the basicgit module that manipulate the checkout",
-  "mocked: to replace/compensate for most of the slow and git tests",
-  #
-  "minified: marks test of the minified version of createstubs",
-  "docfix: upstream documentation fix needed",
-  "micropython: tests of MicroPython code on Cpython with mocks",
-  "doc_stubs: tests to generate stubs from the rst documentation",
-  "codemod: test libcst code modification",
-  "cli: test command line interface",
-  # os versions
-  "win32: run test only on Windows",
-  "linux: run test only on linux",
-  "darwin: run test only on Mac",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "basicgit: marks tests in the basicgit module that manipulate the checkout",
+    "mocked: to replace/compensate for most of the slow and git tests",
+    #
+    "minified: marks test of the minified version of createstubs",
+    "docfix: upstream documentation fix needed",
+    "micropython: tests of MicroPython code on Cpython with mocks",
+    "doc_stubs: tests to generate stubs from the rst documentation",
+    "codemod: test libcst code modification",
+    "cli: test command line interface",
+    # os versions
+    "win32: run test only on Windows",
+    "linux: run test only on linux",
+    "darwin: run test only on Mac",
 ]
 
 # coverage reports
@@ -133,25 +131,25 @@ parallel = false
 branch = true
 source = ["board", "src"]
 omit = [
-  # helper files in board
-  "*/boot.py",
-  "*/main.py",
-  "*/stub_lvgl.py",
+    # helper files in board
+    "*/boot.py",
+    "*/main.py",
+    "*/stub_lvgl.py",
 
-  "*/__init__.py",
+    "*/__init__.py",
 
-  # minfied files should be excluded 
-  # duplicate file names in different folders break the coverage reports
-  "*/minified/*.py",
+    # minfied files should be excluded 
+    # duplicate file names in different folders break the coverage reports
+    "*/minified/*.py",
 
-  # dev helper script in src
-  "*/src/stubber/rst/report_return.py",
-  "*/src/stubber/update_module_list.py",
+    # dev helper script in src
+    "*/src/stubber/rst/report_return.py",
+    "*/src/stubber/update_module_list.py",
 
-  # not my code 
-  "*/logging.py",
-  "*/make_stub_files.py",
-  "*/stubber/tools/*.py",
+    # not my code 
+    "*/logging.py",
+    "*/make_stub_files.py",
+    "*/stubber/tools/*.py",
 
 
 ]
@@ -173,52 +171,52 @@ output = "results/coverage.lcov"
 show_missing = true
 # Regexes for lines to exclude from consideration
 exclude_lines = [
-  # Have to re-enable the standard pragma
-  "pragma: no cover",
-  "pragma: nocover",
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+    "pragma: nocover",
 
-  # Don't complain about missing debug-only code:
-  "def __repr__",
-  "self._log.debug",
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "self._log.debug",
 
-  # Don't complain if tests don't hit defensive assertion code:
-  "raise AssertionError",
-  "raise NotImplementedError",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
 
-  "except subprocess.CalledProcessError as e:",
-  "except OSError:",
-  "except OSError as e:",
-  "except OSError as e2:",
-  "except (OSError, KeyError):",
-  "except (OSError, AttributeError):",
-  "except (OSError, KeyError, NameError):",
-  "except KeyError:",
-  "except AttributeError as e:",
+    "except subprocess.CalledProcessError as e:",
+    "except OSError:",
+    "except OSError as e:",
+    "except OSError as e2:",
+    "except (OSError, KeyError):",
+    "except (OSError, AttributeError):",
+    "except (OSError, KeyError, NameError):",
+    "except KeyError:",
+    "except AttributeError as e:",
 
-  # Don't complain if non-runnable code isn't run:
-  "if __name__ == .__main__.:",
+    # Don't complain if non-runnable code isn't run:
+    "if __name__ == .__main__.:",
 
-  # mind the quotes 
-  'if __name__ == "__main__" or isMicroPython():',
-  "main()",
+    # mind the quotes 
+    'if __name__ == "__main__" or isMicroPython():',
+    "main()",
 
-  # utility functions
-  "show_help()",
-  "isMicroPython()",
-  "read_path()",
+    # utility functions
+    "show_help()",
+    "isMicroPython()",
+    "read_path()",
 
-  #unreachable
-  # mind the quotes 
-  'info["release"] = "2.0.0" ',
-  "if arch",
+    #unreachable
+    # mind the quotes 
+    'info["release"] = "2.0.0" ',
+    "if arch",
 
-  # Micropython detection
-  "except (NotImplementedError, SyntaxError):",
-  # catch error
-  "except (OSError, KeyError):",
-  "except (OSError, AttributeError):",
+    # Micropython detection
+    "except (NotImplementedError, SyntaxError):",
+    # catch error
+    "except (OSError, KeyError):",
+    "except (OSError, AttributeError):",
 
-  # Backward compat <= 3.7 
-  "if sys.version_info.major == 3 and sys.version_info.minor <= 7:",
+    # Backward compat <= 3.7 
+    "if sys.version_info.major == 3 and sys.version_info.minor <= 7:",
 
 ]
