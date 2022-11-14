@@ -126,7 +126,7 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
     PROBLEMATIC = 1  # number of files with issues
 
     result = utils.generate_pyi_files(dest)
-    assert result == True
+    assert result == False
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
 
