@@ -2,8 +2,8 @@
 $version = "v1.19.1"
 # stubber switch $version
 
-stubber get-docstubs
-stubber merge --version $version
+# stubber get-docstubs
+# stubber merge --version $version
 stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 
 $ports = @("esp32", "esp8266", "stm32", "rp2")
@@ -22,9 +22,8 @@ foreach ($port in $ports) {
     # common 
     $snippets_dir = ".\snippets\common"
     rd ".\snippets\common\typings" -r -ea silentlycontinue
-    copy $typings_dir ".\snippets\common\typings" -r -ea silentlycontinue
-    # $typings_dir = "$snippets_dir\typings"
-    # pip install -U $stub_dir --target $typings_dir --no-user 
+    $typings_dir = "$snippets_dir\typings"
+    pip install -U $stub_dir --target $typings_dir --no-user 
     $result = pyright $snippets_dir --outputjson | convertfrom-json 
     $results += $result
 

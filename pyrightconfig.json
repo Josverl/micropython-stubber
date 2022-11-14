@@ -14,7 +14,9 @@
         "tests/data",
         "tests/codemods",
         "**/cst-test",
+        "snippets/**/typings",
     ],
+    "typeshedPath": "typings",
     // section 1
     "pythonVersion": "3.8",
     "pythonPlatform": "All",
@@ -40,9 +42,9 @@
     // section
     "executionEnvironments": [
         {
-            "root": "snippets/core",
+            "root": "snippets/common",
             "extraPaths": [
-                "snippets/core/typings"
+                "snippets/common/typings"
             ],
         },
         {
@@ -84,11 +86,5 @@
                 "src",
             ]
         },
-        {
-            "root": ".",
-            "extraPaths": [
-                "typings"
-            ],
-        }
     ]
 }
