@@ -134,4 +134,7 @@
     "files.watcherExclude": {
         "**/repos/**": true
     },
+    "python.formatting.blackArgs": [
+        "-l 99"
+    ],
 }

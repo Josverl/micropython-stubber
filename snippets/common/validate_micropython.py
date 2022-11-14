@@ -1,9 +1,7 @@
 """
 Code snippet used to validate the micropython stubs
-
-module: Micropython 
-
-Validation based on the pycopy stubs, which are incomplete.
+modules: 
+    Micropython 
 """
 
 # const
@@ -26,29 +24,19 @@ def bar(arg: int) -> int:
     return arg << 2
 
 
-micropython.mem_free()
-micropython.mem_alloc()
+x = micropython.opt_level()
+micropython.opt_level(x)
 
 
-##########################################
-# below functions are not supported yet ##
-##########################################
+micropython.alloc_emergency_exception_buf(512)
 
-x = micropython.opt_level()  
-micropython.opt_level(x)  
+micropython.mem_info()
+micropython.qstr_info()
+micropython.stack_use()
+micropython.heap_lock()
+micropython.heap_unlock()
 
-
-micropython.alloc_emergency_exception_buf(512)  
-
-micropython.mem_info()  
-micropython.qstr_info()  
-micropython.stack_use()  
-micropython.heap_lock()  
-micropython.heap_unlock()  
-micropython.heap_locked()  
-
-
-micropython.kbd_intr()  
+micropython.kbd_intr("0x03")
 
 
 # supply params to the function
@@ -58,4 +46,4 @@ def func(a):
 
 arg = "foo"
 
-micropython.schedule(func, arg)  
+micropython.schedule(func, arg)
