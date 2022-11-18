@@ -88,11 +88,15 @@ jobs:
         run: |
           poetry run coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
-      - name: Coverage
+      - name: Coverage lcov
         if: always()
         run: |
           poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
-          poetry run coverage xml -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+
+      - name: Coverage xml
+        if: always()
+        run: |
+          poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
 
       #----------------------------------------------
       # upload coverage stats
@@ -100,6 +104,7 @@ jobs:
       # .XML  to Codecov
       #----------------------------------------------
       - uses: actions/upload-artifact@v3
+        if: always() # ignore coverage error
         with:
           path: results/
           name: results-${{ matrix.python-version }}-${{ matrix.os }}
