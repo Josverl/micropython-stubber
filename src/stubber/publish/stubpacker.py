@@ -260,14 +260,24 @@ class StubPackage:
                     self.stub_sources[n] = (stub_type, source)
                 try:
                     log.trace(f"Copying {stub_type} from {source}")
-                    shutil.copytree(CONFIG.stub_path / source, self.package_path, symlinks=True, dirs_exist_ok=True)
+                    shutil.copytree(
+                        CONFIG.stub_path / source,
+                        self.package_path,
+                        symlinks=True,
+                        dirs_exist_ok=True,
+                    )
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / source}, {e}")
                     raise (e)
             else:
                 try:
                     log.trace(f"Copying {stub_type} from {fw_path}")
-                    shutil.copytree(CONFIG.stub_path / fw_path, self.package_path, symlinks=True, dirs_exist_ok=True)
+                    shutil.copytree(
+                        CONFIG.stub_path / fw_path,
+                        self.package_path,
+                        symlinks=True,
+                        dirs_exist_ok=True,
+                    )
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
                     raise (e)
@@ -360,6 +370,11 @@ class StubPackage:
             assert _pyproject is not None
             # clear out the packages section
             _pyproject["tool"]["poetry"]["packages"] = []
+            # update the dependencies section by readin that from the template file
+            with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
+                tpl = tomllib.load(f)
+
+            _pyproject["tool"]["poetry"]["dependencies"] = tpl["tool"]["poetry"]["dependencies"]
 
         else:
             # read the template pyproject.toml file from the template folder
@@ -385,7 +400,9 @@ class StubPackage:
 
         # Only include .pyi files
         for p in sorted((self.package_path).rglob("*.pyi")):
-            _pyproject["tool"]["poetry"]["packages"] += [{"include": p.relative_to(self.package_path).as_posix()}]
+            _pyproject["tool"]["poetry"]["packages"] += [
+                {"include": p.relative_to(self.package_path).as_posix()}
+            ]
 
         # write out the pyproject.toml file
         self.pyproject = _pyproject
@@ -420,7 +437,9 @@ class StubPackage:
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
         hash = hashlib.sha1()
-        files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
+        files = list((self.package_path).rglob("**/*.py")) + list(
+            (self.package_path).rglob("**/*.pyi")
+        )
         if include_md:
             files += (
                 [self.package_path / "LICENSE.md"]
