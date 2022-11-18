@@ -4,31 +4,37 @@ $version = "v1.19.1"
 
 # stubber get-docstubs
 # stubber merge --version $version
-stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
+# stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 
 $ports = @("esp32", "esp8266", "stm32", "rp2")
+$ports = @("esp32")
 $results = @()
 foreach ($port in $ports) {
-    $stub_dir = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
-    $snippets_dir = ".\snippets\$port"
-    $typings_dir = "$snippets_dir\typings"
+    $stub_source = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
+
     
     # port specifics
-    rd $typings_dir -r  -ea silentlycontinue
-    pip install -U $stub_dir --target $typings_dir --no-user 
-    $result = pyright $snippets_dir --outputjson | convertfrom-json 
-    $results += $result
-
-    # common 
-    $snippets_dir = ".\snippets\common"
-    rd ".\snippets\common\typings" -r -ea silentlycontinue
+    $snippets_dir = ".\snippets\$port"
     $typings_dir = "$snippets_dir\typings"
-    pip install -U $stub_dir --target $typings_dir --no-user 
-    $result = pyright $snippets_dir --outputjson | convertfrom-json 
+    rd $typings_dir -r  -ea silentlycontinue
+    pip install -U $stub_source --target $typings_dir --no-user 
+    $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
     $results += $result
+    $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
 
+    $snippets_dir = ".\snippets\common"
+    $typings_dir = "$snippets_dir\typings"
+    rd $typings_dir -r 
+    pip install -U $stub_source --target $typings_dir --no-user 
+    $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
+    $results += $result
     $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
 }
+
+
+
+
+
 
 $results | select -expand generalDiagnostics | ? { $_.severity -eq "error" } | out-host
 $results | select summary | ft -auto
