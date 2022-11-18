@@ -135,6 +135,6 @@
         "**/repos/**": true
     },
     "python.formatting.blackArgs": [
-        "-l 99"
+        "--line-length 99"
     ],
 }
