@@ -89,12 +89,12 @@ jobs:
           poetry run coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Coverage lcov
-        if: always()
+        if: always() # ignore previous error
         run: |
           poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
 
       - name: Coverage xml
-        if: always()
+        if: always() # ignore previous error
         run: |
           poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
 
@@ -104,18 +104,19 @@ jobs:
       # .XML  to Codecov
       #----------------------------------------------
       - uses: actions/upload-artifact@v3
-        if: always() # ignore coverage error
+        if: always() # ignore previous error
         with:
           path: results/
           name: results-${{ matrix.python-version }}-${{ matrix.os }}
 
       - name: Upload coverage
+        if: always() # ignore previous error
         uses: codecov/codecov-action@v3
         with:
           file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           fail_ci_if_error: false
 
       - name: Push result to Testspace server
-        if: always()
+        if: always() # ignore previous error
         run: |
           testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml --link codecov
