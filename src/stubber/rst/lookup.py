@@ -20,7 +20,19 @@ __all__ = [
 
 
 # modules documented with base name only
-U_MODULES = ["os", "time", "array", "binascii", "io", "json", "select", "socket", "ssl", "struct", "zlib"]
+U_MODULES = [
+    "os",
+    "time",
+    "array",
+    "binascii",
+    "io",
+    "json",
+    "select",
+    "socket",
+    "ssl",
+    "struct",
+    "zlib",
+]
 
 
 # Some classes are documented as functions
@@ -78,6 +90,7 @@ LOOKUP_LIST = {
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Any]", 0.95),
+    "os.uname": ("uname_result", 0.95),
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "usys.exit": ("NoReturn", 0.95),  # never returns
     "utime.sleep_ms": (
@@ -148,6 +161,7 @@ MODULE_GLUE = {
     "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
     "collections": ["from queue import Queue"],  # dequeu is a subclass
+    "os": ["from stdlib.os import uname_result"],  # uname returns uname_result
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
 }
 
@@ -265,7 +279,7 @@ PARAM_FIXES = [
     #     def write_pulses(self, duration, data:Union[bool,int]=True) -> Any:
     ("duration, data=True", "duration, data:Union[bool,int]=True"),
     # --------------------------------------------------------------------
-    # machine 
+    # machine
     # machine.PWM
     #     # def __init__(self, dest, *, freq, duty_u16, duty_ns) -> None: ...
     #     def __init__(self, dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0) -> None: ...
@@ -277,7 +291,10 @@ PARAM_FIXES = [
     # machine.I2C
     #     # def __init__(self, id, *, scl, sda, freq=400000) -> None: ...
     #     def __init__(self, id=-1, *, scl:Optional[Pin]=None, sda:Optional[Pin]=None, freq=400000) -> None: ...
-    ("id, *, scl, sda, freq=400000", "id:Union[int,str]=-1, *, scl:Optional[Union[Pin,str]]=None, sda:Optional[Union[Pin,str]]=None, freq=400_000"),
+    (
+        "id, *, scl, sda, freq=400000",
+        "id:Union[int,str]=-1, *, scl:Optional[Union[Pin,str]]=None, sda:Optional[Union[Pin,str]]=None, freq=400_000",
+    ),
     # network.WLAN
     # def config(self, param) -> Any:
     # def config(self, *args, **kwargs) -> Any:
@@ -295,10 +312,9 @@ PARAM_FIXES = [
     # def __init__(self, pin_obj, *args, invert=False) -> None: ...
     ("pin_obj, invert", "pin_obj, *args, invert", "Signal.__init__"),
     # machine.Timer
-     # def __init__(self, id, /, *args) -> None: ...
+    # def __init__(self, id, /, *args) -> None: ...
     # def init(self,id, *, mode=PERIODIC, period=-1, callback=None) -> None: ...
-    ("id, /, ...", "id=-1, *args, **kwargs", "Timer.__init__"),   
-
+    ("id, /, ...", "id=-1, *args, **kwargs", "Timer.__init__"),
     # --------------------------------------------------------------------
     # pyb
     # def freq(sysclk, hclk, pclk1, pclk2) -> Tuple:
@@ -306,20 +322,30 @@ PARAM_FIXES = [
     ("sysclk, hclk, pclk1, pclk2", "sysclk=0, hclk=0, pclk1=0, pclk2=0"),
     # Timer.__init__
     # def __init__(self, id, *args) -> None: ...
-    # def __init__(self, id, *, freq=..., prescaler=..., period=..., mode=UP, div=1, callback=None, deadtime=0) -> None: 
-    ("id, *args", "id, *, freq=-1, prescaler=-1, period=-1, mode=UP, div=1, callback=None, deadtime=0", "Timer.__init__"),
+    # def __init__(self, id, *, freq=..., prescaler=..., period=..., mode=UP, div=1, callback=None, deadtime=0) -> None:
+    (
+        "id, *args",
+        "id, *, freq=-1, prescaler=-1, period=-1, mode=UP, div=1, callback=None, deadtime=0",
+        "Timer.__init__",
+    ),
     # Timer.channel
     # def channel(self, channel, mode, *args) -> Any:
     # def channel(self, channel, mode, pin=None, *args) -> Any:
     ("channel, mode, ...", "channel, mode, pin=None, *args"),
-    # pyb SPI 
+    # pyb SPI
     # def __init__(self, bus, *args) -> None: ...
     # def __init__(self,bus,  mode, baudrate=328125, *, prescaler=-1, polarity=1, phase=0, bits=8, firstbit=MSB, ti=False, crc=None) -> None:
-    ("bus, ...", "bus,  mode, baudrate=328125, *, prescaler=-1, polarity=1, phase=0, bits=8, firstbit=MSB, ti=False, crc=None"),
+    (
+        "bus, ...",
+        "bus,  mode, baudrate=328125, *, prescaler=-1, polarity=1, phase=0, bits=8, firstbit=MSB, ti=False, crc=None",
+    ),
     # PYB CAN.setfiler
     # def setfilter(self, bank, mode, fifo, params, *, rtr, extframe=False) -> None:
     # def setfilter(self, bank, mode, fifo, params, *, rtr=..., extframe=False) -> None:
-    ("bank, mode, fifo, params, *, rtr, extframe=False","bank, mode, fifo, params, *, rtr=None, extframe=False")
+    (
+        "bank, mode, fifo, params, *, rtr, extframe=False",
+        "bank, mode, fifo, params, *, rtr=None, extframe=False",
+    ),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
