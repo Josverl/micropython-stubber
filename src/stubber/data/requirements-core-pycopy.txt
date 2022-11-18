@@ -11,7 +11,7 @@ pycopy-cpython-uerrno
 pycopy-cpython-uhashlib
 # pycopy-cpython-uio # does not have the IOBase abstract class 
 pycopy-cpython-ujson
-pycopy-cpython-ulogging
+# pycopy-cpython-ulogging 
 pycopy-cpython-uos
 pycopy-cpython-ure
 pycopy-cpython-uselect

@@ -49,7 +49,11 @@ def generate_pyi_from_file(file: Path) -> bool:
 
 
 def generate_pyi_files(modules_folder: Path) -> bool:
-    """generate typeshed files for all scripts in a folder using mypy/stubgen"""
+    """
+    Generate typeshed files for all scripts in a folder using mypy/stubgen
+
+    Returns: False if one or more files had an issue generating a stub
+    """
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
     # NOTE: FIX 1 add __init__.py to umqtt
     if (modules_folder / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():

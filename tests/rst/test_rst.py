@@ -187,10 +187,9 @@ def test_rst_parse_class_10(line: str):
         ),
         ("lambda)", "lambda_fn)"),
         ("(block_device or path)", "(block_device_or_path)"),
+        # TODO - check if this is correct/needed 
         # network - AbstractNIC.connect
-        ("([service_id, key=None, *, ...])", "(service_id, key=None, *args: Optional[Any])"),
-        # ("()", "()"),
-        # ("()", "()"),
+        ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"),
         # ("()", "()"),
     ],
 )

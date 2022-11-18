@@ -1,3 +1,6 @@
+# type: ignore
+# BUG : https://github.com/Josverl/micropython-stubber/issues/270
+
 # ref: https://learn.adafruit.com/Memory-saving-tips-for-CircuitPython/ram-saving-tips
 
 import gc
@@ -23,18 +26,18 @@ gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 # https://docs.micropython.org/en/latest/reference/constrained.html#reporting
 
 # import gc
-# import micropython
-# gc.collect()
-# micropython.mem_info()
-# print('-----------------------------')
-# print('Initial free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
-# def func():
-#     a = bytearray(10000)
-# gc.collect()
-# print('Func definition: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
-# func()
-# print('Func run free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
-# gc.collect()
-# print('Garbage collect free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
-# print('-----------------------------')
-# micropython.mem_info(1)
+import micropython
+gc.collect()
+micropython.mem_info()
+print('-----------------------------')
+print('Initial free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc())) 
+def func():
+    a = bytearray(10000)
+gc.collect()
+print('Func definition: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
+func()
+print('Func run free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
+gc.collect()
+print('Garbage collect free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
+print('-----------------------------')
+micropython.mem_info(1)

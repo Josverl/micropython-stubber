@@ -5,11 +5,10 @@ Create stubs for (all) modules on a MicroPython board.
     Note: this version has undergone limited testing.
     
     1) reads the list of modules from a text file `./modulelist.txt` that should be uploaded to the device.
-    2) creates a btree database of the files that should be stubbed
-        - todo:
-        - add a main.py that starts stubbing
+    2) stored the already processed modules in a text file `./modulelist.done` 
     3) process the modules in the database:
         - stub the module
+        - update the modulelist.done file
         - reboots the device if it runs out of memory
     4) creates the modules.json
 
@@ -38,15 +37,15 @@ _MAX_CLASS_LEVEL = 2  # Max class nesting
 class Stubber:
     "Generate stubs for modules in firmware"
 
-    def __init__(self, path: str = None, firmware_id: str = None):
+    def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
 
         self._log = logging.getLogger("stubber")
-        self._report = []
+        self._report = []  # type: list[str]
         self.info = _info()
         gc.collect()
         if firmware_id:
@@ -60,7 +59,6 @@ class Stubber:
                 path = path[:-1]
         else:
             path = get_root()
-
         self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace("//", "/")
         self._log.debug(self.path)
         try:
@@ -86,7 +84,7 @@ class Stubber:
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []
 
-    def get_obj_attributes(self, item_instance: object) -> tuple:
+    def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
         # name_, repr_(value), type as text, item_instance
         _result = []
@@ -128,7 +126,7 @@ class Stubber:
             self.create_one_stub(module_name)
         self._log.info("Finally done")
 
-    def create_one_stub(self, module_name):
+    def create_one_stub(self, module_name: str):
         if module_name in self.problematic:
             self._log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
@@ -149,7 +147,7 @@ class Stubber:
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
         """Create a Stub of a single python module
 
         Args:
@@ -185,7 +183,7 @@ class Stubber:
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append({"module": module_name, "file": file_name})
+        self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
 
         if not module_name in ["os", "sys", "logging", "gc"]:
             # try to unload the module unless we use it
@@ -329,12 +327,13 @@ class Stubber:
             s = s.replace(c, "_")
         return s
 
-    def clean(self, path: str = None):
+    def clean(self, path: str = None):  # type: ignore
         "Remove all files from the stub folder"
         if path is None:
             path = self.path
         self._log.info("Clean/remove files in folder: {}".format(path))
         try:
+            os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
         except (OSError, AttributeError):  # lgtm [py/unreachable-statement]
             # os.listdir fails on unix
@@ -370,7 +369,7 @@ class Stubber:
                         start = False
                     else:
                         f.write(",\n")
-                    f.write(dumps(n))
+                    f.write(n)
                 f.write("\n]}")
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
@@ -427,20 +426,20 @@ def _info():
         info["release"] = ".".join([str(n) for n in sys.implementation.version])
         info["version"] = info["release"]
         info["name"] = sys.implementation.name
-        info["mpy"] = sys.implementation.mpy  # type: ignore
+        info["mpy"] = sys.implementation.mpy
     except AttributeError:
         pass
 
     if sys.platform not in ("unix", "win32"):
         try:
             u = os.uname()
-            info["sysname"] = u.sysname
-            info["nodename"] = u.nodename
-            info["release"] = u.release
-            info["machine"] = u.machine
+            info["sysname"] = u[0]  # u.sysname
+            info["nodename"] = u[1]  #  u.nodename
+            info["release"] = u[2]  # u.release
+            info["machine"] = u[4]  #  u.machine
             # parse micropython build info
-            if " on " in u.version:
-                s = u.version.split(" on ")[0]
+            if " on " in u[3]:  # version
+                s = u[3].split(" on ")[0]
                 if info["sysname"] == "esp8266":
                     # esp8266 has no usable info on the release
                     if "-" in s:
@@ -587,73 +586,71 @@ def isMicroPython() -> bool:
 
 
 def main_esp8266():
-    import btree
-    import machine
+    import machine  # type: ignore
 
     try:
-        f = open("modulelist" + ".db", "r+b")
+        f = open("modulelist" + ".done", "r+b")
         was_running = True
         _log.info("Opened existing db")
     except OSError:
-        f = open("modulelist" + ".db", "w+b")
+        f = open("modulelist" + ".done", "w+b")
         _log.info("created new db")
         was_running = False
 
     stubber = Stubber(path=read_path())
-    # stubber = Stubber(path="/sd")
-    # Option: Specify a firmware name & version
-    # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     if not was_running:
         # Only clean folder if this is a first run
         stubber.clean()
 
-    # Now open a database
-    db = btree.open(f)
-    # if started with no or empty database
-    if not was_running or len(list(db.keys())) == 0:
-        # load modulelist into database
-        _log.info("load modulelist into db")
-        with open("modulelist" + ".txt") as f:
-            # not optimal , but works on mpremote and eps8266
-            modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
-            for mod in modules:
-                db[mod] = b"todo"
-        db.flush()
+    # get list of modules to process
+    with open("modulelist" + ".txt") as f:
+        # not optimal , but works on mpremote and esp8266
+        modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+    gc.collect()
+    # remove the ones that are already done
+    modules_done = {}  # type: dict[str, str]
+    try:
+        with open("modulelist" + ".done") as f:
+            # not optimal , but works on mpremote and esp8266
+            for line in f.read().split("\n"):
+                line = line.strip()
+                gc.collect()
+                if len(line) > 0:
+                    key, value = line.split("=", 1)
+                    modules_done[key] = value
 
-    for key in db.keys():
-        _log.debug("{0:<32} {1}".format(key, db[key]))
-        if db[key] != b"todo":
-            continue
+    except (OSError, SyntaxError):
+        pass
+
+    gc.collect()
+    modules = [m for m in modules if m not in modules_done.keys()]
+    gc.collect()
+
+    for modulename in modules:
         # ------------------------------------
         # do epic shit
         # but sometimes things fail
         ok = False
         try:
-            ok = stubber.create_one_stub(key.decode("utf8"))
+            ok = stubber.create_one_stub(modulename)
         except MemoryError:
-            # RESET AND HOPE THAT IN THE CYCLE WE PROGRESS
-            db.close()
-            f.close()
+            # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
             machine.reset()
 
-        # save the (last) result back to the database
+        # save the (last) result back to the database/result file
         if ok:
-            result = bytes(repr(stubber._report[-1]), "utf8")
+            result = stubber._report[-1]
         else:
-            result = b"fail"
+            result = "failed"
         # -------------------------------------
-        db[key] = result
-        db.flush()
-        _log.debug(result)
+        modules_done[modulename] = str(result)
+        with open("modulelist" + ".done", "a") as f:
+            f.write("{}={}\n".format(modulename, result))
 
-    # Finished processing - load all the results from the db
-    all = [i for i in db.items() if not i[1] == b"todo" and not i[1] == b"fail"]
-    if len(all) > 0:
-        stubber._report = all
+    # Finished processing - load all the results , and remove the failed ones
+    if len(modules_done) > 0:
+        stubber._report = [v for k, v in modules_done.items() if v != "failed"]
         stubber.report()
-
-    db.close()
-    f.close()
 
 
 if __name__ == "__main__" or isMicroPython():
