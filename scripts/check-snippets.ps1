@@ -1,36 +1,44 @@
 
-
 $version = "v1.19.1"
 # stubber switch $version
-# stubber -v get-docstubs
+
+stubber get-docstubs
 stubber merge --version $version
 stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 
-$port = "esp32"
+$ports = @("esp32", "esp8266", "stm32", "rp2")
+# $ports = @("esp32")
 $results = @()
-# foreach ($port in @("esp32")) {
-foreach ($port in @("esp32", "esp8266", "stm32", "rp2")) {
-    $stub_dir = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
+foreach ($port in $ports) {
+    $stub_source = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
+
+    
+    # port specifics
     $snippets_dir = ".\snippets\$port"
     $typings_dir = "$snippets_dir\typings"
-    
-    rd $typings_dir -r 
-    pip install -U $stub_dir --target $typings_dir --no-user 
-    $result = pyright $snippets_dir --outputjson | convertfrom-json 
+    rd $typings_dir -r  -ea silentlycontinue
+    pip install -U $stub_source --target $typings_dir --no-user 
+    $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
+    $results += $result
+    $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
+
+    $snippets_dir = ".\snippets\common"
+    $typings_dir = "$snippets_dir\typings"
+    rd $typings_dir -r  -ea silentlycontinue
+    pip install -U $stub_source --target $typings_dir --no-user 
+    $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
     $results += $result
     $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
 }
 
-$results | select -expand generalDiagnostics | out-host
+
+
+
+
+
+$results | select -expand generalDiagnostics | ? { $_.severity -eq "error" } | out-host
 $results | select summary | ft -auto
 
-# foreach ($port in @("esp32", "esp8266", "stm32", "rp2")) {
-#     $stub_dir = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
-#     pip install -U $stub_dir --target typings\$port --no-user 
-#     # ignore asyncio for now
-#     del .\typings\$port\uasyncio -r
-# }
-# pyright .\typings_test\$port
 
 
 # 78 errors, 1 warning, 2 informations
@@ -43,12 +51,13 @@ $results | select summary | ft -auto
 # @{filesAnalyzed=100; errorCount=19; warningCount=5; informationCount=0; timeInSec=1,504}
 # @{filesAnalyzed=121; errorCount=32; warningCount=3; informationCount=0; timeInSec=1,458}
 
-# @{filesAnalyzed=124; errorCount=1; warningCount=1; informationCount=0; timeInSec=2,02}
-# @{filesAnalyzed=121; errorCount=2; warningCount=6; informationCount=0; timeInSec=1,648}
-# @{filesAnalyzed=100; errorCount=14; warningCount=5; informationCount=0; timeInSec=1,466}
-# @{filesAnalyzed=121; errorCount=9; warningCount=3; informationCount=0; timeInSec=1,808}
-
-@{filesAnalyzed = 124; errorCount = 1; warningCount = 0; informationCount = 0; timeInSec = 1, 943 }
-@{filesAnalyzed = 121; errorCount = 2; warningCount = 5; informationCount = 0; timeInSec = 2, 124 }
-@{filesAnalyzed = 100; errorCount = 10; warningCount = 5; informationCount = 0; timeInSec = 2, 08 }
-@{filesAnalyzed = 121; errorCount = 9; warningCount = 3; informationCount = 0; timeInSec = 2, 288 }
+# summary
+# -------
+# @{filesAnalyzed=118; errorCount=0; warningCount=0; informationCount=0; timeInSec=1,528}
+# @{filesAnalyzed=131; errorCount=0; warningCount=0; informationCount=0; timeInSec=1,877}
+# @{filesAnalyzed=114; errorCount=0; warningCount=5; informationCount=0; timeInSec=1,63}
+# @{filesAnalyzed=128; errorCount=0; warningCount=5; informationCount=0; timeInSec=1,879}
+# @{filesAnalyzed=93; errorCount=0; warningCount=8; informationCount=0; timeInSec=1,814}
+# @{filesAnalyzed=108; errorCount=0; warningCount=8; informationCount=0; timeInSec=3,82}
+# @{filesAnalyzed=112; errorCount=0; warningCount=3; informationCount=0; timeInSec=1,846}
+# @{filesAnalyzed=123; errorCount=0; warningCount=3; informationCount=0; timeInSec=2,459}

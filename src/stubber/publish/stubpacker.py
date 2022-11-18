@@ -5,7 +5,10 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import tomli
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
@@ -125,7 +128,7 @@ class StubPackage:
         if not _toml.exists():
             return self.mpy_version
         with open(_toml, "rb") as f:
-            pyproject = tomli.load(f)
+            pyproject = tomllib.load(f)
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
     @pkg_version.setter
@@ -136,7 +139,7 @@ class StubPackage:
         # read the current file
         _toml = self.toml_path
         with open(_toml, "rb") as f:
-            pyproject = tomli.load(f)
+            pyproject = tomllib.load(f)
         pyproject["tool"]["poetry"]["version"] = version
 
         # update the version in the toml file
@@ -151,7 +154,7 @@ class StubPackage:
         _toml = self.toml_path
         if (_toml).exists():
             with open(_toml, "rb") as f:
-                pyproject = tomli.load(f)
+                pyproject = tomllib.load(f)
         return pyproject
 
     @pyproject.setter
@@ -159,8 +162,8 @@ class StubPackage:
         # check if the result is a valid toml file
 
         try:
-            tomli.loads(tomli_w.dumps(pyproject))
-        except tomli.TOMLDecodeError as e:
+            tomllib.loads(tomli_w.dumps(pyproject))
+        except tomllib.TOMLDecodeError as e:
             print("Could not create a valid TOML file")
             raise (e)
         # make sure parent folder exists
@@ -257,14 +260,24 @@ class StubPackage:
                     self.stub_sources[n] = (stub_type, source)
                 try:
                     log.trace(f"Copying {stub_type} from {source}")
-                    shutil.copytree(CONFIG.stub_path / source, self.package_path, symlinks=True, dirs_exist_ok=True)
+                    shutil.copytree(
+                        CONFIG.stub_path / source,
+                        self.package_path,
+                        symlinks=True,
+                        dirs_exist_ok=True,
+                    )
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / source}, {e}")
                     raise (e)
             else:
                 try:
                     log.trace(f"Copying {stub_type} from {fw_path}")
-                    shutil.copytree(CONFIG.stub_path / fw_path, self.package_path, symlinks=True, dirs_exist_ok=True)
+                    shutil.copytree(
+                        CONFIG.stub_path / fw_path,
+                        self.package_path,
+                        symlinks=True,
+                        dirs_exist_ok=True,
+                    )
                 except OSError as e:
                     log.error(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
                     raise (e)
@@ -357,12 +370,17 @@ class StubPackage:
             assert _pyproject is not None
             # clear out the packages section
             _pyproject["tool"]["poetry"]["packages"] = []
+            # update the dependencies section by readin that from the template file
+            with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
+                tpl = tomllib.load(f)
+
+            _pyproject["tool"]["poetry"]["dependencies"] = tpl["tool"]["poetry"]["dependencies"]
 
         else:
             # read the template pyproject.toml file from the template folder
             try:
                 with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
-                    _pyproject = tomli.load(f)
+                    _pyproject = tomllib.load(f)
                 _pyproject["tool"]["poetry"]["version"] = self.mpy_version
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
@@ -382,7 +400,9 @@ class StubPackage:
 
         # Only include .pyi files
         for p in sorted((self.package_path).rglob("*.pyi")):
-            _pyproject["tool"]["poetry"]["packages"] += [{"include": p.relative_to(self.package_path).as_posix()}]
+            _pyproject["tool"]["poetry"]["packages"] += [
+                {"include": p.relative_to(self.package_path).as_posix()}
+            ]
 
         # write out the pyproject.toml file
         self.pyproject = _pyproject
@@ -417,7 +437,9 @@ class StubPackage:
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
         hash = hashlib.sha1()
-        files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
+        files = list((self.package_path).rglob("**/*.py")) + list(
+            (self.package_path).rglob("**/*.pyi")
+        )
         if include_md:
             files += (
                 [self.package_path / "LICENSE.md"]
