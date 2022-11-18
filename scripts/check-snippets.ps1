@@ -2,12 +2,12 @@
 $version = "v1.19.1"
 # stubber switch $version
 
-# stubber get-docstubs
-# stubber merge --version $version
-# stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
+stubber get-docstubs
+stubber merge --version $version
+stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 
 $ports = @("esp32", "esp8266", "stm32", "rp2")
-$ports = @("esp32")
+# $ports = @("esp32")
 $results = @()
 foreach ($port in $ports) {
     $stub_source = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
@@ -24,7 +24,7 @@ foreach ($port in $ports) {
 
     $snippets_dir = ".\snippets\common"
     $typings_dir = "$snippets_dir\typings"
-    rd $typings_dir -r 
+    rd $typings_dir -r  -ea silentlycontinue
     pip install -U $stub_source --target $typings_dir --no-user 
     $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
     $results += $result
