@@ -1,0 +1,11 @@
+# MicroPython v1.19.1-705-gac5934c96 on 2022-11-18; Wio Terminal D51R with SAMD51P19A
+__main__          micropython       ubinascii         urandom
+_boot             onewire           ucollections      ure
+_onewire          samd              uctypes           uselect
+_uasyncio         uarray            uerrno            ustruct
+builtins          uasyncio/__init__ uhashlib          usys
+dht               uasyncio/core     uheapq            utime
+ds18x20           uasyncio/event    uio               uzlib
+framebuf          uasyncio/funcs    ujson
+gc                uasyncio/lock     umachine
+math              uasyncio/stream   uos
