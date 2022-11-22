@@ -692,6 +692,7 @@ def main():
         "requests",
         "rp2",
         "rtch",
+        "samd",
         "select",
         "socket",
         "ssd1306",
