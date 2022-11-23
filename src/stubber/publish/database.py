@@ -14,4 +14,3 @@ def get_database(publish_path: Union[Path, str], production: bool = False) -> Py
     publish_path = Path(publish_path)
     db_path = publish_path / f"package_data{'' if production else '_test'}.jsondb"
     return PysonDB(db_path.as_posix())
-

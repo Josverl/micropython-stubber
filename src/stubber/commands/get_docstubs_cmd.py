@@ -61,7 +61,7 @@ def cli_docstubs(
         raise ValueError("No valid Tag found")
     v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
     release = git.get_tag(rst_path.as_posix(), abbreviate=False) or ""
-    
+
     dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 
     # get verbose from the parent context
