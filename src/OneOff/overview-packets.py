@@ -15,7 +15,7 @@ for c in frozen_candidates(boards="auto", versions="auto"):
     else:
         matrix[name].append(c["version"])
 
-for k,v in matrix.items():
+for k, v in matrix.items():
     print(f"{k:50} | {str(v):>60}")
 
 

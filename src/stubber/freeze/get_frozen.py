@@ -26,8 +26,7 @@ from loguru import logger as log
 from packaging.version import Version
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
-from stubber.freeze.freeze_manifest_1 import \
-    freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
+from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 from stubber.utils.config import CONFIG
 

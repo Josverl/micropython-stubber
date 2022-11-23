@@ -400,9 +400,7 @@ class StubPackage:
 
         # Only include .pyi files
         for p in sorted((self.package_path).rglob("*.pyi")):
-            _pyproject["tool"]["poetry"]["packages"] += [
-                {"include": p.relative_to(self.package_path).as_posix()}
-            ]
+            _pyproject["tool"]["poetry"]["packages"] += [{"include": p.relative_to(self.package_path).as_posix()}]
 
         # write out the pyproject.toml file
         self.pyproject = _pyproject
@@ -437,9 +435,7 @@ class StubPackage:
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
         hash = hashlib.sha1()
-        files = list((self.package_path).rglob("**/*.py")) + list(
-            (self.package_path).rglob("**/*.pyi")
-        )
+        files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
         if include_md:
             files += (
                 [self.package_path / "LICENSE.md"]

@@ -4,7 +4,7 @@ from packaging.version import Version, parse
 from pypi_simple import PyPISimple
 
 
-def get_pypy_versions( package_name:str, base : Optional[Version] = None, production:bool = True):
+def get_pypy_versions(package_name: str, base: Optional[Version] = None, production: bool = True):
     """Get all versions of a package from a PyPI endpoint."""
     package_info = None
     if production:
@@ -12,13 +12,13 @@ def get_pypy_versions( package_name:str, base : Optional[Version] = None, produc
     else:
         endpoint = "https://test.pypi.org/simple/"
 
-    with PyPISimple(endpoint = endpoint) as client:
-        package_info = client.get_project_page(project = package_name)
+    with PyPISimple(endpoint=endpoint) as client:
+        package_info = client.get_project_page(project=package_name)
 
     if not package_info:
         return []
 
-    versions = [parse(pkg.version) for pkg in package_info.packages if pkg.package_type == 'wheel' and pkg.version]
+    versions = [parse(pkg.version) for pkg in package_info.packages if pkg.package_type == "wheel" and pkg.version]
     # print(versions)
 
     if base:

@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from libcst.codemod import (CodemodContext, diff_code,
-                            exec_transform_with_prettyprint)
+from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
 from loguru import logger as log
 

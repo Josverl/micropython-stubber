@@ -5,8 +5,7 @@ from typing import List, Optional
 
 from loguru import logger as log
 from stubber import utils
-from stubber.tools.manifestfile import (MODE_FREEZE, ManifestFile,
-                                        ManifestFileError, ManifestOutput)
+from stubber.tools.manifestfile import MODE_FREEZE, ManifestFile, ManifestFileError, ManifestOutput
 from stubber.utils.config import CONFIG
 
 from .common import apply_frozen_module_fixes, get_freeze_path, get_portboard
