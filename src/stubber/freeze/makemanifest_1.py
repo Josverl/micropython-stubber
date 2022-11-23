@@ -103,7 +103,7 @@ def freeze(path, script=None, opt=0):  # pragma: no cover
 
 
 # do not change method name
-def include(manifest: Union[str,List[str]], **kwargs):
+def include(manifest: Union[str, List[str]], **kwargs):
     """
     Include another manifest.
 
@@ -126,7 +126,7 @@ def include(manifest: Union[str,List[str]], **kwargs):
         if options.extra_features:
             # freeze extra modules.
     """
-    if not isinstance(manifest, Path) and not isinstance(manifest, str): # type: ignore
+    if not isinstance(manifest, Path) and not isinstance(manifest, str):  # type: ignore
         for m in manifest:
             include(m)
     else:
@@ -196,5 +196,3 @@ def freeze_internal(path: str, script: str, opt=None):
         log.warning(f"File {path}/{script} not found")
     except (OSError, FileNotFoundError) as e:  # pragma: no cover
         log.exception(e)
-
-

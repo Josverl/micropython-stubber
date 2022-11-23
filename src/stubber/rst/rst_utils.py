@@ -440,7 +440,9 @@ def return_type_from_context(*, docstring: Union[str, List[str]], signature: str
         return "Any"
 
 
-def _type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False) : #-> Dict[str , Union[str,float]]:
+def _type_from_context(
+    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+):  # -> Dict[str , Union[str,float]]:
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring

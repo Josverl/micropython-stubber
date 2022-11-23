@@ -9,6 +9,7 @@ from stubber.utils.config import CONFIG
 
 from .cli import stubber_cli
 
+
 @stubber_cli.command(name="update-fallback")
 @click.option("--version", default=RELEASED, type=str, help="Version number to use", show_default=True)
 @click.option(
