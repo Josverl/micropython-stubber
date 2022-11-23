@@ -1,5 +1,6 @@
 # list of modules to stub.
 # used by the memory optimised createstubs_mem.py
+builtins
 WM8960
 _OTA
 _boot_fat
@@ -104,6 +105,7 @@ random
 requests
 rp2
 rtch
+samd
 select
 socket
 ssd1306

@@ -104,6 +104,7 @@ random
 requests
 rp2
 rtch
+samd
 select
 socket
 ssd1306
