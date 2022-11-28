@@ -86,16 +86,7 @@ def copy_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     if (dest_path / "modules.json").exists():
         (dest_path / "modules.json").rename(dest_path / "firmware_stubs.json")
 
-    # 1.B - clean up a little bit
-    do_cleanup = False
-    if do_cleanup:
-        # delete all the .py files in the package folder if there is a corresponding .pyi file
-        # FIXME: Leave *.py on the module folders to avoid poetry packaging issues
-        # >      ValueError  umqtt is not a package.
 
-        for f in dest_path.glob("*.py"):
-            if f.with_suffix(".pyi").exists():
-                f.unlink()
     # avoid duplicate modules : folder - file combinations
     # prefer folder from frozen stubs, over file from firmware stubs
     for f in dest_path.glob("*"):
