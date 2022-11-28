@@ -1,22 +1,17 @@
 {
-    // python.autoComplete.extraPaths has changed to "python.analysis.extraPaths"
-    // https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#unresolved-import-warnings
     "python.analysis.autoSearchPaths": true,
     "python.analysis.logLevel": "Trace",
     "python.analysis.diagnosticMode": "openFilesOnly",
     //////////////////////////////////////////////////////////////
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
-    // Paths to look for typeshed modules. Pyright currently honors only the first path in the array.
-    // "python.analysis.typeshedPaths": [],
+
     "python.testing.pytestArgs": [
         "tests"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
     "peacock.color": "#613206",
-    "restructuredtext.languageServer.disabled": true,
     "cSpell.words": [
         "aivar",
         "annamaa",
@@ -137,4 +132,5 @@
     "python.formatting.blackArgs": [
         "--line-length 99"
     ],
+    "editor.formatOnType": true,
 }

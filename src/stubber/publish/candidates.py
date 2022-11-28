@@ -47,7 +47,7 @@ def list_frozen_ports(
 
 def list_micropython_ports(
     family: str = "micropython",
-    version: str = V_LATEST[0],
+    version: str = V_LATEST,
     mpy_path=CONFIG.mpy_path,
 ):
     "get list of micropython ports for a given family and version"
@@ -56,14 +56,43 @@ def list_micropython_ports(
         return []
     mpy_path = Path("./repos/micropython")
     # check out the micropthon repo for this version
-    if not git.checkout_tag(version, mpy_path):
+    if version in ["latest", "master"]:
+        r = git.switch_branch(repo=mpy_path, branch="master")
+    else:
+        r =git.checkout_tag(repo=mpy_path, tag=version)
+    if not r:
         return []
+
     ports_path = mpy_path / "ports"
     ports = list(subfolder_names(ports_path))
     # remove blocked ports from list
     for port in ["minimal", "bare-arm"]:  # CONFIG.blocked_ports:
         if port in ports:
             ports.remove(port)
+    return ports
+
+def list_micropython_port_boards(
+    port: str ,
+    family: str = "micropython",
+    version: str = V_LATEST,
+    mpy_path=CONFIG.mpy_path,
+):
+    "get list of micropython boards for a given family version and board"
+    if family != "micropython":
+        # todo: add support for other families
+        return []
+    mpy_path = Path("./repos/micropython")
+    # check out the micropthon repo for this version
+    if version in ["latest", "master"]:
+        r = git.switch_branch(repo=mpy_path, branch="master")
+    else:
+        r =git.checkout_tag(repo=mpy_path, tag=version)    
+    if not r:
+        return []
+
+    boards_path = mpy_path / "ports" / port / "boards"
+    ports = list(subfolder_names(boards_path))
+    # remove blocked ports from list
     return ports
 
 
@@ -177,6 +206,8 @@ def firmware_candidates(
     versions = [clean_version(v, flat=False) for v in versions]
 
     for version in versions:
-        ports = list_micropython_ports(family, version, mpy_path=mpy_path)
+        ports = list_micropython_ports(family=family, version=version, mpy_path=mpy_path)
         for port in ports:
             yield {"family": family, "version": version, "port": port, "board": "", "pkg_type": FIRMWARE_STUBS}
+            for board in list_micropython_port_boards( family=family, version=version, mpy_path=mpy_path, port=port):
+                yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": FIRMWARE_STUBS}

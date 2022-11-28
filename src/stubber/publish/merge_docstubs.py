@@ -14,12 +14,18 @@ from stubber.utils.versions import clean_version
 
 def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
     """merge docstubs into firmware stubs"""
-    for fw in firmware_candidates(versions=versions, family=family):
+    for fw in firmware_candidates(versions=versions, family=family ):
         # check if we have firmware stubs of this version and port
         base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
-        fw_folder = base + f"-{fw['port']}"
-        mrg_folder = fw_folder + "-merged"
-        doc_folder = base + f"-docstubs"
+        if fw["port"] == "":
+            fw_folder = f"{base}-{fw['port']}"
+            mrg_folder = fw_folder + "-merged"
+            doc_folder = f"{base}-docstubs"
+        else:
+            fw_folder = f"{base}-{fw['port']}-{fw['board']}"
+            mrg_folder = fw_folder + "-merged"
+            doc_folder = f"{base}-docstubs"
+
 
         fw_path = CONFIG.stub_path / fw_folder
         mrg_path = CONFIG.stub_path / mrg_folder
@@ -27,6 +33,7 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
 
         if not fw_path.exists():
             # only continue if both folders exist
+            log.debug(f"skipping {fw_folder}, no firmware stubs found")
             continue
         if not doc_path.exists():
             print(f"Warning: no docstubs for {fw['version']}")

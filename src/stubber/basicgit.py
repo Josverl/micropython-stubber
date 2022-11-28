@@ -158,10 +158,10 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
 
 def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
     """
-    get the most recent git version tag of a local repo"
+    switch to the specified version tag of a local repo
     repo should be in the form of : path/.git
     repo = '../micropython/.git'
-    returns the tag or None
+    returns None
     """
 
     cmd = ["git", "switch", "--detach", tag, "--quiet", "--force"]
@@ -176,10 +176,10 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
 
 def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
     """
-    get the most recent git version tag of a local repo"
+    switch to the specified branch in a local repo"
     repo should be in the form of : path/.git
     repo = '../micropython/.git'
-    returns the tag or None
+    returns None
     """
     cmd = ["git", "switch", branch, "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True)
