@@ -35,6 +35,12 @@ class StubberConfig(Config):
     template_path = key(key_name="template-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish/template"))
     "a Path to the publication folder that has the template files"
 
+    STABLE_VERSION = "1.19.1"
+    "last published stable"
+
+    ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]  
+    "list of recent versions"
+
     def post_read_hook(self) -> dict:
         config_updates = dict()
         # relative to stubs
