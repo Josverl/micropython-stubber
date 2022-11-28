@@ -5,16 +5,7 @@ from loguru import logger as log
 from stubber.commands.cli import stubber_cli
 from stubber.publish.publish import publish_multiple
 from tabulate import tabulate
-
-##########################################################################################
-# log = logging.getLogger("stubber")
-###########
-
-# TODO: make the VERSION AND PORTS dynamic ( move into simpler Config class)
-LAST_VERSION = "1.19.1"
-ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]  # "1.14", "1.15", "1.16","1.17",
-ALL_PORTS = ["stm32", "esp32", "esp8266", "rp2"]
-ALL_BOARDS = ["GENERIC"]
+from stubber.utils.config import CONFIG
 
 
 @stubber_cli.command(name="publish")
@@ -25,8 +16,7 @@ ALL_BOARDS = ["GENERIC"]
     "-V",
     "versions",
     multiple=True,
-    default=[LAST_VERSION],
-    # type=click.Choice(ALL_VERSIONS),
+    default=[CONFIG.STABLE_VERSION],
     show_default=True,
     help="multiple: ",
 )
@@ -36,7 +26,6 @@ ALL_BOARDS = ["GENERIC"]
     "ports",
     multiple=True,
     default=["auto"],
-    #    type=click.Choice(ALL_PORTS),
     show_default=True,
     help="multiple: ",
 )
@@ -46,7 +35,6 @@ ALL_BOARDS = ["GENERIC"]
     "boards",
     multiple=True,
     default=["GENERIC"],  # or "auto" ?
-    #    type=click.Choice(ALL_BOARDS),
     show_default=True,
     help="multiple: ",
 )
