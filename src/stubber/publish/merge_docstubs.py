@@ -11,13 +11,14 @@ from stubber.publish.candidates import firmware_candidates
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
+LAST_VERSION = "v1.19.1"
 
 def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
     """merge docstubs into firmware stubs"""
     for fw in firmware_candidates(versions=versions, family=family ):
         # check if we have firmware stubs of this version and port
         base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
-        if fw["port"] == "":
+        if fw["board"] == "":
             fw_folder = f"{base}-{fw['port']}"
             mrg_folder = fw_folder + "-merged"
             doc_folder = f"{base}-docstubs"
@@ -26,15 +27,30 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
             mrg_folder = fw_folder + "-merged"
             doc_folder = f"{base}-docstubs"
 
-
         fw_path = CONFIG.stub_path / fw_folder
         mrg_path = CONFIG.stub_path / mrg_folder
         doc_path = CONFIG.stub_path / doc_folder
 
         if not fw_path.exists():
-            # only continue if both folders exist
-            log.debug(f"skipping {fw_folder}, no firmware stubs found")
-            continue
+            if fw["version"] != 'latest':
+                # only continue if both folders exist
+                log.debug(f"skipping {mrg_folder}, no firmware stubs found")
+                continue
+            else:
+                # try to get the fw_path from the last released version
+                base = f"{fw['family']}-{clean_version(LAST_VERSION,flat=True)}"
+                if fw["board"] == "":
+                    fw_folder = f"{base}-{fw['port']}"
+                else:
+                    fw_folder = f"{base}-{fw['port']}-{fw['board']}"
+                fw_path = CONFIG.stub_path / fw_folder
+                # check again
+                if not fw_path.exists():
+                    # only continue if both folders exist
+                    log.debug(f"skipping {mrg_folder}, no firmware stubs found")
+                    continue
+
+            
         if not doc_path.exists():
             print(f"Warning: no docstubs for {fw['version']}")
         log.info(f"Merge docstubs for {fw['family']} {fw['version']} {fw['port']} {fw['board']}")
