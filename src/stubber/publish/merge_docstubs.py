@@ -18,7 +18,7 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
     for fw in firmware_candidates(versions=versions, family=family ):
         # check if we have firmware stubs of this version and port
         base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
-        if fw["board"] == "":
+        if fw["board"] == "GENERIC":
             fw_folder = f"{base}-{fw['port']}"
             mrg_folder = fw_folder + "-merged"
             doc_folder = f"{base}-docstubs"
