@@ -85,11 +85,14 @@ def create_package(
         ver_flat = clean_version(mpy_version, flat=True)
         stubs: List[Tuple[str, Path]] = [
             (
-                StubSource.FIRMWARE,
+                # StubSource.FIRMWARE,
+                # Path(f"{family}-{ver_flat}-{port}"),
                 # TODO: look for the most specific firmware stub folder that is available ?
                 # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
                 # that would also require the port - board - variant to be discoverable runtime
-                Path(f"{family}-{ver_flat}-{port}"),
+                StubSource.MERGED,
+                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board!="GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
+
             ),
             (
                 StubSource.FROZEN,
@@ -97,7 +100,7 @@ def create_package(
             ),
             (
                 StubSource.CORE,
-                Path("cpython_core-pycopy"),
+                Path("micropython_core"),
             ),
         ]
         package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
