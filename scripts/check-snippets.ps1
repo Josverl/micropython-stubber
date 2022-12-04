@@ -1,13 +1,19 @@
 
-$version = "v1.19.1"
-# stubber switch $version
+# $version = "v1.19.1"
+# stubber merge --version $version
 
-stubber get-docstubs
+$version = "latest"
 stubber merge --version $version
-stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
+# stubber switch $version
+#stubber get-docstubs
+stubber merge --version $version
+stubber publish --test-pypi --version $version --port rp2 --board pico_w --dry-run
+
+# stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 
 $ports = @("esp32", "esp8266", "stm32", "rp2")
 # $ports = @("esp32")
+$ports = @("rp2")
 $results = @()
 foreach ($port in $ports) {
     $stub_source = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
