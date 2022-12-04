@@ -37,4 +37,4 @@ sm.irq(lambda p: print(time.ticks_ms()))
 # Start the StateMachine.
 sm.active(1)
 
-#sm.active(0)
+# sm.active(0)

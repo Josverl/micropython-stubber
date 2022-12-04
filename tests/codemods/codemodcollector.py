@@ -15,7 +15,6 @@ class TestCase(NamedTuple):
     path: Path = None  # where are the tests
 
 
-
 def collect_test_cases() -> List[Tuple[Any, ...]]:
     """
     Collect tests cases for the test case folder , each containing a

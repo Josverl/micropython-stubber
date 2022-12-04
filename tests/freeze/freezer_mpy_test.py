@@ -3,12 +3,14 @@ from pathlib import Path
 
 import pytest
 from mock import MagicMock
+
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
 from stubber.freeze.common import get_portboard
 from stubber.freeze.freeze_folder import freeze_folders
 from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
+
 # Module Under Test
 from stubber.freeze.get_frozen import freeze_any, get_manifests
 from stubber.utils.repos import switch
@@ -213,7 +215,7 @@ def test_freeze_any(
 #######################################################################################################################
 
 # Some mocked tests to improve the coverage
-@pytest.mark.skip( "fails for unknown reason in CI, TODO: fix")
+@pytest.mark.skip("fails for unknown reason in CI, TODO: fix")
 @pytest.mark.parametrize(
     "mpy_version",
     [

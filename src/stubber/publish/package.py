@@ -91,8 +91,7 @@ def create_package(
                 # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
                 # that would also require the port - board - variant to be discoverable runtime
                 StubSource.MERGED,
-                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board!="GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
-
+                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board != "GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
             ),
             (
                 StubSource.FROZEN,

@@ -13,9 +13,10 @@ from stubber.utils.versions import clean_version
 
 LAST_VERSION = "v1.19.1"
 
+
 def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
     """merge docstubs into firmware stubs"""
-    for fw in firmware_candidates(versions=versions, family=family ):
+    for fw in firmware_candidates(versions=versions, family=family):
         # check if we have firmware stubs of this version and port
         base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
         if fw["board"] == "GENERIC":
@@ -32,7 +33,7 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
         doc_path = CONFIG.stub_path / doc_folder
 
         if not fw_path.exists():
-            if fw["version"] != 'latest':
+            if fw["version"] != "latest":
                 # only continue if both folders exist
                 log.debug(f"skipping {mrg_folder}, no firmware stubs found")
                 continue
@@ -50,7 +51,6 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
                     log.debug(f"skipping {mrg_folder}, no firmware stubs found")
                     continue
 
-            
         if not doc_path.exists():
             print(f"Warning: no docstubs for {fw['version']}")
         log.info(f"Merge docstubs for {fw['family']} {fw['version']} {fw['port']} {fw['board']}")
@@ -85,7 +85,6 @@ def copy_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     # rename the module.json file to firmware.json
     if (dest_path / "modules.json").exists():
         (dest_path / "modules.json").rename(dest_path / "firmware_stubs.json")
-
 
     # avoid duplicate modules : folder - file combinations
     # prefer folder from frozen stubs, over file from firmware stubs

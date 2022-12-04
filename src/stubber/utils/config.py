@@ -38,7 +38,7 @@ class StubberConfig(Config):
     STABLE_VERSION = "1.19.1"
     "last published stable"
 
-    ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]  
+    ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]
     "list of recent versions"
 
     def post_read_hook(self) -> dict:

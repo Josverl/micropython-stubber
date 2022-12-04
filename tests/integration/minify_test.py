@@ -71,4 +71,3 @@ def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture):
     assert result == 0
     m_minify.assert_called_once()
     m_spr.assert_called_once()
-

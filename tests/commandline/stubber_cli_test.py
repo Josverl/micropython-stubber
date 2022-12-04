@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 # module under test :
 import stubber.stubber as stubber
 from click.testing import CliRunner

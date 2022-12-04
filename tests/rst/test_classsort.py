@@ -2,7 +2,7 @@
 import pytest
 
 # pytest.skip("---===*** DEBUGGING ***===---", allow_module_level=True)
-# mark all tests 
+# mark all tests
 pytestmark = pytest.mark.doc_stubs
 
 # SOT

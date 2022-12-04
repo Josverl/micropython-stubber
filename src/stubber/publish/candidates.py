@@ -63,8 +63,9 @@ def list_micropython_ports(
             ports.remove(port)
     return ports
 
+
 def list_micropython_port_boards(
-    port: str ,
+    port: str,
     family: str = "micropython",
     mpy_path=CONFIG.mpy_path,
 ):
@@ -181,11 +182,7 @@ def docstub_candidates(
 
 
 def firmware_candidates(
-    family: str = "micropython",
-    versions: Union[str, List[str]] = V_LATEST,
-    *,
-    mpy_path=CONFIG.mpy_path,
-    pt=FIRMWARE_STUBS
+    family: str = "micropython", versions: Union[str, List[str]] = V_LATEST, *, mpy_path=CONFIG.mpy_path, pt=FIRMWARE_STUBS
 ):
     """
     generate a list of possible firmware stub candidates for the given family and version.
@@ -204,11 +201,11 @@ def firmware_candidates(
         if version in ["latest", "master"]:
             r = git.switch_branch(repo=mpy_path, branch="master")
         else:
-            r =git.checkout_tag(repo=mpy_path, tag=version)
+            r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
-            return []        
+            return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
             yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": pt}
-            for board in list_micropython_port_boards( family=family, mpy_path=mpy_path, port=port):
+            for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
                 yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}
