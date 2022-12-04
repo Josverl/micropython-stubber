@@ -113,7 +113,7 @@ def publish(
     if not ok:
         log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
         shutil.rmtree(package.package_path.as_posix())
-        
+
         package._publish = False
         # TODO Save ?
         return status
@@ -140,7 +140,7 @@ def publish(
         # try to get version from PyPi and increase past that
         old_ver = package.pkg_version
         if package.mpy_version == "latest":
-            new_ver = str(bump_postrelease(Version('1.20'), rc = 744))      # FIXME: hardcoded version
+            new_ver = str(bump_postrelease(Version("1.20"), rc=744))  # FIXME: hardcoded version
             package.pkg_version = new_ver
         else:
             base = Version(package.pkg_version)
@@ -170,7 +170,7 @@ def publish(
         else:
             if package.mpy_version == "latest":
                 log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
-            else: 
+            else:
                 result = package.publish(production=production)
                 if not result:
                     log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
@@ -216,7 +216,7 @@ def publish_one(
 def publish_multiple(
     family="micropython",
     versions: List[str] = ["v1.18", "v1.19.1"],
-    ports:  List[str] = ["auto"],
+    ports: List[str] = ["auto"],
     boards: List[str] = ["GENERIC"],
     frozen: bool = False,
     production=False,
@@ -230,7 +230,7 @@ def publish_multiple(
     worklist = []
     results = []
 
-    worklist += list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS)) 
+    worklist += list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS))
     # if frozen:
     #     worklist += list(
     #         chain(
@@ -244,7 +244,6 @@ def publish_multiple(
         worklist = [i for i in worklist if i["port"] in ports]
     if boards != ["auto"]:
         worklist = [i for i in worklist if i["board"] in boards or i["board"] == "GENERIC"]
-
 
     for todo in worklist:
 

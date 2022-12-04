@@ -35,6 +35,7 @@ def test_git_clone(tmp_path):
     result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
     assert result == True
 
+
 @pytest.mark.mocked
 def test_git_clone_fast(mocker: MockerFixture, tmp_path):
 
@@ -151,6 +152,7 @@ def test_fetch():
         git.fetch(repo=None)  # type: ignore
 
     git.fetch(repo=".")
+
 
 @pytest.mark.mocked
 def test_run_git_fails(mocker: MockerFixture):

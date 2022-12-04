@@ -4,6 +4,7 @@ from packaging.version import Version, parse
 from pypi_simple import PyPISimple, NoSuchProjectError
 from loguru import logger as log
 
+
 def get_pypy_versions(package_name: str, base: Optional[Version] = None, production: bool = True):
     """Get all versions of a package from a PyPI endpoint."""
     package_info = None

@@ -27,6 +27,8 @@ def run_black(path: Path, capture_output=False):
     cmd = [
         "black",
         path.as_posix(),
+        "--line-length",
+        "140",
     ]
     log.debug("Running black on: {}".format(path))
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)

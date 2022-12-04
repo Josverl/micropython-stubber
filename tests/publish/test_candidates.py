@@ -4,6 +4,7 @@ from typing import Generator
 import pytest
 from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_cadidates
 
+
 def test_subfoldernames(tmp_path, pytestconfig):
     # test data
     path = pytestconfig.rootpath / "tests/publish/data/stub-version"

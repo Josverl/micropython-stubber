@@ -3,8 +3,8 @@
 from machine import Pin
 import esp
 
-esp.osdebug(None)       # turn off vendor O/S debugging messages
-esp.osdebug(0)          # redirect vendor O/S debugging messages to UART(0)
+esp.osdebug(None)  # turn off vendor O/S debugging messages
+esp.osdebug(0)  # redirect vendor O/S debugging messages to UART(0)
 
 
 sector_no = 1  # Placeholders
@@ -18,8 +18,8 @@ esp.flash_erase(sector_no)
 esp.flash_write(byte_offset, buffer)
 esp.flash_read(byte_offset, buffer)
 
-# Neopixel 
-# # Note: ESP8266 only 
+# Neopixel
+# # Note: ESP8266 only
 
 # import esp
 # # For low-level driving of a NeoPixel:

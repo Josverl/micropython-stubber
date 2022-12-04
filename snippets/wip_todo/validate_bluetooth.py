@@ -41,8 +41,8 @@ _IRQ_ENCRYPTION_UPDATE = const(28)
 _IRQ_GET_SECRET = const(29)
 _IRQ_SET_SECRET = const(30)
 
-# TODO  Add coumentation 
-_IRQ_PASSKEY_ACTION= -1
+# TODO  Add coumentation
+_IRQ_PASSKEY_ACTION = -1
 
 
 # For the _IRQ_GATTS_READ_REQUEST event, the available return codes are:
@@ -52,7 +52,7 @@ _GATTS_ERROR_READ_NOT_PERMITTED = const(0x02)
 _GATTS_ERROR_WRITE_NOT_PERMITTED = const(0x03)
 _GATTS_ERROR_INSUFFICIENT_AUTHENTICATION = const(0x05)
 _GATTS_ERROR_INSUFFICIENT_AUTHORIZATION = const(0x08)
-_GATTS_ERROR_INSUFFICIENT_ENCRYPTION = const(0x0f)
+_GATTS_ERROR_INSUFFICIENT_ENCRYPTION = const(0x0F)
 
 # For the _IRQ_PASSKEY_ACTION event, the available actions are:
 
@@ -86,19 +86,42 @@ _FLAG_WRITE_AUTHORIZED = const(0x4000)
 # ['__class__', '__name__', 'BLE', 'FLAG_INDICATE', 'FLAG_NOTIFY', 'FLAG_READ', 'FLAG_WRITE', 'FLAG_WRITE_NO_RESPONSE', 'UUID']
 
 
-
-
 HR_UUID = bluetooth.UUID(0x180D)
-HR_CHAR = (bluetooth.UUID(0x2A37), bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,)
-HR_SERVICE = (HR_UUID, (HR_CHAR,),)
-UART_UUID = bluetooth.UUID('6E400001-B5A3-F393-E0A9-E50E24DCCA9E')
-UART_TX = (bluetooth.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E'), bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,)
-UART_RX = (bluetooth.UUID('6E400002-B5A3-F393-E0A9-E50E24DCCA9E'), bluetooth.FLAG_WRITE,)
-UART_SERVICE = (UART_UUID, (UART_TX, UART_RX,),)
-SERVICES = (HR_SERVICE, UART_SERVICE,)
-( (hr,), (tx, rx,), ) = bt.gatts_register_services(SERVICES)
-
-
+HR_CHAR = (
+    bluetooth.UUID(0x2A37),
+    bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,
+)
+HR_SERVICE = (
+    HR_UUID,
+    (HR_CHAR,),
+)
+UART_UUID = bluetooth.UUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
+UART_TX = (
+    bluetooth.UUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
+    bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,
+)
+UART_RX = (
+    bluetooth.UUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E"),
+    bluetooth.FLAG_WRITE,
+)
+UART_SERVICE = (
+    UART_UUID,
+    (
+        UART_TX,
+        UART_RX,
+    ),
+)
+SERVICES = (
+    HR_SERVICE,
+    UART_SERVICE,
+)
+(
+    (hr,),
+    (
+        tx,
+        rx,
+    ),
+) = bt.gatts_register_services(SERVICES)
 
 
 # Eventhandler

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
-    import tomli as tomllib # type: ignore
+    import tomli as tomllib  # type: ignore
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
@@ -244,10 +244,10 @@ class StubPackage:
          - 3 - remove *.py files from the package folder
 
         """
-        # First check if all stub source folders exist 
+        # First check if all stub source folders exist
         for n in range(len(self.stub_sources)):
             stub_type, fw_path = self.stub_sources[n]
-            # update to use -merged 
+            # update to use -merged
             if stub_type == StubSource.FIRMWARE:
                 # Check if -merged folder exists and use that instead
                 if fw_path.name.endswith("-merged"):
@@ -466,7 +466,7 @@ class StubPackage:
         log.trace(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
         return self.hash != current
 
-    def bump(self, *, rc:int=0) -> str:
+    def bump(self, *, rc: int = 0) -> str:
         """
         bump the postrelease version of the package, and write the change to disk
         if rc > 1, the version is bumped to the specified release candidate
@@ -475,7 +475,7 @@ class StubPackage:
             current = Version(self.pkg_version)
             assert isinstance(current, Version)
             # bump the version
-            self.pkg_version = str(bump_postrelease(current, rc = rc))
+            self.pkg_version = str(bump_postrelease(current, rc=rc))
         except Exception as e:  # pragma: no cover
             log.error(f"Error: {e}")
         return self.pkg_version

@@ -187,8 +187,6 @@ def test_stubber_fwid(
 #     assert createstubs.read_path() == ""
 
 
-
-
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_create_all_stubs(
