@@ -409,10 +409,10 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
 @pytest.mark.parametrize(
     "error, modulename",
     [
-        ('NORMAL is not defined', "pyb"),
-        ('UP is not defined', "pyb.Timer"),
-        ('hid_mouse is not defined', "pyb.USB_HID"),
-        ('SPI is not defined', "lcd160cr"),
+        ("NORMAL is not defined", "pyb"),
+        ("UP is not defined", "pyb.Timer"),
+        ("hid_mouse is not defined", "pyb.USB_HID"),
+        ("SPI is not defined", "lcd160cr"),
     ],
 )
 @pytest.mark.docfix
