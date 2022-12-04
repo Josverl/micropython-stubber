@@ -95,6 +95,9 @@ exclude = '''
         | micropython
         | micropython-lib
         | tests[\\/]mocks
+        | tests[\\/]data
+        | tests[\\/]rst[\\/]data
+        | tests[\\/]codemods[\\/]codemod_test_cases
         | scratch
     )/
 )
