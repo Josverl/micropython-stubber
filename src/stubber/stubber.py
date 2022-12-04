@@ -5,6 +5,7 @@
 
 
 from stubber.commands.cli import stubber_cli
+from stubber.commands.build_cmd import cli_build
 from stubber.commands.clone_cmd import cli_clone
 from stubber.commands.config_cmd import cli_config
 from stubber.commands.enrich_folder_cmd import cli_enrich_folder
@@ -29,6 +30,7 @@ from stubber.commands.upd_module_list_cmd import cli_update_module_list
 
 if __name__ == "__main__":
     # add all commands to the CLI
+    stubber_cli.add_command(cli_build)
     stubber_cli.add_command(cli_config)
     stubber_cli.add_command(cli_clone)
     stubber_cli.add_command(cli_switch)
