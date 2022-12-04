@@ -16,9 +16,10 @@
     "typeshedPath": "../snippets/common/typings",
     "stubPath": "../snippets/common/typings",
     // section 3 - set code quality checks 
-    "reportMissingImports": "error",
-    "reportGeneralTypeIssues": "error", // interesting
-    "reportUndefinedVariable": "warning", // "_WHO_AM_I_REG" is not defined - Not a showstopper
+    "reportMissingImports": "information",
+    "reportGeneralTypeIssues": "information", // interesting
+    "reportUndefinedVariable": "information", // "_WHO_AM_I_REG" is not defined - Not a showstopper
+    "reportUnusedExpression": "information",
     // section 4 - informational 
     "reportMissingTypeStubs": "information",
     "reportOptionalCall": "information", //  Object of type "None" cannot be called
