@@ -2,11 +2,12 @@ from pathlib import Path
 from typing import List
 
 import pytest
-# module under test :
-import stubber.stubber as stubber
 from click.testing import CliRunner
 from mock import MagicMock
 from pytest_mock import MockerFixture
+
+# module under test :
+import stubber.stubber as stubber
 from stubber.commands.switch_cmd import VERSION_LIST
 
 # mark all tests
@@ -191,12 +192,17 @@ def test_cmd_minify_all(mocker: MockerFixture):
 def test_cmd_stub(mocker: MockerFixture):
     # check basic commandline sanity check
     runner = CliRunner()
-    # mock: MagicMock = mocker.MagicMock(return_value=True)
-    mock: MagicMock = mocker.patch("stubber.utils.generate_pyi_files", autospec=True, return_value=True)
+    # m_generate: MagicMock = mocker.patch("stubber.commands.stub_cmd.generate_pyi_files", autospec=True, return_value=True)
+    m_generate: MagicMock = mocker.MagicMock(return_value=True)
+    m_postprocessing: MagicMock = mocker.MagicMock()
+    mocker.patch("stubber.commands.stub_cmd.generate_pyi_files", m_generate)
+    mocker.patch("stubber.commands.stub_cmd.do_post_processing", m_postprocessing)
     # fake run on current folder
     result = runner.invoke(stubber.stubber_cli, ["stub", "--source", "."])
 
-    mock.assert_called_once_with(Path("."))
+    m_generate.assert_called_once_with(Path("."))
+    m_postprocessing.assert_called_once() 
+    m_postprocessing.assert_called_once_with( [Path(".")], pyi=True, black=True)
     assert result.exit_code == 0
 
 

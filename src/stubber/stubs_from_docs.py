@@ -89,11 +89,8 @@ from .rst import (
 )
 from .utils.config import CONFIG
 
-# logging
-# # log = logging.getLogger(__name__)
 
 NEW_OUTPUT = True
-#: self.gather_docs = True
 SEPERATOR = "::"
 
 
@@ -702,6 +699,7 @@ class RSTReader:
         return [n.strip() for n in names if n.strip() != "etc."]
 
     def parse_data(self):
+        "proces ..data:: lines ( one or more)"
         log.trace(f"# {self.line.rstrip()}")
         # Get one or more names
         names = self.parse_names()

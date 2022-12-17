@@ -127,7 +127,7 @@ read_db_data = [
 
 @pytest.mark.parametrize("json", read_db_data)
 @pytest.mark.mocked
-def test_package_from_json(tmp_path, pytestconfig, mocker:MockerFixture, json):
+def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
     # setup test configuration
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)

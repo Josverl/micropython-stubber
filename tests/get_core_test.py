@@ -4,7 +4,7 @@ from mock import MagicMock
 from pytest_mock import MockerFixture
 
 # Module Under Test
-import stubber.get_cpython 
+import stubber.get_cpython
 
 
 # No Mocks, does actual extraction using pip-install
@@ -42,7 +42,7 @@ def test_get_cpython_mocked(
     mocker: MockerFixture,
 ):
     """
-    test create stubs with mocks to avoid actual download and extraction 
+    test create stubs with mocks to avoid actual download and extraction
 
     """
     m_os_makedirs: MagicMock = mocker.patch("stubber.get_cpython.os.makedirs", autospec=True)
@@ -52,10 +52,8 @@ def test_get_cpython_mocked(
         tempfolder = cmd[3]
         # create a single file in the tempfolder
         (Path(tempfolder) / "testfile.py").touch()
-    
-    m_spr: MagicMock = mocker.patch("stubber.get_cpython.subprocess.run", autospec=True,  side_effect=mock_subprocess_run)
 
-    
+    m_spr: MagicMock = mocker.patch("stubber.get_cpython.subprocess.run", autospec=True, side_effect=mock_subprocess_run)
 
     stubber.get_cpython.get_core(requirements=requirements, stub_path=tmp_path)
     assert m_os_makedirs.call_count >= 1

@@ -1,3 +1,4 @@
+"Build stub packages - is a Light version of Publish command"
 from typing import List, Union
 
 import click
@@ -8,7 +9,7 @@ from tabulate import tabulate
 from stubber.utils.config import CONFIG
 
 
-@stubber_cli.command(name="publish")
+@stubber_cli.command(name="build")
 @click.option("--family", default="micropython", type=str, show_default=True)
 @click.option(
     "--version",
@@ -39,53 +40,16 @@ from stubber.utils.config import CONFIG
     help="multiple: ",
 )
 @click.option(
-    "--pypi/--test-pypi",
-    "production",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    prompt="Publish to PYPI (y) or Test-PYPI (n)",
-    help="publish to PYPI or Test-PYPI",
-)
-@click.option(
-    "--dry-run",
-    "dryrun",
-    is_flag=True,
-    default=False,
-    help="go though the motions but do not publish",
-)
-@click.option(
-    "--force",
-    is_flag=True,
-    default=False,
-    help="create new post release even if no changes detected",
-)
-@click.option(
     "--clean",
     is_flag=True,
     default=False,
     help="clean folders after processing and publishing",
 )
-
-# @click.option(
-#     "--type",
-#     "-t",
-#     "stub_type",
-#     default=ALL_TYPES[0],
-#     show_default=True,
-#     type=click.Choice(ALL_TYPES),
-#     help="stub type to publish",
-# )
-
-
-def cli_publish(
+def cli_build(
     family: str,
     versions: Union[str, List[str]],
     ports: Union[str, List[str]],
     boards: Union[str, List[str]],
-    production: bool,
-    dryrun: bool,
-    force: bool,
     clean: bool,
     # stub_type: str,
 ):
@@ -93,16 +57,13 @@ def cli_publish(
     Commandline interface to publish stubs.
     """
     # force overrules dryrun
-    if force:
-        dryrun = False
     # lists please
     versions = list(versions)
     ports = list(ports)
     boards = list(boards)
 
     # db = get_database(publish_path=CONFIG.publish_path, production=production)
-    destination = "pypi" if production else "test-pypi"
-    log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
+    log.info(f"Build {family} {versions} {ports} {boards}")
 
     results = publish_multiple(
         frozen=True,
@@ -110,9 +71,11 @@ def cli_publish(
         versions=versions,
         ports=ports,
         boards=boards,
-        production=production,
-        dryrun=dryrun,
-        force=force,
+        production=False,
+        dryrun=True,
+        force=False,
         clean=clean,
     )
-    log.info(tabulate(results, headers="keys"))
+    # log the number of results with no error
+    log.info(f"Build {len([r for r in results if not r['error']])} stubs")
+    print(tabulate(results, headers="keys"))

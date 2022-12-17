@@ -1,4 +1,4 @@
-from socket import * # type:  ignore
+from socket import *  # type:  ignore
 
 # socket.socket
 # Create STREAM TCP socket
@@ -7,8 +7,7 @@ socket(AF_INET, SOCK_STREAM)
 socket(AF_INET, SOCK_DGRAM)
 
 
-
 # poll: () -> _poll
 from select import poll
 
-x=poll()
+x = poll()

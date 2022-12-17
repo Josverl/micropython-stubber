@@ -5,9 +5,10 @@ import pytest
 from mock import MagicMock
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
+
 from stubber.freeze.common import get_portboard
 from stubber.freeze.freeze_folder import freeze_folders
-from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1
+# from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 # Module Under Test
 from stubber.freeze.get_frozen import freeze_any, get_manifests
@@ -28,28 +29,28 @@ from stubber.utils.repos import switch
     "path, port, board",
     [
         (
-            "C:\\develop\\MyPython\\TESTREPO-micropython\\ports\\esp32\\modules\\_boot.py",
+            "C:\\develop\\MyPython\\repos\\micropython\\ports\\esp32\\modules\\_boot.py",
             "esp32",
             "",
         ),
         (
-            "/develop/MyPython/TESTREPO-micropython/ports/esp32/modules/_boot.py",
+            "/develop/MyPython/repos/micropython/ports/esp32/modules/_boot.py",
             "esp32",
             "",
         ),
-        ("../TESTREPO-micropython/ports/esp32/modules/_boot.py", "esp32", ""),
+        ("./repos/micropython/ports/esp32/modules/_boot.py", "esp32", ""),
         (
-            "C:\\develop\\MyPython\\TESTREPO-micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py",
+            "C:\\develop\\MyPython\\repos\\micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py",
             "stm32",
             "PYBV11",
         ),
         (
-            "/develop/MyPython/TESTREPO-micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
+            "/develop/MyPython/repos/micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
             "stm32",
             "PYBV11",
         ),
         (
-            "../TESTREPO-micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
+            "./repos/micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
             "stm32",
             "PYBV11",
         ),
@@ -71,7 +72,7 @@ def test_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrepo_mi
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
     manifest = mpy_folder / "ports/esp32/boards/manifest.py"
-    freeze_one_manifest_1(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
+    freeze_one_manifest_2(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
 
     assert (tmp_path / "esp32/GENERIC" / "uasyncio/task.py").exists()
     # check if the task.py is included
@@ -116,34 +117,34 @@ def test_freeze_folders(
 #######################################################################################################################
 # manifest v1 , micropython v1.12 - v1.19
 #######################################################################################################################
-@pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
-# @pytest.mark.slow
-@pytest.mark.parametrize(
-    "mpy_version",
-    [
-        "v1.12",
-        "v1.16",
-        "v1.18",
-        "v1.19",
-    ],
-)
-# @pytest.mark.slow
-def test_freeze_one_manifest_v1(
-    mpy_version: str,
-    testrepo_micropython: Path,
-    testrepo_micropython_lib: Path,
-    tmp_path: Path,
-):
-    "test if task.py is included with the uasyncio frozen module"
-    mpy_folder = testrepo_micropython.absolute()
-    lib_folder = testrepo_micropython_lib.absolute()
-    stub_folder = tmp_path.absolute()
+# @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
+# # @pytest.mark.slow
+# @pytest.mark.parametrize(
+#     "mpy_version",
+#     [
+#         "v1.12",
+#         "v1.16",
+#         "v1.18",
+#         "v1.19",
+#     ],
+# )
+# # @pytest.mark.slow
+# def test_freeze_one_manifest_v1(
+#     mpy_version: str,
+#     testrepo_micropython: Path,
+#     testrepo_micropython_lib: Path,
+#     tmp_path: Path,
+# ):
+#     "test if task.py is included with the uasyncio frozen module"
+#     mpy_folder = testrepo_micropython.absolute()
+#     lib_folder = testrepo_micropython_lib.absolute()
+#     stub_folder = tmp_path.absolute()
 
-    switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+#     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
-    manifest = mpy_folder / "ports/esp32/boards/manifest.py"
-    freeze_one_manifest_1(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
-    # todo : add more checks
+#     manifest = mpy_folder / "ports/esp32/boards/manifest.py"
+#     freeze_one_manifest_1(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
+#     # todo : add more checks
 
 
 #######################################################################################################################
@@ -190,7 +191,15 @@ def test_freeze_one_manifest_v2(
 # @pytest.mark.slow
 @pytest.mark.parametrize(
     "mpy_version",
-    ["v1.12", "v1.16", "v1.18", "v1.19", "v1.19.1", "latest"],
+    [
+        "v1.12",
+        "v1.16",
+        "v1.17",
+        "v1.18",
+        "v1.19",
+        "v1.19.1",
+        "latest",
+    ],
 )
 def test_freeze_any(
     mpy_version: str,
@@ -213,13 +222,14 @@ def test_freeze_any(
 #######################################################################################################################
 
 # Some mocked tests to improve the coverage
-@pytest.mark.skip( "fails for unknown reason in CI, TODO: fix")
+# @pytest.mark.skip("fails for unknown reason in CI, TODO: fix")
 @pytest.mark.parametrize(
     "mpy_version",
     [
         "master",
         "v1.19",
         "v1.18",
+        "v1.17",
         "v1.16",
         "v1.12",
         "v1.10",
@@ -236,12 +246,13 @@ def test_freeze_any_mocked(
     "mocked test if we can freeze source using manifest.py files"
 
     m_freeze_folders: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
-    m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
+    # m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
     m_freeze_one_manifest_2: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
     x = freeze_any(tmp_path, version=mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-    calls = m_freeze_folders.call_count + m_freeze_one_manifest_1.call_count + m_freeze_one_manifest_2.call_count
+    # calls = m_freeze_folders.call_count + m_freeze_one_manifest_1.call_count + m_freeze_one_manifest_2.call_count
+    calls = m_freeze_folders.call_count + m_freeze_one_manifest_2.call_count
     print(f" m_freeze_folders.call_count {m_freeze_folders.call_count}")
-    print(f" m_freeze_one_manifest_1.call_count {m_freeze_one_manifest_1.call_count}")
+    # print(f" m_freeze_one_manifest_1.call_count {m_freeze_one_manifest_1.call_count}")
     print(f" m_freeze_one_manifest_2.call_count {m_freeze_one_manifest_2.call_count}")
 
     # TODO: fix me
@@ -259,7 +270,7 @@ def test_freeze_manifest2_error_mocked(
     "mocked test if we can freeze source using manifest.py files"
 
     m_freeze_folders: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
-    m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
+    # m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
     m_freeze_one_manifest_2: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
     # get the correct version to test
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
@@ -267,7 +278,7 @@ def test_freeze_manifest2_error_mocked(
     assert x >= 1, "expect >= 1 stubs"
     assert m_freeze_folders.call_count == 0, "expect no calls to freeze_folders"
     assert m_freeze_one_manifest_2.call_count == 34, "34 calls to freeze_one_manifest_2"
-    assert m_freeze_one_manifest_1.call_count == 0
+    # assert m_freeze_one_manifest_1.call_count == 0
 
 
 ##########################################################################

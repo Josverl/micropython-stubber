@@ -4,8 +4,8 @@
 import time
 from machine import I2C, Pin, freq
 
-#blue led on pin 2
-blue=Pin(5,Pin.OUT);
+# blue led on pin 2
+blue = Pin(5, Pin.OUT)
 
 for x in range(20):
     blue.value(0)
@@ -15,11 +15,11 @@ for x in range(20):
 
 blue.value(0)
 
-#---------------------------
+# ---------------------------
 # Toggle pin(value)
-#---------------------------
+# ---------------------------
 for x in range(20):
-    blue.value( (not blue.value()))
+    blue.value((not blue.value()))
     time.sleep_ms(100)
 
 # -----------------------
@@ -27,6 +27,7 @@ for x in range(20):
 # -----------------------
 
 import machine
+
 BlueLED = machine.PWM(machine.Pin(26), freq=1, duty=50)
 
 BlueLED.deinit()
@@ -34,148 +35,155 @@ BlueLED.deinit()
 # Fade LED
 import time
 import machine
-BlueLED = machine.PWM(machine.Pin(26), freq=5000, duty = 0)
+
+BlueLED = machine.PWM(machine.Pin(26), freq=5000, duty=0)
 for j in range(100):
     for i in range(100):
-       BlueLED.duty(i)
-       time.sleep(0.01)
+        BlueLED.duty(i)
+        time.sleep(0.01)
     for i in range(100, 0, -1):
-       BlueLED.duty(i)
-       time.sleep(0.01)
+        BlueLED.duty(i)
+        time.sleep(0.01)
 
 
 # -----------------------
 # run (another) script in the global scope
 # The Python functions eval and exec invoke the compiler at runtime,
 # which requires significant amounts of RAM
-# NOTE: In most cases it is better to use a well formed module 
+# NOTE: In most cases it is better to use a well formed module
 # and import that module, and call any required functions.
-#-----------------------
+# -----------------------
 # TODO: support `.read` on open('somescript.py').read()
-exec( open('somescript.py').read() , globals() ) # type:ignore
-exec( open('createstubs.py').read() , globals() ) # type:ignore
+exec(open("somescript.py").read(), globals())  # type:ignore
+exec(open("createstubs.py").read(), globals())  # type:ignore
 
 # -----------------------
-# set M5Stack speaker to off 
-# to avoid electonic whine when using pin 26 on PWM 
+# set M5Stack speaker to off
+# to avoid electonic whine when using pin 26 on PWM
 # https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/pin
 # -----------------------
 from machine import Pin
-#set speaker = Pin 25, output to 0 (silence)  
-speaker=Pin(25,Pin.OUT,value=0);
+
+# set speaker = Pin 25, output to 0 (silence)
+speaker = Pin(25, Pin.OUT, value=0)
 
 
-#-----------
+# -----------
 # Snippet WiFI
-# Start WiFi  
-#-----------
+# Start WiFi
+# -----------
 import network, time
-wifi_ssid='Bootcamp'
-wifi_psk='MicroPython'
+
+wifi_ssid = "Bootcamp"
+wifi_psk = "MicroPython"
 wlan = network.WLAN(network.STA_IF)
 tmo = 50
 if not wlan.isconnected():
-   print('connecting to network...')
-   wlan.active(True)
-   wlan.connect(wifi_ssid, wifi_psk)
-   #Wait for WiFi connection 
-   while not wlan.isconnected():
-       if tmo == 0:
-           break
-       #BlinkLed(led)
-       print(".", end="")
-       tmo -= 1
-       time.sleep_ms(200)
-   print()
-if tmo!=0: 
-   print('network config:', wlan.ifconfig())
-else: 
-   print('could not connect to WiFi')  
-   wlan.active(False)                  # get the interface's IP/netmask/gw/DNS addresses
+    print("connecting to network...")
+    wlan.active(True)
+    wlan.connect(wifi_ssid, wifi_psk)
+    # Wait for WiFi connection
+    while not wlan.isconnected():
+        if tmo == 0:
+            break
+        # BlinkLed(led)
+        print(".", end="")
+        tmo -= 1
+        time.sleep_ms(200)
+    print()
+if tmo != 0:
+    print("network config:", wlan.ifconfig())
+else:
+    print("could not connect to WiFi")
+    wlan.active(False)  # get the interface's IP/netmask/gw/DNS addresses
 
 
 # ------------------------
 # decode bytearray
 # ------------------------
 
-b = b'!A7B3\n'
-b.decode('utf8')
+b = b"!A7B3\n"
+b.decode("utf8")
 
 import binascii
-def decode(a:bytearray):
+
+
+def decode(a: bytearray):
     "bytearray to string"
     return binascii.hexlify(a).decode()
 
 
-
-#----------
-# Snippet: UniqueID 
-# retrieve The machines unique ID 
-#-----------
+# ----------
+# Snippet: UniqueID
+# retrieve The machines unique ID
+# -----------
 import machine, binascii
+
 id_hex = machine.unique_id()
-id_b= binascii.hexlify(id_hex)
-#optional - decode to string, takes 2x memory
-print( "Unique ID: {}".format( decode(machine.unique_id()) ) )
+id_b = binascii.hexlify(id_hex)
+# optional - decode to string, takes 2x memory
+print("Unique ID: {}".format(decode(machine.unique_id())))
 
 
 import machine, binascii
+
 id_hex = machine.unique_id()
-id_b= binascii.hexlify(id_hex)
-#optional - decode to string, takes 2x memory
+id_b = binascii.hexlify(id_hex)
+# optional - decode to string, takes 2x memory
 id_s = id_b.decode("utf-8")
-print( "Unique ID: {}".format( id_s ) )
+print("Unique ID: {}".format(id_s))
 
 # ------------------------
 # Scan for accesspoints
 # ------------------------
-import network;
-nic = network.WLAN(network.STA_IF);
+import network
+
+nic = network.WLAN(network.STA_IF)
 _ = nic.active(True)
-#networks = nic.scan()
-#sort on signal strength 
+# networks = nic.scan()
+# sort on signal strength
 networks = sorted(nic.scan(), key=lambda x: x[3], reverse=True)
 
 _f = "{0:<32} {2:>8} {3:>8} {4:>8} {5:>8}"
 
-print( _f.format("SSID","bssid","Channel","Signal","Authmode","Hidden") )
-for row in networks: 
-     print( _f.format( *row ) ) 
+print(_f.format("SSID", "bssid", "Channel", "Signal", "Authmode", "Hidden"))
+for row in networks:
+    print(_f.format(*row))
 
 del _f
 
-#------------------------------
+# ------------------------------
 # String formatting
 # https://pyformat.info/#simple
-#----------------------------- 
+# -----------------------------
 
-#basic New
-'{} {}'.format('one', 'two')
-#basic Old
-'%s %s' % ('one', 'two')
+# basic New
+"{} {}".format("one", "two")
+# basic Old
+"%s %s" % ("one", "two")
 
-#print information from a list ( one star )
-mylist = 'Jos', 'Verlinde'
-print('{} {}'.format( *mylist) )
+# print information from a list ( one star )
+mylist = "Jos", "Verlinde"
+print("{} {}".format(*mylist))
 
 
-#print information from a dict ( two star , use named )
-data = {'first': 'Jos', 'last': 'Verlinde'}
-print('{first} {last}'.format( **data ) )
-#or
-'{first} {last}'.format(first='Hodor', last='Hodor!')
+# print information from a dict ( two star , use named )
+data = {"first": "Jos", "last": "Verlinde"}
+print("{first} {last}".format(**data))
+# or
+"{first} {last}".format(first="Hodor", last="Hodor!")
 
-#Padding and alligning strings
-#Align right:
-'{:>10}'.format('test')
+# Padding and alligning strings
+# Align right:
+"{:>10}".format("test")
 
-#Align left:
-'{:10}'.format('test')
-#or 
-'{:<10}'.format('test')
+# Align left:
+"{:10}".format("test")
+# or
+"{:<10}".format("test")
 
 # format as type
-'{:X}'.format(511)
+"{:X}".format(511)
 
 # Type	Meaning
 # 'b'	Binary format. Outputs the number in base 2.
@@ -187,38 +195,38 @@ print('{first} {last}'.format( **data ) )
 # 'n'	Number. This is the same as 'd', except that it uses the current locale setting to insert the appropriate number separator characters.
 # None	The same as 'd'.
 
-#Padding numbers
-#Similar to strings numbers can also be constrained to a specific width.
-'{:4d}'.format(42)
+# Padding numbers
+# Similar to strings numbers can also be constrained to a specific width.
+"{:4d}".format(42)
 
 
-#For floating points the padding value represents the length of the complete output. In the example below we want our output to have at least 6 characters with 2 after the decimal point.
-'{:6.2f}'.format(3.141592653589793)
-#leading zero
-'{:06.2f}'.format(3.141592653589793)
+# For floating points the padding value represents the length of the complete output. In the example below we want our output to have at least 6 characters with 2 after the decimal point.
+"{:6.2f}".format(3.141592653589793)
+# leading zero
+"{:06.2f}".format(3.141592653589793)
 
 
-#For integer values providing a precision doesn't make much sense and is actually forbidden in the new style (it will result in a ValueError).
-'{:04d}'.format(42)
+# For integer values providing a precision doesn't make much sense and is actually forbidden in the new style (it will result in a ValueError).
+"{:04d}".format(42)
 
-#Signed
-'{:+4d}'.format(42)
+# Signed
+"{:+4d}".format(42)
 
-#Use a space character to indicate that negative numbers should be prefixed with a minus symbol and a leading space should be used for positive ones.
-'{: d}'.format((- 23))
+# Use a space character to indicate that negative numbers should be prefixed with a minus symbol and a leading space should be used for positive ones.
+"{: d}".format((-23))
 
 
-#Datetime
+# Datetime
 # New style formatting also allows objects to control their own rendering. This for example allows datetime objects to be formatted inline:
 # This operation is not available with old-style formatting.
-# TODO: Add MicroPython Date and Time Format sample 
+# TODO: Add MicroPython Date and Time Format sample
 
 
-#------------------------------
-# Handling errors 
-# Try/catch 
-# todo: add example with different errors 
-#------------------------------
+# ------------------------------
+# Handling errors
+# Try/catch
+# todo: add example with different errors
+# ------------------------------
 
 # try:
 #     #main code
@@ -229,10 +237,11 @@ print('{first} {last}'.format( **data ) )
 
 # raise an error
 if 0:
-    raise ValueError('A very specific bad thing happened.')
+    raise ValueError("A very specific bad thing happened.")
 
-# Best practice in handling errors and logging: 
+# Best practice in handling errors and logging:
 import logging
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -240,38 +249,39 @@ try:
     a = 1 / 0
 except Exception as error:
     logger.error(error)
-    raise                 # just this!
+    raise  # just this!
 
-#-----------------------------------------
+# -----------------------------------------
 # handle specific OSErrors using e.args[0]
-#-----------------------------------------
+# -----------------------------------------
 import errno
 import os
-#ensure a folder exists
+
+# ensure a folder exists
 try:
-    os.mkdir('existing')
+    os.mkdir("existing")
 except OSError as e:
-    if e.args[0] != errno.EEXIST: 
+    if e.args[0] != errno.EEXIST:
         print(e, "unexpected error creating folder")
 
 
-#------------------------------
+# ------------------------------
 # mount SDCard MicroPython 1.11
-# SDCard configuration 
-#  - Lolin32/TTGO 8 v1.8    SDCard(slot=1, width=4),                                        # SD mode 4 bit 
+# SDCard configuration
+#  - Lolin32/TTGO 8 v1.8    SDCard(slot=1, width=4),                                        # SD mode 4 bit
 #  - M5Stack Core           SDCard(slot=2, width=1, sck=18, miso=19, mosi=23, cs=4), "/sd") # SPI 1 bit
 # https://docs.micropython.org/en/latest/library/machine.SDCard.html#esp32
-#------------------------------
+# ------------------------------
 
-import machine 
-import uos as os 
+import machine
+import uos as os
 
-#Mount SD to /sd
-try: 
+# Mount SD to /sd
+try:
     # Some boards have pulldown and/or LED on GPIO2, pullup avoids issues on TTGO 8 v1.8
     # machine.Pin(2,mode=machine.Pin.IN, pull=machine.Pin.PULL_UP)
     # os.mount(machine.SDCard(slot=1, width=4), "/sd")  # SD mode 4 bit
-    
+
     # # SPI 1 bit M5Stack Core
     os.mount(machine.SDCard(slot=2, width=1, sck=18, miso=19, mosi=23, cs=4), "/sd")  # SPI 1 bit M5Stack Core
     print("SD Card mounted")
@@ -280,18 +290,15 @@ except OSError as e:
         print("No SD Card found")
 
 
-print(os.listdir('/'))
-print(os.listdir('/sd'))
+print(os.listdir("/"))
+print(os.listdir("/sd"))
 
 
-
-
-
-#------------------------------
+# ------------------------------
 # convert a binary string to usable data
 # For more information on format strings and endiannes, refer to
 # https://docs.python.org/3.5/library/struct.html
-#------------------------------
+# ------------------------------
 
 import struct
 
@@ -299,7 +306,7 @@ import struct
 # The first parameter is the format string. Here it specifies the data is structured
 # with a single four-byte integer followed by two characters.
 # The rest of the parareadings are the values for each item in order
-binary_data = struct.pack("icc", 8499000, b'A', b'Z')
+binary_data = struct.pack("icc", 8499000, b"A", b"Z")
 print(binary_data)
 
 
@@ -313,9 +320,9 @@ import logging
 x = "something"
 
 logging.basicConfig(level=logging.DEBUG)
-# log = logging.getLogger(__name__)      
-# in modules the __name__ variable can be used 
-log = logging.getLogger('<keyword>')
+# log = logging.getLogger(__name__)
+# in modules the __name__ variable can be used
+log = logging.getLogger("<keyword>")
 
 log.critical("critical debug message")
 log.error("debug message")
@@ -324,49 +331,54 @@ log.info("debug message")
 log.debug("debug value{}".format(x))
 
 
-
-#------------------------------
+# ------------------------------
 # Class using Python's with statement for managing resources that need to be cleaned up.
-# The problem with using an explicit close() or deinit() statement is that you have to 
+# The problem with using an explicit close() or deinit() statement is that you have to
 # worry about people forgetting to call it at all or forgetting to place it in a finally block
 # to prevent a resource leak when an exception occurs.
-#------------------------------
+# ------------------------------
 class SkeletonFixture:
     def __init__(self):
         pass
+
     def __enter__(self):
         return self
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.deinit()
+
     def deinit(self):
         pass
+
     def method(self):
         pass
 
-# example use 
+
+# example use
 with SkeletonFixture() as fixture:
     fixture.method()
 
 
-#--------------------------------------
-# offline download modules 
-#--------------------------------------
+# --------------------------------------
+# offline download modules
+# --------------------------------------
 
 # import the network module
 
 
-#--------------------------------------
+# --------------------------------------
 # Connect to the network (ESP32 / ESP8622)
-#--------------------------------------
-import network , utime 
-# create station interface - Standard WiFi client 
-wlan = network.WLAN(network.STA_IF) 
+# --------------------------------------
+import network, utime
+
+# create station interface - Standard WiFi client
+wlan = network.WLAN(network.STA_IF)
 wlan.config(dhcp_hostname="foo-bar-baz")
 wlan.active(True)
-wlan.connect('micropython', 'micropython')   
+wlan.connect("micropython", "micropython")
 
-# Note that this may take some time, so we need to wait 
-# Wait 5 sec or until connected 
+# Note that this may take some time, so we need to wait
+# Wait 5 sec or until connected
 tmo = 50
 while not wlan.isconnected():
     utime.sleep_ms(100)
@@ -374,98 +386,105 @@ while not wlan.isconnected():
     if tmo == 0:
         break
 
-# check if the station is connected to an AP            
-if wlan.isconnected(): 
+# check if the station is connected to an AP
+if wlan.isconnected():
     print("=== Station Connected to WiFi \n")
     config = wlan.ifconfig()
-    print("IP:{0}, Network mask:{1}, Router:{2}, DNS: {3}".format( *config ))
+    print("IP:{0}, Network mask:{1}, Router:{2}, DNS: {3}".format(*config))
 else:
     print("!!! Not able to connect to WiFi")
 
 
-
-
-#--------------------------------------
+# --------------------------------------
 # Get curent time from the internet - MicroPython
 # get current time from NTP
-#--------------------------------------
+# --------------------------------------
 from machine import RTC
+
 rtc = RTC()
+
+
 def cb_sync():
     "sync with ntp periodically"
-    ntptime2.settime(tzoffset=-1) # set the rtc datetime from the remote server
+    ntptime2.settime(tzoffset=-1)  # set the rtc datetime from the remote server
+
 
 tim_ntp = Timer(-1)
-tim_ntp.init(period=60*60*1000, mode=Timer.PERIODIC, callback=cb_sync)
+tim_ntp.init(period=60 * 60 * 1000, mode=Timer.PERIODIC, callback=cb_sync)
 
 cb_sync()
 
-dt=rtc.datetime()    # get the date and time in UTC
+dt = rtc.datetime()  # get the date and time in UTC
 print("{4:02}:{5:02}:{6:02}".format(*dt))
-
 
 
 def wifiscan():
     "Scan for accesspointsand display them sorted by network strength"
-    import network #pylint: disable=import-error
+    import network  # pylint: disable=import-error
+
     wlan = network.WLAN(network.STA_IF)
     _ = wlan.active(True)
 
-    #Scan WiFi network and return the list of available access points.
-    #If the optional argument hidden is set to True the hidden access points (not broadsasting SSID) will also be scanned.
-    #Each list entry is a tuple with the following items:
-    #(ssid, bssid, primary_chan, rssi (signal Strength), auth_mode, auth_mode_string, hidden)
+    # Scan WiFi network and return the list of available access points.
+    # If the optional argument hidden is set to True the hidden access points (not broadsasting SSID) will also be scanned.
+    # Each list entry is a tuple with the following items:
+    # (ssid, bssid, primary_chan, rssi (signal Strength), auth_mode, auth_mode_string, hidden)
     _networks = wlan.scan(True)
-    #sort on signal strength 
+    # sort on signal strength
     _networks = sorted(_networks, key=lambda x: x[3], reverse=True)
-    #string to define columns and formatting
+    # string to define columns and formatting
     _f = "{0:<32} {2:>8} {3:>8} {5:15} {6:>8}"
-    print( _f.format("SSID",'mac',"Channel","Signal","0","Authmode","Hidden") )
-    for row in _networks: 
-        print( _f.format( *row ) ) 
+    print(_f.format("SSID", "mac", "Channel", "Signal", "0", "Authmode", "Hidden"))
+    for row in _networks:
+        print(_f.format(*row))
     del _f
 
-#--------------------------------
-# define and use an array of bytes 
-#--------------------------------
-from array import array 
-dmx_message = array('B', [0] * 100)
-print(dmx_message[42] )
 
-#-------------------------------------------------------------
+# --------------------------------
+# define and use an array of bytes
+# --------------------------------
+from array import array
+
+dmx_message = array("B", [0] * 100)
+print(dmx_message[42])
+
+# -------------------------------------------------------------
 #  Identifying the slowest section of code
-#-------------------------------------------------------------
-# This is a process known as profiling and is covered in textbooks and (for standard Python) supported by various software tools. 
-# For the type of smaller embedded application likely to be running on MicroPython platforms the slowest function or method can usually 
+# -------------------------------------------------------------
+# This is a process known as profiling and is covered in textbooks and (for standard Python) supported by various software tools.
+# For the type of smaller embedded application likely to be running on MicroPython platforms the slowest function or method can usually
 # be established by judicious use of the timing ticks group of functions documented in utime. Code execution time can be measured in ms, us, or CPU cycles.
 #
 # The following enables any function or method to be timed by adding an @timed_function decorator:
 import utime
 
+
 def timed_function(f, *args, **kwargs):
     "enables any function or method to be timed by adding an @timed_function decorator"
-    myname = str(f).split(' ')[1]
+    myname = str(f).split(" ")[1]
+
     def new_func(*args, **kwargs):
         t = utime.ticks_us()
         result = f(*args, **kwargs)
         delta = utime.ticks_diff(utime.ticks_us(), t)
-        print('Function {} Time = {:6.3f}ms'.format(myname, delta/1000))
+        print("Function {} Time = {:6.3f}ms".format(myname, delta / 1000))
         return result
+
     return new_func
+
 
 @timed_function
 def foo():
     pass
 
 
-
-
-#-------------------------------------------------------------
-# simple function result caching 
+# -------------------------------------------------------------
+# simple function result caching
 # Ref: https://dbader.org/blog/python-memoization
-#-------------------------------------------------------------
+# -------------------------------------------------------------
 # decorator to ret
-# 
+#
+
 
 def memoize(func):
     "basic moemoization, will eat memory"
@@ -479,6 +498,7 @@ def memoize(func):
         return result
 
     return memoized_func
+
 
 # example of  fibonacci
 def fibonacci(n):
@@ -498,10 +518,12 @@ def fibonacci(n):
         return 1
     return fibonacci(n - 1) + fibonacci(n - 2)
 
-#-------------------------------------------------------------
-# take a number of itemes from an iterable list / database / thing 
-# ref : https://anandology.com/python-practice-book/iterators.html#generators 
-#-------------------------------------------------------------
+
+# -------------------------------------------------------------
+# take a number of itemes from an iterable list / database / thing
+# ref : https://anandology.com/python-practice-book/iterators.html#generators
+# -------------------------------------------------------------
+
 
 def take(n, seq):
     """Returns first n values from the given sequence."""
@@ -514,12 +536,13 @@ def take(n, seq):
         pass
     return result
 
-#-------------------------------------------------------------
+
+# -------------------------------------------------------------
 #
-#-------------------------------------------------------------
-def isMicroPython()->bool:
+# -------------------------------------------------------------
+def isMicroPython() -> bool:
     "runtime test to determine full or micropython"
-    #pylint: disable=unused-variable,eval-used
+    # pylint: disable=unused-variable,eval-used
     try:
         # both should fail on micropython, just to be sure
         # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
@@ -530,14 +553,14 @@ def isMicroPython()->bool:
     except (NotImplementedError, SyntaxError):
         return True
 
+
 print("MicroPython" if isMicroPython() else "python")
 
-#-------------------------------------------------------------
-# 
-#-------------------------------------------------------------
+# -------------------------------------------------------------
+#
+# -------------------------------------------------------------
 # M5 stick scan internal I2C bus
-from machine import I2C,Pin
-i2c = I2C(0,freq=400000,scl=Pin(22),sda=Pin(21))
+from machine import I2C, Pin
+
+i2c = I2C(0, freq=400000, scl=Pin(22), sda=Pin(21))
 i2c.scan()
-
-

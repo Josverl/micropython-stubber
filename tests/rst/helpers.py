@@ -1,5 +1,5 @@
 # others
-from typing import  List, Union
+from typing import List, Union
 
 # SOT
 from stubber.stubs_from_docs import RSTReader

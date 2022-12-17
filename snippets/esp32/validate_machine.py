@@ -8,7 +8,6 @@ machine.freq()  # get the current frequency of the CPU
 machine.freq(240000000)  # set the CPU frequency to 240 MHz
 
 
-
 # Pins and GPIO
 # Use the machine.Pin class:
 
@@ -46,7 +45,7 @@ duty = pwm0.duty()  # get current duty cycle, range 0-1023 (default 512, 50%)
 pwm0.duty(256)  # set duty cycle from 0 to 1023 as a ratio duty/1023, (now 25%)
 
 duty_u16 = pwm0.duty_u16()  # get current duty cycle, range 0-65535
-pwm0.duty_u16(2 ** 16 * 3 // 4)  # set duty cycle from 0 to 65535 as a ratio duty_u16/65535, (now 75%)
+pwm0.duty_u16(2**16 * 3 // 4)  # set duty cycle from 0 to 65535 as a ratio duty_u16/65535, (now 75%)
 
 duty_ns = pwm0.duty_ns()  # get current pulse width in ns
 pwm0.duty_ns(250_000)  # set pulse width in nanoseconds from 0 to 1_000_000_000/freq, (now 25%)
@@ -114,7 +113,6 @@ i2c.readfrom(0x3A, 4)  # read 4 bytes from device with address 0x3a
 i2c.writeto(0x3A, "12")  # write '12' to device with address 0x3a
 
 
-
 # Hardware I2C bus
 
 from machine import Pin, I2C
@@ -139,6 +137,7 @@ i2s.readinto(buf)  # fill buffer with audio samples from I2S device
 # Real time clock (RTC)
 
 from machine import RTC
+
 rtc = RTC()
 rtc.datetime((2017, 8, 23, 1, 12, 48, 0, 0))  # set a specific date and time
 rtc.datetime()  # get date and time
@@ -171,8 +170,8 @@ import machine, os
 sd = machine.SDCard(slot=1)
 
 os.mount(sd, "/sd")  # mount
-os.listdir('/sd')    # list directory contents
-os.umount('/sd')     # eject
+os.listdir("/sd")  # list directory contents
+os.umount("/sd")  # eject
 
 # OneWire driver
 
@@ -204,6 +203,4 @@ for rom in roms:
 from machine import TouchPad, Pin
 
 t = TouchPad(Pin(14))
-t.read()              # Returns a smaller number when touched
-
-
+t.read()  # Returns a smaller number when touched

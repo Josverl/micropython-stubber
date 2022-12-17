@@ -1,16 +1,18 @@
 from pathlib import Path
 import pytest
 from mock import MagicMock
-from packaging.version import Version
-from pytest_mock import MockerFixture
 from stubber.publish.merge_docstubs import merge_all_docstubs, copy_docstubs
 
 from .fakeconfig import FakeConfig
 
 
 @pytest.mark.mocked
+@pytest.mark.integration
 def test_merge_all_docstubs_mocked(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
+    if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
+        pytest.skip("Integration test: micropython-stubs repo not found")
+
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.merge_docstubs.CONFIG", config)
@@ -38,11 +40,11 @@ def test_copydocstubs_mocked(mocker, tmp_path, pytestconfig):
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.merge_docstubs.CONFIG", config)
 
-    m_enrich_folder: MagicMock = mocker.patch("stubber.publish.merge_docstubs.enrich_folder", autospec=True, return_value = 42)
+    m_enrich_folder: MagicMock = mocker.patch("stubber.publish.merge_docstubs.enrich_folder", autospec=True, return_value=42)
     m_copytree: MagicMock = mocker.patch("stubber.publish.merge_docstubs.shutil.copytree", autospec=True)
     m_copy: MagicMock = mocker.patch("stubber.publish.merge_docstubs.shutil.copy", autospec=True)
 
-    # use files already in test set 
+    # use files already in test set
     fw_path = Path(".") / "tests" / "data" / "micropython-1.18-esp32"
     docstub_path = Path(".") / "tests" / "data" / "micropython-1.18-docstubs"
     dest_path = tmp_path / "micropython-merged"
@@ -52,5 +54,3 @@ def test_copydocstubs_mocked(mocker, tmp_path, pytestconfig):
     assert m_enrich_folder.call_count == 1
     assert m_copytree.call_count == 1
     assert m_copy.call_count == 1
-
-

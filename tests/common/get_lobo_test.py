@@ -7,4 +7,4 @@ import stubber.get_lobo as get_lobo
 def test_get_lobo(tmp_path):
     get_lobo.get_frozen(tmp_path)
     filecount = len(list(tmp_path.iterdir()))
-    assert filecount == 15+1, "there should be 15 files + 1 manifest"
+    assert filecount == 15 + 1, "there should be 15 files + 1 manifest"

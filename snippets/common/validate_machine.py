@@ -34,7 +34,6 @@ uart1.write("hello")  # write 5 bytes
 uart1.read(5)  # read up to 5 bytes
 
 
-
 # Software SPI bus
 
 
@@ -113,7 +112,7 @@ wdt.feed()
 import machine
 
 # check if the device woke from a deep sleep
-if machine.reset_cause() == machine.DEEPSLEEP_RESET: # type: ignore - not on all ports
+if machine.reset_cause() == machine.DEEPSLEEP_RESET:  # type: ignore - not on all ports
     print("woke from a deep sleep")
 
 # put the device to sleep for 10 seconds
@@ -126,8 +125,8 @@ import machine, os
 sd = machine.SDCard(slot=2)
 
 os.mount(sd, "/sd")  # mount
-os.listdir('/sd')    # list directory contents
-os.umount('/sd')     # eject
+os.listdir("/sd")  # list directory contents
+os.umount("/sd")  # eject
 
 # OneWire driver
 
@@ -150,6 +149,4 @@ ow.select_rom(b"12345678")  # select a specific device by its ROM code
 from machine import TouchPad, Pin
 
 t = TouchPad(Pin(14))
-t.read()              # Returns a smaller number when touched
-
-
+t.read()  # Returns a smaller number when touched
