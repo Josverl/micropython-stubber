@@ -89,11 +89,9 @@ from .rst import (
 )
 from .utils.config import CONFIG
 
-# logging
-# # log = logging.getLogger(__name__)
+
 
 NEW_OUTPUT = True
-#: self.gather_docs = True
 SEPERATOR = "::"
 
 
