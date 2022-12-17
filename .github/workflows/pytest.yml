@@ -67,12 +67,6 @@ jobs:
       - name: stubber clone
         run: poetry run stubber clone --add-stubs
 
-      # - name: flag tools executable (on linux)
-      #   if: runner.os == 'Linux'
-      #   run: |
-      #     chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
-      #     MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_18 -c "import sys;print(sys.path);import logging"
-
       - name: create or update minified version
         run: |
           poetry run stubber minify --all --compile
