@@ -1,4 +1,4 @@
-"Build stub packages - is a Light version of Publish command" 
+"Build stub packages - is a Light version of Publish command"
 from typing import List, Union
 
 import click
@@ -45,7 +45,6 @@ from stubber.utils.config import CONFIG
     default=False,
     help="clean folders after processing and publishing",
 )
-
 def cli_build(
     family: str,
     versions: Union[str, List[str]],
@@ -77,6 +76,6 @@ def cli_build(
         force=False,
         clean=clean,
     )
-    # log the number of results with no error 
+    # log the number of results with no error
     log.info(f"Build {len([r for r in results if not r['error']])} stubs")
     print(tabulate(results, headers="keys"))

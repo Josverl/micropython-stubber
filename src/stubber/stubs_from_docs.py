@@ -90,7 +90,6 @@ from .rst import (
 from .utils.config import CONFIG
 
 
-
 NEW_OUTPUT = True
 SEPERATOR = "::"
 
