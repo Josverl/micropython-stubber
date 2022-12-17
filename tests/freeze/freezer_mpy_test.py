@@ -6,6 +6,7 @@ from mock import MagicMock
 
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
+
 from stubber.freeze.common import get_portboard
 from stubber.freeze.freeze_folder import freeze_folders
 
@@ -193,7 +194,15 @@ def test_freeze_one_manifest_v2(
 # @pytest.mark.slow
 @pytest.mark.parametrize(
     "mpy_version",
-    ["v1.12", "v1.16", "v1.18", "v1.19", "v1.19.1", "latest"],
+    [
+        "v1.12",
+        "v1.16",
+        "v1.17",
+        "v1.18",
+        "v1.19",
+        "v1.19.1",
+        "latest",
+    ],
 )
 def test_freeze_any(
     mpy_version: str,
@@ -223,6 +232,7 @@ def test_freeze_any(
         "master",
         "v1.19",
         "v1.18",
+        "v1.17",
         "v1.16",
         "v1.12",
         "v1.10",

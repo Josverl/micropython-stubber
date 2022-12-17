@@ -1,16 +1,18 @@
 from pathlib import Path
 import pytest
 from mock import MagicMock
-from packaging.version import Version
-from pytest_mock import MockerFixture
 from stubber.publish.merge_docstubs import merge_all_docstubs, copy_docstubs
 
 from .fakeconfig import FakeConfig
 
 
 @pytest.mark.mocked
+@pytest.mark.integration
 def test_merge_all_docstubs_mocked(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
+    if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
+        pytest.skip("Integration test: micropython-stubs repo not found")
+
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.merge_docstubs.CONFIG", config)

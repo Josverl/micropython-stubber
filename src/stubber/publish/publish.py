@@ -29,26 +29,29 @@ NOTE: stubs and publish paths can be located in different locations and reposito
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
 
+import shutil
 from itertools import chain
 from typing import Any, Dict, List, Union
 
 from loguru import logger as log
 from pysondb import PysonDB
+
 from stubber.publish.bump import bump_postrelease
-from stubber.publish.candidates import frozen_candidates, firmware_candidates, docstub_candidates
+from stubber.publish.candidates import (docstub_candidates,
+                                        firmware_candidates, frozen_candidates)
 from stubber.publish.database import get_database
-from stubber.publish.package import StubSource, create_package, get_package_info, package_name
+from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
+from stubber.publish.package import (StubSource, create_package,
+                                     get_package_info, package_name)
 from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
-import shutil
 
 # ######################################
 # micropython-doc-stubs
 # ######################################
-# todo : Publish: Integrate doc stubs in publishing loop
+
 def publish(
     *,
     db: PysonDB,
@@ -196,7 +199,7 @@ def publish_one(
     clean: bool = False,
     force: bool = False,
 ):
-    "Publish a bunch of stub packages"
+    "Publish a bunch of stub packages of the same version"
     db = get_database(CONFIG.publish_path, production=production)
     l = list(frozen_candidates(family=family, versions=versions, ports=ports, boards=boards))
     result = None

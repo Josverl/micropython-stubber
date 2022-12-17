@@ -2,8 +2,9 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Union
 
-import stubber.basicgit as git
 from packaging.version import parse
+
+import stubber.basicgit as git
 from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version, micropython_versions
@@ -22,7 +23,7 @@ def subfolder_names(path: Path):
                 yield child.name
 
 
-def version_cadidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldest=OLDEST_VERSION) -> Generator[str, None, None]:
+def version_candidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldest=OLDEST_VERSION) -> Generator[str, None, None]:
     "get a list of versions for the given family and suffix"
     if path.exists():
         folder_re = prefix + "-(.*)-" + suffix
@@ -94,7 +95,7 @@ def frozen_candidates(
         board and port are ignored, they are looked up from the available frozen stubs
     - versions = 'latest' , 'auto' or a list of versions
     - port = 'auto' or a specific port
-    - board = 'auto' or a specific board, 'GENERIC' shoould be specifid in CAPS
+    - board = 'auto' or a specific board, 'GENERIC' must be specified in ALLCAPS
     """
     auto_port = isinstance(ports, str) and "auto" == ports or isinstance(ports, list) and "auto" in ports
     auto_board = isinstance(boards, str) and "auto" == boards or isinstance(boards, list) and "auto" in boards
@@ -102,7 +103,7 @@ def frozen_candidates(
 
     if isinstance(versions, str):
         if auto_version:
-            versions = list(version_cadidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
+            versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
         else:
             versions = [versions]
     versions = [clean_version(v, flat=True) for v in versions]
@@ -172,7 +173,7 @@ def docstub_candidates(
     """
     if isinstance(versions, str):
         if "auto" == versions:  # auto with vprefix ...
-            versions = list(version_cadidates(suffix="docstubs", prefix=family, path=path))
+            versions = list(version_candidates(suffix="docstubs", prefix=family, path=path))
         else:
             versions = [versions]
     versions = [clean_version(v, flat=True) for v in versions]

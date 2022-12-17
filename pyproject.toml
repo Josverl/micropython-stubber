@@ -115,6 +115,7 @@ addopts = "-v -sv  -m 'not basicgit'"
 
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: Integration tests (slower)",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "mocked: to replace/compensate for most of the slow and git tests",
     #
