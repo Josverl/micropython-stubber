@@ -27,4 +27,4 @@ class FakeConfig:
             self.stub_path = rootpath / "repos/micropython-stubs/stubs"
             self.template_path = rootpath / "tests/publish/data/template"
 
-            self.publish_path.mkdir(parents=True)
+            self.publish_path.mkdir(parents=True, exist_ok=True)

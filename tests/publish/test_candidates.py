@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_cadidates
+
+from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_candidates
 
 
 def test_subfoldernames(tmp_path, pytestconfig):
@@ -18,7 +19,7 @@ def test_subfoldernames(tmp_path, pytestconfig):
 def test_version_candidates(pytestconfig, suffix, count):
     # test data
     path: Path = pytestconfig.rootpath / "tests/publish/data/stub-version"
-    versions = version_cadidates(suffix, path=path)
+    versions = version_candidates(suffix, path=path)
     assert isinstance(versions, Generator)
     l = list(versions)
     assert len(l) == count
@@ -28,7 +29,7 @@ def test_version_candidates(pytestconfig, suffix, count):
 def test_version_prefix(pytestconfig, prefix, suffix, count):
     # test data
     path: Path = pytestconfig.rootpath / "tests/publish/data/stub-version"
-    versions = version_cadidates(prefix=prefix, suffix=suffix, path=path)
+    versions = version_candidates(prefix=prefix, suffix=suffix, path=path)
     assert isinstance(versions, Generator)
     l = list(versions)
     assert len(l) == count
