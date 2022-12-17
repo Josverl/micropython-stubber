@@ -3,16 +3,13 @@ from pathlib import Path
 
 import pytest
 from mock import MagicMock
-
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
 
 from stubber.freeze.common import get_portboard
 from stubber.freeze.freeze_folder import freeze_folders
-
 # from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
-
 # Module Under Test
 from stubber.freeze.get_frozen import freeze_any, get_manifests
 from stubber.utils.repos import switch
@@ -32,28 +29,28 @@ from stubber.utils.repos import switch
     "path, port, board",
     [
         (
-            "C:\\develop\\MyPython\\TESTREPO-micropython\\ports\\esp32\\modules\\_boot.py",
+            "C:\\develop\\MyPython\\repos\\micropython\\ports\\esp32\\modules\\_boot.py",
             "esp32",
             "",
         ),
         (
-            "/develop/MyPython/TESTREPO-micropython/ports/esp32/modules/_boot.py",
+            "/develop/MyPython/repos/micropython/ports/esp32/modules/_boot.py",
             "esp32",
             "",
         ),
-        ("../TESTREPO-micropython/ports/esp32/modules/_boot.py", "esp32", ""),
+        ("./repos/micropython/ports/esp32/modules/_boot.py", "esp32", ""),
         (
-            "C:\\develop\\MyPython\\TESTREPO-micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py",
+            "C:\\develop\\MyPython\\repos\\micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py",
             "stm32",
             "PYBV11",
         ),
         (
-            "/develop/MyPython/TESTREPO-micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
+            "/develop/MyPython/repos/micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
             "stm32",
             "PYBV11",
         ),
         (
-            "../TESTREPO-micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
+            "./repos/micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
             "stm32",
             "PYBV11",
         ),
