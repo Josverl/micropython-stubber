@@ -1,45 +1,63 @@
 {
-	"folders": [
-		{
-			"path": "board"
-		},
-		{
-			"path": "."
-		},
-		{
-			"path": "snippets"
-		},
-		{
-			"path": "minified"
-		}
-	],
-	"settings": {
-		"python.analysis.logLevel": "Trace",
-		"terminal.integrated.persistentSessionReviveProcess": "never",
-		"todo-tree.filtering.ignoreGitSubmodules": true,
-		"todo-tree.filtering.excludeGlobs": [
-			"**/node_modules",
-			"**/.venv"
-		],
-		"todo-tree.general.debug": true,
-		"todo-tree.general.tags": [
-			"BUG",
-			"HACK",
-			"FIXME",
-			"TODO",
-			"[ ]",
-			"[x]"
-		],
-		"pymakr.debug.logLevel": "trace",
-		"pymakr.ignore": [
-			".vscode",
-			".gitignore",
-			".git",
-			"env",
-			"venv",
-			"stubs",
-			"__*",
-			".*"
-		]
-	}
+    "folders": [
+        {
+            "path": ".",
+            "name": "stubber rootfolder"
+        },
+        {
+            "path": "snippets/common",
+            "name": "snippets/common"
+        },
+        {
+            "path": "snippets/stm32",
+            "name": "snippets/stm32"
+        },
+        {
+            "path": "snippets/esp32",
+            "name": "snippets/esp32"
+        },
+        {
+            "path": "snippets/esp8266",
+            "name": "snippets/esp8266"
+        },
+        {
+            "path": "snippets/rp2",
+            "name": "snippets/rp2"
+        },
+        {
+            "path": "board",
+        },
+        {
+            "path": "minified",
+        }
+    ],
+    "settings": {
+        "python.analysis.logLevel": "Trace",
+        "terminal.integrated.persistentSessionReviveProcess": "never",
+        "todo-tree.filtering.ignoreGitSubmodules": true,
+        "todo-tree.filtering.excludeGlobs": [
+            "**/node_modules",
+            "**/.venv"
+        ],
+        "todo-tree.general.debug": true,
+        "todo-tree.general.tags": [
+            "BUG",
+            "HACK",
+            "FIXME",
+            "TODO",
+            "[ ]",
+            "[x]"
+        ],
+        "pymakr.debug.logLevel": "trace",
+        "pymakr.ignore": [
+            ".vscode",
+            ".gitignore",
+            ".git",
+            "env",
+            "venv",
+            "stubs",
+            "__*",
+            ".*"
+        ]
+    }
 }

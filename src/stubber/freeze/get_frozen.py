@@ -26,7 +26,8 @@ from loguru import logger as log
 from packaging.version import Version
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
-from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
+
+# from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 from stubber.utils.config import CONFIG
 
@@ -101,14 +102,14 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
                 except Exception as e:
                     log.warning(f"Failed to freeze manifest {manifest} with manifest_2, trying manifest_1")
                     try:
-                        freeze_one_manifest_1(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
+                        freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
                         count += 1
                     except Exception as e:
                         log.error(f"Error processing manifest {manifest} : {e}")
 
             elif Version(version) >= Version("1.12"):
                 try:
-                    freeze_one_manifest_1(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
+                    freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
                     count += 1
                 except Exception as e:
                     log.error(f"Error processing manifest {manifest} : {e}")

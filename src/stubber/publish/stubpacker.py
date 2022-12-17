@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
@@ -29,7 +29,7 @@ from stubber.utils.versions import clean_version
 
 class StubPackage:
     """
-    Create a stub-only package for a specific version of micropython
+    Create a stub-only package for a specific version , port and board of micropython
 
     properties:
         - toml_path - the path to the `pyproject.toml` file
@@ -244,43 +244,45 @@ class StubPackage:
          - 3 - remove *.py files from the package folder
 
         """
+        # First check if all stub source folders exist
+        for n in range(len(self.stub_sources)):
+            stub_type, fw_path = self.stub_sources[n]
+            # update to use -merged
+            if stub_type == StubSource.FIRMWARE:
+                # Check if -merged folder exists and use that instead
+                if fw_path.name.endswith("-merged"):
+                    merged_path = fw_path
+                else:
+                    merged_path = fw_path.with_name(f"{fw_path.name}-merged")
+                if (CONFIG.stub_path / merged_path).exists():
+                    stub_type = StubSource.MERGED
+                    # Update the source list
+                    self.stub_sources[n] = (stub_type, merged_path)
+                fw_path = merged_path
+            # check if path exists
+            if not (CONFIG.stub_path / fw_path).exists():
+                if stub_type != StubSource.FROZEN:
+                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
 
         # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
         # for stub_type, fw_path in [s for s in self.stub_sources]:
         for n in range(len(self.stub_sources)):
             stub_type, fw_path = self.stub_sources[n]
-            if stub_type == StubSource.FIRMWARE:
-                # Check if -merged folder exists and copy that instead
-                merged_path = fw_path.with_name(f"{fw_path.name}-merged")
-                source = fw_path
-                if (CONFIG.stub_path / merged_path).exists():
-                    stub_type = StubSource.MERGED
-                    source = merged_path
-                    # Update the source list
-                    self.stub_sources[n] = (stub_type, source)
-                try:
-                    log.trace(f"Copying {stub_type} from {source}")
-                    shutil.copytree(
-                        CONFIG.stub_path / source,
-                        self.package_path,
-                        symlinks=True,
-                        dirs_exist_ok=True,
-                    )
-                except OSError as e:
-                    log.error(f"Error copying stubs from : {CONFIG.stub_path / source}, {e}")
-                    raise (e)
-            else:
-                try:
-                    log.trace(f"Copying {stub_type} from {fw_path}")
-                    shutil.copytree(
-                        CONFIG.stub_path / fw_path,
-                        self.package_path,
-                        symlinks=True,
-                        dirs_exist_ok=True,
-                    )
-                except OSError as e:
-                    log.error(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
-                    raise (e)
+
+            try:
+                log.trace(f"Copying {stub_type} from {fw_path}")
+                shutil.copytree(
+                    CONFIG.stub_path / fw_path,
+                    self.package_path,
+                    symlinks=True,
+                    dirs_exist_ok=True,
+                )
+            except OSError as e:
+                if stub_type != StubSource.FROZEN:
+                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
+                else:
+                    log.debug(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
+
         # 3 - clean up a little bit
         # delete all the .py files in the package folder if there is a corresponding .pyi file
         for f in self.package_path.rglob("*.py"):
@@ -464,15 +466,16 @@ class StubPackage:
         log.trace(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
         return self.hash != current
 
-    def bump(self) -> str:
+    def bump(self, *, rc: int = 0) -> str:
         """
         bump the postrelease version of the package, and write the change to disk
+        if rc > 1, the version is bumped to the specified release candidate
         """
         try:
             current = Version(self.pkg_version)
             assert isinstance(current, Version)
             # bump the version
-            self.pkg_version = str(bump_postrelease(current))
+            self.pkg_version = str(bump_postrelease(current, rc=rc))
         except Exception as e:  # pragma: no cover
             log.error(f"Error: {e}")
         return self.pkg_version

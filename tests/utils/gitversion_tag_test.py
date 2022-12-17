@@ -43,5 +43,5 @@ def test_get_version_build(path):
     """Test that we can get the version info from git"""
     version, build = get_version_build_from_git(path)
     assert isinstance(version, Version)
-    if build  != "dirty":
+    if build != "dirty":
         assert build.isnumeric()

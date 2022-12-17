@@ -20,7 +20,6 @@ from pyb import Accel
 buf = b"00000000"
 
 
-
 pyb.repl_uart(pyb.UART(3, 9600))  # duplicate REPL on UART(1)
 pyb.wfi()  # pause CPU, waiting for interrupt
 pyb.freq()  # get CPU and bus frequencies
@@ -76,7 +75,6 @@ s1.speed(50)  # for continuous rotation servos
 # See pyb.ExtInt.
 
 
-
 callback = lambda e: print("intr")
 ext = ExtInt(Pin("Y1"), ExtInt.IRQ_RISING, Pin.PULL_NONE, callback)
 
@@ -92,7 +90,6 @@ rtc.datetime()  # get date and time
 
 # PWM (pulse width modulation)¶
 # See pyb.Pin and pyb.Timer.
-
 
 
 p = Pin("X1")  # X1 has TIM2, CH1
@@ -125,12 +122,10 @@ uart.read(5)  # read up to 5 bytes
 # SPI bus
 
 
-
 spi = SPI(1, SPI.CONTROLLER, baudrate=200000, polarity=1, phase=0)
 spi.send("hello")
 spi.recv(5)  # receive 5 bytes on the bus
 spi.send_recv("hello")  # send and receive 5 bytes
-
 
 
 # CAN bus (controller area network)¶
@@ -144,7 +139,6 @@ can.recv(0)  # receive message on FIFO 0
 
 # Internal accelerometer¶
 # See pyb.Accel.
-
 
 
 accel = Accel()

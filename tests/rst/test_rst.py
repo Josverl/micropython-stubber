@@ -23,11 +23,11 @@ XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 # shared across this module
 ###################################################################################################
 @pytest.fixture(scope="module")
-def pyright_results(rst_stubs):
+def pyright_results(rst_stubs, pytestconfig: pytest.Config) -> Dict[str, Dict]:
     "Run pyright over folder with rst generated stubs, and return the results"
     # TODO: this fails if the nodeJS version of pyright is installed , and only works for the SLOWER pip install Pyright
-
-    cmd = ["pyright", "--project", "tests/pyrightconfig.json", "--outputjson", rst_stubs.as_posix()]
+    test_config = pytestconfig.rootpath / "tests/pyrightconfig.json"
+    cmd = ["pyright", "--project", test_config.absolute().as_posix(), "--outputjson", rst_stubs.as_posix()]
     try:
         # run pyright in the docstub folder to allow modules to import each other.
         result = subprocess.run(cmd, shell=False, capture_output=True, cwd=rst_stubs.as_posix())
@@ -187,7 +187,7 @@ def test_rst_parse_class_10(line: str):
         ),
         ("lambda)", "lambda_fn)"),
         ("(block_device or path)", "(block_device_or_path)"),
-        # TODO - check if this is correct/needed 
+        # TODO - check if this is correct/needed
         # network - AbstractNIC.connect
         ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"),
         # ("()", "()"),
@@ -409,10 +409,10 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
 @pytest.mark.parametrize(
     "error, modulename",
     [
-        ('"NORMAL" is not defined', "pyb"),
-        ('"UP" is not defined', "pyb.Timer"),
-        ('"hid_mouse" is not defined', "pyb.USB_HID"),
-        ('"SPI" is not defined', "lcd160cr"),
+        ("NORMAL is not defined", "pyb"),
+        ("UP is not defined", "pyb.Timer"),
+        ("hid_mouse is not defined", "pyb.USB_HID"),
+        ("SPI is not defined", "lcd160cr"),
     ],
 )
 @pytest.mark.docfix

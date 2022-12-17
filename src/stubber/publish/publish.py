@@ -29,24 +29,29 @@ NOTE: stubs and publish paths can be located in different locations and reposito
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
 
+import shutil
 from itertools import chain
 from typing import Any, Dict, List, Union
 
 from loguru import logger as log
 from pysondb import PysonDB
-from stubber.publish.candidates import frozen_candidates
+
+from stubber.publish.bump import bump_postrelease
+from stubber.publish.candidates import (docstub_candidates,
+                                        firmware_candidates, frozen_candidates)
 from stubber.publish.database import get_database
-from stubber.publish.package import StubSource, create_package, get_package_info, package_name
+from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
+from stubber.publish.package import (StubSource, create_package,
+                                     get_package_info, package_name)
 from stubber.publish.pypi import Version, get_pypy_versions
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
-
 # ######################################
 # micropython-doc-stubs
 # ######################################
-# todo : Publish: Integrate doc stubs in publishing loop
+
 def publish(
     *,
     db: PysonDB,
@@ -103,7 +108,6 @@ def publish(
             msg = f"{pkg_name}: source '{name}' not found: {CONFIG.stub_path / path}"
             if not name == StubSource.FROZEN:
                 log.warning(msg)
-                log.warning(msg)
                 status["error"] = msg
                 ok = False
             else:
@@ -111,6 +115,8 @@ def publish(
                 log.warning(msg)
     if not ok:
         log.warning(f"{pkg_name}: skipping as one or more source stub folders are missing")
+        shutil.rmtree(package.package_path.as_posix())
+
         package._publish = False
         # TODO Save ?
         return status
@@ -136,13 +142,18 @@ def publish(
         # get last published version.postXXX from PyPI and update version if different
         # try to get version from PyPi and increase past that
         old_ver = package.pkg_version
-        pypi_versions = get_pypy_versions(package.package_name, production=production, base=Version(package.pkg_version))
-        if pypi_versions:
-            package.pkg_version = str(pypi_versions[-1])
+        if package.mpy_version == "latest":
+            new_ver = str(bump_postrelease(Version("1.20"), rc=744))  # FIXME: hardcoded version
+            package.pkg_version = new_ver
+        else:
+            base = Version(package.pkg_version)
+            pypi_versions = get_pypy_versions(package.package_name, production=production, base=base)
+            if pypi_versions:
+                package.pkg_version = str(pypi_versions[-1])
+            new_ver = package.bump()
         # to get the next version
-        new_ver = package.bump()
-
         log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
+
         # Update hashes
         package.update_hashes()
         package.write_package_json()
@@ -160,14 +171,17 @@ def publish(
             log.warning("Dryrun: Updated package is NOT published.")
             status["result"] = "DryRun successful"
         else:
-            result = package.publish(production=production)
-            if not result:
-                log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
-                status["error"] = "Publish failed"
-                return status
-            status["result"] = "Published"
-            db.add(package.to_dict())
-            db.commit()
+            if package.mpy_version == "latest":
+                log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
+            else:
+                result = package.publish(production=production)
+                if not result:
+                    log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
+                    status["error"] = "Publish failed"
+                    return status
+                status["result"] = "Published"
+                db.add(package.to_dict())
+                db.commit()
 
     if clean:
         package.clean()
@@ -185,7 +199,7 @@ def publish_one(
     clean: bool = False,
     force: bool = False,
 ):
-    "Publish a bunch of stub packages"
+    "Publish a bunch of stub packages of the same version"
     db = get_database(CONFIG.publish_path, production=production)
     l = list(frozen_candidates(family=family, versions=versions, ports=ports, boards=boards))
     result = None
@@ -204,9 +218,9 @@ def publish_one(
 
 def publish_multiple(
     family="micropython",
-    versions: Union[str, List[str]] = ["v1.18", "v1.19"],
-    ports: Union[str, List[str]] = "auto",
-    boards: Union[str, List[str]] = "GENERIC",
+    versions: List[str] = ["v1.18", "v1.19.1"],
+    ports: List[str] = ["auto"],
+    boards: List[str] = ["GENERIC"],
     frozen: bool = False,
     production=False,
     dryrun: bool = False,
@@ -218,13 +232,22 @@ def publish_multiple(
 
     worklist = []
     results = []
-    if frozen:
-        worklist += list(
-            chain(
-                frozen_candidates(family=family, versions=versions, ports=ports, boards=boards),
-                # frozen_candidates(family="micropython", versions="v1.19.1", ports="auto", boards="auto"),
-            )
-        )
+
+    worklist += list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS))
+    # if frozen:
+    #     worklist += list(
+    #         chain(
+    #             frozen_candidates(family=family, versions=versions, ports=ports, boards=boards),
+    #             # frozen_candidates(family="micropython", versions="v1.19.1", ports="auto", boards="auto"),
+    #         )
+    #     )
+    # remove unneeded extras from worklist
+    worklist = [i for i in worklist if i["board"] != ""]
+    if ports != ["auto"]:
+        worklist = [i for i in worklist if i["port"] in ports]
+    if boards != ["auto"]:
+        worklist = [i for i in worklist if i["board"] in boards or i["board"] == "GENERIC"]
+
     for todo in worklist:
 
         result = publish(

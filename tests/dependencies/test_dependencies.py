@@ -32,9 +32,10 @@ def test_tool_installed(tool_name, tool_version):
         # remove too much info
         out = out.split("(")[0]
     ver = out.split()[-1]
-    if isinstance( version.parse(ver), version.Version ):
+    if isinstance(version.parse(ver), version.Version):
         # avoid issues with non-standard versions and 'latest'
         assert version.parse(ver) >= version.parse(tool_version)
+
 
 def test_mpy_cross_bytecode_version():
     "Check if mpy-cross can be installed and run"
