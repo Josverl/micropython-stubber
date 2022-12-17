@@ -14,7 +14,8 @@ from stubber.utils.versions import clean_version
 
 LAST_VERSION = "v1.19.1"
 
-def fw_folder_name(base:str,fw:Dict):
+
+def fw_folder_name(base: str, fw: Dict):
     """return the name of the firmware folder"""
     if fw["board"] == "GENERIC":
         fw_folder = f"{base}-{fw['port']}"
@@ -29,7 +30,7 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
         # check if we have firmware stubs of this version and port
         base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
 
-        fw_folder = fw_folder_name(base,fw)
+        fw_folder = fw_folder_name(base, fw)
         mrg_folder = fw_folder + "-merged"
 
         doc_folder = f"{base}-docstubs"
@@ -49,7 +50,7 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
             else:
                 # try to get the fw_path from the last released version
                 base = f"{fw['family']}-{clean_version(LAST_VERSION,flat=True)}"
-                fw_path = CONFIG.stub_path / fw_folder_name(base,fw)
+                fw_path = CONFIG.stub_path / fw_folder_name(base, fw)
                 # check again
                 if fw_path.exists():
                     log.info(f"using {fw_path.name} as the basis for {mrg_folder}")

@@ -3,14 +3,14 @@ import machine
 import uos as os
 
 try:
-    import esp #type: ignore
+    import esp  # type: ignore
 
     esp.osdebug(None)
 except ImportError:
     esp = None
 
 try:
-    import pyb # type: ignore	
+    import pyb  # type: ignore
 
     pyb.country("US")  # ISO 3166-1 Alpha-2 code, eg US, GB, DE, AU
     pyb.usb_mode("VCP+MSC")  # act as a serial and a storage device

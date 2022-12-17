@@ -27,7 +27,7 @@ _MAX_CLASS_LEVEL = 2  # Max class nesting
 class Stubber:
     "Generate stubs for modules in firmware"
 
-    def __init__(self, path: str = None, firmware_id: str = None): # type: ignore
+    def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
         try:
             if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
