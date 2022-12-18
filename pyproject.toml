@@ -24,7 +24,9 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
 ]
 packages = [{ include = "**/*.*", from = "src" }]
-include = []
+include = [
+    "board/createstubs.py"
+]
 exclude = [
     "**/tests/**",
     "**/*-test",
