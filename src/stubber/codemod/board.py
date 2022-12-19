@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum, unique, auto
-from typing import Optional
+from typing import Optional, Iterator
 
 import libcst as cst
 import libcst.codemod as codemod
@@ -134,27 +134,70 @@ class ModuleDocCodemod(codemod.Codemod):
         return update_module_docstr(tree, cst.parse_statement(self.module_doc))
 
 
+class ModulesUpdateCodemod(codemod.Codemod):
+    """Dynamically replace static module list(s)."""
+
+    modules_changeset: ListChangeSet
+    problematic_changeset: ListChangeSet
+    excluded_changeset: ListChangeSet
+
+    modules_scope: m.BaseMatcherNode = _MODULES_MATCHER
+    problematic_scope: m.BaseMatcherNode = m.Assign(
+        targets=[m.AssignTarget(target=m.Attribute(value=m.Name("self"), attr=m.Name("problematic")))]
+    )
+    excluded_scope: m.BaseMatcherNode = m.Assign(
+        targets=[m.AssignTarget(target=m.Attribute(value=m.Name("self"), attr=m.Name("excluded")))]
+    )
+
+    def __init__(
+        self,
+        context: codemod.CodemodContext,
+        *,
+        modules: Optional[ListChangeSet] = None,
+        problematic: Optional[ListChangeSet] = None,
+        excluded: Optional[ListChangeSet] = None,
+    ):
+        super().__init__(context)
+        self.modules_changeset = modules
+        self.problematic_changeset = problematic
+        self.excluded_changeset = excluded
+
+    def iter_transforms(self) -> Iterator[m.MatcherDecoratableVisitor]:
+        if self.modules_changeset:
+            yield ModifyListElements(change_set=self.modules_changeset, scope_matcher=self.modules_scope)
+        if self.problematic_changeset:
+            yield ModifyListElements(change_set=self.problematic_changeset, scope_matcher=self.problematic_scope)
+        if self.excluded_changeset:
+            yield ModifyListElements(change_set=self.excluded_changeset, scope_matcher=self.excluded_scope)
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        for transform in self.iter_transforms():
+            tree = tree.visit(transform)
+        return tree
+
+
 class LVGLCodemod(codemod.Codemod):
     """Generates createstubs.py LVGL flavor."""
 
-    modules_changeset: ListChangeSet
+    modules_transform: ModulesUpdateCodemod
     init_node: cst.SimpleStatementLine
 
     def __init__(
         self,
         context: codemod.CodemodContext,
-        modules_changeset: Optional[ListChangeSet] = None,
+        modules_transform: Optional[ModulesUpdateCodemod] = None,
         init_node: Optional[cst.SimpleStatementLine] = None,
     ):
         super().__init__(context)
-        self.modules_changeset = modules_changeset or ListChangeSet.from_strings(add=["io", "lodepng", "rtch", "lvgl"], replace=True)
+        self.modules_transform = modules_transform or ModulesUpdateCodemod(
+            self.context, modules=ListChangeSet.from_strings(add=["io", "lodepng", "rtch", "lvgl"], replace=True)
+        )
         self.init_node = init_node or cst.parse_module(_LVGL_MAIN)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        modules_transform = ModifyListElements(change_set=self.modules_changeset, scope_matcher=_MODULES_MATCHER)
         init_transform = SimpleStatementReplace(self.init_node, scope_matcher=m.SimpleStatementLine(body=[_STUBBER_MATCHER]))
-        tree = tree.visit(modules_transform)
-        return tree.visit(init_transform)
+        tree = tree.visit(init_transform)
+        return self.modules_transform.transform_module(tree)
 
 
 class LowMemoryCodemod(codemod.Codemod):
