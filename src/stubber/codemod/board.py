@@ -217,17 +217,31 @@ class CreateStubsCodemod(codemod.Codemod):
     """Generates createstubs.py variant based on provided flavor."""
 
     flavor: CreateStubsFlavor
+    modules_transform: ModulesUpdateCodemod
 
-    def __init__(self, context: codemod.CodemodContext, flavor: CreateStubsFlavor = CreateStubsFlavor.BASE):
+    def __init__(
+        self,
+        context: codemod.CodemodContext,
+        flavor: CreateStubsFlavor = CreateStubsFlavor.BASE,
+        *,
+        modules: Optional[ListChangeSet] = None,
+        problematic: Optional[ListChangeSet] = None,
+        excluded: Optional[ListChangeSet] = None,
+    ):
         super().__init__(context)
         self.flavor = flavor
+        self.modules_transform = ModulesUpdateCodemod(
+            self.context,
+            modules=modules,
+            problematic=problematic,
+            excluded=excluded,
+        )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         mod_flavors = {
             CreateStubsFlavor.LVGL: LVGLCodemod,
             CreateStubsFlavor.LOW_MEM: LowMemoryCodemod,
         }
-        if self.flavor not in mod_flavors:
-            # just return base or unknown.
-            return tree
-        return mod_flavors[self.flavor](self.context).transform_module(tree)
+        if self.flavor in mod_flavors:
+            tree = mod_flavors[self.flavor](self.context).transform_module(tree)
+        return self.modules_transform.transform_module(tree)
