@@ -7,7 +7,6 @@ Module: 'uhashlib' on micropython-linux-1.13
 class md5:
     def __init__(self):
         ''
-        pass
 
     def digest():
         pass
@@ -19,7 +18,6 @@ class md5:
 class sha1:
     def __init__(self):
         ''
-        pass
 
     def digest():
         pass
@@ -31,7 +29,6 @@ class sha1:
 class sha256:
     def __init__(self):
         ''
-        pass
 
     def digest():
         pass

@@ -30,7 +30,7 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
         version = "v1"
 
     assert version, "could not find micropython version"
-    print("found micropython version : {}".format(version))
+    print(f"found micropython version : {version}")
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))

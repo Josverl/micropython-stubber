@@ -55,9 +55,7 @@ class DynMod:
 
     def func(self, ret, name, params):
         f = getattr(self.mod, name)
-        argtypes = []
-        for p in params:
-            argtypes.append(self.typemap[p])
+        argtypes = [self.typemap[p] for p in params]
         # print(name, argtypes)
         f.argtypes = argtypes
         f.restype = self.typemap[ret]
@@ -75,15 +73,13 @@ def open(name):
 
 def func(ret, addr, params):
     types = [DynMod.typemap[ret]]
-    for p in params:
-        types.append(DynMod.typemap[p])
+    types.extend(DynMod.typemap[p] for p in params)
     ftype = ctypes.CFUNCTYPE(*types)
     return ftype(addr)
 
 
 def callback(ret, func, params):
     types = [DynMod.typemap[ret]]
-    for p in params:
-        types.append(DynMod.typemap[p])
+    types.extend(DynMod.typemap[p] for p in params)
     ftype = ctypes.CFUNCTYPE(*types)
     return ftype(func)

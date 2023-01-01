@@ -130,12 +130,7 @@ class DotStar:
         if isinstance(value, int):
             rgb = (value >> 16, (value >> 8) & 0xFF, value & 0xFF)
 
-        if len(rgb) == 4:
-            brightness = value[3]
-            # Ignore value[3] below.
-        else:
-            brightness = 1
-
+        brightness = value[3] if len(rgb) == 4 else 1
         # LED startframe is three "1" bits, followed by 5 brightness bits
         # then 8 bits for each of R, G, and B. The order of those 3 are configurable and
         # vary based on hardware
@@ -167,12 +162,13 @@ class DotStar:
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            out = []
-            for in_i in range(*index.indices(self._n)):
-                out.append(
-                    tuple(self._buf[in_i * 4 + (3 - i) + START_HEADER_SIZE] for i in range(3))
+            return [
+                tuple(
+                    self._buf[in_i * 4 + (3 - i) + START_HEADER_SIZE]
+                    for i in range(3)
                 )
-            return out
+                for in_i in range(*index.indices(self._n))
+            ]
         if index < 0:
             index += len(self)
         if index >= self._n or index < 0:

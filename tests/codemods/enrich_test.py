@@ -23,8 +23,8 @@ def test_enrich_file_with_stub(source_file: Path, expected: bool):
     except FileNotFoundError:
         assert not expected, "docstub File not found but expected"
 
-    if expected == False:
-        assert diff is None, "no change to the stub was expected but found: \n{}".format(diff)
+    if not expected:
+        assert diff is None, f"no change to the stub was expected but found: \n{diff}"
     else:
         assert len(diff) > 0, "change to the stub was expected but not found"
 

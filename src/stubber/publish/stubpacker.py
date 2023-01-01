@@ -135,7 +135,7 @@ class StubPackage:
     def pkg_version(self, version: str):
         "set the version of the package"
         if not isinstance(version, str):  # type: ignore
-            version = str(version)
+            version = version
         # read the current file
         _toml = self.toml_path
         with open(_toml, "rb") as f:
@@ -260,9 +260,11 @@ class StubPackage:
                     self.stub_sources[n] = (stub_type, merged_path)
                 fw_path = merged_path
             # check if path exists
-            if not (CONFIG.stub_path / fw_path).exists():
-                if stub_type != StubSource.FROZEN:
-                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
+            if (
+                not (CONFIG.stub_path / fw_path).exists()
+                and stub_type != StubSource.FROZEN
+            ):
+                raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
 
         # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
         # for stub_type, fw_path in [s for s in self.stub_sources]:
@@ -362,11 +364,7 @@ class StubPackage:
         with the given parameters.
         and updating it with the pyi files included
         """
-        # Do not overwrite existing pyproject.toml but read and apply changes to it
-        # 1) read from disk , if exists
-        # 2) create from template, in all other cases
-        on_disk = (self.toml_path).exists()
-        if on_disk:
+        if on_disk := (self.toml_path).exists():
             # do not overwrite the version of a pre-existing file
             _pyproject = self.pyproject
             assert _pyproject is not None
@@ -398,12 +396,10 @@ class StubPackage:
         "Add the stub files to the pyproject.toml file"
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
-        _pyproject["tool"]["poetry"]["packages"] = []
-
-        # Only include .pyi files
-        for p in sorted((self.package_path).rglob("*.pyi")):
-            _pyproject["tool"]["poetry"]["packages"] += [{"include": p.relative_to(self.package_path).as_posix()}]
-
+        _pyproject["tool"]["poetry"]["packages"] = [
+            {"include": p.relative_to(self.package_path).as_posix()}
+            for p in sorted((self.package_path).rglob("*.pyi"))
+        ]
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 
@@ -448,11 +444,11 @@ class StubPackage:
         for file in sorted(files):
             with open(file, "rb") as f:
                 while True:
-                    data = f.read(BUF_SIZE)
-                    if not data:
-                        break
-                    hash.update(data)
+                    if data := f.read(BUF_SIZE):
+                        hash.update(data)
 
+                    else:
+                        break
         return hash.hexdigest()
 
     def update_hashes(self):
@@ -501,7 +497,7 @@ class StubPackage:
             )
             log.trace(f"poetry {parameters} completed")
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
-            log.error("Exception on process, {}".format(e))
+            log.error(f"Exception on process, {e}")
             return False
         except subprocess.CalledProcessError as e:  # pragma: no cover
             # Detect and log  error detection om upload
@@ -539,10 +535,10 @@ class StubPackage:
         # update the package info
         self.write_package_json()
         if production:
-            log.debug(f"Publishing to PRODUCTION  https://pypy.org")
+            log.debug("Publishing to PRODUCTION  https://pypy.org")
             params = ["publish"]
         else:
-            log.debug(f"Publishing to TEST-PyPi https://test.pypy.org")
+            log.debug("Publishing to TEST-PyPi https://test.pypy.org")
             params = ["publish", "-r", "test-pypi"]
         r = self.run_poetry(params)
         print("")  # add a newline after the output

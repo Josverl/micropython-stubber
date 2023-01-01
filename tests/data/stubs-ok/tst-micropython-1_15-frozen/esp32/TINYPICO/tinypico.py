@@ -62,14 +62,9 @@ def get_battery_charging():
     Returns the current battery charging state.
     This can trigger false positives as the charge IC can't tell the difference between a full battery or no battery connected.
     """
-    measuredVal = 0  # start our reading at 0
     io = Pin(BAT_CHARGE, Pin.IN)  # Assign the pin to read
 
-    for y in range(
-        0, 10
-    ):  # loop through 10 times adding the read values together to ensure no false positives
-        measuredVal += io.value()
-
+    measuredVal = sum(io.value() for _ in range(10))
     return measuredVal == 0  # return True if the value is 0
 
 

@@ -10,7 +10,7 @@ from subprocess import CompletedProcess
 # make sure that the source can be found
 RootPath = Path(os.getcwd())
 src_path = str(RootPath / "src")
-if not src_path in sys.path:
+if src_path not in sys.path:
     sys.path.append(src_path)
 
 # pylint: disable=wrong-import-position,import-error
@@ -169,7 +169,7 @@ def test_run_git_fails(mocker: MockerFixture):
     mock_run_git.reset_mock()
     r = git.get_tag()
     mock_run_git.assert_called_once()
-    assert r == None
+    assert r is None
 
     # fail to checkout tag
     mock_run_git.reset_mock()

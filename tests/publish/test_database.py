@@ -31,7 +31,7 @@ def test_get_package_info(pytestconfig, package_name, version, present):
         assert len(pkg_info["description"]) > 0
         assert len(pkg_info["stub_sources"]) > 0
     else:
-        assert pkg_info == None
+        assert pkg_info is None
 
 
 from stubber.publish.database import get_database

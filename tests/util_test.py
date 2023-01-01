@@ -74,7 +74,9 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
             py_files.remove(pyi.with_suffix(".py"))
         except ValueError:
             pass
-    assert len(py_files) == 0, "py and pyi files should match 1:1 and stored in the same folder"
+    assert (
+        not py_files
+    ), "py and pyi files should match 1:1 and stored in the same folder"
 
 
 # post processing

@@ -4,10 +4,7 @@ import hashlib
 class _hash:
     def __init__(self, data=None):
         cls = getattr(hashlib, self.__class__.__name__)
-        if data is None:
-            self._ = cls()
-        else:
-            self._ = cls(data)
+        self._ = cls() if data is None else cls(data)
 
     def update(self, data):
         self._.update(data)

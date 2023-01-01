@@ -19,7 +19,7 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 src_path = str(Path("..") / "src" / "micropython-stubber")
-if not src_path in sys.path:
+if src_path not in sys.path:
     sys.path.append(src_path)
 
 # from stubber.version import __version__ as MODULE_VERSION

@@ -5,7 +5,7 @@ import time
 def countdown():
     """countdown before generating stubs"""
     for i in range(5, 0, -1):
-        print("start stubbing in {}...".format(i))
+        print(f"start stubbing in {i}...")
         time.sleep(1)
     import createstubs
 

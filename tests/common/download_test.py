@@ -15,4 +15,4 @@ def test_download_files(tmp_path):
     assert len(list(tmp_path.iterdir())) == 2, "there should be 2 files"
     for file in frozen_modules:
         fname = os.path.join(tmp_path, file)
-        assert os.path.exists(fname), "file {} is downloaded".format(file)
+        assert os.path.exists(fname), f"file {file} is downloaded"

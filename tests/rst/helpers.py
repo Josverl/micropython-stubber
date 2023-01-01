@@ -14,8 +14,7 @@ def read_stub(folder, stubname):
     content: List[str] = []
     fl = list(folder.rglob(stubname))
     if len(fl):
-        file = fl[0]
-        if file:
+        if file := fl[0]:
             with open(file) as f:
                 content = f.readlines()
     return content
@@ -28,9 +27,6 @@ def read_stub(folder, stubname):
 
 def load_rst(r: RSTReader, text: Union[str, List[str]]):
     "load a string or list of strings"
-    if isinstance(text, List):
-        r.rst_text = text
-    else:
-        r.rst_text = text.splitlines()
+    r.rst_text = text if isinstance(text, List) else text.splitlines()
     r.max_line = len(r.rst_text)
     r.filename = "testmodule"

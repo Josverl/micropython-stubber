@@ -151,7 +151,7 @@ class ManifestFile:
         # Convert path to an absolute path, applying variable substitutions.
         for name, value in self._path_vars.items():
             if value is not None:
-                path = path.replace("$({})".format(name), value)
+                path = path.replace(f"$({name})", value)
         return os.path.abspath(path)
 
     def _manifest_globals(self, kwargs):
@@ -182,7 +182,7 @@ class ManifestFile:
             try:
                 exec(manifest_file, self._manifest_globals({}))
             except Exception as er:
-                raise ManifestFileError("Error in manifest: {}".format(er))
+                raise ManifestFileError(f"Error in manifest: {er}")
 
     def _add_file(self, full_path, target_path, kind=KIND_AUTO, opt=None):
         # Check file exists and get timestamp.
@@ -190,7 +190,7 @@ class ManifestFile:
             stat = os.stat(full_path)
             timestamp = stat.st_mtime
         except OSError:
-            raise ManifestFileError("cannot stat {}".format(full_path))
+            raise ManifestFileError(f"cannot stat {full_path}")
 
         # Map the AUTO kinds to their actual kind based on mode and extension.
         _, ext = os.path.splitext(full_path)
@@ -303,7 +303,7 @@ class ManifestFile:
                 try:
                     exec(f.read(), self._manifest_globals(kwargs))
                 except Exception as er:
-                    raise ManifestFileError("Error in manifest file: {}: {}".format(manifest_path, er))
+                    raise ManifestFileError(f"Error in manifest file: {manifest_path}: {er}")
                 os.chdir(prev_cwd)
             if not top_level:
                 self._metadata.pop()
@@ -314,24 +314,23 @@ class ManifestFile:
 
         Optionally specify unix_ffi=True to use a module from the unix-ffi directory.
         """
-        if self._path_vars["MPY_LIB_DIR"]:
-            lib_dirs = ["micropython", "python-stdlib", "python-ecosys"]
-            if unix_ffi:
-                # Search unix-ffi only if unix_ffi=True, and make unix-ffi modules
-                # take precedence.
-                lib_dirs = ["unix-ffi"] + lib_dirs
-
-            for lib_dir in lib_dirs:
-                for manifest_path in glob.glob(
-                    os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir, "**", name, "manifest.py"),
-                    recursive=True,
-                ):
-                    self.include(manifest_path, **kwargs)
-                    return
-            raise ValueError("Library not found in local micropython-lib: {}".format(name))
-        else:
+        if not self._path_vars["MPY_LIB_DIR"]:
             # TODO: HTTP request to obtain URLs from manifest.json.
             raise ValueError("micropython-lib not available for require('{}').", name)
+        lib_dirs = ["micropython", "python-stdlib", "python-ecosys"]
+        if unix_ffi:
+            # Search unix-ffi only if unix_ffi=True, and make unix-ffi modules
+            # take precedence.
+            lib_dirs = ["unix-ffi"] + lib_dirs
+
+        for lib_dir in lib_dirs:
+            for manifest_path in glob.glob(
+                os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir, "**", name, "manifest.py"),
+                recursive=True,
+            ):
+                self.include(manifest_path, **kwargs)
+                return
+        raise ValueError(f"Library not found in local micropython-lib: {name}")
 
     def package(self, package_path, files=None, base_path=".", opt=None):
         """
@@ -442,7 +441,7 @@ def tagged_py_file(path, metadata):
 
                 # Don't overwrite a version definition if the file already has one in it.
                 if metadata.version and "__version__ =" not in contents:
-                    dest.write("\n\n__version__ = {}\n".format(repr(metadata.version)))
+                    dest.write(f"\n\n__version__ = {repr(metadata.version)}\n")
         yield dest_path
     finally:
         os.unlink(dest_path)

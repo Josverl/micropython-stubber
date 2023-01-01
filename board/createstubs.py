@@ -39,23 +39,18 @@ class Stubber:
         self.info = _info()
         gc.collect()
         if firmware_id:
-            self._fwid = str(firmware_id).lower()
+            self._fwid = firmware_id.lower()
         else:
             self._fwid = "{family}-{ver}-{port}".format(**self.info).lower()
         self._start_free = gc.mem_free()  # type: ignore
 
-        if path:
-            if path.endswith("/"):
-                path = path[:-1]
-        else:
-            path = get_root()
-
-        self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace("//", "/")
+        path = path.removesuffix("/") if path else get_root()
+        self.path = f"{path}/stubs/{self.flat_fwid}".replace("//", "/")
         self._log.debug(self.path)
         try:
-            ensure_folder(path + "/")
+            ensure_folder(f"{path}/")
         except OSError:
-            self._log.error("error creating stub folder {}".format(path))
+            self._log.error(f"error creating stub folder {path}")
         self.problematic = [
             "upip",
             "upysh",
@@ -80,7 +75,7 @@ class Stubber:
         # name_, repr_(value), type as text, item_instance
         _result = []
         _errors = []
-        self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
+        self._log.debug(f"get attributes {repr(item_instance)} {item_instance}")
         for name in dir(item_instance):
             try:
                 val = getattr(item_instance, name)
@@ -89,9 +84,17 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in ("int", "float", "str", "bool", "tuple", "list", "dict"):
+                if type_text in {
+                    "int",
+                    "float",
+                    "str",
+                    "bool",
+                    "tuple",
+                    "list",
+                    "dict",
+                }:
                     order = 1
-                elif type_text in ("function", "method"):
+                elif type_text in {"function", "method"}:
                     order = 2
                 elif type_text in ("class"):
                     order = 3
@@ -99,7 +102,9 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+                _errors.append(
+                    f"Couldn't get attribute '{name}' from object '{item_instance}', Err: {e}"
+                )
         # remove internal __
         _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
         gc.collect()
@@ -111,7 +116,7 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self._log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
+        self._log.info(f"Start micropython-stubber v{__version__} on {self._fwid}")
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)
@@ -125,7 +130,7 @@ class Stubber:
             self._log.warning("Skip module: {:<25}        : Excluded".format(module_name))
             return False
 
-        file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
+        file_name = f'{self.path}/{module_name.replace(".", "/")}.py'
         gc.collect()
         m1 = gc.mem_free()  # type: ignore
         self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, m1))
@@ -138,7 +143,7 @@ class Stubber:
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:    # type: ignore
         """Create a Stub of a single python module
 
         Args:
@@ -146,11 +151,11 @@ class Stubber:
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
         if module_name in self.problematic:
-            self._log.warning("SKIPPING problematic module:{}".format(module_name))
+            self._log.warning(f"SKIPPING problematic module:{module_name}")
             return False
 
         if file_name is None:
-            file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
+            file_name = f"{self.path}/" + module_name.replace(".", "_") + ".py"
 
         if "/" in module_name:
             # for nested modules
@@ -176,7 +181,7 @@ class Stubber:
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
 
-        if not module_name in ["os", "sys", "logging", "gc"]:
+        if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
             try:
                 del new_module
@@ -185,7 +190,7 @@ class Stubber:
             try:
                 del sys.modules[module_name]
             except KeyError:
-                self._log.debug("could not del sys.modules[{}]".format(module_name))
+                self._log.debug(f"could not del sys.modules[{module_name}]")
         gc.collect()
         return True
 
@@ -193,7 +198,7 @@ class Stubber:
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
-            self._log.warning("SKIPPING problematic module:{}".format(object_expr))
+            self._log.warning(f"SKIPPING problematic module:{object_expr}")
             return
 
         # self._log.debug("DUMP    : {}".format(object_expr))
@@ -223,7 +228,7 @@ class Stubber:
                 )
                 if is_exception:
                     superclass = "Exception"
-                s = "\n{}class {}({}):\n".format(indent, item_name, superclass)
+                s = f"\n{indent}class {item_name}({superclass}):\n"
                 # s += indent + "    ''\n"
                 if is_exception:
                     s += indent + "    ...\n"
@@ -237,7 +242,7 @@ class Stubber:
                     fp,
                     item_instance,
                     "{0}.{1}".format(obj_name, item_name),
-                    indent + "    ",
+                    f"{indent}    ",
                     in_class + 1,
                 )
                 # close with the __init__ method to make sure that the literals are defined
@@ -245,7 +250,6 @@ class Stubber:
                 s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
                 s += indent + "        ...\n\n"
                 fp.write(s)
-            # Class Methods and functions
             elif "method" in item_type_txt or "function" in item_type_txt:
                 self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
@@ -258,15 +262,16 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent)
-                    s += "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = (
+                        f"{indent}@classmethod\n"
+                        + f"{indent}def {item_name}(cls, *args, **kwargs) -> {ret}:\n"
+                    )
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
+                    s = f"{indent}def {item_name}({first}*args, **kwargs) -> {ret}:\n"
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
-            # constants of known types & values
             elif item_type_txt == "<class 'module'>":
                 # Skip imported modules
                 # fp.write("# import {}\n".format(item_name))
@@ -286,7 +291,7 @@ class Stubber:
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if not t in ["object", "set", "frozenset"]:
+                    if t not in ["object", "set", "frozenset"]:
                         # Possibly default others to item_instance object ?
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         t = "Any"
@@ -322,7 +327,7 @@ class Stubber:
         "Remove all files from the stub folder"
         if path is None:
             path = self.path
-        self._log.info("Clean/remove files in folder: {}".format(path))
+        self._log.info(f"Clean/remove files in folder: {path}")
         try:
             os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
@@ -330,7 +335,7 @@ class Stubber:
             # os.listdir fails on unix
             return
         for fn in items:
-            item = "{}/{}".format(path, fn)
+            item = f"{path}/{fn}"
             try:
                 os.remove(item)
             except OSError:
@@ -342,8 +347,10 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
-        f_name = "{}/{}".format(self.path, filename)
+        self._log.info(
+            f"Created stubs for {len(self._report)} modules on board {self._fwid}\nPath: {self.path}"
+        )
+        f_name = f"{self.path}/{filename}"
         gc.collect()
         try:
             # write json by node to reduce memory requirements
@@ -374,24 +381,19 @@ def ensure_folder(path: str):
     while i != -1:
         i = path.find("/", start)
         if i != -1:
-            if i == 0:
-                p = path[0]
-            else:
-                p = path[0:i]
+            p = path[0] if i == 0 else path[:i]
             # p = partial folder
             try:
                 _ = os.stat(p)
             except OSError as e:
-                # folder does not exist
-                if e.args[0] == ENOENT:
-                    try:
-                        os.mkdir(p)
-                    except OSError as e2:
-                        # self._log.error("failed to create folder {}".format(p))
-                        raise e2
-                else:
+                if e.args[0] != ENOENT:
                     # self._log.error("failed to create folder {}".format(p))
                     raise e
+                try:
+                    os.mkdir(p)
+                except OSError as e2:
+                    # self._log.error("failed to create folder {}".format(p))
+                    raise e2
         # next level deep
         start = i + 1
 
@@ -399,7 +401,7 @@ def ensure_folder(path: str):
 def _info():
     "collect base information on this runtime"
     _n = sys.implementation.name  # type: ignore
-    _p = sys.platform if not sys.platform.startswith("pyb") else "stm32"
+    _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
     info = {
         "name": _n,  # - micropython
         "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
@@ -433,10 +435,7 @@ def _info():
                 s = u[3].split(" on ")[0]
                 if info["sysname"] == "esp8266":
                     # esp8266 has no usable info on the release
-                    if "-" in s:
-                        v = s.split("-")[0]
-                    else:
-                        v = s
+                    v = s.split("-")[0] if "-" in s else s
                     info["version"] = info["release"] = v.lstrip("v")
                 try:
                     info["build"] = s.split("-")[1]
@@ -491,7 +490,7 @@ def _info():
     # spell-checker: disable
     if "mpy" in info:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
-        arch = [
+        if arch := [
             None,
             "x86",
             "x64",
@@ -503,8 +502,7 @@ def _info():
             "armv7emdp",
             "xtensa",
             "xtensawin",
-        ][sys_mpy >> 10]
-        if arch:
+        ][sys_mpy >> 10]:
             info["arch"] = arch
     return info
     # spell-checker: enable
@@ -518,7 +516,7 @@ def get_root() -> str:
         # unix port
         c = "."
     r = c
-    for r in [c, "/sd", "/flash", "/", "."]:
+    for r in [r, "/sd", "/flash", "/", "."]:
         try:
             _ = os.stat(r)
             break

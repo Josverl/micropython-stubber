@@ -52,7 +52,7 @@ def sort_classes(classes: List[str]):
             except KeyError:
                 # Parent not defined in this module, add as child to root
                 parent = nodes[""]
-            if not "children" in parent:
+            if "children" not in parent:
                 # ensure parent has a 'children' field
                 parent["children"] = []
             children = parent["children"]

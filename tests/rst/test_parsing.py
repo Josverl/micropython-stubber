@@ -137,7 +137,7 @@ def test_parse_class_micro_modulename(line):
     assert len(r.output) > 1
     # don't care about indentation,
     # but one of the lines must start with the class def
-    assert any([l.strip().startswith(line) for l in r.output])
+    assert any(l.strip().startswith(line) for l in r.output)
 
 
 # Nice to haves

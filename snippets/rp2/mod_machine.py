@@ -15,7 +15,7 @@ led = Pin(1, value=2)
 led = Pin(13, Pin.OUT)
 
 
-for i in range(2):  # no infinite loop
+for _ in range(2):
     led.on()
     time.sleep_ms(250)
     led.off()

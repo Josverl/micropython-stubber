@@ -18,7 +18,7 @@ class PytestCodemodTest(_CodemodTest):
 
     def assertEqual(self, first, second, msg=None):
         """basic assertEqual implementation, not type specific."""
-        if not first == second:
+        if first != second:
             raise AssertionError(msg)
 
     def assertCodemod(

@@ -14,7 +14,7 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
     "Common post processing"
     for pth in stub_paths:
         if pyi:
-            log.debug("Generate type hint files (pyi) in folder: {}".format(pth))
+            log.debug(f"Generate type hint files (pyi) in folder: {pth}")
             generate_pyi_files(pth)
         if black:
             run_black(pth)
@@ -30,7 +30,7 @@ def run_black(path: Path, capture_output=False):
         "--line-length",
         "140",
     ]
-    log.debug("Running black on: {}".format(path))
+    log.debug(f"Running black on: {path}")
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
     result = subprocess.run(cmd, capture_output=capture_output)
     return result.returncode
@@ -53,11 +53,11 @@ def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
         "-v",
         "-v",  # show some feedback
     ]
-    log.debug("Running autoflake on: {}".format(path))
+    log.debug(f"Running autoflake on: {path}")
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
     result = subprocess.run(cmd, capture_output=capture_output)
     if result.returncode != 0:
-        log.warning("autoflake failed on: {}".format(file))
+        log.warning(f"autoflake failed on: {file}")
         ret = result.returncode
 
     if progress_pyi:
@@ -73,11 +73,11 @@ def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
                 "-v",
                 "-v",  # show some feedback
             ]
-            log.debug("Running autoflake on: {}".format(path))
+            log.debug(f"Running autoflake on: {path}")
             # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
             result = subprocess.run(cmd, capture_output=capture_output)
             if result.returncode != 0:
-                log.warning("autoflake failed on: {}".format(file))
+                log.warning(f"autoflake failed on: {file}")
                 ret = result.returncode
 
     return ret

@@ -107,7 +107,9 @@ def test_freeze_folders(
 
     scripts = list(tmp_path.rglob("*.py"))
     assert scripts is not None, "can freeze scripts from manifest"
-    assert len(scripts) > 10, "expect at least 10 files, only found {}".format(len(scripts))
+    assert (
+        len(scripts) > 10
+    ), f"expect at least 10 files, only found {len(scripts)}"
 
     # TODO: add seperate tests for generate_pyi_files
     # result = utils.generate_pyi_files(tmp_path)
@@ -215,7 +217,9 @@ def test_freeze_any(
     scripts = list(tmp_path.rglob("*.py"))
 
     assert scripts is not None, "can freeze scripts from manifest"
-    assert len(scripts) > 10, "expect at least 50 files, only found {}".format(len(scripts))
+    assert (
+        len(scripts) > 10
+    ), f"expect at least 50 files, only found {len(scripts)}"
 
 
 #######################################################################################################################

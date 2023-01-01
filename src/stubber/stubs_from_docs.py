@@ -98,11 +98,7 @@ def is_balanced(s: str) -> bool:
     """
     Check if a string has balanced parentheses
     """
-    if s.count("(") != s.count(")"):
-        return False
-    if s.count("{") != s.count("}"):
-        return False
-    return True
+    return False if s.count("(") != s.count(")") else s.count("{") == s.count("}")
 
 
 class RSTReader:
@@ -185,15 +181,12 @@ class RSTReader:
 
     def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
         "Remove the modulename. and or the classname. from the begining of a name"
-        if strip_mod:
-            prefixes = self.module_names
-        else:
-            prefixes = []
+        prefixes = self.module_names if strip_mod else []
         if strip_class and self.current_class != "":
             prefixes += [self.current_class]
         for prefix in prefixes:
-            if len(prefix) > 1 and prefix + "." in name:
-                name = name.replace(prefix + ".", "")
+            if len(prefix) > 1 and f"{prefix}." in name:
+                name = name.replace(f"{prefix}.", "")
         return name
 
     def leave_class(self):
@@ -219,7 +212,7 @@ class RSTReader:
         if NEW_OUTPUT:
             lines = str(self.output_dict).splitlines(keepends=True)
             self.output = lines
-        for i in range(0, len(self.output)):
+        for i in range(len(self.output)):
             for name in ("self", "cls"):
                 if f"({name}, ) ->" in self.output[i]:
                     self.output[i] = self.output[i].replace(f"({name}, ) ->", f"({name}) ->")
@@ -280,9 +273,9 @@ class RSTReader:
             pass
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
-        if len(block) > 0 and len(block[0]) > 0 and block[0][0] != " ":
+        if block and len(block[0]) > 0 and block[0][0] != " ":
             q_char = block[0][0]
-            if all([l.startswith(q_char) for l in block]):
+            if all(l.startswith(q_char) for l in block):
                 # all lines start with the same character, so skip that character
                 block = [l[1:] for l in block]
 
@@ -293,16 +286,14 @@ class RSTReader:
             block = block[:-1]
 
         # prettify
-        if len(block):
-            # Clean up Synopsis
-            if ":synopsis:" in block[0]:
-                block[0] = re.sub(
-                    r"\s+:synopsis:\s+(?P<syn>[\w|\s]*)",
-                    r"\g<syn>",
-                    block[0],
-                )
+        if len(block) and ":synopsis:" in block[0]:
+            block[0] = re.sub(
+                r"\s+:synopsis:\s+(?P<syn>[\w|\s]*)",
+                r"\g<syn>",
+                block[0],
+            )
         # add clickable hyperlinks to CPython docpages
-        for i in range(0, len(block)):
+        for i in range(len(block)):
 
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
@@ -334,7 +325,7 @@ class RSTReader:
         params = params.strip()
         if not params.endswith(")"):
             # remove all after the closing bracket
-            params = params[0 : params.rfind(")") + 1]
+            params = params[:params.rfind(")") + 1]
 
         ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
 
@@ -382,23 +373,18 @@ class RSTReader:
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
         self.leave_class()
-        # DOC: Add / update information to existing class definition
-        full_name = self.output_dict.find(f"class {name}")
-        if full_name:
+        if full_name := self.output_dict.find(f"class {name}"):
             log.warning(f"TODO: UPDATE EXISTING CLASS : {name}")
             class_def = self.output_dict[full_name]
         else:
-            # DOC: add the parent class(es) to the formal documentation
-            parent = ""
-            if name in CHILD_PARENT_CLASS.keys():
-                parent = CHILD_PARENT_CLASS[name]
+            parent = CHILD_PARENT_CLASS[name] if name in CHILD_PARENT_CLASS.keys() else ""
             if parent == "" and (name.endswith("Error") or name.endswith("Exception")):
                 parent = "Exception"
             class_def = ClassSourceDict(
                 f"class {name}({parent}):",
                 docstr=docstr,
             )
-        if len(params) > 0:
+        if params != "":
             method = FunctionSourceDict(
                 name="__init__",
                 indent=class_def.indent + 4,
@@ -444,7 +430,9 @@ class RSTReader:
                 version = "latest"
             else:
                 version = self.source_tag.replace("_", ".")
-            docstr[0] = docstr[0] + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            docstr[
+                0
+            ] = f"{docstr[0]}. See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -544,11 +532,7 @@ class RSTReader:
 
     def get_rst_hint(self):
         "parse the '.. <rst hint>:: ' from the current line"
-        m = re.search(r"\.\.\s?(\w+)\s?::\s?", self.line)
-        if m:
-            return m.group(1)
-        else:
-            return ""
+        return m[1] if (m := re.search(r"\.\.\s?(\w+)\s?::\s?", self.line)) else ""
 
     def parse_method(self):
         name = ""
@@ -565,7 +549,7 @@ class RSTReader:
 
         method_names = self.parse_names(oneliner=False)
         # filter out overloads with 'param=value' description as these can't be output (currently)
-        method_names = [m for m in method_names if not "param=value" in m]
+        method_names = [m for m in method_names if "param=value" not in m]
 
         docstr = self.parse_docstring()
         for this_method in method_names:
@@ -586,9 +570,7 @@ class RSTReader:
                 class_name = self.current_class
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-            # get or create the parent class
-            full_name = self.output_dict.find(f"class {class_name}")
-            if full_name:
+            if full_name := self.output_dict.find(f"class {class_name}"):
                 parent_class = self.output_dict[full_name]
             else:
                 # not found, create and add new class to the output dict
@@ -612,7 +594,6 @@ class RSTReader:
                     definition=[f"def __init__(self, {params} -> None:"],
                     docstr=docstr,
                 )
-                parent_class += method
             elif rst_hint == "classmethod":
                 method = FunctionSourceDict(
                     decorators=["@classmethod"],
@@ -621,8 +602,6 @@ class RSTReader:
                     definition=[f"def {name}(cls, {params} -> {ret_type}:"],
                     docstr=docstr,
                 )
-                parent_class += method
-
             elif rst_hint == "staticmethod":
                 method = FunctionSourceDict(
                     decorators=["@staticmethod"],
@@ -631,7 +610,6 @@ class RSTReader:
                     definition=[f"def {name}({params} -> {ret_type}:"],
                     docstr=docstr,
                 )
-                parent_class += method
             else:  # just plain method
                 method = FunctionSourceDict(
                     name=f"def {name}",
@@ -639,7 +617,8 @@ class RSTReader:
                     definition=[f"def {name}(self, {params} -> {ret_type}:"],
                     docstr=docstr,
                 )
-                parent_class += method
+
+            parent_class += method
 
     def parse_exception(self):
         log.trace(f"# {self.line.rstrip()}")
@@ -674,11 +653,7 @@ class RSTReader:
         oneliner :  treat a line with commas as multiple names (used for constants)
         """
         names: List[str] = []
-        if oneliner:
-            names += self.parse_name().split(",")
-        else:
-            names += [self.parse_name()]
-
+        names += self.parse_name().split(",") if oneliner else [self.parse_name()]
         m = re.search(r"..\s?\w+\s?::\s?", self.line)
         if not m:  # pragma: no cover
             raise KeyError
@@ -731,7 +706,7 @@ class RSTReader:
 
             elif rst_hint == "class":
                 self.parse_class()
-            elif rst_hint == "method" or rst_hint == "staticmethod" or rst_hint == "classmethod":
+            elif rst_hint in ["method", "staticmethod", "classmethod"]:
                 self.parse_method()
             elif rst_hint == "exception":
                 self.parse_exception()
@@ -749,17 +724,17 @@ class RSTReader:
             else:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
-            #  TODO: rebuild this into the NEW_OUTPUT way of working
-            #     if self.gather_docs and len(docstr) > 0:
-            #         self.return_info.append(
-            #             (
-            #                 self.current_module,
-            #                 self.current_class,
-            #                 self.current_function,
-            #                 self.last_line,
-            #                 docstr,
-            #             )
-            #         )
+                #  TODO: rebuild this into the NEW_OUTPUT way of working
+                #     if self.gather_docs and len(docstr) > 0:
+                #         self.return_info.append(
+                #             (
+                #                 self.current_module,
+                #                 self.current_class,
+                #                 self.current_function,
+                #                 self.last_line,
+                #                 docstr,
+                #             )
+                #         )
 
         # now clean up
         self.prepare_output()
@@ -794,7 +769,7 @@ def generate_from_rst(
     for f in dst_path.rglob(pattern="*.py*"):
         try:
             os.remove(f)
-        except (OSError, PermissionError):
+        except OSError:
             pass
 
     for file in files:
@@ -806,14 +781,11 @@ def generate_from_rst(
         reader.parse()
         if file.stem in U_MODULES:
             # create umod.py file and mod.py file
-            reader.write_file((dst_path / ("u" + file.name)).with_suffix(suffix))
-            reader.write_file((dst_path / file.name).with_suffix(suffix))
-            # with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
-            #     # new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
-            #     new_file.write(f"from . import u{file.stem} # Type: Ignore\n")
-        else:
-            # create mod.py file
-            reader.write_file((dst_path / file.name).with_suffix(suffix))
+            reader.write_file((dst_path / f"u{file.name}").with_suffix(suffix))
+                    # with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
+                    #     # new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
+                    #     new_file.write(f"from . import u{file.stem} # Type: Ignore\n")
+        reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
 
     run_autoflake(dst_path, progress_pyi=True)

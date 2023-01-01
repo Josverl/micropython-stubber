@@ -25,10 +25,6 @@ pyb.wfi()  # pause CPU, waiting for interrupt
 pyb.freq()  # get CPU and bus frequencies
 pyb.freq(60000000)  # set CPU freq to 60MHz
 
-if False:
-    pyb.stop()  # stop CPU, waiting for external interrupt
-
-
 # Internal LEDs
 # See pyb.LED.
 

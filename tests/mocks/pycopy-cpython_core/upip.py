@@ -52,10 +52,8 @@ def op_basename(path):
 # Expects *file* name
 def _makedirs(name, mode=0o777):
     ret = False
-    s = ""
     comps = name.rstrip("/").split("/")[:-1]
-    if comps[0] == "":
-        s = "/"
+    s = "/" if comps[0] == "" else ""
     for c in comps:
         if s and s[-1] != "/":
             s += "/"
@@ -64,7 +62,7 @@ def _makedirs(name, mode=0o777):
             os.mkdir(s)
             ret = True
         except OSError as e:
-            if e.args[0] != errno.EEXIST and e.args[0] != errno.EISDIR:
+            if e.args[0] not in [errno.EEXIST, errno.EISDIR]:
                 raise
             ret = False
     return ret
@@ -74,10 +72,10 @@ def save_file(fname, subf):
     global file_buf
     with open(fname, "wb") as outf:
         while True:
-            sz = subf.readinto(file_buf)
-            if not sz:
+            if sz := subf.readinto(file_buf):
+                outf.write(file_buf, sz)
+            else:
                 break
-            outf.write(file_buf, sz)
 
 
 def install_tar(f, prefix):
@@ -105,7 +103,7 @@ def install_tar(f, prefix):
             outfname = prefix + fname
             if info.type != tarfile.DIRTYPE:
                 if debug:
-                    print("Extracting " + outfname)
+                    print(f"Extracting {outfname}")
                 _makedirs(outfname)
                 subf = f.extractfile(info)
                 save_file(outfname, subf)
@@ -115,7 +113,7 @@ def install_tar(f, prefix):
 def expandhome(s):
     if "~/" in s:
         h = os.getenv("HOME")
-        s = s.replace("~/", h + "/")
+        s = s.replace("~/", f"{h}/")
     return s
 
 
@@ -135,7 +133,7 @@ def url_open(url):
     try:
         ai = usocket.getaddrinfo(host, 443, 0, usocket.SOCK_STREAM)
     except OSError as e:
-        fatal("Unable to resolve %s (no Internet?)" % host, e)
+        fatal(f"Unable to resolve {host} (no Internet?)", e)
     # print("Address infos:", ai)
     ai = ai[0]
 
@@ -147,14 +145,14 @@ def url_open(url):
         if proto == "https:":
             s = ussl.wrap_socket(s, server_hostname=host)
             if warn_ussl:
-                print("Warning: %s SSL certificate is not validated" % host)
+                print(f"Warning: {host} SSL certificate is not validated")
                 warn_ussl = False
 
         s.write("GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n" % (urlpath, host))
         l = s.readline()
         protover, status, msg = l.split(None, 2)
         if status != b"200":
-            if status == b"404" or status == b"301":
+            if status in [b"404", b"301"]:
                 raise NotFoundError("Package not found")
             raise ValueError(status)
         while 1:
@@ -171,7 +169,7 @@ def url_open(url):
 
 
 def get_pkg_metadata(name):
-    f = url_open("https://pypi.org/pypi/%s/json" % name)
+    f = url_open(f"https://pypi.org/pypi/{name}/json")
     try:
         return json.load(f)
     finally:
@@ -191,15 +189,14 @@ def get_latest_url_json(name):
 def get_latest_url_simple(name):
     # Stupid PEP 503 normalization
     name = name.replace("_", "-").replace(".", "-").lower()
-    f = url_open("https://pypi.org/simple/%s/" % name)
+    f = url_open(f"https://pypi.org/simple/{name}/")
     try:
         last_url = None
         while 1:
             l = f.readline().decode()
             if not l:
                 break
-            m = simple_lst_re.search(l)
-            if m:
+            if m := simple_lst_re.search(l):
                 last_url = m.group(1)
         return last_url
     finally:
@@ -217,7 +214,7 @@ def install_pkg(pkg_spec, install_path):
     # package_url = get_latest_url_json(pkg_spec)
     package_url = get_latest_url_simple(pkg_spec)
 
-    print("Installing %s from %s" % (pkg_spec, package_url))
+    print(f"Installing {pkg_spec} from {package_url}")
     package_fname = op_basename(package_url)
     f1 = url_open(package_url)
     try:
@@ -239,7 +236,7 @@ def install(to_install, install_path=None):
         install_path += "/"
     if not isinstance(to_install, list):
         to_install = [to_install]
-    print("Installing to: " + install_path)
+    print(f"Installing to: {install_path}")
     # sets would be perfect here, but don't depend on them
     installed = []
     try:
@@ -253,8 +250,7 @@ def install(to_install, install_path=None):
             installed.append(pkg_spec)
             if debug:
                 print(meta)
-            deps = meta.get("deps", "").rstrip()
-            if deps:
+            if deps := meta.get("deps", "").rstrip():
                 deps = deps.decode("utf-8").split("\n")
                 to_install.extend(deps)
     except Exception as e:
@@ -281,7 +277,7 @@ def cleanup():
         try:
             os.remove(fname)
         except OSError:
-            print("Warning: Cannot delete " + fname)
+            print(f"Warning: Cannot delete {fname}")
 
 
 def help():
@@ -332,7 +328,7 @@ def main():
     while i < len(sys.argv) and sys.argv[i][0] == "-":
         opt = sys.argv[i]
         i += 1
-        if opt == "-h" or opt == "--help":
+        if opt in ["-h", "--help"]:
             help()
             return
         elif opt == "-p":
@@ -352,7 +348,7 @@ def main():
         elif opt == "--debug":
             debug = True
         else:
-            fatal("Unknown/unsupported option: " + opt)
+            fatal(f"Unknown/unsupported option: {opt}")
 
     to_install.extend(sys.argv[i:])
     if not to_install:

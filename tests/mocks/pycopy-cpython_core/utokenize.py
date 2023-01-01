@@ -33,7 +33,7 @@ def get_str(l, readline):
     lineno = 0
 
     if l.startswith('"""') or l.startswith("'''"):
-        s = sep = l[0:3]
+        s = sep = l[:3]
         l = l[3:]
         pos = 0
         while True:

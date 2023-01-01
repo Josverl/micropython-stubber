@@ -10,7 +10,6 @@ print("Hello bowler")
 
 def on():
     i = 1
-    pass
 
 
 class PinBase:

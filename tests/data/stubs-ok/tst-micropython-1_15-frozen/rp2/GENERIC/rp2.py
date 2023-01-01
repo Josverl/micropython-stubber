@@ -103,7 +103,7 @@ class PIOASMEmit:
     def label(self, label):
         if self.pass_ == 0:
             if label in self.labels:
-                raise PIOASMError("duplicate label {}".format(label))
+                raise PIOASMError(f"duplicate label {label}")
             self.labels[label] = self.num_instr
 
     def word(self, instr, label=None):
@@ -111,10 +111,10 @@ class PIOASMEmit:
         if self.pass_ > 0:
             if label is None:
                 label = 0
-            else:
-                if not label in self.labels:
-                    raise PIOASMError("unknown label {}".format(label))
+            elif label in self.labels:
                 label = self.labels[label]
+            else:
+                raise PIOASMError(f"unknown label {label}")
             self.prog[_PROG_DATA].append(instr | label)
         return self
 
@@ -136,14 +136,14 @@ class PIOASMEmit:
 
     def in_(self, src, data):
         if not 0 < data <= 32:
-            raise PIOASMError("invalid bit count {}".format(data))
+            raise PIOASMError(f"invalid bit count {data}")
         return self.word(0x4000 | src << 5 | data & 0x1F)
 
     def out(self, dest, data):
         if dest == 8:
             dest = 7  # exec
         if not 0 < data <= 32:
-            raise PIOASMError("invalid bit count {}".format(data))
+            raise PIOASMError(f"invalid bit count {data}")
         return self.word(0x6000 | dest << 5 | data & 0x1F)
 
     def push(self, value=0, value2=0):

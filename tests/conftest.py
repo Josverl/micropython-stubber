@@ -1,6 +1,7 @@
 """
 Shared Test Fixtures
 """
+
 import logging
 import os
 import sys
@@ -18,7 +19,7 @@ logging.basicConfig(level=logging.INFO)  # encoding="utf-8", on 3.10 only
 # make sure that the source can be found, but not twice
 RootPath = Path(os.getcwd())
 src_path = str(RootPath / "src")
-if not src_path in sys.path:
+if src_path not in sys.path:
     sys.path.append(src_path)
 
 
@@ -26,7 +27,7 @@ if not src_path in sys.path:
 def fx_add_board_path(pytestconfig: Config):
     "add ./board path temporarily"
     source_path = str(pytestconfig.rootpath / "board")
-    if not source_path in sys.path:
+    if source_path not in sys.path:
         sys.path[1:1] = [source_path]
     yield source_path
     sys.path.remove(source_path)
@@ -37,7 +38,7 @@ def fx_add_board_path(pytestconfig: Config):
 def fx_add_minified_path(pytestconfig: Config):
     "add ./minified path temporarily"
     source_path = str(pytestconfig.rootpath / "minified")
-    if not source_path in sys.path:
+    if source_path not in sys.path:
         sys.path[1:1] = [source_path]
     yield source_path
     sys.path.remove(source_path)
@@ -49,7 +50,7 @@ def mock_pycopy_path(pytestconfig: Config):
     "Add pycopy-CPython, and machine to path  temporarily"
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "pycopy-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
-    if not source_path in sys.path:
+    if source_path not in sys.path:
         sys.path[1:1] = [source_path, machine_path]
     yield source_path
     sys.path.remove(source_path)
@@ -62,7 +63,7 @@ def mock_micropython_path(pytestconfig: Config):
     "Add micropython-CPython and machine to path  temporarily"
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "micropython-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
-    if not source_path in sys.path:
+    if source_path not in sys.path:
         sys.path[1:1] = [source_path, machine_path]
     yield source_path
     sys.path.remove(source_path)
@@ -91,4 +92,4 @@ def pytest_runtest_setup(item):
     supported_platforms = ALL.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
     if supported_platforms and plat not in supported_platforms:
-        pytest.skip("cannot run on platform {}".format(plat))
+        pytest.skip(f"cannot run on platform {plat}")

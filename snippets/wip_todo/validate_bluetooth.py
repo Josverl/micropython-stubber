@@ -126,6 +126,8 @@ SERVICES = (
 
 # Eventhandler
 def bt_irq(event, data):
+    if event == _IRQ_SCAN_DONE:
+        return
     if event == _IRQ_CENTRAL_CONNECT:
         # A central has connected to this peripheral.
         conn_handle, addr_type, addr = data
@@ -143,9 +145,6 @@ def bt_irq(event, data):
     elif event == _IRQ_SCAN_RESULT:
         # A single scan result.
         addr_type, addr, adv_type, rssi, adv_data = data
-    elif event == _IRQ_SCAN_DONE:
-        # Scan duration finished or manually stopped.
-        pass
     elif event == _IRQ_PERIPHERAL_CONNECT:
         # A successful gap_connect().
         conn_handle, addr_type, addr = data

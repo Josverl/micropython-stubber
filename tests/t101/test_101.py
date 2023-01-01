@@ -18,7 +18,7 @@ def test_version():
 
 
 def test_dummy():
-    assert True
+    pass
 
 
 def test_foo(pytestconfig, testrepo_micropython):

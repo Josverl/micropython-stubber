@@ -51,7 +51,7 @@ def test_docstub_candidates(pytestconfig, family, versions, count):
     assert isinstance(docstubs, Generator)
     l = list(docstubs)
     assert len(l) == count
-    if len(l) > 0:
+    if l:
         assert l[0]["pkg_type"] == DOC_STUBS
 
 
@@ -88,7 +88,7 @@ def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count)
     for i in l:
         print(i)
     assert len(l) == count, f"{len(l)} != {count}, {l}"
-    if len(l) > 0:
+    if l:
         assert l[0]["pkg_type"] == COMBO_STUBS
 
 

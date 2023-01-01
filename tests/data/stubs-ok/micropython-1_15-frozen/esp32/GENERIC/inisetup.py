@@ -5,11 +5,7 @@ from flashbdev import bdev
 def check_bootsec():
     buf = bytearray(bdev.ioctl(5, 0))  # 5 is SEC_SIZE
     bdev.readblocks(0, buf)
-    empty = True
-    for b in buf:
-        if b != 0xFF:
-            empty = False
-            break
+    empty = all(b == 0xFF for b in buf)
     if empty:
         return True
     fs_corrupted()

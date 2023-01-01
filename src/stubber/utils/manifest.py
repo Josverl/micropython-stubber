@@ -37,7 +37,7 @@ def manifest(
         firmware = firmware.replace("--", "-")
         firmware = firmware.replace("--", "-")
 
-    mod_manifest = {
+    return {
         "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json",
         "firmware": {
             "family": family,
@@ -56,7 +56,6 @@ def manifest(
         },
         "modules": [],
     }
-    return mod_manifest
 
 
 def make_manifest(folder: Path, family: str, port: str, version: str, release: str = "", stubtype: str = "", board: str = "") -> bool:
@@ -65,7 +64,7 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
         files = list(folder.glob("**/*.py"))
-        if len(files) == 0:
+        if not files:
             files = list(folder.glob("**/*.pyi"))
 
         # sort the list

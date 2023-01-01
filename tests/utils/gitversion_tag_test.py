@@ -29,8 +29,6 @@ def test_get_version(path):
         # second part must be an integer
         assert parts[1].isnumeric()
 
-    assert True
-
 
 @pytest.mark.parametrize(
     "path",

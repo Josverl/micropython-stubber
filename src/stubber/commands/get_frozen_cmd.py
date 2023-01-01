@@ -24,7 +24,6 @@ from .cli import stubber_cli
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
-# @click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 @click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
@@ -43,17 +42,19 @@ def cli_get_frozen(
 
     stub_paths: List[Path] = []
 
-    if len(version) == 0:
+    if not version:
         version = utils.clean_version(git.get_tag(CONFIG.mpy_path.as_posix()) or "0.0")
     if version:
-        log.info("MicroPython version : {}".format(version))
+        log.info(f"MicroPython version : {version}")
         # folder/{family}-{version}-frozen
         family = "micropython"
         stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
         stub_paths.append(stub_path)
         freeze_any(stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     else:
-        log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
-    log.info(f"::group:: start post processing of retrieved stubs")
+        log.warning(
+            f"Unable to find the micropython repo in folder : {CONFIG.mpy_path.as_posix()}"
+        )
+    log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
-    log.info(f"::group:: Done")
+    log.info("::group:: Done")

@@ -15,11 +15,10 @@ def get_portboard(manifest_path: Path):
     # https://regex101.com/r/tv7JX4/1
     re_pb = r".*micropython[\/\\]ports[\/\\](?P<port>[\w_-]*)([\/\\]boards[\/\\](?P<board>\w*))?[\/\\]"
     mpy_port = mpy_board = ""
-    matches = re.search(re_pb, manifest_path.absolute().as_posix())
-    if matches:
+    if matches := re.search(re_pb, manifest_path.absolute().as_posix()):
         # port and board
-        mpy_port = str(matches.group("port") or "")
-        mpy_board = str(matches.group("board") or "")
+        mpy_port = str(matches["port"] or "")
+        mpy_board = str(matches["board"] or "")
         return mpy_port, mpy_board
     log.error(f"no port or board found in {manifest_path}")
     raise (ValueError("Neither port or board found in path"))
@@ -29,10 +28,10 @@ def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
     """
     get path to a folder to store the frozen stubs for the given port/board
     """
-    if port == "":
+    if not port:
         raise ValueError("port must be provided")
 
-    if board == "":
+    if not board:
         board = "GENERIC"
 
     if board == "manifest_release":
@@ -48,7 +47,7 @@ def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
     """
     # NOTE: FIX 1 add __init__.py to umqtt
     if (freeze_path / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
-        log.debug(f"add missing : umqtt/__init__.py")
+        log.debug("add missing : umqtt/__init__.py")
         with open(freeze_path / "umqtt" / "__init__.py", "a") as f:
             f.write("")
 
@@ -56,7 +55,7 @@ def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
     # this is normally implemented as a C module, let's use the .py version to generate a stub for this
     if (freeze_path / "uasyncio").exists() and not (freeze_path / "uasyncio" / "task.py").exists():
         # copy task.py from micropython\extmod\uasyncio\task.py to stub_folder
-        log.debug(f"add missing : uasyncio/task.py")
+        log.debug("add missing : uasyncio/task.py")
         task_py = mpy_path / "extmod" / "uasyncio" / "task.py"
         try:
             shutil.copy(str(task_py), str(freeze_path / "uasyncio"))

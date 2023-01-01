@@ -7,7 +7,6 @@ Module: '_thread' on micropython-linux-1.13
 class LockType:
     def __init__(self):
         ''
-        pass
 
     def acquire():
         pass

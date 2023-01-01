@@ -52,12 +52,12 @@ def clone(remote_repo: str, path: Path, shallow=False, tag: Optional[str] = None
         cmd += ["--depth", "1"]
     if tag in ("latest", "master"):
         tag = None
-    if not tag:
-        cmd += [remote_repo, str(path)]
-    else:
-        cmd += [remote_repo, "--branch", tag, str(path)]
-    result = _run_git(cmd, expect_stderr=True, capture_output=False)
-    if result:
+    cmd += (
+        [remote_repo, "--branch", tag, str(path)]
+        if tag
+        else [remote_repo, str(path)]
+    )
+    if result := _run_git(cmd, expect_stderr=True, capture_output=False):
         return result.returncode == 0
     else:
         return False
@@ -81,10 +81,11 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
     tag: str = result.stdout.decode("utf-8")
     tag = tag.replace("\r", "").replace("\n", "")
     if abbreviate and "-" in tag:
-        # this may or not be the latest on the main branch
-        # result = _run_git(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo=repo, expect_stderr=True)
-        result = _run_git(["git", "status", "--branch"], repo=repo.as_posix(), expect_stderr=True)
-        if result:
+        if result := _run_git(
+            ["git", "status", "--branch"],
+            repo=repo.as_posix(),
+            expect_stderr=True,
+        ):
             lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
             if lines[0].startswith("On branch"):
                 if lines[0].endswith("master"):
@@ -115,7 +116,7 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     """
     checkout a specific git tag
     """
-    cmd = ["git", "checkout", "tags/" + tag, "--detach", "--quiet", "--force"]
+    cmd = ["git", "checkout", f"tags/{tag}", "--detach", "--quiet", "--force"]
     result = _run_git(cmd, repo=repo, expect_stderr=True, capture_output=True)
     if not result:
         return False
@@ -134,11 +135,11 @@ def synch_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
         ["git", "submodule", "update", "--quiet"],
     ]
     for cmd in cmds:
-        result = _run_git(cmd, repo=repo, expect_stderr=True)
-        if not result:
+        if result := _run_git(cmd, repo=repo, expect_stderr=True):
+            # actually a good result
+            log.debug(result.stderr.decode("utf-8"))
+        else:
             return False
-        # actually a good result
-        log.debug(result.stderr.decode("utf-8"))
     return True
 
 
@@ -203,9 +204,7 @@ def fetch(repo: Union[Path, str]) -> bool:
 
     cmd = ["git", "fetch", "--all", "--tags", "--quiet"]
     result = _run_git(cmd, repo=repo, echo_output=False)
-    if not result:
-        return False
-    return result.returncode == 0
+    return result.returncode == 0 if result else False
 
 
 def pull(repo: Union[Path, str], branch="main") -> bool:

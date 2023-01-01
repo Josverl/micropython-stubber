@@ -42,7 +42,7 @@ def enrich_file(target_path: Path, docstub_path: Path, diff=False, write_back=Fa
             candidates += list(docstub_path.rglob(target_path.stem[1:] + ext))
         else:
             # also look for candidates with leading u
-            candidates += list(docstub_path.rglob("u" + target_path.stem + ext))
+            candidates += list(docstub_path.rglob(f"u{target_path.stem}{ext}"))
 
     for docstub_file in candidates:
         if docstub_file.exists():
@@ -57,25 +57,27 @@ def enrich_file(target_path: Path, docstub_path: Path, diff=False, write_back=Fa
     oldcode = target_path.read_text()
 
     codemod_instance = merge_docstub.MergeCommand(context, stub_file=docstub_file)
-    newcode = exec_transform_with_prettyprint(
-        codemod_instance,
-        oldcode,
-        # include_generated=False,
-        generated_code_marker=config["generated_code_marker"],
-        # format_code=not args.no_format,
-        formatter_args=config["formatter"],
-        # python_version=args.python_version,
-    )
-    if newcode:
-        if write_back:
-            log.trace(f"Write back enriched file {target_path}")
-            # write updated code to file
-            target_path.write_text(newcode, encoding="utf-8")
-        if diff:  # pragma: no cover
-            return diff_code(oldcode, newcode, 5, filename=target_path.name)
-        return newcode
-    else:
+    if not (
+        newcode := exec_transform_with_prettyprint(
+            codemod_instance,
+            oldcode,
+            # include_generated=False,
+            generated_code_marker=config["generated_code_marker"],
+            # format_code=not args.no_format,
+            formatter_args=config["formatter"],
+            # python_version=args.python_version,
+        )
+    ):
         return None
+    if write_back:
+        log.trace(f"Write back enriched file {target_path}")
+        # write updated code to file
+        target_path.write_text(newcode, encoding="utf-8")
+    return (
+        diff_code(oldcode, newcode, 5, filename=target_path.name)
+        if diff
+        else newcode
+    )
 
 
 def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False, require_docstub=False) -> int:

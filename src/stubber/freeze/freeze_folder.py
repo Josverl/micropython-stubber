@@ -26,7 +26,7 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
     match_lib_with_mpy(version_tag=version, lib_path=Path(lib_folder))
 
     targets = []
-    scripts = glob.glob(mpy_folder + "/ports/**/modules/*.py", recursive=True)
+    scripts = glob.glob(f"{mpy_folder}/ports/**/modules/*.py", recursive=True)
     if len(scripts) > 0:
         # clean target folder
         shutil.rmtree(stub_folder, ignore_errors=True)
@@ -46,12 +46,12 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
         # copy file
         try:
             shutil.copy2(script, dest_path)
-            if not dest_path in targets:
+            if dest_path not in targets:
                 targets.append(dest_path)
         except OSError as e:
             ## Ignore errors that are caused by reorganisation of Micropython-lib
             # log.exception(e)
-            warnings.warn("unable to freeze {} due to error {}".format(e.filename, str(e)))
+            warnings.warn(f"unable to freeze {e.filename} due to error {str(e)}")
 
     for dest_path in targets:
         # make a module manifest

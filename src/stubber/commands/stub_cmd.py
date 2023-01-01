@@ -22,7 +22,7 @@ from .cli import stubber_cli
 def cli_stub(source: Union[str, Path]):
     "Create or update .pyi type hint files."
 
-    log.info("Generate type hint files (pyi) in folder: {}".format(source))
+    log.info(f"Generate type hint files (pyi) in folder: {source}")
     OK = generate_pyi_files(Path(source))
     do_post_processing([Path(source)], pyi=True, black=True)
     return 0 if OK else 1

@@ -44,9 +44,8 @@ class Task(OrgTask):
                     result._blocking = False
                     result.add_done_callback(self._wakeup)
                     self._fut_waiter = result
-                    if self._must_cancel:
-                        if self._fut_waiter.cancel():
-                            self._must_cancel = False
+                    if self._must_cancel and self._fut_waiter.cancel():
+                        self._must_cancel = False
                 else:
                     self._loop.call_soon(
                         self._step,
@@ -64,12 +63,6 @@ class Task(OrgTask):
                 self._loop.create_task(result)
                 self._loop.call_soon(self._step)
                 # Yielding a generator is just wrong.
-            #                self._loop.call_soon(
-            #                    self._step, None,
-            #                    RuntimeError(
-            #                        'yield was used instead of yield from for '
-            #                        'generator in task {!r} with {}'.format(
-            #                            self, result)))
             else:
                 # Yielding something else is an error.
                 self._loop.call_soon(
@@ -98,7 +91,6 @@ class StreamWriter(OrgStreamWriter):
     def aclose(self):
         self.close()
         return
-        yield
 
 
 asyncio.streams.StreamWriter = StreamWriter

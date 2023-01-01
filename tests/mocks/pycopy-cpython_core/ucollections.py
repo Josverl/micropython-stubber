@@ -13,9 +13,8 @@ class deque:
         return len(self.d)
 
     def append(self, x):
-        if self.flags & 1:
-            if len(self.d) == self.maxlen:
-                raise IndexError
+        if self.flags & 1 and len(self.d) == self.maxlen:
+            raise IndexError
         self.d.append(x)
 
     def popleft(self):

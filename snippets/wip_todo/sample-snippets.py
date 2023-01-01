@@ -7,7 +7,7 @@ from machine import I2C, Pin, freq
 # blue led on pin 2
 blue = Pin(5, Pin.OUT)
 
-for x in range(20):
+for _ in range(20):
     blue.value(0)
     time.sleep_ms(100)
     blue.value(1)
@@ -18,7 +18,7 @@ blue.value(0)
 # ---------------------------
 # Toggle pin(value)
 # ---------------------------
-for x in range(20):
+for _ in range(20):
     blue.value((not blue.value()))
     time.sleep_ms(100)
 
@@ -83,9 +83,7 @@ if not wlan.isconnected():
     wlan.active(True)
     wlan.connect(wifi_ssid, wifi_psk)
     # Wait for WiFi connection
-    while not wlan.isconnected():
-        if tmo == 0:
-            break
+    while not wlan.isconnected() and tmo != 0:
         # BlinkLed(led)
         print(".", end="")
         tmo -= 1
@@ -122,7 +120,7 @@ import machine, binascii
 id_hex = machine.unique_id()
 id_b = binascii.hexlify(id_hex)
 # optional - decode to string, takes 2x memory
-print("Unique ID: {}".format(decode(machine.unique_id())))
+print(f"Unique ID: {decode(machine.unique_id())}")
 
 
 import machine, binascii
@@ -131,7 +129,7 @@ id_hex = machine.unique_id()
 id_b = binascii.hexlify(id_hex)
 # optional - decode to string, takes 2x memory
 id_s = id_b.decode("utf-8")
-print("Unique ID: {}".format(id_s))
+print(f"Unique ID: {id_s}")
 
 # ------------------------
 # Scan for accesspoints
@@ -158,9 +156,9 @@ del _f
 # -----------------------------
 
 # basic New
-"{} {}".format("one", "two")
+'one two'
 # basic Old
-"%s %s" % ("one", "two")
+'one two'
 
 # print information from a list ( one star )
 mylist = "Jos", "Verlinde"
@@ -215,29 +213,6 @@ print("{first} {last}".format(**data))
 # Use a space character to indicate that negative numbers should be prefixed with a minus symbol and a leading space should be used for positive ones.
 "{: d}".format((-23))
 
-
-# Datetime
-# New style formatting also allows objects to control their own rendering. This for example allows datetime objects to be formatted inline:
-# This operation is not available with old-style formatting.
-# TODO: Add MicroPython Date and Time Format sample
-
-
-# ------------------------------
-# Handling errors
-# Try/catch
-# todo: add example with different errors
-# ------------------------------
-
-# try:
-#     #main code
-#     ...
-# except e as identifier:
-#     #handle error
-#     ...
-
-# raise an error
-if 0:
-    raise ValueError("A very specific bad thing happened.")
 
 # Best practice in handling errors and logging:
 import logging
@@ -328,7 +303,7 @@ log.critical("critical debug message")
 log.error("debug message")
 log.warning("debug message")
 log.info("debug message")
-log.debug("debug value{}".format(x))
+log.debug(f"debug value{x}")
 
 
 # ------------------------------
@@ -488,7 +463,7 @@ def foo():
 
 def memoize(func):
     "basic moemoization, will eat memory"
-    cache = dict()
+    cache = {}
 
     def memoized_func(*args):
         if args in cache:
@@ -530,8 +505,7 @@ def take(n, seq):
     seq = iter(seq)
     result = []
     try:
-        for i in range(n):
-            result.append(next(seq))
+        result.extend(next(seq) for _ in range(n))
     except StopIteration:
         pass
     return result

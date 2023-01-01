@@ -14,11 +14,7 @@ def wifi():
 def check_bootsec():
     buf = bytearray(bdev.SEC_SIZE)
     bdev.readblocks(0, buf)
-    empty = True
-    for b in buf:
-        if b != 0xFF:
-            empty = False
-            break
+    empty = all(b == 0xFF for b in buf)
     if empty:
         return True
     fs_corrupted()

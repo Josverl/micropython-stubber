@@ -120,18 +120,12 @@ class SourceDict(OrderedDict):
         """add literal / constant to the constant scope of this block, or a class in this block"""
         if "." in name and isinstance(self, ModuleSourceDict):
             classname, const_name = name.split(".", 1)
-            classfullname = self.find(classname.replace("# ", ""))  # Wildcards are
-            if classfullname:
-                cls_dict: ClassSourceDict = self[classfullname]
-                cls_dict.add_constant_smart(const_name, type, docstr)
-            else:
+            if not (classfullname := self.find(classname.replace("# ", ""))):
                 raise KeyError(f"const {name} could not be added to Class {classname}")
+            cls_dict: ClassSourceDict = self[classfullname]
+            cls_dict.add_constant_smart(const_name, type, docstr)
         else:
-            if "*" in name:
-                # * wildcard used in documentation
-                line = f"# {name}: {type}"
-            else:
-                line = f"{name}: {type}"
+            line = f"# {name}: {type}" if "*" in name else f"{name}: {type}"
             # assign a value so constant can be used as default value
             if type == "Any":
                 line += " = ..."
@@ -146,13 +140,16 @@ class SourceDict(OrderedDict):
                 if len(_docstr):
                     if len(_docstr) == 1:
                         #  - if len = 1 add triple quotes before & after, respecting indentaion
-                        _docstr = [spaces(self.indent + self._body) + '"""' + _docstr[0].lstrip() + '"""']
+                        _docstr = [f'{spaces(self.indent + self._body)}"""{_docstr[0].lstrip()}"""']
                     else:
                         #  - if len > 1 add triple quotes on sep lines before & after,respecting indentaion
                         _docstr = (
                             [spaces(self.indent + self._body) + '"""\\']
-                            + [spaces(self.indent + self._body) + l.lstrip() for l in _docstr]
-                            + [spaces(self.indent + self._body) + '"""']
+                            + [
+                                spaces(self.indent + self._body) + l.lstrip()
+                                for l in _docstr
+                            ]
+                            + [f'{spaces(self.indent + self._body)}"""']
                         )
             if len(_docstr):
                 #  - add docstring after defining constant
@@ -230,16 +227,13 @@ class ModuleSourceDict(SourceDict):
         "find a classnode based on the name with or without the superclass"
         keys = list(self.keys())
         if not name.startswith("class "):
-            name = "class " + name
+            name = f"class {name}"
         # try full match first
         if name in keys:
             return name
         # is there a partial ? - only match before `(`
         name = name.split("(")[0]
-        for k in keys:
-            if name == k.split("(")[0]:
-                return k
-        return None
+        return next((k for k in keys if name == k.split("(")[0]), None)
 
     def classes(self):
         "get a list of the class names in parent-child order"
@@ -272,10 +266,10 @@ class ClassSourceDict(SourceDict):
     ):
         "set correct order for class and exception definitions to allow adding class variables"
         _init: List[str] = []
-        if len(init) > 0:
+        if init != "":
             _init = [spaces(indent + 4) + init]
             # add ...
-            _init.append(spaces(indent + 4 + 4) + "...")
+            _init.append(f"{spaces(indent + 4 + 4)}...")
         super().__init__(
             [
                 ("comment", []),
@@ -312,14 +306,13 @@ class FunctionSourceDict(SourceDict):
         super().__init__(
             [
                 ("decorator", [spaces(indent) + d for d in decorators]),
-                ("def", _def),  # includes indentation
-                ("docstr", '""'),  # just a placeholder
-                #                ("comments", []),
+                ("def", _def),
+                ("docstr", '""'),
                 ("constants", []),
-                ("body", spaces(indent + 4) + "..."),
+                ("body", f"{spaces(indent + 4)}..."),
             ],
             indent,
-            body=4,  # function body indent +4
+            body=4,
             lf=lf,
         )
         self.name = name

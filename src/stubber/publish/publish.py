@@ -78,13 +78,12 @@ def publish(
     status: Dict[str, Any] = {"result": "-", "name": pkg_name, "version": version, "error": None}
     log.debug("=" * 40)
 
-    package_info = get_package_info(
+    if package_info := get_package_info(
         db,
         CONFIG.publish_path,
         pkg_name=pkg_name,
         mpy_version=version,
-    )
-    if package_info:
+    ):
         # create package from the information retrieved from the database
         package = StubPackage(pkg_name, version=version, json_data=package_info)
 
@@ -103,10 +102,10 @@ def publish(
     status["version"] = package.pkg_version
     # check if the sources exist
     ok = True
-    for (name, path) in package.stub_sources:
+    for name, path in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
             msg = f"{pkg_name}: source '{name}' not found: {CONFIG.stub_path / path}"
-            if not name == StubSource.FROZEN:
+            if name != StubSource.FROZEN:
                 log.warning(msg)
                 status["error"] = msg
                 ok = False
@@ -147,8 +146,9 @@ def publish(
             package.pkg_version = new_ver
         else:
             base = Version(package.pkg_version)
-            pypi_versions = get_pypy_versions(package.package_name, production=production, base=base)
-            if pypi_versions:
+            if pypi_versions := get_pypy_versions(
+                package.package_name, production=production, base=base
+            ):
                 package.pkg_version = str(pypi_versions[-1])
             new_ver = package.bump()
         # to get the next version
@@ -170,18 +170,17 @@ def publish(
         if dryrun:  # pragma: no cover
             log.warning("Dryrun: Updated package is NOT published.")
             status["result"] = "DryRun successful"
+        elif package.mpy_version == "latest":
+            log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
         else:
-            if package.mpy_version == "latest":
-                log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
-            else:
-                result = package.publish(production=production)
-                if not result:
-                    log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
-                    status["error"] = "Publish failed"
-                    return status
-                status["result"] = "Published"
-                db.add(package.to_dict())
-                db.commit()
+            result = package.publish(production=production)
+            if not result:
+                log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
+                status["error"] = "Publish failed"
+                return status
+            status["result"] = "Published"
+            db.add(package.to_dict())
+            db.commit()
 
     if clean:
         package.clean()
@@ -203,7 +202,7 @@ def publish_one(
     db = get_database(CONFIG.publish_path, production=production)
     l = list(frozen_candidates(family=family, versions=versions, ports=ports, boards=boards))
     result = None
-    if len(l) > 0:
+    if l:
         todo = l[0]
         result = publish(
             db=db,

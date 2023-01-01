@@ -40,10 +40,10 @@ def edit_lines(content, edits, diff=False):
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
-        return l.replace(x, f"print")
+        return l.replace(x, "print")
 
     def rpass(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
-        return l.replace(x, f"pass")
+        return l.replace(x, "pass")
 
     def get_whitespace_context(content, index):
         """Get whitespace count of lines surrounding index"""
@@ -80,7 +80,7 @@ def edit_lines(content, edits, diff=False):
         close_cnt = line.count(")")
         ahead_index = 1
         look_ahead = 0
-        while not open_cnt == close_cnt:  # pragma: no cover
+        while open_cnt != close_cnt:  # pragma: no cover
             look_ahead = l_index + ahead_index
             ahead_index += 1
             next_l = content[look_ahead]
@@ -253,10 +253,9 @@ def minify(
         log.exception(e)
 
     log.debug("Minified file written to :", target)
-    if cross_compile:
-        result = subprocess.run(["mpy-cross", "-O2", str(target)])
-        if result.returncode == 0:
-            log.debug("mpy-cross compiled to    :", target.with_suffix(".mpy"))
-        return result.returncode
-    else:
+    if not cross_compile:
         return 0
+    result = subprocess.run(["mpy-cross", "-O2", str(target)])
+    if result.returncode == 0:
+        log.debug("mpy-cross compiled to    :", target.with_suffix(".mpy"))
+    return result.returncode

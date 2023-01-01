@@ -214,7 +214,7 @@ def test_create_all_stubs(
 
     stubber.clean()
     stublist = list(tmp_path.glob("**/*.*"))
-    assert len(stublist) == 0
+    assert not stublist
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -294,7 +294,7 @@ def test_create_module_stub_ignored(
     stubber.create_module_stub("webrepl", str(tmp_path / "webrepl.py"))
 
     stublist = list(tmp_path.glob("**/*.py"))
-    assert len(stublist) == 0
+    assert not stublist
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -335,7 +335,7 @@ def test_unavailable_modules(
     stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.py"))
     stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.py"))
     stublist = list(tmp_path.glob("**/*.py"))
-    assert len(stublist) == 0
+    assert not stublist
 
 
 # def test_clean(tmp_path):

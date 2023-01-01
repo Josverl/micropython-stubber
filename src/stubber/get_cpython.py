@@ -38,7 +38,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
 
         # within package/mymodule1.py, for example
 
-        data = pkgutil.get_data(__name__, "data/" + requirements)
+        data = pkgutil.get_data(__name__, f"data/{requirements}")
         if not data:  # pragma: no cover
             raise Exception("Resource Not found")
         temp_file = tempfile.NamedTemporaryFile(prefix="requirements", suffix=".txt", delete=False)
@@ -68,13 +68,13 @@ def get_core(requirements, stub_path=None, family: str = "core"):
 
         except OSError as err:  # pragma: no cover
             log.error(
-                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err)
+                f"An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {err}"
             )
 
         # copy *.py files in build folder to stub_path
         # sort by filename to reduce churn in the repo
         for filename in sorted(build_path.rglob("*.py")):
-            log.debug("pipped : {}".format(filename.name))
+            log.debug(f"pipped : {filename.name}")
             # f_name, f_ext = os.path.splitext(os.path.basename(filename))  # pylint: disable=unused-variable
             modlist.append({"file": filename.name, "module": filename.stem})
             try:

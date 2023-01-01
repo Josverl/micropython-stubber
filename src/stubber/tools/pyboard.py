@@ -144,13 +144,11 @@ class TelnetToSerial:
         return len(data)
 
     def inWaiting(self):
-        n_waiting = len(self.fifo)
-        if not n_waiting:
-            data = self.tn.read_eager()
-            self.fifo.extend(data)
-            return len(data)
-        else:
+        if n_waiting := len(self.fifo):
             return n_waiting
+        data = self.tn.read_eager()
+        self.fifo.extend(data)
+        return len(data)
 
 
 class ProcessToSerial:
@@ -198,11 +196,7 @@ class ProcessToSerial:
         return len(data)
 
     def inWaiting(self):
-        # res = self.sel.select(0)
-        res = self.poll.poll(0)
-        if res:
-            return 1
-        return 0
+        return 1 if (res := self.poll.poll(0)) else 0
 
 
 class ProcessPtyToTerminal:
@@ -278,7 +272,7 @@ class Pyboard:
                     if wait == 0:
                         continue
                     if attempt == 0:
-                        sys.stdout.write("Waiting {} seconds for pyboard ".format(wait))
+                        sys.stdout.write(f"Waiting {wait} seconds for pyboard ")
                         delayed = True
                 time.sleep(1)
                 sys.stdout.write(".")
@@ -286,7 +280,7 @@ class Pyboard:
             else:
                 if delayed:
                     print("")
-                raise PyboardError("failed to access " + device)
+                raise PyboardError(f"failed to access {device}")
             if delayed:
                 print("")
 
@@ -393,7 +387,7 @@ class Pyboard:
                     return
                 else:
                     # Unexpected data from device.
-                    raise PyboardError("unexpected read during raw paste: {}".format(data))
+                    raise PyboardError(f"unexpected read during raw paste: {data}")
             # Send out as much data as possible that fits within the allowed window.
             b = command_bytes[i : min(i + window_remain, len(command_bytes))]
             self.serial.write(b)
@@ -406,7 +400,7 @@ class Pyboard:
         # Wait for device to acknowledge end of data.
         data = self.read_until(1, b"\x04")
         if not data.endswith(b"\x04"):
-            raise PyboardError("could not complete raw paste: {}".format(data))
+            raise PyboardError(f"could not complete raw paste: {data}")
 
     def exec_raw_no_follow(self, command):
         if isinstance(command, bytes):
@@ -454,7 +448,7 @@ class Pyboard:
         return self.follow(timeout, data_consumer)
 
     def eval(self, expression):
-        ret = self.exec_("print({})".format(expression))
+        ret = self.exec_(f"print({expression})")
         ret = ret.strip()
         return ret
 
@@ -476,7 +470,8 @@ class Pyboard:
     def fs_ls(self, src):
         cmd = (
             "import uos\nfor f in uos.ilistdir(%s):\n"
-            " print('{:12} {}{}'.format(f[3]if len(f)>3 else 0,f[0],'/'if f[1]&0x4000 else ''))" % (("'%s'" % src) if src else "")
+            " print('{:12} {}{}'.format(f[3]if len(f)>3 else 0,f[0],'/'if f[1]&0x4000 else ''))"
+            % (f"'{src}'" if src else "")
         )
         self.exec_(cmd, data_consumer=stdout_write_bytes)
 
@@ -495,8 +490,8 @@ class Pyboard:
                     data = ast.literal_eval(str(data[:-3], "ascii"))
                     if not isinstance(data, bytes):
                         raise ValueError("Not bytes")
-                except (UnicodeError, ValueError) as e:
-                    raise PyboardError("fs_get: Could not interpret received data: %s" % str(e))
+                except ValueError as e:
+                    raise PyboardError(f"fs_get: Could not interpret received data: {str(e)}")
                 if not data:
                     break
                 f.write(data)
@@ -510,9 +505,9 @@ class Pyboard:
                 if not data:
                     break
                 if sys.version_info < (3,):
-                    self.exec_("w(b" + repr(data) + ")")
+                    self.exec_(f"w(b{repr(data)})")
                 else:
-                    self.exec_("w(" + repr(data) + ")")
+                    self.exec_(f"w({repr(data)})")
         self.exec_("f.close()")
 
     def fs_mkdir(self, dir):
@@ -550,7 +545,7 @@ def filesystem_command(pyb, args):
         if dest is None or dest == "":
             dest = src
         elif dest == ".":
-            dest = "./" + src
+            dest = f"./{src}"
         elif dest.endswith("/"):
             dest += src
         return dest
@@ -585,7 +580,7 @@ def filesystem_command(pyb, args):
                 args = [""]
             for src in args:
                 src = fname_remote(src)
-                print("%s :%s" % (cmd, src))
+                print(f"{cmd} :{src}")
                 op(src)
     except PyboardError as er:
         print(str(er.args[2], "ascii"))
@@ -745,7 +740,7 @@ def main():
             with open(filename, "rb") as f:
                 pyfile = f.read()
                 if filename.endswith(".mpy") and pyfile[0] == ord("M"):
-                    pyb.exec_("_injected_buf=" + repr(pyfile))
+                    pyb.exec_(f"_injected_buf={repr(pyfile)}")
                     pyfile = _injected_import_hook_code
                 execbuffer(pyfile)
 

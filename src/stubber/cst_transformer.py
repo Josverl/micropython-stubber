@@ -21,9 +21,7 @@ class TransformError(Exception):
     Error raised upon encountering a known error while attempting to transform
     the tree.
     """
-
-
-MODULE_KEY = tuple(["__module"])
+MODULE_KEY = ("__module", )
 
 # debug helper
 _m = cst.parse_module("")
@@ -122,14 +120,8 @@ def update_def_docstr(
     if not src_comment:
         return dest_node
 
-    # function def on a single line ending with an ellipsis (...)
     if isinstance(dest_node.body, cst.SimpleStatementSuite):
-        # in order to add a boy the simple hack is to copy the src_node.body
-        if src_node:
-            return dest_node.with_changes(body=src_node.body)
-        else:
-            return dest_node
-
+        return dest_node.with_changes(body=src_node.body) if src_node else dest_node
     # just checking
     if not isinstance(dest_node.body, cst.IndentedBlock):
         raise TransformError("Expected Def with Indented body")
@@ -141,12 +133,12 @@ def update_def_docstr(
     # classdef of functiondef with an indented body
     # need some funcky casting to avoid issues with changing the body
     # note : indented body is nested : body.body
-    if dest_node.get_docstring() != None:
-        body = tuple([src_comment] + list(dest_node.body.body[1:]))
-    else:
+    if dest_node.get_docstring() is None:
         # append the new docstring and append the function body
         body = tuple([src_comment] + list(dest_node.body.body))
 
+    else:
+        body = tuple([src_comment] + list(dest_node.body.body[1:]))
     body_2 = dest_node.body.with_changes(body=body)
 
     return dest_node.with_changes(body=body_2)
@@ -161,10 +153,10 @@ def update_module_docstr(node: cst.Module, doc_tree: Optional[cst.SimpleStatemen
     #     raise TransformError("Expected module with body")
 
     # need some funcky casting to avoid issues with changing the body
-    if node.get_docstring() != None:
-        body = tuple([doc_tree] + list(node.body[1:]))
-    else:
+    if node.get_docstring() is None:
         # append the new docstring and append the function body
         body = tuple([doc_tree] + list(node.body))
 
+    else:
+        body = tuple([doc_tree] + list(node.body[1:]))
     return node.with_changes(body=body)

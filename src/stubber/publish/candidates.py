@@ -26,11 +26,10 @@ def subfolder_names(path: Path):
 def version_candidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldest=OLDEST_VERSION) -> Generator[str, None, None]:
     "get a list of versions for the given family and suffix"
     if path.exists():
-        folder_re = prefix + "-(.*)-" + suffix
+        folder_re = f"{prefix}-(.*)-{suffix}"
         for name in subfolder_names(path):
-            match = re.match(folder_re, name)
-            if match:
-                folder_ver = clean_version(match.group(1))
+            if match := re.match(folder_re, name):
+                folder_ver = clean_version(match[1])
                 if folder_ver == V_LATEST or parse(folder_ver) >= parse(oldest):
                     yield folder_ver
 
@@ -42,8 +41,7 @@ def list_frozen_ports(
 ):
     "get list of ports with frozen stubs for a given family and version"
     ports_path = path / f"{family}-{version}-frozen"
-    ports = list(subfolder_names(ports_path))
-    return ports
+    return list(subfolder_names(ports_path))
 
 
 def list_micropython_ports(
@@ -76,9 +74,7 @@ def list_micropython_port_boards(
         return []
     mpy_path = Path("./repos/micropython")
     boards_path = mpy_path / "ports" / port / "boards"
-    ports = list(subfolder_names(boards_path))
-    # remove blocked ports from list
-    return ports
+    return list(subfolder_names(boards_path))
 
 
 def frozen_candidates(
@@ -97,11 +93,26 @@ def frozen_candidates(
     - port = 'auto' or a specific port
     - board = 'auto' or a specific board, 'GENERIC' must be specified in ALLCAPS
     """
-    auto_port = isinstance(ports, str) and "auto" == ports or isinstance(ports, list) and "auto" in ports
-    auto_board = isinstance(boards, str) and "auto" == boards or isinstance(boards, list) and "auto" in boards
-    auto_version = isinstance(versions, str) and "auto" == versions or isinstance(versions, list) and "auto" in versions
-
+    auto_port = (
+        isinstance(ports, str)
+        and ports == "auto"
+        or isinstance(ports, list)
+        and "auto" in ports
+    )
+    auto_board = (
+        isinstance(boards, str)
+        and boards == "auto"
+        or isinstance(boards, list)
+        and "auto" in boards
+    )
     if isinstance(versions, str):
+        auto_version = (
+            isinstance(versions, str)
+            and versions == "auto"
+            or isinstance(versions, list)
+            and "auto" in versions
+        )
+
         if auto_version:
             versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
         else:
@@ -172,7 +183,7 @@ def docstub_candidates(
     Note that the folders do not need to exist, with the exeption of auto which will scan the stubs folder for versions of docstubs
     """
     if isinstance(versions, str):
-        if "auto" == versions:  # auto with vprefix ...
+        if versions == "auto":  # auto with vprefix ...
             versions = list(version_candidates(suffix="docstubs", prefix=family, path=path))
         else:
             versions = [versions]
@@ -191,7 +202,7 @@ def firmware_candidates(
     /ports/<list of ports>/boards/<list of boards>
     """
     if isinstance(versions, str):
-        if "auto" == versions:  # auto with vprefix ...
+        if versions == "auto":  # auto with vprefix ...
             versions = list(micropython_versions(start=OLDEST_VERSION))
         else:
             versions = [versions]

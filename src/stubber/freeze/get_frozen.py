@@ -41,13 +41,15 @@ def get_manifests(mpy_path: Path) -> List[Path]:
     all_manifests = [
         m.absolute()
         for m in (mpy_path / "ports").rglob("manifest.py")
-        if Path(m).parent.name != "coverage" and not "venv" in m.parts and not ".venv" in m.parts
+        if Path(m).parent.name != "coverage"
+        and "venv" not in m.parts
+        and ".venv" not in m.parts
     ]
     log.info(f"manifests found: {len(all_manifests)}")
     return all_manifests
 
 
-def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None, mpy_lib_path: Optional[Path] = None):  #
+def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None, mpy_lib_path: Optional[Path] = None):    #
     """
     get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
@@ -58,15 +60,14 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
     """
     count = 0
     current_dir = os.getcwd()
-    if not mpy_path:
-        mpy_path = CONFIG.mpy_path.absolute()
-    else:
-        mpy_path = Path(mpy_path).absolute()
-    if not mpy_lib_path:
-        mpy_lib_path = CONFIG.mpy_path.absolute()
-    else:
-        mpy_lib_path = Path(mpy_lib_path).absolute()
-
+    mpy_path = (
+        Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
+    )
+    mpy_lib_path = (
+        Path(mpy_lib_path).absolute()
+        if mpy_lib_path
+        else CONFIG.mpy_path.absolute()
+    )
     if not stub_folder:
         frozen_stub_path = Path("{}/{}_{}_frozen".format(CONFIG.stub_path, FAMILY, utils.clean_version(version, flat=True))).absolute()
     else:
@@ -95,7 +96,9 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
             log.warning("no manifests found")
         for manifest in all_manifests:
             # TODO: try processing older version with new algoritm (1.12 - 1.19.1)
-            if version in ["latest", "master"] or Version(version) >= Version("1.12"):
+            if version in {"latest", "master"} or Version(version) >= Version(
+                "1.12"
+            ):
                 try:
                     freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
                     count += 1

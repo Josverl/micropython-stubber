@@ -27,9 +27,7 @@ class Logger:
 
     def _level_str(self, level):
         l = _level_dict.get(level)
-        if l is not None:
-            return l
-        return "LVL%s" % level
+        return l if l is not None else f"LVL{level}"
 
     def setLevel(self, level):
         self.level = level

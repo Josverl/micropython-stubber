@@ -47,7 +47,6 @@ elif sys.platform == "win32":
         pytest.param("createstubs_db"),
     ],
 )
-# specify the minified tests using a marker
 @pytest.mark.parametrize(
     "script_folder",
     [
@@ -62,16 +61,11 @@ elif sys.platform == "win32":
 def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant: str, pytestconfig: Config):
     "run createstubs in the native (linux/windows) version of micropython"
 
-    # skip this on windows - python 3.7
-    # TODO: why does it not work?
-    if sys.platform == "win32" and sys.version_info[0] == 3 and sys.version_info[0] == 7:
-        pytest.skip(msg="Test does not work well on Win + Python 3.7 ....")
-
     # Use temp_path to generate stubs
     script_path = Path(script_folder).absolute()
     # other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
-    cmd = [fw_filename.as_posix(), variant + ".py", "--path", str(tmp_path)]
+    cmd = [fw_filename.as_posix(), f"{variant}.py", "--path", str(tmp_path)]
 
     # Delete database before the test
     if variant == "createstubs_db":
@@ -89,15 +83,14 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
             capture_output=False,
         )
         print(subproc.stdout)
-        assert subproc.returncode == 0, "createstubs ran with an error :" + str(subproc.stdout)
-        # assert (subproc.returncode <= 0 ), "createstubs ran with an error"
+        assert (
+            subproc.returncode == 0
+        ), f"createstubs ran with an error :{str(subproc.stdout)}"
+            # assert (subproc.returncode <= 0 ), "createstubs ran with an error"
     except ImportError as e:
         print(e)
-        pass
     except BaseException as e:
         print(e)
-        pass
-
     # did it run without error ?
 
     stub_path = tmp_path / "stubs"

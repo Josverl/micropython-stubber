@@ -35,14 +35,12 @@ def make_path_vars(
     if not board_path.exists():  # pragma: no cover
         raise ValueError("board path not found")
 
-    # VARS must be absolute paths
-    path_vars = {
+    return {
         "MPY_DIR": mpy_path.absolute().as_posix(),
         "MPY_LIB_DIR": mpy_lib_path.absolute().as_posix(),
         "PORT_DIR": port_path.absolute().as_posix(),
         "BOARD_DIR": board_path.absolute().as_posix(),
     }
-    return path_vars
 
 
 def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path, mpy_lib_path: Path, version: str):
@@ -61,7 +59,7 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
         os.chdir(path_vars["PORT_DIR"])
         upy_manifest.execute(manifest.as_posix())
     except ManifestFileError as er:
-        log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
+        log.error(f'freeze error executing "{manifest}": {er.args[0]}')
         raise er
     log.info(f"total {len(upy_manifest.files())} files")
 

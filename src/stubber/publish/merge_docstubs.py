@@ -17,11 +17,11 @@ LAST_VERSION = "v1.19.1"
 
 def fw_folder_name(base: str, fw: Dict):
     """return the name of the firmware folder"""
-    if fw["board"] == "GENERIC":
-        fw_folder = f"{base}-{fw['port']}"
-    else:
-        fw_folder = f"{base}-{fw['port']}-{fw['board']}"
-    return fw_folder
+    return (
+        f"{base}-{fw['port']}"
+        if fw["board"] == "GENERIC"
+        else f"{base}-{fw['port']}-{fw['board']}"
+    )
 
 
 def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
@@ -31,7 +31,7 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
         base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
 
         fw_folder = fw_folder_name(base, fw)
-        mrg_folder = fw_folder + "-merged"
+        mrg_folder = f"{fw_folder}-merged"
 
         doc_folder = f"{base}-docstubs"
         fw_path = CONFIG.stub_path / fw_folder
