@@ -1,0 +1,24 @@
+rule_settings:
+  enable: [default]
+  disable:
+  - use-contextlib-suppress
+  - use-fstring-for-formatting
+  - use-fstring-for-concatenation
+  python_version: '3.8'
+
+  rule_types:
+    - refactoring
+    - suggestion
+    - comment
+
+ignore:
+  - board/*_*.py
+  - board/logging.py
+  - minified/
+  - .venv/
+  - tests/*
+  - '*_test.py'
+  - repos/
+  - .git/
+  - .github/
+  
