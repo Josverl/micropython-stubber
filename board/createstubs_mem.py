@@ -23,7 +23,7 @@ import sys
 import uos as os
 from ujson import dumps
 
-__version__ = "1.9.11"
+__version__ = "1.11.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 

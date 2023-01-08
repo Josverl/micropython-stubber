@@ -1,7 +1,0 @@
-ignore:
-  - board/*_*.py
-  - board/logging.py
-  - minified
-  - minified
-  - .venv
-  - '*_test.py' 
