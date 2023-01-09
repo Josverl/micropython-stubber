@@ -171,8 +171,10 @@ class LVGLCodemod(codemod.Codemod):
         modules_transform = modules_transform or self.context.scratch.get("modules_transform")
         if modules_transform and not isinstance(modules_transform, ModulesUpdateCodemod):
             raise TypeError(f"modules_transform must be of type ModulesUpdateCodemod, received: {type(modules_transform)}")
-        self.modules_transform = modules_transform or ModulesUpdateCodemod(
-            self.context, modules=ListChangeSet.from_strings(add=["io", "lodepng", "rtch", "lvgl"], replace=True)
+        self.modules_transform = (
+            modules_transform
+            if modules_transform and modules_transform.modules_changeset
+            else ModulesUpdateCodemod(self.context, modules=ListChangeSet.from_strings(add=["io", "lodepng", "rtch", "lvgl"], replace=True))
         )
         self.init_node = init_node or cst.parse_module(_LVGL_MAIN)
 
