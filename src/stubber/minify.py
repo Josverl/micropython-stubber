@@ -2,10 +2,13 @@
  Processing for createstubs.py
  minimizes and cross-compiles a micropyton file.
 """
+import io
 import itertools
 import subprocess
+import tempfile
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, IO, TextIO
+from contextlib import ExitStack
 
 from loguru import logger as log
 
@@ -154,7 +157,7 @@ def edit_lines(content, edits, diff=False):
     return stripped
 
 
-def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
+def minify_script(source_script: Union[Path, str, IO[str]], keep_report=True, diff=False) -> str:
     """minifies createstubs.py
 
     Args:
@@ -194,38 +197,44 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
             ("rprint", 'self._log.info("Created stubs for'),
         ]
 
-    with source_script.open("r") as f:
-        if not python_minifier:  # pragma: no cover
-            raise Exception("python_minifier not available")
+    if not python_minifier:  # pragma: no cover
+        raise Exception("python_minifier not available")
 
-        content = f.read()
+    source_content = source_script
+    if isinstance(source_script, str) and Path(source_script).exists():
+        source_script = Path(source_script)
+        source_content = source_script.read_text()
+    elif isinstance(source_script, Path):
+        source_content = source_script.read_text()
+    else:
+        source_content = "".join(source_script.readlines())
 
-        content = edit_lines(content, edits, diff=diff)
+    content = edit_lines(source_content, edits, diff=diff)
 
-        source = python_minifier.minify(
-            content,
-            filename=source_script.name,
-            combine_imports=True,
-            remove_literal_statements=True,  # no Docstrings
-            remove_annotations=True,  # not used runtime anyways
-            hoist_literals=True,  # remove redundant strings
-            rename_locals=True,  # short names save memory
-            preserve_locals=["stubber", "path"],  # names to keep
-            rename_globals=True,  # short names save memory
-            # keep these globals to allow testing/mocking to work against the minified version
-            preserve_globals=[
-                "main",
-                "Stubber",
-                "read_path",
-                "get_root",
-                "_info",
-                "os",
-                "sys",
-                "__version__",
-            ],
-            # remove_pass=True,  # no dead code
-            # convert_posargs_to_args=True, # Does not save any space
-        )
+    source = python_minifier.minify(
+        content,
+        filename=getattr(source_script, "name", None),
+        combine_imports=True,
+        remove_literal_statements=True,  # no Docstrings
+        remove_annotations=True,  # not used runtime anyways
+        hoist_literals=True,  # remove redundant strings
+        rename_locals=True,  # short names save memory
+        preserve_locals=["stubber", "path"],  # names to keep
+        rename_globals=True,  # short names save memory
+        # keep these globals to allow testing/mocking to work against the minified version
+        preserve_globals=[
+            "main",
+            "Stubber",
+            "read_path",
+            "get_root",
+            "_info",
+            "os",
+            "sys",
+            "__version__",
+        ],
+        # remove_pass=True,  # no dead code
+        # convert_posargs_to_args=True, # Does not save any space
+    )
     log.debug(f"Original length : {len(content)}")
     log.info(f"Minified length : {len(source)}")
     log.info(f"Reduced by      : {len(content)-len(source)} ")
@@ -233,30 +242,49 @@ def minify_script(source_script: Path, keep_report=True, diff=False) -> str:
 
 
 def minify(
-    source: Union[str, Path],
-    target: Union[str, Path],
+    source: Union[str, Path, IO[str]],
+    target: Union[str, Path, IO[str], IO[bytes]],
     keep_report: bool = True,
     diff: bool = False,
     cross_compile: bool = False,
 ):
+    with ExitStack() as stack:
+        source_buf = source
+        target_buf = target
 
-    source = Path(source)
-    target = Path(target)
-    # if target is a folder , then append the filename
-    if target.exists() and target.is_dir():
-        target = target / source.name
-    try:
-        with target.open("w+") as f:
-            minified = minify_script(source_script=source, keep_report=keep_report, diff=diff)
-            f.write(minified)
-    except Exception as e:  # pragma: no cover
-        log.exception(e)
+        if isinstance(source, (str, Path)):
+            source = Path(source)
+            source_buf = stack.enter_context(source.open("r"))
+            if isinstance(target, (str, Path)):
+                target = Path(target)
+                # if target is a folder , then append the filename
+                if target.exists() and target.is_dir():
+                    target = target / Path(source).name
+                target_buf = stack.enter_context(target.open("w+"))
 
-    log.debug("Minified file written to :", target)
-    if cross_compile:
-        result = subprocess.run(["mpy-cross", "-O2", str(target)])
-        if result.returncode == 0:
-            log.debug("mpy-cross compiled to    :", target.with_suffix(".mpy"))
-        return result.returncode
-    else:
-        return 0
+        try:
+            minified = minify_script(source_script=source_buf, keep_report=keep_report, diff=diff)
+            if isinstance(target_buf, (io.StringIO, io.TextIOWrapper)):
+                target_buf.write(minified)
+        except Exception as e:  # pragma: no cover
+            log.exception(e)
+        else:
+            log.debug("Minified file written to :", target)
+            if cross_compile:
+                cross_targ = target
+                if not isinstance(cross_targ, Path):
+                    _, temp_file = tempfile.mkstemp()
+                    temp_file = Path(temp_file)
+                    target_buf.seek(0)
+                    temp_file.write_text(minified)
+                    cross_targ = temp_file
+                result = subprocess.run(["mpy-cross", "-O2", str(cross_targ)])
+                if result.returncode == 0:
+                    if isinstance(target_buf, io.BytesIO):
+                        target_buf.write(cross_targ.read_bytes())
+                    else:
+                        mpy_target = target if not hasattr(target, "with_suffix") else target.with_suffix(".mpy")
+                        log.debug("mpy-cross compiled to    :", mpy_target)
+                return result.returncode
+            else:
+                return 0
