@@ -60,7 +60,6 @@ class TomlConfigSource(ConfigSource):
                 self.data = {}
 
         # Quick checks on data format
-
         assert isinstance(self.data, Dict)
         for k, v in self.data.items():
             assert isinstance(k, str)

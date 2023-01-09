@@ -26,7 +26,7 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
 
-    if not tag or tag in ["master", ""]:
+    if not tag or tag in {"master", ""}:
         tag = "latest"
     if tag == "latest":
         git.switch_branch(repo=mpy_path, branch="master")
@@ -48,7 +48,7 @@ def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
     """
     data = pkgutil.get_data("stubber", filename)
     if not data:
-        raise Exception(f"Resource {filename} not found")
+        raise FileNotFoundError(f"Resource {filename} not found")
     version_commit = defaultdict()  # lgtm [py/multiple-definition]
     with tempfile.NamedTemporaryFile(prefix="tags", suffix=".csv", mode="w+t") as ntf:
         ntf.file.write(data.decode(encoding="utf8"))
