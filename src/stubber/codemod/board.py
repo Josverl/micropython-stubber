@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum, unique, auto
+from enum import Enum
 from typing import Optional, Iterator
 
 import libcst as cst
@@ -70,53 +70,32 @@ try:
     )
 except Exception:
     fw_id = "lvgl-{0}_{1}_{2}_{3}-{4}".format(8, 1, 0, "dev", sys.platform)
-    
-stubber = Stubber(firmware_id=fw_id)
-
+finally:
+    stubber = Stubber(firmware_id=fw_id)
 """
 
 
-@unique
-class CreateStubsFlavor(Enum):
+class CreateStubsFlavor(str, Enum):
     """Dictates create stubs target variant."""
 
-    BASE = auto()
-    LOW_MEM = auto()
-    LVGL = auto()
-
-
-class SimpleStatementReplace(m.MatcherDecoratableTransformer):
-    new_node: cst.SimpleStatementLine
-    scope_matcher: m.BaseMatcherNode
-
-    def __init__(self, new_node: cst.SimpleStatementLine, scope_matcher: Optional[m.BaseMatcherNode] = None):
-        self.new_node = new_node
-        self.scope_matcher = scope_matcher
-        if self.scope_matcher:
-            self.__class__ = type(
-                f"{self.__class__.__name__}_{repr(scope_matcher)}",
-                (self.__class__,),
-                {"replace_statement": m.call_if_inside(scope_matcher)(self.__class__.replace_statement)},
-            )
-        super().__init__()
-
-    @m.leave(m.SimpleStatementLine())
-    def replace_statement(self, _: cst.SimpleStatementLine, __: cst.SimpleStatementLine) -> cst.SimpleStatementLine:
-        return self.new_node
+    BASE = "base"
+    LOW_MEM = "low_mem"
+    LVGL = "lvgl"
 
 
 class ReadModulesCodemod(codemod.Codemod):
     """Replaces static modules list with file-load method."""
 
-    modules_reader_node: cst.SimpleStatementLine
+    modules_reader_node: cst.Module
 
-    def __init__(self, context: codemod.CodemodContext, reader_node: Optional[cst.SimpleStatementLine] = None):
+    def __init__(self, context: codemod.CodemodContext, reader_node: Optional[cst.Module] = None):
         super().__init__(context)
-        self.modules_reader_node = reader_node or cst.parse_statement(_MODULES_READER)
+        self.modules_reader_node = reader_node or cst.parse_module(_MODULES_READER)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        transform = SimpleStatementReplace(self.modules_reader_node, scope_matcher=m.SimpleStatementLine(body=[_MODULES_MATCHER]))
-        return tree.visit(transform)
+        repl_node = m.findall(tree, m.SimpleStatementLine(body=[_MODULES_MATCHER]), metadata_resolver=self)
+        tree = tree.deep_replace(repl_node[0], self.modules_reader_node)
+        return tree
 
 
 class ModuleDocCodemod(codemod.Codemod):
@@ -137,9 +116,9 @@ class ModuleDocCodemod(codemod.Codemod):
 class ModulesUpdateCodemod(codemod.Codemod):
     """Dynamically replace static module list(s)."""
 
-    modules_changeset: ListChangeSet
-    problematic_changeset: ListChangeSet
-    excluded_changeset: ListChangeSet
+    modules_changeset: Optional[ListChangeSet]
+    problematic_changeset: Optional[ListChangeSet]
+    excluded_changeset: Optional[ListChangeSet]
 
     modules_scope: m.BaseMatcherNode = _MODULES_MATCHER
     problematic_scope: m.BaseMatcherNode = m.Assign(
@@ -162,7 +141,7 @@ class ModulesUpdateCodemod(codemod.Codemod):
         self.problematic_changeset = problematic
         self.excluded_changeset = excluded
 
-    def iter_transforms(self) -> Iterator[m.MatcherDecoratableVisitor]:
+    def iter_transforms(self) -> Iterator[ModifyListElements]:
         if self.modules_changeset:
             yield ModifyListElements(change_set=self.modules_changeset, scope_matcher=self.modules_scope)
         if self.problematic_changeset:
@@ -180,24 +159,27 @@ class LVGLCodemod(codemod.Codemod):
     """Generates createstubs.py LVGL flavor."""
 
     modules_transform: ModulesUpdateCodemod
-    init_node: cst.SimpleStatementLine
+    init_node: cst.Module
 
     def __init__(
         self,
         context: codemod.CodemodContext,
         modules_transform: Optional[ModulesUpdateCodemod] = None,
-        init_node: Optional[cst.SimpleStatementLine] = None,
+        init_node: Optional[cst.Module] = None,
     ):
         super().__init__(context)
+        modules_transform = modules_transform or self.context.scratch.get("modules_transform")
+        if modules_transform and not isinstance(modules_transform, ModulesUpdateCodemod):
+            raise TypeError(f"modules_transform must be of type ModulesUpdateCodemod, received: {type(modules_transform)}")
         self.modules_transform = modules_transform or ModulesUpdateCodemod(
             self.context, modules=ListChangeSet.from_strings(add=["io", "lodepng", "rtch", "lvgl"], replace=True)
         )
         self.init_node = init_node or cst.parse_module(_LVGL_MAIN)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        init_transform = SimpleStatementReplace(self.init_node, scope_matcher=m.SimpleStatementLine(body=[_STUBBER_MATCHER]))
-        tree = tree.visit(init_transform)
-        return self.modules_transform.transform_module(tree)
+        repl_node = m.findall(tree, m.SimpleStatementLine(body=[_STUBBER_MATCHER]), metadata_resolver=self)
+        tree = tree.deep_replace(repl_node[0], self.init_node)
+        return self.modules_transform.transform_module_impl(tree)
 
 
 class LowMemoryCodemod(codemod.Codemod):
@@ -209,8 +191,9 @@ class LowMemoryCodemod(codemod.Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         doc_transformer = ModuleDocCodemod(self.context, _LOW_MEM_MODULE_DOC)
         read_mods_transformer = ReadModulesCodemod(self.context)
-        tree = doc_transformer.transform_module(tree)
-        return read_mods_transformer.transform_module(tree)
+        doc_tree = doc_transformer.transform_module_impl(tree)
+        read_mods_tree = read_mods_transformer.transform_module_impl(doc_tree)
+        return tree.with_deep_changes(tree, body=(*read_mods_tree.body,))
 
 
 class CreateStubsCodemod(codemod.Codemod):
@@ -236,12 +219,14 @@ class CreateStubsCodemod(codemod.Codemod):
             problematic=problematic,
             excluded=excluded,
         )
+        self.context.scratch.setdefault("modules_transform", self.modules_transform)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         mod_flavors = {
             CreateStubsFlavor.LVGL: LVGLCodemod,
             CreateStubsFlavor.LOW_MEM: LowMemoryCodemod,
         }
+        tree = self.modules_transform.transform_module(tree)
         if self.flavor in mod_flavors:
             tree = mod_flavors[self.flavor](self.context).transform_module(tree)
-        return self.modules_transform.transform_module(tree)
+        return tree
