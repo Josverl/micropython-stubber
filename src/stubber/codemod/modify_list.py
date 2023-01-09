@@ -5,6 +5,7 @@ from typing import Sequence, Optional
 
 import libcst as cst
 from libcst import matchers as m
+from stubber.codemod.utils import ScopeableMatcherTransformer
 
 
 @dataclass
@@ -22,21 +23,12 @@ class ListChangeSet:
         return ListChangeSet(add=add_nodes, remove=remove_nodes, replace=replace)
 
 
-class ModifyListElements(m.MatcherDecoratableTransformer):
-    scope_matcher: Optional[m.BaseMatcherNode]
+class ModifyListElements(ScopeableMatcherTransformer):
     change_set: ListChangeSet
 
     def __init__(self, *, change_set: ListChangeSet, scope_matcher: Optional[m.BaseMatcherNode] = None):
-        self.scope_matcher = scope_matcher
         self.change_set = change_set
-        if self.scope_matcher:
-            # create a dynamically derived class with the transform meth wrapped with scope check.
-            self.__class__ = type(
-                f"{self.__class__.__name__}_{repr(scope_matcher)}",
-                (self.__class__,),
-                {"modify_list_elements": m.call_if_inside(scope_matcher)(self.__class__.modify_list_elements)},
-            )
-        super().__init__()
+        super().__init__(scope_matcher=scope_matcher)
 
     @m.leave(m.List())
     def modify_list_elements(self, original_node: cst.List, updated_node: cst.List) -> cst.List:
@@ -44,6 +36,6 @@ class ModifyListElements(m.MatcherDecoratableTransformer):
         new_elements = [] if self.change_set.replace else current_elements
         new_elements.extend(self.change_set.add)
 
-        new_list = cst.List(elements=[cst.Element(value=cst.helpers.ensure_type(e, cst.BaseExpression)) for e in new_elements])
+        new_list = cst.List(elements=[cst.Element(value=cst.ensure_type(e, cst.BaseExpression)) for e in new_elements])
 
         return updated_node.with_changes(elements=new_list.elements)
