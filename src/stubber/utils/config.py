@@ -42,7 +42,7 @@ class StubberConfig(Config):
     "list of recent versions"
 
     def post_read_hook(self) -> dict:
-        config_updates = dict()
+        config_updates = {}
         # relative to stubs
         config_updates.update(fallback_path=self.stub_path / self.fallback_path)
 

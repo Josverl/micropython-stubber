@@ -57,7 +57,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
     # NOTE: FIX 1 add __init__.py to umqtt
     if (modules_folder / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
-        log.debug(f"add missing : umqtt/__init__.py")
+        log.debug("add missing : umqtt/__init__.py")
         with open(modules_folder / "umqtt" / "__init__.py", "a") as f:
             f.write("")
 
@@ -68,7 +68,6 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         for mod_manifest in modlist:
             ## generate fyi files for folder
             r = r and generate_pyi_files(mod_manifest.parent)
-        return r
     else:  # one or less module manifests
         ## generate fyi files for folder
         log.debug("::group::[stubgen] running stubgen on {0}".format(modules_folder))
@@ -113,4 +112,5 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         for py in py_files:
             r = r and generate_pyi_from_file(py)
             # todo: report failures by adding to module manifest
-        return r
+
+    return r
