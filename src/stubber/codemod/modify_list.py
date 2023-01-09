@@ -7,7 +7,7 @@ import libcst as cst
 from libcst import matchers as m
 
 
-@dataclass(kw_only=True)
+@dataclass
 class ListChangeSet:
     add: Sequence[cst.BaseExpression] = field(default_factory=list)
     remove: Sequence[m.BaseMatcherNode] = field(default_factory=list)
