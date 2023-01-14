@@ -8,6 +8,7 @@ import libcst.codemod as codemod
 from libcst import matchers as m
 
 from stubber.codemod.modify_list import ModifyListElements, ListChangeSet
+from stubber.codemod.utils import ScopeableMatcherTransformer
 from stubber.cst_transformer import update_module_docstr
 
 _STUBBER_MATCHER = m.Assign(
@@ -141,13 +142,13 @@ class ModulesUpdateCodemod(codemod.Codemod):
         self.problematic_changeset = problematic
         self.excluded_changeset = excluded
 
-    def iter_transforms(self) -> Iterator[ModifyListElements]:
+    def iter_transforms(self) -> Iterator[ScopeableMatcherTransformer]:
         if self.modules_changeset:
-            yield ModifyListElements(change_set=self.modules_changeset, scope_matcher=self.modules_scope)
+            yield ModifyListElements(change_set=self.modules_changeset).with_scope(self.modules_scope)
         if self.problematic_changeset:
-            yield ModifyListElements(change_set=self.problematic_changeset, scope_matcher=self.problematic_scope)
+            yield ModifyListElements(change_set=self.problematic_changeset).with_scope(self.problematic_scope)
         if self.excluded_changeset:
-            yield ModifyListElements(change_set=self.excluded_changeset, scope_matcher=self.excluded_scope)
+            yield ModifyListElements(change_set=self.excluded_changeset).with_scope(self.excluded_scope)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         for transform in self.iter_transforms():
