@@ -46,15 +46,15 @@ def test_custom_modules(context):
     assert "mycustommodule" in mod.code
 
 
-# being problematic ironically.
-# something weird with codemod state and multiple visits
-# def test_custom_modules__problematic(context):
-#     res = CreateStubsCodemod(
-#         context[0],
-#         modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
-#         problematic=ListChangeSet.from_strings(add=["runt"], replace=True),
-#     ).transform_module(context[1])
-#     assert compare_lines('self.problematic = ["runt"]', res.code)
+def test_custom_modules__problematic(context):
+    mod = CreateStubsCodemod(
+        context[0],
+        modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
+        problematic=ListChangeSet.from_strings(add=["runt"], replace=True),
+    )
+    res = mod.transform_module(context[1])
+    assert compare_lines('"runt"', res.code)
+    assert compare_lines('"coolmod"', res.code)
 
 
 def test_low_mem__module_doc(low_memory_result):
