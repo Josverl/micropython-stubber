@@ -26,9 +26,9 @@ class ListChangeSet:
 class ModifyListElements(ScopeableMatcherTransformer):
     change_set: ListChangeSet
 
-    def __init__(self, *, change_set: ListChangeSet, scope_matcher: Optional[m.BaseMatcherNode] = None):
+    def __init__(self, *, change_set: ListChangeSet):
         self.change_set = change_set
-        super().__init__(scope_matcher=scope_matcher)
+        super().__init__()
 
     @m.leave(m.List())
     def modify_list_elements(self, original_node: cst.List, updated_node: cst.List) -> cst.List:
