@@ -140,7 +140,9 @@ class TestModifyListElements:
         request.cls.scope = request.param.scope
 
     def test_scenario(self):
-        trans = ModifyListElements(change_set=self.changeset, scope_matcher=self.scope)
+        trans = ModifyListElements(change_set=self.changeset)
+        if self.scope:
+            trans = trans.with_scope(self.scope)
         module = cst.parse_module(self.before)
         result = module.visit(trans)
         assert result.code == self.after
