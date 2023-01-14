@@ -57,6 +57,21 @@ def test_custom_modules__problematic(context):
     assert compare_lines('"coolmod"', res.code)
 
 
+def test_custom_modules__problematic_excluded(context):
+    mod = CreateStubsCodemod(
+        context[0],
+        modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
+        problematic=ListChangeSet.from_strings(add=["runt"], replace=True),
+        excluded=ListChangeSet.from_strings(remove=["webrepl", "_webrepl"], add=["myexclude"]),
+    )
+    res = mod.transform_module(context[1])
+    assert compare_lines('"runt"', res.code)
+    assert compare_lines('"coolmod"', res.code)
+    assert not compare_lines('"webrepl"', res.code)
+    assert not compare_lines('"_webrepl"', res.code)
+    assert compare_lines('"myexclude"', res.code)
+
+
 def test_low_mem__module_doc(low_memory_result):
     assert board._LOW_MEM_MODULE_DOC in low_memory_result.code
 
