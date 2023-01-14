@@ -9,6 +9,9 @@ import stubber.codemod.board as board
 from stubber.codemod.board import CreateStubsCodemod, CreateStubsFlavor
 from stubber.codemod.modify_list import ListChangeSet
 
+# mark all tests
+pytestmark = pytest.mark.codemod
+
 
 @pytest.fixture
 def create_stubs() -> cst.Module:
