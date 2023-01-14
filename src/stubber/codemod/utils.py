@@ -1,8 +1,26 @@
 from __future__ import annotations
 from libcst import matchers as m
 from libcst.matchers._visitors import _gather_constructed_leave_funcs, _gather_constructed_visit_funcs
-from typing import Optional
+from typing import Any, Optional
+from types import FunctionType
 import itertools
+
+
+def shallow_copy_function(func: Any) -> FunctionType:
+    """Create a shallow copy of the given function.
+
+    The returned function is unbound and does not copy
+    attributes defined on the function.
+
+    """
+    ret = FunctionType(
+        func.__code__,
+        func.__globals__,
+        name=func.__name__,
+        argdefs=getattr(func, "__defaults__", None),
+        closure=getattr(func, "__closure__", None),
+    )
+    return ret
 
 
 class ScopeableMatcherTransformer(m.MatcherDecoratableTransformer):
@@ -15,8 +33,10 @@ class ScopeableMatcherTransformer(m.MatcherDecoratableTransformer):
 
     def _build_scoped_meth(self, method_name: str, scope_matcher: m.BaseMatcherNode):
         """Build unbound scoped method from parent class."""
-        unbound_meth = getattr(type(self), method_name)
-        unbound_meth.__dict__.pop("_call_if_inside_matcher", None)
+        bound_meth = getattr(type(self), method_name)
+        matchers = {k: v for k, v in bound_meth.__dict__.items() if k in {"_leave_matcher", "_visit_matcher"}}
+        unbound_meth = shallow_copy_function(bound_meth)
+        unbound_meth.__dict__.update(matchers)
         return m.call_if_inside(scope_matcher)(unbound_meth)
 
     def with_scope(self, scope_matcher: m.BaseMatcherNode) -> m.MatcherDecoratableTransformer:
