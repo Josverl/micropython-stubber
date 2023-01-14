@@ -2,9 +2,9 @@ from pathlib import Path
 
 from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
-
 from .typed_config_toml import TomlConfigSource
 
+from loguru import logger as log
 
 @section("micropython-stubber")
 class StubberConfig(Config):
@@ -57,16 +57,21 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     "read the configuration from the pyproject.toml file"
     # locate the pyproject.toml file
     path = Path.cwd()
+    use_toml = True
     while not (path / filename).exists():
         path = path.parent
-        if path == Path("/"):
-            raise FileNotFoundError(f"Could not find config file {filename}")
+        if path == path.parent:
+            log.info(f"Could not find config file: {filename}")
+            use_toml = False
+            break
+
     filename = str(path / filename)
 
     config = StubberConfig()
     # add provider sources to the config
     config.add_source(EnvironmentConfigSource())
-    config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
+    if use_toml:
+        config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
     config.read()
     return config
 
