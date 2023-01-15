@@ -7,7 +7,7 @@ import itertools
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import List, Tuple, Union, IO, TextIO
+from typing import List, Tuple, Union, IO
 from contextlib import ExitStack
 
 from loguru import logger as log
@@ -43,10 +43,10 @@ def edit_lines(content, edits, diff=False):
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
-        return l.replace(x, f"print")
+        return l.replace(x, "print")
 
     def rpass(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
-        return l.replace(x, f"pass")
+        return l.replace(x, "pass")
 
     def get_whitespace_context(content, index):
         """Get whitespace count of lines surrounding index"""
@@ -83,7 +83,7 @@ def edit_lines(content, edits, diff=False):
         close_cnt = line.count(")")
         ahead_index = 1
         look_ahead = 0
-        while not open_cnt == close_cnt:  # pragma: no cover
+        while open_cnt != close_cnt:  # pragma: no cover
             look_ahead = l_index + ahead_index
             ahead_index += 1
             next_l = content[look_ahead]
@@ -198,7 +198,7 @@ def minify_script(source_script: Union[Path, str, IO[str]], keep_report=True, di
         ]
 
     if not python_minifier:  # pragma: no cover
-        raise Exception("python_minifier not available")
+        raise ModuleNotFoundError("python_minifier not available")
 
     source_content = source_script
     if isinstance(source_script, str) and Path(source_script).exists():
@@ -269,22 +269,30 @@ def minify(
         except Exception as e:  # pragma: no cover
             log.exception(e)
         else:
-            log.debug("Minified file written to :", target)
-            if cross_compile:
-                cross_targ = target
-                if not isinstance(cross_targ, Path):
-                    _, temp_file = tempfile.mkstemp()
-                    temp_file = Path(temp_file)
-                    target_buf.seek(0)
-                    temp_file.write_text(minified)
-                    cross_targ = temp_file
-                result = subprocess.run(["mpy-cross", "-O2", str(cross_targ)])
-                if result.returncode == 0:
-                    if isinstance(target_buf, io.BytesIO):
-                        target_buf.write(cross_targ.read_bytes())
-                    else:
-                        mpy_target = target if not hasattr(target, "with_suffix") else target.with_suffix(".mpy")
-                        log.debug("mpy-cross compiled to    :", mpy_target)
-                return result.returncode
-            else:
-                return 0
+            return _extracted_from_minify_(target, cross_compile, target_buf, minified)
+
+
+# TODO Rename this here and in `minify`
+def _extracted_from_minify_(target, cross_compile, target_buf, minified):
+    log.debug("Minified file written to :", target)
+    if not cross_compile:
+        return 0
+    cross_targ = target
+    if not isinstance(cross_targ, Path):
+        _, temp_file = tempfile.mkstemp()
+        temp_file = Path(temp_file)
+        target_buf.seek(0)
+        temp_file.write_text(minified)
+        cross_targ = temp_file
+    result = subprocess.run(["mpy-cross", "-O2", str(cross_targ)])
+    if result.returncode == 0:
+        if isinstance(target_buf, io.BytesIO):
+            target_buf.write(cross_targ.read_bytes())
+        else:
+            mpy_target = (
+                target.with_suffix(".mpy")
+                if hasattr(target, "with_suffix")
+                else target
+            )
+            log.debug("mpy-cross compiled to    :", mpy_target)
+    return result.returncode

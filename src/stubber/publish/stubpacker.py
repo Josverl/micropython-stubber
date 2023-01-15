@@ -133,6 +133,7 @@ class StubPackage:
 
     @pkg_version.setter
     def pkg_version(self, version: str):
+        # sourcery skip: remove-unnecessary-cast
         "set the version of the package"
         if not isinstance(version, str):  # type: ignore
             version = str(version)
@@ -260,9 +261,11 @@ class StubPackage:
                     self.stub_sources[n] = (stub_type, merged_path)
                 fw_path = merged_path
             # check if path exists
-            if not (CONFIG.stub_path / fw_path).exists():
-                if stub_type != StubSource.FROZEN:
-                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
+            if (
+                not (CONFIG.stub_path / fw_path).exists()
+                and stub_type != StubSource.FROZEN
+            ):
+                raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
 
         # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
         # for stub_type, fw_path in [s for s in self.stub_sources]:
@@ -279,7 +282,7 @@ class StubPackage:
                 )
             except OSError as e:
                 if stub_type != StubSource.FROZEN:
-                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
+                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}") from e
                 else:
                     log.debug(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
 
@@ -362,11 +365,7 @@ class StubPackage:
         with the given parameters.
         and updating it with the pyi files included
         """
-        # Do not overwrite existing pyproject.toml but read and apply changes to it
-        # 1) read from disk , if exists
-        # 2) create from template, in all other cases
-        on_disk = (self.toml_path).exists()
-        if on_disk:
+        if (self.toml_path).exists():
             # do not overwrite the version of a pre-existing file
             _pyproject = self.pyproject
             assert _pyproject is not None
@@ -398,12 +397,10 @@ class StubPackage:
         "Add the stub files to the pyproject.toml file"
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
-        _pyproject["tool"]["poetry"]["packages"] = []
-
-        # Only include .pyi files
-        for p in sorted((self.package_path).rglob("*.pyi")):
-            _pyproject["tool"]["poetry"]["packages"] += [{"include": p.relative_to(self.package_path).as_posix()}]
-
+        _pyproject["tool"]["poetry"]["packages"] = [
+            {"include": p.relative_to(self.package_path).as_posix()}
+            for p in sorted((self.package_path).rglob("*.pyi"))
+        ]
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 
@@ -436,7 +433,7 @@ class StubPackage:
         # BUF_SIZE is totally arbitrary,
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
-        hash = hashlib.sha1()
+        pkg_hash = hashlib.sha1()
         files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
         if include_md:
             files += (
@@ -448,12 +445,12 @@ class StubPackage:
         for file in sorted(files):
             with open(file, "rb") as f:
                 while True:
-                    data = f.read(BUF_SIZE)
-                    if not data:
-                        break
-                    hash.update(data)
+                    if data := f.read(BUF_SIZE):
+                        pkg_hash.update(data)
 
-        return hash.hexdigest()
+                    else:
+                        break
+        return pkg_hash.hexdigest()
 
     def update_hashes(self):
         "Update the pachage hashes"
@@ -539,10 +536,10 @@ class StubPackage:
         # update the package info
         self.write_package_json()
         if production:
-            log.debug(f"Publishing to PRODUCTION  https://pypy.org")
+            log.debug("Publishing to PRODUCTION https://pypy.org")
             params = ["publish"]
         else:
-            log.debug(f"Publishing to TEST-PyPi https://test.pypy.org")
+            log.debug("Publishing to TEST-PyPi https://test.pypy.org")
             params = ["publish", "-r", "test-pypi"]
         r = self.run_poetry(params)
         print("")  # add a newline after the output

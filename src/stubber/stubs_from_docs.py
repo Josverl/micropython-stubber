@@ -185,10 +185,7 @@ class RSTReader:
 
     def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
         "Remove the modulename. and or the classname. from the begining of a name"
-        if strip_mod:
-            prefixes = self.module_names
-        else:
-            prefixes = []
+        prefixes = self.module_names if strip_mod else []
         if strip_class and self.current_class != "":
             prefixes += [self.current_class]
         for prefix in prefixes:
@@ -219,7 +216,7 @@ class RSTReader:
         if NEW_OUTPUT:
             lines = str(self.output_dict).splitlines(keepends=True)
             self.output = lines
-        for i in range(0, len(self.output)):
+        for i in range(len(self.output)):
             for name in ("self", "cls"):
                 if f"({name}, ) ->" in self.output[i]:
                     self.output[i] = self.output[i].replace(f"({name}, ) ->", f"({name}) ->")
@@ -293,16 +290,15 @@ class RSTReader:
             block = block[:-1]
 
         # prettify
-        if len(block):
-            # Clean up Synopsis
-            if ":synopsis:" in block[0]:
-                block[0] = re.sub(
-                    r"\s+:synopsis:\s+(?P<syn>[\w|\s]*)",
-                    r"\g<syn>",
-                    block[0],
-                )
+        # Clean up Synopsis
+        if len(block) and ":synopsis:" in block[0]:
+            block[0] = re.sub(
+                r"\s+:synopsis:\s+(?P<syn>[\w|\s]*)",
+                r"\g<syn>",
+                block[0],
+            )
         # add clickable hyperlinks to CPython docpages
-        for i in range(0, len(block)):
+        for i in range(len(block)):
 
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
@@ -545,10 +541,7 @@ class RSTReader:
     def get_rst_hint(self):
         "parse the '.. <rst hint>:: ' from the current line"
         m = re.search(r"\.\.\s?(\w+)\s?::\s?", self.line)
-        if m:
-            return m.group(1)
-        else:
-            return ""
+        return m[1] if m else ""
 
     def parse_method(self):
         name = ""
@@ -565,7 +558,7 @@ class RSTReader:
 
         method_names = self.parse_names(oneliner=False)
         # filter out overloads with 'param=value' description as these can't be output (currently)
-        method_names = [m for m in method_names if not "param=value" in m]
+        method_names = [m for m in method_names if "param=value" not in m]
 
         docstr = self.parse_docstring()
         for this_method in method_names:
@@ -674,11 +667,7 @@ class RSTReader:
         oneliner :  treat a line with commas as multiple names (used for constants)
         """
         names: List[str] = []
-        if oneliner:
-            names += self.parse_name().split(",")
-        else:
-            names += [self.parse_name()]
-
+        names += self.parse_name().split(",") if oneliner else [self.parse_name()]
         m = re.search(r"..\s?\w+\s?::\s?", self.line)
         if not m:  # pragma: no cover
             raise KeyError
@@ -710,11 +699,11 @@ class RSTReader:
         # deal with documentation wildcards
         for name in names:
 
-            type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
-            if type in ["None"]:  # None does not make sense
-                type = "Any"  # perhaps default to Int ?
+            r_type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
+            if r_type in ["None"]:  # None does not make sense
+                r_type = "Any"  # perhaps default to Int ?
             name = self.strip_prefixes(name)
-            self.output_dict.add_constant_smart(name=name, type=type, docstr=docstr)
+            self.output_dict.add_constant_smart(name=name, type=r_type, docstr=docstr)
 
     def parse(self):
         self.line_no = 0
@@ -731,7 +720,7 @@ class RSTReader:
 
             elif rst_hint == "class":
                 self.parse_class()
-            elif rst_hint == "method" or rst_hint == "staticmethod" or rst_hint == "classmethod":
+            elif rst_hint in ["method", "staticmethod", "classmethod"]:
                 self.parse_method()
             elif rst_hint == "exception":
                 self.parse_exception()
@@ -749,17 +738,7 @@ class RSTReader:
             else:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
-            #  TODO: rebuild this into the NEW_OUTPUT way of working
-            #     if self.gather_docs and len(docstr) > 0:
-            #         self.return_info.append(
-            #             (
-            #                 self.current_module,
-            #                 self.current_class,
-            #                 self.current_function,
-            #                 self.last_line,
-            #                 docstr,
-            #             )
-            #         )
+
 
         # now clean up
         self.prepare_output()

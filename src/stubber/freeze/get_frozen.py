@@ -41,7 +41,9 @@ def get_manifests(mpy_path: Path) -> List[Path]:
     all_manifests = [
         m.absolute()
         for m in (mpy_path / "ports").rglob("manifest.py")
-        if Path(m).parent.name != "coverage" and not "venv" in m.parts and not ".venv" in m.parts
+        if Path(m).parent.name != "coverage"
+        and "venv" not in m.parts
+        and ".venv" not in m.parts
     ]
     log.info(f"manifests found: {len(all_manifests)}")
     return all_manifests

@@ -156,9 +156,9 @@ def simple_candidates(
     #  kw =  single word -
     for kw in keywords:
         i = match_string.find(kw)
-        if not " " in kw:
+        if " " not in kw:
             # single keyword
-            if not kw in match_words:
+            if kw not in match_words:
                 continue
         else:
             # key phrase
@@ -194,9 +194,9 @@ def compound_candidates(
     #  kw =  single word -
     for kw in keywords:
         i = match_string.find(kw)
-        if not " " in kw:
+        if " " not in kw:
             # single keyword
-            if not kw in match_words:
+            if kw not in match_words:
                 continue
         else:
             # key phrase
@@ -224,10 +224,7 @@ def compound_candidates(
                     break
                 else:
                     sub = element
-        if sub:
-            result["type"] = f"{type}[{sub}]"
-        else:
-            result["type"] = f"{type}"
+        result["type"] = f"{type}[{sub}]" if sub else f"{type}"
         confidence = confidence * dist_rate(i)  # distance weighting
         result["confidence"] = confidence
         log.trace(f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}")
@@ -266,10 +263,7 @@ def object_candidates(
         words = match_string.split(" ")  # Return <multiple words object>
         if kw in words:
             pos = words.index(kw)
-            if pos == 0:
-                object = "Any"
-            else:
-                object = words[pos - 1]
+            object = "Any" if pos == 0 else words[pos - 1]
             if object in ("stream-like", "file"):
                 object = "IO"  # needs from typing import IO
             elif object == "callback":
@@ -442,7 +436,7 @@ def return_type_from_context(*, docstring: Union[str, List[str]], signature: str
 
 def _type_from_context(
     *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
-):  # -> Dict[str , Union[str,float]]:
+):    # -> Dict[str , Union[str,float]]:
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -534,7 +528,9 @@ def _type_from_context(
     # ref: https://docs.python.org/3/library/typing.html#typing.Coroutine
     # Coroutine[YieldType, SendType, ReturnType]
     # todo: sanity check against actual code .....
-    if "This is a coroutine" in docstring and not "Coroutine" in str(best["type"]):  # type: ignore
+    if "This is a coroutine" in docstring and "Coroutine" not in str(
+        best["type"]
+    ):  # type: ignore
         best["type"] = f"Coroutine[{best['type']}, Any, Any]"
 
     # return the best candidate, or Any
