@@ -10,7 +10,7 @@ matrix = {}
 # for c in (frozen_candidates(boards="GENERIC", versions="auto")):
 for c in frozen_candidates(boards="auto", versions="auto"):
     name = package_name(**c)
-    if not name in matrix.keys():
+    if name not in matrix.keys():
         matrix[name] = [c["version"]]
     else:
         matrix[name].append(c["version"])

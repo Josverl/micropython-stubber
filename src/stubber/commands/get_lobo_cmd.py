@@ -43,6 +43,6 @@ def cli_get_lobo(
     get_lobo.get_frozen(stub_path)
     stub_paths = [stub_path]
 
-    log.info(f"::group:: start post processing of retrieved stubs")
+    log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
-    log.info(f"::group:: Done")
+    log.info("::group:: Done")

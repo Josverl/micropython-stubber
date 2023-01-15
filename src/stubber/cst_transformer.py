@@ -125,11 +125,7 @@ def update_def_docstr(
     # function def on a single line ending with an ellipsis (...)
     if isinstance(dest_node.body, cst.SimpleStatementSuite):
         # in order to add a boy the simple hack is to copy the src_node.body
-        if src_node:
-            return dest_node.with_changes(body=src_node.body)
-        else:
-            return dest_node
-
+        return dest_node.with_changes(body=src_node.body) if src_node else dest_node
     # just checking
     if not isinstance(dest_node.body, cst.IndentedBlock):
         raise TransformError("Expected Def with Indented body")

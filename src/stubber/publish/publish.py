@@ -106,7 +106,7 @@ def publish(
     for (name, path) in package.stub_sources:
         if not (CONFIG.stub_path / path).exists():
             msg = f"{pkg_name}: source '{name}' not found: {CONFIG.stub_path / path}"
-            if not name == StubSource.FROZEN:
+            if name != StubSource.FROZEN:
                 log.warning(msg)
                 status["error"] = msg
                 ok = False

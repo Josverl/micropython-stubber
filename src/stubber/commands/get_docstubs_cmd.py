@@ -20,7 +20,6 @@ from .cli import stubber_cli
 
 
 @stubber_cli.command(name="get-docstubs")
-# todo: allow multiple source
 @click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 @click.option(
     "--stub-path",
@@ -70,6 +69,6 @@ def cli_docstubs(
     generate_from_rst(rst_path, dst_path, v_tag, release=release, verbose=verbose, suffix=".pyi")
 
     # no need to generate .pyi in post processing
-    log.info(f"::group:: start post processing of retrieved stubs")
+    log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing([dst_path], False, black)
-    log.info(f"::group:: Done")
+    log.info("::group:: Done")

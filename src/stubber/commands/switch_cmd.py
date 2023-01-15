@@ -27,7 +27,6 @@ except Exception:
 
 
 @stubber_cli.command(name="switch")
-# WIP: Transition from Option to  Argument, currently supports both
 @click.argument("tag", required=False, type=click.Choice(VERSION_LIST, case_sensitive=False))
 @click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
 def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
@@ -63,7 +62,7 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
         return -1
 
     # fetch then switch
-    log.info(f"fetch updates")
+    log.info("fetch updates")
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
     try:

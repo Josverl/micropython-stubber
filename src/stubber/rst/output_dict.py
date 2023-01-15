@@ -127,11 +127,7 @@ class SourceDict(OrderedDict):
             else:
                 raise KeyError(f"const {name} could not be added to Class {classname}")
         else:
-            if "*" in name:
-                # * wildcard used in documentation
-                line = f"# {name}: {type}"
-            else:
-                line = f"{name}: {type}"
+            line = f"# {name}: {type}" if "*" in name else f"{name}: {type}"
             # assign a value so constant can be used as default value
             if type == "Any":
                 line += " = ..."

@@ -46,7 +46,7 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
         # copy file
         try:
             shutil.copy2(script, dest_path)
-            if not dest_path in targets:
+            if dest_path not in targets:
                 targets.append(dest_path)
         except OSError as e:
             ## Ignore errors that are caused by reorganisation of Micropython-lib

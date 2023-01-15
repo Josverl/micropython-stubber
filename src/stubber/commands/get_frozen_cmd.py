@@ -24,7 +24,6 @@ from .cli import stubber_cli
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
-# @click.option("--path", "-p", default=config.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True), show_default=True)
 @click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
 @click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
@@ -54,6 +53,6 @@ def cli_get_frozen(
         freeze_any(stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     else:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
-    log.info(f"::group:: start post processing of retrieved stubs")
+    log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
-    log.info(f"::group:: Done")
+    log.info("::group:: Done")

@@ -82,7 +82,7 @@ def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED
                 log.warning(e)
     added = 0
     for (name, source) in fallback_sources(version):
-        if not "." in name:
+        if "." not in name:
             # copy folder
             log.debug(f"add {source} folder")
             try:

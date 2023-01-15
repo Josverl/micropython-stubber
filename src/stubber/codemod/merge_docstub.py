@@ -100,7 +100,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             )
 
         # update the docstring.
-        if not MODULE_KEY in self.annotations:
+        if MODULE_KEY not in self.annotations:
             # no changes
             return updated_node
 
@@ -118,7 +118,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
     def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
-        if not stack_id in self.annotations:
+        if stack_id not in self.annotations:
             # no changes to the function
             return updated_node
         # update the firmware_stub from the doc_stub information
@@ -148,7 +148,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         stack_id = tuple(self.stack)
         self.stack.pop()
-        if not stack_id in self.annotations:
+        if stack_id not in self.annotations:
             # no changes to the function
             return updated_node
         # update the firmware_stub from the doc_stub information
