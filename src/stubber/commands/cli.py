@@ -15,7 +15,7 @@ from stubber.utils.my_version import __version__
     "--verbose",
     count=True,
     default=0,
-    help="-v for DEBUG",
+    help="-v for DEBUG, -v -v for TRACE",
     is_eager=True,
 )
 @click.pass_context
@@ -24,14 +24,17 @@ def stubber_cli(ctx, verbose: int = 0):
     ctx.ensure_object(dict)
     # replace std log handler with a custom one capped on INFO level
     log.remove()
-    level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "INFO")
+    level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "TRACE")
     if level == "INFO":
-        format = "<green>{time:YY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{module: <18}</cyan> - <level>{message}</level>"
+        format_str = "<green>{time:YY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{module: <18}</cyan> - <level>{message}</level>"
     else:
-        format = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+        format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
-    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format)
+    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
     log.info(f"micropython-stubber {__version__}")
 
+    if level != "INFO":
+        log.info(f"Log level set to {level}")
+    # save info in context for other CLICK modules to use
     ctx.obj["loglevel"] = level
     ctx.obj["verbose"] = verbose
