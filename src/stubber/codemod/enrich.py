@@ -57,25 +57,27 @@ def enrich_file(target_path: Path, docstub_path: Path, diff=False, write_back=Fa
     oldcode = target_path.read_text()
 
     codemod_instance = merge_docstub.MergeCommand(context, stub_file=docstub_file)
-    newcode = exec_transform_with_prettyprint(
-        codemod_instance,
-        oldcode,
-        # include_generated=False,
-        generated_code_marker=config["generated_code_marker"],
-        # format_code=not args.no_format,
-        formatter_args=config["formatter"],
-        # python_version=args.python_version,
-    )
-    if newcode:
-        if write_back:
-            log.trace(f"Write back enriched file {target_path}")
-            # write updated code to file
-            target_path.write_text(newcode, encoding="utf-8")
-        if diff:  # pragma: no cover
-            return diff_code(oldcode, newcode, 5, filename=target_path.name)
-        return newcode
-    else:
+    if not (
+        newcode := exec_transform_with_prettyprint(
+            codemod_instance,
+            oldcode,
+            # include_generated=False,
+            generated_code_marker=config["generated_code_marker"],
+            # format_code=not args.no_format,
+            formatter_args=config["formatter"],
+            # python_version=args.python_version,
+        )
+    ):
         return None
+    if write_back:
+        log.trace(f"Write back enriched file {target_path}")
+        # write updated code to file
+        target_path.write_text(newcode, encoding="utf-8")
+    return (
+        diff_code(oldcode, newcode, 5, filename=target_path.name)
+        if diff
+        else newcode
+    )
 
 
 def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False, require_docstub=False) -> int:
@@ -94,10 +96,10 @@ def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, writ
                 count += 1
                 if show_diff:
                     print(diff)
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             # no docstub to enrich with
             if require_docstub:
-                raise (FileNotFoundError(f"No doc-stub file found for {source_file}"))
+                raise (FileNotFoundError(f"No doc-stub file found for {source_file}")) from e
     # run black on the destination folder
     # no Autoflake as this removes some relevan (unused) imports
     run_black(source_folder)

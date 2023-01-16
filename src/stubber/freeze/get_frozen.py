@@ -26,17 +26,19 @@ from loguru import logger as log
 from packaging.version import Version
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
-
-# from stubber.freeze.freeze_manifest_1 import freeze_one_manifest_1  # Micropython v1.12 - 1.19.1
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 from stubber.utils.config import CONFIG
+from stubber.codemod.add_comment import AddComment
+
 
 # globals
 FAMILY = "micropython"
 
 
 def get_manifests(mpy_path: Path) -> List[Path]:
-    """return a list of all manifests.py files found in the ports folder"""
+    """
+    Returns a list of all manifests.py files found in the ports folder of the MicroPython repo
+    """
     log.info(f"looking for manifests in  {mpy_path}")
     all_manifests = [
         m.absolute()
@@ -48,27 +50,36 @@ def get_manifests(mpy_path: Path) -> List[Path]:
     log.info(f"manifests found: {len(all_manifests)}")
     return all_manifests
 
-
-def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None, mpy_lib_path: Optional[Path] = None):  #
+def add_comment_to_path(path: Path, comment: str) -> None:
     """
-    get and parse the to-be-frozen .py modules for micropython to extract the static type information
+    Add a comment to the top of each file in the path
+    using a codemod
+    """
+    # todo: #305 add comment line to each file with the micropython version it was generated from
+    # frozen_stub_path
+    # python -m libcst.tool codemod --include-stubs --no-format  add_comment.AddComment .\repos\micropython-stubs\stubs\micropython-v1_19_1-frozen\ --comment "# Micropython 1.19.1 frozen stubs"
+    pass
+
+
+def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None, mpy_lib_path: Optional[Path] = None) -> int:
+    """
+    Get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
      - repos should be cloned side-by-side as some of the manifests refer to micropython-lib scripts using a relative path
 
-    the repos should be checked out to the version
+    The micropython-* repos must be checked out to the required version/tag.
 
     """
     count = 0
     current_dir = os.getcwd()
-    if not mpy_path:
-        mpy_path = CONFIG.mpy_path.absolute()
-    else:
-        mpy_path = Path(mpy_path).absolute()
-    if not mpy_lib_path:
-        mpy_lib_path = CONFIG.mpy_path.absolute()
-    else:
-        mpy_lib_path = Path(mpy_lib_path).absolute()
-
+    mpy_path = (
+        Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
+    )
+    mpy_lib_path = (
+        Path(mpy_lib_path).absolute()
+        if mpy_lib_path
+        else CONFIG.mpy_path.absolute()
+    )
     if not stub_folder:
         frozen_stub_path = Path("{}/{}_{}_frozen".format(CONFIG.stub_path, FAMILY, utils.clean_version(version, flat=True))).absolute()
     else:
@@ -96,25 +107,15 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
         else:
             log.warning("no manifests found")
         for manifest in all_manifests:
-            # TODO: try processing older version with new algoritm (1.12 - 1.19.1)
-            if version in ["latest", "master"] or Version(version) >= Version("1.12"):
-                try:
-                    freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
-                    count += 1
-                except Exception as e:
-                    log.warning(f"Failed to freeze manifest {manifest} with manifest_2, trying manifest_1")
-                    try:
-                        freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
-                        count += 1
-                    except Exception as e:
-                        log.error(f"Error processing manifest {manifest} : {e}")
+            try:
+                freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
+                count += 1
+            except Exception as e:
+                log.error(f"Error processing manifest {manifest} : {e}")
+        
+    # add comment line to each file with the micropython version it was generated from
+    add_comment_to_path(frozen_stub_path, f"# Micropython {version} frozen stubs")
 
-            elif Version(version) >= Version("1.12"):
-                try:
-                    freeze_one_manifest_2(manifest, frozen_stub_path, mpy_path, mpy_lib_path, version)
-                    count += 1
-                except Exception as e:
-                    log.error(f"Error processing manifest {manifest} : {e}")
     # restore cwd
     os.chdir(current_dir)
     return count
