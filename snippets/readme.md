@@ -1,4 +1,4 @@
-# Validatiion Snippets
+# Validation Snippets
 
 This folder contains a collection of code snippets to help validate the quality of the stubs by providing some code to validate.
 
