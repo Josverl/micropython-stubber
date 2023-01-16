@@ -1,3 +1,6 @@
+# sourcery skip: require-parameter-annotation, require-return-annotation
+""" Test the package creation and manipulation"""
+
 from pathlib import Path
 
 import pytest
@@ -143,6 +146,7 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
 
 
 def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
+    # sourcery skip: no-long-functions
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
@@ -188,9 +192,9 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     stubs_in_pkg = package.pyproject["tool"]["poetry"]["packages"]  # type: ignore
     assert len(stubs_in_pkg) >= 1
 
-    hash = package.create_hash()
-    assert isinstance(hash, str)
-    assert len(hash) > 30  # 41 bytes ?
+    packet_hash = package.create_hash()
+    assert isinstance(packet_hash, str)
+    assert len(packet_hash) > 30  # 41 bytes ?
 
     assert package.is_changed() == True
 
