@@ -1,3 +1,4 @@
+# script used to prepare for testing different setups 
 
 pip install -U micropython-stdlib-minimal --target ./typings --no-user
 # pip install micropython-esp32-stubs --target ./typings --no-user
