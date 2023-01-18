@@ -419,6 +419,7 @@ class StubPackage:
                 f.unlink()
 
     def create_hash(self, include_md:bool=True) -> str:
+        # sourcery skip: reintroduce-else, swap-if-else-branches, use-named-expression
         """
         Create a SHA1 hash of all files in the package, excluding the pyproject.toml file itself.
         the hash is based on the content of the .py/.pyi and .md files in the package.
@@ -442,11 +443,11 @@ class StubPackage:
         for file in sorted(files):
             with open(file, "rb") as f:
                 while True:
-                    if data := f.read(BUF_SIZE):
-                        pkg_hash.update(data)
-
-                    else:
+                    data = f.read(BUF_SIZE)
+                    if not data:
                         break
+                    pkg_hash.update(data)
+
         return pkg_hash.hexdigest()
 
     def update_hashes(self) -> None:
