@@ -48,13 +48,6 @@ from stubber.utils.config import CONFIG
     help="publish to PYPI or Test-PYPI",
 )
 @click.option(
-    "--dry-run",
-    "dryrun",
-    is_flag=True,
-    default=False,
-    help="go though the motions but do not publish",
-)
-@click.option(
     "--force",
     is_flag=True,
     default=False,
@@ -67,34 +60,18 @@ from stubber.utils.config import CONFIG
     help="clean folders after processing and publishing",
 )
 
-# @click.option(
-#     "--type",
-#     "-t",
-#     "stub_type",
-#     default=ALL_TYPES[0],
-#     show_default=True,
-#     type=click.Choice(ALL_TYPES),
-#     help="stub type to publish",
-# )
-
-
 def cli_publish(
     family: str,
     versions: Union[str, List[str]],
     ports: Union[str, List[str]],
     boards: Union[str, List[str]],
-    production: bool,
-    dryrun: bool,
-    force: bool,
-    clean: bool,
-    # stub_type: str,
+    production: bool = True,
+    force: bool = False,
+    clean: bool = False,
 ):
     """
     Commandline interface to publish stubs.
     """
-    # force overrules dryrun
-    if force:
-        dryrun = False
     # lists please
     versions = list(versions)
     ports = list(ports)
@@ -105,13 +82,11 @@ def cli_publish(
     log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
 
     results = publish_multiple(
-        frozen=True,
         family=family,
         versions=versions,
         ports=ports,
         boards=boards,
         production=production,
-        dryrun=dryrun,
         force=force,
         clean=clean,
     )
