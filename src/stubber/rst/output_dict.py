@@ -32,7 +32,7 @@ SourceDict is the 'base class'
 """
 from __future__ import annotations
 
-from typing import List, OrderedDict, Union
+from typing import List, Optional, OrderedDict, Union
 
 from .classsort import sort_classes
 
@@ -44,6 +44,7 @@ __all__ = [
     "FunctionSourceDict",
 ]
 
+EMPTY_DOCSTR = '""" """'
 
 def spaces(n: int = 4) -> str:
     return " " * n
@@ -116,16 +117,16 @@ class SourceDict(OrderedDict):
             line = spaces(self.indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
-    def add_constant_smart(self, name: str, type: str = "Any", docstr: List[str] = [], autoindent: bool = True):
+    def add_constant_smart(self, name: str, type: str = "Any", docstr: Optional[List[str]] = None, autoindent: bool = True):
         """add literal / constant to the constant scope of this block, or a class in this block"""
+        if docstr is None:
+            docstr = []
         if "." in name and isinstance(self, ModuleSourceDict):
             classname, const_name = name.split(".", 1)
-            classfullname = self.find(classname.replace("# ", ""))  # Wildcards are
-            if classfullname:
-                cls_dict: ClassSourceDict = self[classfullname]
-                cls_dict.add_constant_smart(const_name, type, docstr)
-            else:
+            if not (classfullname := self.find(classname.replace("# ", ""))):
                 raise KeyError(f"const {name} could not be added to Class {classname}")
+            cls_dict: ClassSourceDict = self[classfullname]
+            cls_dict.add_constant_smart(const_name, type, docstr)
         else:
             line = f"# {name}: {type}" if "*" in name else f"{name}: {type}"
             # assign a value so constant can be used as default value
@@ -176,7 +177,7 @@ class ModuleSourceDict(SourceDict):
         "set correct order a module definition to allow adding class variables"
         super().__init__(
             [
-                ("docstr", ['""" """']),
+                ("docstr", [EMPTY_DOCSTR]),
                 ("version", ""),
                 ("comment", []),
                 ("imports", []),
@@ -232,10 +233,7 @@ class ModuleSourceDict(SourceDict):
             return name
         # is there a partial ? - only match before `(`
         name = name.split("(")[0]
-        for k in keys:
-            if name == k.split("(")[0]:
-                return k
-        return None
+        return next((k for k in keys if name == k.split("(")[0]), None)
 
     def classes(self):
         "get a list of the class names in parent-child order"
@@ -257,18 +255,14 @@ class ModuleSourceDict(SourceDict):
 
 
 class ClassSourceDict(SourceDict):
-    def __init__(
-        self,
-        name: str,
-        *,
-        docstr: List[str] = ['""" """'],
-        init: str = "",  # "def __init__(self)->None:",
-        indent: int = 0,
-        lf="\n",
-    ):
+    def __init__(self, name: str, *, docstr: Optional[List[str]] = None, init: str = "", indent: int = 0, lf="\n"):
         "set correct order for class and exception definitions to allow adding class variables"
+        # Defaults
+        if docstr is None:
+            docstr = [EMPTY_DOCSTR]
+
         _init: List[str] = []
-        if len(init) > 0:
+        if init != "":
             _init = [spaces(indent + 4) + init]
             # add ...
             _init.append(spaces(indent + 4 + 4) + "...")
@@ -276,7 +270,7 @@ class ClassSourceDict(SourceDict):
             [
                 ("comment", []),
                 ("class", spaces(indent) + name),  # includes indentation
-                ("docstr", ['""" """']),
+                ("docstr", [EMPTY_DOCSTR]),
                 ("constants", []),
                 ("__init__", _init),
             ],
@@ -290,17 +284,16 @@ class ClassSourceDict(SourceDict):
 
 
 class FunctionSourceDict(SourceDict):
-    def __init__(
-        self,
-        name: str,
-        *,
-        definition: List[str] = [],
-        docstr: List[str] = ['""" """'],
-        indent: int = 0,
-        decorators: List[str] = [],
-        lf="\n",
-    ):
+    def __init__(self, name: str, *, definition: Optional[List[str]] = None, docstr: Optional[List[str]] = None, indent: int = 0, decorators: Optional[List[str]] = None, lf="\n"):
         "set correct order for function and method definitions"
+        # defaults
+        if definition is None:
+            definition = []
+        if docstr is None:
+            docstr = [EMPTY_DOCSTR]
+        if decorators is None:
+            decorators = []
+
         # add indent
         _def = [spaces(indent) + l for l in definition]
 

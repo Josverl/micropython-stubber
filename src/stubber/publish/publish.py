@@ -1,29 +1,6 @@
 """
 prepare a set of stub files for publishing to PyPi
 
-required folder structure:
-NOTE: stubs and publish paths can be located in different locations and repositories
-
-+--stubs                                                               - [config.stubs_path]
-|  +--<any stub folders in repo>
-|  +--micropython-v1_18-esp32
-+--publish                                                             - [config.publish_path]
-|  +--package_data.jsondb
-|  +--package_data_test.jsondb
-|  +--template                                                         - [config.template_path]
-|     +--pyproject.toml
-|     +--README.md
-|     +--LICENSE.md
-|  +--<folder for each package>
-|     +--<package name> double nested to match the folder structure
-|  +--<family>-<port>-<board>-<type>-stubs-<version>
-|  +--micropython-esp32-stubs-v1_18
-|  +--micropython-stm32-stubs-v1_18
-|  +--micropython-stm32-stubs-v1_19_1
-|  +-- ...
-|
-
-
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
 from typing import Any, Dict, List
@@ -36,8 +13,9 @@ from stubber.publish.package import create_package, get_package_info, package_na
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 
+from pysondb import PysonDB 
 
-def get_package(db, *, pkg_type, version:str, port:str, board:str="GENERIC", family:str="micropython",) -> StubPackage:
+def get_package(db:PysonDB, *, pkg_type, version:str, port:str, board:str="GENERIC", family:str="micropython",) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
     pkg_name = package_name(pkg_type, port=port, board=board, family=family)
     if package_info := get_package_info(
@@ -67,7 +45,7 @@ def build_multiple(
     production:bool=False,
     clean: bool = False,
     force: bool = False,
-) -> List[Dict[str, Any]]:  # sourcery skip: default-mutable-arg
+) -> List[Dict[str, Any]]:    # sourcery skip: default-mutable-arg
     """
     Build a bunch of stub packages
     """
@@ -76,8 +54,7 @@ def build_multiple(
     worklist= build_worklist(family, versions, ports, boards)
 
     for todo in worklist:
-        package = get_package(db, **todo)
-        if package:
+        if package := get_package(db, **todo):
             package.build(
                 force=force,
                 production=production
@@ -97,7 +74,7 @@ def publish_multiple(
     clean: bool = False,
     build: bool = False,
     force: bool = False,
-) -> List[Dict[str, Any]]:  # sourcery skip: default-mutable-arg
+) -> List[Dict[str, Any]]:    # sourcery skip: default-mutable-arg
     """
     Publish a bunch of stub packages
     """
@@ -106,8 +83,7 @@ def publish_multiple(
     worklist= build_worklist(family, versions, ports, boards)
 
     for todo in worklist:
-        package = get_package(db, **todo)
-        if package:
+        if package := get_package(db, **todo):
             package.publish(
                 db=db,
                 clean=clean,
@@ -120,7 +96,7 @@ def publish_multiple(
             log.error(f"Failed to create package for {todo}")
     return results
 
-def build_worklist(family, versions, ports, boards):
+def build_worklist(family:str,versions:List[str],ports:List[str], boards:List[str] ):
     """Build a worklist of packages to build or publish"""	
     worklist = []
     worklist += list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS))
