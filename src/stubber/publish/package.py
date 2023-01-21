@@ -99,13 +99,9 @@ def create_package(
             ),
         ]
 
-    elif pkg_type == CORE_STUBS:
+    else:
         # TODO add core stubs
         raise NotImplementedError(type)
-    else:
-        raise NotImplementedError(type)
-
-    package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
-    return package
+    return StubPackage(pkg_name, version=mpy_version, stubs=stubs)
 
 
