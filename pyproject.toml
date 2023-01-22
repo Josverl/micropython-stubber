@@ -168,6 +168,8 @@ omit = [
     "*/make_stub_files.py",
     "*/stubber/tools/*.py",
 
+    # codemod partials
+    "*/codemod/_partials"
 
 ]
 
