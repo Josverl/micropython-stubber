@@ -109,6 +109,7 @@ exclude = '''
         | tests[\\/]rst[\\/]data
         | tests[\\/]codemods[\\/]codemod_test_cases
         | scratch
+        | src[\\/]stubber[\\/]codemod[\\/]_partials
     )/
 )
 '''
