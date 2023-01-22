@@ -11,6 +11,8 @@ from stubber.codemod.modify_list import ModifyListElements, ListChangeSet
 from stubber.codemod.utils import ScopeableMatcherTransformer
 from stubber.cst_transformer import update_module_docstr
 
+from ._partials import Partial
+
 _STUBBER_MATCHER = m.Assign(
     targets=[
         m.AssignTarget(
@@ -31,6 +33,8 @@ _MODULES_MATCHER = m.Assign(
     ],
 )
 
+_ENTRY_MATCHER = m.FunctionDef(name=m.Name(value="main"))
+
 _MODULES_READER = """
 # Read stubs from modulelist
 try:
@@ -42,6 +46,7 @@ except OSError:
     stubber.modules = ["micropython"]
     _log.warning("Warning: modulelist.txt could not be found.")
 """
+
 
 _LOW_MEM_MODULE_DOC = '''
 """Create stubs for (all) modules on a MicroPython board.
@@ -58,6 +63,33 @@ _LOW_MEM_MODULE_DOC = '''
     you can find a cross-compiled version located here: ./minified/createstubs_mem.mpy
 """
 '''
+
+
+_DB_MODULE_DOC = '''
+"""
+Create stubs for (all) modules on a MicroPython board.
+
+    This variant of the createstubs.py script is optimized for use on very-low-memory devices.
+    Note: this version has undergone limited testing.
+    
+    1) reads the list of modules from a text file `./modulelist.txt` that should be uploaded to the device.
+    2) stored the already processed modules in a text file `./modulelist.done` 
+    3) process the modules in the database:
+        - stub the module
+        - update the modulelist.done file
+        - reboots the device if it runs out of memory
+    4) creates the modules.json
+
+    If that cannot be found then only a single module (micropython) is stubbed.
+    In order to run this on low-memory devices two additional steps are recommended: 
+    - minification, using python-minifierto reduce overall size, and remove logging overhead.
+    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
+
+You should find a cross-compiled version located here: `./minified/createstubs_db.mpy
+
+"""
+'''
+
 
 _LVGL_MAIN = """
 # Specify firmware name & version
@@ -81,6 +113,7 @@ class CreateStubsFlavor(str, Enum):
 
     BASE = "base"
     LOW_MEM = "low_mem"
+    DB = "db"
     LVGL = "lvgl"
 
 
@@ -199,6 +232,21 @@ class LowMemoryCodemod(codemod.Codemod):
         return tree.with_deep_changes(tree, body=(*read_mods_tree.body,))
 
 
+class DBCodemod(codemod.Codemod):
+    """Generates createstubs.py db flavor."""
+
+    def __init__(self, context: codemod.CodemodContext):
+        super().__init__(context)
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        doc_transformer = ModuleDocCodemod(self.context, _DB_MODULE_DOC)
+        entry_module = cst.parse_module(Partial.DB_ENTRY.contents())
+        doc_tree = doc_transformer.transform_module_impl(tree)
+        entry = m.findall(doc_tree, _ENTRY_MATCHER, metadata_resolver=self)
+        entry_tree = doc_tree.deep_replace(entry[0], entry_module)
+        return tree.with_deep_changes(tree, body=(*entry_tree.body,))
+
+
 class CreateStubsCodemod(codemod.Codemod):
     """Generates createstubs.py variant based on provided flavor."""
 
@@ -228,6 +276,7 @@ class CreateStubsCodemod(codemod.Codemod):
         mod_flavors = {
             CreateStubsFlavor.LVGL: LVGLCodemod,
             CreateStubsFlavor.LOW_MEM: LowMemoryCodemod,
+            CreateStubsFlavor.DB: DBCodemod,
         }
         tree = self.modules_transform.transform_module(tree)
         if self.flavor in mod_flavors:
