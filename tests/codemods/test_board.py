@@ -33,6 +33,14 @@ def low_memory_mod(context) -> CreateStubsCodemod:
 def low_memory_result(context, low_memory_mod) -> cst.Module:
     return low_memory_mod.transform_module(context[1])
 
+@pytest.fixture
+def db_mod(context) -> CreateStubsCodemod:
+    return CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.DB)
+
+@pytest.fixture
+def db_result(context, db_mod) -> cst.Module:
+    return db_mod.transform_module(context[1])
+
 
 def dedent_lines(body: str) -> str:
     lines = [dedent(l) for l in body.splitlines(keepends=True)]
@@ -108,3 +116,10 @@ def test_lvgl__modules_custom(context):
         context[0], flavor=CreateStubsFlavor.LVGL, modules=ListChangeSet.from_strings(add=["supercoolmodule"], replace=True)
     ).transform_module(context[1])
     assert compare_lines('"supercoolmodule"', res.code)
+
+
+def test_db__module_doc(db_result):
+    assert compare_lines('reads the list of modules', db_result.code)
+
+def test_db__entry(db_result):
+    assert compare_lines("was_running = True", db_result.code)
