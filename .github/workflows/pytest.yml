@@ -63,7 +63,7 @@ jobs:
       # install project
       #----------------------------------------------
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --with dev --no-interaction
 
       #----------------------------------------------
       # stubber clone
