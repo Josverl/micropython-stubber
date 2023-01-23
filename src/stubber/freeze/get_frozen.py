@@ -43,12 +43,11 @@ def get_manifests(mpy_path: Path) -> List[Path]:
     all_manifests = [
         m.absolute()
         for m in (mpy_path / "ports").rglob("manifest.py")
-        if Path(m).parent.name != "coverage"
-        and "venv" not in m.parts
-        and ".venv" not in m.parts
+        if Path(m).parent.name != "coverage" and "venv" not in m.parts and ".venv" not in m.parts
     ]
     log.info(f"manifests found: {len(all_manifests)}")
     return all_manifests
+
 
 def add_comment_to_path(path: Path, comment: str) -> None:
     """
@@ -72,14 +71,8 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
     """
     count = 0
     current_dir = os.getcwd()
-    mpy_path = (
-        Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
-    )
-    mpy_lib_path = (
-        Path(mpy_lib_path).absolute()
-        if mpy_lib_path
-        else CONFIG.mpy_path.absolute()
-    )
+    mpy_path = Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
+    mpy_lib_path = Path(mpy_lib_path).absolute() if mpy_lib_path else CONFIG.mpy_path.absolute()
     if not stub_folder:
         frozen_stub_path = Path("{}/{}_{}_frozen".format(CONFIG.stub_path, FAMILY, utils.clean_version(version, flat=True))).absolute()
     else:
@@ -112,7 +105,7 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
                 count += 1
             except Exception as e:
                 log.error(f"Error processing manifest {manifest} : {e}")
-        
+
     # add comment line to each file with the micropython version it was generated from
     add_comment_to_path(frozen_stub_path, f"# Micropython {version} frozen stubs")
 

@@ -40,7 +40,7 @@ def get_core(requirements, stub_path=None, family: str = "core"):
 
         data = pkgutil.get_data(__name__, "data/" + requirements)
         if not data:  # pragma: no cover
-            raise Exception("Resource Not found")
+            raise FileNotFoundError("Resource Not found")
         temp_file = tempfile.NamedTemporaryFile(prefix="requirements", suffix=".txt", delete=False)
         with temp_file.file as fp:
             fp.write(data)

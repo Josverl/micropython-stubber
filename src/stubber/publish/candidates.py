@@ -1,3 +1,16 @@
+"""
+In order to generate stups for all ports and boars and versions of micropython we need to know
+what versions are available. This module provides functions to :
+    - get a list of all ports for a given version of micropython  ( list micropython ports)
+    - get a list of all ports and board for a given version of micropython (list micropython ports boards)
+
+        - get a list of versions for micropython ( version candidates)
+    - get the frozen stubs for a given version of micropython ( frozen candidates)
+    - get a list of all the docstubs (docstub candidates)
+    - get a list of the firmware/board stubs (firmware candidates)
+"""
+
+
 import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Union
@@ -93,29 +106,13 @@ def frozen_candidates(
     - port = 'auto' or a specific port
     - board = 'auto' or a specific board, 'GENERIC' must be specified in ALLCAPS
     """
-    auto_port = (
-        isinstance(ports, str)
-        and ports == "auto"
-        or isinstance(ports, list)
-        and "auto" in ports
-    )
-    auto_board = (
-        isinstance(boards, str)
-        and boards == "auto"
-        or isinstance(boards, list)
-        and "auto" in boards
-    )
-    if isinstance(versions, str):
-        auto_version = (
-            versions == "auto"
-            or isinstance(versions, list)
-            and "auto" in versions
-        )
-
-        if auto_version:
-            versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
-        else:
-            versions = [versions]
+    auto_port = is_auto(ports)
+    auto_board = is_auto(boards)
+    if is_auto(versions):
+        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
+    else:
+        versions = [versions] if isinstance(versions, str) else versions
+        
     versions = [clean_version(v, flat=True) for v in versions]
 
     if isinstance(ports, str):
@@ -170,6 +167,11 @@ def frozen_candidates(
                     "GENERIC_512K",
                 ]:
                     yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
+
+
+def is_auto(thing):
+    "Is this thing specified as 'auto' ?"
+    return isinstance(thing, str) and thing == "auto" or isinstance(thing, list) and "auto" in thing
 
 
 def docstub_candidates(

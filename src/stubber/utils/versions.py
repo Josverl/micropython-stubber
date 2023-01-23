@@ -1,3 +1,5 @@
+"""Handle versions of micropython based on the git tags in the repo """
+
 from github import Github
 from packaging.version import parse
 
@@ -18,7 +20,7 @@ def clean_version(
         return version
     nibbles = version.split("-")
     if not patch and nibbles[0] >= "1.10.0" and nibbles[0].endswith(".0"):
-            # remove the last ".0"
+        # remove the last ".0"
         nibbles[0] = nibbles[0][:-2]
     if len(nibbles) == 1:
         version = nibbles[0]
@@ -41,9 +43,10 @@ def clean_version(
 
 
 def micropython_versions(start="v1.9.2"):
+    """Get the list of micropython versions from github tags"""
     try:
         g = Github()
         repo = g.get_repo("micropython/micropython")
         return [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(start)]
     except Exception:
-        return ['v1.19.1', 'v1.19', 'v1.18', 'v1.17', 'v1.16', 'v1.15', 'v1.14', 'v1.13', 'v1.12', 'v1.11', 'v1.10', 'v1.9.4', 'v1.9.3']
+        return ["v1.19.1", "v1.19", "v1.18", "v1.17", "v1.16", "v1.15", "v1.14", "v1.13", "v1.12", "v1.11", "v1.10", "v1.9.4", "v1.9.3"]

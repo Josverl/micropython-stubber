@@ -51,7 +51,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         )
 
     def __init__(self, context: CodemodContext, stub_file: Union[Path, str]) -> None:
-        """ initialize the base class with context, and save our args."""
+        """initialize the base class with context, and save our args."""
         super().__init__(context)
         self.replace_functiondef_with_classdef = True
         # stack for storing the canonical name of the current function/method

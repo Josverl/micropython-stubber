@@ -6,6 +6,7 @@ from .typed_config_toml import TomlConfigSource
 
 from loguru import logger as log
 
+
 @section("micropython-stubber")
 class StubberConfig(Config):
     "stubber confguration class"

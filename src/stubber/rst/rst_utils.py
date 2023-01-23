@@ -124,7 +124,7 @@ RE_LIT_AS_A = r"as a\s?(?P<return>[^.!?:;]*)"
 RE_LIT_SENTENCE = r"\s?(?P<return>[^.!?:;]*)"
 
 
-def dist_rate(i:int) -> float:
+def dist_rate(i: int) -> float:
     """"""
     max_len = 150  # must occur in the first 150 chars
     return max((max_len - i), 1) / max_len
@@ -215,7 +215,7 @@ def object_candidates(match_string: str, rate: float = 0.81, exclude: Optional[L
     """
     find and rate possible types and confidence weighting for Object types.
     Case sensitive
-    Exclude defaults to ["IRQ"] 
+    Exclude defaults to ["IRQ"]
     """
     # defaults
     if exclude is None:
@@ -412,7 +412,7 @@ def return_type_from_context(*, docstring: Union[str, List[str]], signature: str
 
 def _type_from_context(
     *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
-):    # -> Dict[str , Union[str,float]]:
+):  # -> Dict[str , Union[str,float]]:
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -504,9 +504,7 @@ def _type_from_context(
     # ref: https://docs.python.org/3/library/typing.html#typing.Coroutine
     # Coroutine[YieldType, SendType, ReturnType]
     # todo: sanity check against actual code .....
-    if "This is a coroutine" in docstring and "Coroutine" not in str(
-        best["type"]
-    ):  # type: ignore
+    if "This is a coroutine" in docstring and "Coroutine" not in str(best["type"]):  # type: ignore
         best["type"] = f"Coroutine[{best['type']}, Any, Any]"
 
     # return the best candidate, or Any

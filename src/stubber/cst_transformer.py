@@ -22,7 +22,9 @@ class TransformError(Exception):
     Error raised upon encountering a known error while attempting to transform
     the tree.
     """
-MODULE_KEY = ("__module", )
+
+
+MODULE_KEY = ("__module",)
 
 # debug helper
 _m = cst.parse_module("")
@@ -32,6 +34,7 @@ class StubTypingCollector(cst.CSTVisitor):
     """
     Collect the function/method and class definitions from the stubs source
     """
+
     def __init__(self):
         # stack for storing the canonical name of the current function
         self.stack: List[str] = []
@@ -66,7 +69,7 @@ class StubTypingCollector(cst.CSTVisitor):
         - name, decorators, docstring
         """
         # "Store the class docstring
-        docstr_node = self.update_append_first_node(node        )
+        docstr_node = self.update_append_first_node(node)
         ti = TypeInfo(
             name=node.name.value,
             params=None,
@@ -160,5 +163,5 @@ def update_module_docstr(node: cst.Module, doc_tree: Optional[cst.SimpleStatemen
         # append the new docstring and append the function body
         body = tuple([doc_tree] + list(node.body))  # type: ignore
     else:
-        body = tuple([doc_tree] + list(node.body[1:])) # type: ignore
+        body = tuple([doc_tree] + list(node.body[1:]))  # type: ignore
     return node.with_changes(body=body)

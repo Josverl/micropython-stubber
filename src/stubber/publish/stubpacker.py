@@ -618,7 +618,7 @@ class StubPackage:
         self,
         production: bool,  # PyPI or Test-PyPi - USED TO FIND THE NEXT VERSION NUMBER
         force=False,  # BUILD even if no changes
-    ) -> bool:    # sourcery skip: default-mutable-arg, extract-duplicate-method, require-parameter-annotation
+    ) -> bool:  # sourcery skip: default-mutable-arg, extract-duplicate-method, require-parameter-annotation
         """
         Build a package
         look up the previous package version in the dabase
@@ -688,7 +688,7 @@ class StubPackage:
                 pub_ok = self.poetry_publish(production=production)
                 if not pub_ok:
                     log.warning(f"{self.package_name}: Publish failed for {self.pkg_version}")
-                    self.status["error"] = "Publish failed"                    
+                    self.status["error"] = "Publish failed"
                     return False
                 self.status["result"] = "Published to PyPi" if production else "Published to Test-PyPi"
                 self.update_hashes()

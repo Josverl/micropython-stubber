@@ -1,3 +1,8 @@
+"""
+Read versions published to PyPi or test.PyPi.
+uses the pypi-simple package to get the versions from the simple index.
+"""
+
 from typing import Optional
 
 from packaging.version import Version, parse

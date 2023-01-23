@@ -52,11 +52,7 @@ def clone(remote_repo: str, path: Path, shallow=False, tag: Optional[str] = None
         cmd += ["--depth", "1"]
     if tag in ("latest", "master"):
         tag = None
-    cmd += (
-        [remote_repo, "--branch", tag, str(path)]
-        if tag
-        else [remote_repo, str(path)]
-    )
+    cmd += [remote_repo, "--branch", tag, str(path)] if tag else [remote_repo, str(path)]
     if result := _run_git(cmd, expect_stderr=True, capture_output=False):
         return result.returncode == 0
     else:
