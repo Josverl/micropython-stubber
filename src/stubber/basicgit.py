@@ -117,8 +117,9 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.debug(result.stderr.decode("utf-8"))
-    log.debug(result.stdout.decode("utf-8"))
+    msg = {result.stdout.decode("utf-8")}
+    if msg != {""}:
+        log.warning(f"git message: {msg}")
     return True
 
 

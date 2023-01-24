@@ -33,15 +33,20 @@
             "args": [
                 "-v",
                 "-v",
-                "get-frozen",
+                "publish",
+                "--port",
+                "esp32",
+                "--board",
+                "um_tinypico",
+                "--pypi",
+                "--dry-run",
+                "--build",
                 // "switch",
                 // "v1.19.1"
                 // "get-frozen",
                 // "--version",
                 // "v1.19.1",
                 // "--port",
-                // "esp32",
-                // "--test-pypi"
                 // "--dry-run",
                 //
                 // "minify",
