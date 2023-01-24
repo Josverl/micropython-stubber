@@ -9,8 +9,7 @@ from loguru import logger as log
 from stubber.publish.candidates import firmware_candidates, is_auto
 from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
-from stubber.publish.package import create_package, get_package, get_package_info, package_name
-from stubber.publish.stubpacker import StubPackage
+from stubber.publish.package import  get_package
 from stubber.utils.config import CONFIG
 
 from pysondb import PysonDB
@@ -50,6 +49,7 @@ def publish_multiple(
     clean: bool = False,
     build: bool = False,
     force: bool = False,
+    dry_run: bool = False,
 ) -> List[Dict[str, Any]]:  # sourcery skip: default-mutable-arg
     """
     Publish a bunch of stub packages
@@ -60,7 +60,7 @@ def publish_multiple(
 
     for todo in worklist:
         if package := get_package(db, **todo):
-            package.publish(db=db, clean=clean, force=force, build=build, production=production)
+            package.publish(db=db, clean=clean, force=force, build=build, production=production, dry_run=dry_run)
             results.append(package.status)
         else:
             log.error(f"Failed to create package for {todo}")
