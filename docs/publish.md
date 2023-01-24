@@ -8,6 +8,11 @@ reqs:
  - poetry installed and on path
    `pip install poetry` 
 
+   - poetry config 
+    - `poetry config repositories.test-pypi https://test.pypi.org/legacy/`
+    - poetry config repositories.pypi https://upload.pypi.org/legacy/
+
+
  - poetry api key stored in systems secure store or in environment variable `PYPI_API_KEY`
     - **PYPI test**
         - get token from https://test.pypi.org/manage/account/token/

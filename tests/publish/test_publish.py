@@ -59,6 +59,8 @@ def test_hash(
     assert pkg.is_changed(include_md=False), "should show as changed after stub hash change"
 
 
+
+
 @pytest.mark.integration
 def test_update_package(fake_package: StubPackage):
     pkg = fake_package

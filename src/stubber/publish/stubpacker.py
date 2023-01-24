@@ -141,13 +141,16 @@ class StubPackage:
             version = str(version)
         # read the current file
         _toml = self.toml_path
-        with open(_toml, "rb") as f:
-            pyproject = tomllib.load(f)
-        pyproject["tool"]["poetry"]["version"] = version
+        try:
+            with open(_toml, "rb") as f:
+                pyproject = tomllib.load(f)
+            pyproject["tool"]["poetry"]["version"] = version
 
-        # update the version in the toml file
-        with open(_toml, "wb") as output:
-            tomli_w.dump(pyproject, output)
+            # update the version in the toml file
+            with open(_toml, "wb") as output:
+                tomli_w.dump(pyproject, output)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"pyproject.toml file not found at {_toml}") from e
 
     def update_pkg_version(self, production: bool) -> str:
         """Get the next version for the package"""
@@ -263,49 +266,50 @@ class StubPackage:
          - 2 - copy the remaining stubs to the package folder
          - 3 - remove *.py files from the package folder
         """
-        # First check if all stub source folders exist
-        for n in range(len(self.stub_sources)):
-            stub_type, fw_path = self.stub_sources[n]
-            # update to use -merged
-            if stub_type == StubSource.FIRMWARE:
-                # Check if -merged folder exists and use that instead
-                if fw_path.name.endswith("-merged"):
-                    merged_path = fw_path
-                else:
-                    merged_path = fw_path.with_name(f"{fw_path.name}-merged")
-                if (CONFIG.stub_path / merged_path).exists():
-                    stub_type = StubSource.MERGED
-                    # Update the source list
-                    self.stub_sources[n] = (stub_type, merged_path)
-                fw_path = merged_path
-            # check if path exists
-            if not (CONFIG.stub_path / fw_path).exists() and stub_type != StubSource.FROZEN:
-                raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
+        try: 
+            # First check if all stub source folders exist
+            for n in range(len(self.stub_sources)):
+                stub_type, fw_path = self.stub_sources[n]
+                # update to use -merged
+                if stub_type == StubSource.FIRMWARE:
+                    # Check if -merged folder exists and use that instead
+                    if fw_path.name.endswith("-merged"):
+                        merged_path = fw_path
+                    else:
+                        merged_path = fw_path.with_name(f"{fw_path.name}-merged")
+                    if (CONFIG.stub_path / merged_path).exists():
+                        stub_type = StubSource.MERGED
+                        # Update the source list
+                        self.stub_sources[n] = (stub_type, merged_path)
+                    fw_path = merged_path
+                # check if path exists
+                if not (CONFIG.stub_path / fw_path).exists() and stub_type != StubSource.FROZEN:
+                    raise FileNotFoundError(f"Could not find stub source folder {CONFIG.stub_path / fw_path}")
 
-        # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
-        # for stub_type, fw_path in [s for s in self.stub_sources]:
-        for n in range(len(self.stub_sources)):
-            stub_type, fw_path = self.stub_sources[n]
+            # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
+            # for stub_type, fw_path in [s for s in self.stub_sources]:
+            for n in range(len(self.stub_sources)):
+                stub_type, fw_path = self.stub_sources[n]
 
-            try:
-                log.trace(f"Copying {stub_type} from {fw_path}")
-                shutil.copytree(
-                    CONFIG.stub_path / fw_path,
-                    self.package_path,
-                    symlinks=True,
-                    dirs_exist_ok=True,
-                )
-            except OSError as e:
-                if stub_type != StubSource.FROZEN:
-                    raise FileNotFoundError(f"Could not find stub source folder {fw_path}") from e
-                else:
-                    log.debug(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
-
-        # 3 - clean up a little bit
-        # delete all the .py files in the package folder if there is a corresponding .pyi file
-        for f in self.package_path.rglob("*.py"):
-            if f.with_suffix(".pyi").exists():
-                f.unlink()
+                try:
+                    log.trace(f"Copying {stub_type} from {fw_path}")
+                    shutil.copytree(
+                        CONFIG.stub_path / fw_path,
+                        self.package_path,
+                        symlinks=True,
+                        dirs_exist_ok=True,
+                    )
+                except OSError as e:
+                    if stub_type != StubSource.FROZEN:
+                        raise FileNotFoundError(f"Could not find stub source folder {fw_path}") from e
+                    else:
+                        log.debug(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
+        finally:
+            # 3 - clean up a little bit
+            # delete all the .py files in the package folder if there is a corresponding .pyi file
+            for f in self.package_path.rglob("*.py"):
+                if f.with_suffix(".pyi").exists():
+                    f.unlink()
 
     def create_readme(self) -> None:
         """
@@ -426,7 +430,6 @@ class StubPackage:
         and after the package has been built, to avoid needing to store files multiple times.
 
         `.gitignore` cannot be used as this will prevent poetry from processing the files.
-
         """
         # remove all *.py and *.pyi files in the folder
         for wc in ["*.py", "*.pyi", "modules.json"]:
@@ -564,7 +567,6 @@ class StubPackage:
         else:
             log.debug("Publishing to TEST-PyPi https://test.pypy.org")
             params = ["publish", "-r", "test-pypi"]
-        log.error(f"Publishing {self.package_name} to {params} is Skipped")
         r = self.run_poetry(params)
         print("")  # add a newline after the output
         return r
@@ -592,7 +594,7 @@ class StubPackage:
         return ok
 
     def update_package(self) -> bool:
-        """Update the package files, if all the sources are available"""
+        """Update the package .pyi files, if all the sources are available"""
         log.info(f"- Update {self.package_path.name}")
         log.trace(f"{self.package_path.as_posix()}")
 
@@ -627,6 +629,11 @@ class StubPackage:
         """
         log.debug("=" * 40)
         log.info(f"Build: {self.package_path.name}")
+        self.update_package_files()
+        # toml 
+        # readme 
+        # license
+        
         ok = self.update_package()
         self.status["version"] = self.pkg_version
         if not ok:

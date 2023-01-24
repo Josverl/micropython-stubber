@@ -2,7 +2,6 @@
 prepare a set of stub files for publishing to PyPi
 
 """
-
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
@@ -13,6 +12,8 @@ from pysondb import PysonDB
 from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.versions import clean_version
+from stubber.utils.config import CONFIG
+
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()
@@ -30,6 +31,38 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
         return f"{family}-core-stubs".lower()
 
     raise NotImplementedError(port, board, pkg_type)
+
+
+def get_package(
+    db: PysonDB,
+    *,
+    pkg_type,
+    version: str,
+    port: str,
+    board: str = "GENERIC",
+    family: str = "micropython",
+) -> StubPackage:
+    """Get the package from the database or create a new one if it does not exist."""
+    pkg_name = package_name(pkg_type, port=port, board=board, family=family)
+    if package_info := get_package_info(
+        db,
+        CONFIG.publish_path,
+        pkg_name=pkg_name,
+        mpy_version=version,
+    ):
+        # create package from the information retrieved from the database
+        return StubPackage(pkg_name, version=version, json_data=package_info)
+
+    log.debug(f"No package found for {pkg_name} in database, creating new package")
+    return create_package(
+        pkg_name,
+        mpy_version=version,
+        port=port,
+        board=board,
+        family=family,
+        pkg_type=pkg_type,
+    )
+
 
 
 def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str) -> Union[Dict, None]:
@@ -62,15 +95,16 @@ def create_package(
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBO_STUBS,
-) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
+) -> StubPackage:    # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
         assert port != ""
-        if not board:
-            board = "GENERIC"
+        # Use lower case for paths to avoid case sensitive issues
+        port = port.lower()
+        board = board.lower() if board else "GENERIC"
         stubs: List[Tuple[str, Path]] = [
             (
                 # StubSource.FIRMWARE,
@@ -79,7 +113,7 @@ def create_package(
                 # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
                 # that would also require the port - board - variant to be discoverable runtime
                 StubSource.MERGED,
-                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board != "GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
+                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board.upper() != "GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
             ),
             (
                 StubSource.FROZEN,
@@ -87,7 +121,7 @@ def create_package(
             ),
             (
                 StubSource.CORE,
-                Path("micropython_core"),
+                Path("micropython_core"), # TODO : Add version to core stubs
             ),
         ]
     elif pkg_type == DOC_STUBS:
