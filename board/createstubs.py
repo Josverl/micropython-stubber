@@ -560,7 +560,7 @@ def read_path() -> str:
     return path
 
 
-def isMicroPython() -> bool:
+def is_micropython() -> bool:
     "runtime test to determine full or micropython"
     # pylint: disable=unused-variable,eval-used
     try:
@@ -576,7 +576,7 @@ def isMicroPython() -> bool:
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = isMicroPython.__module__  # type: ignore # lgtm [py/unused-local-variable]
+        c = is_micropython.__module__  # type: ignore # lgtm [py/unused-local-variable]
         return False
     except (NotImplementedError, AttributeError):
         return True
@@ -776,7 +776,7 @@ def main():
     stubber.report()
 
 
-if __name__ == "__main__" or isMicroPython():
+if __name__ == "__main__" or is_micropython():
     try:
         _log = logging.getLogger("stubber")
         logging.basicConfig(level=logging.INFO)

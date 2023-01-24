@@ -13,7 +13,7 @@ import sys
 ## prevent the full stubbing to be automatically started due to the IsMicroPython()
 with open("no_auto_stubber.txt", "w") as f:
     f.write("lvgl")
-from createstubs import Stubber, __version__, isMicroPython, logging
+from createstubs import Stubber, __version__, is_micropython, logging
 
 
 def main():
@@ -46,5 +46,5 @@ def main():
     os.remove("no_auto_stubber.txt")
 
 
-if __name__ == "__main__" or isMicroPython():
+if __name__ == "__main__" or is_micropython():
     main()
