@@ -43,7 +43,7 @@ class Stubber:
         self.info = _info()
         gc.collect()
         if firmware_id:
-            self._fwid = str(firmware_id).lower()
+            self._fwid = firmware_id.lower()
         else:
             self._fwid = "{family}-{ver}-{port}".format(**self.info).lower()
         self._start_free = gc.mem_free()  # type: ignore
@@ -92,9 +92,17 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in ("int", "float", "str", "bool", "tuple", "list", "dict"):
+                if type_text in {
+                    "int",
+                    "float",
+                    "str",
+                    "bool",
+                    "tuple",
+                    "list",
+                    "dict",
+                }:
                     order = 1
-                elif type_text in ("function", "method"):
+                elif type_text in {"function", "method"}:
                     order = 2
                 elif type_text in ("class"):
                     order = 3
@@ -141,7 +149,7 @@ class Stubber:
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:    # type: ignore
         """Create a Stub of a single python module
 
         Args:
@@ -179,7 +187,7 @@ class Stubber:
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
 
-        if not module_name in ["os", "sys", "logging", "gc"]:
+        if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
             try:
                 del new_module
@@ -248,7 +256,6 @@ class Stubber:
                 s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
                 s += indent + "        ...\n\n"
                 fp.write(s)
-            # Class Methods and functions
             elif "method" in item_type_txt or "function" in item_type_txt:
                 self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
@@ -261,15 +268,17 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent)
-                    s += "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(
+                        indent
+                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
+                        indent, item_name, ret
+                    )
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
-            # constants of known types & values
             elif item_type_txt == "<class 'module'>":
                 # Skip imported modules
                 # fp.write("# import {}\n".format(item_name))
@@ -289,7 +298,7 @@ class Stubber:
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if not t in ["object", "set", "frozenset"]:
+                    if t not in ["object", "set", "frozenset"]:
                         # Possibly default others to item_instance object ?
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         t = "Any"
@@ -377,24 +386,19 @@ def ensure_folder(path: str):
     while i != -1:
         i = path.find("/", start)
         if i != -1:
-            if i == 0:
-                p = path[0]
-            else:
-                p = path[0:i]
+            p = path[0] if i == 0 else path[:i]
             # p = partial folder
             try:
                 _ = os.stat(p)
             except OSError as e:
-                # folder does not exist
-                if e.args[0] == ENOENT:
-                    try:
-                        os.mkdir(p)
-                    except OSError as e2:
-                        # self._log.error("failed to create folder {}".format(p))
-                        raise e2
-                else:
+                if e.args[0] != ENOENT:
                     # self._log.error("failed to create folder {}".format(p))
                     raise e
+                try:
+                    os.mkdir(p)
+                except OSError as e2:
+                    # self._log.error("failed to create folder {}".format(p))
+                    raise e2
         # next level deep
         start = i + 1
 
@@ -402,7 +406,7 @@ def ensure_folder(path: str):
 def _info():
     "collect base information on this runtime"
     _n = sys.implementation.name  # type: ignore
-    _p = sys.platform if not sys.platform.startswith("pyb") else "stm32"
+    _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
     info = {
         "name": _n,  # - micropython
         "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
@@ -436,10 +440,7 @@ def _info():
                 s = u[3].split(" on ")[0]
                 if info["sysname"] == "esp8266":
                     # esp8266 has no usable info on the release
-                    if "-" in s:
-                        v = s.split("-")[0]
-                    else:
-                        v = s
+                    v = s.split("-")[0] if "-" in s else s
                     info["version"] = info["release"] = v.lstrip("v")
                 try:
                     info["build"] = s.split("-")[1]
@@ -494,7 +495,7 @@ def _info():
     # spell-checker: disable
     if "mpy" in info:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
-        arch = [
+        if arch := [
             None,
             "x86",
             "x64",
@@ -506,8 +507,7 @@ def _info():
             "armv7emdp",
             "xtensa",
             "xtensawin",
-        ][sys_mpy >> 10]
-        if arch:
+        ][sys_mpy >> 10]:
             info["arch"] = arch
     return info
     # spell-checker: enable
@@ -521,7 +521,7 @@ def get_root() -> str:
         # unix port
         c = "."
     r = c
-    for r in [c, "/sd", "/flash", "/", "."]:
+    for r in [r, "/sd", "/flash", "/", "."]:
         try:
             _ = os.stat(r)
             break
