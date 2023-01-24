@@ -2,14 +2,15 @@ rule_settings:
   enable: 
   - default
   - snake-case-functions
-  - docstrings-for-modules
-  - require-parameter-annotation
   - no-wildcard-imports
   - no-long-functions
-  # - require-return-annotation  # Pylance does infer this quite well already
+
+  - docstrings-for-modules
   # - docstrings-for-functions
+  # - require-parameter-annotation
 
   disable:
+  - require-return-annotation  # Pylance does infer this quite well already
   - use-contextlib-suppress
   - use-fstring-for-formatting
   - use-fstring-for-concatenation
@@ -25,18 +26,23 @@ rule_settings:
     - comment
 
 ignore:
-  - "*.ipynb"
+  # Specific folders and files to ignore
+  - src/stubber/board
+  - src/stubber/minified
+  - src/stubber/tools/manifestfile.py
   - board/*_*.py
+  - board/boot.py
+  - board/main.py
   - board/logging.py
   - minified/
+  # common files to ignore
+  - "*.ipynb"
   - .venv/
   - tests/*
   - '*_test.py'
   - repos/
   - .git/
   - .github/
-  - src/stubber/board
-  - src/stubber/minified
   
 rules:
 - id: no-wildcard-imports
