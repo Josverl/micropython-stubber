@@ -179,8 +179,8 @@ def d(path):
 					except C as G:H('failed to create folder {}'.format(B));raise G
 		D=A+1
 def _info():
-	Y='0.0.0';X='port';W='name';I='mpy';H='unknown';E='family';C='ver';Q=sys.implementation.name;U='stm32'if sys.platform.startswith(r)else sys.platform;A={W:Q,B:Y,R:Y,N:G,S:H,s:H,a:H,E:Q,b:U,X:U,C:G}
-	try:A[B]=K.join([str(A)for A in sys.implementation.version]);A[R]=A[B];A[W]=sys.implementation.name;A[I]=sys.implementation.mpy
+	Z='0.0.0';Y='port';X='name';I='mpy';H='unknown';E='family';C='ver';Q=sys.implementation.name;U='stm32'if sys.platform.startswith(r)else sys.platform;A={X:Q,B:Z,R:Z,N:G,S:H,s:H,a:H,E:Q,b:U,Y:U,C:G}
+	try:A[B]=K.join([str(A)for A in sys.implementation.version]);A[R]=A[B];A[X]=sys.implementation.name;A[I]=sys.implementation.mpy
 	except J:pass
 	if sys.platform not in('unix','win32'):
 		try:y(A)
@@ -189,7 +189,7 @@ def _info():
 	except (P,L):pass
 	try:from pycom import FAT as F;A[E]=t;del F
 	except (P,L):pass
-	if A[b]=='esp32_LoBo':A[E]='loboris';A[X]=u
+	if A[b]=='esp32_LoBo':A[E]='loboris';A[Y]=u
 	elif A[S]=='ev3':
 		A[E]='ev3-pybricks';A[B]='1.0.0'
 		try:from pybricks.hubs import EV3Brick;A[B]='2.0.0'
@@ -201,8 +201,8 @@ def _info():
 		if A[N]!=G and M(A[N])<4:A[C]+=T+A[N]
 	if A[C][0]!=O:A[C]=O+A[C]
 	if I in A:
-		Z=int(A[I])
-		if(c:=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][Z>>10]):A['arch']=c
+		c=int(A[I]);W=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][c>>10]
+		if W:A['arch']=W
 	return A
 def y(info):
 	E=' on ';A=info;C=os.uname();A[S]=C[0];A[s]=C[1];A[B]=C[2];A[a]=C[4]
