@@ -402,7 +402,7 @@ def ensure_folder(path: str):
         start = i + 1
 
 
-def _info():  # sourcery skip: extract-duplicate-method
+def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
     "collect base information on this runtime"
     _n = sys.implementation.name  # type: ignore
     _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
@@ -478,7 +478,7 @@ def _info():  # sourcery skip: extract-duplicate-method
     # spell-checker: disable
     if "mpy" in info:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
-        if arch := [
+        arch = [
             None,
             "x86",
             "x64",
@@ -490,7 +490,8 @@ def _info():  # sourcery skip: extract-duplicate-method
             "armv7emdp",
             "xtensa",
             "xtensawin",
-        ][sys_mpy >> 10]:
+        ][sys_mpy >> 10]
+        if arch:
             info["arch"] = arch
     return info
 # spell-checker: enable
