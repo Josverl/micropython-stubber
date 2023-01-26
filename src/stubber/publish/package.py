@@ -9,11 +9,12 @@ from typing import Dict, List, Tuple, Union
 from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
-from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
-from stubber.publish.stubpacker import StubPackage
-from stubber.utils.versions import clean_version
-from stubber.utils.config import CONFIG
 
+from stubber.publish.enums import (COMBO_STUBS, CORE_STUBS, DOC_STUBS,
+                                   StubSource)
+from stubber.publish.stubpacker import StubPackage
+from stubber.utils.config import CONFIG
+from stubber.utils.versions import clean_version
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()
@@ -102,10 +103,11 @@ def create_package(
     """
     ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
-        assert port != ""
+        assert port != "" , "port must be specified for combo stubs"
         # Use lower case for paths to avoid case sensitive issues
         port = port.lower()
-        board = board.lower() if board else "GENERIC"
+        # board is always uppercase by convention (GENERIC)
+        board = board.upper() if board else "GENERIC"
         stubs: List[Tuple[str, Path]] = [
             (
                 # StubSource.FIRMWARE,
@@ -114,7 +116,7 @@ def create_package(
                 # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
                 # that would also require the port - board - variant to be discoverable runtime
                 StubSource.MERGED,
-                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board.upper() != "GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
+                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board != "GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
             ),
             (
                 StubSource.FROZEN,
