@@ -28,7 +28,10 @@ def build_multiple(
     db = get_database(CONFIG.publish_path, production=production)
     results = []
     worklist = build_worklist(family, versions, ports, boards)
-
+    if len(worklist) == 0:
+        log.error("Could not find any packages than can be build.")
+        return results
+        
     for todo in worklist:
         if package := get_package(db, **todo):
             package.build(force=force, production=production)
@@ -55,6 +58,10 @@ def publish_multiple(
     db = get_database(CONFIG.publish_path, production=production)
     results = []
     worklist = build_worklist(family, versions, ports, boards)
+
+    if len(worklist) == 0:
+        log.error("Could not find any packages than can be published.")
+        return results
 
     for todo in worklist:
         if package := get_package(db, **todo):
@@ -85,4 +92,8 @@ def build_worklist(family: str, versions: List[str], ports: List[str], boards: L
     if not is_auto(boards):
         boards_ = [i.upper() for i in boards]
         worklist = [i for i in worklist if i["board"].upper() in boards_]
+
+    for b in boards:
+        if not any(i for i in worklist if i["board"] == b):
+            log.warning(f"Could not find any package candidate for board {b}")        
     return worklist
