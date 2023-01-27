@@ -6,7 +6,7 @@ prepare a set of stub files for publishing to PyPi
 from typing import Any, Dict, List
 from loguru import logger as log
 
-from stubber.publish.candidates import firmware_candidates, is_auto
+from stubber.publish.candidates import board_candidates, is_auto
 from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import  get_package
@@ -83,7 +83,7 @@ def build_worklist(family: str, versions: List[str], ports: List[str], boards: L
     if family != "micropython":
         return []
     # get all the candidates
-    worklist = list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS))
+    worklist = list(board_candidates(family=family, versions=versions, pt=COMBO_STUBS))
     worklist = [i for i in worklist if i["board"] != ""]
     # then filter down to the ones we want
     if not is_auto(ports):

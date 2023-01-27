@@ -10,8 +10,7 @@ from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
 
-from stubber.publish.enums import (COMBO_STUBS, CORE_STUBS, DOC_STUBS,
-                                   StubSource)
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
@@ -30,8 +29,8 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
         return f"{family}-doc-stubs".lower()
     elif pkg_type == CORE_STUBS:
         return f"{family}-core-stubs".lower()
-
-    raise NotImplementedError(port, board, pkg_type)
+    # # {family}-{port}-{board}-{type}-stubs
+    return f"{family}-{port}-{board}-{pkg_type}-stubs".lower().replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
 
 
 def get_package(
@@ -66,7 +65,6 @@ def get_package(
     )
 
 
-
 def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str) -> Union[Dict, None]:
     """
     get a package's record from the json db if it can be found
@@ -97,13 +95,13 @@ def create_package(
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBO_STUBS,
-) -> StubPackage:    # sourcery skip: merge-duplicate-blocks, remove-redundant-if
+) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
-        assert port != "" , "port must be specified for combo stubs"
+        assert port != "", "port must be specified for combo stubs"
         # Use lower case for paths to avoid case sensitive issues
         port = port.lower()
         # board is always uppercase by convention (GENERIC)
@@ -124,7 +122,7 @@ def create_package(
             ),
             (
                 StubSource.CORE,
-                Path("micropython_core"), # TODO : Add version to core stubs
+                Path("micropython_core"),  # TODO : Add version to core stubs
             ),
         ]
     elif pkg_type == DOC_STUBS:
