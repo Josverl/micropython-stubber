@@ -5,6 +5,7 @@ from typing import List, Union
 import click
 from loguru import logger as log
 from stubber.commands.cli import stubber_cli
+from stubber.publish.package import GENERIC
 from stubber.publish.publish import build_multiple
 from tabulate import tabulate
 from stubber.utils.config import CONFIG
@@ -36,7 +37,7 @@ from stubber.utils.config import CONFIG
     "-b",
     "boards",
     multiple=True,
-    default=["GENERIC"],  # or "auto" ?
+    default=[GENERIC],  # or "auto" ?
     show_default=True,
     help="multiple: ",
 )

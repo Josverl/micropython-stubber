@@ -5,6 +5,8 @@ from typing import Tuple
 
 from loguru import logger as log
 
+from stubber.publish.package import GENERIC
+
 
 def get_portboard(manifest_path: Path):
     """
@@ -32,7 +34,7 @@ def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
         raise ValueError("port must be provided")
 
     if not board:
-        board = "GENERIC"
+        board = GENERIC
 
     if board == "manifest_release":
         board = "RELEASE"
