@@ -6,6 +6,7 @@ from typing import List, Union
 import click
 from loguru import logger as log
 from stubber.publish.merge_docstubs import merge_all_docstubs
+from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
 
 from .cli import stubber_cli
@@ -24,15 +25,40 @@ from .cli import stubber_cli
     show_default=True,
     help="'latest', 'auto', or one or more versions",
 )
+@click.option(
+    "--port",
+    "-p",
+    "ports",
+    multiple=True,
+    default=["auto"],
+    show_default=True,
+    help="multiple: ",
+)
+@click.option(
+    "--board",
+    "-b",
+    "boards",
+    multiple=True,
+    default=[GENERIC],  # or "auto" ?
+    show_default=True,
+    help="multiple: ",
+)
+
 def cli_merge_docstubs(
     versions: Union[str, List[str]],
-    family,
+    boards: Union[str, List[str]],
+    ports: Union[str, List[str]],
+    family:str,
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
     """
+    if isinstance(ports, tuple):
+        ports = list(ports)
+    if isinstance(boards, tuple):
+        boards = list(boards)
+    if isinstance(versions, tuple):
+        versions = list(versions)    
     # single version should be a string
-    if len(versions) == 1:
-        versions = versions[0]
     log.info(f"Merge docstubs for {family} {versions}")
-    _ = merge_all_docstubs(versions=versions, family=family, mpy_path=CONFIG.mpy_path)
+    _ = merge_all_docstubs(versions=versions, family=family, boards=boards, ports=ports, mpy_path=CONFIG.mpy_path)

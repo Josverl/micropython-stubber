@@ -4,12 +4,12 @@ Merge firmware stubs and docstubs into a single folder
 
 import shutil
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Union
 
 from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
-from stubber.publish.candidates import board_candidates
+from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
@@ -28,7 +28,8 @@ def board_folder_name(fw: Dict, *, version: Optional[str] = None):
     """return the name of the firmware folder"""
     base = get_base(fw, version=version)
     folder_name = f"{base}-{fw['port']}" if fw["board"] == GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    return folder_name.lower()
+    folder_name = folder_name.lower().replace("-generic_", "-")
+    return folder_name
 
 
 def get_board_path(fw: Dict):
@@ -41,10 +42,26 @@ def get_merged_path(fw: Dict):
     return merged_path
 
 
-def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
+def merge_all_docstubs(
+    versions: Union[List[str],str] = ["v1.19.1"],
+    family: str = "micropython",
+    ports: Union[List[str],str] = ["auto"],
+    boards: Union[List[str],str] = [GENERIC],
+    *,
+    mpy_path=CONFIG.mpy_path,
+):
     """merge docstubs and board stubs to merged stubs"""
+    if isinstance(versions, str):
+        versions = [versions]
+    if isinstance(ports, str):
+        ports = [ports]
+    if isinstance(boards, str):
+        boards = [boards]
+
     candidates = list(board_candidates(versions=versions, family=family))
+    candidates = filter_list(candidates, ports, boards)
     log.info(f"checking {len(candidates)} possible board candidates")
+
     merged = 0
     if not candidates:
         log.error("No candidates found")
@@ -77,14 +94,14 @@ def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG
                 continue
 
         log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
-        result = copy_docstubs(board_path, merged_path, doc_path)
+        result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
         if result:
             merged += 1
     log.info(f"merged {merged} of {len(candidates)} candidates")
     return merged
 
 
-def copy_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
+def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     """
     Parameters:
         fw_path: Path to firmware stubs (absolute path)
