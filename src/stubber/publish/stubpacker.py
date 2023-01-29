@@ -459,6 +459,7 @@ class StubPackage:
                 # do not include [self.toml_file]
             )
         for file in sorted(files):
+            # TODO: Extract function to allow for retry on file not found
             try:
                 with open(file, "rb") as f:
                     while True:
@@ -605,7 +606,7 @@ class StubPackage:
             self.status["error"] = "Skipped, stub folder(s) missing"
             shutil.rmtree(self.package_path.as_posix())
             self._publish = False  # type: ignore
-            return True
+            return False
         try:
             self.update_package_files()
             self.update_included_stubs()
