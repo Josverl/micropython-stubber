@@ -130,8 +130,8 @@ def frozen_candidates(
             #     ports = ["esp32"]
         # ---------------------------------------------------------------------------
         for port in ports:
-            board_path = path / f"{family}-{version}-frozen" / port
-            if board_path.exists():
+            port_path = path / f"{family}-{version}-frozen" / port
+            if port_path.exists():
                 yield {"family": family, "version": version, "port": port, "board": GENERIC, "pkg_type": COMBO_STUBS}
             # if not auto_board:
             #     for board in boards:
@@ -142,7 +142,7 @@ def frozen_candidates(
             if auto_board:
                 if family == "micropython":
                     # lookup the (frozen) micropython ports
-                    boards = list(subfolder_names(board_path))
+                    boards = list(subfolder_names(port_path))
                     # TODO: remove non-relevant boards
                     # - release - used in release testing
                     # generic_512 - small memory footprint
@@ -157,7 +157,9 @@ def frozen_candidates(
             for board in boards:
                 assert isinstance(board, str)
                 # frozen stubs found, and not excluded, generic is already explicitly included, test builds excluded
-                if (path / f"{family}-{version}-frozen" / port / board).exists() and board.upper() not in [
+                # Micropython repo uses CAPS for board names, but micropython-stubs are lowercase
+                board_found = (path / f"{family}-{version}-frozen" / port / board.upper()).exists()
+                if board_found and board.upper() not in [
                     GENERIC.upper(),
                     "RELEASE",
                     "GENERIC_512K",

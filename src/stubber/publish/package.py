@@ -10,7 +10,8 @@ from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
 
-from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
+from stubber.publish.enums import (COMBO_STUBS, CORE_STUBS, DOC_STUBS,
+                                   StubSource)
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
@@ -130,7 +131,7 @@ def create_package(
             ),
             (
                 StubSource.FROZEN,
-                Path(f"{family}-{ver_flat}-frozen") / port / board,
+                Path(f"{family}-{ver_flat}-frozen") / port / board.upper(), # BOARD in source frozen path needs to be UPPERCASE
             ),
             (
                 StubSource.CORE,
