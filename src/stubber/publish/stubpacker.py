@@ -7,6 +7,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from stubber.basicgit import get_git_describe
+
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
@@ -164,7 +166,11 @@ class StubPackage:
     def get_prerelease_package_version(self, production: bool = False) -> str:
         """Get the next prerelease version for the package."""
         base = Version("1.20")  # TODO hardcoded version - should be the next minor version after the last release
-        rc = 744  # FIXME: #307 hardcoded prerelease version - should be based on the git commit count
+        rc = 1  # FIXME: #307 hardcoded prerelease version - should be based on the git commit count
+        describe = get_git_describe(CONFIG.mpy_path.as_posix())
+        if describe:
+            ver, rc, _ = describe.split('-')
+            rc = int(rc)
         return str(bump_postrelease(base, rc=rc))
 
     def get_next_package_version(self, prod: bool = False) -> str:
@@ -650,7 +656,8 @@ class StubPackage:
         if self.is_changed() or force:
             #  Build the distribution files
             old_ver = self.pkg_version
-            self.status["version"] = self.update_pkg_version(production)
+            self.pkg_version = self.update_pkg_version(production)
+            self.status["version"] = self.pkg_version
             # to get the next version
             log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}")
             self.write_package_json()
