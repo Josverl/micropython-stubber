@@ -156,7 +156,7 @@ def frozen_candidates(
             # ---------------------------------------------------------------------------
             for board in boards:
                 assert isinstance(board, str)
-                # prozen stubs found , and not excluded, generic is already explicitly included
+                # frozen stubs found, and not excluded, generic is already explicitly included, test builds excluded
                 if (path / f"{family}-{version}-frozen" / port / board).exists() and board.upper() not in [
                     GENERIC.upper(),
                     "RELEASE",
@@ -166,7 +166,7 @@ def frozen_candidates(
 
 
 def is_auto(thing):
-    "Is this thing specified as 'auto' ?"
+    "Is this version/port/board specified as 'auto' ?"
     return isinstance(thing, str) and thing == "auto" or isinstance(thing, list) and "auto" in thing
 
 
@@ -175,7 +175,8 @@ def docstub_candidates(
     versions: Union[str, List[str]] = V_LATEST,
     path=CONFIG.stub_path,
 ):
-    """generate a list of possible documentation stub candidates for the given family and version.
+    """
+    Generate a list of possible documentation stub candidates for the given family and version.
 
     Note that the folders do not need to exist, with the exeption of auto which will scan the stubs folder for versions of docstubs
     """
