@@ -88,11 +88,11 @@ def build_worklist(family: str, versions: List[str], ports: List[str], boards: L
     worklist = [i for i in worklist if i["board"] != ""]
     # then filter down to the ones we want
     if not is_auto(ports):
-        ports_ = [i.upper() for i in ports]
-        worklist = [i for i in worklist if i["port"].upper() in ports_]
+        ports_ = [i.lower() for i in ports]
+        worklist = [i for i in worklist if i["port"].lower() in ports_]
     if not is_auto(boards):
-        boards_ = [i.upper() for i in boards]
-        worklist = [i for i in worklist if i["board"].upper() in boards_]
+        boards_ = [i.lower() for i in boards]
+        worklist = [i for i in worklist if i["board"].lower() in boards_]
 
     for b in boards:
         if not any(i for i in worklist if i["board"] == b):
