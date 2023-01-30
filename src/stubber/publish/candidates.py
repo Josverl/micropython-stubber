@@ -19,7 +19,7 @@ from packaging.version import parse
 
 import stubber.basicgit as git
 from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
-from stubber.publish.package import GENERIC
+from stubber.publish.package import GENERIC, GENERIC_L, GENERIC_U
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version, micropython_versions
 
@@ -132,7 +132,7 @@ def frozen_candidates(
         for port in ports:
             port_path = path / f"{family}-{version}-frozen" / port
             if port_path.exists():
-                yield {"family": family, "version": version, "port": port, "board": GENERIC, "pkg_type": COMBO_STUBS}
+                yield {"family": family, "version": version, "port": port, "board": GENERIC_L, "pkg_type": COMBO_STUBS}
             # if not auto_board:
             #     for board in boards:
             #         port_path = board_path/ "board" / board
@@ -160,7 +160,7 @@ def frozen_candidates(
                 # Micropython repo uses CAPS for board names, but micropython-stubs are lowercase
                 board_found = (path / f"{family}-{version}-frozen" / port / board.upper()).exists()
                 if board_found and board.upper() not in [
-                    GENERIC.upper(),
+                    GENERIC_L.upper(),
                     "RELEASE",
                     "GENERIC_512K",
                 ]:
@@ -217,9 +217,9 @@ def board_candidates(
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
             # Yield the generic port exactly one time
-            yield {"family": family, "version": version, "port": port, "board": GENERIC, "pkg_type": pt}
+            yield {"family": family, "version": version, "port": port, "board": GENERIC_U, "pkg_type": pt}
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
-                if board.lower() != GENERIC:
+                if board not in GENERIC:
                     yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}
 
 
