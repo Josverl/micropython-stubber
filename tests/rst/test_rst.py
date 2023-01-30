@@ -14,7 +14,6 @@ pytestmark = pytest.mark.doc_stubs
 # SOT
 from stubber.stubs_from_docs import TYPING_IMPORT, RSTReader, generate_from_rst
 
-TEST_DOCFIX = False  # run the tests agains the doc_fix_branch
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 
 
@@ -46,16 +45,8 @@ def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path)
     "make sure a recent branch is checked out"
 
     git.switch_branch("master", testrepo_micropython.as_posix())
-    if TEST_DOCFIX:
-        # run test against the proposed documentation fixes
-        try:
-            git.switch_branch("fix_lib_documentation", testrepo_micropython.as_posix())
-        except Exception:
-            # git.switch_branch("master", MICROPYTHON_FOLDER)
-            git.checkout_commit("micropython/master")
 
-    v_tag = git.get_tag(testrepo_micropython.as_posix()) or "xx_x"
-    yield v_tag
+    yield git.get_tag(testrepo_micropython.as_posix()) or "xx_x"
 
 
 # TODO: Source version and tag
