@@ -68,13 +68,13 @@ tools = ["mpremote", "esptool", "pyserial"]
 [tool.poetry.group.docs]
 optional = true
 [tool.poetry.group.docs.dependencies]
-Sphinx                      = "^4.4.0"
-myst-parser                 = "^0.17.0"
-sphinxcontrib-mermaid       = "^0.7.1"
-sphinx_rtd_theme            = "^1.0.0"
-sphinx-autoapi              = "^1.9.0"
-sphinx-click                = "^4.4.0"
-attrs                       = "^22.1.0"
+Sphinx = "^4.4.0"
+myst-parser = "^0.17.0"
+sphinxcontrib-mermaid = "^0.7.1"
+sphinx_rtd_theme = "^1.0.0"
+sphinx-autoapi = "^1.9.0"
+sphinx-click = "^4.4.0"
+attrs = "^22.1.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -241,3 +241,11 @@ exclude_lines = [
     "if sys.version_info.major == 3 and sys.version_info.minor <= 7:",
 
 ]
+
+[tool.sourcery-analytics]
+
+[tool.sourcery-analytics.thresholds]
+method_length = 50
+method_cyclomatic_complexity = 15
+method_cognitive_complexity = 15
+method_working_memory = 99
