@@ -42,7 +42,6 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
     try:
         mpy_path, mpy_lib_path = repo_paths(Path(path))
     except Exception:
-        log.error("micropython(-liib) repo not found")
         return -1
     result = fetch_repos(tag, mpy_path, mpy_lib_path)
     return -1 if result else 0

@@ -10,6 +10,7 @@ from stubber.freeze.get_frozen import freeze_any
 import stubber.utils as utils
 from loguru import logger as log
 from stubber.utils.config import CONFIG
+from stubber.utils.repos import fetch_repos
 
 from .cli import stubber_cli
 
@@ -42,17 +43,21 @@ def cli_get_frozen(
 
     stub_paths: List[Path] = []
 
-    if not version:
-        version = utils.clean_version(git.get_tag(CONFIG.mpy_path.as_posix()) or "0.0")
     if version:
-        log.info("MicroPython version : {}".format(version))
-        # folder/{family}-{version}-frozen
-        family = "micropython"
-        stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
-        stub_paths.append(stub_path)
-        freeze_any(stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
+        result = fetch_repos(version, CONFIG.mpy_path, CONFIG.mpy_lib_path)
+        if not result:
+            return -1
     else:
+        version = utils.clean_version(git.get_tag(CONFIG.mpy_path.as_posix()) or "0.0")
+    if not version:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
+
+    log.info("MicroPython version : {}".format(version))
+    # folder/{family}-{version}-frozen
+    family = "micropython"
+    stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
+    stub_paths.append(stub_path)
+    freeze_any(stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, pyi, black)
     log.info("::group:: Done")
