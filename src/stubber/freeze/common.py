@@ -1,3 +1,5 @@
+"""shared functions for freeze manifest processing."""
+
 import re
 import shutil
 from pathlib import Path
@@ -45,7 +47,7 @@ def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
 
 def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
     """
-    apply common fixes to the fozen modules to improve stub generation
+    apply common fixes to the frozen modules to improve stub generation
     """
     # NOTE: FIX 1 add __init__.py to umqtt
     if (freeze_path / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
