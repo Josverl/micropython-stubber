@@ -16,7 +16,7 @@ from stubber.rst import (
     DOCSTUB_SKIP,
     U_MODULES,
 )
-from stubber.rst.reader import RSTReader
+from stubber.rst.reader import RSTWriter
 
 
 
@@ -26,7 +26,6 @@ def generate_from_rst(
     v_tag: str,
     release: Optional[str] = None,
     pattern: str = "*.rst",
-    verbose: bool = False,
     suffix=".py",
 ) -> int:
     # sourcery skip: remove-redundant-exception, simplify-single-exception-tuple
@@ -44,7 +43,7 @@ def generate_from_rst(
     # files = [f for f in files if f.name == "collections.rst"]
 
     clean_destination(dst_path)
-    make_docstubs(dst_path, v_tag, release, verbose, suffix, files)
+    make_docstubs(dst_path, v_tag, release, suffix, files)
 
     run_autoflake(dst_path, progress_pyi=True)
     run_black(dst_path)
@@ -76,13 +75,12 @@ def get_rst_sources(rst_path:Path, pattern:str) -> List[Path]:
     files = [f for f in files if f.name not in DOCSTUB_SKIP]
     return files
 
-def make_docstubs(dst_path:Path, v_tag:str, release:str, verbose:bool, suffix:str, files:List[Path]):
+def make_docstubs(dst_path:Path, v_tag:str, release:str,  suffix:str, files:List[Path]):
     """Create the docstubs"""
 
     for file in files:
-        reader = RSTReader(v_tag)
+        reader = RSTWriter(v_tag)
         reader.source_release = release
-        reader.verbose = verbose
         log.debug(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()

@@ -2,7 +2,7 @@
 import pytest
 
 # SOT
-from stubber.rst.reader import RSTReader
+from stubber.rst.reader import RSTWriter
 
 from helpers import load_rst
 
@@ -108,7 +108,7 @@ CD_HASHLIB = """
 )
 def test_parse_class_modulename(line, module):
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, CD_ACCEL)
     r.current_module = module
     # process
@@ -128,7 +128,7 @@ def test_parse_class_modulename(line, module):
 )
 def test_parse_class_micro_modulename(line):
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, CD_HASHLIB)
     # r.current_module = module # 'uhashlib'
     # process
