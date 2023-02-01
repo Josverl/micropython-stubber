@@ -2,7 +2,7 @@
 import pytest
 
 # SOT
-from stubber.stubs_from_docs import RSTReader
+from stubber.rst.reader import RSTReader
 
 from helpers import load_rst
 
