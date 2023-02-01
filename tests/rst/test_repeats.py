@@ -1,7 +1,7 @@
 import pytest
 
 # SOT
-from stubber.stubs_from_docs import RSTReader
+from stubber.rst.reader import RSTReader
 
 # mark all tests
 pytestmark = pytest.mark.doc_stubs
