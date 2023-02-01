@@ -1,6 +1,4 @@
 # others
-from pathlib import Path
-
 import pytest
 from helpers import load_rst
 
@@ -110,12 +108,13 @@ def test_module_constants():
     r.current_module = "machine"
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
-    list = r.output_dict["constants"]
+    lst = r.output_dict["constants"]
 
-    doc_list = [c for c in list if c.startswith('"""')]
-    const_list = [c for c in list if not c.startswith('"""')]
+    doc_list = [c for c in lst if c.startswith('"""')]
+    const_list = [c for c in lst if not c.startswith('"""')]
     # should have 11  constants
     assert len(const_list) == 11
     # and 11 single line comments for docstrings
@@ -129,6 +128,7 @@ def test_class_constants():
     # r.current_module = module # 'uhashlib'
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     expected = [
@@ -165,12 +165,13 @@ def test_timer_constants(pytestconfig: pytest.Config):
     r.current_module = "machine"
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
-    list = r.output_dict["class Timer():"]["constants"]
+    lst = r.output_dict["class Timer():"]["constants"]
 
-    doc_list = [c for c in list if c.lstrip().startswith('"""')]
-    const_list = [c for c in list if not c.lstrip().startswith('"""')]
+    doc_list = [c for c in lst if c.lstrip().startswith('"""')]
+    const_list = [c for c in lst if not c.lstrip().startswith('"""')]
     # should have 2 constants
     assert len(const_list) == 2
     # and 11 single line comments for docstrings

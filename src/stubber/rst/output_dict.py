@@ -165,9 +165,9 @@ class SourceDict(OrderedDict):
         self._nr += 1
         if autoindent:
             line = spaces(self.indent + self._body) + line
-        id = str(self._nr)
-        self.update({id: line})
-        return id
+        id_ = str(self._nr)
+        self.update({id_: line})
+        return id_
 
     def index(self, key: str):
         return list(self.keys()).index(key)
