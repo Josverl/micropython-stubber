@@ -232,6 +232,16 @@ class RSTReader(FileReadWriter):
                 self.line_no += 1  # advance line
         except IndexError:
             pass
+
+        # remove empty lines at beginning/end of block
+        block = self.clean_docstr(block)
+        # add clickable hyperlinks to CPython docpages
+        block = self.add_link_to_docsstr(block)
+        return block
+
+    @staticmethod
+    def clean_docstr(block):
+        """Clean up a docstring"""
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
         if block and len(block[0]) > 0 and block[0][0] != " ":
@@ -239,14 +249,11 @@ class RSTReader(FileReadWriter):
             if all(l.startswith(q_char) for l in block):
                 # all lines start with the same character, so skip that character
                 block = [l[1:] for l in block]
-
         # remove empty lines at beginning/end of block
         if len(block) and len(block[0]) == 0:
             block = block[1:]
         if len(block) and len(block[-1]) == 0:
             block = block[:-1]
-
-        # prettify
         # Clean up Synopsis
         if len(block) and ":synopsis:" in block[0]:
             block[0] = re.sub(
@@ -254,9 +261,12 @@ class RSTReader(FileReadWriter):
                 r"\g<syn>",
                 block[0],
             )
-        # add clickable hyperlinks to CPython docpages
-        for i in range(len(block)):
+        return block
 
+    @staticmethod
+    def add_link_to_docsstr(block):
+        """Add clickable hyperlinks to CPython docpages	"""
+        for i in range(len(block)):
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
             # Optionally link to python 3.4 / 3.5 documentation
@@ -324,6 +334,9 @@ class RSTParser(RSTReader):
             # remove all after the closing bracket
             params = params[: params.rfind(")") + 1]
 
+        # Remove modulename. and Classname. from class constant
+        params = self.strip_prefixes(params, strip_mod=True, strip_class=True)
+
         ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
 
         # multiple optionals
@@ -348,16 +361,16 @@ class RSTParser(RSTReader):
 
         #
         # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
-        params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]=0")
+        # params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]=0")
 
-        # Remove modulename. and Classname. from class constant
-        params = self.strip_prefixes(params, strip_mod=True, strip_class=True)
 
         for fix in PARAM_FIXES:
-            if len(fix) > 2 and fix[2] != name:
+            if fix.module and fix.module != name:
                 continue
-            if fix[0] in params:
-                params = params.replace(fix[0], fix[1])
+            if fix.is_re:
+                params = re.sub(fix.from_, fix.to, params)
+            else:
+                params = params.replace(fix.from_, fix.to)
 
         # formatting
         # fixme: ... not allowed in .py
