@@ -82,15 +82,16 @@ from stubber.rst import (
     ModuleSourceDict,
     return_type_from_context,
 )
+from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
 
 
 SEPERATOR = "::"
 
 
-
-class FileReadWriter():
+class FileReadWriter:
     """base class for reading rst files"""
+
     def __init__(self):
         self.filename = ""
         # input buffer
@@ -140,7 +141,6 @@ class FileReadWriter():
         """
         return False if s.count("(") != s.count(")") else s.count("{") == s.count("}")
 
-
     def extend_and_balance_line(self) -> str:
         """
         Append the current line + next line in order to try to balance the parentheses
@@ -149,7 +149,11 @@ class FileReadWriter():
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
+        while (
+            not self.is_balanced(newline)
+            and self.line_no >= 0
+            and (self.line_no + append + 1) <= self.max_line
+        ):
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
@@ -167,7 +171,7 @@ class RSTReader(FileReadWriter):
     def __init__(self):
         self.current_module = ""
         self.current_class = ""
-        self.current_function = ""  # function & method        
+        self.current_function = ""  # function & method
         super().__init__()
 
     def read_file(self, filename: Path):
@@ -265,7 +269,7 @@ class RSTReader(FileReadWriter):
 
     @staticmethod
     def add_link_to_docsstr(block):
-        """Add clickable hyperlinks to CPython docpages	"""
+        """Add clickable hyperlinks to CPython docpages"""
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
@@ -307,17 +311,29 @@ class RSTReader(FileReadWriter):
 
 
 class RSTParser(RSTReader):
-    """Parse the RST file and create a ModuleSourceDict
-    
-    methods have side effects
     """
-    target = ".py"  # py/pyi
+    Parse the RST file and create a ModuleSourceDict
+    most methods have side effects
+    """
 
-    def __init__(self,v_tag:str) -> None:
+    target = ".py"  # py/pyi
+    PARAM_RE_FIXES = [
+        Fix(
+            r"\[angle, time=0\]", "[angle], time=0", is_re=True
+        ),  # fix: method:: Servo.angle([angle, time=0])
+        Fix(
+            r"\[speed, time=0\]", "[speed], time=0", is_re=True
+        ),  # fix: .. method:: Servo.speed([speed, time=0])
+        Fix(
+            r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+        ),  # fix: network - AbstractNIC.connect
+    ]
+
+    def __init__(self, v_tag: str) -> None:
         super().__init__()
         self.output_dict: ModuleSourceDict = ModuleSourceDict("")
         self.output_dict.add_import(TYPING_IMPORT)
-        self.return_info: List[Tuple] = [] # development aid only
+        self.return_info: List[Tuple] = []  # development aid only
         self.source_tag = v_tag
         self.source_release = v_tag
 
@@ -339,14 +355,11 @@ class RSTParser(RSTReader):
 
         ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
 
-        # multiple optionals
-        # # .. method:: Servo.angle([angle, time=0])
-        if "[angle, time=0]" in params:
-            params = params.replace("[angle, time=0]", "[angle], time=0")
-        # .. method:: Servo.speed([speed, time=0])
-        elif "[speed, time=0]" in params:
-            params = params.replace("[speed, time=0]", "[speed], time=0")
+        for fix in self.PARAM_RE_FIXES:
+            params = self.apply_fix(fix, params, name)
 
+        # ###########################################################################################################
+        # does not look cool, but works really well
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
         params = params.replace("]]", "")  # Q&D Hack-complex nesting
@@ -357,29 +370,27 @@ class RSTParser(RSTReader):
         # Optional step 2: x: Optional[Any]=None='abc' --> x: Optional[Any]='abc'
         params = re.sub(r": Optional\[Any\]=None\s*=", r": Optional[Any]=", params)
         # Optional step 3: fix ...
-        params = re.sub(r"\.\.\.: Optional\[Any\]=None", r"...: Optional[Any]", params)
-
-        #
-        # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
-        # params = params.replace("block_num, buf, offset", "block_num, buf, offset: Optional[int]=0")
-
+        params = re.sub(r"\.\.\.: Optional\[Any\]=None", r"...", params)
+        # ###########################################################################################################
 
         for fix in PARAM_FIXES:
-            if fix.module and fix.module != name:
-                continue
-            if fix.is_re:
-                params = re.sub(fix.from_, fix.to, params)
-            else:
-                params = params.replace(fix.from_, fix.to)
+            params = self.apply_fix(fix, params, name)
 
-        # formatting
-        # fixme: ... not allowed in .py
+        # # formatting
+        # # fixme: ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args, **kwargs")
             params = params.replace("...", "*args, **kwargs")
 
         return params
 
+    @staticmethod
+    def apply_fix(fix: Fix, params: str, name: str = ""):
+        if fix.module and fix.module != name:
+            return params
+        return (
+            re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
+        )
 
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
@@ -441,7 +452,10 @@ class RSTParser(RSTReader):
                 version = "latest"
             else:
                 version = self.source_tag.replace("_", ".")
-            docstr[0] = docstr[0] + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            docstr[0] = (
+                docstr[0]
+                + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            )
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -462,7 +476,6 @@ class RSTParser(RSTReader):
         self.output_dict.add_comment(mod_comment)
         self.line_no += 1  # advance as we did not read any docstring
 
-
     def parse_function(self):
         log.trace(f"# {self.line.rstrip()}")
         # this_function = self.line.split(SEPERATOR)[-1].strip()
@@ -474,7 +487,9 @@ class RSTParser(RSTReader):
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=this_function, module=self.current_module
+            )
 
             # defaults
             name = params = ""
@@ -583,7 +598,9 @@ class RSTParser(RSTReader):
             params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
+            )
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -638,7 +655,6 @@ class RSTParser(RSTReader):
 
     def parse_name(self, line: Optional[str] = None):
         "get the constant/function/class name from a line with an identifier"
-
         if line:
             return line.split(SEPERATOR)[-1].strip()
         else:
@@ -682,7 +698,9 @@ class RSTParser(RSTReader):
         # deal with documentation wildcards
         for name in names:
 
-            r_type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
+            r_type = return_type_from_context(
+                docstring=docstr, signature=name, module=self.current_module, literal=True
+            )
             if r_type in ["None"]:  # None does not make sense
                 r_type = "Any"  # perhaps default to Int ?
             name = self.strip_prefixes(name)
@@ -700,7 +718,6 @@ class RSTParser(RSTReader):
                 self.parse_current_module()
             elif rst_hint == "function":
                 self.parse_function()
-
             elif rst_hint == "class":
                 self.parse_class()
             elif rst_hint in ["method", "staticmethod", "classmethod"]:
@@ -709,13 +726,11 @@ class RSTParser(RSTReader):
                 self.parse_exception()
             elif rst_hint == "data":
                 self.parse_data()
-
             elif rst_hint == "toctree":
                 self.parse_toc()
-                # not this will be the end of this file processing.
-
+                # Note: this will end the processing of this file.
             elif len(rst_hint) > 0:
-                # something new / not yet parsed
+                # something new / not yet parsed/understood
                 self.line_no += 1
                 log.trace(f"# {line.rstrip()}")
             else:
@@ -725,9 +740,11 @@ class RSTParser(RSTReader):
 
 #################################################################################################################
 class RSTWriter(RSTParser):
-
+    """ 
+    Reads, parses and writes
+    """
     def __init__(self, v_tag="v1.xx"):
-        super().__init__( v_tag=v_tag)
+        super().__init__(v_tag=v_tag)
 
     def write_file(self, filename: Path) -> bool:
         self.prepare_output()
@@ -741,5 +758,3 @@ class RSTWriter(RSTParser):
             for name in ("self", "cls"):
                 if f"({name}, ) ->" in self.output[i]:
                     self.output[i] = self.output[i].replace(f"({name}, ) ->", f"({name}) ->")
-
-
