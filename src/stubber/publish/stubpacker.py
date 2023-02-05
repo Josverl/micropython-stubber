@@ -666,8 +666,9 @@ class StubPackage:
         production: bool,  # PyPI or Test-PyPi
         build=False,  #
         force=False,  # publish even if no changes
+        dry_run=False,  # do not actually publish
         clean: bool = False,  # clean up afterwards
-    ) -> bool:  # sourcery skip: default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches
+    ) -> bool:  # sourcery skip: assign-if-exp, default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches, swap-if-expression
         """
         Publish a package to PyPi
         look up the previous package version in the dabase, and only publish if there are changes to the package
@@ -692,7 +693,11 @@ class StubPackage:
                 self.status["result"] = "Published to GitHub"
             else:
                 self.update_hashes()  # resets is_changed to False
-                pub_ok = self.poetry_publish(production=production)
+                if not dry_run:
+                    pub_ok = self.poetry_publish(production=production)
+                else:
+                    log.warning(f"{self.package_name}: Dry run, not publishing to {'' if production else 'Test-'}PyPi" )
+                    pub_ok = True
                 if not pub_ok:
                     log.warning(f"{self.package_name}: Publish failed for {self.pkg_version}")
                     self.status["error"] = "Publish failed"
