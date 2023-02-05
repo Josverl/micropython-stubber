@@ -11,16 +11,20 @@ try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore
+
+from typing import NewType
+
 import tomli_w
 from loguru import logger as log
 from packaging.version import Version, parse
+from pysondb import PysonDB
+
 from stubber.publish.bump import bump_postrelease
 from stubber.publish.enums import StubSource
 from stubber.publish.package import StubSource
+from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-from stubber.publish.pypi import Version, get_pypi_versions
-from pysondb import PysonDB
 
 # TODO: Get git tag and store in DB for reference
 # import stubber.basicgit as git
@@ -30,7 +34,6 @@ from pysondb import PysonDB
 
 #  git -C .\all-stubs\ log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
 
-from typing import NewType
 
 Status = NewType("Status", Dict[str, Union[str, None]])
 
@@ -241,8 +244,7 @@ class StubPackage:
         for (name, path) in json_data["stub_sources"]:
             if path.startswith("stubs/"):
                 path = path.replace("stubs/", "")
-            # force all source paths to lowercase to avoid issues with case sensitive file systems
-            self.stub_sources.append((name, Path(path.lower())))
+            self.stub_sources.append((name, Path(path)))
 
     def update_package_files(self) -> None:
         """
