@@ -1,4 +1,5 @@
-"Build stub packages - is a Light version of Publish command"
+"""Build stub packages - is a Light version of Publish command"""
+
 from typing import List, Union
 
 import click
@@ -83,5 +84,5 @@ def cli_build(
         clean=clean,
     )
     # log the number of results with no error
-    log.info(f"Build {len([r for r in results if not r['error']])} stubs")
+    log.info(f"Built {len([r for r in results if not r['error']])} stubs")
     print(tabulate(results, headers="keys"))
