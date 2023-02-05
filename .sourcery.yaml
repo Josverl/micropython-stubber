@@ -2,12 +2,12 @@ rule_settings:
   enable: 
   - default
   - snake-case-functions
-  - require-return-annotation
   - docstrings-for-modules
-  # - docstrings-for-functions
   - require-parameter-annotation
   - no-wildcard-imports
   - no-long-functions
+  # - require-return-annotation  # Pylance does infer this quite well already
+  # - docstrings-for-functions
 
   disable:
   - use-contextlib-suppress
@@ -34,6 +34,7 @@ ignore:
   - .git/
   - .github/
   - src/stubber/board
+  - src/stubber/minified
   
 rules:
 - id: no-wildcard-imports

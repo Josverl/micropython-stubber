@@ -1,3 +1,5 @@
+"""Create a stub-only package for a specific version of micropython"""
+
 import hashlib
 import json
 import shutil
@@ -132,7 +134,7 @@ class StubPackage:
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
     @pkg_version.setter
-    def pkg_version(self, version: str):
+    def pkg_version(self, version: str)->None:
         # sourcery skip: remove-unnecessary-cast
         "set the version of the package"
         if not isinstance(version, str):  # type: ignore
@@ -159,7 +161,7 @@ class StubPackage:
         return pyproject
 
     @pyproject.setter
-    def pyproject(self, pyproject):
+    def pyproject(self, pyproject:Dict)->None:
         # check if the result is a valid toml file
 
         try:
@@ -175,7 +177,7 @@ class StubPackage:
 
     # -----------------------------------------------
 
-    def to_dict(self):
+    def to_dict(self)->dict:
         """return the package as a dict to store in the jsondb
 
         need to simplify some of the Objects to allow serialisation to json
@@ -196,7 +198,7 @@ class StubPackage:
             "stub_hash": self.stub_hash,
         }
 
-    def from_dict(self, json_data):
+    def from_dict(self, json_data:Dict)->None:
         """load the package from a dict (from the jsondb)"""
         self.package_name = json_data["name"]
         # self.package_path = Path(json_data["path"])
@@ -218,14 +220,12 @@ class StubPackage:
                 path = path.replace("stubs/", "")
             self.stub_sources.append((name, Path(path)))
 
-    def update_package_files(self):
+    def update_package_files(self) -> None:
         """
         Update the stub-only package for a specific version of micropython
          - cleans the package folder
          - copies the stubs from the list of stubs.
          - creates/updates the readme and the license file
-
-
         """
         # create the package folder
         self.package_path.mkdir(parents=True, exist_ok=True)
@@ -235,7 +235,7 @@ class StubPackage:
         self.create_readme()
         self.create_license()
 
-    def copy_stubs(self):
+    def copy_stubs(self) -> None:
         """
         Copy files from all listed stub folders to the package folder
         the order of the stub folders is relevant as "last copy wins"
@@ -243,7 +243,6 @@ class StubPackage:
          - 1 - Copy all firmware stubs/merged to the package folder
          - 2 - copy the remaining stubs to the package folder
          - 3 - remove *.py files from the package folder
-
         """
         # First check if all stub source folders exist
         for n in range(len(self.stub_sources)):
@@ -292,7 +291,7 @@ class StubPackage:
             if f.with_suffix(".pyi").exists():
                 f.unlink()
 
-    def create_readme(self):
+    def create_readme(self) -> None:
         """
         Create a readme file for the package
          - based on the template readme file
@@ -348,7 +347,7 @@ class StubPackage:
             except Exception:
                 pass
 
-    def create_license(self):
+    def create_license(self) -> None:
         """
         Create a license file for the package
          - copied from the template license file
@@ -357,9 +356,7 @@ class StubPackage:
         # option : append other license files
         shutil.copy(CONFIG.template_path / "LICENSE.md", self.package_path)
 
-    def create_update_pyproject_toml(
-        self,
-    ):
+    def create_update_pyproject_toml(self)  -> None:
         """
         create or update/overwrite a `pyproject.toml` file by combining a template file
         with the given parameters.
@@ -393,7 +390,7 @@ class StubPackage:
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 
-    def update_included_stubs(self):
+    def update_included_stubs(self) -> None:
         "Add the stub files to the pyproject.toml file"
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
@@ -406,7 +403,7 @@ class StubPackage:
 
         # OK
 
-    def clean(self):
+    def clean(self) -> None:
         """
         Remove the stub files from the package folder
 
@@ -421,7 +418,7 @@ class StubPackage:
             for f in (self.package_path).rglob(wc):
                 f.unlink()
 
-    def create_hash(self, include_md=True) -> str:
+    def create_hash(self, include_md:bool=True) -> str:
         """
         Create a SHA1 hash of all files in the package, excluding the pyproject.toml file itself.
         the hash is based on the content of the .py/.pyi and .md files in the package.
@@ -452,8 +449,8 @@ class StubPackage:
                         break
         return pkg_hash.hexdigest()
 
-    def update_hashes(self):
-        "Update the pachage hashes"
+    def update_hashes(self) -> None:
+        """Update the pachage hashes"""
         self.hash = self.create_hash()
         self.stub_hash = self.create_hash(include_md=False)
 
@@ -514,7 +511,7 @@ class StubPackage:
             return False
         return True
 
-    def write_package_json(self):
+    def write_package_json(self) -> None:
         # write the json to a file
         with open(self.package_path / "package.json", "w") as f:
             json.dump(self.to_dict(), f, indent=4)
@@ -529,7 +526,7 @@ class StubPackage:
         """build the package by running `poetry build`"""
         return self.run_poetry(["build", "-vvv"])
 
-    def publish(self, production=False) -> bool:
+    def publish(self, production:bool=False) -> bool:
         if not self._publish:
             log.warning(f"Publishing is disabled for {self.package_name}")
             return False
