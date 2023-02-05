@@ -1,9 +1,21 @@
 rule_settings:
-  enable: [default]
+  enable: 
+  - default
+  - snake-case-functions
+  - require-return-annotation
+  - docstrings-for-modules
+  # - docstrings-for-functions
+  - require-parameter-annotation
+  - no-wildcard-imports
+  - no-long-functions
+
   disable:
   - use-contextlib-suppress
   - use-fstring-for-formatting
   - use-fstring-for-concatenation
+  - do-not-use-staticmethod
+  - name-type-suffix
+
   python_version: '3.8'
 
   rule_types:
@@ -21,6 +33,7 @@ ignore:
   - repos/
   - .git/
   - .github/
+  - src/stubber/board
   
 rules:
 - id: no-wildcard-imports

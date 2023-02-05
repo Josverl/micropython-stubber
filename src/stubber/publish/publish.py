@@ -7,8 +7,6 @@ NOTE: stubs and publish paths can be located in different locations and reposito
 +--stubs                                                               - [config.stubs_path]
 |  +--<any stub folders in repo>
 |  +--micropython-v1_18-esp32
-
-
 +--publish                                                             - [config.publish_path]
 |  +--package_data.jsondb
 |  +--package_data_test.jsondb
@@ -30,17 +28,15 @@ NOTE: stubs and publish paths can be located in different locations and reposito
 """
 
 import shutil
-from itertools import chain
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from loguru import logger as log
 from pysondb import PysonDB
 
 from stubber.publish.bump import bump_postrelease
-from stubber.publish.candidates import (docstub_candidates,
-                                        firmware_candidates, frozen_candidates)
+from stubber.publish.candidates import firmware_candidates, frozen_candidates
 from stubber.publish.database import get_database
-from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
+from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import (StubSource, create_package,
                                      get_package_info, package_name)
 from stubber.publish.pypi import Version, get_pypy_versions
@@ -57,14 +53,14 @@ def publish(
     db: PysonDB,
     pkg_type,
     version: str,
-    family="micropython",
-    production,  # PyPI or Test-PyPi
-    dryrun=False,  # don't publish , dont save to the database
+    family:str="micropython",
+    production:bool,  # PyPI or Test-PyPi
+    dryrun=False,  # don't publish , don't save to the database
     force=False,  # publish even if no changes
-    clean: bool = False,  # clean up afterards
+    clean: bool = False,  # clean up afterwards
     port: str = "",
     board: str = "",
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:    # sourcery skip: default-mutable-arg, require-parameter-annotation
     """
     Publish a package to PyPi
     look up the previous package version in the dabase, and only publish if there are changes to the package
@@ -78,13 +74,12 @@ def publish(
     status: Dict[str, Any] = {"result": "-", "name": pkg_name, "version": version, "error": None}
     log.debug("=" * 40)
 
-    package_info = get_package_info(
+    if package_info := get_package_info(
         db,
         CONFIG.publish_path,
         pkg_name=pkg_name,
         mpy_version=version,
-    )
-    if package_info:
+        ):
         # create package from the information retrieved from the database
         package = StubPackage(pkg_name, version=version, json_data=package_info)
 
@@ -131,9 +126,7 @@ def publish(
         return status
 
     # If there are changes to the package, then publish it
-    if not (package.is_changed() or force):
-        log.debug(f"No changes to package : {package.package_name} {package.pkg_version}")
-    else:
+    if package.is_changed():
         if not force:  # pragma: no cover
             log.info(f"Found changes to package : {package.package_name} {package.pkg_version}")
             log.debug(f"Old hash {package.hash} != New hash {package.create_hash()}")
@@ -146,11 +139,7 @@ def publish(
             new_ver = str(bump_postrelease(Version("1.20"), rc=744))  # FIXME: hardcoded version
             package.pkg_version = new_ver
         else:
-            base = Version(package.pkg_version)
-            pypi_versions = get_pypy_versions(package.package_name, production=production, base=base)
-            if pypi_versions:
-                package.pkg_version = str(pypi_versions[-1])
-            new_ver = package.bump()
+            new_ver = next_package_version(package, production)
         # to get the next version
         log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
 
@@ -163,47 +152,103 @@ def publish(
         log.trace(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
         result = package.build()
         if not result:
-            log.warning(f"{pkg_name}: skipping as build failed")
-            status["error"] = "Build failed"
-            return status
-
+            return failed_build(pkg_name, status)
         if dryrun:  # pragma: no cover
             log.warning("Dryrun: Updated package is NOT published.")
             status["result"] = "DryRun successful"
+        elif package.mpy_version == "latest":
+            log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
         else:
-            if package.mpy_version == "latest":
-                log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
-            else:
-                result = package.publish(production=production)
-                if not result:
-                    log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
-                    status["error"] = "Publish failed"
-                    return status
-                status["result"] = "Published"
-                db.add(package.to_dict())
-                db.commit()
+            result = package.publish(production=production)
+            if not result:
+                return failed_publish(pkg_name, package, status)
+            status["result"] = "Published"
+            db.add(package.to_dict())
+            db.commit()
 
+    elif force:
+        # if not dryrun:
+        # only bump version if we are going to publish
+        # get last published version.postXXX from PyPI and update version if different
+        # try to get version from PyPi and increase past that
+        old_ver = package.pkg_version
+        if package.mpy_version == "latest":
+            new_ver = str(bump_postrelease(Version("1.20"), rc=744))  # FIXME: hardcoded version
+            package.pkg_version = new_ver
+        else:
+            new_ver = next_package_version(package, production)
+        # to get the next version
+        log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
+
+        # Update hashes
+        package.update_hashes()
+        package.write_package_json()
+
+        status["version"] = package.pkg_version
+
+        log.trace(f"New hash: {package.package_name} {package.pkg_version} {package.hash}")
+        result = package.build()
+        if not result:
+            return failed_build(pkg_name, status)
+        if dryrun:  # pragma: no cover
+            log.warning("Dryrun: Updated package is NOT published.")
+            status["result"] = "DryRun successful"
+        elif package.mpy_version == "latest":
+            log.warning("version: `latest` package will only be avaialbe on GIT, and not  published to PyPi.")
+        else:
+            result = package.publish(production=production)
+            if not result:
+                return failed_publish(pkg_name, package, status)
+            status["result"] = "Published"
+            db.add(package.to_dict())
+            db.commit()
+
+    else:
+        log.debug(f"No changes to package : {package.package_name} {package.pkg_version}")
     if clean:
         package.clean()
     return status
 
 
+def failed_publish(pkg_name:str, package, status:dict) -> dict:
+    """Publish failed, so return the status."""
+    log.warning(f"{pkg_name}: Publish failed for {package.pkg_version}")
+    status["error"] = "Publish failed"
+    return status
+
+
+def failed_build(pkg_name:str, status:dict) -> dict:
+    """Build failed, so return the status."""
+    log.warning(f"{pkg_name}: skipping as build failed")
+    status["error"] = "Build failed"
+    return status
+
+def next_package_version(package:StubPackage, prod:bool=False)->str:
+    """Get the next version for the package."""
+    base = Version(package.pkg_version)
+    if pypi_versions := get_pypy_versions(package.package_name, production=prod, base=base):
+        package.pkg_version = str(pypi_versions[-1])
+    return package.bump()
+
+
 def publish_one(
-    family="micropython",
+    family:str="micropython",
     versions: Union[str, List[str]] = "v1.18",
     ports: Union[str, List[str]] = "auto",
     boards: Union[str, List[str]] = "GENERIC",
     frozen: bool = False,
-    production=False,
+    production:bool=False,
     dryrun: bool = False,
     clean: bool = False,
     force: bool = False,
-):
-    "Publish a bunch of stub packages of the same version"
+) -> Optional[Dict[str, Any]]:
+    """
+    Publish a bunch of stub packages of the same version
+    """
     db = get_database(CONFIG.publish_path, production=production)
     l = list(frozen_candidates(family=family, versions=versions, ports=ports, boards=boards))
     result = None
-    if len(l) > 0:
+    if l:
         todo = l[0]
         result = publish(
             db=db,
@@ -217,17 +262,19 @@ def publish_one(
 
 
 def publish_multiple(
-    family="micropython",
+    family:str="micropython",
     versions: List[str] = ["v1.18", "v1.19.1"],
     ports: List[str] = ["auto"],
     boards: List[str] = ["GENERIC"],
     frozen: bool = False,
-    production=False,
+    production:bool=False,
     dryrun: bool = False,
     clean: bool = False,
     force: bool = False,
-):
-    "Publish a bunch of stub packages"
+) -> List[Dict[str, Any]]:  # sourcery skip: default-mutable-arg
+    """
+    Publish a bunch of stub packages
+    """
     db = get_database(CONFIG.publish_path, production=production)
 
     worklist = []
