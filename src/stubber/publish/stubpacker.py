@@ -292,7 +292,7 @@ class StubPackage:
                 stub_type, fw_path = self.stub_sources[n]
 
                 try:
-                    log.trace(f"Copying {stub_type} from {fw_path}")
+                    log.debug(f"Copying {stub_type} from {fw_path}")
                     shutil.copytree(
                         CONFIG.stub_path / fw_path,
                         self.package_path,
@@ -482,7 +482,7 @@ class StubPackage:
         """
         current = self.calculate_hash(include_md=include_md)
         stored = self.hash if include_md else self.stub_hash
-        log.warning(f"changed: {self.hash != current} : Stored {stored} Current: {current}")
+        log.trace(f"changed = {self.hash != current} | Stored: {stored} | Current: {current}")
         return stored != current
 
     def bump(self, *, rc: int = 0) -> str:
@@ -509,7 +509,7 @@ class StubPackage:
             return False
         # todo: call poetry directly to improve error handling
         try:
-            log.debug(f"poetry {parameters} starting")
+            log.trace(f"poetry {parameters} starting")
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
@@ -627,12 +627,7 @@ class StubPackage:
             - update package files
             - build the wheels and sdist
         """
-        log.debug("=" * 40)
         log.info(f"Build: {self.package_path.name}")
-        self.update_package_files()
-        # toml 
-        # readme 
-        # license
         
         ok = self.update_package()
         self.status["version"] = self.pkg_version
@@ -641,14 +636,18 @@ class StubPackage:
             self.status["error"] = "Build failed"
             return False
         # If there are changes to the package, then publish it
+        if self.is_changed() :
+            log.info(f"Found changes to package sources: {self.package_name} {self.pkg_version} ")
+            log.trace(f"Old hash {self.hash} != New hash {self.calculate_hash()}")
+        elif force:
+            log.info(f"Force build: {self.package_name} {self.pkg_version} ")
+
         if self.is_changed() or force:
             #  Build the distribution files
-            log.info(f"Found changes to package sources: {self.package_name} {self.pkg_version} ")
-            log.debug(f"Old hash {self.hash} != New hash {self.calculate_hash()}")
             old_ver = self.pkg_version
             self.status["version"] = self.update_pkg_version(production)
             # to get the next version
-            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {production}")
+            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}")
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
             if self.poetry_build():
@@ -683,7 +682,7 @@ class StubPackage:
         """
         log.info(f"Publish: {self.package_path.name}")
         if self.is_changed() or build or force:
-            self.build(production=production, force=True)
+            self.build(production=production, force=force)
 
         self.update_pkg_version(production=production)
         # Publish the package to PyPi, Test-PyPi or Github
@@ -704,12 +703,15 @@ class StubPackage:
                     return False
                 self.status["result"] = "Published to PyPi" if production else "Published to Test-PyPi"
                 self.update_hashes()
-                # get the package state and add it to the database
-                db.add(self.to_dict())
-                db.commit()
+                if dry_run:
+                    log.warning(f"{self.package_name}: Dry run, not saving to database" )
+                else:
+                    # get the package state and add it to the database
+                    db.add(self.to_dict())
+                    db.commit()
                 return True
         else:
-            log.debug(f"No changes to package : {self.package_name} {self.pkg_version}")
+            log.info(f"No changes to package : {self.package_name} {self.pkg_version}")
 
         if clean:
             self.clean()
