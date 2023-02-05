@@ -377,7 +377,10 @@ PARAM_FIXES = [
         "bank, mode, fifo, params, *, rtr=None, extframe=False",
     ),
     # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
-    Fix("block_num, buf, offset", "block_num, buf, offset: Optional[int] = 0")
+    Fix(r"\s*block_num, buf, offset\s*\)", "block_num, buf, offset: Optional[int] = 0)",is_re=True),
+
+    # # This is a cleanup something that went wrong before 
+    # Fix("**kwargs: Optional[Any]","**kwargs")
 ]
 
 # List of classes and their parent classes that should be added to the class definition

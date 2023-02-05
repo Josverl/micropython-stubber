@@ -179,10 +179,24 @@ def test_rst_parse_class_10(line: str):
         ),
         ("lambda)", "lambda_fn)"),
         ("(block_device or path)", "(block_device_or_path)"),
-        # TODO - check if this is correct/needed
         # network - AbstractNIC.connect
-        ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"),
-        # ("()", "()"),
+        # ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"), # old - incorrect
+        ("([service_id, key=None, *, ...])", "(service_id: Optional[Any]=None, key: Optional[Any]=None, *args, **kwargs)"), # New
+
+        ("(block_num, buf, offset)","(block_num, buf, offset: Optional[int] = 0)"),
+        ("(key, mode[, IV])","(key, mode, IV: Optional[Any]=None)"),
+
+        ("([(ip, subnet, gateway, dns)])","(configtuple: Optional[Any]=None)"),
+
+        # a different notations of optionals
+        ("(id1, [foo], [bar])","(id1, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
+        ("(id2, [foo] [,bar])","(id2, foo: Optional[Any]=None ,bar: Optional[Any]=None)"),
+        # ("(id3, [foo, bar])","(id3, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
+
+        # with assignments
+        ("(id4, foo=-1, [bar])","(id4, foo=-1, bar: Optional[Any]=None)"),
+        # ("(id5, foo=-1, [bar=2])","(id5, foo=-1, bar: Optional[Any]=2)"),
+
     ],
 )
 def test_fix_param(param_in, expected):
