@@ -227,3 +227,26 @@ def pull(repo: Union[Path, str], branch="main") -> bool:
         log.error("error durign pull", result)
         return False
     return result.returncode == 0
+
+
+def get_git_describe(folder:Optional[str]=None):
+    """"based on MicroPython makeversionhdr
+    returns : current git tag, commits ,commit hash : "v1.19.1-841-g3446"
+    """
+    # Note: git describe doesn't work if no tag is available
+    try:
+        git_describe = subprocess.check_output(
+            ["git", "describe", "--tags", "--dirty", "--always", "--match", "v[1-9].*"],
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            cwd=folder,
+        ).strip()
+    except subprocess.CalledProcessError as er:
+        if er.returncode == 128:
+            # git exit code of 128 means no repository found
+            return None
+        git_describe = ""
+    except OSError:
+        return None
+    # format 
+    return git_describe
