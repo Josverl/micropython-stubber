@@ -12,7 +12,7 @@ from stubber.freeze.freeze_folder import freeze_folders
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 # Module Under Test
 from stubber.freeze.get_frozen import freeze_any, get_manifests
-from stubber.publish.package import GENERIC_L
+from stubber.publish.package import GENERIC_L, GENERIC_U
 from stubber.utils.repos import switch
 
 # pylint: disable=wrong-import-position,import-error
@@ -75,8 +75,7 @@ def test_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrepo_mi
     manifest = mpy_folder / "ports/esp32/boards/manifest.py"
     freeze_one_manifest_2(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
 
-    assert (tmp_path / "esp32" / GENERIC_L / "uasyncio/task.py").exists()
-    # check if the task.py is included
+    assert (tmp_path / "esp32" / GENERIC_U / "uasyncio/task.py").exists(), "task.py must be included in uasyncio"
 
 
 #######################################################################################################################
