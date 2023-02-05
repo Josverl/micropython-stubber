@@ -101,24 +101,28 @@ def publish(
         if clean:
             package.clean()
         return status
-    
-    if package.is_changed() or force:
+    status = publish_package(db, package, production, force, pkg_name, status)
+    if clean:
+        package.clean()
+    return status
+
+def publish_package(db:PysonDB ,package:StubPackage, production:bool,force:bool, pkg_name:str, status:Status) -> Status:
+    """Publish the package to PyPi, Test-PyPi or Github"""
+    if package.is_changed():
         if force:
-            log.warning("Force: Update of package")
-            old_ver = package.pkg_version
-            if package.mpy_version == "latest":
-                new_ver = prerelease_package_version(package, production)
-                package.pkg_version = new_ver
-            else:
-                new_ver = next_package_version(package, production)
-            # to get the next version
-            log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
-            # Update hashes
-            package.update_hashes()
-            package.write_package_json()
-
-            status["version"] = package.pkg_version
-
+            force_package_update(package, production, pkg_name, status)
+        if package.mpy_version == "latest":
+            log.warning("version: `latest` package will only be available on Github, and not published to PyPi.")
+            status["result"] = "Published to GitHub"
+        else:
+            build_ok = package.publish(production=production)
+            if not build_ok:
+                return failed_publish(pkg_name, package, status)
+            status["result"] = "Published to PyPi" if production else "Published to Test-PyPi"
+            db.add(package.to_dict())
+            db.commit()
+    elif force:
+        force_package_update(package, production, pkg_name, status)
         if package.mpy_version == "latest":
             log.warning("version: `latest` package will only be available on Github, and not published to PyPi.")
             status["result"] = "Published to GitHub"
@@ -131,9 +135,23 @@ def publish(
             db.commit()
     else:
         log.debug(f"No changes to package : {package.package_name} {package.pkg_version}")
-    if clean:
-        package.clean()
     return status
+
+def force_package_update(package:StubPackage, production:bool, pkg_name:str, status:Status) -> None:
+    """Force an update of the package version and hashes"""	
+    log.warning("Force: Update of package")
+    old_ver = package.pkg_version
+    if package.mpy_version == "latest":
+        new_ver = prerelease_package_version(package, production)
+        package.pkg_version = new_ver
+    else:
+        new_ver = next_package_version(package, production)
+    # to get the next version
+    log.debug(f"{pkg_name}: bump version for {old_ver} to {new_ver} {production}")
+    # Update hashes
+    package.update_hashes()
+    package.write_package_json()
+    status["version"] = package.pkg_version
 
 def build_dist(production:bool, force:bool, pkg_name:str, status:Status, package: StubPackage)-> bool:
     if not force:  # pragma: no cover
