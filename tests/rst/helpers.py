@@ -2,7 +2,7 @@
 from typing import List, Union
 
 # SOT
-from stubber.rst.reader import RSTReader
+from stubber.rst.reader import RSTWriter
 
 ###################################################################################################
 # Helpers
@@ -26,7 +26,7 @@ def read_stub(folder, stubname):
 ####################################################################################################
 
 
-def load_rst(r: RSTReader, text: Union[str, List[str]]):
+def load_rst(r: RSTWriter, text: Union[str, List[str]]):
     "load a string or list of strings"
     if isinstance(text, List):
         r.rst_text = text

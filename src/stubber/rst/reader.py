@@ -64,8 +64,6 @@ Note: black on python 3.7 does not like some function defs
 """
 
 
-import json
-import os
 import re
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -87,45 +85,44 @@ from stubber.rst import (
 from stubber.utils.config import CONFIG
 
 
-NEW_OUTPUT = True
 SEPERATOR = "::"
 
 
-def is_balanced(s: str) -> bool:
-    """
-    Check if a string has balanced parentheses
-    """
-    return False if s.count("(") != s.count(")") else s.count("{") == s.count("}")
 
-
-class RSTReader:
-    verbose = False
-    gather_docs = False  # used only during Development
-    target = ".py"  # py/pyi
-
-    def __init__(self, v_tag="v1.xx"):
-        self.line_no: int = 0  # current Linenumber used during parsing.
+class FileReadWriter():
+    """base class for reading rst files"""
+    def __init__(self):
         self.filename = ""
-
-        self.current_module = ""
-        self.current_class = ""
-        self.current_function = ""  # function & method
-
         # input buffer
         self.rst_text: List[str] = []
         self.max_line = 0
+        self.line_no: int = 0  # current Linenumber used during parsing.
+        self.last_line = ""
 
         # Output buffer
         self.output: List[str] = []
-        self.output_dict: ModuleSourceDict = ModuleSourceDict("")
-        self.output_dict.add_import(TYPING_IMPORT)
 
-        self.source_tag = v_tag
-        self.source_release = v_tag
+    def read_file(self, filename: Path):
+        log.trace(f"Reading : {filename}")
+        # ignore Unicode decoding issues
+        with open(filename, errors="ignore", encoding="utf8") as file:
+            self.rst_text = file.readlines()
+        # Replace incorrect defenitions in .rst files with better ones
+        for FIX in RST_DOC_FIXES:
+            self.rst_text = [line.replace(FIX[0], FIX[1]) for line in self.rst_text]
 
-        # development aids only
-        self.return_info: List[Tuple] = []
-        self.last_line = ""
+        self.filename = filename.as_posix()  # use fwd slashes in origin
+        self.max_line = len(self.rst_text) - 1
+
+    def write_file(self, filename: Path) -> bool:
+        try:
+            log.debug(f" - Writing to: {filename}")
+            with open(filename, mode="w", encoding="utf8") as file:
+                file.writelines(self.output)
+        except OSError as e:
+            log.error(e)
+            return False
+        return True
 
     @property
     def line(self) -> str:
@@ -136,6 +133,14 @@ class RSTReader:
             self.last_line = ""
         return self.last_line
 
+    @staticmethod
+    def is_balanced(s: str) -> bool:
+        """
+        Check if a string has balanced parentheses
+        """
+        return False if s.count("(") != s.count(")") else s.count("{") == s.count("}")
+
+
     def extend_and_balance_line(self) -> str:
         """
         Append the current line + next line in order to try to balance the parentheses
@@ -144,18 +149,30 @@ class RSTReader:
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while not is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
+        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
         # only update line if things balanced out correctly
-        if is_balanced(newline):
+        if self.is_balanced(newline):
             self.rst_text[self.line_no] = newline
             for _ in range(append):
                 self.rst_text.pop(self.line_no + 1)
                 self.max_line -= 1
         # reprocess line
         return self.line
+
+
+class RSTReader(FileReadWriter):
+    def __init__(self):
+        self.current_module = ""
+        self.current_class = ""
+        self.current_function = ""  # function & method        
+        super().__init__()
+
+    def read_file(self, filename: Path):
+        super().read_file(filename)
+        self.current_module = filename.stem  # just to be sure
 
     @property
     def module_names(self) -> List[str]:
@@ -176,73 +193,20 @@ class RSTReader:
                 namelist += [c_mod, c_mod[1:]]
         return namelist
 
-    def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
-        "Remove the modulename. and or the classname. from the begining of a name"
-        prefixes = self.module_names if strip_mod else []
-        if strip_class and self.current_class != "":
-            prefixes += [self.current_class]
-        for prefix in prefixes:
-            if len(prefix) > 1 and prefix + "." in name:
-                name = name.replace(prefix + ".", "")
-        return name
-
-    def leave_class(self):
-        if self.current_class != "":
-            self.current_class = ""
-
-    def read_file(self, filename: Path):
-        log.trace(f"Reading : {filename}")
-        # ignore Unicode decoding issues
-        with open(filename, errors="ignore", encoding="utf8") as file:
-            self.rst_text = file.readlines()
-
-        # Replace incorrect defenitions in .rst files with better ones
-        for FIX in RST_DOC_FIXES:
-            self.rst_text = [line.replace(FIX[0], FIX[1]) for line in self.rst_text]
-
-        self.filename = filename.as_posix()  # use fwd slashes in origin
-        self.max_line = len(self.rst_text) - 1
-        self.current_module = filename.stem  # just to be sure
-
-    def prepare_output(self):
-        "clean up some trailing spaces and commas"
-        if NEW_OUTPUT:
-            lines = str(self.output_dict).splitlines(keepends=True)
-            self.output = lines
-        for i in range(len(self.output)):
-            for name in ("self", "cls"):
-                if f"({name}, ) ->" in self.output[i]:
-                    self.output[i] = self.output[i].replace(f"({name}, ) ->", f"({name}) ->")
-
-    def write_file(self, filename: Path) -> bool:
-        self.prepare_output()
-        try:
-            log.debug(f" - Writing to: {filename}")
-            with open(filename, mode="w", encoding="utf8") as file:
-                file.writelines(self.output)
-        except OSError as e:
-            log.error(e)
-            return False
-        if self.gather_docs:
-            log.debug(f" - Writing to: {filename.with_suffix('json')}")
-            with open(filename.with_suffix(".json"), mode="w", encoding="utf8") as file:
-                json.dump(self.return_info, file, ensure_ascii=False, indent=4)
-            self.return_info = []
-
-        return True
-
+    @property
     def at_anchor(self) -> bool:
         "Stop at anchor ( however .. note: should be added)"
         _l = self.rst_text[self.line_no].lstrip()
         return _l.startswith("..") and not _l.startswith(".. note:")
 
+    @property
     def at_heading(self) -> bool:
         "stop at heading"
         _l = self.rst_text[min(self.line_no + 1, self.max_line - 1)]
         # Heading  ---, ==, ~~~
         return _l.startswith("--") or _l.startswith("==") or _l.startswith("~~")
 
-    def parse_docstring(self) -> List[str]:
+    def read_docstring(self) -> List[str]:
         """Read a textblock that will be used as a docstring, or used to process a toc tree
         The textblock is terminated at the following RST line structures/tags
             .. <anchor>
@@ -260,8 +224,8 @@ class RSTReader:
         try:
             while (
                 self.line_no < len(self.rst_text)
-                and not self.at_anchor()  # stop at next anchor ( however .. note: should be added)
-                and not self.at_heading()  # stop at next heading
+                and not self.at_anchor  # stop at next anchor ( however .. note: should be added)
+                and not self.at_heading  # stop at next heading
             ):
                 line = self.rst_text[self.line_no]
                 block.append(line.rstrip())
@@ -316,6 +280,41 @@ class RSTReader:
             block[i] = _l
         return block
 
+    def get_rst_hint(self):
+        "parse the '.. <rst hint>:: ' from the current line"
+        m = re.search(r"\.\.\s?(\w+)\s?::\s?", self.line)
+        return m[1] if m else ""
+
+    def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
+        "Remove the modulename. and or the classname. from the begining of a name"
+        prefixes = self.module_names if strip_mod else []
+        if strip_class and self.current_class != "":
+            prefixes += [self.current_class]
+        for prefix in prefixes:
+            if len(prefix) > 1 and prefix + "." in name:
+                name = name.replace(prefix + ".", "")
+        return name
+
+
+class RSTParser(RSTReader):
+    """Parse the RST file and create a ModuleSourceDict
+    
+    methods have side effects
+    """
+    target = ".py"  # py/pyi
+
+    def __init__(self,v_tag:str) -> None:
+        super().__init__()
+        self.output_dict: ModuleSourceDict = ModuleSourceDict("")
+        self.output_dict.add_import(TYPING_IMPORT)
+        self.return_info: List[Tuple] = [] # development aid only
+        self.source_tag = v_tag
+        self.source_release = v_tag
+
+    def leave_class(self):
+        if self.current_class != "":
+            self.current_class = ""
+
     def fix_parameters(self, params: str, name: str = "") -> str:
         """Patch / correct the documentation parameter notation to a supported format that works for linting.
         - name is the name of the function or method or Class
@@ -368,6 +367,7 @@ class RSTReader:
 
         return params
 
+
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
         self.leave_class()
@@ -398,7 +398,7 @@ class RSTReader:
         "process table of content with additional rst files, and add / include them in the current module"
         log.trace(f"# {self.line.rstrip()}")
         self.line_no += 1  # skip one line
-        toctree = self.parse_docstring()
+        toctree = self.read_docstring()
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
         # Now parse all files mentioned in the toc
@@ -419,7 +419,7 @@ class RSTReader:
         self.current_module = module_name
         self.current_function = self.current_class = ""
         # get module docstring
-        docstr = self.parse_docstring()
+        docstr = self.read_docstring()
 
         if len(docstr) > 0:
             # Add link to online documentation
@@ -445,12 +445,10 @@ class RSTReader:
         self.current_module = module_name
         self.current_function = self.current_class = ""
         log.debug(mod_comment)
-        if NEW_OUTPUT:  # new output
-            self.output_dict.name = module_name
-            self.output_dict.add_comment(mod_comment)
-
+        self.output_dict.name = module_name
+        self.output_dict.add_comment(mod_comment)
         self.line_no += 1  # advance as we did not read any docstring
-        # todo: read first block and do something with it ( for a submodule)
+
 
     def parse_function(self):
         log.trace(f"# {self.line.rstrip()}")
@@ -459,13 +457,12 @@ class RSTReader:
 
         # Get one or more names
         function_names = self.parse_names(oneliner=False)
-        docstr = self.parse_docstring()
+        docstr = self.read_docstring()
 
         for this_function in function_names:
             # Parse return type from docstring
             ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
 
-            ...
             # defaults
             name = params = ""
             try:
@@ -517,7 +514,7 @@ class RSTReader:
         log.trace(f"# class:: {name} - {this_class}")
         # fixup parameters
         params = self.fix_parameters(params, f"{name}.__init__")
-        docstr = self.parse_docstring()
+        docstr = self.read_docstring()
 
         if any(":noindex:" in line for line in docstr):
             # if the class docstring contains ':noindex:' on any line then skip
@@ -526,11 +523,6 @@ class RSTReader:
             # write a class header
             self.create_update_class(name, params, docstr)
 
-    def get_rst_hint(self):
-        "parse the '.. <rst hint>:: ' from the current line"
-        m = re.search(r"\.\.\s?(\w+)\s?::\s?", self.line)
-        return m[1] if m else ""
-
     def parse_method(self):
         name = ""
         this_method = ""
@@ -538,7 +530,7 @@ class RSTReader:
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
         log.trace(f"# {self.line.rstrip()}")
-        if not is_balanced(self.line):
+        if not self.is_balanced(self.line):
             self.extend_and_balance_line()
 
         ## rst_hint is used to access the method decorator ( method, staticmethod, staticmethod ... )
@@ -548,7 +540,7 @@ class RSTReader:
         # filter out overloads with 'param=value' description as these can't be output (currently)
         method_names = [m for m in method_names if "param=value" not in m]
 
-        docstr = self.parse_docstring()
+        docstr = self.read_docstring()
         for this_method in method_names:
             try:
                 name, params = this_method.split("(", 1)  # split methodname from params
@@ -633,9 +625,6 @@ class RSTReader:
 
     def parse_name(self, line: Optional[str] = None):
         "get the constant/function/class name from a line with an identifier"
-        # this_const = self.line.split(SEPERATOR)[-1].strip()
-        # name = this_const
-        # name = this_const.split(".")[1]  # Take only the last part from Pin.toggle
 
         if line:
             return line.split(SEPERATOR)[-1].strip()
@@ -660,8 +649,7 @@ class RSTReader:
             and self.rst_text[self.line_no + counter].startswith(" " * col)
             and not self.rst_text[self.line_no + counter][col + 1].isspace()
         ):
-            if self.verbose:  # pragma: no cover
-                log.trace("Sequence detected")
+            log.trace("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
         # now advance the linecounter
@@ -676,7 +664,7 @@ class RSTReader:
         names = self.parse_names()
 
         # get module docstring
-        docstr = self.parse_docstring()
+        docstr = self.read_docstring()
 
         # deal with documentation wildcards
         for name in names:
@@ -721,5 +709,24 @@ class RSTReader:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
 
-        # now clean up
+
+#################################################################################################################
+class RSTWriter(RSTParser):
+
+    def __init__(self, v_tag="v1.xx"):
+        super().__init__( v_tag=v_tag)
+
+    def write_file(self, filename: Path) -> bool:
         self.prepare_output()
+        return super().write_file(filename)
+
+    def prepare_output(self):
+        "clean up some trailing spaces and commas"
+        lines = str(self.output_dict).splitlines(keepends=True)
+        self.output = lines
+        for i in range(len(self.output)):
+            for name in ("self", "cls"):
+                if f"({name}, ) ->" in self.output[i]:
+                    self.output[i] = self.output[i].replace(f"({name}, ) ->", f"({name}) ->")
+
+

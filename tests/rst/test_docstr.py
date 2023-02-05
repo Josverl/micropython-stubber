@@ -2,7 +2,7 @@
 import pytest
 
 # SOT
-from stubber.rst.reader import RSTReader
+from stubber.rst.reader import RSTWriter
 
 from helpers import load_rst
 
@@ -66,7 +66,7 @@ QUOTED_DOCSTR = """
 
 def test_parse_docstr_module():
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, MODULE_DOCSTR)
     # r.current_module = module # 'uhashlib'
     # process
@@ -85,7 +85,7 @@ def test_parse_docstr_module():
 
 def test_parse_docstr_quoted():
     # quoted docstrings from module level constants
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, QUOTED_DOCSTR)
     r.parse()
     # check
@@ -137,7 +137,7 @@ Methods
 
 
 def test_parse_long_method():
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, PYB_CAN_DOCSTR)
     r.parse()
     # check

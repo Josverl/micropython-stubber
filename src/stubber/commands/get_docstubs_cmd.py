@@ -63,10 +63,8 @@ def cli_docstubs(
 
     dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 
-    # get verbose from the parent context
-    verbose = ctx.obj["verbose"] != 0
     log.info(f"Get docstubs for MicroPython {utils.clean_version(v_tag, drop_v=False)}")
-    generate_from_rst(rst_path, dst_path, v_tag, release=release, verbose=verbose, suffix=".pyi")
+    generate_from_rst(rst_path, dst_path, v_tag, release=release, suffix=".pyi")
 
     # no need to generate .pyi in post processing
     log.info("::group:: start post processing of retrieved stubs")

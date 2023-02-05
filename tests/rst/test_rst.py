@@ -13,7 +13,7 @@ pytestmark = pytest.mark.doc_stubs
 
 # SOT
 from stubber.stubs_from_docs import  generate_from_rst
-from stubber.rst.reader import RSTReader, TYPING_IMPORT
+from stubber.rst.reader import RSTWriter, TYPING_IMPORT
 
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 
@@ -114,7 +114,7 @@ EXP_10 = [
 )
 def test_rst_parse_function(filename, expected):
     # testcase = FN_1
-    r = RSTReader()
+    r = RSTWriter()
     r.read_file(Path(filename))
     # process
     r.parse()
@@ -151,7 +151,7 @@ CLASS_10 = [
 # def test_rst_parse_class_10(expected: List[str]):
 def test_rst_parse_class_10(line: str):
     # testcase = FN_1
-    r = RSTReader()
+    r = RSTWriter()
     r.read_file(Path("tests/rst/data/class_10.rst"))
     # process
     r.parse()
@@ -187,21 +187,21 @@ def test_rst_parse_class_10(line: str):
 )
 def test_fix_param(param_in, param_out):
     "validate known parameter typing notation errors"
-    r = RSTReader()
+    r = RSTWriter()
     result = r.fix_parameters(param_in)
     assert result == param_out
 
 
 def test_import_typing():
     "always include typing"
-    r = RSTReader()
+    r = RSTWriter()
     r.prepare_output()
     for line in TYPING_IMPORT:
         assert line.strip() in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
 
 
 def test_fix_param_dynamic():
-    r = RSTReader()
+    r = RSTWriter()
 
     # in 'machine' module
 

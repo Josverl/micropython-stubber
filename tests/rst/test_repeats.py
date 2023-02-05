@@ -1,7 +1,7 @@
 import pytest
 
 # SOT
-from stubber.rst.reader import RSTReader
+from stubber.rst.reader import RSTWriter
 
 # mark all tests
 pytestmark = pytest.mark.doc_stubs
@@ -52,7 +52,7 @@ Constants
 
 def test_number_sequence():
     testcase = SEQ_NUMBERS
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
     r.rst_text = testcase
@@ -75,7 +75,7 @@ def test_comma_sequence():
         "     'E'. As mentioned above,\n",
     ]
 
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
     r.rst_text = SEQ_COMMAS
@@ -135,7 +135,7 @@ SEQ_3 = """
 
 def test_sequence_3():
 
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
     r.rst_text = SEQ_3.splitlines(keepends=True)
@@ -179,7 +179,7 @@ Functions
 
 def test_sequence_functions():
 
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
 
     r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
@@ -233,7 +233,7 @@ Compiled regular expression. Instances of this class are created using
 
 def test_sequence_methods():
 
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
 
     r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True)
