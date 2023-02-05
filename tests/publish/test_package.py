@@ -192,7 +192,7 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     stubs_in_pkg = package.pyproject["tool"]["poetry"]["packages"]  # type: ignore
     assert len(stubs_in_pkg) >= 1
 
-    packet_hash = package.create_hash()
+    packet_hash = package.calculate_hash()
     assert isinstance(packet_hash, str)
     assert len(packet_hash) > 30  # 41 bytes ?
 
@@ -202,7 +202,7 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     assert result == True
 
     if test_build:
-        built = package.build()
+        built = package.poetry_build()
         assert built
         assert (package.package_path / "dist").exists(), "Distribution folder should exist"
         filelist = list((package.package_path / "dist").glob("*.whl")) + list((package.package_path / "dist").glob("*.tar.gz"))
