@@ -52,7 +52,6 @@ from stubber.utils.config import CONFIG
     default=False,
     help="build package even if no changes detected",
 )
-
 def cli_build(
     family: str,
     versions: Union[str, List[str]],
@@ -79,7 +78,7 @@ def cli_build(
         versions=versions,
         ports=ports,
         boards=boards,
-        production=True,    # use production database during build
+        production=True,  # use production database during build
         force=force,
         clean=clean,
     )
