@@ -26,13 +26,21 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
-        return f"{family}-{port}-{board}-stubs".lower().replace("-generic-stubs", "-stubs")
+        name = f"{family}-{port}-{board}-stubs".lower()
+        name = name.replace("-generic-stubs", "-stubs")
+        name = name.replace("-generic_", "-")
+        return name
     elif pkg_type == DOC_STUBS:
         return f"{family}-doc-stubs".lower()
     elif pkg_type == CORE_STUBS:
         return f"{family}-core-stubs".lower()
     # # {family}-{port}-{board}-{type}-stubs
-    return f"{family}-{port}-{board}-{pkg_type}-stubs".lower().replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
+    name = f"{family}-{port}-{board}-{pkg_type}-stubs".lower()
+    # remove -generic- from the name
+    name = name.replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
+    # remove -genetic_ from the name
+    name = name.replace("-generic_", "-")
+    return name
 
 
 def get_package(

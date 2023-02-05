@@ -17,6 +17,7 @@ from .fakeconfig import FakeConfig
     "family, pkg, port, board, expected",
     [
         ("micropython", COMBO_STUBS, "esp32", "GENERIC", "micropython-esp32-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "GENERIC_S3", "micropython-esp32-s3-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "generic", "micropython-esp32-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "tiny", "micropython-esp32-tiny-stubs"),
