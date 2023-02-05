@@ -1,5 +1,6 @@
 """
 simple Git module, where needed via powershell
+
 """
 import subprocess
 from pathlib import Path
@@ -83,9 +84,7 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
             expect_stderr=True,
         ):
             lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
-            if lines[0].startswith("On branch") and lines[0].endswith(
-                "master"
-            ):
+            if lines[0].startswith("On branch") and lines[0].endswith("master"):
                 tag = "latest"
     return tag
 
@@ -228,8 +227,8 @@ def pull(repo: Union[Path, str], branch="main") -> bool:
     return result.returncode == 0
 
 
-def get_git_describe(folder:Optional[str]=None):
-    """"based on MicroPython makeversionhdr
+def get_git_describe(folder: Optional[str] = None):
+    """ "based on MicroPython makeversionhdr
     returns : current git tag, commits ,commit hash : "v1.19.1-841-g3446"
     """
     # Note: git describe doesn't work if no tag is available
@@ -247,5 +246,5 @@ def get_git_describe(folder:Optional[str]=None):
         git_describe = ""
     except OSError:
         return None
-    # format 
+    # format
     return git_describe

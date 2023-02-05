@@ -13,6 +13,7 @@ from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
 from stubber.publish.package import GENERIC_L
 
+
 def build_multiple(
     family: str = "micropython",
     versions: List[str] = ["v1.19.1"],
@@ -26,7 +27,7 @@ def build_multiple(
     Build a bunch of stub packages
     """
     db = get_database(CONFIG.publish_path, production=production)
-    results:List[Dict[str, Any]] = []
+    results: List[Dict[str, Any]] = []
     worklist = build_worklist(family, versions, ports, boards)
     if len(worklist) == 0:
         log.error("Could not find any packages than can be build.")
@@ -73,7 +74,7 @@ def publish_multiple(
     return results
 
 
-def build_worklist(family: str, versions: List[str], ports: Union[List[str],str], boards: Union[List[str],str]):
+def build_worklist(family: str, versions: List[str], ports: Union[List[str], str], boards: Union[List[str], str]):
     """Build a worklist of packages to build or publish, and filter to only the requested ports and boards"""
     if isinstance(versions, str):
         versions = [versions]
@@ -91,4 +92,3 @@ def build_worklist(family: str, versions: List[str], ports: Union[List[str],str]
         if not any(i for i in worklist if i["board"] == b):
             log.warning(f"Could not find any package candidate for board {b}")
     return worklist
-

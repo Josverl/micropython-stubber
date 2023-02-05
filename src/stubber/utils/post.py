@@ -62,7 +62,6 @@ def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
 
     if progress_pyi:
         for file in list(path.rglob("*.pyi")):
-
             cmd = [
                 "autoflake",
                 "-r",

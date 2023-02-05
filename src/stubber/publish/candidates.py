@@ -239,5 +239,5 @@ def filter_list(
         worklist = [i for i in worklist if i["port"].lower() in ports_]
     if boards and not is_auto(boards):
         boards_ = [i.lower() for i in boards]
-        worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_","") in boards_ ]
+        worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_", "") in boards_]
     return worklist

@@ -5,12 +5,13 @@ from stubber.codemod.add_comment import AddComment
 # mark all tests
 pytestmark = pytest.mark.codemod
 
+
 class AddCommentTest(CodemodTest):
     "test adding comments"
 
     TRANSFORM = AddComment  # The codemod that will be instantiated for us in assertCodemod.
 
-    def test_add_one(self) -> None:    # sourcery skip: class-extract-method
+    def test_add_one(self) -> None:  # sourcery skip: class-extract-method
         before = """\
             foo = "bar"
         """

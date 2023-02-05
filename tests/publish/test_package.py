@@ -153,7 +153,7 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
     run_common_package_tests(package, pkg_name, config.publish_path, stub_path=config.stub_path, pkg_type=None, test_build=False)
 
 
-def run_common_package_tests(package:StubPackage, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
+def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
     # sourcery skip: no-long-functions
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
@@ -162,7 +162,7 @@ def run_common_package_tests(package:StubPackage, pkg_name, publish_path: Path, 
     assert package.package_path.relative_to(publish_path), "package path should be relative to publish path"
     assert (package.package_path).exists()
     assert (package.package_path / "pyproject.toml").exists()
-    # package path is all lowercase 
+    # package path is all lowercase
     assert package.package_path.name == package.package_path.name.lower()
 
     assert len(package.stub_sources) >= 1
@@ -195,7 +195,7 @@ def run_common_package_tests(package:StubPackage, pkg_name, publish_path: Path, 
     if not (stub_path.exists() and src and src[0][1].exists()):
         # withouth sources there is nothing to build
         return
-    
+
     package.copy_stubs()
     filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1

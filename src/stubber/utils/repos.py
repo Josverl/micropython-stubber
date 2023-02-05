@@ -76,7 +76,7 @@ def match_lib_with_mpy(version_tag: str, lib_path: Path):
     return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 
-def fetch_repos(tag, mpy_path:Path, mpy_lib_path:Path):
+def fetch_repos(tag, mpy_path: Path, mpy_lib_path: Path):
     """Fetch updates , then switch to the provided tag"""
     log.info("fetch updates")
     git.fetch(mpy_path)
@@ -100,8 +100,9 @@ def fetch_repos(tag, mpy_path:Path, mpy_lib_path:Path):
     log.info(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
     return result
 
-def repo_paths(dest_path:Path) -> Tuple[Path, Path]:
-    """Return the paths to the micropython and micropython-lib repos, given a path to the repos.'"""	
+
+def repo_paths(dest_path: Path) -> Tuple[Path, Path]:
+    """Return the paths to the micropython and micropython-lib repos, given a path to the repos.'"""
     if not dest_path.exists():
         os.mkdir(dest_path)
     # repos are relative to provided path
@@ -119,5 +120,4 @@ def repo_paths(dest_path:Path) -> Tuple[Path, Path]:
     if not (mpy_lib_path / ".git").exists():
         log.error("micropython-lib repo not found")
         raise LookupError
-    return mpy_path,mpy_lib_path
-
+    return mpy_path, mpy_lib_path

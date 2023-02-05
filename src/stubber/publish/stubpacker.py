@@ -82,7 +82,6 @@ class StubPackage:
 
         """
         if json_data is not None:
-
             self.from_dict(json_data)
 
         else:
@@ -159,8 +158,8 @@ class StubPackage:
         """Get the next prerelease version for the package."""
         rc = 1
         if describe := get_git_describe(CONFIG.mpy_path.as_posix()):
-            ver, rc, _ = describe.split('-')
-            base = bump_version( Version(ver), minor_bump=True)  
+            ver, rc, _ = describe.split("-")
+            base = bump_version(Version(ver), minor_bump=True)
             rc = int(rc)
             return str(bump_version(base, rc=rc))
         else:
@@ -240,7 +239,7 @@ class StubPackage:
         # set pkg version after creating the toml file
         self.pkg_version = json_data["pkg_version"]
         self.stub_sources = []
-        for (name, path) in json_data["stub_sources"]:
+        for name, path in json_data["stub_sources"]:
             if path.startswith("stubs/"):
                 path = path.replace("stubs/", "")
             self.stub_sources.append((name, Path(path)))
@@ -580,7 +579,7 @@ class StubPackage:
         Check if (all) the packages sources exist.
         """
         ok = True
-        for (name, path) in self.stub_sources:
+        for name, path in self.stub_sources:
             if not (CONFIG.stub_path / path).exists():
                 # todo: below is a workaround for different types, but where is the source of this difference coming from?
                 msg = (
@@ -672,7 +671,9 @@ class StubPackage:
         force=False,  # publish even if no changes
         dry_run=False,  # do not actually publish
         clean: bool = False,  # clean up afterwards
-    ) -> bool:  # sourcery skip: assign-if-exp, default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches, swap-if-expression
+    ) -> (
+        bool
+    ):  # sourcery skip: assign-if-exp, default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches, swap-if-expression
         """
         Publish a package to PyPi
         look up the previous package version in the dabase, and only publish if there are changes to the package

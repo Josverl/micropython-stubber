@@ -5,7 +5,7 @@ using a custom-built parser to read and process the micropython RST files
 
 import os
 from pathlib import Path
-from typing import  List, Optional
+from typing import List, Optional
 
 from loguru import logger as log
 
@@ -17,7 +17,6 @@ from stubber.rst import (
     U_MODULES,
 )
 from stubber.rst.reader import RSTWriter
-
 
 
 def generate_from_rst(
@@ -59,6 +58,7 @@ def generate_from_rst(
     )
     return len(files)
 
+
 def clean_destination(dst_path):
     """Remove all .py/.pyi files in desination folder to avoid left-behinds"""
     for f in dst_path.rglob(pattern="*.py*"):
@@ -67,15 +67,17 @@ def clean_destination(dst_path):
         except OSError:
             pass
 
-def get_rst_sources(rst_path:Path, pattern:str) -> List[Path]:
-    """Get the list of rst files to process"""	
+
+def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
+    """Get the list of rst files to process"""
     files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
 
     # - excluded modules, ones that offer little advantage  or cause much problems
     files = [f for f in files if f.name not in DOCSTUB_SKIP]
     return files
 
-def make_docstubs(dst_path:Path, v_tag:str, release:str,  suffix:str, files:List[Path]):
+
+def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path]):
     """Create the docstubs"""
 
     for file in files:

@@ -5,7 +5,7 @@ from packaging.version import Version, parse
 #     current: Version,
 #     rc: int = 0,  # o, to bump post release, or release candidate number
 # ) -> Version:
-#     return bump_version( current, rc=rc , post_bump=True  ) 
+#     return bump_version( current, rc=rc , post_bump=True  )
 
 
 def bump_version(
@@ -14,7 +14,7 @@ def bump_version(
     major_bump: bool = False,
     minor_bump: bool = False,
     micro_bump: bool = False,
-    version_bump: bool = False, # Increase the first non-zero of micro , minor , major 
+    version_bump: bool = False,  # Increase the first non-zero of micro , minor , major
     post_bump: bool = False,
     rc: int = 0,  # to bump post release, or release candidate number
 ) -> Version:
@@ -32,8 +32,7 @@ def bump_version(
     release_bump = major_bump or minor_bump or micro_bump or version_bump
     other_bump = post_bump or rc != 0
 
-
-    if  release_bump and other_bump:
+    if release_bump and other_bump:
         raise ValueError("Cannot bump both release and other fragments")
 
     parts = []
@@ -47,7 +46,7 @@ def bump_version(
     major = current.major
     minor = current.minor
     micro = current.micro
-    if version_bump: # Increase the first non-zero of micro , minor , major 
+    if version_bump:  # Increase the first non-zero of micro , minor , major
         if micro != 0:
             micro_bump = True
         elif minor != 0:
@@ -72,7 +71,7 @@ def bump_version(
             parts.append(f".a{rc}")
         # ----------------------------------------------------------------------
         # post
-        if post_bump and rc==0: 
+        if post_bump and rc == 0:
             parts.append(".post1" if current.post is None else f".post{current.post + 1}")
         # ----------------------------------------------------------------------
         # Development release
@@ -90,5 +89,3 @@ def bump_version(
         raise ValueError(f"{new} is not a valid version")
 
     return new
-
-

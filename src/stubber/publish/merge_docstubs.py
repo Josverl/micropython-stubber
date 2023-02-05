@@ -28,7 +28,7 @@ def board_folder_name(fw: Dict, *, version: Optional[str] = None):
     """return the name of the firmware folder"""
     base = get_base(fw, version=version)
     folder_name = f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    folder_name = folder_name.lower().replace("-generic_", "-") # @GENERIC Prefix
+    folder_name = folder_name.lower().replace("-generic_", "-")  # @GENERIC Prefix
     return folder_name
 
 
@@ -41,10 +41,10 @@ def get_merged_path(fw: Dict):
 
 
 def merge_all_docstubs(
-    versions: Union[List[str],str] = ["v1.19.1"],
+    versions: Union[List[str], str] = ["v1.19.1"],
     family: str = "micropython",
-    ports: Union[List[str],str] = ["auto"],
-    boards: Union[List[str],str] = [GENERIC_L],
+    ports: Union[List[str], str] = ["auto"],
+    boards: Union[List[str], str] = [GENERIC_L],
     *,
     mpy_path=CONFIG.mpy_path,
 ):

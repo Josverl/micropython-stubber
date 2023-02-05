@@ -12,7 +12,7 @@ from helpers import read_stub
 pytestmark = pytest.mark.doc_stubs
 
 # SOT
-from stubber.stubs_from_docs import  generate_from_rst
+from stubber.stubs_from_docs import generate_from_rst
 from stubber.rst.reader import RSTWriter, TYPING_IMPORT
 
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
@@ -181,22 +181,17 @@ def test_rst_parse_class_10(line: str):
         ("(block_device or path)", "(block_device_or_path)"),
         # network - AbstractNIC.connect
         # ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"), # old - incorrect
-        ("([service_id, key=None, *, ...])", "(service_id: Optional[Any]=None, key: Optional[Any]=None, *args, **kwargs)"), # New
-
-        ("(block_num, buf, offset)","(block_num, buf, offset: Optional[int] = 0)"),
-        ("(key, mode[, IV])","(key, mode, IV: Optional[Any]=None)"),
-
-        ("([(ip, subnet, gateway, dns)])","(configtuple: Optional[Any]=None)"),
-
+        ("([service_id, key=None, *, ...])", "(service_id: Optional[Any]=None, key: Optional[Any]=None, *args, **kwargs)"),  # New
+        ("(block_num, buf, offset)", "(block_num, buf, offset: Optional[int] = 0)"),
+        ("(key, mode[, IV])", "(key, mode, IV: Optional[Any]=None)"),
+        ("([(ip, subnet, gateway, dns)])", "(configtuple: Optional[Any]=None)"),
         # a different notations of optionals
-        ("(id1, [foo], [bar])","(id1, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
-        ("(id2, [foo] [,bar])","(id2, foo: Optional[Any]=None ,bar: Optional[Any]=None)"),
+        ("(id1, [foo], [bar])", "(id1, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
+        ("(id2, [foo] [,bar])", "(id2, foo: Optional[Any]=None ,bar: Optional[Any]=None)"),
         # ("(id3, [foo, bar])","(id3, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
-
         # with assignments
-        ("(id4, foo=-1, [bar])","(id4, foo=-1, bar: Optional[Any]=None)"),
+        ("(id4, foo=-1, [bar])", "(id4, foo=-1, bar: Optional[Any]=None)"),
         # ("(id5, foo=-1, [bar=2])","(id5, foo=-1, bar: Optional[Any]=2)"),
-
     ],
 )
 def test_fix_param(param_in, expected):
@@ -336,7 +331,6 @@ def test_pyright_invalid_strings(pyright_results, capsys):
 @pytest.mark.docfix
 # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_pyright_obscured_definitions(pyright_results, capsys):
-
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
     # Only look at errors

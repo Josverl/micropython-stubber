@@ -30,7 +30,7 @@ def test_update_fallback_2(tmp_path: Path):
     fallback_path = tmp_path / CONFIG.fallback_path
     # create fake sources
     fakes = 0
-    for (name, source) in fallback_sources(RELEASED):
+    for name, source in fallback_sources(RELEASED):
         if not "." in name:
             ...
             file = stub_path / source / name / "__init__.py"

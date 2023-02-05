@@ -149,11 +149,7 @@ class FileReadWriter:
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while (
-            not self.is_balanced(newline)
-            and self.line_no >= 0
-            and (self.line_no + append + 1) <= self.max_line
-        ):
+        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
@@ -318,15 +314,9 @@ class RSTParser(RSTReader):
 
     target = ".py"  # py/pyi
     PARAM_RE_FIXES = [
-        Fix(
-            r"\[angle, time=0\]", "[angle], time=0", is_re=True
-        ),  # fix: method:: Servo.angle([angle, time=0])
-        Fix(
-            r"\[speed, time=0\]", "[speed], time=0", is_re=True
-        ),  # fix: .. method:: Servo.speed([speed, time=0])
-        Fix(
-            r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
-        ),  # fix: network - AbstractNIC.connect
+        Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
+        Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
+        Fix(r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True),  # fix: network - AbstractNIC.connect
     ]
 
     def __init__(self, v_tag: str) -> None:
@@ -388,9 +378,7 @@ class RSTParser(RSTReader):
     def apply_fix(fix: Fix, params: str, name: str = ""):
         if fix.module and fix.module != name:
             return params
-        return (
-            re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
-        )
+        return re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
 
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
@@ -452,10 +440,7 @@ class RSTParser(RSTReader):
                 version = "latest"
             else:
                 version = self.source_tag.replace("_", ".")
-            docstr[0] = (
-                docstr[0]
-                + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
-            )
+            docstr[0] = docstr[0] + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -487,9 +472,7 @@ class RSTParser(RSTReader):
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=this_function, module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
 
             # defaults
             name = params = ""
@@ -598,9 +581,7 @@ class RSTParser(RSTReader):
             params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -697,10 +678,7 @@ class RSTParser(RSTReader):
 
         # deal with documentation wildcards
         for name in names:
-
-            r_type = return_type_from_context(
-                docstring=docstr, signature=name, module=self.current_module, literal=True
-            )
+            r_type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
             if r_type in ["None"]:  # None does not make sense
                 r_type = "Any"  # perhaps default to Int ?
             name = self.strip_prefixes(name)
@@ -740,9 +718,10 @@ class RSTParser(RSTReader):
 
 #################################################################################################################
 class RSTWriter(RSTParser):
-    """ 
+    """
     Reads, parses and writes
     """
+
     def __init__(self, v_tag="v1.xx"):
         super().__init__(v_tag=v_tag)
 
