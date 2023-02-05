@@ -83,11 +83,10 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
             expect_stderr=True,
         ):
             lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
-            if lines[0].startswith("On branch"):
-                if lines[0].endswith("master"):
-                    tag = "latest"
-                elif lines[0].endswith("fix_lib_documentation"):
-                    tag = "fix_lib_documentation"
+            if lines[0].startswith("On branch") and lines[0].endswith(
+                "master"
+            ):
+                tag = "latest"
     return tag
 
 
