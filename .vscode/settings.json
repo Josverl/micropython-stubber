@@ -123,17 +123,22 @@
     "files.watcherExclude": {
         "**/repos/**": true
     },
-    "python.formatting.blackArgs": [
-        "--line-length 99"
-    ],
-    "editor.formatOnType": true,
-    "editor.formatOnSave": true,
     "python.formatting.provider": "black",
+    "editor.formatOnType": false,
+    "editor.formatOnSave": true,
     "yaml.schemas": {
         "https://docs.sourcery.ai/resources/sourcery_yaml_schema.json": ".sourcery.yaml"
-    }
-    // "python.formatting.blackArgs": [
-    //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
-    // ],
-    // "editor.formatOnSave": false,    
+    },
+    "editor.formatOnSaveMode": "file",
+    "[python]": {
+        "editor.defaultFormatter": null,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
+    "python.formatting.blackArgs": [
+        "--config",
+        "${workspaceFolder}/pyproject.toml",
+        "--verbose"
+    ]
 }

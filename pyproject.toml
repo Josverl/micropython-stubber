@@ -97,6 +97,7 @@ sourcery-cli = "^1.0.3"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+
 [tool.black]
 # use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
 line-length = 140
@@ -105,14 +106,16 @@ include = '\.pyi?$'
 exclude = '''
 (
     /(
-        | \..*
         | minified
-        | micropython
-        | micropython-lib
+        | repos[\\/]micropython
+        | repos[\\/]micropython-lib
+        | repos[\\/]micropython-stubs
         | tests[\\/]mocks
         | tests[\\/]data
         | tests[\\/]rst[\\/]data
         | tests[\\/]codemods[\\/]codemod_test_cases
+        | typings
+        | snippets[\\/].*?[\\/]typings
         | scratch
         | src[\\/]stubber[\\/]codemod[\\/]_partials
     )/
