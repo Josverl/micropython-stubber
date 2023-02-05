@@ -43,12 +43,11 @@ from .cli import stubber_cli
     show_default=True,
     help="multiple: ",
 )
-
 def cli_merge_docstubs(
     versions: Union[str, List[str]],
     boards: Union[str, List[str]],
     ports: Union[str, List[str]],
-    family:str,
+    family: str,
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
@@ -58,7 +57,7 @@ def cli_merge_docstubs(
     if isinstance(boards, tuple):
         boards = list(boards)
     if isinstance(versions, tuple):
-        versions = list(versions)    
+        versions = list(versions)
     # single version should be a string
     log.info(f"Merge docstubs for {family} {versions}")
     _ = merge_all_docstubs(versions=versions, family=family, boards=boards, ports=ports, mpy_path=CONFIG.mpy_path)

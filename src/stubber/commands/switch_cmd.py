@@ -9,7 +9,7 @@ import click
 import stubber.basicgit as git
 from loguru import logger as log
 from stubber.utils.config import CONFIG
-from stubber.utils.repos import fetch_repos,  repo_paths
+from stubber.utils.repos import fetch_repos, repo_paths
 
 from .cli import stubber_cli
 
@@ -26,7 +26,7 @@ except Exception:
 
 
 @stubber_cli.command(name="switch")
-@click.argument("tag",required=False, type=click.Choice(VERSION_LIST, case_sensitive=False))
+@click.argument("tag", required=False, type=click.Choice(VERSION_LIST, case_sensitive=False))
 @click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
 def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
     """

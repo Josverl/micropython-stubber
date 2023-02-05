@@ -4,9 +4,7 @@ from typing import Generator
 
 import pytest
 
-from stubber.publish.candidates import (COMBO_STUBS, DOC_STUBS,
-                                        docstub_candidates, frozen_candidates,
-                                        subfolder_names, version_candidates)
+from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_candidates
 from stubber.publish.publish import build_worklist
 
 
@@ -115,23 +113,24 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
         _ = frozen_candidates(path=path, family=family, versions=versions, ports=ports, boards=boards)
     assert exc_info.type == NotImplementedError
 
+
 @pytest.mark.parametrize(
     "family, versions, ports, boards, count",
     [
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
-        ("micropython", "v1.18", "auto", "GENERIC", 16), # find v1.18 ports
-        ("micropython", "v1.18", "esp32", "GENERIC", 1), # find v1.18 ESP32 ports 
-        ("micropython", "v1.19.1", "esp8266", "GENERIC", 1), # find v1.18 ESP8266 ports 
-        ("micropython", "v1.19.1", "esp8266", "generic", 1), # find v1.18 ESP8266 ports 
-        ("micropython", "v1.18", "stm32", "auto", 56), # find v1.18 STM32 boards
-        ("micropython", "v1.17", "auto", "auto", 124), # find all v1.17 ports & boards
-        ("micropython", "v1.18", "auto", "auto", 139), # find all v1.18 ports & boards
-        ("micropython", "v1.19.1", "auto", "auto", 157), # find all v1.18 ports & boards
-        ("micropython", "v1.18", "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
-        ("micropython", ["v1.18"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC fix test numbers
-        ("micropython", ["latest"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
-        ("micropython", ["latest","v1.18"], "auto", "NUCLEO_F091RC", 2), # find v1.18 NUCLEO_F091RC boards
+        ("micropython", "v1.18", "auto", "GENERIC", 16),  # find v1.18 ports
+        ("micropython", "v1.18", "esp32", "GENERIC", 1),  # find v1.18 ESP32 ports
+        ("micropython", "v1.19.1", "esp8266", "GENERIC", 1),  # find v1.18 ESP8266 ports
+        ("micropython", "v1.19.1", "esp8266", "generic", 1),  # find v1.18 ESP8266 ports
+        ("micropython", "v1.18", "stm32", "auto", 56),  # find v1.18 STM32 boards
+        ("micropython", "v1.17", "auto", "auto", 124),  # find all v1.17 ports & boards
+        ("micropython", "v1.18", "auto", "auto", 139),  # find all v1.18 ports & boards
+        ("micropython", "v1.19.1", "auto", "auto", 157),  # find all v1.18 ports & boards
+        ("micropython", "v1.18", "auto", "NUCLEO_F091RC", 1),  # find v1.18 NUCLEO_F091RC boards
+        ("micropython", ["v1.18"], "auto", "NUCLEO_F091RC", 1),  # find v1.18 NUCLEO_F091RC fix test numbers
+        ("micropython", ["latest"], "auto", "NUCLEO_F091RC", 1),  # find v1.18 NUCLEO_F091RC boards
+        ("micropython", ["latest", "v1.18"], "auto", "NUCLEO_F091RC", 2),  # find v1.18 NUCLEO_F091RC boards
     ],
 )
 def test_worklist(family, versions, ports, boards, count):
@@ -140,5 +139,3 @@ def test_worklist(family, versions, ports, boards, count):
     msg = ", ".join(sorted([f"{l['version']}-{l['port']}-{l['board']}" for l in wl]))
     # print(msg)
     assert len(wl) == count, f"expected {count}, found {len(wl)} {msg}."
-
-

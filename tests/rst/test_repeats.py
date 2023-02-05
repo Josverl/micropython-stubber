@@ -135,7 +135,6 @@ SEQ_3 = """
 
 
 def test_sequence_3():
-
     r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
@@ -179,7 +178,6 @@ Functions
 
 
 def test_sequence_functions():
-
     r = RSTWriter()
     # Plug in test data
 
@@ -233,7 +231,6 @@ Compiled regular expression. Instances of this class are created using
 
 
 def test_sequence_methods():
-
     r = RSTWriter()
     # Plug in test data
 

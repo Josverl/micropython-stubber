@@ -8,11 +8,12 @@ from stubber.publish.publish import build_multiple
 
 from .fakeconfig import FakeConfig
 
-ALL_PUBLISH_RESULTS = {"Published to PyPi","Published to Test-PyPi", "Build successful", "-"}
+ALL_PUBLISH_RESULTS = {"Published to PyPi", "Published to Test-PyPi", "Build successful", "-"}
+
 
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_build_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig : pytest.Config):
+def test_build_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
     """Test build_multiple"""
     # test requires that the stubs are cloned locally
     if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
@@ -39,7 +40,7 @@ def test_build_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig : p
 
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_build_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig : pytest.Config):
+def test_build_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
     """Test build_multiple"""
     # test requires that the stubs are cloned locally
     if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
@@ -64,9 +65,10 @@ def test_build_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig : pyt
     assert m_p_build.call_count >= 1
     assert m_p_publish.call_count == 0
 
+
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_build_force(mocker: MockerFixture, tmp_path: Path, pytestconfig : pytest.Config):
+def test_build_force(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
     """Test build_multiple"""
     # test requires that the stubs are cloned locally
     if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
@@ -84,11 +86,13 @@ def test_build_force(mocker: MockerFixture, tmp_path: Path, pytestconfig : pytes
 
     # -----------------------------------------------------------------------------------------------
     # Test publish - not changed + Force :--> should build and publish
-    m_p_build.reset_mock();  m_check.reset_mock();  m_p_publish.reset_mock();  m_is_changed.reset_mock()
+    m_p_build.reset_mock()
+    m_check.reset_mock()
+    m_p_publish.reset_mock()
+    m_is_changed.reset_mock()
     # -----------------------------------------------------------------------------------------------
     m_is_changed.return_value = False
     result = build_multiple(production=False, force=True, ports=["stm32"])
     assert len(result) > 0
     assert m_p_build.call_count >= 1
-    assert m_p_publish.call_count ==0
-
+    assert m_p_publish.call_count == 0

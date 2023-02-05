@@ -9,7 +9,6 @@ pytestmark = pytest.mark.doc_stubs
 
 
 def test_Module_SD():
-
     od = ModuleSourceDict("utest")
     assert isinstance(od, dict)
 

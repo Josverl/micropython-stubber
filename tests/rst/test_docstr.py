@@ -94,12 +94,8 @@ def test_parse_docstr_quoted():
     assert len(r.output) > 1
     assert len(r.output_dict["constants"]) > 2
 
-    assert not any(
-        l.startswith("# :") for l in r.output_dict["constants"]
-    ), "Some lines were not unquoted"
-    assert not any(
-        l.startswith("# +") for l in r.output_dict["constants"]
-    ), "Some lines were not unquoted"
+    assert not any(l.startswith("# :") for l in r.output_dict["constants"]), "Some lines were not unquoted"
+    assert not any(l.startswith("# +") for l in r.output_dict["constants"]), "Some lines were not unquoted"
 
 
 ## method is broken over two lines

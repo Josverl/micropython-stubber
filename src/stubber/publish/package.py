@@ -10,8 +10,7 @@ from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
 
-from stubber.publish.enums import (COMBO_STUBS, CORE_STUBS, DOC_STUBS,
-                                   StubSource)
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
@@ -34,7 +33,7 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
         # # {family}-{port}-{board}-stubs
         name = f"{family}-{port}-{board}-stubs".lower()
         name = name.replace("-generic-stubs", "-stubs")
-        name = name.replace("-generic_", "-") # @GENERIC Prefix
+        name = name.replace("-generic_", "-")  # @GENERIC Prefix
         return name
     elif pkg_type == DOC_STUBS:
         return f"{family}-doc-stubs".lower()
@@ -45,7 +44,7 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
     # remove -generic- from the name
     name = name.replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
     # remove -genetic_ from the name
-    name = name.replace("-generic_", "-") # @GENERIC Prefix
+    name = name.replace("-generic_", "-")  # @GENERIC Prefix
     return name
 
 
@@ -111,16 +110,16 @@ def create_package(
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBO_STUBS,
-) -> StubPackage:    # sourcery skip: merge-duplicate-blocks, remove-redundant-if
+) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
         assert port != "", "port must be specified for combo stubs"
-        stubs = combo_sources(family, port, board,  ver_flat)
+        stubs = combo_sources(family, port, board, ver_flat)
     elif pkg_type == DOC_STUBS:
-        stubs= [
+        stubs = [
             (
                 "Doc stubs",
                 Path(f"{family}-{ver_flat}-docstubs"),
@@ -135,12 +134,11 @@ def create_package(
     return StubPackage(pkg_name, version=mpy_version, stubs=stubs)
 
 
-
-def combo_sources(family:str,port:str, board:str,  ver_flat:str) -> List[Tuple[str, Path]]:
+def combo_sources(family: str, port: str, board: str, ver_flat: str) -> List[Tuple[str, Path]]:
     """
     Build a source set for combo stubs
-        -  
-      
+        -
+
     """
     # Use lower case for paths to avoid case sensitive issues
     port = port.lower()
@@ -148,8 +146,8 @@ def combo_sources(family:str,port:str, board:str,  ver_flat:str) -> List[Tuple[s
     # but MUST  be used in lowercase in the stubs repo
     board_l = board.lower() if board else GENERIC_L
     board_u = board_l.upper()
-    board_l = board_l.replace("generic_","") # @GENERIC Prefix
-    
+    board_l = board_l.replace("generic_", "")  # @GENERIC Prefix
+
     return [
         (
             # StubSource.FIRMWARE,
@@ -158,15 +156,11 @@ def combo_sources(family:str,port:str, board:str,  ver_flat:str) -> List[Tuple[s
             # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
             # that would also require the port - board - variant to be discoverable runtime
             StubSource.MERGED,
-            Path(f"{family}-{ver_flat}-{port}-merged")
-            if board_l in GENERIC
-            else Path(f"{family}-{ver_flat}-{port}-{board_l}-merged"),
+            Path(f"{family}-{ver_flat}-{port}-merged") if board_l in GENERIC else Path(f"{family}-{ver_flat}-{port}-{board_l}-merged"),
         ),
         (
             StubSource.FROZEN,
-            Path(f"{family}-{ver_flat}-frozen")
-            / port
-            / board_u.upper(),  # BOARD in source frozen path needs to be UPPERCASE
+            Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper(),  # BOARD in source frozen path needs to be UPPERCASE
         ),
         (
             StubSource.CORE,

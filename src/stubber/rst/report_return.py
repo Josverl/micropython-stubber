@@ -31,7 +31,6 @@ def process(folder: Path, pattern: str):
             for item in docstrings:
                 # module, class, function/method , line, docstring
                 if item[4] != []:
-
                     signature = str(item[3]).split("::")[-1].strip()
                     docstring = item[4]
 

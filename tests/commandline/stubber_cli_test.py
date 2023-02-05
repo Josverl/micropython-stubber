@@ -98,7 +98,7 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
     mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
 
-    m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True)     # Moved to other module 
+    m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True)  # Moved to other module
 
     mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
     result = runner.invoke(stubber.stubber_cli, params)
@@ -133,8 +133,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
     m_get_tag: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
 
-    
-    m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True) 
+    m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True)
 
     m_exists = mocker.patch("stubber.commands.clone_cmd.Path.exists", return_value=True)
     result = runner.invoke(stubber.stubber_cli, ["switch", version])
@@ -202,8 +201,8 @@ def test_cmd_stub(mocker: MockerFixture):
     result = runner.invoke(stubber.stubber_cli, ["stub", "--source", "."])
 
     m_generate.assert_called_once_with(Path("."))
-    m_postprocessing.assert_called_once() 
-    m_postprocessing.assert_called_once_with( [Path(".")], pyi=True, black=True)
+    m_postprocessing.assert_called_once()
+    m_postprocessing.assert_called_once_with([Path(".")], pyi=True, black=True)
     assert result.exit_code == 0
 
 

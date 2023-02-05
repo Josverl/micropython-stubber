@@ -104,6 +104,7 @@ def test_bump_micro(before, after):
     result = bump_version(version, micro_bump=True)
     assert result == Version(after)
 
+
 @pytest.mark.parametrize(
     "before, after",
     [

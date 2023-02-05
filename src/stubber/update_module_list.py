@@ -38,7 +38,6 @@ def read_modules(path: Optional[Path] = None) -> Set[str]:
         with file.open("r") as f:
             while line := f.readline():
                 if len(line) > 1 and line[0] != "#":
-
                     file_mods = line.split()
                     log.trace(line[:-1])
                     log.trace(set(file_mods))

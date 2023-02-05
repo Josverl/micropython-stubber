@@ -23,6 +23,7 @@ __all__ = [
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+
 @dataclass
 class Fix:
     from_: str
@@ -57,7 +58,7 @@ but can also be imported with a `u` prefix
 # This table is used to try to correct the errors in the documentation.
 # it is applied to each .rst file after loading the contents.
 
-RST_DOC_FIXES :List[Tuple[str,str]] = [
+RST_DOC_FIXES: List[Tuple[str, str]] = [
     # ------------------------------------------------------------------------------------------------
     # re.rst - function and class with the same name
     # todo: issue https://github.com/micropython/micropython/issues/8273
@@ -191,7 +192,6 @@ MODULE_GLUE = {
 # ]
 
 
-
 PARAM_FIXES = [
     Fix("\\*", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"\**", "*"),  # change weirdly written wildcards \* --> *
@@ -236,10 +236,7 @@ PARAM_FIXES = [
     #     "config=['dhcp' or configtuple]",
     #     "config: Union[str,Tuple]='dhcp'"
     # ),
-    Fix(
-        "config='dhcp' or configtuple: Optional[Any]=None",
-        "config: Union[str,Tuple]='dhcp'"
-    ),
+    Fix("config='dhcp' or configtuple: Optional[Any]=None", "config: Union[str,Tuple]='dhcp'"),
     # (
     #     "='dhcp' or configtuple: Optional[Any]=None",
     #     ": Union[str,Tuple]='dhcp'",
@@ -377,9 +374,8 @@ PARAM_FIXES = [
         "bank, mode, fifo, params, *, rtr=None, extframe=False",
     ),
     # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
-    Fix(r"\s*block_num, buf, offset\s*\)", "block_num, buf, offset: Optional[int] = 0)",is_re=True),
-
-    # # This is a cleanup something that went wrong before 
+    Fix(r"\s*block_num, buf, offset\s*\)", "block_num, buf, offset: Optional[int] = 0)", is_re=True),
+    # # This is a cleanup something that went wrong before
     # Fix("**kwargs: Optional[Any]","**kwargs")
 ]
 

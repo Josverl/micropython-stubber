@@ -485,7 +485,6 @@ def _type_from_context(
     # ------------------------------------------------------
     # parse the docstring for the regexes and weigh the results accordingly
     for weighted in weighted_regex:
-
         match_iter = re.finditer(weighted[0], docstring, re.MULTILINE | re.IGNORECASE)
         for match in match_iter:
             # matches.append(match)
