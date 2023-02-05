@@ -9,6 +9,7 @@ from stubber.rst.rst_utils import _type_from_context, return_type_from_context
 # mark all tests
 pytestmark = pytest.mark.doc_stubs
 
+
 ### Test setup
 @pytest.mark.parametrize(
     "signature, docstring, expected_type, confidence",

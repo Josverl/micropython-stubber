@@ -19,7 +19,7 @@ from stubber.utils.my_version import __version__
     is_eager=True,
 )
 @click.pass_context
-def stubber_cli(ctx, verbose: int = 0):
+def stubber_cli(ctx: click.Context, verbose: int = 0) -> None:
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     ctx.ensure_object(dict)
     # replace std log handler with a custom one capped on INFO level

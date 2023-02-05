@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.11.5"
+version = "1.11.6"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -64,7 +64,22 @@ pypi-simple = "~1.0.0"
 [tool.poetry.extras]
 tools = ["mpremote", "esptool", "pyserial"]
 
-[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.docs]
+optional = true
+[tool.poetry.group.docs.dependencies]
+Sphinx = "^4.4.0"
+myst-parser = "^0.17.0"
+sphinxcontrib-mermaid = "^0.7.1"
+sphinx_rtd_theme = "^1.0.0"
+sphinx-autoapi = "^1.9.0"
+sphinx-click = "^4.4.0"
+attrs = "^22.1.0"
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.20.2"
 pytest = "^7.1.2"
 pytest-mock = "^3.10.0"
 pytest-json-report = "~1.5.0"
@@ -76,21 +91,12 @@ packaging = "~21.3"
 distro = "~1.8.0"
 pydeps = "^1.10.22"
 pytest-github-actions-annotate-failures = "^0.1.7"
-
-[tool.poetry.group.docs]
-optional = true
-[tool.poetry.group.docs.dependencies]
-Sphinx                      = "^4.4.0"
-myst-parser                 = "^0.17.0"
-sphinxcontrib-mermaid       = "^0.7.1"
-sphinx_rtd_theme            = "^1.0.0"
-sphinx-autoapi              = "^1.9.0"
-sphinx-click                = "^4.4.0"
-attrs                       = "^22.1.0"
+sourcery-cli = "^1.0.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
 
 [tool.black]
 # use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
@@ -100,14 +106,16 @@ include = '\.pyi?$'
 exclude = '''
 (
     /(
-        | \..*
         | minified
-        | micropython
-        | micropython-lib
+        | repos[\\/]micropython
+        | repos[\\/]micropython-lib
+        | repos[\\/]micropython-stubs
         | tests[\\/]mocks
         | tests[\\/]data
         | tests[\\/]rst[\\/]data
         | tests[\\/]codemods[\\/]codemod_test_cases
+        | typings
+        | snippets[\\/].*?[\\/]typings
         | scratch
         | src[\\/]stubber[\\/]codemod[\\/]_partials
     )/
@@ -239,3 +247,11 @@ exclude_lines = [
     "if sys.version_info.major == 3 and sys.version_info.minor <= 7:",
 
 ]
+
+[tool.sourcery-analytics]
+
+[tool.sourcery-analytics.thresholds]
+method_length = 50
+method_cyclomatic_complexity = 15
+method_cognitive_complexity = 15
+method_working_memory = 99

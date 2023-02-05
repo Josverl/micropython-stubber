@@ -269,11 +269,10 @@ def minify(
         except Exception as e:  # pragma: no cover
             log.exception(e)
         else:
-            return _extracted_from_minify_(target, cross_compile, target_buf, minified)
+            return minify_and_compile(target, cross_compile, target_buf, minified)
 
 
-# TODO Rename this here and in `minify`
-def _extracted_from_minify_(target, cross_compile, target_buf, minified):
+def minify_and_compile(target, cross_compile, target_buf, minified):
     log.debug("Minified file written to :", target)
     if not cross_compile:
         return 0
@@ -289,10 +288,6 @@ def _extracted_from_minify_(target, cross_compile, target_buf, minified):
         if isinstance(target_buf, io.BytesIO):
             target_buf.write(cross_targ.read_bytes())
         else:
-            mpy_target = (
-                target.with_suffix(".mpy")
-                if hasattr(target, "with_suffix")
-                else target
-            )
+            mpy_target = target.with_suffix(".mpy") if hasattr(target, "with_suffix") else target
             log.debug("mpy-cross compiled to    :", mpy_target)
     return result.returncode

@@ -2,7 +2,7 @@
 import pytest
 
 # SOT
-from stubber.stubs_from_docs import RSTReader
+from stubber.rst.reader import RSTWriter
 
 from helpers import load_rst
 
@@ -66,11 +66,12 @@ QUOTED_DOCSTR = """
 
 def test_parse_docstr_module():
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, MODULE_DOCSTR)
     # r.current_module = module # 'uhashlib'
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     assert len(r.output_dict["docstr"]) > 20
@@ -85,15 +86,16 @@ def test_parse_docstr_module():
 
 def test_parse_docstr_quoted():
     # quoted docstrings from module level constants
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, QUOTED_DOCSTR)
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     assert len(r.output_dict["constants"]) > 2
 
-    assert not any([l.startswith("# :") for l in r.output_dict["constants"]]), "Some lines were not unquoted"
-    assert not any([l.startswith("# +") for l in r.output_dict["constants"]]), "Some lines were not unquoted"
+    assert not any(l.startswith("# :") for l in r.output_dict["constants"]), "Some lines were not unquoted"
+    assert not any(l.startswith("# +") for l in r.output_dict["constants"]), "Some lines were not unquoted"
 
 
 ## method is broken over two lines
@@ -137,9 +139,10 @@ Methods
 
 
 def test_parse_long_method():
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, PYB_CAN_DOCSTR)
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     assert r.output_dict

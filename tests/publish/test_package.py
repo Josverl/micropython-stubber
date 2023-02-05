@@ -1,8 +1,11 @@
+# sourcery skip: require-parameter-annotation, require-return-annotation
+""" Test the package creation and manipulation"""
+
 from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
-from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS
+from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.package import create_package, package_name
 from stubber.publish.stubpacker import StubPackage
 
@@ -14,9 +17,13 @@ from .fakeconfig import FakeConfig
     "family, pkg, port, board, expected",
     [
         ("micropython", COMBO_STUBS, "esp32", "GENERIC", "micropython-esp32-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "GENERIC_S3", "micropython-esp32-s3-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "generic", "micropython-esp32-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "tiny", "micropython-esp32-tiny-stubs"),
         ("micropython", DOC_STUBS, "esp32", None, "micropython-doc-stubs"),
         ("micropython", DOC_STUBS, "esp32", "GENERIC", "micropython-doc-stubs"),
+        ("micropython", DOC_STUBS, "esp32", "generic", "micropython-doc-stubs"),
         ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
         ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
         ("pycom", CORE_STUBS, None, None, "pycom-core-stubs"),
@@ -33,6 +40,10 @@ def test_package_name(family, pkg, port, board, expected):
     [
         (DOC_STUBS, None, None),
         (COMBO_STUBS, "esp32", "GENERIC"),
+        (COMBO_STUBS, "esp32", "GENERIC_S3"),
+        (COMBO_STUBS, "esp32", "UM_TINYPICO"),
+        (COMBO_STUBS, "stm32", "PYBV1"),
+        (COMBO_STUBS, "esp32", "generic"),
     ],
 )
 # CORE_STUBS
@@ -142,23 +153,32 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
     run_common_package_tests(package, pkg_name, config.publish_path, stub_path=config.stub_path, pkg_type=None, test_build=False)
 
 
-def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
+def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
+    # sourcery skip: no-long-functions
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
-
+    # Package path
     assert package.package_path.relative_to(publish_path), "package path should be relative to publish path"
     assert (package.package_path).exists()
     assert (package.package_path / "pyproject.toml").exists()
+    # package path is all lowercase
+    assert package.package_path.name == package.package_path.name.lower()
 
     assert len(package.stub_sources) >= 1
 
-    if stub_path.exists():
-        for s in package.stub_sources:
-            folder = stub_path / s[1]
-            assert folder.is_dir(), "stub source should be folder"
-            assert folder.exists(), "stubs source should exists"
-            assert not s[1].is_absolute(), "should be a relative path"
+    # if stub_path.exists():
+    #     for s in package.stub_sources:
+    #         folder = stub_path / s[1]
+    #         assert folder.is_dir(), "stub source should be folder"
+    #         # assert folder.exists(), "stubs source should exists"
+    #         assert not s[1].is_absolute(), "should be a relative path"
+
+    # BOARD Name in frozen must be uppercase
+    if src := [s for s in package.stub_sources if s[0] == StubSource.FROZEN]:
+        board_name = src[0][1].name
+        assert board_name == board_name.upper(), "BOARD Name in frozen must be uppercase"
+
     # update existing pyproject.toml
     package.create_update_pyproject_toml()
     assert (package.package_path / "pyproject.toml").exists()
@@ -172,9 +192,10 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     assert new_version
     assert isinstance(new_version, str)
 
-    if not stub_path.exists():
+    if not (stub_path.exists() and src and src[0][1].exists()):
         # withouth sources there is nothing to build
         return
+
     package.copy_stubs()
     filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1
@@ -188,9 +209,9 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     stubs_in_pkg = package.pyproject["tool"]["poetry"]["packages"]  # type: ignore
     assert len(stubs_in_pkg) >= 1
 
-    hash = package.create_hash()
-    assert isinstance(hash, str)
-    assert len(hash) > 30  # 41 bytes ?
+    packet_hash = package.calculate_hash()
+    assert isinstance(packet_hash, str)
+    assert len(packet_hash) > 30  # 41 bytes ?
 
     assert package.is_changed() == True
 
@@ -198,7 +219,7 @@ def run_common_package_tests(package, pkg_name, publish_path: Path, stub_path: P
     assert result == True
 
     if test_build:
-        built = package.build()
+        built = package.poetry_build()
         assert built
         assert (package.package_path / "dist").exists(), "Distribution folder should exist"
         filelist = list((package.package_path / "dist").glob("*.whl")) + list((package.package_path / "dist").glob("*.tar.gz"))

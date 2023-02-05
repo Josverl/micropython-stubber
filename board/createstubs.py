@@ -402,7 +402,7 @@ def ensure_folder(path: str):
         start = i + 1
 
 
-def _info():  # sourcery skip: extract-duplicate-method
+def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
     "collect base information on this runtime"
     _n = sys.implementation.name  # type: ignore
     _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
@@ -478,7 +478,7 @@ def _info():  # sourcery skip: extract-duplicate-method
     # spell-checker: disable
     if "mpy" in info:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
-        if arch := [
+        arch = [
             None,
             "x86",
             "x64",
@@ -490,7 +490,8 @@ def _info():  # sourcery skip: extract-duplicate-method
             "armv7emdp",
             "xtensa",
             "xtensawin",
-        ][sys_mpy >> 10]:
+        ][sys_mpy >> 10]
+        if arch:
             info["arch"] = arch
     return info
 # spell-checker: enable
@@ -560,7 +561,7 @@ def read_path() -> str:
     return path
 
 
-def isMicroPython() -> bool:
+def is_micropython() -> bool:
     "runtime test to determine full or micropython"
     # pylint: disable=unused-variable,eval-used
     try:
@@ -576,7 +577,7 @@ def isMicroPython() -> bool:
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = isMicroPython.__module__  # type: ignore # lgtm [py/unused-local-variable]
+        c = is_micropython.__module__  # type: ignore # lgtm [py/unused-local-variable]
         return False
     except (NotImplementedError, AttributeError):
         return True
@@ -776,7 +777,7 @@ def main():
     stubber.report()
 
 
-if __name__ == "__main__" or isMicroPython():
+if __name__ == "__main__" or is_micropython():
     try:
         _log = logging.getLogger("stubber")
         logging.basicConfig(level=logging.INFO)

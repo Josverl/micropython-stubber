@@ -36,19 +36,14 @@ def read_modules(path: Optional[Path] = None) -> Set[str]:
     for file in path.glob("*.txt"):
         log.debug(f"processing: {file.name}")
         with file.open("r") as f:
-            line = f.readline()
-            while line:
+            while line := f.readline():
                 if len(line) > 1 and line[0] != "#":
-
                     file_mods = line.split()
-                    log.trace(line[0:-1])
+                    log.trace(line[:-1])
                     log.trace(set(file_mods))
                     # remove modules ending in _test
                     file_mods = [m for m in file_mods if not m.endswith("_test")]
                     all_modules = set(all_modules | set(file_mods))
-                # next
-                line = f.readline()
-
     log.trace(">" * 40)
 
     return all_modules
@@ -81,39 +76,30 @@ def main():
     #######################################################################
     # the exceptions
     #######################################################################
-    mods_problematic = set(
-        [
-            "upysh",
-            "webrepl_setup",
-            "http_client",
-            "http_client_ssl",
-            "http_server",
-            "http_server_ssl",
-        ]
-    )
-    mods_excluded = set(
-        [
-            "__main__",
-            "_main",
-            "_boot",
-            "webrepl",
-            "_webrepl",
-            "port_diag",
-            "example_sub_led",
-            "example_pub_button",
-            "upip",
-            "upip_utarfile",
-            "upysh",
-            # DOCSTUB_SKIP = [
-            "uasyncio",  # can create better stubs from frozen python modules.
-            "builtins",  # conflicts with static type checking , has very little information anyway
-            "re",  # regex is too complex
-            # when using only .pyi files, these are safe to use
-            # "collections",
-            # "io",
-            # "uio",
-        ]
-    )
+    mods_problematic = {
+        "upysh",
+        "webrepl_setup",
+        "http_client",
+        "http_client_ssl",
+        "http_server",
+        "http_server_ssl",
+    }
+    mods_excluded = {
+        "__main__",
+        "_main",
+        "_boot",
+        "webrepl",
+        "_webrepl",
+        "port_diag",
+        "example_sub_led",
+        "example_pub_button",
+        "upip",
+        "upip_utarfile",
+        "upysh",
+        "uasyncio",
+        "builtins",
+        "re",
+    }
 
     all_modules = read_modules()
     modules_to_stub = sorted(all_modules - set(mods_excluded | mods_problematic))
@@ -133,7 +119,7 @@ def main():
                 lines = [l for l in lines if l[0] == "#"]
         else:
             lines = ["# list of modules to stub."]
-        lines = lines + [m + "\n" for m in modules_to_stub]
+        lines += [m + "\n" for m in modules_to_stub]
         log.info(f"writing module list to {modules_txt}")
         with open(modules_txt, "w") as f:
             f.writelines(lines)

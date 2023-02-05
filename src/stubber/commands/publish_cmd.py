@@ -3,6 +3,7 @@ from typing import List, Union
 import click
 from loguru import logger as log
 from stubber.commands.cli import stubber_cli
+from stubber.publish.package import GENERIC_L
 from stubber.publish.publish import publish_multiple
 from tabulate import tabulate
 from stubber.utils.config import CONFIG
@@ -34,7 +35,7 @@ from stubber.utils.config import CONFIG
     "-b",
     "boards",
     multiple=True,
-    default=["GENERIC"],  # or "auto" ?
+    default=[GENERIC_L],  # or "auto" ?
     show_default=True,
     help="multiple: ",
 )
@@ -48,11 +49,10 @@ from stubber.utils.config import CONFIG
     help="publish to PYPI or Test-PYPI",
 )
 @click.option(
-    "--dry-run",
-    "dryrun",
+    "--build",
     is_flag=True,
     default=False,
-    help="go though the motions but do not publish",
+    help="build before publish",
 )
 @click.option(
     "--force",
@@ -61,40 +61,31 @@ from stubber.utils.config import CONFIG
     help="create new post release even if no changes detected",
 )
 @click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Do not actually publish, just show what would be done",
+)
+@click.option(
     "--clean",
     is_flag=True,
     default=False,
     help="clean folders after processing and publishing",
 )
-
-# @click.option(
-#     "--type",
-#     "-t",
-#     "stub_type",
-#     default=ALL_TYPES[0],
-#     show_default=True,
-#     type=click.Choice(ALL_TYPES),
-#     help="stub type to publish",
-# )
-
-
 def cli_publish(
     family: str,
     versions: Union[str, List[str]],
     ports: Union[str, List[str]],
     boards: Union[str, List[str]],
-    production: bool,
-    dryrun: bool,
-    force: bool,
-    clean: bool,
-    # stub_type: str,
+    production: bool = True,
+    build: bool = False,
+    force: bool = False,
+    dry_run: bool = False,
+    clean: bool = False,
 ):
     """
     Commandline interface to publish stubs.
     """
-    # force overrules dryrun
-    if force:
-        dryrun = False
     # lists please
     versions = list(versions)
     ports = list(ports)
@@ -105,14 +96,14 @@ def cli_publish(
     log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
 
     results = publish_multiple(
-        frozen=True,
         family=family,
         versions=versions,
         ports=ports,
         boards=boards,
         production=production,
-        dryrun=dryrun,
+        build=build,
         force=force,
+        dry_run=dry_run,
         clean=clean,
     )
     log.info(tabulate(results, headers="keys"))

@@ -11,7 +11,7 @@ class AddCommentTest(CodemodTest):
 
     TRANSFORM = AddComment  # The codemod that will be instantiated for us in assertCodemod.
 
-    def test_add_one(self) -> None:
+    def test_add_one(self) -> None:  # sourcery skip: class-extract-method
         before = """\
             foo = "bar"
         """

@@ -12,9 +12,9 @@ from helpers import read_stub
 pytestmark = pytest.mark.doc_stubs
 
 # SOT
-from stubber.stubs_from_docs import TYPING_IMPORT, RSTReader, generate_from_rst
+from stubber.stubs_from_docs import generate_from_rst
+from stubber.rst.reader import RSTWriter, TYPING_IMPORT
 
-TEST_DOCFIX = False  # run the tests agains the doc_fix_branch
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 
 
@@ -46,16 +46,8 @@ def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path)
     "make sure a recent branch is checked out"
 
     git.switch_branch("master", testrepo_micropython.as_posix())
-    if TEST_DOCFIX:
-        # run test against the proposed documentation fixes
-        try:
-            git.switch_branch("fix_lib_documentation", testrepo_micropython.as_posix())
-        except Exception:
-            # git.switch_branch("master", MICROPYTHON_FOLDER)
-            git.checkout_commit("micropython/master")
 
-    v_tag = git.get_tag(testrepo_micropython.as_posix()) or "xx_x"
-    yield v_tag
+    yield git.get_tag(testrepo_micropython.as_posix()) or "xx_x"
 
 
 # TODO: Source version and tag
@@ -122,7 +114,7 @@ EXP_10 = [
 )
 def test_rst_parse_function(filename, expected):
     # testcase = FN_1
-    r = RSTReader()
+    r = RSTWriter()
     r.read_file(Path(filename))
     # process
     r.parse()
@@ -152,14 +144,14 @@ CLASS_10 = [
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
         "    def info(self) -> Tuple:",
-        "    def readblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
-        "    def writeblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
+        "    def readblocks(self, block_num, buf, offset: Optional[int] = 0) -> Any:",
+        "    def writeblocks(self, block_num, buf, offset: Optional[int] = 0) -> Any:",
     ],
 )
 # def test_rst_parse_class_10(expected: List[str]):
 def test_rst_parse_class_10(line: str):
     # testcase = FN_1
-    r = RSTReader()
+    r = RSTWriter()
     r.read_file(Path("tests/rst/data/class_10.rst"))
     # process
     r.parse()
@@ -172,7 +164,7 @@ def test_rst_parse_class_10(line: str):
 
 
 @pytest.mark.parametrize(
-    "param_in, param_out",
+    "param_in, expected",
     [
         ("", ""),
         ("()", "()"),
@@ -187,29 +179,38 @@ def test_rst_parse_class_10(line: str):
         ),
         ("lambda)", "lambda_fn)"),
         ("(block_device or path)", "(block_device_or_path)"),
-        # TODO - check if this is correct/needed
         # network - AbstractNIC.connect
-        ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"),
-        # ("()", "()"),
+        # ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"), # old - incorrect
+        ("([service_id, key=None, *, ...])", "(service_id: Optional[Any]=None, key: Optional[Any]=None, *args, **kwargs)"),  # New
+        ("(block_num, buf, offset)", "(block_num, buf, offset: Optional[int] = 0)"),
+        ("(key, mode[, IV])", "(key, mode, IV: Optional[Any]=None)"),
+        ("([(ip, subnet, gateway, dns)])", "(configtuple: Optional[Any]=None)"),
+        # a different notations of optionals
+        ("(id1, [foo], [bar])", "(id1, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
+        ("(id2, [foo] [,bar])", "(id2, foo: Optional[Any]=None ,bar: Optional[Any]=None)"),
+        # ("(id3, [foo, bar])","(id3, foo: Optional[Any]=None, bar: Optional[Any]=None)"),
+        # with assignments
+        ("(id4, foo=-1, [bar])", "(id4, foo=-1, bar: Optional[Any]=None)"),
+        # ("(id5, foo=-1, [bar=2])","(id5, foo=-1, bar: Optional[Any]=2)"),
     ],
 )
-def test_fix_param(param_in, param_out):
+def test_fix_param(param_in, expected):
     "validate known parameter typing notation errors"
-    r = RSTReader()
+    r = RSTWriter()
     result = r.fix_parameters(param_in)
-    assert result == param_out
+    assert result == expected
 
 
 def test_import_typing():
     "always include typing"
-    r = RSTReader()
+    r = RSTWriter()
     r.prepare_output()
     for line in TYPING_IMPORT:
         assert line.strip() in [l.rstrip() for l in r.output], f"did not import typing : '{line}'"
 
 
 def test_fix_param_dynamic():
-    r = RSTReader()
+    r = RSTWriter()
 
     # in 'machine' module
 
@@ -330,7 +331,6 @@ def test_pyright_invalid_strings(pyright_results, capsys):
 @pytest.mark.docfix
 # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_pyright_obscured_definitions(pyright_results, capsys):
-
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
     # Only look at errors

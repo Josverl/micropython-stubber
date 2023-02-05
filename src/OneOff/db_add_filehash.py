@@ -14,7 +14,7 @@ def update_db(source: Path, production: bool):
 
     assert isinstance(db_keys, list)
     if len(db_keys) == 0:
-        raise Exception(f"no keys in database, or empty database '{db.filename}'")
+        raise IndexError(f"no keys in database, or empty database '{db.filename}'")
     if "stub_hash" not in db_keys:
         db.add_new_key("stub_hash", "")
 
