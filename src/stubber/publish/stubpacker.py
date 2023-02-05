@@ -455,7 +455,6 @@ class StubPackage:
                 + [self.package_path / "README.md"]
                 # do not include [self.toml_file]
             )
-        # print(f"Creating hash for {self.package_name} with {len(files)} files : ", end="" )
         for file in sorted(files):
             try:
                 with open(file, "rb") as f:
@@ -466,10 +465,7 @@ class StubPackage:
                         file_hash.update(data)
             except FileNotFoundError:
                 log.warning(f"File not found {file}")
-                # ignore file not found errors
-                # this is to allow the hash to be created WHILE GIT / VIRUS SCANNERS HOLD LINGERING FILES
-                pass
-        # print(f"Hash: {file_hash.hexdigest()}")
+                # ignore file not found errors to allow the hash to be created WHILE GIT / VIRUS SCANNERS HOLD LINGERING FILES
         return file_hash.hexdigest()
 
     def update_hashes(self, ret=False) -> None:
@@ -482,10 +478,7 @@ class StubPackage:
         The default checks the hash of all files, including the .md files.
         """
         current = self.calculate_hash(include_md=include_md)
-        if include_md:
-            stored = self.hash
-        else:
-            stored = self.stub_hash
+        stored = self.hash if include_md else self.stub_hash
         log.warning(f"changed: {self.hash != current} : Stored {stored} Current: {current}")
         return stored != current
 
@@ -625,7 +618,7 @@ class StubPackage:
         self,
         production: bool,  # PyPI or Test-PyPi - USED TO FIND THE NEXT VERSION NUMBER
         force=False,  # BUILD even if no changes
-    ) -> bool:  # sourcery skip: default-mutable-arg, require-parameter-annotation
+    ) -> bool:    # sourcery skip: default-mutable-arg, extract-duplicate-method, require-parameter-annotation
         """
         Build a package
         look up the previous package version in the dabase
@@ -651,8 +644,7 @@ class StubPackage:
             log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {production}")
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
-            build_ok = self.poetry_build()
-            if build_ok:
+            if self.poetry_build():
                 self.status["result"] = "Build OK"
             else:
                 log.warning(f"{self.package_name}: skipping as build failed")
@@ -668,7 +660,7 @@ class StubPackage:
         build=False,  #
         force=False,  # publish even if no changes
         clean: bool = False,  # clean up afterwards
-    ) -> bool:  # sourcery skip: default-mutable-arg, require-parameter-annotation
+    ) -> bool:  # sourcery skip: default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches
         """
         Publish a package to PyPi
         look up the previous package version in the dabase, and only publish if there are changes to the package

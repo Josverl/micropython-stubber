@@ -15,6 +15,7 @@ rule_settings:
   - use-fstring-for-concatenation
   - do-not-use-staticmethod
   - name-type-suffix
+  - invert-any-all
 
   python_version: '3.8'
 
