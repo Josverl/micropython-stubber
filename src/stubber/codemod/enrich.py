@@ -73,11 +73,7 @@ def enrich_file(target_path: Path, docstub_path: Path, diff=False, write_back=Fa
         log.trace(f"Write back enriched file {target_path}")
         # write updated code to file
         target_path.write_text(newcode, encoding="utf-8")
-    return (
-        diff_code(oldcode, newcode, 5, filename=target_path.name)
-        if diff
-        else newcode
-    )
+    return diff_code(oldcode, newcode, 5, filename=target_path.name) if diff else newcode
 
 
 def enrich_folder(source_folder: Path, docstub_path: Path, show_diff=False, write_back=False, require_docstub=False) -> int:

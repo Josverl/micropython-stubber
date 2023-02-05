@@ -42,7 +42,7 @@ def cli_get_frozen(
 
     stub_paths: List[Path] = []
 
-    if len(version) == 0:
+    if not version:
         version = utils.clean_version(git.get_tag(CONFIG.mpy_path.as_posix()) or "0.0")
     if version:
         log.info("MicroPython version : {}".format(version))

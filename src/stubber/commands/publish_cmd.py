@@ -59,7 +59,6 @@ from stubber.utils.config import CONFIG
     default=False,
     help="clean folders after processing and publishing",
 )
-
 def cli_publish(
     family: str,
     versions: Union[str, List[str]],

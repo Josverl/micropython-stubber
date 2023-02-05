@@ -46,6 +46,7 @@ __all__ = [
 
 EMPTY_DOCSTR = '""" """'
 
+
 def spaces(n: int = 4) -> str:
     return " " * n
 
@@ -284,7 +285,16 @@ class ClassSourceDict(SourceDict):
 
 
 class FunctionSourceDict(SourceDict):
-    def __init__(self, name: str, *, definition: Optional[List[str]] = None, docstr: Optional[List[str]] = None, indent: int = 0, decorators: Optional[List[str]] = None, lf="\n"):
+    def __init__(
+        self,
+        name: str,
+        *,
+        definition: Optional[List[str]] = None,
+        docstr: Optional[List[str]] = None,
+        indent: int = 0,
+        decorators: Optional[List[str]] = None,
+        lf="\n",
+    ):
         "set correct order for function and method definitions"
         # defaults
         if definition is None:

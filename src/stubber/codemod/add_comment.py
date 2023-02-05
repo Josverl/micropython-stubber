@@ -43,15 +43,11 @@ class AddComment(VisitorBasedCodemodCommand):
 
     def visit_Comment(self, node: Comment) -> None:
         """
-        connect comments from the source 
+        connect comments from the source
         """
         if self._regex_pattern.search(node.value):
             self.needs_add = False
 
     def leave_Module(self, original_node: Module, updated_node: Module) -> Module:
         """If the tag already exists, don't modify the file."""
-        return (
-            insert_header_comments(updated_node, self.comments)
-            if self.needs_add
-            else updated_node
-        )
+        return insert_header_comments(updated_node, self.comments) if self.needs_add else updated_node

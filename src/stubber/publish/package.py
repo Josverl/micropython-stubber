@@ -19,7 +19,7 @@ log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 
-def package_name(pkg_type:str, *,port: str = "", board: str = "", family="micropython", **kwargs) -> str:
+def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micropython", **kwargs) -> str:
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
@@ -62,15 +62,15 @@ def create_package(
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBO_STUBS,
-) -> StubPackage:
+) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
     """
-    package = None
     ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
         assert port != ""
-        if not board: board = "GENERIC"
+        if not board:
+            board = "GENERIC"
         stubs: List[Tuple[str, Path]] = [
             (
                 # StubSource.FIRMWARE,
@@ -98,14 +98,10 @@ def create_package(
                 Path(f"{family}-{ver_flat}-docstubs"),
             ),
         ]
-
     elif pkg_type == CORE_STUBS:
         # TODO add core stubs
         raise NotImplementedError(type)
     else:
         raise NotImplementedError(type)
 
-    package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
-    return package
-
-
+    return StubPackage(pkg_name, version=mpy_version, stubs=stubs)

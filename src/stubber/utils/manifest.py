@@ -1,3 +1,5 @@
+"""Create a `module.json` manifest listing all files/stubs in this folder and subfolders."""	
+
 import json
 import os
 from pathlib import Path

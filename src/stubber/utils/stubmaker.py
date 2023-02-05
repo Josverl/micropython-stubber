@@ -1,3 +1,5 @@
+"""Generate stub files for micropython modules using mypy/stubgen"""
+
 import sys
 from pathlib import Path
 
