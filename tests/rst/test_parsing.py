@@ -113,6 +113,7 @@ def test_parse_class_modulename(line, module):
     r.current_module = module
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     assert line in [l.rstrip() for l in r.output]
@@ -133,11 +134,12 @@ def test_parse_class_micro_modulename(line):
     # r.current_module = module # 'uhashlib'
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     # don't care about indentation,
     # but one of the lines must start with the class def
-    assert any([l.strip().startswith(line) for l in r.output])
+    assert any(l.strip().startswith(line) for l in r.output)
 
 
 # Nice to haves
