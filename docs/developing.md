@@ -6,7 +6,7 @@
 git clone https://github.com/Josverl/micropython-stubber.git
 cd micropython-stubber
 
-poetry install
+poetry install --with dev --with docs
 stubber clone
 ```
 
