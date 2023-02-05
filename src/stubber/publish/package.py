@@ -114,7 +114,8 @@ def create_package(
         assert port != "", "port must be specified for combo stubs"
         # Use lower case for paths to avoid case sensitive issues
         port = port.lower()
-        # board is always uppercase by convention (GENERIC)
+        # BOARD in the micropython repo is always uppercase by convention (GENERIC)
+        # but MUST  be used in lowercase in the stubs repo
         board = board.lower() if board else GENERIC
         stubs: List[Tuple[str, Path]] = []
         stubs= [
