@@ -1,9 +1,12 @@
 """Test candidates.py"""
 from pathlib import Path
 from typing import Generator
+
 import pytest
 
-from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_candidates
+from stubber.publish.candidates import (COMBO_STUBS, DOC_STUBS,
+                                        docstub_candidates, frozen_candidates,
+                                        subfolder_names, version_candidates)
 from stubber.publish.publish import build_worklist
 
 
@@ -128,6 +131,7 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
 def test_worklist(family, versions, ports, boards, count):
     wl = build_worklist(family=family, versions=versions, ports=ports, boards=boards)
     assert isinstance(wl, list)
-    assert len(wl) == count
+    msg = ", ".join([l["port"] for l in wl])
+    assert len(wl) == count, f"expected {count}, found {len(wl)} {msg}."
 
 
