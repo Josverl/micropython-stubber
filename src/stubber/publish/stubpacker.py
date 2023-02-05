@@ -19,6 +19,8 @@ from stubber.publish.enums import StubSource
 from stubber.publish.package import StubSource
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
+from stubber.publish.pypi import Version, get_pypi_versions
+from pysondb import PysonDB
 
 # TODO: Get git tag and store in DB for reference
 # import stubber.basicgit as git
@@ -27,6 +29,10 @@ from stubber.utils.versions import clean_version
 # https://github.com/Josverl/micropython-stubs/tree/d45c8fa3dbdc01978af58532ff4c5313090aabfb
 
 #  git -C .\all-stubs\ log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
+
+from typing import NewType
+
+Status = NewType("Status", Dict[str, Union[str, None]])
 
 
 class StubPackage:
@@ -78,13 +84,6 @@ class StubPackage:
             STUB_PATH - root-relative path to the folder where the stubs are stored ('./stubs').
 
         """
-        # package must be stored in its own folder, add package name if needed
-        # if not publish_path.name == package_name:
-        #     package_path = publish_path / package_name
-        # else:
-        #     package_path = publish_path
-        # # create the package folder
-        # package_path.mkdir(parents=True, exist_ok=True)
         if json_data is not None:
 
             self.from_dict(json_data)
@@ -107,6 +106,7 @@ class StubPackage:
             else:
                 self.stub_sources: List[Tuple[str, Path]] = []
             self._publish = True
+        self.status: Status = Status({"result": "-", "name": self.package_name, "version": self.pkg_version, "error": None})
 
     @property
     def package_path(self) -> Path:
@@ -134,7 +134,7 @@ class StubPackage:
         return str(parse(pyproject["tool"]["poetry"]["version"]))
 
     @pkg_version.setter
-    def pkg_version(self, version: str)->None:
+    def pkg_version(self, version: str) -> None:
         # sourcery skip: remove-unnecessary-cast
         "set the version of the package"
         if not isinstance(version, str):  # type: ignore
@@ -149,6 +149,25 @@ class StubPackage:
         with open(_toml, "wb") as output:
             tomli_w.dump(pyproject, output)
 
+    def update_pkg_version(self, production: bool) -> str:
+        """Get the next version for the package"""
+        return (
+            self.get_prerelease_package_version(production) if self.mpy_version == "latest" else self.get_next_package_version(production)
+        )
+
+    def get_prerelease_package_version(self, production: bool = False) -> str:
+        """Get the next prerelease version for the package."""
+        base = Version("1.20")  # TODO hardcoded version - should be the next minor version after the last release
+        rc = 744  # FIXME: #307 hardcoded prerelease version - should be based on the git commit count
+        return str(bump_postrelease(base, rc=rc))
+
+    def get_next_package_version(self, prod: bool = False) -> str:
+        """Get the next version for the package."""
+        base = Version(self.pkg_version)
+        if pypi_versions := get_pypi_versions(self.package_name, production=prod, base=base):
+            self.pkg_version = str(pypi_versions[-1])
+        return self.bump()
+
     # -----------------------------------------------
     @property
     def pyproject(self) -> Union[Dict[str, Any], None]:
@@ -161,7 +180,7 @@ class StubPackage:
         return pyproject
 
     @pyproject.setter
-    def pyproject(self, pyproject:Dict)->None:
+    def pyproject(self, pyproject: Dict) -> None:
         # check if the result is a valid toml file
 
         try:
@@ -177,7 +196,7 @@ class StubPackage:
 
     # -----------------------------------------------
 
-    def to_dict(self)->dict:
+    def to_dict(self) -> dict:
         """return the package as a dict to store in the jsondb
 
         need to simplify some of the Objects to allow serialisation to json
@@ -198,7 +217,7 @@ class StubPackage:
             "stub_hash": self.stub_hash,
         }
 
-    def from_dict(self, json_data:Dict)->None:
+    def from_dict(self, json_data: Dict) -> None:
         """load the package from a dict (from the jsondb)"""
         self.package_name = json_data["name"]
         # self.package_path = Path(json_data["path"])
@@ -260,10 +279,7 @@ class StubPackage:
                     self.stub_sources[n] = (stub_type, merged_path)
                 fw_path = merged_path
             # check if path exists
-            if (
-                not (CONFIG.stub_path / fw_path).exists()
-                and stub_type != StubSource.FROZEN
-            ):
+            if not (CONFIG.stub_path / fw_path).exists() and stub_type != StubSource.FROZEN:
                 raise FileNotFoundError(f"Could not find stub source folder {fw_path}")
 
         # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
@@ -356,7 +372,7 @@ class StubPackage:
         # option : append other license files
         shutil.copy(CONFIG.template_path / "LICENSE.md", self.package_path)
 
-    def create_update_pyproject_toml(self)  -> None:
+    def create_update_pyproject_toml(self) -> None:
         """
         create or update/overwrite a `pyproject.toml` file by combining a template file
         with the given parameters.
@@ -390,17 +406,16 @@ class StubPackage:
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 
-    def update_included_stubs(self) -> None:
+    def update_included_stubs(self) -> int:
         "Add the stub files to the pyproject.toml file"
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
         _pyproject["tool"]["poetry"]["packages"] = [
-            {"include": p.relative_to(self.package_path).as_posix()}
-            for p in sorted((self.package_path).rglob("*.pyi"))
+            {"include": p.relative_to(self.package_path).as_posix()} for p in sorted((self.package_path).rglob("*.pyi"))
         ]
         # write out the pyproject.toml file
         self.pyproject = _pyproject
-
+        return len(_pyproject["tool"]["poetry"]["packages"])
         # OK
 
     def clean(self) -> None:
@@ -418,7 +433,7 @@ class StubPackage:
             for f in (self.package_path).rglob(wc):
                 f.unlink()
 
-    def create_hash(self, include_md:bool=True) -> str:
+    def calculate_hash(self, include_md: bool = True) -> str:
         # sourcery skip: reintroduce-else, swap-if-else-branches, use-named-expression
         """
         Create a SHA1 hash of all files in the package, excluding the pyproject.toml file itself.
@@ -432,33 +447,47 @@ class StubPackage:
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
         file_hash = hashlib.sha1()
-        files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
+        # Stubs Only
+        files = list((self.package_path).rglob("**/*.pyi"))
         if include_md:
             files += (
                 [self.package_path / "LICENSE.md"]
                 + [self.package_path / "README.md"]
                 # do not include [self.toml_file]
             )
-
+        # print(f"Creating hash for {self.package_name} with {len(files)} files : ", end="" )
         for file in sorted(files):
-            with open(file, "rb") as f:
-                while True:
-                    data = f.read(BUF_SIZE)
-                    if not data:
-                        break
-                    file_hash.update(data)
+            try:
+                with open(file, "rb") as f:
+                    while True:
+                        data = f.read(BUF_SIZE)
+                        if not data:
+                            break
+                        file_hash.update(data)
+            except FileNotFoundError:
+                log.warning(f"File not found {file}")
+                # ignore file not found errors
+                # this is to allow the hash to be created WHILE GIT / VIRUS SCANNERS HOLD LINGERING FILES
+                pass
+        # print(f"Hash: {file_hash.hexdigest()}")
         return file_hash.hexdigest()
-    
-    def update_hashes(self) -> None:
-        """Update the pachage hashes"""
-        self.hash = self.create_hash()
-        self.stub_hash = self.create_hash(include_md=False)
 
-    def is_changed(self) -> bool:
-        "Check if the package has changed, based on the current and the stored hash"
-        current = self.create_hash()
-        log.trace(f"changed: {self.hash != current} : Stored {self.hash} Current: {current}")
-        return self.hash != current
+    def update_hashes(self, ret=False) -> None:
+        """Update the package hashes. Resets is_changed() to False"""
+        self.hash = self.calculate_hash()
+        self.stub_hash = self.calculate_hash(include_md=False)
+
+    def is_changed(self, include_md: bool = True) -> bool:
+        """Check if the package has changed, based on the current and the stored hash.
+        The default checks the hash of all files, including the .md files.
+        """
+        current = self.calculate_hash(include_md=include_md)
+        if include_md:
+            stored = self.hash
+        else:
+            stored = self.stub_hash
+        log.warning(f"changed: {self.hash != current} : Stored {stored} Current: {current}")
+        return stored != current
 
     def bump(self, *, rc: int = 0) -> str:
         """
@@ -469,7 +498,7 @@ class StubPackage:
             current = Version(self.pkg_version)
             assert isinstance(current, Version)
             # bump the version
-            self.pkg_version = str(bump_postrelease(current, rc=rc))
+            self.pkg_version = str(bump_postrelease(current=current, rc=rc))
         except Exception as e:  # pragma: no cover
             log.error(f"Error: {e}")
         return self.pkg_version
@@ -512,6 +541,10 @@ class StubPackage:
         return True
 
     def write_package_json(self) -> None:
+        """write the package.json file to disk"""
+        # make sure folder exists
+        if not self.package_path.exists():
+            self.package_path.mkdir(parents=True, exist_ok=True)
         # write the json to a file
         with open(self.package_path / "package.json", "w") as f:
             json.dump(self.to_dict(), f, indent=4)
@@ -522,11 +555,11 @@ class StubPackage:
         """
         return self.run_poetry(["check", "-vvv"])
 
-    def build(self) -> bool:
+    def poetry_build(self) -> bool:
         """build the package by running `poetry build`"""
         return self.run_poetry(["build", "-vvv"])
 
-    def publish(self, production:bool=False) -> bool:
+    def poetry_publish(self, production: bool = False) -> bool:
         if not self._publish:
             log.warning(f"Publishing is disabled for {self.package_name}")
             return False
@@ -538,6 +571,142 @@ class StubPackage:
         else:
             log.debug("Publishing to TEST-PyPi https://test.pypy.org")
             params = ["publish", "-r", "test-pypi"]
+        log.error(f"Publishing {self.package_name} to {params} is Skipped")
         r = self.run_poetry(params)
         print("")  # add a newline after the output
         return r
+
+    def are_package_sources_available(self) -> bool:
+        """
+        Check if (all) the packages sources exist.
+        """
+        ok = True
+        for (name, path) in self.stub_sources:
+            if not (CONFIG.stub_path / path).exists():
+                # todo: below is a workaround for different types, but where is the source of this difference coming from?
+                msg = (
+                    f"{self.package_name}: source '{name._value_}' not found: {CONFIG.stub_path / path}"
+                    if isinstance(name, StubSource)
+                    else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
+                )
+                if name != StubSource.FROZEN:
+                    log.debug(msg)
+                    self.status["error"] = msg
+                    ok = False
+                else:
+                    # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
+                    log.debug(msg)
+        return ok
+
+    def update_package(self) -> bool:
+        """Update the package files, if all the sources are available"""
+        log.info(f"- Update {self.package_path.name}")
+        log.trace(f"{self.package_path.as_posix()}")
+
+        # check if the sources exist
+        ok = self.are_package_sources_available()
+        if not ok:
+            log.debug(f"{self.package_name}: skipping as one or more source stub folders are missing")
+            self.status["error"] = "Skipped, stub folder(s) missing"
+            shutil.rmtree(self.package_path.as_posix())
+            self._publish = False  # type: ignore
+            return True
+        try:
+            self.update_package_files()
+            self.update_included_stubs()
+            self.check()
+        except Exception as e:  # pragma: no cover
+            log.error(f"{self.package_name}: {e}")
+            self.status["error"] = str(e)
+            return False
+        return True
+
+    def build(
+        self,
+        production: bool,  # PyPI or Test-PyPi - USED TO FIND THE NEXT VERSION NUMBER
+        force=False,  # BUILD even if no changes
+    ) -> bool:  # sourcery skip: default-mutable-arg, require-parameter-annotation
+        """
+        Build a package
+        look up the previous package version in the dabase
+            - update package files
+            - build the wheels and sdist
+        """
+        log.debug("=" * 40)
+        log.info(f"Build: {self.package_path.name}")
+        ok = self.update_package()
+        self.status["version"] = self.pkg_version
+        if not ok:
+            log.warning(f"{self.package_name}: skipping as build failed")
+            self.status["error"] = "Build failed"
+            return False
+        # If there are changes to the package, then publish it
+        if self.is_changed() or force:
+            #  Build the distribution files
+            log.info(f"Found changes to package sources: {self.package_name} {self.pkg_version} ")
+            log.debug(f"Old hash {self.hash} != New hash {self.calculate_hash()}")
+            old_ver = self.pkg_version
+            self.status["version"] = self.update_pkg_version(production)
+            # to get the next version
+            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {production}")
+            self.write_package_json()
+            log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
+            build_ok = self.poetry_build()
+            if build_ok:
+                self.status["result"] = "Build OK"
+            else:
+                log.warning(f"{self.package_name}: skipping as build failed")
+                self.status["error"] = "Build failed"
+                return False
+        return True
+
+    def publish(
+        self,
+        db: PysonDB,
+        *,
+        production: bool,  # PyPI or Test-PyPi
+        build=False,  #
+        force=False,  # publish even if no changes
+        clean: bool = False,  # clean up afterwards
+    ) -> bool:  # sourcery skip: default-mutable-arg, require-parameter-annotation
+        """
+        Publish a package to PyPi
+        look up the previous package version in the dabase, and only publish if there are changes to the package
+        - change determied by hash across all files
+
+        Build
+            - update package files
+            - build the wheels and sdist
+        Publish
+            - publish to PyPi
+            - update database with new hash
+        """
+        log.info(f"Publish: {self.package_path.name}")
+        if self.is_changed() or build or force:
+            self.build(production=production, force=True)
+
+        self.update_pkg_version(production=production)
+        # Publish the package to PyPi, Test-PyPi or Github
+        if self.is_changed() or force:
+            if self.mpy_version == "latest":
+                log.warning("version: `latest` package will only be available on Github, and not published to PyPi.")
+                self.status["result"] = "Published to GitHub"
+            else:
+                self.update_hashes()  # resets is_changed to False
+                pub_ok = self.poetry_publish(production=production)
+                if not pub_ok:
+                    log.warning(f"{self.package_name}: Publish failed for {self.pkg_version}")
+                    self.status["error"] = "Publish failed"                    
+                    return False
+                self.status["result"] = "Published to PyPi" if production else "Published to Test-PyPi"
+                self.update_hashes()
+                # get the package state and add it to the database
+                db.add(self.to_dict())
+                db.commit()
+                return True
+        else:
+            log.debug(f"No changes to package : {self.package_name} {self.pkg_version}")
+
+        if clean:
+            self.clean()
+        return True

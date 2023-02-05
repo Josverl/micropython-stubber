@@ -64,18 +64,6 @@ pypi-simple = "~1.0.0"
 [tool.poetry.extras]
 tools = ["mpremote", "esptool", "pyserial"]
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
-pytest-mock = "^3.10.0"
-pytest-json-report = "~1.5.0"
-pytest-metadata = "^2.0.2"
-mock = "^4.0.3"
-coverage = "^6.4.3"
-pyright = "^1.1.265"
-packaging = "~21.3"
-distro = "~1.8.0"
-pydeps = "^1.10.22"
-pytest-github-actions-annotate-failures = "^0.1.7"
 
 [tool.poetry.group.docs]
 optional = true
@@ -87,6 +75,22 @@ sphinx_rtd_theme            = "^1.0.0"
 sphinx-autoapi              = "^1.9.0"
 sphinx-click                = "^4.4.0"
 attrs                       = "^22.1.0"
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.20.2"
+pytest = "^7.1.2"
+pytest-mock = "^3.10.0"
+pytest-json-report = "~1.5.0"
+pytest-metadata = "^2.0.2"
+mock = "^4.0.3"
+coverage = "^6.4.3"
+pyright = "^1.1.265"
+packaging = "~21.3"
+distro = "~1.8.0"
+pydeps = "^1.10.22"
+pytest-github-actions-annotate-failures = "^0.1.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

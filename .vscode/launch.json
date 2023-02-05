@@ -32,12 +32,11 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-v",
-                "merge",
-                "--version",
-                "v1.19.1"
+                "-v",
+                "get-frozen",
+                // "switch",
+                // "v1.19.1"
                 // "get-frozen",
-                // "get-frozen",
-                // "publish",
                 // "--version",
                 // "v1.19.1",
                 // "--port",

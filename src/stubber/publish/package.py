@@ -19,7 +19,7 @@ log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 
-def package_name(pkg_type, port: str = "", board: str = "", family="micropython", **kwargs) -> str:
+def package_name(pkg_type:str, *,port: str = "", board: str = "", family="micropython", **kwargs) -> str:
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
@@ -30,11 +30,6 @@ def package_name(pkg_type, port: str = "", board: str = "", family="micropython"
         return f"{family}-core-stubs".lower()
 
     raise NotImplementedError(port, board, pkg_type)
-
-
-# def package_path(port, board, mpy_version, pub_path: Path, pkg=COMBINED, family="micropython") -> Path:
-#     "generate a package name"
-#     return pub_path / package_name( port, board, pkg, family)
 
 
 def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str) -> Union[Dict, None]:
@@ -51,12 +46,6 @@ def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version:
     # sort
     packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
 
-    # [
-    #     log.trace(
-    #         f"{x['data']['name']} - {x['data']['mpy_version']} - {x['data']['pkg_version']}"
-    #     )
-    #     for x in packages
-    # ]
     if len(packages) > 0:
         pkg_from_db = packages[-1]["data"]
         log.debug(f"Found latest {pkg_name} == {pkg_from_db['pkg_version']}")
@@ -76,13 +65,12 @@ def create_package(
 ) -> StubPackage:
     """
     create and initialize a package with the correct sources
-
     """
     package = None
+    ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
         assert port != ""
-        assert board != ""
-        ver_flat = clean_version(mpy_version, flat=True)
+        if not board: board = "GENERIC"
         stubs: List[Tuple[str, Path]] = [
             (
                 # StubSource.FIRMWARE,
@@ -102,18 +90,14 @@ def create_package(
                 Path("micropython_core"),
             ),
         ]
-        package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
     elif pkg_type == DOC_STUBS:
         # TODO add doc stubs
-        ver_flat = clean_version(mpy_version, flat=True)
-
         stubs: List[Tuple[str, Path]] = [
             (
                 "Doc stubs",
                 Path(f"{family}-{ver_flat}-docstubs"),
             ),
         ]
-        package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
 
     elif pkg_type == CORE_STUBS:
         # TODO add core stubs
@@ -121,4 +105,7 @@ def create_package(
     else:
         raise NotImplementedError(type)
 
+    package = StubPackage(pkg_name, version=mpy_version, stubs=stubs)
     return package
+
+

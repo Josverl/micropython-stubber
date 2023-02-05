@@ -24,6 +24,7 @@ rule_settings:
     - comment
 
 ignore:
+  - "*.ipynb"
   - board/*_*.py
   - board/logging.py
   - minified/
