@@ -144,8 +144,8 @@ CLASS_10 = [
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
         "    def info(self) -> Tuple:",
-        "    def readblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
-        "    def writeblocks(self, block_num, buf, offset: Optional[int]=0) -> Any:",
+        "    def readblocks(self, block_num, buf, offset: Optional[int] = 0) -> Any:",
+        "    def writeblocks(self, block_num, buf, offset: Optional[int] = 0) -> Any:",
     ],
 )
 # def test_rst_parse_class_10(expected: List[str]):
@@ -164,7 +164,7 @@ def test_rst_parse_class_10(line: str):
 
 
 @pytest.mark.parametrize(
-    "param_in, param_out",
+    "param_in, expected",
     [
         ("", ""),
         ("()", "()"),
@@ -185,11 +185,11 @@ def test_rst_parse_class_10(line: str):
         # ("()", "()"),
     ],
 )
-def test_fix_param(param_in, param_out):
+def test_fix_param(param_in, expected):
     "validate known parameter typing notation errors"
     r = RSTWriter()
     result = r.fix_parameters(param_in)
-    assert result == param_out
+    assert result == expected
 
 
 def test_import_typing():
