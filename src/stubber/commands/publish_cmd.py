@@ -48,6 +48,12 @@ from stubber.utils.config import CONFIG
     help="publish to PYPI or Test-PYPI",
 )
 @click.option(
+    "--build",
+    is_flag=True,
+    default=False,
+    help="build before publish",
+)
+@click.option(
     "--force",
     is_flag=True,
     default=False,
@@ -71,6 +77,7 @@ def cli_publish(
     ports: Union[str, List[str]],
     boards: Union[str, List[str]],
     production: bool = True,
+    build: bool = False,
     force: bool = False,
     dry_run: bool = False,
     clean: bool = False,
@@ -93,6 +100,7 @@ def cli_publish(
         ports=ports,
         boards=boards,
         production=production,
+        build=build,
         force=force,
         dry_run=dry_run,
         clean=clean,
