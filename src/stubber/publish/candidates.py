@@ -68,12 +68,11 @@ def list_micropython_ports(
     mpy_path = Path("./repos/micropython")
 
     ports_path = mpy_path / "ports"
-    ports = list(subfolder_names(ports_path))
-    # remove blocked ports from list
-    for port in ["minimal", "bare-arm"]:  # CONFIG.blocked_ports:
-        if port in ports:
-            ports.remove(port)
-    return ports
+    return [
+        p
+        for p in list(subfolder_names(ports_path))
+        if p not in CONFIG.BLOCKED_PORTS
+    ]
 
 
 def list_micropython_port_boards(
@@ -202,11 +201,10 @@ def firmware_candidates(
     list is basesed on the micropython repo
     /ports/<list of ports>/boards/<list of boards>
     """
-    if isinstance(versions, str):
-        if versions == "auto":  # auto with vprefix ...
-            versions = list(micropython_versions(start=OLDEST_VERSION))
-        else:
-            versions = [versions]
+    if is_auto(versions):
+        versions = list(micropython_versions(start=OLDEST_VERSION))
+    elif isinstance(versions, str):
+        versions = [versions]
     versions = [clean_version(v, flat=False) for v in versions]
 
     for version in versions:

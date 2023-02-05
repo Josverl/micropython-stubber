@@ -6,45 +6,14 @@ prepare a set of stub files for publishing to PyPi
 from typing import Any, Dict, List
 from loguru import logger as log
 
-from stubber.publish.candidates import firmware_candidates
+from stubber.publish.candidates import firmware_candidates, is_auto
 from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
-from stubber.publish.package import create_package, get_package_info, package_name
+from stubber.publish.package import create_package, get_package, get_package_info, package_name
 from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 
 from pysondb import PysonDB
-
-
-def get_package(
-    db: PysonDB,
-    *,
-    pkg_type,
-    version: str,
-    port: str,
-    board: str = "GENERIC",
-    family: str = "micropython",
-) -> StubPackage:
-    """Get the package from the database or create a new one if it does not exist."""
-    pkg_name = package_name(pkg_type, port=port, board=board, family=family)
-    if package_info := get_package_info(
-        db,
-        CONFIG.publish_path,
-        pkg_name=pkg_name,
-        mpy_version=version,
-    ):
-        # create package from the information retrieved from the database
-        return StubPackage(pkg_name, version=version, json_data=package_info)
-
-    log.debug(f"No package found for {pkg_name} in database, creating new package")
-    return create_package(
-        pkg_name,
-        mpy_version=version,
-        port=port,
-        board=board,
-        family=family,
-        pkg_type=pkg_type,
-    )
 
 
 def build_multiple(
@@ -99,12 +68,23 @@ def publish_multiple(
 
 
 def build_worklist(family: str, versions: List[str], ports: List[str], boards: List[str]):
-    """Build a worklist of packages to build or publish"""
-    worklist = []
-    worklist += list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS))
+    """Build a worklist of packages to build or publish, and filter to only the requested ports and boards"""
+    if isinstance(versions, str):
+        versions = [versions]
+    if isinstance(ports, str):
+        ports = [ports]
+    if isinstance(boards, str):
+        boards = [boards]
+    if family != "micropython":
+        return []
+    # get all the candidates
+    worklist = list(firmware_candidates(family=family, versions=versions, pt=COMBO_STUBS))
     worklist = [i for i in worklist if i["board"] != ""]
-    if ports != ["auto"]:
-        worklist = [i for i in worklist if i["port"] in ports]
-    if boards != ["auto"]:
-        worklist = [i for i in worklist if i["board"] in boards or i["board"] == "GENERIC"]
+    # then filter down to the ones we want
+    if not is_auto(ports):
+        ports_ = [i.upper() for i in ports]
+        worklist = [i for i in worklist if i["port"].upper() in ports_]
+    if not is_auto(boards):
+        boards_ = [i.upper() for i in boards]
+        worklist = [i for i in worklist if i["board"].upper() in boards_]
     return worklist

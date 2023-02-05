@@ -78,7 +78,7 @@ def cli_build(
         versions=versions,
         ports=ports,
         boards=boards,
-        production=False,
+        production=True,    # use production database during build
         force=force,
         clean=clean,
     )

@@ -42,6 +42,9 @@ class StubberConfig(Config):
     ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]
     "list of recent versions"
 
+    BLOCKED_PORTS = ["minimal", "bare-arm"]
+    "ports that should be ignored as a source of stubs"
+
     def post_read_hook(self) -> dict:
         config_updates = {}
         # relative to stubs
