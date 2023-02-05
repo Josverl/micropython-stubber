@@ -117,13 +117,15 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
     [
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
-        ("micropython", "v1.18", "auto", "GENERIC", 17), # find v1.18 ports
+        ("micropython", "v1.18", "auto", "GENERIC", 16), # find v1.18 ports
         ("micropython", "v1.18", "esp32", "GENERIC", 1), # find v1.18 ESP32 ports 
         ("micropython", "v1.19.1", "esp8266", "GENERIC", 1), # find v1.18 ESP8266 ports 
         ("micropython", "v1.18", "stm32", "auto", 56), # find v1.18 STM32 boards
-        ("micropython", "v1.18", "auto", "auto", 140), # find all v1.18 ports & boards
+        ("micropython", "v1.17", "auto", "auto", 124), # find all v1.17 ports & boards
+        ("micropython", "v1.18", "auto", "auto", 139), # find all v1.18 ports & boards
+        ("micropython", "v1.19.1", "auto", "auto", 157), # find all v1.18 ports & boards
         ("micropython", "v1.18", "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
-        ("micropython", ["v1.18"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
+        ("micropython", ["v1.18"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC fix test numbers
         ("micropython", ["latest"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
         ("micropython", ["latest","v1.18"], "auto", "NUCLEO_F091RC", 2), # find v1.18 NUCLEO_F091RC boards
     ],
@@ -131,7 +133,8 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
 def test_worklist(family, versions, ports, boards, count):
     wl = build_worklist(family=family, versions=versions, ports=ports, boards=boards)
     assert isinstance(wl, list)
-    msg = ", ".join([l["port"] for l in wl])
+    msg = ", ".join(sorted([f"{l['version']}-{l['port']}-{l['board']}" for l in wl]))
+    # print(msg)
     assert len(wl) == count, f"expected {count}, found {len(wl)} {msg}."
 
 
