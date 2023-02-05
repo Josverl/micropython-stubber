@@ -431,7 +431,7 @@ class StubPackage:
         # BUF_SIZE is totally arbitrary,
         BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
-        pkg_hash = hashlib.sha1()
+        file_hash = hashlib.sha1()
         files = list((self.package_path).rglob("**/*.py")) + list((self.package_path).rglob("**/*.pyi"))
         if include_md:
             files += (
@@ -446,10 +446,9 @@ class StubPackage:
                     data = f.read(BUF_SIZE)
                     if not data:
                         break
-                    pkg_hash.update(data)
-
-        return pkg_hash.hexdigest()
-
+                    file_hash.update(data)
+        return file_hash.hexdigest()
+    
     def update_hashes(self) -> None:
         """Update the pachage hashes"""
         self.hash = self.create_hash()
