@@ -9,7 +9,7 @@ from loguru import logger as log
 from stubber.publish.candidates import board_candidates, is_auto
 from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
-from stubber.publish.package import  get_package
+from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
 
 
@@ -31,7 +31,7 @@ def build_multiple(
     if len(worklist) == 0:
         log.error("Could not find any packages than can be build.")
         return results
-        
+
     for todo in worklist:
         if package := get_package(db, **todo):
             package.build(force=force, production=production)
@@ -95,5 +95,5 @@ def build_worklist(family: str, versions: List[str], ports: List[str], boards: L
 
     for b in boards:
         if not any(i for i in worklist if i["board"] == b):
-            log.warning(f"Could not find any package candidate for board {b}")        
+            log.warning(f"Could not find any package candidate for board {b}")
     return worklist

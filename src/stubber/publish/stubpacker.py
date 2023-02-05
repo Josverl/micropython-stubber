@@ -266,7 +266,7 @@ class StubPackage:
          - 2 - copy the remaining stubs to the package folder
          - 3 - remove *.py files from the package folder
         """
-        try: 
+        try:
             # First check if all stub source folders exist
             for n in range(len(self.stub_sources)):
                 stub_type, fw_path = self.stub_sources[n]
@@ -628,7 +628,7 @@ class StubPackage:
             - build the wheels and sdist
         """
         log.info(f"Build: {self.package_path.name}")
-        
+
         ok = self.update_package()
         self.status["version"] = self.pkg_version
         if not ok:
@@ -636,7 +636,7 @@ class StubPackage:
             self.status["error"] = "Build failed"
             return False
         # If there are changes to the package, then publish it
-        if self.is_changed() :
+        if self.is_changed():
             log.info(f"Found changes to package sources: {self.package_name} {self.pkg_version} ")
             log.trace(f"Old hash {self.hash} != New hash {self.calculate_hash()}")
         elif force:
@@ -695,7 +695,7 @@ class StubPackage:
                 if not dry_run:
                     pub_ok = self.poetry_publish(production=production)
                 else:
-                    log.warning(f"{self.package_name}: Dry run, not publishing to {'' if production else 'Test-'}PyPi" )
+                    log.warning(f"{self.package_name}: Dry run, not publishing to {'' if production else 'Test-'}PyPi")
                     pub_ok = True
                 if not pub_ok:
                     log.warning(f"{self.package_name}: Publish failed for {self.pkg_version}")
@@ -704,7 +704,7 @@ class StubPackage:
                 self.status["result"] = "Published to PyPi" if production else "Published to Test-PyPi"
                 self.update_hashes()
                 if dry_run:
-                    log.warning(f"{self.package_name}: Dry run, not saving to database" )
+                    log.warning(f"{self.package_name}: Dry run, not saving to database")
                 else:
                     # get the package state and add it to the database
                     db.add(self.to_dict())
