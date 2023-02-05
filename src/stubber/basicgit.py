@@ -1,5 +1,6 @@
 """
 simple Git module, where needed via powershell
+
 """
 import subprocess
 from pathlib import Path
@@ -28,7 +29,7 @@ def _run_git(
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
         # add some logging for github actions
-        log.error("Exception on process, rc=", e.returncode, "output=", e.output.decode("utf-8"), "\nstderr=", e.stderr.decode("utf-8"))
+        log.error(f"{str(e)} : { e.stderr.decode('utf-8')}")
         return None
     if result.stderr and result.stderr != b"":
         stderr = result.stderr.decode("utf-8")
@@ -52,11 +53,7 @@ def clone(remote_repo: str, path: Path, shallow=False, tag: Optional[str] = None
         cmd += ["--depth", "1"]
     if tag in ("latest", "master"):
         tag = None
-    cmd += (
-        [remote_repo, "--branch", tag, str(path)]
-        if tag
-        else [remote_repo, str(path)]
-    )
+    cmd += [remote_repo, "--branch", tag, str(path)] if tag else [remote_repo, str(path)]
     if result := _run_git(cmd, expect_stderr=True, capture_output=False):
         return result.returncode == 0
     else:
@@ -87,11 +84,8 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
             expect_stderr=True,
         ):
             lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
-            if lines[0].startswith("On branch"):
-                if lines[0].endswith("master"):
-                    tag = "latest"
-                elif lines[0].endswith("fix_lib_documentation"):
-                    tag = "fix_lib_documentation"
+            if lines[0].startswith("On branch") and lines[0].endswith("master"):
+                tag = "latest"
     return tag
 
 
@@ -121,8 +115,9 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.debug(result.stderr.decode("utf-8"))
-    log.debug(result.stdout.decode("utf-8"))
+    msg = {result.stdout.decode("utf-8")}
+    if msg != {""}:
+        log.warning(f"git message: {msg}")
     return True
 
 
@@ -230,3 +225,26 @@ def pull(repo: Union[Path, str], branch="main") -> bool:
         log.error("error durign pull", result)
         return False
     return result.returncode == 0
+
+
+def get_git_describe(folder: Optional[str] = None):
+    """ "based on MicroPython makeversionhdr
+    returns : current git tag, commits ,commit hash : "v1.19.1-841-g3446"
+    """
+    # Note: git describe doesn't work if no tag is available
+    try:
+        git_describe = subprocess.check_output(
+            ["git", "describe", "--tags", "--dirty", "--always", "--match", "v[1-9].*"],
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            cwd=folder,
+        ).strip()
+    except subprocess.CalledProcessError as er:
+        if er.returncode == 128:
+            # git exit code of 128 means no repository found
+            return None
+        git_describe = ""
+    except OSError:
+        return None
+    # format
+    return git_describe

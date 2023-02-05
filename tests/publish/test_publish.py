@@ -1,125 +1,155 @@
+"""Test publish module - refactored"""
+from pathlib import Path
 import pytest
 from mock import MagicMock
-from packaging.version import Version
 from pytest_mock import MockerFixture
-
-from stubber.publish.publish import publish_multiple, publish_one
-
-from .fakeconfig import FakeConfig
-
-# @pytest.mark.parametrize(
-#     "pkg_type, ports, boards, versions",
-#     [
-#         (COMBO_STUBS, ["esp32"], ["GENERIC"], ["1.18"]),
-#         (DOC_STUBS, [], [], ["1.18"]),
-#     ],
-# )
+from packaging.version import parse
 
 
-@pytest.mark.parametrize(
-    "production, dryrun, check_cnt, build_cnt, publish_cnt",
-    [
-        (True, True, 1, 1, 0),
-        (True, False, 1, 1, 1),
-        (False, True, 1, 1, 0),
-        (False, False, 1, 1, 1),
-    ],
-)
-@pytest.mark.mocked
-@pytest.mark.integration
-def test_publish_one(
-    mocker: MockerFixture,
-    tmp_path,
-    pytestconfig,
-    production: bool,
-    dryrun: bool,
-    check_cnt: int,
-    build_cnt: int,
-    publish_cnt: int,
-):
-    """Test publish_multiple stubs of a single version"""
-    # test requires that the stubs are cloned locally
-    if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
-        # mark test as skipped
-        pytest.skip("Integration test: micropython-stubs repo not found")
-
-    # use the test config
-    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
-
-    # need to use fake config in two places
-    mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)
-    m_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.build", autospec=True, return_value=True)
-    m_publish: MagicMock = mocker.patch("stubber.publish.stubpacker.StubPackage.publish", autospec=True, return_value=True)
-
-    result = publish_one(production=production, dryrun=dryrun, frozen=True, ports="esp32", boards="GENERIC", versions="1.18")
-    assert result
-    assert m_check.call_count == check_cnt
-    assert m_build.call_count == build_cnt
-    assert m_publish.call_count == publish_cnt
-    assert result["result"] in ["Published", "DryRun successful"]
-    assert Version(result["version"]).base_version == Version("1.18").base_version
+from stubber.publish.stubpacker import StubPackage
+from pysondb import PysonDB
 
 
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_publish_multiple(mocker, tmp_path, pytestconfig):
-    """Test publish_multiple"""
-    # test requires that the stubs are cloned locally
-    if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
-        pytest.skip("Integration test: micropython-stubs repo not found")
+def test_hash(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
+    pkg = fake_package
 
-    # use the test config
-    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
-    mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    pkg.update_package_files()
+    stub_count = pkg.update_included_stubs()
+    assert stub_count > 0
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)
-    m_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.build", autospec=True, return_value=True)
-    m_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.publish", autospec=True, return_value=True)
+    calc_hash_md = pkg.calculate_hash(include_md=True)
+    calc_hash_pyi = pkg.calculate_hash(include_md=False)
 
-    result = publish_multiple(production=False, frozen=True, dryrun=True)
-    assert len(result) > 0
-    result = publish_multiple(production=False, frozen=True, dryrun=False)
-    assert len(result) > 0
+    # both should be present
+    assert calc_hash_md
+    assert calc_hash_pyi
+    assert calc_hash_pyi != calc_hash_md, "hashes should be different"
 
-    assert m_build.call_count >= 2
-    assert m_publish.call_count >= 2
-    assert m_check.call_count >= 2
+    changed_after_update = pkg.is_changed()
+    assert changed_after_update, "should be changed initially"
+
+    pkg.update_hashes()
+    assert pkg.hash
+    assert pkg.stub_hash
+    assert pkg.hash != pkg.stub_hash, "hashes should be different"
+
+    # check that the hashes are correct
+    assert pkg.hash == calc_hash_md
+    assert pkg.stub_hash == calc_hash_pyi
+
+    # should not register as changed after update
+    changed_after_update = pkg.is_changed()
+    assert not changed_after_update, "should not show as changed after update"
+
+    # TEST CHANGE DETECTION
+    # change the hash
+    pkg.hash = "1234567890"
+    assert pkg.is_changed(), "should show as changed after hash change"
+
+    # change the stub hash
+    pkg.hash = calc_hash_md
+    pkg.stub_hash = "1234567890"
+    assert pkg.is_changed(include_md=False), "should show as changed after stub hash change"
 
 
 @pytest.mark.integration
-@pytest.mark.mocked
-def test_publish_prod(mocker, tmp_path, pytestconfig):
-    """Test publish_multiple"""
-    if not (pytestconfig.rootpath / "repos/micropython-stubs").exists():
-        pytest.skip("Integration test: micropython-stubs repo not found")
+def test_update_package(fake_package: StubPackage):
+    pkg = fake_package
 
-    production: bool = True
-    dryrun: bool = False
-    # use the test config
-    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
-    # need to use fake config in two places
-    mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    changed_after_update = pkg.is_changed()
+    assert changed_after_update, "should be changed initially"
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)
-    m_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.build", autospec=True, return_value=True)
-    m_pypi: MagicMock = mocker.patch(
-        "stubber.publish.publish.get_pypy_versions", autospec=True, return_value=[Version("1.18.post1"), Version("1.18.post42")]
-    )
+    ok = pkg.update_package()
+    assert ok, "should be ok"
 
-    m_publish: MagicMock = mocker.patch("stubber.publish.stubpacker.StubPackage.publish", autospec=True, return_value=True)
+    changed_after_update = pkg.is_changed()
+    assert changed_after_update, "should be changed after update"
 
-    result = publish_one(production=production, dryrun=dryrun, frozen=True, ports="esp32", boards="GENERIC", versions="1.18")
-    assert result
-    assert result["result"] in ["Published", "DryRun successful"]
-    assert Version(result["version"]).base_version == Version("1.18").base_version
+    calc_hash_md = pkg.calculate_hash(include_md=True)
+    calc_hash_pyi = pkg.calculate_hash(include_md=False)
 
-    assert Version(result["version"]) == Version("1.18.post43")
-    assert m_check.call_count == 1
-    assert m_build.call_count == 1
-    assert m_publish.call_count == 1
-    assert m_pypi.call_count == 1
+    # both should be present
+    assert calc_hash_md
+    assert calc_hash_pyi
+    assert calc_hash_pyi != calc_hash_md, "hashes should be different"
+
+    pkg.update_hashes()
+    assert pkg.hash
+    assert pkg.stub_hash
+    assert pkg.hash != pkg.stub_hash, "hashes should be different"
+
+    # should not register as changed after update
+    changed_after_update = pkg.is_changed()
+    assert not changed_after_update, "should not show as changed after update"
+
+    # can the hashes be saved to the database
+    db_dict = pkg.to_dict()
+    assert db_dict
+    assert db_dict["hash"]
+    assert db_dict["stub_hash"]
+
+    assert db_dict["hash"] == calc_hash_md
+    assert db_dict["stub_hash"] == calc_hash_pyi
+
+    assert db_dict["hash"] != db_dict["stub_hash"], "hashes should be different"
+
+
+@pytest.mark.integration
+def test_build_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
+    pkg = fake_package
+
+    result = pkg.build(production=False, force=False)
+
+    assert result, "should be ok"
+
+    # check if the package was built
+    dist_path = pkg.package_path / "dist"
+    assert dist_path.exists(), "dist path should exist"
+    assert dist_path.is_dir(), "dist path should be a directory"
+    # check if the dist path contains a wheel
+    assert len(list(dist_path.glob("*.whl"))) == 1, "should be one wheel in the dist path"
+    assert len(list(dist_path.glob("*.gz"))) == 1, "should be one tarball in the dist path"
+    # package still should show as changed in order to trigger a publish
+    assert pkg.is_changed(), "should show as changed after build"
+
+
+@pytest.mark.integration
+def test_publish_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage, temp_db: PysonDB):
+    pkg = fake_package
+    db = temp_db
+
+    m_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+
+    # allow the publishing logic to run during test
+    pkg._publish = True  # type: ignore
+    result = pkg.publish(production=False, force=False, db=db)
+
+    assert result, "should be ok"
+
+    # check if the package was built
+    dist_path = pkg.package_path / "dist"
+    assert dist_path.exists(), "dist path should exist"
+    assert dist_path.is_dir(), "dist path should be a directory"
+    # check if the dist path contains a wheel
+    assert len(list(dist_path.glob("*.whl"))) == 1, "should be one wheel in the dist path"
+    assert len(list(dist_path.glob("*.gz"))) == 1, "should be one tarball in the dist path"
+
+    assert not pkg.is_changed(), "should show as un changed after publish"
+
+    # Check if the  has been published
+    assert m_publish.called, "should call poetry publish"
+
+    # check is the hashes are added to the database
+    recs = db.get_by_query(query=lambda x: x["mpy_version"] == pkg.mpy_version and x["name"] == pkg.package_name)
+    # dict to list
+    recs = [{"id": key, "data": recs[key]} for key in recs]
+    # sort
+    packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
+
+    assert packages[-1]["data"]["name"] == pkg.package_name, "should be the same package name"
+    assert packages[-1]["data"]["pkg_version"] == pkg.pkg_version, "should be the same package version"
+    assert packages[-1]["data"]["mpy_version"] == pkg.mpy_version, "should be the same mpy version"
+    assert packages[-1]["data"]["hash"] == pkg.hash, "should be the same hash"
+    assert packages[-1]["data"]["stub_hash"] == pkg.stub_hash, "should be the same stub hash"

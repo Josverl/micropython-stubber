@@ -1,11 +1,9 @@
 # others
-from pathlib import Path
-
 import pytest
 from helpers import load_rst
 
 # SOT
-from stubber.stubs_from_docs import RSTReader
+from stubber.rst.reader import RSTWriter
 
 # mark all tests
 pytestmark = pytest.mark.doc_stubs
@@ -105,17 +103,18 @@ not all constants are available on all ports.
 
 def test_module_constants():
     # test is module level constants can be processed
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, MACHINE_RST)
     r.current_module = "machine"
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
-    list = r.output_dict["constants"]
+    lst = r.output_dict["constants"]
 
-    doc_list = [c for c in list if c.startswith('"""')]
-    const_list = [c for c in list if not c.startswith('"""')]
+    doc_list = [c for c in lst if c.startswith('"""')]
+    const_list = [c for c in lst if not c.startswith('"""')]
     # should have 11  constants
     assert len(const_list) == 11
     # and 11 single line comments for docstrings
@@ -124,11 +123,12 @@ def test_module_constants():
 
 def test_class_constants():
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, MACHINE_PIN_RST)
     # r.current_module = module # 'uhashlib'
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     expected = [
@@ -159,18 +159,19 @@ def test_timer_constants(pytestconfig: pytest.Config):
     Timer.PERIODIC
     Timer operating mode.
     """
-    r = RSTReader()
+    r = RSTWriter()
 
     r.read_file(pytestconfig.rootpath / "tests/rst/data/machine.Timer.rst")
     r.current_module = "machine"
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
-    list = r.output_dict["class Timer():"]["constants"]
+    lst = r.output_dict["class Timer():"]["constants"]
 
-    doc_list = [c for c in list if c.lstrip().startswith('"""')]
-    const_list = [c for c in list if not c.lstrip().startswith('"""')]
+    doc_list = [c for c in lst if c.lstrip().startswith('"""')]
+    const_list = [c for c in lst if not c.lstrip().startswith('"""')]
     # should have 2 constants
     assert len(const_list) == 2
     # and 11 single line comments for docstrings

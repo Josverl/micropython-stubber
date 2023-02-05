@@ -5,6 +5,8 @@ from typing import Tuple
 
 from loguru import logger as log
 
+from stubber.publish.package import GENERIC_U
+
 
 def get_portboard(manifest_path: Path):
     """
@@ -15,11 +17,10 @@ def get_portboard(manifest_path: Path):
     # https://regex101.com/r/tv7JX4/1
     re_pb = r".*micropython[\/\\]ports[\/\\](?P<port>[\w_-]*)([\/\\]boards[\/\\](?P<board>\w*))?[\/\\]"
     mpy_port = mpy_board = ""
-    matches = re.search(re_pb, manifest_path.absolute().as_posix())
-    if matches:
+    if matches := re.search(re_pb, manifest_path.absolute().as_posix()):
         # port and board
-        mpy_port = str(matches.group("port") or "")
-        mpy_board = str(matches.group("board") or "")
+        mpy_port = str(matches["port"] or "")
+        mpy_board = str(matches["board"] or "")
         return mpy_port, mpy_board
     log.error(f"no port or board found in {manifest_path}")
     raise (ValueError("Neither port or board found in path"))
@@ -29,17 +30,17 @@ def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
     """
     get path to a folder to store the frozen stubs for the given port/board
     """
-    if port == "":
+    if not port:
         raise ValueError("port must be provided")
 
-    if board == "":
-        board = "GENERIC"
+    if not board:
+        board = GENERIC_U
 
     if board == "manifest_release":
         board = "RELEASE"
     # set global for later use - must be an absolute path.
-    freeze_path = (stub_path / port / board).absolute()
-    return freeze_path, board
+    freeze_path = (stub_path / port / board.upper()).absolute()
+    return freeze_path, board.upper()
 
 
 def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):

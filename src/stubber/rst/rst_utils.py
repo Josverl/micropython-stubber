@@ -37,7 +37,7 @@ to do:
 
 from loguru import logger as log
 import re
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from .lookup import LOOKUP_LIST, NONE_VERBS
 
@@ -124,28 +124,22 @@ RE_LIT_AS_A = r"as a\s?(?P<return>[^.!?:;]*)"
 RE_LIT_SENTENCE = r"\s?(?P<return>[^.!?:;]*)"
 
 
-def dist_rate(i) -> float:
+def dist_rate(i: int) -> float:
     """"""
     max_len = 150  # must occur in the first 150 chars
-    linear = max((max_len - i), 1) / max_len
-    # quadratic = max(max_len - (i / 18) ** 4, 1) / max_len
-    return linear
+    return max((max_len - i), 1) / max_len
 
 
 WORD_TERMINATORS = ".,!;:?"
 
 
-def simple_candidates(
-    type: str,
-    match_string: str,
-    keywords: List[str],
-    rate: float = 0.5,
-    exclude: List[str] = [],
-):
+def simple_candidates(type: str, match_string: str, keywords: List[str], rate: float = 0.5, exclude: Optional[List[str]] = None):
     """
     find and rate possible types and confidence weighting for simple types.
     Case sensitive
     """
+    if exclude is None:
+        exclude = []
     candidates = []
     if not any(t in match_string for t in keywords) or any(t in match_string for t in exclude):
         # quick bailout , there are no matches, or there is an exclude
@@ -156,14 +150,8 @@ def simple_candidates(
     #  kw =  single word -
     for kw in keywords:
         i = match_string.find(kw)
-        if " " not in kw:
-            # single keyword
-            if kw not in match_words:
-                continue
-        else:
-            # key phrase
-            if i < 0:
-                continue
+        if " " not in kw and kw not in match_words or " " in kw and i < 0:
+            continue
         # Assume unsigned are int
         result = BASE.copy()
         result["type"] = type
@@ -173,17 +161,13 @@ def simple_candidates(
     return candidates
 
 
-def compound_candidates(
-    type: str,
-    match_string: str,
-    keywords: List[str],
-    rate: float = 0.85,
-    exclude: List[str] = [],
-):
+def compound_candidates(type: str, match_string: str, keywords: List[str], rate: float = 0.85, exclude: Optional[List[str]] = None):
     """
     find and rate possible types and confidence weighting for compound types that can have a subscription.
     Case sensitive
     """
+    if exclude is None:
+        exclude = []
     candidates = []
     if not any(t in match_string for t in keywords) or any(t in match_string for t in exclude):
         # quick bailout , there are no matches, or there is an exclude
@@ -194,14 +178,8 @@ def compound_candidates(
     #  kw =  single word -
     for kw in keywords:
         i = match_string.find(kw)
-        if " " not in kw:
-            # single keyword
-            if kw not in match_words:
-                continue
-        else:
-            # key phrase
-            if i < 0:
-                continue
+        if " " not in kw and kw not in match_words or " " in kw and i < 0:
+            continue
         # List / Dict / Generator of Any / Tuple /
         sub = None
         result = BASE.copy()
@@ -213,11 +191,11 @@ def compound_candidates(
                     # do not match on the same main and sub
                     continue
                 confidence += 0.10  # boost as we have a subtype
-                if element == "tuple":
-                    sub = "Tuple"
-                    break
-                elif element == "string":
+                if element == "string":
                     sub = "str"
+                    break
+                elif element == "tuple":
+                    sub = "Tuple"
                     break
                 elif element == "unsigned":
                     sub = "int"
@@ -233,16 +211,15 @@ def compound_candidates(
     return candidates
 
 
-def object_candidates(
-    match_string: str,
-    rate: float = 0.81,
-    exclude: List[str] = ["IRQ"],
-):
+def object_candidates(match_string: str, rate: float = 0.81, exclude: Optional[List[str]] = None):
     """
     find and rate possible types and confidence weighting for Object types.
     Case sensitive
+    Exclude defaults to ["IRQ"]
     """
-
+    # defaults
+    if exclude is None:
+        exclude = ["IRQ"]
     candidates = []
     keywords = [
         "Object",
@@ -263,20 +240,20 @@ def object_candidates(
         words = match_string.split(" ")  # Return <multiple words object>
         if kw in words:
             pos = words.index(kw)
-            object = "Any" if pos == 0 else words[pos - 1]
-            if object in ("stream-like", "file"):
-                object = "IO"  # needs from typing import IO
-            elif object == "callback":
-                object = "Callable[..., Any]"  # requires additional 'from typing import Callable'
+            obj = "Any" if pos == 0 else words[pos - 1]
+            if obj in ("stream-like", "file"):
+                obj = "IO"  # needs from typing import IO
+            elif obj == "callback":
+                obj = "Callable[..., Any]"  # requires additional 'from typing import Callable'
             else:
                 # clean
-                object = re.sub(r"[^a-z.A-Z0-9]", "", object)
+                obj = re.sub(r"[^a-z.A-Z0-9]", "", obj)
             result = BASE.copy()
-            result["type"] = object
-            if object in ["an", "any"]:  # "Return an / any object"
+            result["type"] = obj
+            if obj in ["an", "any"]:  # "Return an / any object"
                 result["type"] = "Any"
                 confidence += 0.10  # abstract , but very good
-            elif object[0].islower():
+            elif obj[0].islower():
                 confidence -= 0.20  # not so good
             result["confidence"] = confidence * dist_rate(i)
             candidates.append(result)
@@ -286,13 +263,12 @@ def object_candidates(
 def has_none_verb(docstr: str) -> List:
     "returns a None result if the docstring starts with a verb that indicates None"
     docstr = docstr.strip().casefold()
-    if any(docstr.startswith(kw.casefold()) for kw in NONE_VERBS):
-        result = BASE.copy()
-        result["type"] = "None"
-        result["confidence"] = C_NONE  # better than the default Any
-        return [result]
-    else:
+    if not any(docstr.startswith(kw.casefold()) for kw in NONE_VERBS):
         return []
+    result = BASE.copy()
+    result["type"] = "None"
+    result["confidence"] = C_NONE  # better than the default Any
+    return [result]
 
 
 def distill_return(return_text: str) -> List[Dict]:
@@ -436,7 +412,7 @@ def return_type_from_context(*, docstring: Union[str, List[str]], signature: str
 
 def _type_from_context(
     *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
-):    # -> Dict[str , Union[str,float]]:
+):  # -> Dict[str , Union[str,float]]:
     """Determine the return type of a function or method based on:
      - the function signature
      - the terminology used in the docstring
@@ -461,19 +437,19 @@ def _type_from_context(
 
     # give the regex that searches for returns a 0.2 boost as that is bound to be more relevant
 
-    if not literal:
-        weighted_regex = [
+    weighted_regex = (
+        [
+            (RE_LIT_AS_A, 1.0),
+            (RE_LIT_SENTENCE, 2.0),
+        ]
+        if literal
+        else [
             (RE_RETURN_VALUE, WEIGHT_RETURN_VAL),
             (RE_RETURN, WEIGHT_RETURNS),
             (RE_GETS, WEIGHT_GETS),
             #       (reads_regex, 1.0),
         ]
-    else:
-        weighted_regex = [
-            (RE_LIT_AS_A, 1.0),
-            (RE_LIT_SENTENCE, 2.0),
-        ]
-
+    )
     # only the function name without the leading module
     function_re = re.compile(r"[\w|.]+(?=\()")
 
@@ -509,7 +485,6 @@ def _type_from_context(
     # ------------------------------------------------------
     # parse the docstring for the regexes and weigh the results accordingly
     for weighted in weighted_regex:
-
         match_iter = re.finditer(weighted[0], docstring, re.MULTILINE | re.IGNORECASE)
         for match in match_iter:
             # matches.append(match)
@@ -528,9 +503,7 @@ def _type_from_context(
     # ref: https://docs.python.org/3/library/typing.html#typing.Coroutine
     # Coroutine[YieldType, SendType, ReturnType]
     # todo: sanity check against actual code .....
-    if "This is a coroutine" in docstring and "Coroutine" not in str(
-        best["type"]
-    ):  # type: ignore
+    if "This is a coroutine" in docstring and "Coroutine" not in str(best["type"]):  # type: ignore
         best["type"] = f"Coroutine[{best['type']}, Any, Any]"
 
     # return the best candidate, or Any

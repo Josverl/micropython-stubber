@@ -32,17 +32,21 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-v",
-                "merge",
-                "--version",
-                "v1.19.1"
+                "-v",
+                "publish",
+                "--port",
+                "esp32",
+                "--board",
+                "um_tinypico",
+                "--pypi",
+                "--dry-run",
+                "--build",
+                // "switch",
+                // "v1.19.1"
                 // "get-frozen",
-                // "get-frozen",
-                // "publish",
                 // "--version",
                 // "v1.19.1",
                 // "--port",
-                // "esp32",
-                // "--test-pypi"
                 // "--dry-run",
                 //
                 // "minify",

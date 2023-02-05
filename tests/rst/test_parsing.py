@@ -2,7 +2,7 @@
 import pytest
 
 # SOT
-from stubber.stubs_from_docs import RSTReader
+from stubber.rst.reader import RSTWriter
 
 from helpers import load_rst
 
@@ -90,6 +90,8 @@ CD_HASHLIB = """
         Create an MD5 hasher object and optionally feed ``data`` into it.
 
 """
+
+
 # @pytest.mark.parametrize(
 @pytest.mark.parametrize(
     "line",
@@ -108,11 +110,12 @@ CD_HASHLIB = """
 )
 def test_parse_class_modulename(line, module):
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, CD_ACCEL)
     r.current_module = module
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     assert line in [l.rstrip() for l in r.output]
@@ -128,16 +131,17 @@ def test_parse_class_modulename(line, module):
 )
 def test_parse_class_micro_modulename(line):
     # check if the module name has been removed form the class def
-    r = RSTReader()
+    r = RSTWriter()
     load_rst(r, CD_HASHLIB)
     # r.current_module = module # 'uhashlib'
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     # don't care about indentation,
     # but one of the lines must start with the class def
-    assert any([l.strip().startswith(line) for l in r.output])
+    assert any(l.strip().startswith(line) for l in r.output)
 
 
 # Nice to haves

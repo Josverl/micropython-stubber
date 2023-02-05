@@ -38,7 +38,6 @@ def test_git_clone(tmp_path):
 
 @pytest.mark.mocked
 def test_git_clone_fast(mocker: MockerFixture, tmp_path):
-
     m_result = CompletedProcess(
         args=[
             "git",

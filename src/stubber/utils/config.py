@@ -6,6 +6,7 @@ from .typed_config_toml import TomlConfigSource
 
 from loguru import logger as log
 
+
 @section("micropython-stubber")
 class StubberConfig(Config):
     "stubber confguration class"
@@ -40,6 +41,9 @@ class StubberConfig(Config):
 
     ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]
     "list of recent versions"
+
+    BLOCKED_PORTS = ["minimal", "bare-arm"]
+    "ports that should be ignored as a source of stubs"
 
     def post_read_hook(self) -> dict:
         config_updates = {}

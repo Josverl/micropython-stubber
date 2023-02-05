@@ -1,3 +1,5 @@
+# sourcery skip: snake-case-functions
+"""Merge documentation and type information from from the docstubs into a board stub"""
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 #
 # This source code is licensed under the MIT license found in the
@@ -49,6 +51,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         )
 
     def __init__(self, context: CodemodContext, stub_file: Union[Path, str]) -> None:
+        """initialize the base class with context, and save our args."""
         super().__init__(context)
         self.replace_functiondef_with_classdef = True
         # stack for storing the canonical name of the current function/method
@@ -86,7 +89,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
     # ------------------------------------------------------------------------
 
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        "Update the Module docstring"
+        """Update the Module docstring"""
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
             _imp = self.stub_imports[k]
@@ -101,7 +104,6 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         # update the docstring.
         if MODULE_KEY not in self.annotations:
-            # no changes
             return updated_node
 
         # update/replace  module docstrings
@@ -111,8 +113,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         return update_module_docstr(updated_node, new.docstr_node)
 
     # ------------------------------------------------------------
-    #  keep track of the the (class, method) names to the stack
+
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+        """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
     def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
@@ -130,12 +133,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         if new.def_type == "classdef":
             # Same type, we can copy over all the annotations
             return updated_node.with_changes(decorators=new.decorators)
-        elif new.def_type == "funcdef":
+        else:
             # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
-            return updated_node
-        else:
-            #  just return the updated node
             return updated_node
 
     # ------------------------------------------------------------------------

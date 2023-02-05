@@ -1,9 +1,23 @@
 rule_settings:
-  enable: [default]
+  enable: 
+  - default
+  - snake-case-functions
+  - no-wildcard-imports
+  - no-long-functions
+
+  - docstrings-for-modules
+  # - docstrings-for-functions
+  # - require-parameter-annotation
+
   disable:
+  - require-return-annotation  # Pylance does infer this quite well already
   - use-contextlib-suppress
   - use-fstring-for-formatting
   - use-fstring-for-concatenation
+  - do-not-use-staticmethod
+  - name-type-suffix
+  - invert-any-all
+
   python_version: '3.8'
 
   rule_types:
@@ -11,17 +25,33 @@ rule_settings:
     - suggestion
     - comment
 
+  # Specific folders and files to ignore
 ignore:
+  - board
   - board/*_*.py
+  - board/boot.py
+  - board/main.py
   - board/logging.py
   - minified/
+  - src/stubber/board
+  - src/stubber/minified
+  - src/stubber/tools/manifestfile.py
+  - "*.ipynb"
   - .venv/
   - tests/*
   - '*_test.py'
   - repos/
   - .git/
   - .github/
-  
+metrics: 
+  quality_threshold: 25
+
+clone_detection: 
+  min_lines: 3
+  min_duplicates: 2
+  identical_clones_only: false
+
+
 rules:
 - id: no-wildcard-imports
   pattern: from ${module} import *
@@ -42,3 +72,6 @@ rules:
     - match: from pandas.series import *
     - match: from .something import *
     - no-match: from math import sin
+      
+
+

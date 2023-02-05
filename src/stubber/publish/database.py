@@ -1,3 +1,5 @@
+"""basic interface to the json database"""
+
 from pathlib import Path
 from typing import Union
 

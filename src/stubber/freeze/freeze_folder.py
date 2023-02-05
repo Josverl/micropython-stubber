@@ -36,7 +36,7 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
         freeze_path, board = get_freeze_path(Path(stub_folder), port, board)
         dest_path = freeze_path.as_posix()
         # if board == "":
-        #     board = "GENERIC"
+        #     board = GENERIC
 
         # dest_path = os.path.join(stub_folder, port, board)
 

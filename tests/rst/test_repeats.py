@@ -1,7 +1,7 @@
 import pytest
 
 # SOT
-from stubber.stubs_from_docs import RSTReader
+from stubber.rst.reader import RSTWriter
 
 # mark all tests
 pytestmark = pytest.mark.doc_stubs
@@ -52,7 +52,7 @@ Constants
 
 def test_number_sequence():
     testcase = SEQ_NUMBERS
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
     r.rst_text = testcase
@@ -61,6 +61,7 @@ def test_number_sequence():
     r.max_line = len(r.rst_text) - 1
     # process
     r.parse()
+    r.prepare_output()
     # check
     assert len(r.output) > 1
     # todo: use regex to match
@@ -75,7 +76,7 @@ def test_comma_sequence():
         "     'E'. As mentioned above,\n",
     ]
 
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
     r.rst_text = SEQ_COMMAS
@@ -84,7 +85,7 @@ def test_comma_sequence():
     r.max_line = len(r.rst_text) - 1
     # process
     r.parse()
-
+    r.prepare_output()
     # todo: use regex to match
     constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and " = " in l])
     assert constants == 2
@@ -134,8 +135,7 @@ SEQ_3 = """
 
 
 def test_sequence_3():
-
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
     r.rst_text = SEQ_3.splitlines(keepends=True)
@@ -144,7 +144,7 @@ def test_sequence_3():
     r.max_line = len(r.rst_text) - 1
     # process
     r.parse()
-
+    r.prepare_output()
     assert len(r.output) > 1
     c_list = r.output_dict["class framebuf():"]["constants"]
     # todo: use regex to match
@@ -178,8 +178,7 @@ Functions
 
 
 def test_sequence_functions():
-
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
 
     r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
@@ -188,7 +187,7 @@ def test_sequence_functions():
     r.max_line = len(r.rst_text) - 1
     # process
     r.parse()
-
+    r.prepare_output()
     assert len(r.output) > 1
     # three function defs
     assert r.output_dict["def compile"], "first function in sequence not found"
@@ -232,8 +231,7 @@ Compiled regular expression. Instances of this class are created using
 
 
 def test_sequence_methods():
-
-    r = RSTReader()
+    r = RSTWriter()
     # Plug in test data
 
     r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True)
@@ -242,7 +240,7 @@ def test_sequence_methods():
     r.max_line = len(r.rst_text) - 1
     # process
     r.parse()
-
+    r.prepare_output()
     assert len(r.output) > 1
 
     # a class

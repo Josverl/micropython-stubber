@@ -49,11 +49,6 @@
         "upysh",
         "webrepl"
     ],
-    "python.formatting.provider": "black",
-    // "python.formatting.blackArgs": [
-    //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
-    // ],
-    // "editor.formatOnSave": false,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "workbench.colorCustomizations": {
         "activityBar.activeBorder": "#0bb45d",
@@ -128,8 +123,22 @@
     "files.watcherExclude": {
         "**/repos/**": true
     },
+    "python.formatting.provider": "black",
+    "editor.formatOnType": false,
+    "editor.formatOnSave": true,
+    "yaml.schemas": {
+        "https://docs.sourcery.ai/resources/sourcery_yaml_schema.json": ".sourcery.yaml"
+    },
+    "editor.formatOnSaveMode": "file",
+    "[python]": {
+        "editor.defaultFormatter": null,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
     "python.formatting.blackArgs": [
-        "--line-length 99"
-    ],
-    "editor.formatOnType": true,
+        "--config",
+        "${workspaceFolder}/pyproject.toml",
+        "--verbose"
+    ]
 }

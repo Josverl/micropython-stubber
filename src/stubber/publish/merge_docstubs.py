@@ -1,69 +1,105 @@
-""" Merge firmware stubs and docstubs into a single folder
+""" 
+Merge firmware stubs and docstubs into a single folder
 """
 
 import shutil
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional, Union
 
 from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
-from stubber.publish.candidates import firmware_candidates
+from stubber.publish.candidates import board_candidates, filter_list
+from stubber.publish.package import GENERIC, GENERIC_L
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
-LAST_VERSION = "v1.19.1"
+## Helper function
 
 
-def fw_folder_name(base: str, fw: Dict):
+def get_base(candidate, version: Optional[str] = None):
+    if not version:
+        version = clean_version(candidate["version"], flat=True)
+    base = f"{candidate['family']}-{version}"
+    return base.lower()
+
+
+def board_folder_name(fw: Dict, *, version: Optional[str] = None):
     """return the name of the firmware folder"""
-    if fw["board"] == "GENERIC":
-        fw_folder = f"{base}-{fw['port']}"
-    else:
-        fw_folder = f"{base}-{fw['port']}-{fw['board']}"
-    return fw_folder
+    base = get_base(fw, version=version)
+    folder_name = f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
+    folder_name = folder_name.lower().replace("-generic_", "-")  # @GENERIC Prefix
+    return folder_name
 
 
-def merge_all_docstubs(versions, family: str = "micropython", *, mpy_path=CONFIG.mpy_path):
-    """merge docstubs into firmware stubs"""
-    for fw in firmware_candidates(versions=versions, family=family):
-        # check if we have firmware stubs of this version and port
-        base = f"{fw['family']}-{clean_version(fw['version'],flat=True)}"
+def get_board_path(fw: Dict):
+    return CONFIG.stub_path / board_folder_name(fw)
 
-        fw_folder = fw_folder_name(base, fw)
-        mrg_folder = fw_folder + "-merged"
 
-        doc_folder = f"{base}-docstubs"
-        fw_path = CONFIG.stub_path / fw_folder
-        mrg_path = CONFIG.stub_path / mrg_folder
-        doc_path = CONFIG.stub_path / doc_folder
+def get_merged_path(fw: Dict):
+    return CONFIG.stub_path / (board_folder_name(fw) + "-merged")
 
+
+def merge_all_docstubs(
+    versions: Union[List[str], str] = ["v1.19.1"],
+    family: str = "micropython",
+    ports: Union[List[str], str] = ["auto"],
+    boards: Union[List[str], str] = [GENERIC_L],
+    *,
+    mpy_path=CONFIG.mpy_path,
+):
+    """merge docstubs and board stubs to merged stubs"""
+    if isinstance(versions, str):
+        versions = [versions]
+    if isinstance(ports, str):
+        ports = [ports]
+    if isinstance(boards, str):
+        boards = [boards]
+
+    candidates = list(board_candidates(versions=versions, family=family))
+    candidates = filter_list(candidates, ports, boards)
+    log.info(f"checking {len(candidates)} possible board candidates")
+
+    merged = 0
+    if not candidates:
+        log.error("No candidates found")
+        return
+    for candidate in candidates:
+        # check if we have board stubs of this version and port
+        doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         if not doc_path.exists():
-            print(f"Warning: no docstubs for {fw['version']}")
+            log.warning(f"No docstubs found for {candidate['version']}")
             continue
+        # src and dest paths
+        board_path = get_board_path(candidate)
+        merged_path = get_merged_path(candidate)
 
-        if not fw_path.exists():
-            if fw["version"] != "latest":
-                # only continue if both folders exist
-                log.debug(f"skipping {mrg_folder}, no firmware stubs found")
-                continue
-            else:
-                # try to get the fw_path from the last released version
-                base = f"{fw['family']}-{clean_version(LAST_VERSION,flat=True)}"
-                fw_path = CONFIG.stub_path / fw_folder_name(base, fw)
+        if not board_path.exists():
+            if candidate["version"] == "latest":
+                # for the latest we do a bit more effort to get something 'good enough'
+                # try to get the board_path from the last released version as the basis
+                board_path = CONFIG.stub_path / board_folder_name(candidate, version=clean_version(CONFIG.STABLE_VERSION, flat=True))
                 # check again
-                if fw_path.exists():
-                    log.info(f"using {fw_path.name} as the basis for {mrg_folder}")
+                if board_path.exists():
+                    log.info(f"using {board_path.name} as the basis for {merged_path.name}")
                 else:
                     # only continue if both folders exist
-                    log.debug(f"skipping {mrg_folder}, no firmware stubs found")
+                    log.debug(f"skipping {merged_path.name}, no firmware stubs found")
                     continue
+            else:
+                # only continue if both folders exist
+                log.debug(f"skipping {merged_path.name}, no firmware stubs found")
+                continue
 
-        log.info(f"Merge docstubs for {fw['family']} {fw['version']} {fw['port']} {fw['board']}")
-        copy_docstubs(fw_path, mrg_path, doc_path)
+        log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
+        result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
+        if result:
+            merged += 1
+    log.info(f"merged {merged} of {len(candidates)} candidates")
+    return merged
 
 
-def copy_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
+def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     """
     Parameters:
         fw_path: Path to firmware stubs (absolute path)
