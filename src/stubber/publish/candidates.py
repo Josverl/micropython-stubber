@@ -68,11 +68,7 @@ def list_micropython_ports(
     mpy_path = Path("./repos/micropython")
 
     ports_path = mpy_path / "ports"
-    return [
-        p
-        for p in list(subfolder_names(ports_path))
-        if p not in CONFIG.BLOCKED_PORTS
-    ]
+    return [p for p in list(subfolder_names(ports_path)) if p not in CONFIG.BLOCKED_PORTS]
 
 
 def list_micropython_port_boards(
@@ -111,7 +107,7 @@ def frozen_candidates(
         versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
     else:
         versions = [versions] if isinstance(versions, str) else versions
-        
+
     versions = [clean_version(v, flat=True) for v in versions]
 
     if isinstance(ports, str):
@@ -193,13 +189,12 @@ def docstub_candidates(
         yield {"family": family, "version": version, "pkg_type": DOC_STUBS}
 
 
-def firmware_candidates(
+def board_candidates(
     family: str = "micropython", versions: Union[str, List[str]] = V_LATEST, *, mpy_path=CONFIG.mpy_path, pt=FIRMWARE_STUBS
 ):
     """
-    generate a list of possible firmware stub candidates for the given family and version.
-    list is basesed on the micropython repo
-    /ports/<list of ports>/boards/<list of boards>
+    generate a list of possible board stub candidates for the given family and version.
+    list is based on the micropython repo:  /ports/<list of ports>/boards/<list of boards>
     """
     if is_auto(versions):
         versions = list(micropython_versions(start=OLDEST_VERSION))
