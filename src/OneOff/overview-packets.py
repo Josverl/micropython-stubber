@@ -6,11 +6,11 @@ from stubber.publish.candidates import *
 from stubber.publish.package import package_name
 
 # # latest
-# for c in frozen_candidates(boards="GENERIC", versions="auto"):
+# for c in frozen_candidates(boards=GENERIC, versions="auto"):
 #     print(f"{package_name( **c) :50} | {c['port']:10}{c['board']:30} == {c['version']}")
 
 matrix = {}
-# for c in (frozen_candidates(boards="GENERIC", versions="auto")):
+# for c in (frozen_candidates(boards=GENERIC, versions="auto")):
 for c in frozen_candidates(boards="auto", versions="auto"):
     name = package_name(**c)
     if name in matrix:

@@ -100,11 +100,11 @@ class StubPackage:
             """hash of the the stub files"""
             self.create_update_pyproject_toml()
 
+            self.stub_sources: List[Tuple[str, Path]] = []
             # save the stub sources
             if stubs:
                 self.stub_sources = stubs
-            else:
-                self.stub_sources: List[Tuple[str, Path]] = []
+
             self._publish = True
         self.status: Status = Status({"result": "-", "name": self.package_name, "version": self.pkg_version, "error": None})
 
@@ -214,7 +214,8 @@ class StubPackage:
             "publish": self._publish,
             "pkg_version": str(self.pkg_version),
             "path": self.package_path.name,  # only store the folder name , as it is relative to the publish folder
-            "stub_sources": [(name, Path(path).as_posix()) for (name, path) in self.stub_sources],
+            # force all source paths to lowercase to avoid issues with case sensitive file systems
+            "stub_sources": [(name, Path(path).as_posix().lower()) for (name, path) in self.stub_sources],
             "description": self.description,
             "hash": self.hash,
             "stub_hash": self.stub_hash,
@@ -240,7 +241,8 @@ class StubPackage:
         for (name, path) in json_data["stub_sources"]:
             if path.startswith("stubs/"):
                 path = path.replace("stubs/", "")
-            self.stub_sources.append((name, Path(path)))
+            # force all source paths to lowercase to avoid issues with case sensitive file systems
+            self.stub_sources.append((name, Path(path.lower())))
 
     def update_package_files(self) -> None:
         """

@@ -10,7 +10,7 @@ from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates
-from stubber.publish.package import package_name
+from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
@@ -27,7 +27,7 @@ def get_base(candidate, version: Optional[str] = None):
 def board_folder_name(fw: Dict, *, version: Optional[str] = None):
     """return the name of the firmware folder"""
     base = get_base(fw, version=version)
-    return f"{base}-{fw['port']}" if fw["board"] == "GENERIC" else f"{base}-{fw['port']}-{fw['board']}"
+    return f"{base}-{fw['port']}" if fw["board"] == GENERIC else f"{base}-{fw['port']}-{fw['board']}"
 
 
 def get_board_path(fw: Dict):

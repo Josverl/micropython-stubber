@@ -15,6 +15,8 @@ from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
+GENERIC = "generic"
+
 # replace std log handler with a custom one capped on INFO level
 log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
@@ -39,7 +41,7 @@ def get_package(
     pkg_type,
     version: str,
     port: str,
-    board: str = "GENERIC",
+    board: str = GENERIC,
     family: str = "micropython",
 ) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
@@ -105,8 +107,9 @@ def create_package(
         # Use lower case for paths to avoid case sensitive issues
         port = port.lower()
         # board is always uppercase by convention (GENERIC)
-        board = board.upper() if board else "GENERIC"
-        stubs: List[Tuple[str, Path]] = [
+        board = board.lower() if board else GENERIC
+        stubs: List[Tuple[str, Path]] = []
+        stubs= [
             (
                 # StubSource.FIRMWARE,
                 # Path(f"{family}-{ver_flat}-{port}"),
@@ -114,7 +117,7 @@ def create_package(
                 # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
                 # that would also require the port - board - variant to be discoverable runtime
                 StubSource.MERGED,
-                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board != "GENERIC" else Path(f"{family}-{ver_flat}-{port}-merged"),
+                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board != GENERIC else Path(f"{family}-{ver_flat}-{port}-merged"),
             ),
             (
                 StubSource.FROZEN,
@@ -127,7 +130,7 @@ def create_package(
         ]
     elif pkg_type == DOC_STUBS:
         # TODO add doc stubs
-        stubs: List[Tuple[str, Path]] = [
+        stubs= [
             (
                 "Doc stubs",
                 Path(f"{family}-{ver_flat}-docstubs"),
