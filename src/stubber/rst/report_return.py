@@ -59,7 +59,7 @@ def process(folder: Path, pattern: str):
                             log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 
                         log.trace(r)
-    if len(report) > 0:
+    if report:
         filename = folder / "report.json"
         with open(filename, mode="w", encoding="utf8") as fp:
             json.dump(report, fp, ensure_ascii=False, indent=4)

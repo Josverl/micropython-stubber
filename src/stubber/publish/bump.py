@@ -25,12 +25,10 @@ def bump_postrelease(
     if rc != 0:
         # Pre-release / alpha / beta / rc segment
         parts.append(f".a{rc}")
+    elif current.post is None:
+        parts.append(".post1")
     else:
-        # BUMP Post-release
-        if current.post is not None:
-            parts.append(f".post{current.post + 1}")
-        else:
-            parts.append(f".post{1}")
+        parts.append(f".post{current.post + 1}")
     # Development release
     if current.dev is not None:
         parts.append(f".dev{current.dev}")

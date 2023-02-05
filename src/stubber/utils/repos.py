@@ -1,3 +1,5 @@
+""" utility functions to handle to cloned repos needed for stubbing."""
+
 import csv
 import pkgutil
 import tempfile

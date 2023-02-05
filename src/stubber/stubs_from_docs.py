@@ -98,11 +98,7 @@ def is_balanced(s: str) -> bool:
     """
     Check if a string has balanced parentheses
     """
-    if s.count("(") != s.count(")"):
-        return False
-    if s.count("{") != s.count("}"):
-        return False
-    return True
+    return False if s.count("(") != s.count(")") else s.count("{") == s.count("}")
 
 
 class RSTReader:
@@ -277,9 +273,9 @@ class RSTReader:
             pass
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
-        if len(block) > 0 and len(block[0]) > 0 and block[0][0] != " ":
+        if block and len(block[0]) > 0 and block[0][0] != " ":
             q_char = block[0][0]
-            if all([l.startswith(q_char) for l in block]):
+            if all(l.startswith(q_char) for l in block):
                 # all lines start with the same character, so skip that character
                 block = [l[1:] for l in block]
 
@@ -330,7 +326,7 @@ class RSTReader:
         params = params.strip()
         if not params.endswith(")"):
             # remove all after the closing bracket
-            params = params[0 : params.rfind(")") + 1]
+            params = params[: params.rfind(")") + 1]
 
         ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
 
@@ -378,23 +374,18 @@ class RSTReader:
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
         self.leave_class()
-        # DOC: Add / update information to existing class definition
-        full_name = self.output_dict.find(f"class {name}")
-        if full_name:
+        if full_name := self.output_dict.find(f"class {name}"):
             log.warning(f"TODO: UPDATE EXISTING CLASS : {name}")
             class_def = self.output_dict[full_name]
         else:
-            # DOC: add the parent class(es) to the formal documentation
-            parent = ""
-            if name in CHILD_PARENT_CLASS.keys():
-                parent = CHILD_PARENT_CLASS[name]
+            parent = CHILD_PARENT_CLASS[name] if name in CHILD_PARENT_CLASS.keys() else ""
             if parent == "" and (name.endswith("Error") or name.endswith("Exception")):
                 parent = "Exception"
             class_def = ClassSourceDict(
                 f"class {name}({parent}):",
                 docstr=docstr,
             )
-        if len(params) > 0:
+        if params != "":
             method = FunctionSourceDict(
                 name="__init__",
                 indent=class_def.indent + 4,
@@ -579,9 +570,7 @@ class RSTReader:
                 class_name = self.current_class
             name = name.split(".")[-1]  # Take only the last part from Pin.toggle
 
-            # get or create the parent class
-            full_name = self.output_dict.find(f"class {class_name}")
-            if full_name:
+            if full_name := self.output_dict.find(f"class {class_name}"):
                 parent_class = self.output_dict[full_name]
             else:
                 # not found, create and add new class to the output dict
@@ -605,7 +594,6 @@ class RSTReader:
                     definition=[f"def __init__(self, {params} -> None:"],
                     docstr=docstr,
                 )
-                parent_class += method
             elif rst_hint == "classmethod":
                 method = FunctionSourceDict(
                     decorators=["@classmethod"],
@@ -614,8 +602,6 @@ class RSTReader:
                     definition=[f"def {name}(cls, {params} -> {ret_type}:"],
                     docstr=docstr,
                 )
-                parent_class += method
-
             elif rst_hint == "staticmethod":
                 method = FunctionSourceDict(
                     decorators=["@staticmethod"],
@@ -624,7 +610,6 @@ class RSTReader:
                     definition=[f"def {name}({params} -> {ret_type}:"],
                     docstr=docstr,
                 )
-                parent_class += method
             else:  # just plain method
                 method = FunctionSourceDict(
                     name=f"def {name}",
@@ -632,7 +617,7 @@ class RSTReader:
                     definition=[f"def {name}(self, {params} -> {ret_type}:"],
                     docstr=docstr,
                 )
-                parent_class += method
+            parent_class += method
 
     def parse_exception(self):
         log.trace(f"# {self.line.rstrip()}")
@@ -739,7 +724,6 @@ class RSTReader:
                 # NOTHING TO SEE HERE , MOVE ON
                 self.line_no += 1
 
-
         # now clean up
         self.prepare_output()
 
@@ -753,6 +737,7 @@ def generate_from_rst(
     verbose: bool = False,
     suffix=".py",
 ) -> int:
+    # sourcery skip: remove-redundant-exception, simplify-single-exception-tuple
     if not dst_path.exists():
         dst_path.mkdir(parents=True)
     if not release:
@@ -786,13 +771,7 @@ def generate_from_rst(
         if file.stem in U_MODULES:
             # create umod.py file and mod.py file
             reader.write_file((dst_path / ("u" + file.name)).with_suffix(suffix))
-            reader.write_file((dst_path / file.name).with_suffix(suffix))
-            # with open((dst_path / file.name).with_suffix(suffix), "w") as new_file:
-            #     # new_file.write(f"from u{file.stem} import * # Type: Ignore\n")
-            #     new_file.write(f"from . import u{file.stem} # Type: Ignore\n")
-        else:
-            # create mod.py file
-            reader.write_file((dst_path / file.name).with_suffix(suffix))
+        reader.write_file((dst_path / file.name).with_suffix(suffix))
         del reader
 
     run_autoflake(dst_path, progress_pyi=True)
