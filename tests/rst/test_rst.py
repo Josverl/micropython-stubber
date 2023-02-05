@@ -12,7 +12,8 @@ from helpers import read_stub
 pytestmark = pytest.mark.doc_stubs
 
 # SOT
-from stubber.stubs_from_docs import TYPING_IMPORT, RSTReader, generate_from_rst
+from stubber.stubs_from_docs import  generate_from_rst
+from stubber.rst.reader import RSTReader, TYPING_IMPORT
 
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 
