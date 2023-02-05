@@ -26,11 +26,12 @@ def build_multiple(
     Build a bunch of stub packages
     """
     db = get_database(CONFIG.publish_path, production=production)
-    results = []
+    results:List[Dict[str, Any]] = []
     worklist = build_worklist(family, versions, ports, boards)
     if len(worklist) == 0:
         log.error("Could not find any packages than can be build.")
         return results
+    log.info(f"checking {len(worklist)} possible board candidates")
 
     for todo in worklist:
         if package := get_package(db, **todo):
