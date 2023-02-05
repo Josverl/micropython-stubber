@@ -64,7 +64,7 @@ def clean_destination(dst_path):
     for f in dst_path.rglob(pattern="*.py*"):
         try:
             os.remove(f)
-        except (OSError, PermissionError):
+        except OSError:
             pass
 
 def get_rst_sources(rst_path:Path, pattern:str) -> List[Path]:

@@ -33,13 +33,11 @@ def board_folder_name(fw: Dict, *, version: Optional[str] = None):
 
 
 def get_board_path(fw: Dict):
-    board_path = CONFIG.stub_path / board_folder_name(fw)
-    return board_path
+    return CONFIG.stub_path / board_folder_name(fw)
 
 
 def get_merged_path(fw: Dict):
-    merged_path = CONFIG.stub_path / (board_folder_name(fw) + "-merged")
-    return merged_path
+    return CONFIG.stub_path / (board_folder_name(fw) + "-merged")
 
 
 def merge_all_docstubs(
