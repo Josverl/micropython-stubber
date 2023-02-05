@@ -91,6 +91,7 @@ packaging = "~21.3"
 distro = "~1.8.0"
 pydeps = "^1.10.22"
 pytest-github-actions-annotate-failures = "^0.1.7"
+sourcery-cli = "^1.0.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
