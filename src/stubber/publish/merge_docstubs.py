@@ -21,13 +21,14 @@ def get_base(candidate, version: Optional[str] = None):
     if not version:
         version = clean_version(candidate["version"], flat=True)
     base = f"{candidate['family']}-{version}"
-    return base
+    return base.lower()
 
 
 def board_folder_name(fw: Dict, *, version: Optional[str] = None):
     """return the name of the firmware folder"""
     base = get_base(fw, version=version)
-    return f"{base}-{fw['port']}" if fw["board"] == GENERIC else f"{base}-{fw['port']}-{fw['board']}"
+    folder_name = f"{base}-{fw['port']}" if fw["board"] == GENERIC else f"{base}-{fw['port']}-{fw['board']}"
+    return folder_name.lower()
 
 
 def get_board_path(fw: Dict):
