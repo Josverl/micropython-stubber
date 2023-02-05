@@ -49,11 +49,6 @@
         "upysh",
         "webrepl"
     ],
-    "python.formatting.provider": "black",
-    // "python.formatting.blackArgs": [
-    //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
-    // ],
-    // "editor.formatOnSave": false,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "workbench.colorCustomizations": {
         "activityBar.activeBorder": "#0bb45d",
@@ -132,4 +127,10 @@
         "--line-length 99"
     ],
     "editor.formatOnType": true,
+    "editor.formatOnSave": true,
+    "python.formatting.provider": "black",
+    // "python.formatting.blackArgs": [
+    //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
+    // ],
+    // "editor.formatOnSave": false,    
 }

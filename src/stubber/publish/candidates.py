@@ -13,7 +13,7 @@ what versions are available. This module provides functions to :
 
 import re
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
 from packaging.version import parse
 
@@ -219,3 +219,23 @@ def board_candidates(
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
                 if board.lower() != GENERIC:
                     yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}
+
+
+def filter_list(
+    worklist: List[Dict[str, str]],
+    ports: Optional[Union[List[str], str]] = None,
+    boards: Optional[Union[List[str], str]] = None,
+    # versions: Optional[Union[List[str], str]] = None,
+):
+    """
+    filter a list of candidates down to the ones we want, based on the ports and boars specified (case insensitive)
+    for board also match using a 'GENERIC_' prefix, so board 's3' will match candidate 'GENERIC_S3'
+    """
+    worklist = [i for i in worklist if i["board"] != ""]
+    if ports and not is_auto(ports):
+        ports_ = [i.lower() for i in ports]
+        worklist = [i for i in worklist if i["port"].lower() in ports_]
+    if boards and not is_auto(boards):
+        boards_ = [i.lower() for i in boards]
+        worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_","") in boards_ ]
+    return worklist
