@@ -97,7 +97,7 @@ def publish(
     # Publish the package
     if dryrun:  # pragma: no cover
         log.warning("Dryrun: Updated package is NOT published.")
-        status["result"] = "DryRun successful"
+        status["result"] = "Build successful"
         if clean:
             package.clean()
         return status

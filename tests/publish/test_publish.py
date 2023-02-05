@@ -9,7 +9,7 @@ from stubber.publish.publish import publish_multiple, publish_one
 
 from .fakeconfig import FakeConfig
 
-ALL_PUBLISH_RESULTS = {"Published to PyPi","Published to Test-PyPi", "DryRun successful", "-"}
+ALL_PUBLISH_RESULTS = {"Published to PyPi","Published to Test-PyPi", "Build successful", "-"}
 
 @pytest.mark.parametrize(
     "production, dryrun, is_changed, check_cnt, build_cnt, publish_cnt",
