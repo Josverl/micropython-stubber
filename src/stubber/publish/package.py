@@ -44,6 +44,7 @@ def get_package(
 ) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
     pkg_name = package_name(pkg_type, port=port, board=board, family=family)
+    version = clean_version(version, drop_v=True)
     if package_info := get_package_info(
         db,
         CONFIG.publish_path,

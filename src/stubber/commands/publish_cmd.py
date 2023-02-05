@@ -54,6 +54,12 @@ from stubber.utils.config import CONFIG
     help="create new post release even if no changes detected",
 )
 @click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Do not actually publish, just show what would be done",
+)
+@click.option(
     "--clean",
     is_flag=True,
     default=False,
@@ -66,6 +72,7 @@ def cli_publish(
     boards: Union[str, List[str]],
     production: bool = True,
     force: bool = False,
+    dry_run: bool = False,
     clean: bool = False,
 ):
     """
@@ -87,6 +94,7 @@ def cli_publish(
         boards=boards,
         production=production,
         force=force,
+        dry_run=dry_run,
         clean=clean,
     )
     log.info(tabulate(results, headers="keys"))
