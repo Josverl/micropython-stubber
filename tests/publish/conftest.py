@@ -5,6 +5,8 @@ import shutil
 import pytest
 from pytest_mock import MockerFixture
 
+from stubber.publish.package import create_package
+
 from .fakeconfig import FakeConfig
 
 
