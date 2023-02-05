@@ -217,6 +217,8 @@ def firmware_candidates(
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
+            # Yield the generic port exactly one time
             yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": pt}
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
-                yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}
+                if board != "GENERIC":
+                    yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}

@@ -1,3 +1,5 @@
+"""pytest fixtures for publish tests"""
+
 from pathlib import Path
 import shutil
 import pytest
@@ -5,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from .fakeconfig import FakeConfig
 
-from stubber.publish.publish import create_package
+
 from stubber.publish.enums import COMBO_STUBS
 from pysondb import PysonDB
 
