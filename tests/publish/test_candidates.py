@@ -68,8 +68,10 @@ def test_docstub_candidates(pytestconfig, family, versions, count):
         ("micropython", "auto", "auto", "auto", 19),
         # list GENERIC boards for any version (case sensitive on linux/mac)
         ("micropython", "auto", "auto", "GENERIC", 11),
+        ("micropython", "auto", "auto", "generic", 11),
         ("micropython", "latest", "auto", "auto", 7),
         ("micropython", "v1.16", "foo", "GENERIC", 0),  # port folder does not exist
+        ("micropython", "v1.16", "foo", "generic", 0),  # port folder does not exist
         # list GENERIC boards for specific version (case sensitive on linux/mac)
         ("micropython", "v1.18", "auto", "GENERIC", 3),
         ("micropython", "v1.18", "esp32", "auto", 2),
@@ -80,6 +82,7 @@ def test_docstub_candidates(pytestconfig, family, versions, count):
         # list all ports / boards for a version
         ("micropython", "v1.18", "auto", "auto", 5),
         ("micropython", "v1.18", "stm32", "PYBD_SF2", 2),  # Self + Generic
+        ("micropython", "v1.18", "stm32", "pybd_sf2", 2),  # Self + Generic
     ],
 )
 def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count):
@@ -120,6 +123,7 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
         ("micropython", "v1.18", "auto", "GENERIC", 16), # find v1.18 ports
         ("micropython", "v1.18", "esp32", "GENERIC", 1), # find v1.18 ESP32 ports 
         ("micropython", "v1.19.1", "esp8266", "GENERIC", 1), # find v1.18 ESP8266 ports 
+        ("micropython", "v1.19.1", "esp8266", "generic", 1), # find v1.18 ESP8266 ports 
         ("micropython", "v1.18", "stm32", "auto", 56), # find v1.18 STM32 boards
         ("micropython", "v1.17", "auto", "auto", 124), # find all v1.17 ports & boards
         ("micropython", "v1.18", "auto", "auto", 139), # find all v1.18 ports & boards

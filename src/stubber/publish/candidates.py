@@ -19,6 +19,7 @@ from packaging.version import parse
 
 import stubber.basicgit as git
 from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
+from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version, micropython_versions
 
@@ -99,7 +100,7 @@ def frozen_candidates(
         board and port are ignored, they are looked up from the available frozen stubs
     - versions = 'latest' , 'auto' or a list of versions
     - port = 'auto' or a specific port
-    - board = 'auto' or a specific board, 'GENERIC' must be specified in ALLCAPS
+    - board = 'auto' or a specific board, 'generic' must be specified in lowercare
     """
     auto_port = is_auto(ports)
     auto_board = is_auto(boards)
@@ -131,7 +132,7 @@ def frozen_candidates(
         for port in ports:
             board_path = path / f"{family}-{version}-frozen" / port
             if board_path.exists():
-                yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": COMBO_STUBS}
+                yield {"family": family, "version": version, "port": port, "board": GENERIC, "pkg_type": COMBO_STUBS}
             # if not auto_board:
             #     for board in boards:
             #         port_path = board_path/ "board" / board
@@ -157,7 +158,7 @@ def frozen_candidates(
                 assert isinstance(board, str)
                 # prozen stubs found , and not excluded, generic is already explicitly included
                 if (path / f"{family}-{version}-frozen" / port / board).exists() and board.upper() not in [
-                    "GENERIC",
+                    GENERIC.upper(),
                     "RELEASE",
                     "GENERIC_512K",
                 ]:
@@ -213,7 +214,7 @@ def board_candidates(
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
             # Yield the generic port exactly one time
-            yield {"family": family, "version": version, "port": port, "board": "GENERIC", "pkg_type": pt}
+            yield {"family": family, "version": version, "port": port, "board": GENERIC, "pkg_type": pt}
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
-                if board != "GENERIC":
+                if board.lower() != GENERIC:
                     yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}

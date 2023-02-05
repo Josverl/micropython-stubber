@@ -17,9 +17,12 @@ from .fakeconfig import FakeConfig
     "family, pkg, port, board, expected",
     [
         ("micropython", COMBO_STUBS, "esp32", "GENERIC", "micropython-esp32-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "generic", "micropython-esp32-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "tiny", "micropython-esp32-tiny-stubs"),
         ("micropython", DOC_STUBS, "esp32", None, "micropython-doc-stubs"),
         ("micropython", DOC_STUBS, "esp32", "GENERIC", "micropython-doc-stubs"),
+        ("micropython", DOC_STUBS, "esp32", "generic", "micropython-doc-stubs"),
         ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
         ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
         ("pycom", CORE_STUBS, None, None, "pycom-core-stubs"),
@@ -36,6 +39,7 @@ def test_package_name(family, pkg, port, board, expected):
     [
         (DOC_STUBS, None, None),
         (COMBO_STUBS, "esp32", "GENERIC"),
+        (COMBO_STUBS, "esp32", "generic"),
     ],
 )
 # CORE_STUBS
