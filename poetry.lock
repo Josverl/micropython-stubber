@@ -2144,6 +2144,19 @@ files = [
 ]
 
 [[package]]
+name = "sourcery-cli"
+version = "1.0.3"
+description = "Magically refactor Python"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sourcery_cli-1.0.3-py2.py3-none-macosx_10_9_universal2.whl", hash = "sha256:4e6fa17d5b73868c6357acb80360b815974791c33875b22208a90cf6d7d4efd9"},
+    {file = "sourcery_cli-1.0.3-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:896e4cd115699e1bdf260c0402fe94b9d6894aef7ab5b77ec11811565e477df2"},
+    {file = "sourcery_cli-1.0.3-py2.py3-none-win_amd64.whl", hash = "sha256:d99e76088c800c57ff2bd5e3a8572440010082116c009aba3806718dafeb2c0b"},
+]
+
+[[package]]
 name = "sphinx"
 version = "4.5.0"
 description = "Python documentation generator"
@@ -2649,4 +2662,4 @@ tools = ["mpremote", "esptool", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "b75a83cbf9a69c868f7bb56ad392870bc7b875dd34c28fd9fa14270263107b8f"
+content-hash = "357be19bd66ba03353ca333b83fa85bd70a720dc11975985e2dfc72f9773f99f"
