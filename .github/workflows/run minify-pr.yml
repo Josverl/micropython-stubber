@@ -34,18 +34,11 @@ jobs:
       - name: Install Poetry
         run: pip install -U poetry==1.2.1
 
-
-      #----------------------------------------------
-      # install dependencies 
-      #----------------------------------------------
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-
       #----------------------------------------------
       # install root project
       #----------------------------------------------
       - name: Install library
-        run: poetry install --no-interaction
+        run: poetry install --with dev --no-interaction
 
 
       - name: flag tools executable
