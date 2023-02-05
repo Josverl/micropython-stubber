@@ -5,7 +5,7 @@ from typing import Tuple
 
 from loguru import logger as log
 
-from stubber.publish.package import GENERIC
+from stubber.publish.package import GENERIC_U
 
 
 def get_portboard(manifest_path: Path):
@@ -34,13 +34,13 @@ def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
         raise ValueError("port must be provided")
 
     if not board:
-        board = GENERIC
+        board = GENERIC_U
 
     if board == "manifest_release":
         board = "RELEASE"
     # set global for later use - must be an absolute path.
-    freeze_path = (stub_path / port / board).absolute()
-    return freeze_path, board
+    freeze_path = (stub_path / port / board.upper()).absolute()
+    return freeze_path, board.upper()
 
 
 def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
