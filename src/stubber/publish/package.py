@@ -118,6 +118,8 @@ def create_package(
         # BOARD in the micropython repo is always uppercase by convention (GENERIC)
         # but MUST  be used in lowercase in the stubs repo
         board = board.lower() if board else GENERIC
+        board_mpy = board.upper() 
+        board = board.replace("generic_","") 
         stubs: List[Tuple[str, Path]] = []
         stubs= [
             (
@@ -131,7 +133,7 @@ def create_package(
             ),
             (
                 StubSource.FROZEN,
-                Path(f"{family}-{ver_flat}-frozen") / port / board.upper(), # BOARD in source frozen path needs to be UPPERCASE
+                Path(f"{family}-{ver_flat}-frozen") / port / board_mpy.upper(), # BOARD in source frozen path needs to be UPPERCASE
             ),
             (
                 StubSource.CORE,
