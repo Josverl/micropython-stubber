@@ -112,13 +112,13 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
 @pytest.mark.parametrize(
     "family, versions, ports, boards, count",
     [
-
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
-        ("micropython", "v1.18", "auto", "GENERIC", 19), # find v1.18 ports
-        ("micropython", "v1.18", "esp32", "GENERIC", 2), # find v1.18 ports <-- FIXME: should be 1
+        ("micropython", "v1.18", "auto", "GENERIC", 17), # find v1.18 ports
+        ("micropython", "v1.18", "esp32", "GENERIC", 1), # find v1.18 ESP32 ports 
+        ("micropython", "v1.19.1", "esp8266", "GENERIC", 1), # find v1.18 ESP8266 ports 
         ("micropython", "v1.18", "stm32", "auto", 56), # find v1.18 STM32 boards
-        ("micropython", "v1.18", "auto", "auto", 142), # find all v1.18 ports & boards
+        ("micropython", "v1.18", "auto", "auto", 140), # find all v1.18 ports & boards
         ("micropython", "v1.18", "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
         ("micropython", ["v1.18"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
         ("micropython", ["latest"], "auto", "NUCLEO_F091RC", 1), # find v1.18 NUCLEO_F091RC boards
