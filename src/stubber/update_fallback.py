@@ -23,7 +23,7 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
         fw_version = version
     if fw_version == "latest":
         fw_version = RELEASED
-    SOURCES = [
+    return [
         ("uasyncio", f"micropython-{fw_version}-esp32"),
         ("umqtt", f"micropython-{fw_version}-esp32"),
         ("_onewire.py*", f"micropython-{fw_version}-esp32"),
@@ -51,7 +51,10 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
         ("uzlib.py*", f"micropython-{fw_version}-esp32"),
         ("bluetooth.py*", f"micropython-{version}-docstubs"),
         # esp
-        ("esp.py*", f"micropython-{version}-docstubs"),  # 8266 fw stub has most functions
+        (
+            "esp.py*",
+            f"micropython-{version}-docstubs",
+        ),  # 8266 fw stub has most functions
         ("esp32.py*", f"micropython-{version}-docstubs"),  # esp32"),
         # pyboard == stm32
         ("pyb.py*", f"micropython-{fw_version}-stm32"),
@@ -64,7 +67,6 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
         ("time.py*", f"micropython-{fw_version}-esp32"),  # -> stdlib
         ("utime.py*", f"micropython-{fw_version}-esp32"),
     ]
-    return SOURCES
 
 
 def update_fallback(stubpath: Path, fallback_path: Path, version: str = RELEASED):
