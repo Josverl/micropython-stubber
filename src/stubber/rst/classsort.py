@@ -70,8 +70,8 @@ def sort_classes(classes: List[str]):
             for child in node["children"]:
                 list_node(child, sorted)
 
-    sorted: List[str] = []
+    l_sorted: List[str] = []
 
     for node in forest:
-        list_node(node, sorted)
-    return sorted
+        list_node(node, l_sorted)
+    return l_sorted
