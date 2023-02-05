@@ -21,20 +21,12 @@ from loguru import logger as log
 from packaging.version import Version, parse
 from pysondb import PysonDB
 
-from stubber.publish.bump import bump_postrelease
+from stubber.publish.bump import bump_version
 from stubber.publish.enums import StubSource
 from stubber.publish.package import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-
-# TODO: Get git tag and store in DB for reference
-# import stubber.basicgit as git
-# git log -n 1 --format="%H"
-# git log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
-# https://github.com/Josverl/micropython-stubs/tree/d45c8fa3dbdc01978af58532ff4c5313090aabfb
-
-#  git -C .\all-stubs\ log -n 1 --format="https://github.com/josverl/micropython-stubs/tree/%H"
 
 
 Status = NewType("Status", Dict[str, Union[str, None]])
@@ -165,12 +157,14 @@ class StubPackage:
 
     def get_prerelease_package_version(self, production: bool = False) -> str:
         """Get the next prerelease version for the package."""
-        base = Version("1.20")  # TODO hardcoded version - should be the next minor version after the last release
-        rc = 1  # FIXME: #307 hardcoded prerelease version - should be based on the git commit count
+        rc = 1
         if describe := get_git_describe(CONFIG.mpy_path.as_posix()):
             ver, rc, _ = describe.split('-')
+            base = bump_version( Version(ver), minor_bump=True)  
             rc = int(rc)
-        return str(bump_postrelease(base, rc=rc))
+            return str(bump_version(base, rc=rc))
+        else:
+            raise ValueError("cannot determine next version number micropython")
 
     def get_next_package_version(self, prod: bool = False) -> str:
         """Get the next version for the package."""
@@ -504,7 +498,7 @@ class StubPackage:
             current = Version(self.pkg_version)
             assert isinstance(current, Version)
             # bump the version
-            self.pkg_version = str(bump_postrelease(current=current, rc=rc))
+            self.pkg_version = str(bump_version(post_bump=True, current=current, rc=rc))
         except Exception as e:  # pragma: no cover
             log.error(f"Error: {e}")
         return self.pkg_version
