@@ -167,8 +167,7 @@ class StubPackage:
         """Get the next prerelease version for the package."""
         base = Version("1.20")  # TODO hardcoded version - should be the next minor version after the last release
         rc = 1  # FIXME: #307 hardcoded prerelease version - should be based on the git commit count
-        describe = get_git_describe(CONFIG.mpy_path.as_posix())
-        if describe:
+        if describe := get_git_describe(CONFIG.mpy_path.as_posix()):
             ver, rc, _ = describe.split('-')
             rc = int(rc)
         return str(bump_postrelease(base, rc=rc))
