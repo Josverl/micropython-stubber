@@ -12,8 +12,6 @@ from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import  get_package
 from stubber.utils.config import CONFIG
 
-from pysondb import PysonDB
-
 
 def build_multiple(
     family: str = "micropython",

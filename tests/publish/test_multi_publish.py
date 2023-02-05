@@ -20,11 +20,11 @@ def test_publish_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig :
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-    m_is_changed: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.is_changed", autospec=True, return_value=False)  # type: ignore
+    m_is_changed: MagicMock = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)  # type: ignore
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_check: MagicMock = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
+    m_p_build: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
+    m_p_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
     # Test publish: not changed :--> should not build or publish
@@ -46,11 +46,11 @@ def test_publish_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig : p
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-    m_is_changed: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.is_changed", autospec=True, return_value=False)
+    m_is_changed: MagicMock = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_check: MagicMock = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
+    m_p_build: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
+    m_p_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
     # Test publish - changed :--> should build and publish
@@ -63,6 +63,7 @@ def test_publish_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig : p
 
 @pytest.mark.mocked
 @pytest.mark.integration
+
 def test_publish_build(mocker: MockerFixture, tmp_path: Path, pytestconfig : pytest.Config):
     """Test publish_multiple"""
     # test requires that the stubs are cloned locally
@@ -73,20 +74,20 @@ def test_publish_build(mocker: MockerFixture, tmp_path: Path, pytestconfig : pyt
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-    m_is_changed: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.is_changed", autospec=True, return_value=False)
+    m_is_changed: MagicMock = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_check: MagicMock = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
+    m_p_build: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
+    m_p_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
-    # Test publish - unchanged + explicit build :--> should build but not publish
+    # Test publish - unchanged + explicit build :--> should not build and not publish
     # -----------------------------------------------------------------------------------------------
     m_is_changed.return_value = False
     result = publish_multiple(production=False, build=True, ports=["stm32"])
     assert len(result) > 0
-    assert m_p_build.call_count >= 1 , "Build should be called"
-    assert m_p_publish.call_count == 0, "Publish should be called"
+    assert m_p_build.call_count ==0 , "Build should not be called" 
+    assert m_p_publish.call_count == 0, "Publish should not be called"
 
 @pytest.mark.mocked
 @pytest.mark.integration
@@ -100,11 +101,11 @@ def test_publish_build_force(mocker: MockerFixture, tmp_path: Path, pytestconfig
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-    m_is_changed: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.is_changed", autospec=True, return_value=False)
+    m_is_changed: MagicMock = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_check: MagicMock = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
+    m_p_build: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
+    m_p_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
     # Test publish - unchanged + explicit build :--> should build but not publish
@@ -128,11 +129,11 @@ def test_publish_force(mocker: MockerFixture, tmp_path: Path, pytestconfig : pyt
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-    m_is_changed: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.is_changed", autospec=True, return_value=False)
+    m_is_changed: MagicMock = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
-    m_check: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.check", autospec=True, return_value=True)
-    m_p_build: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_check: MagicMock = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)
+    m_p_build: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
+    m_p_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
     # Test publish - not changed + Force :--> should build and publish

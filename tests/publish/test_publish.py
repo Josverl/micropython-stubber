@@ -139,7 +139,7 @@ def test_publish_package(
     pkg = fake_package
     db = temp_db
 
-    m_publish: MagicMock = mocker.patch("stubber.publish.publish.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # allow the publishing logic to run during test 
     pkg._publish = True   # type: ignore 
