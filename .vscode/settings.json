@@ -129,6 +129,9 @@
     "editor.formatOnType": true,
     "editor.formatOnSave": true,
     "python.formatting.provider": "black",
+    "yaml.schemas": {
+        "https://docs.sourcery.ai/resources/sourcery_yaml_schema.json": ".sourcery.yaml"
+    }
     // "python.formatting.blackArgs": [
     //     "--force-exclude \"(minified|tests/data|micropython|micropython-lib)\""
     // ],
