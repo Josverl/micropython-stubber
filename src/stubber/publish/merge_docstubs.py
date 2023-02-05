@@ -10,7 +10,7 @@ from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
-from stubber.publish.package import GENERIC
+from stubber.publish.package import GENERIC, GENERIC_L
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
@@ -27,8 +27,8 @@ def get_base(candidate, version: Optional[str] = None):
 def board_folder_name(fw: Dict, *, version: Optional[str] = None):
     """return the name of the firmware folder"""
     base = get_base(fw, version=version)
-    folder_name = f"{base}-{fw['port']}" if fw["board"] == GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    folder_name = folder_name.lower().replace("-generic_", "-")
+    folder_name = f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
+    folder_name = folder_name.lower().replace("-generic_", "-") # @GENERIC Prefix
     return folder_name
 
 
@@ -46,7 +46,7 @@ def merge_all_docstubs(
     versions: Union[List[str],str] = ["v1.19.1"],
     family: str = "micropython",
     ports: Union[List[str],str] = ["auto"],
-    boards: Union[List[str],str] = [GENERIC],
+    boards: Union[List[str],str] = [GENERIC_L],
     *,
     mpy_path=CONFIG.mpy_path,
 ):

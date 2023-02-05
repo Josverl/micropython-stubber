@@ -16,7 +16,12 @@ from stubber.publish.stubpacker import StubPackage
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
-GENERIC = "generic"
+GENERIC_L = "generic"
+"generic lowercase"
+GENERIC_U = "GENERIC"
+"GENERIC uppercase"
+GENERIC = {GENERIC_L, GENERIC_U}
+"GENERIC eithercase"
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()
@@ -29,7 +34,7 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
         # # {family}-{port}-{board}-stubs
         name = f"{family}-{port}-{board}-stubs".lower()
         name = name.replace("-generic-stubs", "-stubs")
-        name = name.replace("-generic_", "-")
+        name = name.replace("-generic_", "-") # @GENERIC Prefix
         return name
     elif pkg_type == DOC_STUBS:
         return f"{family}-doc-stubs".lower()
@@ -40,7 +45,7 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
     # remove -generic- from the name
     name = name.replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
     # remove -genetic_ from the name
-    name = name.replace("-generic_", "-")
+    name = name.replace("-generic_", "-") # @GENERIC Prefix
     return name
 
 
@@ -50,7 +55,7 @@ def get_package(
     pkg_type,
     version: str,
     port: str,
-    board: str = GENERIC,
+    board: str = GENERIC_L,
     family: str = "micropython",
 ) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
@@ -106,42 +111,15 @@ def create_package(
     board: str = "",
     family: str = "micropython",
     pkg_type=COMBO_STUBS,
-) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
+) -> StubPackage:    # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
     if pkg_type == COMBO_STUBS:
         assert port != "", "port must be specified for combo stubs"
-        # Use lower case for paths to avoid case sensitive issues
-        port = port.lower()
-        # BOARD in the micropython repo is always uppercase by convention (GENERIC)
-        # but MUST  be used in lowercase in the stubs repo
-        board = board.lower() if board else GENERIC
-        board_mpy = board.upper() 
-        board = board.replace("generic_","") 
-        stubs: List[Tuple[str, Path]] = []
-        stubs= [
-            (
-                # StubSource.FIRMWARE,
-                # Path(f"{family}-{ver_flat}-{port}"),
-                # TODO: look for the most specific firmware stub folder that is available ?
-                # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
-                # that would also require the port - board - variant to be discoverable runtime
-                StubSource.MERGED,
-                Path(f"{family}-{ver_flat}-{port}-{board}-merged") if board != GENERIC else Path(f"{family}-{ver_flat}-{port}-merged"),
-            ),
-            (
-                StubSource.FROZEN,
-                Path(f"{family}-{ver_flat}-frozen") / port / board_mpy.upper(), # BOARD in source frozen path needs to be UPPERCASE
-            ),
-            (
-                StubSource.CORE,
-                Path("micropython_core"),  # TODO : Add version to core stubs
-            ),
-        ]
+        stubs = combo_sources(family, port, board,  ver_flat)
     elif pkg_type == DOC_STUBS:
-        # TODO add doc stubs
         stubs= [
             (
                 "Doc stubs",
@@ -155,3 +133,43 @@ def create_package(
         raise NotImplementedError(type)
 
     return StubPackage(pkg_name, version=mpy_version, stubs=stubs)
+
+
+
+def combo_sources(family:str,port:str, board:str,  ver_flat:str) -> List[Tuple[str, Path]]:
+    """
+    Build a source set for combo stubs
+        -  
+      
+    """
+    # Use lower case for paths to avoid case sensitive issues
+    port = port.lower()
+    # BOARD in the micropython repo is always uppercase by convention (GENERIC)
+    # but MUST  be used in lowercase in the stubs repo
+    board_l = board.lower() if board else GENERIC_L
+    board_u = board_l.upper()
+    board_l = board_l.replace("generic_","") # @GENERIC Prefix
+    
+    return [
+        (
+            # StubSource.FIRMWARE,
+            # Path(f"{family}-{ver_flat}-{port}"),
+            # TODO: look for the most specific firmware stub folder that is available ?
+            # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
+            # that would also require the port - board - variant to be discoverable runtime
+            StubSource.MERGED,
+            Path(f"{family}-{ver_flat}-{port}-merged")
+            if board_l in GENERIC
+            else Path(f"{family}-{ver_flat}-{port}-{board_l}-merged"),
+        ),
+        (
+            StubSource.FROZEN,
+            Path(f"{family}-{ver_flat}-frozen")
+            / port
+            / board_u.upper(),  # BOARD in source frozen path needs to be UPPERCASE
+        ),
+        (
+            StubSource.CORE,
+            Path("micropython_core"),  # TODO : Add version to core stubs
+        ),
+    ]

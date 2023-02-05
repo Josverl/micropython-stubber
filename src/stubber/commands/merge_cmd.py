@@ -6,7 +6,7 @@ from typing import List, Union
 import click
 from loguru import logger as log
 from stubber.publish.merge_docstubs import merge_all_docstubs
-from stubber.publish.package import GENERIC
+from stubber.publish.package import GENERIC_L
 from stubber.utils.config import CONFIG
 
 from .cli import stubber_cli
@@ -39,7 +39,7 @@ from .cli import stubber_cli
     "-b",
     "boards",
     multiple=True,
-    default=[GENERIC],  # or "auto" ?
+    default=[GENERIC_L],  # or "auto" ?
     show_default=True,
     help="multiple: ",
 )
