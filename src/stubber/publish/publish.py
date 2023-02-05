@@ -3,10 +3,10 @@ prepare a set of stub files for publishing to PyPi
 
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 from loguru import logger as log
 
-from stubber.publish.candidates import board_candidates, is_auto
+from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import get_package
@@ -73,7 +73,7 @@ def publish_multiple(
     return results
 
 
-def build_worklist(family: str, versions: List[str], ports: List[str], boards: List[str]):
+def build_worklist(family: str, versions: List[str], ports: Union[List[str],str], boards: Union[List[str],str]):
     """Build a worklist of packages to build or publish, and filter to only the requested ports and boards"""
     if isinstance(versions, str):
         versions = [versions]
@@ -85,16 +85,10 @@ def build_worklist(family: str, versions: List[str], ports: List[str], boards: L
         return []
     # get all the candidates
     worklist = list(board_candidates(family=family, versions=versions, pt=COMBO_STUBS))
-    worklist = [i for i in worklist if i["board"] != ""]
-    # then filter down to the ones we want
-    if not is_auto(ports):
-        ports_ = [i.lower() for i in ports]
-        worklist = [i for i in worklist if i["port"].lower() in ports_]
-    if not is_auto(boards):
-        boards_ = [i.lower() for i in boards]
-        worklist = [i for i in worklist if i["board"].lower() in boards_]
+    worklist = filter_list(worklist, ports, boards)
 
     for b in boards:
         if not any(i for i in worklist if i["board"] == b):
             log.warning(f"Could not find any package candidate for board {b}")
     return worklist
+
