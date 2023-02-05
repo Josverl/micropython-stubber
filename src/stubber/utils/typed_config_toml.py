@@ -12,7 +12,7 @@ from typing import Dict, Optional
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 assert tomllib
 
 from loguru import logger as log
@@ -74,6 +74,4 @@ class TomlConfigSource(ConfigSource):
     def get_config_value(self, section_name: str, key_name: str) -> Optional[str]:
         # Extract info from data which we read in during __init__
         section = self.data.get(section_name.lower(), None)
-        if section is None:
-            return None
-        return section.get(key_name.lower(), None)
+        return None if section is None else section.get(key_name.lower(), None)
