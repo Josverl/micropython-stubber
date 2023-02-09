@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import Optional, Union
 
 from loguru import logger as log
 
@@ -19,7 +20,7 @@ from .utils.config import CONFIG
 # # log = logging.getLogger(__name__)
 
 
-def get_core(requirements, stub_path=None, family: str = "core"):
+def get_core(requirements:str, stub_path:Optional[Union[str,Path]]=None, family: str = "core"):
     "Download MicroPython compatibility modules"
     if not stub_path:
         stub_path = CONFIG.stub_path / "cpython-core"  # pragma: no cover

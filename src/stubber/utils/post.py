@@ -20,7 +20,7 @@ def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
             run_black(pth)
 
 
-def run_black(path: Path, capture_output=False):
+def run_black(path: Path, capture_output: bool = False):
     """
     run black to format the code / stubs
     """
@@ -36,7 +36,7 @@ def run_black(path: Path, capture_output=False):
     return result.returncode
 
 
-def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
+def run_autoflake(path: Path, capture_output: bool = False, progress_pyi: bool = False):
     """
     run autoflake to remove unused imports
     needs to be run BEFORE black otherwise it does not recognize long import from`s.
@@ -57,7 +57,7 @@ def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
     result = subprocess.run(cmd, capture_output=capture_output)
     if result.returncode != 0:
-        log.warning("autoflake failed on: {}".format(file))
+        log.warning(f"autoflake failed on: {path}")
         ret = result.returncode
 
     if progress_pyi:
@@ -76,7 +76,7 @@ def run_autoflake(path: Path, capture_output=False, progress_pyi=False):
             # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
             result = subprocess.run(cmd, capture_output=capture_output)
             if result.returncode != 0:
-                log.warning("autoflake failed on: {}".format(file))
+                log.warning(f"autoflake failed on: {file}")
                 ret = result.returncode
 
     return ret

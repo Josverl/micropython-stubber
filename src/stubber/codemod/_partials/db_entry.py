@@ -85,6 +85,6 @@ def main():
 
     # Finished processing - load all the results , and remove the failed ones
     if len(modules_done) > 0:
-        stubber._report = [v for k, v in modules_done.items() if v != "failed"]
+        stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
 ###PARTIALEND###

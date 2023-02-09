@@ -18,7 +18,7 @@ except ImportError:  # pragma: no cover
     python_minifier = None
 
 
-def edit_lines(content, edits, diff=False):
+def edit_lines(content:str, edits:List[Tuple[str,str]], diff:bool=False):
     """Edit string by list of edits
 
     Args:
@@ -36,29 +36,29 @@ def edit_lines(content, edits, diff=False):
         str: edited string
     """
 
-    def comment(l, x):
+    def comment(l:str, x:str):
         return l.replace(x, f"# {x}")
 
-    def rprint(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
+    def rprint(l:str, x:str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, "print")
 
-    def rpass(l, x):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
+    def rpass(l:str, x:str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         return l.replace(x, "pass")
 
-    def get_whitespace_context(content, index):
+    def get_whitespace_context(content:List[str], index:int):
         """Get whitespace count of lines surrounding index"""
 
-        def count_ws(line):
+        def count_ws(line:str):
             return sum(1 for _ in itertools.takewhile(str.isspace, line))
 
         lines = content[index - 1 : index + 2]
         context = (count_ws(l) for l in lines)
         return context
 
-    def handle_multiline(content, index):
+    def handle_multiline(content:List[str], index:int):
         """Handles edits that require multiline comments
 
         Example:
@@ -105,7 +105,7 @@ def edit_lines(content, edits, diff=False):
         if check and line_ws != post_ws:
             return range(index - 1, index + 1)
 
-    def handle_try_except(content, index):
+    def handle_try_except(content:List[str], index:int):
         """Checks if line at index is in try/except block
 
         Handles situations like this:
@@ -125,20 +125,20 @@ def edit_lines(content, edits, diff=False):
 
     lines = []
     multilines = set()
-    content = content.splitlines(keepends=True)
-    for line in content:
+    content_l = content.splitlines(keepends=True)
+    for line in content_l:
         _line = line
         for edit, text in edits:
             if text in line:
                 if edit == "comment":
-                    l_index = content.index(line)
+                    l_index = content_l.index(line)
                     # Check if edit spans multiple lines
-                    mline = handle_multiline(content, l_index)
+                    mline = handle_multiline(content_l, l_index)
                     if mline:
                         multilines.update(mline)
                         break
                     # Check if line is only statement in try/except
-                    if handle_try_except(content, l_index):
+                    if handle_try_except(content_l, l_index):
                         edit = "rpass"
                         text = line.strip()
                 func = eval(edit)  # pylint: disable= eval-used
@@ -157,7 +157,7 @@ def edit_lines(content, edits, diff=False):
     return stripped
 
 
-def minify_script(source_script: Union[Path, str, IO[str]], keep_report=True, diff=False) -> str:
+def minify_script(source_script: Union[Path, str, IO[str]], keep_report:bool=True, diff:bool=False) -> str:
     """minifies createstubs.py
 
     Args:

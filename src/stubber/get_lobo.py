@@ -17,7 +17,7 @@ FAMILY = "loboris"
 PORT = "esp32_lobo"
 
 
-def get_frozen(stub_path: Optional[Path] = None, *, repo: Optional[str] = None, version="3.2.24"):
+def get_frozen(stub_path: Optional[Path] = None, *, repo: Optional[str] = None, version:str="3.2.24"):
     "Download Loboris frozen modules direct from github repo"
     if stub_path is None:
         stub_path = CONFIG.stub_path / "{}-{}-frozen".format(FAMILY, utils.clean_version(version, flat=True))

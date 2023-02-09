@@ -37,7 +37,7 @@ def subfolder_names(path: Path):
                 yield child.name
 
 
-def version_candidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, oldest=OLDEST_VERSION) -> Generator[str, None, None]:
+def version_candidates(suffix: str, prefix:str=r".*", *, path:Path=CONFIG.stub_path, oldest:str=OLDEST_VERSION) -> Generator[str, None, None]:
     "get a list of versions for the given family and suffix"
     if path.exists():
         folder_re = prefix + "-(.*)-" + suffix
@@ -51,7 +51,7 @@ def version_candidates(suffix: str, prefix=r".*", *, path=CONFIG.stub_path, olde
 def list_frozen_ports(
     family: str = "micropython",
     version: str = V_LATEST,
-    path=CONFIG.stub_path,
+    path:Path=CONFIG.stub_path,
 ):
     "get list of ports with frozen stubs for a given family and version"
     ports_path = path / f"{family}-{version}-frozen"
@@ -60,7 +60,7 @@ def list_frozen_ports(
 
 def list_micropython_ports(
     family: str = "micropython",
-    mpy_path=CONFIG.mpy_path,
+    mpy_path:Path=CONFIG.mpy_path,
 ):
     "get list of micropython ports for a given family and version"
     if family != "micropython":
@@ -75,7 +75,7 @@ def list_micropython_ports(
 def list_micropython_port_boards(
     port: str,
     family: str = "micropython",
-    mpy_path=CONFIG.mpy_path,
+    mpy_path:Path=CONFIG.mpy_path,
 ):
     "get list of micropython boards for a given family version and board"
     if family != "micropython":
@@ -92,7 +92,7 @@ def frozen_candidates(
     ports: Union[str, List[str]] = "auto",
     boards: Union[str, List[str]] = "auto",
     *,
-    path=CONFIG.stub_path,
+    path:Path=CONFIG.stub_path,
 ) -> Generator[Dict[str, Any], None, None]:
     """
     generate a list of possible firmware stubs for the given family (, version port and board) ?
@@ -167,7 +167,7 @@ def frozen_candidates(
                     yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
 
 
-def is_auto(thing):
+def is_auto(thing:Union[None,str, List[str]]):
     "Is this version/port/board specified as 'auto' ?"
     return isinstance(thing, str) and thing == "auto" or isinstance(thing, list) and "auto" in thing
 
@@ -175,7 +175,7 @@ def is_auto(thing):
 def docstub_candidates(
     family: str = "micropython",
     versions: Union[str, List[str]] = V_LATEST,
-    path=CONFIG.stub_path,
+    path:Path=CONFIG.stub_path,
 ):
     """
     Generate a list of possible documentation stub candidates for the given family and version.
@@ -194,7 +194,7 @@ def docstub_candidates(
 
 
 def board_candidates(
-    family: str = "micropython", versions: Union[str, List[str]] = V_LATEST, *, mpy_path=CONFIG.mpy_path, pt=FIRMWARE_STUBS
+    family: str = "micropython", versions: Union[str, List[str]] = V_LATEST, *, mpy_path:Path=CONFIG.mpy_path, pt:str=FIRMWARE_STUBS
 ):
     """
     generate a list of possible board stub candidates for the given family and version.

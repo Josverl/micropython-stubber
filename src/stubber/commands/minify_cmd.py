@@ -28,7 +28,7 @@ from .cli import stubber_cli
 )
 @click.pass_context
 def cli_minify(
-    ctx,
+    ctx:click.Context,
     source: Union[str, Path],
     target: Union[str, Path],
     keep_report: bool,

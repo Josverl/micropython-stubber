@@ -46,7 +46,7 @@ def _run_git(
     return result
 
 
-def clone(remote_repo: str, path: Path, shallow=False, tag: Optional[str] = None) -> bool:
+def clone(remote_repo: str, path: Path, shallow:bool=False, tag: Optional[str] = None) -> bool:
     """git clone [--depth 1] [--branch <tag_name>] <remote> <directory>"""
     cmd = ["git", "clone"]
     if shallow:
@@ -202,7 +202,7 @@ def fetch(repo: Union[Path, str]) -> bool:
     return result.returncode == 0 if result else False
 
 
-def pull(repo: Union[Path, str], branch="main") -> bool:
+def pull(repo: Union[Path, str], branch:str="main") -> bool:
     """
     pull a repo origin into main
     repo should be in the form of : path/.git

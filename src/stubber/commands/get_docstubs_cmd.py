@@ -34,11 +34,11 @@ from .cli import stubber_cli
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.pass_context
 def cli_docstubs(
-    ctx,
+    ctx:click.Context,
     path: str = CONFIG.repo_path.as_posix(),
     target: str = CONFIG.stub_path.as_posix(),
     black: bool = True,
-    basename="micropython",
+    basename:str="micropython",
 ):
     """
     Build stubs from documentation.
