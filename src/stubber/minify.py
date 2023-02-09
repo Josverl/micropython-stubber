@@ -18,7 +18,7 @@ except ImportError:  # pragma: no cover
     python_minifier = None
 
 
-def edit_lines(content:str, edits:List[Tuple[str,str]], diff:bool=False):
+def edit_lines(content: str, edits: List[Tuple[str, str]], diff: bool = False):
     """Edit string by list of edits
 
     Args:
@@ -36,29 +36,29 @@ def edit_lines(content:str, edits:List[Tuple[str,str]], diff:bool=False):
         str: edited string
     """
 
-    def comment(l:str, x:str):
+    def comment(l: str, x: str):
         return l.replace(x, f"# {x}")
 
-    def rprint(l:str, x:str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
+    def rprint(l: str, x: str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, "print")
 
-    def rpass(l:str, x:str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
+    def rpass(l: str, x: str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
         return l.replace(x, "pass")
 
-    def get_whitespace_context(content:List[str], index:int):
+    def get_whitespace_context(content: List[str], index: int):
         """Get whitespace count of lines surrounding index"""
 
-        def count_ws(line:str):
+        def count_ws(line: str):
             return sum(1 for _ in itertools.takewhile(str.isspace, line))
 
         lines = content[index - 1 : index + 2]
         context = (count_ws(l) for l in lines)
         return context
 
-    def handle_multiline(content:List[str], index:int):
+    def handle_multiline(content: List[str], index: int):
         """Handles edits that require multiline comments
 
         Example:
@@ -105,7 +105,7 @@ def edit_lines(content:str, edits:List[Tuple[str,str]], diff:bool=False):
         if check and line_ws != post_ws:
             return range(index - 1, index + 1)
 
-    def handle_try_except(content:List[str], index:int):
+    def handle_try_except(content: List[str], index: int):
         """Checks if line at index is in try/except block
 
         Handles situations like this:
@@ -157,17 +157,37 @@ def edit_lines(content:str, edits:List[Tuple[str,str]], diff:bool=False):
     return stripped
 
 
-def minify_script(source_script: Union[Path, str, IO[str]], keep_report:bool=True, diff:bool=False) -> str:
-    """minifies createstubs.py
-
-    Args:
-        keep_report (bool, optional): Keeps single report line in createstubs
-            Defaults to True.
-        diff (bool, optional): Print diff from edits. Defaults to False.
-
-    Returns:
-        str: minified source text
+def minify_script(
+    source_script: Union[Path, str, IO[str]],  # Input script
+    keep_report: bool = True,  # Keeps single report line in createstubs
+    diff: bool = False,  # Print diff from edits
+) -> str:
     """
+    Minifies createstubs.py and variants
+
+
+    """
+
+    if not python_minifier:  # pragma: no cover
+        raise ModuleNotFoundError("python_minifier not available")
+
+    source_content = ""
+    if isinstance(source_script, str):
+        if Path(source_script).exists():
+            # string = path to file
+            source_script = Path(source_script)
+            source_content = source_script.read_text()
+        else:
+            # string = script content
+            source_content = source_script
+    elif isinstance(source_script, Path):
+        # Path = path to file
+        source_content = source_script.read_text()
+    else:
+        # IO = file object
+        source_content = "".join(source_script.readlines())
+    if not source_content:
+        raise ValueError("No source content")
 
     edits: List[Tuple[str, str]] = [
         ("comment", "print"),
@@ -189,6 +209,7 @@ def minify_script(source_script: Union[Path, str, IO[str]], keep_report:bool=Tru
         ("comment", "_log.warning"),
     ]
     if keep_report:
+        # insert report keepers after the comment modifiers
         edits[2:2] = [
             # keepers
             ("rprint", 'self._log.info("Stub module: '),
@@ -196,18 +217,6 @@ def minify_script(source_script: Union[Path, str, IO[str]], keep_report:bool=Tru
             ("rprint", 'self._log.info("Clean/remove files in folder:'),
             ("rprint", 'self._log.info("Created stubs for'),
         ]
-
-    if not python_minifier:  # pragma: no cover
-        raise ModuleNotFoundError("python_minifier not available")
-
-    source_content = source_script
-    if isinstance(source_script, str) and Path(source_script).exists():
-        source_script = Path(source_script)
-        source_content = source_script.read_text()
-    elif isinstance(source_script, Path):
-        source_content = source_script.read_text()
-    else:
-        source_content = "".join(source_script.readlines())
 
     content = edit_lines(source_content, edits, diff=diff)
 
@@ -221,7 +230,7 @@ def minify_script(source_script: Union[Path, str, IO[str]], keep_report:bool=Tru
         rename_locals=True,  # short names save memory
         preserve_locals=["stubber", "path"],  # names to keep
         rename_globals=True,  # short names save memory
-        # keep these globals to allow testing/mocking to work against the minified version
+        # keep these globals to allow testing/mocking to work against the minified not compiled version
         preserve_globals=[
             "main",
             "Stubber",
@@ -272,7 +281,12 @@ def minify(
             return minify_and_compile(target, cross_compile, target_buf, minified)
 
 
-def minify_and_compile(target, cross_compile, target_buf, minified):
+def minify_and_compile(
+    target,
+    cross_compile: bool,
+    target_buf,
+    minified: str,
+):
     log.debug("Minified file written to :", target)
     if not cross_compile:
         return 0
