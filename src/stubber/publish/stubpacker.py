@@ -629,6 +629,10 @@ class StubPackage:
         look up the previous package version in the dabase
             - update package files
             - build the wheels and sdist
+
+        :param production: PyPI or Test-PyPi -
+        :param force: BUILD even if no changes
+        :return: True if the package was built
         """
         log.info(f"Build: {self.package_path.name}")
 
@@ -687,8 +691,18 @@ class StubPackage:
             - update database with new hash
         """
         log.info(f"Publish: {self.package_path.name}")
-        if self.is_changed() or build or force:
+        # count .pyi files in the package
+        filecount = len(list(self.package_path.rglob("*.pyi")))
+        if filecount == 0:
+            log.debug(f"{self.package_name}: starting build as no .pyi files found")
+            build = True
+
+        if build or force or self.is_changed():
             self.build(production=production, force=force)
+
+        if not self._publish:
+            log.debug(f"{self.package_name}: skip publishing")
+            return False
 
         self.update_pkg_version(production=production)
         # Publish the package to PyPi, Test-PyPi or Github
