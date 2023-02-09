@@ -82,10 +82,10 @@ def bump_version(
         # Local version segment
         if current.local is not None:
             parts.append(f"+{current.local}")
-
-    new = parse("".join(parts))
-    # Sanity check that the new version is valid
-    if not isinstance(new, Version):
-        raise ValueError(f"{new} is not a valid version")
+    try:
+        # Sanity check that the new version is valid
+        new = parse("".join(parts))
+    except ValueError as e:
+        raise ValueError(f"{''.join(parts)} is not a valid version") from e
 
     return new

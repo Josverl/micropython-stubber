@@ -41,7 +41,7 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
     match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
 
 
-def read_micropython_lib_commits(filename="data/micropython_tags.csv"):
+def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     """
     Read a csv with the micropython version and matchin micropython-lib commit-hashes
     these can be used to make sure that the correct micropython-lib version is checked out.
@@ -76,7 +76,7 @@ def match_lib_with_mpy(version_tag: str, lib_path: Path):
     return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 
-def fetch_repos(tag, mpy_path: Path, mpy_lib_path: Path):
+def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
     """Fetch updates , then switch to the provided tag"""
     log.info("fetch updates")
     git.fetch(mpy_path)
@@ -86,7 +86,7 @@ def fetch_repos(tag, mpy_path: Path, mpy_lib_path: Path):
     except Exception:
         log.trace("no stubs repo found : {CONFIG.stub_path.parent}")
 
-    if not tag or tag == "":
+    if not tag:
         tag = "latest"
 
     log.info(f"Switching to {tag}")

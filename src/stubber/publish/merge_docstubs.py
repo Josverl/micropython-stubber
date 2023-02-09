@@ -17,7 +17,7 @@ from stubber.utils.versions import clean_version
 ## Helper function
 
 
-def get_base(candidate, version: Optional[str] = None):
+def get_base(candidate: Dict[str, str], version: Optional[str] = None):
     if not version:
         version = clean_version(candidate["version"], flat=True)
     base = f"{candidate['family']}-{version}"
@@ -41,14 +41,20 @@ def get_merged_path(fw: Dict):
 
 
 def merge_all_docstubs(
-    versions: Union[List[str], str] = ["v1.19.1"],
+    versions: Optional[Union[List[str], str]] = None,
     family: str = "micropython",
-    ports: Union[List[str], str] = ["auto"],
-    boards: Union[List[str], str] = [GENERIC_L],
+    ports: Optional[Union[List[str], str]] = None,
+    boards: Optional[Union[List[str], str]] = None,
     *,
-    mpy_path=CONFIG.mpy_path,
+    mpy_path: Path = CONFIG.mpy_path,
 ):
     """merge docstubs and board stubs to merged stubs"""
+    if versions is None:
+        versions = ["v1.19.1"]
+    if ports is None:
+        ports = ["auto"]
+    if boards is None:
+        boards = [GENERIC_L]
     if isinstance(versions, str):
         versions = [versions]
     if isinstance(ports, str):

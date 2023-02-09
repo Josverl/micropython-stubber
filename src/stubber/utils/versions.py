@@ -42,7 +42,7 @@ def clean_version(
     return version
 
 
-def micropython_versions(start="v1.9.2"):
+def micropython_versions(start:str="v1.9.2"):
     """Get the list of micropython versions from github tags"""
     try:
         g = Github()

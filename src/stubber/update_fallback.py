@@ -13,6 +13,7 @@ RELEASED = "v1_18"
 
 
 def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tuple[str, str]]:
+    # sourcery skip: inline-immediately-returned-variable
     """
     list of sources to build/update the fallback 'catch-all' stubfolder
     version : the version to use

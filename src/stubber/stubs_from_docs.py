@@ -25,7 +25,7 @@ def generate_from_rst(
     v_tag: str,
     release: Optional[str] = None,
     pattern: str = "*.rst",
-    suffix=".py",
+    suffix:str=".py",
 ) -> int:
     # sourcery skip: remove-redundant-exception, simplify-single-exception-tuple
     if not dst_path.exists():
@@ -59,7 +59,7 @@ def generate_from_rst(
     return len(files)
 
 
-def clean_destination(dst_path):
+def clean_destination(dst_path:Path):
     """Remove all .py/.pyi files in desination folder to avoid left-behinds"""
     for f in dst_path.rglob(pattern="*.py*"):
         try:

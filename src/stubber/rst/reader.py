@@ -240,7 +240,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def clean_docstr(block):
+    def clean_docstr(block:List[str]):
         """Clean up a docstring"""
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
@@ -264,7 +264,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def add_link_to_docsstr(block):
+    def add_link_to_docsstr(block:List[str]):
         """Add clickable hyperlinks to CPython docpages"""
         for i in range(len(block)):
             # hyperlink to Cpython doc pages

@@ -7,7 +7,6 @@ from typing import Optional, Union
 
 import click
 import stubber.basicgit as git
-from loguru import logger as log
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos, repo_paths
 
@@ -43,5 +42,7 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
         mpy_path, mpy_lib_path = repo_paths(Path(path))
     except Exception:
         return -1
+    if not tag:
+        tag = "latest"
     result = fetch_repos(tag, mpy_path, mpy_lib_path)
     return -1 if result else 0

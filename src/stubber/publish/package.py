@@ -27,7 +27,7 @@ log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 
-def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micropython", **kwargs) -> str:
+def package_name(pkg_type: str, *, port: str = "", board: str = "", family:str="micropython", **kwargs) -> str:
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
@@ -51,7 +51,7 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family="micr
 def get_package(
     db: PysonDB,
     *,
-    pkg_type,
+    pkg_type:str,
     version: str,
     port: str,
     board: str = GENERIC_L,
@@ -109,7 +109,7 @@ def create_package(
     port: str = "",
     board: str = "",
     family: str = "micropython",
-    pkg_type=COMBO_STUBS,
+    pkg_type:str=COMBO_STUBS,
 ) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
