@@ -7,7 +7,7 @@ rule_settings:
 
   - docstrings-for-modules
   # - docstrings-for-functions
-  # - require-parameter-annotation
+  - require-parameter-annotation
 
   disable:
   - require-return-annotation  # Pylance does infer this quite well already
@@ -72,6 +72,91 @@ rules:
     - match: from pandas.series import *
     - match: from .something import *
     - no-match: from math import sin
-      
+
+# Quick Fix https://github.com/sourcery-ai/sourcery/issues/314      
+- id: require-parameter-annotation
+  pattern: |
+    def ${name}(..., ${arg}: !!!=${default?}, ...):
+        ...
+  condition: |
+    not name.starts_with("_")
+    and not arg.equals("self")
+    and not arg.equals("cls")
+    and not arg.equals("*")
+    and not arg.equals("/")
+  paths:
+    exclude:
+    - test_*.py
+    - '*_test.py'
+  description: Annotate parameter `${arg}` in public function/method `${name}` with a type annotation
+  explanation: |
+    Adding type annotations has several benefits:
+    1. It improves the documentation of the function
+    2. It allows the function to be checked for correctness
+    3. It allows checking that the function callers are passing the correct params
+    These [mypy docs](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html#functions) describe how to
+    annotate function arguments and return types.
+    From Google Style Guide [2.21](https://google.github.io/styleguide/pyguide#221-type-annotated-code)
+  tags:
+  - google-python-style-guide
+  - gpsg
+  - gpsg-type-annotations
+  tests:
+  - match: |
+      def add(a, b: int):
+        return a + b
+  - match: |
+      def f(a=1):
+        return a * 2
+  - no-match: |
+      def f() -> int:
+          pass
+  - no-match: |
+      def f(a: int, b: str):
+          pass
+  - no-match: |
+      def f(self, a: int, b: str):
+          pass
+  - no-match: |
+      def f(cls, a: int, b: str):
+          pass
+  - no-match: |
+      def f(a: int, *, b: str):
+          pass
+  - no-match: |
+      def f(a: int, /, b: str):
+          pass
 
 
+- id: docstrings-for-modules
+  pattern: |
+    '''!!!'''
+    ...
+  condition: pattern.in_module_scope()
+  paths:
+    exclude:
+    - test_*.py
+    - '*_test.py'
+    - '__init__.py'
+  description: Modules should have docstrings
+  explanation: |
+    Modules (Python files) should start with docstrings describing the contents and usage of the module.
+    From Google Style Guide [3.8.2](https://google.github.io/styleguide/pyguide.html#382-modules)
+  tags:
+  - google-python-style-guide
+  - gpsg
+  - gpsg-docstrings
+  tests:
+  - match: |
+      def hello():
+        print("hello")
+  - match: |
+      class Hello:
+        """Hello"""
+        def hello():
+          """Prints 'hello'"""
+          print("hello")
+  - no-match: |
+      """Hello module"""
+      def hello():
+        print("hello")
