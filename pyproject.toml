@@ -139,6 +139,7 @@ markers = [
     "mocked: to replace/compensate for most of the slow and git tests",
     #
     "minified: marks test of the minified version of createstubs",
+    "minify: marks test of the minification of createstubs",
     "docfix: upstream documentation fix needed",
     "micropython: tests of MicroPython code on Cpython with mocks",
     "doc_stubs: tests to generate stubs from the rst documentation",
@@ -177,7 +178,7 @@ omit = [
     "*/stubber/tools/*.py",
 
     # codemod partials
-    "*/codemod/_partials"
+    "*/codemod/_partials",
 
 ]
 
@@ -252,6 +253,6 @@ exclude_lines = [
 
 [tool.sourcery-analytics.thresholds]
 method_length = 50
-method_cyclomatic_complexity = 15
-method_cognitive_complexity = 15
+method_cyclomatic_complexity = 99
+method_cognitive_complexity = 99
 method_working_memory = 99

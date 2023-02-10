@@ -10,7 +10,7 @@ from stubber.codemod.board import CreateStubsCodemod, CreateStubsFlavor
 from stubber.codemod.modify_list import ListChangeSet
 
 # mark all tests
-pytestmark = pytest.mark.codemod
+pytestmark = [pytest.mark.codemod, pytest.mark.minify]
 
 
 @pytest.fixture
@@ -33,9 +33,11 @@ def low_memory_mod(context) -> CreateStubsCodemod:
 def low_memory_result(context, low_memory_mod) -> cst.Module:
     return low_memory_mod.transform_module(context[1])
 
+
 @pytest.fixture
 def db_mod(context) -> CreateStubsCodemod:
     return CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.DB)
+
 
 @pytest.fixture
 def db_result(context, db_mod) -> cst.Module:
@@ -57,7 +59,7 @@ def test_custom_modules(context):
     assert "mycustommodule" in mod.code
 
 
-def test_custom_modules__problematic(context):
+def test_custom_modules_problematic(context):
     mod = CreateStubsCodemod(
         context[0],
         modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
@@ -68,7 +70,7 @@ def test_custom_modules__problematic(context):
     assert compare_lines('"coolmod"', res.code)
 
 
-def test_custom_modules__problematic_excluded(context):
+def test_custom_modules_problematic_excluded(context):
     mod = CreateStubsCodemod(
         context[0],
         modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
@@ -83,15 +85,15 @@ def test_custom_modules__problematic_excluded(context):
     assert compare_lines('"myexclude"', res.code)
 
 
-def test_low_mem__module_doc(low_memory_result):
+def test_low_mem_module_doc(low_memory_result):
     assert board._LOW_MEM_MODULE_DOC in low_memory_result.code
 
 
-def test_low_mem__read_stubs(low_memory_result):
+def test_low_mem_read_stubs(low_memory_result):
     assert compare_lines(board._MODULES_READER, low_memory_result.code)
 
 
-def test_low_mem__custom_modules(context):
+def test_low_mem_custom_modules(context):
     # this reads from module list, so wont do anything
     # but it shouldnt fail either.
     res = CreateStubsCodemod(
@@ -101,25 +103,26 @@ def test_low_mem__custom_modules(context):
     assert not compare_lines("'supercoolmodule'", res.code)
 
 
-def test_lvgl__init(context):
+def test_lvgl_init(context):
     res = CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.LVGL).transform_module(context[1])
     assert compare_lines(board._LVGL_MAIN, res.code)
 
 
-def test_lvgl__modules_default(context):
+def test_lvgl_modules_default(context):
     res = CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.LVGL).transform_module(context[1])
     assert compare_lines('"io", "lodepng", "rtch", "lvgl"', res.code)
 
 
-def test_lvgl__modules_custom(context):
+def test_lvgl_modules_custom(context):
     res = CreateStubsCodemod(
         context[0], flavor=CreateStubsFlavor.LVGL, modules=ListChangeSet.from_strings(add=["supercoolmodule"], replace=True)
     ).transform_module(context[1])
     assert compare_lines('"supercoolmodule"', res.code)
 
 
-def test_db__module_doc(db_result):
-    assert compare_lines('reads the list of modules', db_result.code)
+def test_db_module_doc(db_result):
+    assert compare_lines("reads the list of modules", db_result.code)
 
-def test_db__entry(db_result):
+
+def test_db_entry(db_result):
     assert compare_lines("was_running = True", db_result.code)

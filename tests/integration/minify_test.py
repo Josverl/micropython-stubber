@@ -8,6 +8,7 @@ import stubber.minify as minify
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.slow
+@pytest.mark.minify
 def test_minification_py(tmp_path: Path, source: str):
     "python script - test creation of minified version"
     # load process.py in the same python environment
@@ -24,6 +25,7 @@ def test_minification_py(tmp_path: Path, source: str):
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.mocked
+@pytest.mark.minify
 def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture):
     "testthe rest of the minification functions using mocks to reduce the time needed"
     # load process.py in the same python environment
