@@ -1,3 +1,7 @@
+"""
+Commandline interface to publish stubs.
+"""
+
 from typing import List, Union
 
 import click
