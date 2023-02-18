@@ -23,14 +23,13 @@ from pysondb import PysonDB
 
 from stubber.publish.bump import bump_version
 from stubber.publish.enums import StubSource
-from stubber.publish.package import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
 
 Status = NewType("Status", Dict[str, Union[str, None]])
-StubSources = List[Tuple[str, Path]]
+StubSources = List[Tuple[StubSource, Path]]
 
 
 class StubPackage:
@@ -606,7 +605,7 @@ class StubPackage:
             # todo: below is a workaround for different types, but where is the source of this difference coming from?
             msg = (
                 f"{self.package_name}: source '{name.value}' not found: {CONFIG.stub_path / path}"
-                if isinstance(name, StubSource)
+                if isinstance(name, StubSource) # type: ignore
                 else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
             )
             self.status["error"] = msg
