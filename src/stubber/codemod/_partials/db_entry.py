@@ -1,4 +1,12 @@
-from typing import TYPE_CHECKING, type_check_only
+"""
+This file contains the partials that are used to generate the DB variant of createstubs.py
+
+- type_check_only is used to avoid circular imports
+
+The partial in enclused in ###PARTIAL### and ###PARTIALEND### markers
+i
+"""
+from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
     from logging import Logger
@@ -6,14 +14,19 @@ if TYPE_CHECKING:
     @type_check_only
     class Stubber:
         path: str
+        _report : List[str]
+        def __init__(self, path:str) -> None: ...
+        def clean(self) -> None: ...
+        def create_one_stub(self, modulename:str) -> bool: ...
+        def report(self, filename: str = "modules.json"): ...
+
 
     @type_check_only
     def read_path() -> str: ...
 
     @type_check_only
     class _gc():
-        def collect(self) -> None:
-
+        def collect(self) -> None: ...
 
     gc: _gc
     _log: Logger
