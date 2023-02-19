@@ -1,36 +1,47 @@
 """
-This file contains the partials that are used to generate the DB variant of createstubs.py
-
+This file contains the `def main()` funcion for the db variant of createstubs.py
 - type_check_only is used to avoid circular imports
-
-The partial in enclused in ###PARTIAL### and ###PARTIALEND### markers
-i
+The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
 """
+
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
+    import sys
     from logging import Logger
 
     @type_check_only
     class Stubber:
         path: str
-        _report : List[str]
-        def __init__(self, path:str) -> None: ...
-        def clean(self) -> None: ...
-        def create_one_stub(self, modulename:str) -> bool: ...
-        def report(self, filename: str = "modules.json"): ...
+        _report: List[str]
+        modules = []
 
+        def __init__(self, path: str = "", firmware_id: str = "") -> None:
+            ...
+
+        def clean(self) -> None:
+            ...
+
+        def create_one_stub(self, modulename: str) -> bool:
+            ...
+
+        def report(self, filename: str = "modules.json"):
+            ...
+
+        def create_all_stubs(self):
+            ...
 
     @type_check_only
-    def read_path() -> str: ...
+    def read_path() -> str:
+        ...
 
     @type_check_only
-    class _gc():
-        def collect(self) -> None: ...
+    class _gc:
+        def collect(self) -> None:
+            ...
 
     gc: _gc
     _log: Logger
-
 
 
 ###PARTIAL###
@@ -97,4 +108,6 @@ def main():
     if modules_done:
         stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
+
+
 ###PARTIALEND###

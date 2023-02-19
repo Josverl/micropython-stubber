@@ -153,11 +153,19 @@ def update_def_docstr(
     return dest_node.with_changes(body=body_2)
 
 
-def update_module_docstr(node: cst.Module, doc_tree: Optional[cst.SimpleStatementLine]) -> Any:
-    """Update the docstring of a module"""
+def update_module_docstr(
+    node: cst.Module,
+    doc_tree: Optional[Union[str, cst.SimpleStatementLine, cst.BaseCompoundStatement]],
+) -> Any:
+    """
+    Add or update the docstring of a module
+    """
     if not doc_tree:
         return node
-
+    if not isinstance(doc_tree, (str, cst.SimpleStatementLine, cst.BaseCompoundStatement)): # type: ignore
+        raise TransformError("Expected a docstring or a statement")
+    if isinstance(doc_tree, str):
+        doc_tree = cst.parse_statement(doc_tree)
     # need some funcky casting to avoid issues with changing the body
     if node.get_docstring() is None:
         # append the new docstring and append the function body

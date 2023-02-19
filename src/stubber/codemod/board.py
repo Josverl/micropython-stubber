@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 
 from enum import Enum
 from typing import Optional, Iterator
@@ -8,11 +9,11 @@ import libcst.codemod as codemod
 from libcst import matchers as m
 
 from stubber.codemod.modify_list import ModifyListElements, ListChangeSet
-from stubber.codemod.utils import ScopeableMatcherTransformer
 from stubber.cst_transformer import update_module_docstr
 
 from ._partials import Partial
 
+# matches on `stubber = Stubber()`
 _STUBBER_MATCHER = m.Assign(
     targets=[
         m.AssignTarget(
@@ -22,6 +23,7 @@ _STUBBER_MATCHER = m.Assign(
     value=m.Call(func=m.Name("Stubber")),
 )
 
+# matches on `stubber.modules = ["foo","bar"]`
 _MODULES_MATCHER = m.Assign(
     targets=[
         m.AssignTarget(
@@ -33,7 +35,32 @@ _MODULES_MATCHER = m.Assign(
     ],
 )
 
-_ENTRY_MATCHER = m.FunctionDef(name=m.Name(value="main"))
+# matches on `def main():`
+DEF_MAIN_MATCHER = m.FunctionDef(name=m.Name(value="main"))
+
+# matches on `self.problematic = []`
+_PROBLEMATIC_MATCHER = m.Assign(
+    targets=[
+        m.AssignTarget(
+            target=m.Attribute(
+                value=m.Name("self"),
+                attr=m.Name("problematic"),
+            )
+        )
+    ]
+)
+# matches on `self.excluded = []`
+_EXCLUDED_MATCHER = m.Assign(
+    targets=[
+        m.AssignTarget(
+            target=m.Attribute(
+                value=m.Name("self"),
+                attr=m.Name("excluded"),
+            )
+        )
+    ]
+)
+
 
 _MODULES_READER = """
 # Read stubs from modulelist
@@ -59,8 +86,6 @@ _LOW_MEM_MODULE_DOC = '''
       to reduce overall size, and remove logging overhead.
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
-
-    you can find a cross-compiled version located here: ./minified/createstubs_mem.mpy
 """
 '''
 
@@ -85,34 +110,23 @@ Create stubs for (all) modules on a MicroPython board.
     - minification, using python-minifierto reduce overall size, and remove logging overhead.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
-You should find a cross-compiled version located here: `./minified/createstubs_db.mpy
-
 """
 '''
 
-
-_LVGL_MAIN = """
-# Specify firmware name & version
-try:
-    fw_id = "lvgl-{0}_{1}_{2}-{3}-{4}".format(
-        lvgl.version_major(),
-        lvgl.version_minor(),
-        lvgl.version_patch(),
-        lvgl.version_info(),
-        sys.platform,
-    )
-except Exception:
-    fw_id = "lvgl-{0}_{1}_{2}_{3}-{4}".format(8, 1, 0, "dev", sys.platform)
-finally:
-    stubber = Stubber(firmware_id=fw_id)
+_LVGL_MODULE_DOC = '''
 """
+Create stubs for the lvgl modules on a MicroPython board.
+
+Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
+"""
+'''
 
 
 class CreateStubsFlavor(str, Enum):
     """Dictates create stubs target variant."""
 
     BASE = "base"
-    LOW_MEM = "low_mem"
+    LOW_MEM = "mem"
     DB = "db"
     LVGL = "lvgl"
 
@@ -127,9 +141,13 @@ class ReadModulesCodemod(codemod.Codemod):
         self.modules_reader_node = reader_node or cst.parse_module(_MODULES_READER)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        """Replaces static modules list with file-load method."""
         repl_node = m.findall(tree, m.SimpleStatementLine(body=[_MODULES_MATCHER]), metadata_resolver=self)
         tree = tree.deep_replace(repl_node[0], self.modules_reader_node)
         return tree
+
+
+from stubber.utils.my_version import __version__
 
 
 class ModuleDocCodemod(codemod.Codemod):
@@ -139,28 +157,26 @@ class ModuleDocCodemod(codemod.Codemod):
 
     def __init__(self, context: codemod.CodemodContext, module_doc: str):
         super().__init__(context)
+        if module_doc.endswith('"""\n'):
+            generated = f'\nThis variant was generated from createstubs.py by micropython-stubber v{__version__} on {datetime.now().strftime("%B %d, %Y")}\n"""\n'
+            module_doc = module_doc[:-4] + generated
         self.module_doc = module_doc
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        if not isinstance(self.module_doc, str):
-            raise TypeError(f"Expected module_doc to be of type str, received: {type(self.module_doc)}")
-        return update_module_docstr(tree, cst.parse_statement(self.module_doc))
+        """Replaces a module's docstring."""
+        return update_module_docstr(tree, self.module_doc)
 
 
 class ModulesUpdateCodemod(codemod.Codemod):
-    """Dynamically replace static module list(s)."""
+    """Update or replace the static module list(s) with the provided changes."""
 
     modules_changeset: Optional[ListChangeSet]
     problematic_changeset: Optional[ListChangeSet]
     excluded_changeset: Optional[ListChangeSet]
 
-    modules_scope: m.BaseMatcherNode = _MODULES_MATCHER
-    problematic_scope: m.BaseMatcherNode = m.Assign(
-        targets=[m.AssignTarget(target=m.Attribute(value=m.Name("self"), attr=m.Name("problematic")))]
-    )
-    excluded_scope: m.BaseMatcherNode = m.Assign(
-        targets=[m.AssignTarget(target=m.Attribute(value=m.Name("self"), attr=m.Name("excluded")))]
-    )
+    modules_scope: m.BaseMatcherNode = _MODULES_MATCHER  # matches on `stubber.modules = ["foo","bar"]`
+    problematic_scope: m.BaseMatcherNode = _PROBLEMATIC_MATCHER  # matches on `self.problematic = []`
+    excluded_scope: m.BaseMatcherNode = _EXCLUDED_MATCHER  # matches on `self.excluded = []`
 
     def __init__(
         self,
@@ -175,7 +191,7 @@ class ModulesUpdateCodemod(codemod.Codemod):
         self.problematic_changeset = problematic
         self.excluded_changeset = excluded
 
-    def iter_transforms(self) -> Iterator[ScopeableMatcherTransformer]:
+    def iter_transforms(self) -> Iterator[m.MatcherDecoratableTransformer]:
         if self.modules_changeset:
             yield ModifyListElements(change_set=self.modules_changeset).with_scope(self.modules_scope)
         if self.problematic_changeset:
@@ -184,12 +200,13 @@ class ModulesUpdateCodemod(codemod.Codemod):
             yield ModifyListElements(change_set=self.excluded_changeset).with_scope(self.excluded_scope)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        """Update or replace the static module list(s) with the provided changes."""
         for transform in self.iter_transforms():
             tree = tree.visit(transform)
         return tree
 
 
-class LVGLCodemod(codemod.Codemod):
+class LVGLCodemod_old(codemod.Codemod):
     """Generates createstubs.py LVGL flavor."""
 
     modules_transform: ModulesUpdateCodemod
@@ -213,22 +230,57 @@ class LVGLCodemod(codemod.Codemod):
         self.init_node = init_node or cst.parse_module(_LVGL_MAIN)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        """Generates createstubs.py LVGL flavor."""
         repl_node = m.findall(tree, m.SimpleStatementLine(body=[_STUBBER_MATCHER]), metadata_resolver=self)
         tree = tree.deep_replace(repl_node[0], self.init_node)
         return self.modules_transform.transform_module_impl(tree)
 
 
-class LowMemoryCodemod(codemod.Codemod):
-    """Generates createstubs.py low-memory flavor."""
+class LVGLCodemod(codemod.Codemod):
+    """Generates createstubs.py LVGL flavor."""
 
+    modules_transform: ModulesUpdateCodemod
+    init_node: cst.Module
+
+    def __init__(
+        self,
+        context: codemod.CodemodContext,
+    ):
+        super().__init__(context)
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        """Generates createstubs.py LVGL flavor."""
+        # repl_node = m.findall(tree, m.SimpleStatementLine(body=[_STUBBER_MATCHER]), metadata_resolver=self)
+        # tree = tree.deep_replace(repl_node[0], self.init_node)
+        # return self.modules_transform.transform_module_impl(tree)
+
+        docstr_transformer = ModuleDocCodemod(self.context, _LVGL_MODULE_DOC)
+        def_main_tree = cst.parse_module(Partial.LVGL_MAIN.contents())
+
+        work_tree = docstr_transformer.transform_module_impl(tree)
+        matches = m.findall(work_tree, DEF_MAIN_MATCHER, metadata_resolver=self)
+
+        entry_tree = work_tree.deep_replace(matches[0], def_main_tree)
+        return tree.with_deep_changes(tree, body=(*entry_tree.body,))
+
+
+class LowMemoryCodemod(codemod.Codemod):
     def __init__(self, context: codemod.CodemodContext):
         super().__init__(context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        doc_transformer = ModuleDocCodemod(self.context, _LOW_MEM_MODULE_DOC)
+        """
+        Generates createstubs.py low-memory variant.
+        - replace the static module list with the low-memory variant (read from file)
+        """
+
+        docstr_transformer = ModuleDocCodemod(self.context, _LOW_MEM_MODULE_DOC)
         read_mods_transformer = ReadModulesCodemod(self.context)
-        doc_tree = doc_transformer.transform_module_impl(tree)
+        # update the docstring
+        doc_tree = docstr_transformer.transform_module_impl(tree)
+        # load the modules from file
         read_mods_tree = read_mods_transformer.transform_module_impl(doc_tree)
+        # apply all changes to the original tree
         return tree.with_deep_changes(tree, body=(*read_mods_tree.body,))
 
 
@@ -239,16 +291,18 @@ class DBCodemod(codemod.Codemod):
         super().__init__(context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        doc_transformer = ModuleDocCodemod(self.context, _DB_MODULE_DOC)
-        entry_module = cst.parse_module(Partial.DB_ENTRY.contents())
-        doc_tree = doc_transformer.transform_module_impl(tree)
-        entry = m.findall(doc_tree, _ENTRY_MATCHER, metadata_resolver=self)
-        entry_tree = doc_tree.deep_replace(entry[0], entry_module)
+        """Generates createstubs.py db flavor."""
+        docstr_transformer = ModuleDocCodemod(self.context, _DB_MODULE_DOC)
+        def_main_tree = cst.parse_module(Partial.DB_MAIN.contents())
+
+        work_tree = docstr_transformer.transform_module_impl(tree)
+        matches = m.findall(work_tree, DEF_MAIN_MATCHER, metadata_resolver=self)
+
+        entry_tree = work_tree.deep_replace(matches[0], def_main_tree)
         return tree.with_deep_changes(tree, body=(*entry_tree.body,))
 
 
 class CreateStubsCodemod(codemod.Codemod):
-    """Generates createstubs.py variant based on provided flavor."""
 
     flavor: CreateStubsFlavor
     modules_transform: ModulesUpdateCodemod
@@ -273,12 +327,21 @@ class CreateStubsCodemod(codemod.Codemod):
         self.context.scratch.setdefault("modules_transform", self.modules_transform)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        """
+        Generates a createstubs.py variant based on provided flavor.
+        Optionally allows to replace the
+        - list of modules to stub. (if relevant for the flavour)
+        - list of problematic modules.
+        - list of excluded modules.
+        """
         mod_flavors = {
             CreateStubsFlavor.LVGL: LVGLCodemod,
             CreateStubsFlavor.LOW_MEM: LowMemoryCodemod,
             CreateStubsFlavor.DB: DBCodemod,
         }
+        # update the tree with the list of modules to stub , excluded modules and problematic modules
         tree = self.modules_transform.transform_module(tree)
+        # update the tree with the flavor specific changes
         if self.flavor in mod_flavors:
             tree = mod_flavors[self.flavor](self.context).transform_module(tree)
         return tree
