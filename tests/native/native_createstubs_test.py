@@ -76,11 +76,9 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
     # Delete database before the test
     if variant == "createstubs_db":
         if firmware.endswith("v1_11"):
-            pytest.skip(reason="v1.11 has no  machine module")  # type: ignore
-        if (Path(script_folder) / "modulelist.db").exists():
-            os.remove(Path(script_folder) / "modulelist.db")
-        if (Path(script_folder) / "modulelist.done").exists():
-            os.remove(Path(script_folder) / "modulelist.done")
+            pytest.skip(reason="v1.11 has no machine module")  # type: ignore
+        (Path(script_folder) / "modulelist.db").unlink(missing_ok=True)
+        (Path(script_folder) / "modulelist.done").unlink(missing_ok=True)
     try:
         subproc = subprocess.run(
             cmd,
