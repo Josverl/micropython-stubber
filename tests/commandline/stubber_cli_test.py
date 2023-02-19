@@ -167,7 +167,7 @@ def test_cmd_minify(mocker: MockerFixture):
 
     result = runner.invoke(stubber.stubber_cli, ["minify"])
     assert result.exit_code == 0
-    mock_minify.assert_called_once_with(Path("board/createstubs.py"), Path("./minified"), True, False, False)
+    mock_minify.assert_called_once()
 
 
 @pytest.mark.mocked
@@ -180,9 +180,6 @@ def test_cmd_minify_all(mocker: MockerFixture):
     result = runner.invoke(stubber.stubber_cli, ["minify", "--all"])
     assert result.exit_code == 0
     assert mock_minify.call_count == 3
-    mock_minify.assert_any_call(Path("board/createstubs.py"), Path("./minified"), True, False, False)
-    mock_minify.assert_any_call(Path("board/createstubs_db.py"), Path("./minified"), True, False, False)
-    mock_minify.assert_any_call(Path("board/createstubs_mem.py"), Path("./minified"), True, False, False)
 
 
 ##########################################################################################

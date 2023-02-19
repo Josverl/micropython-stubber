@@ -15,7 +15,7 @@ from stubber.codemod.modify_list import ListChangeSet
 from loguru import logger as log
 
 from stubber.utils.post import run_black
-from stubber.minify import minify
+from stubber.minify import minify, cross_compile
 
 
 def cross_compile(

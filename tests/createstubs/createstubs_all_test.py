@@ -54,7 +54,7 @@ def test_firmwarestubber_base_version_match_package(
     pyproject = tomllib.loads(open(str(path)).read())
     pyproject_version = pyproject["tool"]["poetry"]["version"]
 
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
     # base version should match the package
     assert parse(createstubs.__version__).base_version == parse(pyproject_version).base_version
 
