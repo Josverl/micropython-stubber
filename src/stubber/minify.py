@@ -12,16 +12,10 @@ from contextlib import ExitStack
 
 from loguru import logger as log
 
-try:
-    import python_minifier
-except ImportError:  # pragma: no cover
-    python_minifier = None
+import python_minifier
 
 # Type Aliases for minify
-StubSource = Union[
-    Path,
-    io.StringIO,
-]
+StubSource = Union[Path, io.StringIO]
 StubDest = Union[Path, io.TextIOWrapper, io.StringIO, io.BytesIO]
 LineEdits = List[Tuple[str, str]]
 
@@ -262,7 +256,6 @@ def minify(
     target: StubDest,
     keep_report: bool = True,
     diff: bool = False,
-    cross_compile: bool = False,
 ):
     """Minifies and compiles a script"""
     assert not isinstance(source, str), "source must be a file path or file object"
@@ -278,36 +271,69 @@ def minify(
                 if target.exists() and target.is_dir():
                     target = target / Path(source).name
                 target_buf = stack.enter_context(target.open("w+"))
-
         try:
             minified = minify_script(source_script=source_buf, keep_report=keep_report, diff=diff)
             if isinstance(target_buf, (io.StringIO, io.TextIOWrapper)):
                 target_buf.write(minified)
         except Exception as e:  # pragma: no cover
             log.exception(e)
-        else:
-            if cross_compile:
-                run_cross_compile(target_buf, minified)
     return 0
 
 
-def run_cross_compile(
-    target_buf: StubDest,
-    minified: str,
-):
-    log.debug("Minified file written to :", target_buf)
-    cc_target = target_buf
-    if not isinstance(cc_target, Path):
-        _, temp_file = tempfile.mkstemp()
+def cross_compile(
+    source: Union[Path, str],
+    target: Path,
+    version: str = "",
+):  # sourcery skip: assign-if-exp
+    """Runs mpy-cross on a (minified) script"""
+    temp_file = None
+    if isinstance(source, Path):
+        source_file = source
+    else:
+        # create a temp file and write the source to it
+        _, temp_file = tempfile.mkstemp(suffix=".py", prefix="mpy_cross_")
         temp_file = Path(temp_file)
-        target_buf.seek(0)
-        temp_file.write_text(minified)
-        cc_target = temp_file
-    result = subprocess.run(["mpy-cross", "-O2", str(cc_target)])
+        temp_file.write_text(source)
+        source_file = temp_file
+    if version:
+        cmd = ["pipx", "run", f"mpy-cross=={version}"]
+    else:
+        cmd = ["mpy-cross"]
+    # Add params
+    cmd += ["-O2", str(source_file), "-o", str(target), "-s", "createstubs.py"]
+    log.trace(" ".join(cmd))
+    result = subprocess.run(cmd)  # , capture_output=True, text=True)
+
     if result.returncode == 0:
-        if isinstance(target_buf, io.BytesIO):
-            target_buf.write(cc_target.read_bytes())
-        else:
-            mpy_target = target_buf.with_suffix(".mpy") if hasattr(target_buf, "with_suffix") else target_buf
-            log.debug("mpy-cross compiled to    :", mpy_target)
+        log.debug(f"mpy-cross compiled to    : {target.name}")
+    else:
+        log.error("mpy-cross failed to compile:")
     return result.returncode
+
+
+# def run_cross_compile_0(
+#     target_buf: StubDest,
+#     minified: str,
+# ):
+#     log.debug("Minified file written to :", target_buf)
+#     cc_target = target_buf
+#     if not isinstance(target_buf, Path):
+#         cc_target = save_to_tempfile(target_buf, minified)
+#     result = subprocess.run(["mpy-cross", "-O2", str(cc_target)])
+#     if result.returncode == 0:
+#         if isinstance(target_buf, io.BytesIO):
+#             target_buf.write(cc_target.read_bytes())
+#         else:
+#             mpy_target = target_buf.with_suffix(".mpy") if hasattr(target_buf, "with_suffix") else target_buf
+#             log.debug("mpy-cross compiled to    :", mpy_target)
+#     return result.returncode
+
+
+def save_to_tempfile(target_buf: StubDest, minified: str):
+    "Save IO buffer to a temp file"
+    _, temp_file = tempfile.mkstemp()
+    temp_file = Path(temp_file)
+    assert not isinstance(target_buf, Path), "target_buf must be a file path or file object"
+    target_buf.seek(0)
+    temp_file.write_text(minified)
+    return temp_file
