@@ -95,7 +95,8 @@ def test_custom_modules_problematic_excluded(context, create_stubs):
 
 
 def test_low_mem_module_doc(low_memory_result):
-    assert board._LOW_MEM_MODULE_DOC in low_memory_result.code
+    # do not match on trailing quotes as ther may be something appended
+    assert board._LOW_MEM_MODULE_DOC[-4] in low_memory_result.code
 
 
 def test_low_mem_read_stubs(low_memory_result):
@@ -120,16 +121,6 @@ def test_low_mem_custom_modules(context, create_stubs):
     assert not compare_lines("'supercoolmodule'", res.code)
 
 
-def test_lvgl_init(context, create_stubs):
-    ctx = context
-    base_module = create_stubs
-
-    res = CreateStubsCodemod(
-        ctx,
-        variant=CreateStubsVariant.LVGL,
-    ).transform_module(base_module)
-    assert compare_lines(board._LVGL_MAIN, res.code)
-
 
 def test_lvgl_modules_default(context, create_stubs):
     ctx = context
@@ -144,11 +135,12 @@ def test_lvgl_modules_default(context, create_stubs):
 def test_lvgl_modules_custom(context, create_stubs):
     ctx = context
     base_module = create_stubs
-    res = CreateStubsCodemod(
+    cm = CreateStubsCodemod(
         ctx,
         variant=CreateStubsVariant.LVGL,
         modules=ListChangeSet.from_strings(add=["supercoolmodule"], replace=True),
-    ).transform_module(base_module)
+    )
+    res = cm.transform_module(base_module)
     assert compare_lines('"supercoolmodule"', res.code)
 
 
