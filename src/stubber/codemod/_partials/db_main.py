@@ -65,14 +65,14 @@ def main():
     # get list of modules to process
     with open("modulelist" + ".txt") as f:
         # not optimal , but works on mpremote and esp8266
-        modules = [l.strip() for l in f.read().split("\\n") if len(l.strip()) and l.strip()[0] != "#"]
+        modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
     gc.collect()
     # remove the ones that are already done
     modules_done = {}  # type: dict[str, str]
     try:
         with open("modulelist" + ".done") as f:
             # not optimal , but works on mpremote and esp8266
-            for line in f.read().split("\\n"):
+            for line in f.read().split("\n"):
                 line = line.strip()
                 gc.collect()
                 if len(line) > 0:
