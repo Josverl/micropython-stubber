@@ -87,17 +87,14 @@ def main():
             machine.reset()
 
         # save the (last) result back to the database/result file
-        if ok:
-            result = stubber._report[-1]
-        else:
-            result = "failed"
+        result = stubber._report[-1] if ok else "failed"
         # -------------------------------------
         modules_done[modulename] = str(result)
         with open("modulelist" + ".done", "a") as f:
             f.write("{}={}\n".format(modulename, result))
 
     # Finished processing - load all the results , and remove the failed ones
-    if len(modules_done) > 0:
+    if modules_done:
         stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
 ###PARTIALEND###
