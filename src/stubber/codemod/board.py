@@ -1,3 +1,6 @@
+"""" 
+Codemods to create the different variants of createstubs.py
+"""
 from __future__ import annotations
 from datetime import datetime
 
@@ -215,36 +218,6 @@ class LVGLCodemod(codemod.Codemod):
     def __init__(
         self,
         context: codemod.CodemodContext,
-        modules_transform: Optional[ModulesUpdateCodemod] = None,
-        init_node: Optional[cst.Module] = None,
-    ):
-        super().__init__(context)
-        modules_transform = modules_transform or self.context.scratch.get("modules_transform")
-        if modules_transform and not isinstance(modules_transform, ModulesUpdateCodemod):
-            raise TypeError(f"modules_transform must be of type ModulesUpdateCodemod, received: {type(modules_transform)}")
-        self.modules_transform = (
-            modules_transform
-            if modules_transform and modules_transform.modules_changeset
-            else ModulesUpdateCodemod(self.context, modules=ListChangeSet.from_strings(add=["io", "lodepng", "rtch", "lvgl"], replace=True))
-        )
-        self.init_node = init_node or cst.parse_module(_LVGL_MAIN)
-
-    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        """Generates createstubs.py LVGL variant."""
-        repl_node = m.findall(tree, m.SimpleStatementLine(body=[_STUBBER_MATCHER]), metadata_resolver=self)
-        tree = tree.deep_replace(repl_node[0], self.init_node)
-        return self.modules_transform.transform_module_impl(tree)
-
-
-class LVGLCodemod(codemod.Codemod):
-    """Generates createstubs.py LVGL variant."""
-
-    modules_transform: ModulesUpdateCodemod
-    init_node: cst.Module
-
-    def __init__(
-        self,
-        context: codemod.CodemodContext,
     ):
         super().__init__(context)
 
@@ -343,10 +316,10 @@ class CreateStubsCodemod(codemod.Codemod):
             CreateStubsVariant.MEM: LowMemoryCodemod,
             CreateStubsVariant.DB: DBCodemod,
         }
-        # update the tree with the list of modules to stub , excluded modules and problematic modules
-        tree = self.modules_transform.transform_module(tree)
         if self.variant in mod_variants:
             # get the appropriate codemod for the variant and transform the tree
             codemod = mod_variants[self.variant]
             tree = codemod(self.context).transform_module(tree)
+        # update the tree with the list of modules to stub , excluded modules and problematic modules
+        tree = self.modules_transform.transform_module(tree)
         return tree
