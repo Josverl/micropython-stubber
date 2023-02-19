@@ -27,7 +27,7 @@ def test_minification_py(tmp_path: Path, source: str):
 @pytest.mark.mocked
 @pytest.mark.minify
 def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture):
-    "testthe rest of the minification functions using mocks to reduce the time needed"
+    "test the rest of the minification functions using mocks to reduce the time needed"
     # load process.py in the same python environment
     source_path = Path("./board") / source
 
