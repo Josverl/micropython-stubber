@@ -6,7 +6,7 @@ from pathlib import Path
 from textwrap import dedent
 
 import stubber.codemod.board as board
-from stubber.codemod.board import CreateStubsCodemod, CreateStubsFlavor
+from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet
 
 # mark all tests
@@ -20,28 +20,28 @@ def create_stubs() -> cst.Module:
 
 
 @pytest.fixture
-def context(create_stubs) -> tuple[codemod.CodemodContext, cst.Module]:
-    return codemod.CodemodContext(), create_stubs
+def context(create_stubs) -> codemod.CodemodContext:
+    return codemod.CodemodContext()
 
 
 @pytest.fixture
 def low_memory_mod(context) -> CreateStubsCodemod:
-    return CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.LOW_MEM)
+    return CreateStubsCodemod(context, variant=CreateStubsVariant.LOW_MEM)
 
 
 @pytest.fixture
-def low_memory_result(context, low_memory_mod) -> cst.Module:
-    return low_memory_mod.transform_module(context[1])
+def low_memory_result(create_stubs, low_memory_mod) -> cst.Module:
+    return low_memory_mod.transform_module(create_stubs)
 
 
 @pytest.fixture
 def db_mod(context) -> CreateStubsCodemod:
-    return CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.DB)
+    return CreateStubsCodemod(context, variant=CreateStubsVariant.DB)
 
 
 @pytest.fixture
-def db_result(context, db_mod) -> cst.Module:
-    return db_mod.transform_module(context[1])
+def db_result(create_stubs, db_mod) -> cst.Module:
+    return db_mod.transform_module(create_stubs)
 
 
 def dedent_lines(body: str) -> str:
@@ -53,31 +53,40 @@ def compare_lines(excerpt: str, body: str) -> bool:
     return dedent_lines(excerpt) in dedent_lines(body)
 
 
-def test_custom_modules(context):
-    ctx, cont = context
-    mod = CreateStubsCodemod(ctx, modules=ListChangeSet.from_strings(add=["mycustommodule"], replace=True)).transform_module(cont)
+def test_custom_modules(context, create_stubs):
+    ctx = context
+    base_module = create_stubs
+    mod = CreateStubsCodemod(
+        ctx,
+        modules=ListChangeSet.from_strings(add=["mycustommodule"], replace=True),
+    ).transform_module(base_module)
     assert "mycustommodule" in mod.code
 
 
-def test_custom_modules_problematic(context):
+def test_custom_modules_problematic(context, create_stubs):
+    ctx = context
+    base_module = create_stubs
     mod = CreateStubsCodemod(
-        context[0],
+        ctx,
         modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
         problematic=ListChangeSet.from_strings(add=["runt"], replace=True),
     )
-    res = mod.transform_module(context[1])
+    res = mod.transform_module(base_module)
     assert compare_lines('"runt"', res.code)
     assert compare_lines('"coolmod"', res.code)
 
 
-def test_custom_modules_problematic_excluded(context):
+def test_custom_modules_problematic_excluded(context, create_stubs):
+    ctx = context
+    base_module = create_stubs
+
     mod = CreateStubsCodemod(
-        context[0],
+        ctx,
         modules=ListChangeSet.from_strings(add=["coolmod"], replace=True),
         problematic=ListChangeSet.from_strings(add=["runt"], replace=True),
         excluded=ListChangeSet.from_strings(remove=["webrepl", "_webrepl"], add=["myexclude"]),
     )
-    res = mod.transform_module(context[1])
+    res = mod.transform_module(base_module)
     assert compare_lines('"runt"', res.code)
     assert compare_lines('"coolmod"', res.code)
     assert not compare_lines('"webrepl"', res.code)
@@ -93,30 +102,53 @@ def test_low_mem_read_stubs(low_memory_result):
     assert compare_lines(board._MODULES_READER, low_memory_result.code)
 
 
-def test_low_mem_custom_modules(context):
+def test_low_mem_custom_modules(context, create_stubs):
     # this reads from module list, so wont do anything
     # but it shouldnt fail either.
+    ctx = context
+    base_module = create_stubs
+
     res = CreateStubsCodemod(
-        context[0], flavor=CreateStubsFlavor.LOW_MEM, modules=ListChangeSet.from_strings(add=["supercoolmodule"], replace=True)
-    ).transform_module(context[1])
+        ctx,
+        variant=CreateStubsVariant.LOW_MEM,
+        modules=ListChangeSet.from_strings(
+            add=["supercoolmodule"],
+            replace=True,
+        ),
+    ).transform_module(base_module)
     assert res.code
     assert not compare_lines("'supercoolmodule'", res.code)
 
 
-def test_lvgl_init(context):
-    res = CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.LVGL).transform_module(context[1])
+def test_lvgl_init(context, create_stubs):
+    ctx = context
+    base_module = create_stubs
+
+    res = CreateStubsCodemod(
+        ctx,
+        variant=CreateStubsVariant.LVGL,
+    ).transform_module(base_module)
     assert compare_lines(board._LVGL_MAIN, res.code)
 
 
-def test_lvgl_modules_default(context):
-    res = CreateStubsCodemod(context[0], flavor=CreateStubsFlavor.LVGL).transform_module(context[1])
+def test_lvgl_modules_default(context, create_stubs):
+    ctx = context
+    base_module = create_stubs
+    res = CreateStubsCodemod(
+        ctx,
+        variant=CreateStubsVariant.LVGL,
+    ).transform_module(base_module)
     assert compare_lines('"io", "lodepng", "rtch", "lvgl"', res.code)
 
 
-def test_lvgl_modules_custom(context):
+def test_lvgl_modules_custom(context, create_stubs):
+    ctx = context
+    base_module = create_stubs
     res = CreateStubsCodemod(
-        context[0], flavor=CreateStubsFlavor.LVGL, modules=ListChangeSet.from_strings(add=["supercoolmodule"], replace=True)
-    ).transform_module(context[1])
+        ctx,
+        variant=CreateStubsVariant.LVGL,
+        modules=ListChangeSet.from_strings(add=["supercoolmodule"], replace=True),
+    ).transform_module(base_module)
     assert compare_lines('"supercoolmodule"', res.code)
 
 
