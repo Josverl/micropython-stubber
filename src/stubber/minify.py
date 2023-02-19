@@ -1,6 +1,6 @@
 """
- Processing for createstubs.py
- minimizes and cross-compiles a micropyton file.
+Processing for createstubs.py
+Minimizes and cross-compiles a MicroPyton file.
 """
 import io
 import itertools
@@ -15,8 +15,8 @@ from loguru import logger as log
 import python_minifier
 
 # Type Aliases for minify
-StubSource = Union[Path, io.StringIO]
-StubDest = Union[Path, io.TextIOWrapper, io.StringIO, io.BytesIO]
+StubSource = Union[Path, str, io.IOBase]
+StubDest = Union[Path, io.IOBase]
 LineEdits = List[Tuple[str, str]]
 
 
@@ -168,25 +168,28 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     Minifies createstubs.py and variants
 
     Args:
-        keep_report (bool, optional): Keeps single report line in createstubs
+    source_script:
+        - (str): content to edit
+        - (Path): path to file to edit
+        - (io.IOBase): file-like object to edit
+    keep_report (bool, optional): Keeps single report line in createstubs
             Defaults to True.
-        diff (bool, optional): Print diff from edits. Defaults to False.
+    diff (bool, optional): Print diff from edits. Defaults to False.
 
     Returns:
         str: minified source text
-
     """
-
-    if not python_minifier:  # pragma: no cover
-        raise ModuleNotFoundError("python_minifier not available")
 
     source_content = ""
     if isinstance(source_script, Path):
-        # Path = path to file
         source_content = source_script.read_text()
-    else:
-        # IO = file object
+    elif isinstance(source_script, (io.StringIO, io.TextIOWrapper)):
         source_content = "".join(source_script.readlines())
+    elif isinstance(source_script, str):  # type: ignore
+        source_content = source_script
+    else:
+        raise TypeError(f"source_script must be str, Path, or file-like object, not {type(source_script)}")
+
     if not source_content:
         raise ValueError("No source content")
 
@@ -258,23 +261,25 @@ def minify(
     diff: bool = False,
 ):
     """Minifies and compiles a script"""
-    assert not isinstance(source, str), "source must be a file path or file object"
-    assert not isinstance(target, str), "target must be a file path or file object"
+    source_buf = None
+    target_buf = None
+
     with ExitStack() as stack:
-        source_buf = source
-        target_buf = target
 
         if isinstance(source, Path):
             source_buf = stack.enter_context(source.open("r"))
-            if isinstance(target, Path):
-                # if target is a folder , then append the filename
-                if target.exists() and target.is_dir():
-                    target = target / Path(source).name
-                target_buf = stack.enter_context(target.open("w+"))
+        elif isinstance(source, io.IOBase):
+            source_buf = source
+        else:
+            source_buf = io.StringIO(source)
+
+        if isinstance(target, Path):
+            target_buf = stack.enter_context(target.open("w+"))
+        elif isinstance(target, io.IOBase):  # type: ignore
+            target_buf = target
         try:
             minified = minify_script(source_script=source_buf, keep_report=keep_report, diff=diff)
-            if isinstance(target_buf, (io.StringIO, io.TextIOWrapper)):
-                target_buf.write(minified)
+            target_buf.write(minified)
         except Exception as e:  # pragma: no cover
             log.exception(e)
     return 0
@@ -309,24 +314,6 @@ def cross_compile(
     else:
         log.error("mpy-cross failed to compile:")
     return result.returncode
-
-
-# def run_cross_compile_0(
-#     target_buf: StubDest,
-#     minified: str,
-# ):
-#     log.debug("Minified file written to :", target_buf)
-#     cc_target = target_buf
-#     if not isinstance(target_buf, Path):
-#         cc_target = save_to_tempfile(target_buf, minified)
-#     result = subprocess.run(["mpy-cross", "-O2", str(cc_target)])
-#     if result.returncode == 0:
-#         if isinstance(target_buf, io.BytesIO):
-#             target_buf.write(cc_target.read_bytes())
-#         else:
-#             mpy_target = target_buf.with_suffix(".mpy") if hasattr(target_buf, "with_suffix") else target_buf
-#             log.debug("mpy-cross compiled to    :", mpy_target)
-#     return result.returncode
 
 
 def save_to_tempfile(target_buf: StubDest, minified: str):

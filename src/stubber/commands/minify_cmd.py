@@ -8,7 +8,6 @@ from typing import Union
 import click
 from loguru import logger as log
 from stubber.minify import minify, cross_compile
-from stubber.utils.config import CONFIG
 import stubber
 
 from .cli import stubber_cli
