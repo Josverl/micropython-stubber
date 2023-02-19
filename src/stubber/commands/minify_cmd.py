@@ -49,7 +49,7 @@ def cli_minify(
     log.trace(f"sources: {sources}")
     for source in sources:
         log.info(f"\nMinifying {source}...")
-        minify(source, target, keep_report, diff, cross_compile)  # noqa
+        minify(Path(source), Path(target), keep_report, diff, cross_compile)  # noqa
 
     log.info("\nDone!")
     return 0
