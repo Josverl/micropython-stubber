@@ -62,3 +62,4 @@ tests/codemods/codemod_test_cases/**/output.py
 snippets/*/typings
 typings_test
 typings
+src/stubber/board/modulelist.done

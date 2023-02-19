@@ -1,3 +1,5 @@
+"""helper functions for stub transformations"""
+
 # sourcery skip: snake-case-functions
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -7,7 +9,7 @@ import libcst as cst
 
 @dataclass
 class TypeInfo:
-    "contains the  functiondefs and classdefs info read from the stubs source"
+    "contains the functiondefs and classdefs info read from the stubs source"
     name: str
     decorators: Sequence[cst.Decorator]
     params: Optional[cst.Parameters] = None
@@ -162,7 +164,7 @@ def update_module_docstr(
     """
     if not doc_tree:
         return node
-    if not isinstance(doc_tree, (str, cst.SimpleStatementLine, cst.BaseCompoundStatement)): # type: ignore
+    if not isinstance(doc_tree, (str, cst.SimpleStatementLine, cst.BaseCompoundStatement)):  # type: ignore
         raise TransformError("Expected a docstring or a statement")
     if isinstance(doc_tree, str):
         doc_tree = cst.parse_statement(doc_tree)

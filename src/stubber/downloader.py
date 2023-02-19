@@ -1,4 +1,4 @@
-"Download files from a public github repo"
+"""Download files from a public github repo"""
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
 # pylint: disable= invalid-name

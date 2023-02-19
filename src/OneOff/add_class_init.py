@@ -1,3 +1,5 @@
+"""Add (missing) __init__ methods to a class using a regex"""
+
 from pathlib import Path
 import re
 
@@ -10,7 +12,7 @@ repl_classdef = (
 )
 
 
-def add_init_methods(filename) -> int:
+def add_init_methods(filename:Path) -> int:
     """Add (missing) __init__ methods to a class using a regex
     this assumes the (incorrect) classdef format that has been used by stubbers prior to version 1.4.0
     and updates that to add the init.
