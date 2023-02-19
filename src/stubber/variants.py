@@ -88,20 +88,7 @@ for var in [CreateStubsVariant.BASE, CreateStubsVariant.MEM, CreateStubsVariant.
     log.info(f"\nMinifying to {minified_path.name}")
     minify(variant_path, minified_path, keep_report=True, diff=False)
 
-    # cross compile for mpy version with mpy-cross
-    if 0:
-        # PATH -> PATH
-        cross_compile(minified_path, mpy_path)
-
-    if 1:
-        # str -> path
-        # read minified file
-        minified_txt = minified_path.read_text()
-        cross_compile(minified_txt, mpy_path, version="1.19.1")
-
-    if 0:
-        # custom modules (and skip defaults).
-        custom_stubs = ListChangeSet.from_strings(add=["mycoolpackage", "othermodule"], replace=True)
-        custom_variant = CreateStubsCodemod(ctx, modules=custom_stubs).transform_module(base_module)
-
-        print(custom_variant.code)
+    # str -> path
+    # read minified file
+    minified_txt = minified_path.read_text()
+    cross_compile(minified_txt, mpy_path, version="1.19.1")
