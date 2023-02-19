@@ -18,8 +18,8 @@ try:
 except ImportError:
     pass
 
-SD = False
-if SD:
+MOUNT_SD = False
+if MOUNT_SD:
     # Mount SD to /sd
     try:
         # Some boards have pulldown and/or LED on GPIO2, pullup avoids issues on TTGO 8 v1.8

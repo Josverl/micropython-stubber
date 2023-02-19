@@ -1,3 +1,5 @@
+"""stubber configuration"""
+
 from pathlib import Path
 
 from typedconfig.config import Config, key, section
@@ -9,7 +11,7 @@ from loguru import logger as log
 
 @section("micropython-stubber")
 class StubberConfig(Config):
-    "stubber confguration class"
+    "stubber configuration class"
     stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
     "a Path to the stubs directory"
     # relative to stubs folder
