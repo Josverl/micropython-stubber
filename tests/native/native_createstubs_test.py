@@ -39,6 +39,15 @@ elif sys.platform == "win32":
     ]
 
 
+# specify the minified tests using a marker
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        pytest.param(""),
+        pytest.param("_min", marks=pytest.mark.minified),
+        # pytest.param("_mpy", marks=pytest.mark.minified), # TODO: add mpy tests including compiling to the correct version
+    ],
+)
 @pytest.mark.parametrize(
     "variant",
     [
@@ -47,19 +56,11 @@ elif sys.platform == "win32":
         pytest.param("createstubs_db"),
     ],
 )
-# specify the minified tests using a marker
-@pytest.mark.parametrize(
-    "script_folder",
-    [
-        pytest.param("./src/stubber/board"),
-        pytest.param("./src/stubber/minified", marks=pytest.mark.minified),
-    ],
-)
 @pytest.mark.parametrize(
     "firmware",
     fw_list,
 )
-def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant: str, pytestconfig: Config):
+def test_createstubs(firmware: str, variant: str, suffix: str, tmp_path: Path, pytestconfig: Config):
     "run createstubs in the native (linux/windows) version of micropython"
 
     # skip this on windows - python 3.7
@@ -67,18 +68,23 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
     if sys.platform == "win32" and sys.version_info[0] == 3 and sys.version_info[0] == 7:
         pytest.skip(msg="Test does not work well on Win + Python 3.7 ....")
 
-    # Use temp_path to generate stubs
-    script_path = Path(script_folder).absolute()
+    # all createsub variants are in the same folder
+    script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
+    script_name = variant + suffix + ".py"
     # other tests may / will change the CWD to a different folder
     fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
-    cmd = [fw_filename.as_posix(), variant + ".py", "--path", str(tmp_path)]
+    cmd = [fw_filename.as_posix(), script_name, "--path", str(tmp_path)]
 
+    # check if the script exists
+    assert (script_path / script_name).exists(), f"script {script_name} does not exist"
     # Delete database before the test
     if variant == "createstubs_db":
         if firmware.endswith("v1_11"):
             pytest.skip(reason="v1.11 has no machine module")  # type: ignore
-        (Path(script_folder) / "modulelist.db").unlink(missing_ok=True)
-        (Path(script_folder) / "modulelist.done").unlink(missing_ok=True)
+        (script_path / "modulelist.db").unlink(missing_ok=True)
+        (script_path / "modulelist.done").unlink(missing_ok=True)
+
+    print(" ".join(cmd))
     try:
         subproc = subprocess.run(
             cmd,
@@ -100,9 +106,10 @@ def test_createstubs(firmware: str, tmp_path: Path, script_folder: str, variant:
 
     stub_path = tmp_path / "stubs"
     stubfiles = list(stub_path.rglob("*.py"))
+
     # use rough filecount to see if there were results without checking the details
-    if "micropython" in script_folder:
-        assert len(stubfiles) >= 45, "micropython: there should be 45 stubs or more"
+    if "micropython" in firmware:
+        assert len(stubfiles) >= 35, "micropython: there should be 35 stubs or more"
     else:
         assert len(stubfiles) >= 25, "pycopy: there should be 25 stubs or more"
 
