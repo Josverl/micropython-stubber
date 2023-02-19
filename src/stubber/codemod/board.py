@@ -126,7 +126,7 @@ class CreateStubsVariant(str, Enum):
     """Dictates create stubs target variant."""
 
     BASE = "base"
-    LOW_MEM = "mem"
+    MEM = "mem"
     DB = "db"
     LVGL = "lvgl"
 
@@ -230,14 +230,14 @@ class LVGLCodemod(codemod.Codemod):
         self.init_node = init_node or cst.parse_module(_LVGL_MAIN)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        """Generates createstubs.py LVGL flavor."""
+        """Generates createstubs.py LVGL variant."""
         repl_node = m.findall(tree, m.SimpleStatementLine(body=[_STUBBER_MATCHER]), metadata_resolver=self)
         tree = tree.deep_replace(repl_node[0], self.init_node)
         return self.modules_transform.transform_module_impl(tree)
 
 
 class LVGLCodemod(codemod.Codemod):
-    """Generates createstubs.py LVGL flavor."""
+    """Generates createstubs.py LVGL variant."""
 
     modules_transform: ModulesUpdateCodemod
     init_node: cst.Module
@@ -249,7 +249,7 @@ class LVGLCodemod(codemod.Codemod):
         super().__init__(context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        """Generates createstubs.py LVGL flavor."""
+        """Generates createstubs.py LVGL variant."""
         # repl_node = m.findall(tree, m.SimpleStatementLine(body=[_STUBBER_MATCHER]), metadata_resolver=self)
         # tree = tree.deep_replace(repl_node[0], self.init_node)
         # return self.modules_transform.transform_module_impl(tree)
@@ -293,7 +293,7 @@ class DBCodemod(codemod.Codemod):
         super().__init__(context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        """Generates createstubs.py db flavor."""
+        """Generates createstubs.py db variant."""
         docstr_transformer = ModuleDocCodemod(self.context, _DB_MODULE_DOC)
         def_main_tree = cst.parse_module(Partial.DB_MAIN.contents())
 
@@ -330,13 +330,23 @@ class CreateStubsCodemod(codemod.Codemod):
         self.context.scratch.setdefault("modules_transform", self.modules_transform)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        """
+        Generates a createstubs.py variant based on provided flavor.
+        Transform it to emit the appropriate variant of createstubs.py,
+        Optionally allows to replace the
+        - list of modules to stub. (if relevant for the flavour)
+        - list of problematic modules.
+        - list of excluded modules.
+        """
         mod_variants = {
             CreateStubsVariant.LVGL: LVGLCodemod,
-            CreateStubsVariant.LOW_MEM: LowMemoryCodemod,
+            CreateStubsVariant.MEM: LowMemoryCodemod,
             CreateStubsVariant.DB: DBCodemod,
         }
         # update the tree with the list of modules to stub , excluded modules and problematic modules
         tree = self.modules_transform.transform_module(tree)
         if self.variant in mod_variants:
-            tree = mod_variants[self.variant](self.context).transform_module(tree)
+            # get the appropriate codemod for the variant and transform the tree
+            codemod = mod_variants[self.variant]
+            tree = codemod(self.context).transform_module(tree)
         return tree

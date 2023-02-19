@@ -16,7 +16,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from conftest import LOCATIONS, VARIANTS
+from conftest import LOCATIONS, VARIANTS, import_variant
 
 pytestmark = pytest.mark.micropython
 
@@ -28,7 +28,7 @@ def test_get_obj_attributes(
     variant,
     mock_micropython_path,
 ):
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     stubber = createstubs.Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
@@ -50,9 +50,8 @@ def test_literal_order(
     """
     Literals MUST be listed before methods as they can be used in as defaults in method parameters.
     """
-    # location = "board"
-    # variant = "createstubs"
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
+
     machine = import_module("tests.data.stub_merge.micropython-v1_18-esp32.machine")
     stubber = createstubs.Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
@@ -78,8 +77,8 @@ def test_literal_init_order(
     Literals MUST be listed before methods as they can be used in as defaults in method parameters.
     """
     location = "board"  # no need to test on minified versions
-    # variant = "createstubs"
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
+
     machine = import_module("tests.data.stub_merge.micropython-v1_18-esp32.machine")
     stubber = createstubs.Stubber()  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"

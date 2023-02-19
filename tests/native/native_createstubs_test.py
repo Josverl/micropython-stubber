@@ -51,8 +51,8 @@ elif sys.platform == "win32":
 @pytest.mark.parametrize(
     "script_folder",
     [
-        pytest.param("./board"),
-        pytest.param("./minified", marks=pytest.mark.minified),
+        pytest.param("./src/stubber/board"),
+        pytest.param("./src/stubber/minified", marks=pytest.mark.minified),
     ],
 )
 @pytest.mark.parametrize(

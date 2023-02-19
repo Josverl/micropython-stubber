@@ -6,7 +6,7 @@ import libcst as cst
 import libcst.codemod as codemod
 from pathlib import Path
 
-from stubber.codemod.board import CreateStubsCodemod, CreateStubsFlavor
+from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet
 
 from loguru import logger as log
@@ -22,10 +22,10 @@ base_txt = (base_path / "createstubs.py").read_text()
 base_module = cst.parse_module(base_txt)
 
 
-for var in [CreateStubsFlavor.LOW_MEM, CreateStubsFlavor.DB, CreateStubsFlavor.LVGL]:
+for var in [CreateStubsVariant.MEM, CreateStubsVariant.DB, CreateStubsVariant.LVGL]:
     # Transform base to Low memory createstubs.py
     log.info(f"Transforming to {var.value} variant")
-    cm = CreateStubsCodemod(ctx, flavor=var)
+    cm = CreateStubsCodemod(ctx, variant=var)
     variant = cm.transform_module(base_module)
 
     # write low_mem_variant.code to file

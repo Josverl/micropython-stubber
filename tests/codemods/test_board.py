@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.codemod, pytest.mark.minify]
 
 @pytest.fixture
 def create_stubs() -> cst.Module:
-    path = Path(__file__).parent.parent.parent / "board" / "createstubs.py"
+    path = Path(__file__).parent.parent.parent / "src" / "stubber" / "board" / "createstubs.py"
     return cst.parse_module(path.read_text())
 
 
@@ -26,7 +26,7 @@ def context(create_stubs) -> codemod.CodemodContext:
 
 @pytest.fixture
 def low_memory_mod(context) -> CreateStubsCodemod:
-    return CreateStubsCodemod(context, variant=CreateStubsVariant.LOW_MEM)
+    return CreateStubsCodemod(context, variant=CreateStubsVariant.MEM)
 
 
 @pytest.fixture
@@ -110,7 +110,7 @@ def test_low_mem_custom_modules(context, create_stubs):
 
     res = CreateStubsCodemod(
         ctx,
-        variant=CreateStubsVariant.LOW_MEM,
+        variant=CreateStubsVariant.MEM,
         modules=ListChangeSet.from_strings(
             add=["supercoolmodule"],
             replace=True,
