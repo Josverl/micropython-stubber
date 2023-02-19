@@ -17,8 +17,17 @@ try:
 except ImportError:  # pragma: no cover
     python_minifier = None
 
+# Type Aliases for minify
+StubSource = Union[
+    Path,
+    io.StringIO,
+]
+StubDest = Union[Path, io.TextIOWrapper, io.StringIO, io.BytesIO]
+LineEdits = List[Tuple[str, str]]
 
-def edit_lines(content: str, edits: List[Tuple[str, str]], diff: bool = False):
+
+def edit_lines(content: str, edits: LineEdits, diff: bool = False):
+    # sourcery skip: no-long-functions
     """Edit string by list of edits
 
     Args:
@@ -37,15 +46,18 @@ def edit_lines(content: str, edits: List[Tuple[str, str]], diff: bool = False):
     """
 
     def comment(l: str, x: str):
+        """Comment out line, so it will be removed on minify"""
         return l.replace(x, f"# {x}")
 
-    def rprint(l: str, x: str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
+    def rprint(l: str, x: str):  # type: ignore
+        """Replace (logging) with print"""
         split = l.split("(")
         if len(split) > 1:
             return l.replace(split[0].strip(), "print")
         return l.replace(x, "print")
 
-    def rpass(l: str, x: str):  # type: ignore # lgtm [py/unused-local-variable] pylint: disable= unused-variable
+    def rpass(l: str, x: str):  # type: ignore
+        """Replace with pass"""
         return l.replace(x, "pass")
 
     def get_whitespace_context(content: List[str], index: int):
@@ -157,14 +169,17 @@ def edit_lines(content: str, edits: List[Tuple[str, str]], diff: bool = False):
     return stripped
 
 
-def minify_script(
-    source_script: Union[Path, str, IO[str]],  # Input script
-    keep_report: bool = True,  # Keeps single report line in createstubs
-    diff: bool = False,  # Print diff from edits
-) -> str:
+def minify_script(source_script: StubSource, keep_report: bool = True, diff: bool = False) -> str:
     """
     Minifies createstubs.py and variants
 
+    Args:
+        keep_report (bool, optional): Keeps single report line in createstubs
+            Defaults to True.
+        diff (bool, optional): Print diff from edits. Defaults to False.
+
+    Returns:
+        str: minified source text
 
     """
 
@@ -172,15 +187,7 @@ def minify_script(
         raise ModuleNotFoundError("python_minifier not available")
 
     source_content = ""
-    if isinstance(source_script, str):
-        if Path(source_script).exists():
-            # string = path to file
-            source_script = Path(source_script)
-            source_content = source_script.read_text()
-        else:
-            # string = script content
-            source_content = source_script
-    elif isinstance(source_script, Path):
+    if isinstance(source_script, Path):
         # Path = path to file
         source_content = source_script.read_text()
     else:
@@ -189,7 +196,7 @@ def minify_script(
     if not source_content:
         raise ValueError("No source content")
 
-    edits: List[Tuple[str, str]] = [
+    edits: LineEdits = [
         ("comment", "print"),
         ("comment", "import logging"),
         # report keepers may be inserted here
@@ -251,21 +258,22 @@ def minify_script(
 
 
 def minify(
-    source: Union[str, Path, IO[str]],
-    target: Union[str, Path, IO[str], IO[bytes]],
+    source: StubSource,
+    target: StubDest,
     keep_report: bool = True,
     diff: bool = False,
     cross_compile: bool = False,
 ):
+    """Minifies and compiles a script"""
+    assert not isinstance(source, str), "source must be a file path or file object"
+    assert not isinstance(target, str), "target must be a file path or file object"
     with ExitStack() as stack:
         source_buf = source
         target_buf = target
 
-        if isinstance(source, (str, Path)):
-            source = Path(source)
+        if isinstance(source, Path):
             source_buf = stack.enter_context(source.open("r"))
-            if isinstance(target, (str, Path)):
-                target = Path(target)
+            if isinstance(target, Path):
                 # if target is a folder , then append the filename
                 if target.exists() and target.is_dir():
                     target = target / Path(source).name
@@ -278,30 +286,28 @@ def minify(
         except Exception as e:  # pragma: no cover
             log.exception(e)
         else:
-            return minify_and_compile(target, cross_compile, target_buf, minified)
+            if cross_compile:
+                run_cross_compile(target_buf, minified)
+    return 0
 
 
-def minify_and_compile(
-    target,
-    cross_compile: bool,
-    target_buf,
+def run_cross_compile(
+    target_buf: StubDest,
     minified: str,
 ):
-    log.debug("Minified file written to :", target)
-    if not cross_compile:
-        return 0
-    cross_targ = target
-    if not isinstance(cross_targ, Path):
+    log.debug("Minified file written to :", target_buf)
+    cc_target = target_buf
+    if not isinstance(cc_target, Path):
         _, temp_file = tempfile.mkstemp()
         temp_file = Path(temp_file)
         target_buf.seek(0)
         temp_file.write_text(minified)
-        cross_targ = temp_file
-    result = subprocess.run(["mpy-cross", "-O2", str(cross_targ)])
+        cc_target = temp_file
+    result = subprocess.run(["mpy-cross", "-O2", str(cc_target)])
     if result.returncode == 0:
         if isinstance(target_buf, io.BytesIO):
-            target_buf.write(cross_targ.read_bytes())
+            target_buf.write(cc_target.read_bytes())
         else:
-            mpy_target = target.with_suffix(".mpy") if hasattr(target, "with_suffix") else target
+            mpy_target = target_buf.with_suffix(".mpy") if hasattr(target_buf, "with_suffix") else target_buf
             log.debug("mpy-cross compiled to    :", mpy_target)
     return result.returncode
