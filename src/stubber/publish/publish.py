@@ -11,14 +11,14 @@ from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
-from stubber.publish.package import GENERIC_L
+from stubber.publish.package import GENERIC_U
 
 
 def build_multiple(
     family: str = "micropython",
     versions: List[str] = ["v1.19.1"],
     ports: List[str] = ["auto"],
-    boards: List[str] = [GENERIC_L],
+    boards: List[str] = [GENERIC_U],
     production: bool = False,
     clean: bool = False,
     force: bool = False,
@@ -47,7 +47,7 @@ def publish_multiple(
     family: str = "micropython",
     versions: List[str] = ["v1.19.1"],
     ports: List[str] = ["auto"],
-    boards: List[str] = [GENERIC_L],
+    boards: List[str] = [GENERIC_U],
     production: bool = False,
     clean: bool = False,
     build: bool = False,

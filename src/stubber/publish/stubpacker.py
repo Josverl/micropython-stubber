@@ -23,13 +23,13 @@ from pysondb import PysonDB
 
 from stubber.publish.bump import bump_version
 from stubber.publish.enums import StubSource
-from stubber.publish.package import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
 
 Status = NewType("Status", Dict[str, Union[str, None]])
+StubSources = List[Tuple[StubSource, Path]]
 
 
 class StubPackage:
@@ -60,7 +60,7 @@ class StubPackage:
         package_name: str,
         version: str = "0.0.1",
         description: str = "MicroPython stubs",
-        stubs: Optional[List[Tuple[str, Path]]] = None,
+        stubs: Optional[StubSources] = None,
         json_data: Optional[Dict[str, Any]] = None,
     ):
         """
@@ -96,7 +96,7 @@ class StubPackage:
             """hash of the the stub files"""
             self.create_update_pyproject_toml()
 
-            self.stub_sources: List[Tuple[str, Path]] = []
+            self.stub_sources: StubSources = []
             # save the stub sources
             if stubs:
                 self.stub_sources = stubs
@@ -215,8 +215,7 @@ class StubPackage:
             "publish": self._publish,
             "pkg_version": str(self.pkg_version),
             "path": self.package_path.name,  # only store the folder name , as it is relative to the publish folder
-            # force all source paths to lowercase to avoid issues with case sensitive file systems
-            "stub_sources": [(name, Path(path).as_posix().lower()) for (name, path) in self.stub_sources],
+            "stub_sources": [(name, Path(path).as_posix()) for (name, path) in self.stub_sources],
             "description": self.description,
             "hash": self.hash,
             "stub_hash": self.stub_hash,
@@ -259,6 +258,36 @@ class StubPackage:
         self.create_readme()
         self.create_license()
 
+    @staticmethod
+    def update_sources(stub_sources: StubSources) -> StubSources:
+        """
+        Update the stub sources to:
+        - use the -merged folder for the firmware sources
+        - and fallback to use the GENERIC folder for the frozen sources
+        """
+        updated_sources = []
+        for stub_type, fw_path in stub_sources:
+            # update to use -merged
+            if stub_type == StubSource.FIRMWARE:
+                # Check if -merged folder exists and use that instead
+                if fw_path.name.endswith("-merged"):
+                    merged_path = fw_path
+                else:
+                    merged_path = fw_path.with_name(f"{fw_path.name}-merged")
+                if (CONFIG.stub_path / merged_path).exists():
+                    updated_sources.append((stub_type, merged_path))
+                else:
+                    updated_sources.append((stub_type, fw_path))
+            elif stub_type == StubSource.FROZEN:
+                # use if folder exists , else use GENERIC folder
+                if (CONFIG.stub_path / fw_path).exists():
+                    updated_sources.append((stub_type, fw_path))
+                else:
+                    updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+            else:
+                updated_sources.append((stub_type, fw_path))
+        return updated_sources
+
     def copy_stubs(self) -> None:
         """
         Copy files from all listed stub folders to the package folder
@@ -269,23 +298,11 @@ class StubPackage:
          - 3 - remove *.py files from the package folder
         """
         try:
-            # First check if all stub source folders exist
-            for n in range(len(self.stub_sources)):
-                stub_type, fw_path = self.stub_sources[n]
-                # update to use -merged
-                if stub_type == StubSource.FIRMWARE:
-                    # Check if -merged folder exists and use that instead
-                    if fw_path.name.endswith("-merged"):
-                        merged_path = fw_path
-                    else:
-                        merged_path = fw_path.with_name(f"{fw_path.name}-merged")
-                    if (CONFIG.stub_path / merged_path).exists():
-                        stub_type = StubSource.MERGED
-                        # Update the source list
-                        self.stub_sources[n] = (stub_type, merged_path)
-                    fw_path = merged_path
-                # check if path exists
-                if not (CONFIG.stub_path / fw_path).exists() and stub_type != StubSource.FROZEN:
+            # update to -menrge and fallback to GENERIC
+            self.stub_sources = self.update_sources(self.stub_sources)
+            # Check if all stub source folders exist
+            for stub_type, fw_path in self.stub_sources:
+                if not (CONFIG.stub_path / fw_path).exists():  # and stub_type != StubSource.FROZEN:
                     raise FileNotFoundError(f"Could not find stub source folder {CONFIG.stub_path / fw_path}")
 
             # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
@@ -294,7 +311,7 @@ class StubPackage:
                 stub_type, fw_path = self.stub_sources[n]
 
                 try:
-                    log.debug(f"Copying {stub_type} from {fw_path}")
+                    log.debug(f"Copying {stub_type.value} from {fw_path}")
                     shutil.copytree(
                         CONFIG.stub_path / fw_path,
                         self.package_path,
@@ -579,21 +596,21 @@ class StubPackage:
         Check if (all) the packages sources exist.
         """
         ok = True
-        for name, path in self.stub_sources:
-            if not (CONFIG.stub_path / path).exists():
-                # todo: below is a workaround for different types, but where is the source of this difference coming from?
-                msg = (
-                    f"{self.package_name}: source '{name._value_}' not found: {CONFIG.stub_path / path}"
-                    if isinstance(name, StubSource)
-                    else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
-                )
-                if name != StubSource.FROZEN:
-                    log.debug(msg)
-                    self.status["error"] = msg
-                    ok = False
-                else:
-                    # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
-                    log.debug(msg)
+        for name, path in self.update_sources(self.stub_sources):
+            if (CONFIG.stub_path / path).exists():
+                continue
+            if name == StubSource.FROZEN:
+                # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
+                continue
+            # todo: below is a workaround for different types, but where is the source of this difference coming from?
+            msg = (
+                f"{self.package_name}: source '{name.value}' not found: {CONFIG.stub_path / path}"
+                if isinstance(name, StubSource) # type: ignore
+                else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
+            )
+            self.status["error"] = msg
+            log.debug(msg)
+            ok = False
         return ok
 
     def update_package(self) -> bool:
