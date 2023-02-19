@@ -122,7 +122,7 @@ Note that the stubs can be very large, and it may be best to directly store them
 '''
 
 
-class CreateStubsFlavor(str, Enum):
+class CreateStubsVariant(str, Enum):
     """Dictates create stubs target variant."""
 
     BASE = "base"
@@ -193,11 +193,11 @@ class ModulesUpdateCodemod(codemod.Codemod):
 
     def iter_transforms(self) -> Iterator[m.MatcherDecoratableTransformer]:
         if self.modules_changeset:
-            yield ModifyListElements(change_set=self.modules_changeset).with_scope(self.modules_scope)
+            yield ModifyListElements(change_set=self.modules_changeset).with_scope(self.modules_scope)  # type: ignore
         if self.problematic_changeset:
-            yield ModifyListElements(change_set=self.problematic_changeset).with_scope(self.problematic_scope)
+            yield ModifyListElements(change_set=self.problematic_changeset).with_scope(self.problematic_scope)  # type: ignore
         if self.excluded_changeset:
-            yield ModifyListElements(change_set=self.excluded_changeset).with_scope(self.excluded_scope)
+            yield ModifyListElements(change_set=self.excluded_changeset).with_scope(self.excluded_scope)  # type: ignore
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         """Update or replace the static module list(s) with the provided changes."""
@@ -206,8 +206,8 @@ class ModulesUpdateCodemod(codemod.Codemod):
         return tree
 
 
-class LVGLCodemod_old(codemod.Codemod):
-    """Generates createstubs.py LVGL flavor."""
+class LVGLCodemod(codemod.Codemod):
+    """Generates createstubs.py LVGL variant."""
 
     modules_transform: ModulesUpdateCodemod
     init_node: cst.Module
@@ -265,6 +265,8 @@ class LVGLCodemod(codemod.Codemod):
 
 
 class LowMemoryCodemod(codemod.Codemod):
+    """Generates createstubs.py low-memory variant."""
+
     def __init__(self, context: codemod.CodemodContext):
         super().__init__(context)
 
@@ -285,7 +287,7 @@ class LowMemoryCodemod(codemod.Codemod):
 
 
 class DBCodemod(codemod.Codemod):
-    """Generates createstubs.py db flavor."""
+    """Generates createstubs.py db variant."""
 
     def __init__(self, context: codemod.CodemodContext):
         super().__init__(context)
@@ -303,21 +305,22 @@ class DBCodemod(codemod.Codemod):
 
 
 class CreateStubsCodemod(codemod.Codemod):
+    """Generates createstubs.py variant based on provided variant."""
 
-    flavor: CreateStubsFlavor
+    variant: CreateStubsVariant
     modules_transform: ModulesUpdateCodemod
 
     def __init__(
         self,
         context: codemod.CodemodContext,
-        flavor: CreateStubsFlavor = CreateStubsFlavor.BASE,
+        variant: CreateStubsVariant = CreateStubsVariant.BASE,
         *,
         modules: Optional[ListChangeSet] = None,
         problematic: Optional[ListChangeSet] = None,
         excluded: Optional[ListChangeSet] = None,
     ):
         super().__init__(context)
-        self.flavor = flavor
+        self.variant = variant
         self.modules_transform = ModulesUpdateCodemod(
             self.context,
             modules=modules,
@@ -327,21 +330,13 @@ class CreateStubsCodemod(codemod.Codemod):
         self.context.scratch.setdefault("modules_transform", self.modules_transform)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        """
-        Generates a createstubs.py variant based on provided flavor.
-        Optionally allows to replace the
-        - list of modules to stub. (if relevant for the flavour)
-        - list of problematic modules.
-        - list of excluded modules.
-        """
-        mod_flavors = {
-            CreateStubsFlavor.LVGL: LVGLCodemod,
-            CreateStubsFlavor.LOW_MEM: LowMemoryCodemod,
-            CreateStubsFlavor.DB: DBCodemod,
+        mod_variants = {
+            CreateStubsVariant.LVGL: LVGLCodemod,
+            CreateStubsVariant.LOW_MEM: LowMemoryCodemod,
+            CreateStubsVariant.DB: DBCodemod,
         }
         # update the tree with the list of modules to stub , excluded modules and problematic modules
         tree = self.modules_transform.transform_module(tree)
-        # update the tree with the flavor specific changes
-        if self.flavor in mod_flavors:
-            tree = mod_flavors[self.flavor](self.context).transform_module(tree)
+        if self.variant in mod_variants:
+            tree = mod_variants[self.variant](self.context).transform_module(tree)
         return tree
