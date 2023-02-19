@@ -60,24 +60,29 @@ base_txt = (base_path / "createstubs.py").read_text()
 base_module = cst.parse_module(base_txt)
 
 
-for var in [CreateStubsVariant.MEM, CreateStubsVariant.DB, CreateStubsVariant.LVGL]:
-    # Transform base to Low memory createstubs.py
-    log.info(f"Transforming to {var.value} variant")
-    cm = CreateStubsCodemod(ctx, variant=var)
-    variant = cm.transform_module(base_module)
+for var in [CreateStubsVariant.BASE, CreateStubsVariant.MEM, CreateStubsVariant.DB, CreateStubsVariant.LVGL]:
+    # Transform base to createstubs.py variant
 
-    # write low_mem_variant.code to file
-    variant_path = base_path / f"createstubs_{var.value}.py"
-    minified_path = base_path / f"createstubs_{var.value}_min.py"
-    mpy_path = base_path / f"createstubs_{var.value}_mpy.mpy"  # intentional
+    suffix = "" if var == CreateStubsVariant.BASE else f"_{var.value}"
 
-    log.info(f"Write variant {var.value} to {variant_path}")
-    with open(variant_path, "w") as f:
-        f.write(variant.code)
+    variant_path = base_path / f"createstubs{suffix}.py"
+    minified_path = base_path / f"createstubs{suffix}_min.py"
+    mpy_path = base_path / f"createstubs{suffix}_mpy.mpy"  # intentional
 
-    # format file with black
-    run_black(variant_path, capture_output=True)
-    # check with pyright if it is valid python
+    if var != CreateStubsVariant.BASE:
+        # No need to create base variant as it is the same as the base file
+        log.info(f"Transforming to {var.value} variant")
+        cm = CreateStubsCodemod(ctx, variant=var)
+        variant = cm.transform_module(base_module)
+
+        # write low_mem_variant.code to file
+        log.info(f"Write variant {var.value} to {variant_path}")
+        with open(variant_path, "w") as f:
+            f.write(variant.code)
+
+        # format file with black
+        run_black(variant_path, capture_output=True)
+        # check with pyright if it is valid python
 
     # Minify file with pyminifier
     log.info(f"\nMinifying to {minified_path.name}")
