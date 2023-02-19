@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.12.0 on February 12, 2023
+This variant was generated from createstubs.py by micropython-stubber v1.12.1 on February 19, 2023
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -622,14 +622,14 @@ def main():
     # get list of modules to process
     with open("modulelist" + ".txt") as f:
         # not optimal , but works on mpremote and esp8266
-        modules = [l.strip() for l in f.read().split("\\n") if len(l.strip()) and l.strip()[0] != "#"]
+        modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
     gc.collect()
     # remove the ones that are already done
     modules_done = {}  # type: dict[str, str]
     try:
         with open("modulelist" + ".done") as f:
             # not optimal , but works on mpremote and esp8266
-            for line in f.read().split("\\n"):
+            for line in f.read().split("\n"):
                 line = line.strip()
                 gc.collect()
                 if len(line) > 0:
