@@ -65,17 +65,7 @@ _EXCLUDED_MATCHER = m.Assign(
 )
 
 
-_MODULES_READER = """
-# Read stubs from modulelist
-try:
-    with open("modulelist" + ".txt") as f:
-        # not optimal , but works on mpremote and eps8266
-        stubber.modules = [l.strip() for l in f.read().split("\\n") if len(l.strip()) and l.strip()[0] != "#"]
-except OSError:
-    # fall back gracefully
-    stubber.modules = ["micropython"]
-    _log.warning("Warning: modulelist.txt could not be found.")
-"""
+
 
 
 _LOW_MEM_MODULE_DOC = '''
@@ -141,7 +131,7 @@ class ReadModulesCodemod(codemod.Codemod):
 
     def __init__(self, context: codemod.CodemodContext, reader_node: Optional[cst.Module] = None):
         super().__init__(context)
-        self.modules_reader_node = reader_node or cst.parse_module(_MODULES_READER)
+        self.modules_reader_node = reader_node or cst.parse_module(Partial.MODULES_READER.contents())
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         """Replaces static modules list with file-load method."""
