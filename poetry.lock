@@ -725,7 +725,7 @@ files = [
 name = "importlib-metadata"
 version = "6.0.0"
 description = "Read metadata from Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1202,23 +1202,6 @@ files = [
 pyserial = ">=3.3"
 
 [[package]]
-name = "mpy-cross"
-version = "1.19.1"
-description = "micropython mpy-cross distribution"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "mpy_cross-1.19.1-py2.py3-none-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:1668472a4c9982d99fbac7ec8ae452d8b7b09249dfa6c7697fc80d33266c0f4d"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux1_i686.whl", hash = "sha256:10d142b1ea8277bbaa1428f7ddf5e860f036b73553d339883aa6a40a62d58dcd"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:0dbc5c6106643bf84431cca61bcae5d9471233617e14de3ffd9d6f490dbd3106"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux2014_aarch64.whl", hash = "sha256:3be50b473f3271128971a670366b950636989bc2a23492fa7e8a51c26d96e6f1"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-manylinux2014_armv7l.whl", hash = "sha256:6e62e99149ed25213fa3a55d5509111a647aee7dea4d670a6a07434455adf998"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-win32.whl", hash = "sha256:197a7cef34128d1f2f1dbd90db05924bdb30180deb09340efbddf1fb8fe5f04e"},
-    {file = "mpy_cross-1.19.1-py2.py3-none-win_amd64.whl", hash = "sha256:4941f54e3d5330e7f538f84d352cf3633280052fe5abefaca4f59d00e6c7075a"},
-]
-
-[[package]]
 name = "mypy"
 version = "0.991"
 description = "Optional static typing for Python"
@@ -1676,7 +1659,7 @@ files = [
 cffi = ">=1.4.1"
 
 [package.extras]
-docs = ["sphinx (>=1.6.5)", "sphinx-rtd-theme"]
+docs = ["sphinx (>=1.6.5)", "sphinx_rtd_theme"]
 tests = ["hypothesis (>=3.27.0)", "pytest (>=3.2.1,!=3.3.0)"]
 
 [[package]]
@@ -2646,7 +2629,7 @@ files = [
 name = "zipp"
 version = "3.11.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -2664,4 +2647,4 @@ tools = ["mpremote", "esptool", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "357be19bd66ba03353ca333b83fa85bd70a720dc11975985e2dfc72f9773f99f"
+content-hash = "0378eb788de77a9ada50f125497d3186acec1819d21c3214000283b550ef34ba"
