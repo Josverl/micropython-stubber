@@ -1,0 +1,24 @@
+# MicroPython 67fac4e on 2023-02-16; Pimoroni Pico LiPo 16MB with RP2040
+
+__main__          breakout_pmw3901  motor             uasyncio/lock
+_boot             breakout_potentiometer              neopixel          uasyncio/stream
+_boot_fat         breakout_rgbmatrix5x5               onewire           ubinascii
+_onewire          breakout_rtc      pcf85063a         ucollections
+_rp2              breakout_scd41    picoexplorer      ucryptolib
+_thread           breakout_sgp30    picographics      uctypes
+_uasyncio         breakout_trackball                  picokeypad        uerrno
+adcfft            breakout_vl53l5cx picoscroll        uhashlib
+breakout_as7262   builtins          picounicorn       uheapq
+breakout_bh1745   cmath             picowireless      uio
+breakout_bme280   dht               pimoroni          ujson
+breakout_bme68x   ds18x20           pimoroni_bus      ulab
+breakout_bmp280   encoder           pimoroni_i2c      umachine
+breakout_dotmatrix                  framebuf          plasma            uos
+breakout_encoder  galactic          qrcode            urandom
+breakout_icp10125 gc                rp2               ure
+breakout_ioexpander                 gfx_pack          servo             uselect
+breakout_ltr559   hub75             uarray            ustruct
+breakout_matrix11x7                 interstate75      uasyncio/__init__ usys
+breakout_mics6814 jpegdec           uasyncio/core     utime
+breakout_msa301   math              uasyncio/event    uzlib
+breakout_paa5100  micropython       uasyncio/funcs    version
