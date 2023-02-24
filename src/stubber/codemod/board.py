@@ -39,7 +39,7 @@ _MODULES_MATCHER = m.Assign(
 )
 
 # matches on `def main():`
-DEF_MAIN_MATCHER = m.FunctionDef(name=m.Name(value="main"))
+_DEF_MAIN_MATCHER = m.FunctionDef(name=m.Name(value="main"))
 
 # matches on `self.problematic = []`
 _PROBLEMATIC_MATCHER = m.Assign(
