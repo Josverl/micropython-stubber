@@ -8,6 +8,8 @@ from textwrap import dedent
 import stubber.codemod.board as board
 from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet
+from stubber.codemod._partials import Partial
+
 
 # mark all tests
 pytestmark = [pytest.mark.codemod, pytest.mark.minify]
@@ -100,7 +102,10 @@ def test_low_mem_module_doc(low_memory_result):
 
 
 def test_low_mem_read_stubs(low_memory_result):
-    assert compare_lines(board._MODULES_READER, low_memory_result.code)
+    assert compare_lines(
+        Partial.MODULES_READER.contents(),
+        low_memory_result.code,
+    )
 
 
 def test_low_mem_custom_modules(context, create_stubs):
@@ -119,7 +124,6 @@ def test_low_mem_custom_modules(context, create_stubs):
     ).transform_module(base_module)
     assert res.code
     assert not compare_lines("'supercoolmodule'", res.code)
-
 
 
 def test_lvgl_modules_default(context, create_stubs):
