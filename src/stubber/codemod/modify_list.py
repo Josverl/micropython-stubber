@@ -29,8 +29,8 @@ class ListChangeSet:
 
 
 class ModifyListElements(ScopeableMatcherTransformer):
-    """ 
-    Modifies the elements of a list (of modules to stub or exclude), 
+    """
+    Modifies the elements of a list (i.e, of modules to stub or exclude), 
     adding and removing elements as specified in the change_set.
     """
     change_set: ListChangeSet
