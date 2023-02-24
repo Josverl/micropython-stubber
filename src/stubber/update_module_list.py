@@ -111,21 +111,21 @@ def main():
     # log.debug(wrapped(modules_to_stub))
     lines: List[str] = []
     # update modules.txt
-    for modules_txt in [Path("board/modulelist.txt"), Path("minified/modulelist.txt")]:
-        if modules_txt.exists():
-            with open(modules_txt) as f:
-                lines = f.readlines()
-                # only keep comment lines
-                lines = [l for l in lines if l[0] == "#"]
-        else:
-            lines = ["# list of modules to stub."]
-        lines += [m + "\n" for m in modules_to_stub]
-        log.info(f"writing module list to {modules_txt}")
-        with open(modules_txt, "w") as f:
-            f.writelines(lines)
+    modules_txt = Path("src/stubber/board/modulelist.txt")
+    if modules_txt.exists():
+        with open(modules_txt) as f:
+            lines = f.readlines()
+            # only keep comment lines
+            lines = [l for l in lines if l[0] == "#"]
+    else:
+        lines = ["# list of modules to stub."]
+    lines += [m + "\n" for m in modules_to_stub]
+    log.info(f"writing module list to {modules_txt}")
+    with open(modules_txt, "w") as f:
+        f.writelines(lines)
 
     # update createstubs.py
-    createstubs = Path("board/createstubs.py")
+    createstubs = Path("src/stubber/board/createstubs.py")
     if createstubs.exists():
         with open(createstubs) as f:
             lines = f.readlines()
