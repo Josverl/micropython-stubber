@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.12.1 on February 19, 2023
+This variant was generated from createstubs.py by micropython-stubber v1.12.1 on February 24, 2023
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
