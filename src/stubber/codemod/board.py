@@ -14,7 +14,7 @@ from libcst import matchers as m
 from stubber.codemod.modify_list import ModifyListElements, ListChangeSet
 from stubber.cst_transformer import update_module_docstr
 
-from ._partials import Partial
+from stubber.codemod._partials import Partial
 
 # matches on `stubber = Stubber()`
 _STUBBER_MATCHER = m.Assign(

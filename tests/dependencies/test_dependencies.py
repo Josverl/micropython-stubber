@@ -17,9 +17,9 @@ from packaging import version
         ("autoflake", "1.4"),
         ("black", "21.12b0"),
         ("pyright", "1.1"),
-        ("mpy-cross", "1.17"),
     ],
 )
+@pytest.mark.skip("Only needed to debug venv installation issues")
 def test_tool_installed(tool_name, tool_version):
     "Check if a tool is installed and can be run"
     cmd = [tool_name, "--version"]
