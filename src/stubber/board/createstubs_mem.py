@@ -600,16 +600,17 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
-
-    # Read stubs from modulelist
-    try:
-        with open("modulelist" + ".txt") as f:
-            # not optimal , but works on mpremote and eps8266
-            stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
-    except OSError:
-        # fall back gracefully
-        stubber.modules = ["micropython"]
-        _log.warning("Warning: modulelist.txt could not be found.")
+    # Read stubs from modulelist in the current folder or in /libs
+    # fall back to default modules
+    stubber.modules = ["micropython"]
+    for p in ["", "/libs"]:
+        try:
+            with open(p + "modulelist" + ".txt") as f:
+                # not optimal , but works on mpremote and eps8266
+                stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+                break
+        except OSError:
+            pass
 
     gc.collect()
 
