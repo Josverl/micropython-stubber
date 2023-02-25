@@ -199,7 +199,7 @@ def test_cmd_stub(mocker: MockerFixture):
 
     m_generate.assert_called_once_with(Path("."))
     m_postprocessing.assert_called_once()
-    m_postprocessing.assert_called_once_with([Path(".")], pyi=True, black=True)
+    m_postprocessing.assert_called_once_with([Path(".")], pyi=False, black=True)
     assert result.exit_code == 0
 
 

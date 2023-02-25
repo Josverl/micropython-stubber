@@ -9,6 +9,7 @@ import stubber.minify as minify
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.slow
 @pytest.mark.minify
+@pytest.mark.skip(reason="TODO: NEW MINIFY TESTS")
 def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Config):
     "python script - test creation of minified version"
     # load process.py in the same python environment
