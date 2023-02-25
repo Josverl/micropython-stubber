@@ -32,7 +32,7 @@ jobs:
       # poetry is not in the default image
       #----------------------------------------------
       - name: Install Poetry
-        run: pipx install poetry~=1.3
+        run: pipx install poetry==1.3.1
 
       #----------------------------------------------
       # install root project
