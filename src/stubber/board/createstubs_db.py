@@ -4,8 +4,8 @@ Create stubs for (all) modules on a MicroPython board.
     This variant of the createstubs.py script is optimized for use on very-low-memory devices.
     Note: this version has undergone limited testing.
     
-    1) reads the list of modules from a text file `./modulelist.txt` that should be uploaded to the device.
-    2) stored the already processed modules in a text file `./modulelist.done` 
+    1) reads the list of modules from a text file `modulelist.txt` that should be uploaded to the device.
+    2) stored the already processed modules in a text file `modulelist.done` 
     3) process the modules in the database:
         - stub the module
         - update the modulelist.done file
@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.12.1 on February 24, 2023
+This variant was generated from createstubs.py by micropython-stubber v1.12.1
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -641,12 +641,11 @@ def main():
                 if len(line) > 0:
                     key, value = line.split("=", 1)
                     modules_done[key] = value
-
     except (OSError, SyntaxError):
         pass
-
     gc.collect()
-    modules = [m for m in modules if m not in modules_done.keys()]
+    # see if we can continue from where we left off
+    modules = [m for m in stubber.modules if m not in modules_done.keys()]
     gc.collect()
 
     for modulename in modules:

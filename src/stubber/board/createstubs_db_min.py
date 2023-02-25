@@ -230,31 +230,31 @@ def d():
 	try:A=bytes('abc',encoding='utf8');B=d.__module__;return G
 	except (e,I):return N
 def main():
-	R='failed';I='.done';E='modulelist';import machine as S
+	Q='failed';I='.done';E='modulelist';import machine as R
 	try:C=J(E+I,'r+b');M=N
 	except A:C=J(E+I,'w+b');M=G
 	stubber=Stubber(path=read_path())
 	if not M:stubber.clean()
 	stubber.modules=[q]
-	for T in [F,'/libs']:
+	for S in [F,'/libs']:
 		try:
-			with J(T+E+'.txt')as C:stubber.modules=[A.strip()for A in C.read().split('\n')if K(A.strip())and A.strip()[0]!='#'];break
+			with J(S+E+'.txt')as C:stubber.modules=[A.strip()for A in C.read().split('\n')if K(A.strip())and A.strip()[0]!='#'];break
 		except A:pass
 	B.collect();D={}
 	try:
 		with J(E+I)as C:
 			for H in C.read().split('\n'):
 				H=H.strip();B.collect()
-				if K(H)>0:U,V=H.split('=',1);D[U]=V
+				if K(H)>0:T,U=H.split('=',1);D[T]=U
 	except (A,SyntaxError):pass
-	B.collect();O=[A for A in O if A not in D.keys()];B.collect()
-	for L in O:
-		P=G
-		try:P=stubber.create_one_stub(L)
-		except MemoryError:S.reset()
-		Q=stubber._report[-1]if P else R;D[L]=str(Q)
-		with J(E+I,'a')as C:C.write('{}={}\n'.format(L,Q))
-	if D:stubber._report=[A for(B,A)in D.items()if A!=R];stubber.report()
+	B.collect();V=[A for A in stubber.modules if A not in D.keys()];B.collect()
+	for L in V:
+		O=G
+		try:O=stubber.create_one_stub(L)
+		except MemoryError:R.reset()
+		P=stubber._report[-1]if O else Q;D[L]=str(P)
+		with J(E+I,'a')as C:C.write('{}={}\n'.format(L,P))
+	if D:stubber._report=[A for(B,A)in D.items()if A!=Q];stubber.report()
 if __name__=='__main__'or d():
 	try:logging.basicConfig(level=logging.INFO)
 	except g:pass
