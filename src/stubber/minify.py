@@ -274,6 +274,11 @@ def minify(
             source_buf = io.StringIO(source)
 
         if isinstance(target, Path):
+            if target.is_dir():
+                if isinstance(source, Path):
+                    target = target / source.name
+                else:
+                    target = target / "minified.py"  # or raise error?
             target_buf = stack.enter_context(target.open("w+"))
         elif isinstance(target, io.IOBase):  # type: ignore
             target_buf = target
