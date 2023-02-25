@@ -20,14 +20,10 @@ from stubber.commands.stub_cmd import cli_stub
 from stubber.commands.switch_cmd import cli_switch
 from stubber.commands.upd_fallback_cmd import cli_update_fallback
 from stubber.commands.upd_module_list_cmd import cli_update_module_list
-
-##########################################################################################
-# log = logging.getLogger("stubber")
-#########################################################################################
+from stubber.commands.variants_cmd import cli_variants
 
 
 ##########################################################################################
-
 if __name__ == "__main__":
     # add all commands to the CLI
     stubber_cli.add_command(cli_build)
@@ -45,4 +41,5 @@ if __name__ == "__main__":
     stubber_cli.add_command(cli_merge_docstubs)
     stubber_cli.add_command(cli_update_module_list)
     stubber_cli.add_command(cli_update_fallback)
+    stubber_cli.add_command(cli_variants)
     stubber_cli()

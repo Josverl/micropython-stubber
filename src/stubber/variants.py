@@ -1,5 +1,7 @@
 """
-POC to create a variants of createstubs.py
+Create all variants of createstubs.py
+- and minify them 
+- and cross compile them
 """
 
 import subprocess
@@ -17,7 +19,7 @@ from loguru import logger as log
 from stubber.utils.post import run_black
 from stubber.minify import minify, cross_compile
 
-ALL_VARIANTS = [CreateStubsVariant.BASE, CreateStubsVariant.MEM, CreateStubsVariant.DB, CreateStubsVariant.LVGL]
+ALL_VARIANTS = list(CreateStubsVariant)
 
 
 def cross_compile(
@@ -48,8 +50,15 @@ def cross_compile(
     return result.returncode
 
 
-def create_variants(base_path: Path, make_variants: List[CreateStubsVariant] = ALL_VARIANTS, version: str = ""):
-    """Create variants of createstubs.py"""
+def create_variants(
+    base_path: Path,
+    *,
+    version: str = "",
+    make_variants: List[CreateStubsVariant] = ALL_VARIANTS,
+):
+    """
+    Create variants of createstubs.py and optionally minify and cross compile them
+    """
     ctx = codemod.CodemodContext()
     base_file = base_path / "createstubs.py"
     log.info(f"Reading : {base_file}")
@@ -81,7 +90,7 @@ def create_variants(base_path: Path, make_variants: List[CreateStubsVariant] = A
             # TODO: check with pyright if it is valid python
 
         # Minify file with pyminifier
-        log.info(f"\nMinifying to {minified_path.name}")
+        log.info(f"Minifying to {minified_path.name}")
         minify(variant_path, minified_path, keep_report=True, diff=False)
 
         # str -> path
@@ -90,14 +99,14 @@ def create_variants(base_path: Path, make_variants: List[CreateStubsVariant] = A
         cross_compile(minified_txt, mpy_path, version=version)
 
 
-# read base createstubs.py
-base_path = Path.cwd() / "src" / "stubber" / "board"
-create_variants(base_path)
+if __name__ == "__main__":
+    # read base createstubs.py
+    base_path = Path.cwd() / "src" / "stubber" / "board"
+    create_variants(base_path)
 
+    if 0:
+        # custom modules (and skip defaults).
+        custom_stubs = ListChangeSet.from_strings(add=["mycoolpackage", "othermodule"], replace=True)
+        custom_variant = CreateStubsCodemod(ctx, modules=custom_stubs).transform_module(base_module)
 
-if 0:
-    # custom modules (and skip defaults).
-    custom_stubs = ListChangeSet.from_strings(add=["mycoolpackage", "othermodule"], replace=True)
-    custom_variant = CreateStubsCodemod(ctx, modules=custom_stubs).transform_module(base_module)
-
-    print(custom_variant.code)
+        print(custom_variant.code)
