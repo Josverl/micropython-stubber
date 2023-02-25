@@ -7,6 +7,7 @@ from typedconfig.source import EnvironmentConfigSource
 from .typed_config_toml import TomlConfigSource
 
 from loguru import logger as log
+import stubber.basicgit as git
 
 
 @section("micropython-stubber")
@@ -38,14 +39,26 @@ class StubberConfig(Config):
     template_path = key(key_name="template-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish/template"))
     "a Path to the publication folder that has the template files"
 
-    STABLE_VERSION = "1.19.1"
+    stable_version = key(key_name="stable-version", cast=str, required=False, default="1.19.1")
+
     "last published stable"
 
-    ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]
+    all_versions = key(key_name="all-versions", cast=list, required=False, default=["1.17", "1.18", "1.19", "1.19.1"])
     "list of recent versions"
 
     BLOCKED_PORTS = ["minimal", "bare-arm"]
     "ports that should be ignored as a source of stubs"
+
+    # def __init__(self):
+    #     super().__init__()
+    #     self.update_versions()
+
+    # def update_versions(self):
+    #     try:
+    #         self.ALL_VERSIONS = git.get_tags(self.mpy_path, minver="v1.17")
+    #     except Exception:
+    #         self.ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]
+    #     self.STABLE_VERSION = self.ALL_VERSIONS[-1]
 
     def post_read_hook(self) -> dict:
         config_updates = {}
@@ -55,7 +68,14 @@ class StubberConfig(Config):
         # relative to repo path
         config_updates.update(mpy_path=self.repo_path / self.mpy_path)
         config_updates.update(mpy_lib_path=self.repo_path / self.mpy_lib_path)
-        # config_updates.update(mpy_stubs_repo_path=self.repo_path / self.mpy_stubs_repo_path)
+        # read the versions from the git tags
+        all_versions = []
+        try:
+            all_versions = git.get_tags(self.repo_path / self.mpy_path, minver="v1.17")
+        except Exception:
+            all_versions = ["1.17", "1.18", "1.19", "1.19.1"]
+        config_updates.update(all_versions=all_versions)
+        config_updates.update(stable_version=all_versions[-1])
         return config_updates
 
 
