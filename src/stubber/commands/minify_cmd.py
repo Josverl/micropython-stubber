@@ -56,5 +56,5 @@ def cli_minify(
             log.info("Cross compiling...")
             cross_compile(dst, min_dest)
 
-    log.info("\nDone!")
+    log.info("Done!")
     return 0

@@ -26,7 +26,9 @@ def stubber_cli(ctx: click.Context, verbose: int = 0) -> None:
     log.remove()
     level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "TRACE")
     if level == "INFO":
-        format_str = "<green>{time:YY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{module: <18}</cyan> - <level>{message}</level>"
+        format_str = (
+            "<green>{time:YY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{module: <18}</cyan> - <level>{message}</level>"
+        )
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
