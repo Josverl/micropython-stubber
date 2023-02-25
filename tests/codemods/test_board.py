@@ -52,6 +52,7 @@ def dedent_lines(body: str) -> str:
 
 
 def compare_lines(excerpt: str, body: str) -> bool:
+    """True if all lines in the excerpt are in the body, ignoring leading whitespace"""	
     return dedent_lines(excerpt) in dedent_lines(body)
 
 

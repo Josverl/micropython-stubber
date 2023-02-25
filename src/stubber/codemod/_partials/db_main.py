@@ -84,12 +84,11 @@ def main():
                 if len(line) > 0:
                     key, value = line.split("=", 1)
                     modules_done[key] = value
-
     except (OSError, SyntaxError):
         pass
-
     gc.collect()
-    modules = [m for m in modules if m not in modules_done.keys()]
+    # see if we can continue from where we left off
+    modules = [m for m in stubber.modules if m not in modules_done.keys()]
     gc.collect()
 
     for modulename in modules:

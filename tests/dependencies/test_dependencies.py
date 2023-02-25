@@ -39,7 +39,7 @@ def test_tool_installed(tool_name, tool_version):
 
 def test_mpy_cross_bytecode_version():
     "Check if mpy-cross can be installed and run"
-    cmd = ["mpy-cross", "--version"]
+    cmd = ["pipx", "run", "mpy-cross", "--version"]
     result = subprocess.run(cmd, capture_output=True)
     assert "mpy-cross emitting mpy" in result.stdout.decode("utf-8")
     # assert "mpy-cross emitting mpy v5" in result.stdout.decode("utf-8")

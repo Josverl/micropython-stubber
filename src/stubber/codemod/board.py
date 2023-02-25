@@ -65,16 +65,13 @@ _EXCLUDED_MATCHER = m.Assign(
 )
 
 
-
-
-
 _LOW_MEM_MODULE_DOC = '''
 """Create stubs for (all) modules on a MicroPython board.
 
     This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file 
-    `./modulelist.txt` that should be uploaded to the device.
+    `modulelist.txt` in the root or `libs` folder that should be uploaded to the device.
     If that cannot be found then only a single module (micropython) is stubbed.
-    In order to run this on low-memory devices two additioanl steps are recommended: 
+    In order to run this on low-memory devices two additional steps are recommended: 
     - minifification, using python-minifier
       to reduce overall size, and remove logging overhead.
     - cross compilation, using mpy-cross, 
@@ -90,8 +87,8 @@ Create stubs for (all) modules on a MicroPython board.
     This variant of the createstubs.py script is optimized for use on very-low-memory devices.
     Note: this version has undergone limited testing.
     
-    1) reads the list of modules from a text file `./modulelist.txt` that should be uploaded to the device.
-    2) stored the already processed modules in a text file `./modulelist.done` 
+    1) reads the list of modules from a text file `modulelist.txt` that should be uploaded to the device.
+    2) stored the already processed modules in a text file `modulelist.done` 
     3) process the modules in the database:
         - stub the module
         - update the modulelist.done file
@@ -151,7 +148,7 @@ class ModuleDocCodemod(codemod.Codemod):
     def __init__(self, context: codemod.CodemodContext, module_doc: str):
         super().__init__(context)
         if module_doc.endswith('"""\n'):
-            generated = f'\nThis variant was generated from createstubs.py by micropython-stubber v{__version__} on {datetime.now().strftime("%B %d, %Y")}\n"""\n'
+            generated = f'\nThis variant was generated from createstubs.py by micropython-stubber v{__version__}\n"""\n'
             module_doc = module_doc[:-4] + generated
         self.module_doc = module_doc
 
@@ -221,7 +218,7 @@ class LVGLCodemod(codemod.Codemod):
         def_main_tree = cst.parse_module(Partial.LVGL_MAIN.contents())
 
         work_tree = docstr_transformer.transform_module_impl(tree)
-        matches = m.findall(work_tree, DEF_MAIN_MATCHER, metadata_resolver=self)
+        matches = m.findall(work_tree, _DEF_MAIN_MATCHER, metadata_resolver=self)
 
         entry_tree = work_tree.deep_replace(matches[0], def_main_tree)
         return tree.with_deep_changes(tree, body=(*entry_tree.body,))
@@ -261,7 +258,7 @@ class DBCodemod(codemod.Codemod):
         def_main_tree = cst.parse_module(Partial.DB_MAIN.contents())
 
         work_tree = docstr_transformer.transform_module_impl(tree)
-        matches = m.findall(work_tree, DEF_MAIN_MATCHER, metadata_resolver=self)
+        matches = m.findall(work_tree, _DEF_MAIN_MATCHER, metadata_resolver=self)
 
         entry_tree = work_tree.deep_replace(matches[0], def_main_tree)
         return tree.with_deep_changes(tree, body=(*entry_tree.body,))
