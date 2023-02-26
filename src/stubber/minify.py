@@ -305,12 +305,7 @@ def cross_compile(
         temp_file = Path(temp_file)
         temp_file.write_text(source)
         source_file = temp_file
-
-    cmd = [
-        "pipx",
-        "run",
-        f"mpy-cross=={version}" if version else "mpy-cross",
-    ]
+    cmd = ["pipx", "run", f"mpy-cross=={version}"] if version else ["pipx", "run", "mpy-cross"]
     # Add params
     cmd += ["-O2", str(source_file), "-o", str(target), "-s", "createstubs.py"]
     log.trace(" ".join(cmd))
