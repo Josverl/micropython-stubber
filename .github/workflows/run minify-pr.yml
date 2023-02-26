@@ -40,17 +40,15 @@ jobs:
       - name: Install library
         run: poetry install --with dev --no-interaction
 
-
       - name: flag tools executable
         if: runner.os == 'Linux'
         run: |
           chmod +x $GITHUB_WORKSPACE/tests/tools/* --recursive --verbose
           MICROPYPATH=./board ./tests/tools/ubuntu_20_04/micropython_v1_18 -c "import sys;print(sys.path);import logging"
 
-      - name: stubber minify --all --compile
-        shell: pwsh
+      - name: make all variants
         run: |
-          poetry run stubber minify --all --compile
+          poetry run stubber make-variants
 
       - name: run test on minified/createstubs.by
         run: |
@@ -68,7 +66,7 @@ jobs:
             automated pr
 
       - name: Check outputs
-        if: always()     
+        if: always()
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

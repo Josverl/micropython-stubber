@@ -72,9 +72,9 @@ jobs:
       - name: stubber clone
         run: poetry run stubber clone --add-stubs
 
-      - name: create or update minified version
+      - name: create or update variants
         run: |
-          poetry run stubber minify --all --compile
+          poetry run stubber make-variants
 
       - name: Test with pytest
         if: always()
