@@ -1,6 +1,7 @@
 """
-simple Git module, where needed via powershell
+Simple Git module, where needed via powershell
 
+Some of the functions are based on the gitpython module
 """
 import subprocess
 from pathlib import Path
@@ -8,6 +9,16 @@ from typing import List, Optional, Union
 
 from loguru import logger as log
 from packaging.version import parse
+
+from github import Github
+import cachetools.func
+import os
+
+
+# Token with no permissions
+PAT_NO_ACCESS = "github_pat" + "_11AAHPVFQ0IwtAmfc3cD5Z" + "_xOVII22ErRzzZ7xwwxRcNotUu4krMMbjinQcsMxjnWkYFBIDRWFlZMaHSqq"
+PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
+GH_CLIENT = Github(PAT)
 
 
 def _run_local_git(
@@ -101,6 +112,20 @@ def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) ->
         return []
     tags = result.stdout.decode("utf-8").replace("\r", "").split("\n")
     tags = [tag for tag in tags if tag.startswith("v")]
+    if minver:
+        tags = [tag for tag in tags if parse(tag) >= parse(minver)]
+    return sorted(tags)
+
+
+@cachetools.func.ttl_cache(maxsize=16, ttl=60)  # 60 seconds
+def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
+    """
+    Get list of tag of a repote github repo
+    """
+    if not repo or not isinstance(repo, str) or "/" not in repo:
+        return []
+    gh_repo = GH_CLIENT.get_repo(repo)
+    tags = [tag.name for tag in gh_repo.get_tags()]
     if minver:
         tags = [tag for tag in tags if parse(tag) >= parse(minver)]
     return sorted(tags)
