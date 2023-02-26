@@ -3,7 +3,7 @@ import sys
 from collections import namedtuple
 from importlib import import_module
 from pathlib import Path
-from typing import List
+from typing import List, Any, Generator
 
 import pytest
 from mock import MagicMock
@@ -15,28 +15,26 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
+from conftest import import_variant, LOCATIONS, VARIANTS
 
 pytestmark = pytest.mark.micropython
 
 UName = namedtuple("UName", ["sysname", "nodename", "release", "version", "machine"])
 
-LOCATIONS = ["board", pytest.param("minified", marks=pytest.mark.minified)]
-VARIANTS = ["createstubs", "createstubs_mem", "createstubs_db"]
-
-# TODO: add test to check if all variants x locations have the same version number
 FIRST_VERSION = None
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_firmwarestubber_all_versions_same(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
 ):
     global FIRST_VERSION
 
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
+
     if not FIRST_VERSION:
         FIRST_VERSION = parse(createstubs.__version__)
     # all versions should be the same
@@ -47,16 +45,16 @@ def test_firmwarestubber_all_versions_same(
 @pytest.mark.parametrize("location", LOCATIONS)
 @pytest.mark.skip(reason="not sure if this is needed")
 def test_firmwarestubber_base_version_match_package(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
 ):
     # Q&D Location
     path = Path(__file__).resolve().parents[2] / "pyproject.toml"
     pyproject = tomllib.loads(open(str(path)).read())
     pyproject_version = pyproject["tool"]["poetry"]["version"]
 
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
     # base version should match the package
     assert parse(createstubs.__version__).base_version == parse(pyproject_version).base_version
 
@@ -64,21 +62,20 @@ def test_firmwarestubber_base_version_match_package(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_stubber_Class_available(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
 ):
-    # import minified.createstubs as createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
+
     assert createstubs.Stubber is not None, "Stubber Class not imported"
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-def test_stubber_info_basic(location, variant, mock_micropython_path):
-    # import createstubs  # type: ignore
-    # import createstubs as createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+def test_stubber_info_basic(location: Any, variant: str, mock_micropython_path: Generator[str, None, None]):
+
+    createstubs = import_variant(location, variant)
     stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
 
@@ -97,9 +94,11 @@ def test_stubber_info_basic(location, variant, mock_micropython_path):
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-def test_stubber_info_custom(location, variant, fx_add_minified_path, mock_micropython_path):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+def test_stubber_info_custom(
+    location: Any, variant: str, fx_add_minified_path: Generator[str, None, None], mock_micropython_path: Generator[str, None, None]
+):
+    createstubs = import_variant(location, variant)
+
     myid = "MyCustomID"
     stubber = createstubs.Stubber(firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
@@ -119,29 +118,30 @@ from testcases import fwid_test_cases
 @pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname, mock_modules", fwid_test_cases)
 @pytest.mark.mocked
 def test_stubber_fwid(
-    mock_micropython_path,
-    location,
-    variant,
+    mock_micropython_path: Generator[str, None, None],
+    location: Any,
+    variant: str,
     mocker: MockerFixture,
-    fwid,
-    sys_imp_name,
-    sys_platform,
-    os_uname,
+    fwid: Any,
+    sys_imp_name: Any,
+    sys_platform: Any,
+    os_uname: Any,
     mock_modules: List[str],
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
+    # FIX-ME : This does not yet cover minified
+    mod_name = f"stubber.board.{variant}"
     # class.property : just pass a value
-    mocker.patch(f"{location}.{variant}.sys.platform", sys_platform)
-    mocker.patch(f"{location}.{variant}.sys.implementation.name", sys_imp_name)
+    mocker.patch(f"{mod_name}.sys.platform", sys_platform)
+    mocker.patch(f"{mod_name}.sys.implementation.name", sys_imp_name)
     # class.method--> mock using function
     fake_uname = os_uname
 
     def mock_uname():
         return fake_uname
 
-    mocker.patch(f"{location}.{variant}.os.uname", mock_uname, create=True)
+    mocker.patch(f"{mod_name}.os.uname", mock_uname, create=True)
     # now run the tests
     stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
@@ -190,13 +190,12 @@ def test_stubber_fwid(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_create_all_stubs(
-    location,
-    variant,
+    location: Any,
+    variant: str,
     tmp_path: Path,
-    mock_micropython_path,
+    mock_micropython_path: Generator[str, None, None],
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     myid = "MyCustomID"
 
@@ -220,12 +219,11 @@ def test_create_all_stubs(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_get_root(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     x = createstubs.get_root()
     assert type(x) == str
@@ -235,13 +233,12 @@ def test_get_root(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_create_module_stub(
-    location,
-    variant,
+    location: Any,
+    variant: str,
     tmp_path: Path,
-    mock_micropython_path,
+    mock_micropython_path: Generator[str, None, None],
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -257,13 +254,12 @@ def test_create_module_stub(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_create_module_stub_folder(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
     tmp_path: Path,
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -277,13 +273,12 @@ def test_create_module_stub_folder(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_create_module_stub_ignored(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
     tmp_path: Path,
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -300,13 +295,12 @@ def test_create_module_stub_ignored(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_nested_modules(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
     tmp_path: Path,
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -320,13 +314,12 @@ def test_nested_modules(
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_unavailable_modules(
-    location,
-    variant,
-    mock_micropython_path,
+    location: Any,
+    variant: str,
+    mock_micropython_path: Generator[str, None, None],
     tmp_path: Path,
 ):
-    # import createstubs  # type: ignore
-    createstubs = import_module(f"{location}.{variant}")  # type: ignore
+    createstubs = import_variant(location, variant)
 
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
@@ -352,18 +345,3 @@ def test_unavailable_modules(
 #     stublist = list(Path(test_path).glob('**/*.py'))
 #     assert len(stublist) == 1
 #     stubber.clean()
-# Error
-# # tests\stubber\createstubs_info_mpy_test.py:244:
-# # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-# # board\createstubs.py:435: in create_module_stub
-# #     with open(file_name, "w") as fp:
-# # _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-# # name = PurePosixPath('C:\\/Users/josverl/AppData/Local/Temp/pytest-of-josverl/pytest-39/test_clean0/stubs/mycustomid/json.py')
-# # mode = 'w', args = (), kw = {}
-
-# #     def open(name, mode="r", *args, **kw):
-# # >       f = io.open(name, mode, *args, **kw)
-# # E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\/Users/josverl/AppData/Local/Temp/pytest-of-josverl/pytest-39/test_clean0/stubs/mycustomid/json.py'
-
-# # tests\mocks\micropython-cpython_core\uio.py:44: FileNotFoundError

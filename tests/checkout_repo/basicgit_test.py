@@ -71,14 +71,14 @@ def test_get_tag_current():
         pytest.skip("no git repo in current folder")
     else:
         # get tag of current repro
-        tag = git.get_tag()
+        tag = git.get_local_tag()
         common_tst(tag)
 
 
 def test_get_tags():
     # get tag of current repro
     # requires that this repo has at least a v1.3 tag
-    tags = git.get_tags(minver="v1.3")
+    tags = git.get_local_tags(minver="v1.3")
     assert isinstance(tags, list)
     assert len(tags) > 0
     for tag in tags:
@@ -97,14 +97,14 @@ def test_get_tag_latest():
 
     assert result.stderr == 0
     # get tag of current repro
-    tag = git.get_tag("./repo/micropython")
+    tag = git.get_local_tag("./repo/micropython")
     assert tag == "latest"
 
 
 @pytest.mark.basicgit
 def test_get_failure_throws():
     with pytest.raises(Exception):
-        git.get_tag(".not")
+        git.get_local_tag(".not")
 
 
 @pytest.mark.basicgit
@@ -125,7 +125,7 @@ def test_get_tag_submodule(testrepo_micropython: Path):
         str(testrepo_micropython),
         ".\\micropython",
     ]:
-        tag = git.get_tag(testcase)
+        tag = git.get_local_tag(testcase)
         common_tst(tag)
 
 
@@ -133,15 +133,15 @@ def test_get_tag_submodule(testrepo_micropython: Path):
 @pytest.mark.skip(reason="test discards uncomitted changes in top repo")
 def test_checkout_sibling(testrepo_micropython):
     repo_path = testrepo_micropython
-    x = git.get_tag(repo_path)
+    x = git.get_local_tag(repo_path)
     assert x
 
     for ver in ["v1.11", "v1.9.4", "v1.12"]:
         git.checkout_tag(ver, repo=repo_path)
-        assert git.get_tag(repo_path) == ver
+        assert git.get_local_tag(repo_path) == ver
 
     git.checkout_tag(x, repo=repo_path)
-    assert git.get_tag(repo_path) == x, "can restore to prior version"
+    assert git.get_local_tag(repo_path) == x, "can restore to prior version"
 
 
 @pytest.mark.basicgit
@@ -157,7 +157,7 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    mock_run_git = mocker.patch("stubber.basicgit._run_git", autospec=True, return_value=None)
+    mock_run_git = mocker.patch("stubber.basicgit._run_local_git", autospec=True, return_value=None)
 
     # fail to fetch
     r = git.fetch(repo=".")
@@ -166,7 +166,7 @@ def test_run_git_fails(mocker: MockerFixture):
 
     # fail to get tag
     mock_run_git.reset_mock()
-    r = git.get_tag()
+    r = git.get_local_tag()
     mock_run_git.assert_called_once()
     assert r == None
 

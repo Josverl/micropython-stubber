@@ -8,7 +8,7 @@
             "name": "Python: file as Module",
             "type": "python",
             "request": "launch",
-            "module": "stubber.publish.${fileBasenameNoExtension}",
+            "module": "stubber.${fileBasenameNoExtension}",
             "justMyCode": false
         },
         {
@@ -33,13 +33,14 @@
             "args": [
                 "-v",
                 "-v",
-                "build",
-                "--port",
-                "esp32",
-                "--board",
-                "S3",
-                // "--pypi",
-                // "--dry-run",
+                "publish",
+                // "--port",
+                // "esp32",
+                // "--board",
+                // "um_tinypico",
+                "--pypi",
+                "--dry-run",
+                // "--build",
                 // "switch",
                 // "v1.19.1"
                 // "get-frozen",

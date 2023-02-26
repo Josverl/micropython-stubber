@@ -1,5 +1,15 @@
-"""
-Create stubs for (all) modules on a MicroPython board
+"""Create stubs for (all) modules on a MicroPython board.
+
+    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file 
+    `modulelist.txt` in the root or `libs` folder that should be uploaded to the device.
+    If that cannot be found then only a single module (micropython) is stubbed.
+    In order to run this on low-memory devices two additional steps are recommended: 
+    - minifification, using python-minifier
+      to reduce overall size, and remove logging overhead.
+    - cross compilation, using mpy-cross, 
+      to avoid the compilation step on the micropython device 
+
+This variant was generated from createstubs.py by micropython-stubber v1.13.0
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -12,7 +22,7 @@ from ujson import dumps
 
 # from utime import sleep_us
 
-__version__ = "1.11.2"
+__version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # # deal with ESP32 firmware specific implementations.
@@ -146,7 +156,7 @@ class Stubber:
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:    # type: ignore
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
         """Create a Stub of a single python module
 
         Args:
@@ -265,11 +275,7 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(
-                        indent
-                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
-                        indent, item_name, ret
-                    )
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
@@ -364,20 +370,20 @@ class Stubber:
             self._log.error("Failed to create the report.")
 
     def write_json_node(self, f):
-                f.write("{")
-                f.write(dumps({"firmware": self.info})[1:-1])
+        f.write("{")
+        f.write(dumps({"firmware": self.info})[1:-1])
+        f.write(",\n")
+        f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
+        f.write(",\n")
+        f.write('"modules" :[\n')
+        start = True
+        for n in self._report:
+            if start:
+                start = False
+            else:
                 f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
-                f.write(",\n")
-                f.write('"modules" :[\n')
-                start = True
-                for n in self._report:
-                    if start:
-                        start = False
-                    else:
-                        f.write(",\n")
-                    f.write(n)
-                f.write("\n]}")
+            f.write(n)
+        f.write("\n]}")
 
 
 def ensure_folder(path: str):
@@ -435,12 +441,14 @@ def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
 
     try:  # families
         from pycopy import const as _t  # type: ignore
+
         info["family"] = "pycopy"
         del _t
     except (ImportError, KeyError):
         pass
     try:  # families
         from pycom import FAT as _t  # type: ignore
+
         info["family"] = "pycom"
         del _t
 
@@ -494,6 +502,8 @@ def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
         if arch:
             info["arch"] = arch
     return info
+
+
 # spell-checker: enable
 
 
@@ -508,7 +518,7 @@ def extract_os_info(info):
     if " on " in u[3]:  # version
         s = u[3].split(" on ")[0]
         if info["sysname"] == "esp8266":
-                    # esp8266 has no usable info on the release
+            # esp8266 has no usable info on the release
             v = s.split("-")[0] if "-" in s else s
             info["version"] = info["release"] = v.lstrip("v")
         try:
@@ -590,186 +600,17 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
-    # there is no option to discover modules from micropython, need to hardcode
-    # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
-    # spell-checker: disable
-    # modules to stub : 131
-    stubber.modules = [
-        "WM8960",
-        "_OTA",
-        "_boot_fat",
-        "_coap",
-        "_flash_control_OTA",
-        "_main_pybytes",
-        "_mqtt",
-        "_mqtt_core",
-        "_msg_handl",
-        "_onewire",
-        "_periodical_pin",
-        "_pybytes",
-        "_pybytes_ca",
-        "_pybytes_config",
-        "_pybytes_config_reader",
-        "_pybytes_connection",
-        "_pybytes_constants",
-        "_pybytes_debug",
-        "_pybytes_library",
-        "_pybytes_machine_learning",
-        "_pybytes_main",
-        "_pybytes_protocol",
-        "_pybytes_pyconfig",
-        "_pybytes_pymesh_config",
-        "_rp2",
-        "_terminal",
-        "_thread",
-        "_uasyncio",
-        "_urequest",
-        "aioble/__init__",
-        "aioble/central",
-        "aioble/client",
-        "aioble/core",
-        "aioble/device",
-        "aioble/l2cap",
-        "aioble/peripheral",
-        "aioble/security",
-        "aioble/server",
-        "ak8963",
-        "apa102",
-        "apa106",
-        "array",
-        "binascii",
-        "bluetooth",
-        "btree",
-        "cmath",
-        "collections",
-        "crypto",
-        "cryptolib",
-        "curl",
-        "dht",
-        "display",
-        "display_driver_utils",
-        "ds18x20",
-        "errno",
-        "esp",
-        "esp32",
-        "espidf",
-        "flashbdev",
-        "framebuf",
-        "freesans20",
-        "fs_driver",
-        "functools",
-        "gc",
-        "gsm",
-        "hashlib",
-        "heapq",
-        "ili9341",
-        "ili9XXX",
-        "imagetools",
-        "inisetup",
-        "io",
-        "json",
-        "lcd160cr",
-        "lodepng",
-        "logging",
-        "lsm6dsox",
-        "lv_colors",
-        "lv_utils",
-        "lvgl",
-        "lwip",
-        "machine",
-        "math",
-        "microWebSocket",
-        "microWebSrv",
-        "microWebTemplate",
-        "micropython",
-        "mip",
-        "mpu6500",
-        "mpu9250",
-        "neopixel",
-        "network",
-        "ntptime",
-        "onewire",
-        "os",
-        "platform",
-        "pyb",
-        "pycom",
-        "pye",
-        "queue",
-        "random",
-        "requests",
-        "rp2",
-        "rtch",
-        "samd",
-        "select",
-        "socket",
-        "ssd1306",
-        "ssh",
-        "ssl",
-        "stm",
-        "struct",
-        "sys",
-        "time",
-        "tpcalib",
-        "uarray",
-        "uasyncio/__init__",
-        "uasyncio/core",
-        "uasyncio/event",
-        "uasyncio/funcs",
-        "uasyncio/lock",
-        "uasyncio/stream",
-        "uasyncio/tasks",
-        "ubinascii",
-        "ubluetooth",
-        "ucollections",
-        "ucrypto",
-        "ucryptolib",
-        "uctypes",
-        "uerrno",
-        "uftpd",
-        "uhashlib",
-        "uheapq",
-        "uio",
-        "ujson",
-        "ulab",
-        "ulab/approx",
-        "ulab/compare",
-        "ulab/fft",
-        "ulab/filter",
-        "ulab/linalg",
-        "ulab/numerical",
-        "ulab/poly",
-        "ulab/user",
-        "ulab/vector",
-        "umachine",
-        "umqtt/__init__",
-        "umqtt/robust",
-        "umqtt/simple",
-        "uos",
-        "uplatform",
-        "uqueue",
-        "urandom",
-        "ure",
-        "urequests",
-        "urllib/urequest",
-        "uselect",
-        "usocket",
-        "ussl",
-        "ustruct",
-        "usys",
-        "utelnetserver",
-        "utime",
-        "utimeq",
-        "uwebsocket",
-        "uzlib",
-        "websocket",
-        "websocket_helper",
-        "wipy",
-        "writer",
-        "xpt2046",
-        "ymodem",
-        "zephyr",
-        "zlib",
-    ]  # spell-checker: enable
+    # Read stubs from modulelist in the current folder or in /libs
+    # fall back to default modules
+    stubber.modules = ["micropython"]
+    for p in ["", "/libs"]:
+        try:
+            with open(p + "modulelist" + ".txt") as f:
+                # not optimal , but works on mpremote and eps8266
+                stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+                break
+        except OSError:
+            pass
 
     gc.collect()
 

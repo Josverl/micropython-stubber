@@ -1,3 +1,5 @@
+"""common functions for freeze stub generation"""
+
 import re
 import shutil
 from pathlib import Path

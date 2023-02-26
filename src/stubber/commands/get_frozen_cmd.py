@@ -1,3 +1,4 @@
+"""Get the frozen stubs for MicroPython."""
 ##########################################################################################
 # get-frozen
 ##########################################################################################
@@ -48,7 +49,7 @@ def cli_get_frozen(
         if not result:
             return -1
     else:
-        version = utils.clean_version(git.get_tag(CONFIG.mpy_path.as_posix()) or "0.0")
+        version = utils.clean_version(git.get_local_tag(CONFIG.mpy_path.as_posix()) or "0.0")
     if not version:
         log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
 
