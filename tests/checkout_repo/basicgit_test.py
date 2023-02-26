@@ -157,7 +157,7 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    mock_run_git = mocker.patch("stubber.basicgit._run_git", autospec=True, return_value=None)
+    mock_run_git = mocker.patch("stubber.basicgit._run_local_git", autospec=True, return_value=None)
 
     # fail to fetch
     r = git.fetch(repo=".")

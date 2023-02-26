@@ -84,6 +84,7 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     "params",
     [
         pytest.param(["switch", "latest"], id="latest"),
+        pytest.param(["switch", "v1.17"], id="v1.17"),
         pytest.param(["switch", "v1.9.4"], id="v1.9.4"),
     ],
 )

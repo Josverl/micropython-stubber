@@ -71,8 +71,9 @@ class StubberConfig(Config):
         # read the versions from the git tags
         all_versions = []
         try:
-            all_versions = git.get_local_tags(self.repo_path / self.mpy_path, minver="v1.17")
-        except Exception:
+            all_versions = git.get_tags("micropython/micropython", minver="v1.17")
+        except Exception as e:
+            log.warning(f"Could not read micropython versions from git: {e}")
             all_versions = ["1.17", "1.18", "1.19", "1.19.1"]
         config_updates.update(all_versions=all_versions)
         config_updates.update(stable_version=all_versions[-1])
