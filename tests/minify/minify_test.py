@@ -3,19 +3,20 @@ from types import SimpleNamespace
 import pytest
 from pytest_mock import MockerFixture
 
-import stubber.minify as minify
+from stubber.minify import minify
+
+# mark all tests
+pytestmark = pytest.mark.minify
 
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.slow
-@pytest.mark.minify
-@pytest.mark.skip(reason="TODO: NEW MINIFY TESTS")
 def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Config):
     "python script - test creation of minified version"
     # load process.py in the same python environment
     source_path = pytestconfig.rootpath / "src" / "stubber" / "board" / source
 
-    result = minify.minify(source=source_path, target=tmp_path)
+    result = minify(source=source_path, target=tmp_path)
     assert result == 0
     # now test that log statements have been removed
     with open(tmp_path / source) as f:
@@ -26,7 +27,6 @@ def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Confi
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.mocked
-@pytest.mark.minify
 def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, pytestconfig: pytest.Config):
     "test the rest of the minification functions using mocks to reduce the time needed"
     # load process.py in the same python environment
@@ -47,7 +47,7 @@ def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, 
     )
 
     # -----------------------------------------
-    result = minify.minify(source=source_path, target=tmp_path)
+    result = minify(source=source_path, target=tmp_path)
     assert result == 0
     m_minify.assert_called_once()
     assert m_spr.call_count == 0  # no calls to cross compile
@@ -55,7 +55,7 @@ def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, 
     # -----------------------------------------
     m_minify.reset_mock()
     m_spr.reset_mock()
-    result = minify.minify(source=source_path, target=tmp_path, keep_report=False)
+    result = minify(source=source_path, target=tmp_path, keep_report=False)
     assert result == 0
     m_minify.assert_called_once()
     assert m_spr.call_count == 0  # no calls to cross compile
@@ -63,7 +63,7 @@ def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, 
     # -----------------------------------------
     m_minify.reset_mock()
     m_spr.reset_mock()
-    result = minify.minify(source=source_path, target=tmp_path, keep_report=False, diff=True)
+    result = minify(source=source_path, target=tmp_path, keep_report=False, diff=True)
     assert result == 0
     m_minify.assert_called_once()
     assert m_spr.call_count == 0

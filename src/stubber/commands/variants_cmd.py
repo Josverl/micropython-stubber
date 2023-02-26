@@ -20,7 +20,7 @@ from .cli import stubber_cli
     show_default=True,
     help="multiple: ",
 )
-@stubber_cli.command(name="variants")
+@stubber_cli.command(name="make-variants")
 @click.pass_context
 def cli_variants(
     ctx: click.Context,
