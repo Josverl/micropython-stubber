@@ -24,7 +24,9 @@ class ListChangeSet:
         cls, *, add: Optional[Sequence[str]] = None, remove: Optional[Sequence[str]] = None, replace: bool = False
     ) -> ListChangeSet:
         add_nodes = [cst.SimpleString(f'"{s}"') for s in add] if add else []
-        remove_nodes = [m.SimpleString(f'"{s}"') for s in remove or list()] if remove else []
+        remove_nodes = (
+            [m.SimpleString(f'"{s}"') for s in remove or []] if remove else []
+        )
         return ListChangeSet(add=add_nodes, remove=remove_nodes, replace=replace)
 
 
