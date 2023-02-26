@@ -62,7 +62,7 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     runner = CliRunner()
     m_clone: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
 
-    m_tag = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True)
+    m_tag = mocker.patch("stubber.commands.clone_cmd.git.get_local_tag", autospec=True)
     m_dir = mocker.patch("stubber.commands.clone_cmd.os.mkdir", autospec=True)  # type: ignore
 
     # now test with path specified
@@ -96,7 +96,7 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
 
     m_switch: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.switch_branch", autospec=True, return_value=0)
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
-    mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
+    mocker.patch("stubber.commands.clone_cmd.git.get_local_tag", autospec=True, return_value="v1.42")
 
     m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True)  # Moved to other module
 
@@ -131,7 +131,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
 
     m_switch: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.switch_branch", autospec=True, return_value=0)
     m_checkout: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
-    m_get_tag: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.get_tag", autospec=True, return_value="v1.42")
+    m_get_l_tag: MagicMock = mocker.patch("stubber.commands.clone_cmd.git.get_local_tag", autospec=True, return_value="v1.42")
 
     m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True)
 
@@ -146,7 +146,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
     m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
     # should be called
-    assert m_get_tag.called
+    assert m_get_l_tag.called
     assert m_match.called
     assert m_exists.called
     # may/may not not be called
@@ -211,7 +211,7 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
 
-    mock_version: MagicMock = mocker.patch("stubber.basicgit.get_tag", autospec=True, return_value="v1.42")
+    m_get_local_tag: MagicMock = mocker.patch("stubber.basicgit.get_local_tag", autospec=True, return_value="v1.42")
 
     m_freeze_any: MagicMock = mocker.patch("stubber.commands.get_frozen_cmd.freeze_any", autospec=True)
     m_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
@@ -221,7 +221,7 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
     assert result.exit_code == 0
     # FIXME : test failes in CI
     m_freeze_any.assert_called_once()
-    mock_version.assert_called_once()
+    m_get_local_tag.assert_called_once()
 
     m_post.assert_called_once_with([tmp_path / "micropython-v1_42-frozen"], True, True)
 
@@ -273,7 +273,7 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # check basic commandline sanity check
     runner = CliRunner()
 
-    mock_version: MagicMock = mocker.patch("stubber.basicgit.get_tag", autospec=True, return_value="v1.42")
+    m_get_l_tag: MagicMock = mocker.patch("stubber.basicgit.get_local_tag", autospec=True, return_value="v1.42")
 
     # from stubber.commands.get_docstubs import generate_from_rst
     mock: MagicMock = mocker.patch("stubber.commands.get_docstubs_cmd.generate_from_rst", autospec=True)
@@ -286,7 +286,7 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # process is called twice
     assert mock.call_count == 1
     mock.assert_called_once()
-    assert mock_version.call_count >= 1
+    assert m_get_l_tag.call_count >= 1
 
     # post is called one
     mock_post.assert_called_with([tmp_path / "micropython-v1_42-docstubs"], False, True)
