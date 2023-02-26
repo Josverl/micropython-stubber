@@ -18,7 +18,7 @@ from .cli import stubber_cli
 
 
 # get version list from Git tags in the repo that is provided on the command line
-VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3")
+VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + ["latest"]
 
 
 @stubber_cli.command(name="switch")
