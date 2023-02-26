@@ -2,21 +2,21 @@
 Processing for createstubs.py
 Minimizes and cross-compiles a MicroPyton file.
 """
-import io
 import itertools
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import List, Tuple, Union, IO
+from typing import List, Tuple, Union
 from contextlib import ExitStack
+from io import BytesIO, StringIO, IOBase, TextIOWrapper
 
 from loguru import logger as log
 
 import python_minifier
 
 # Type Aliases for minify
-StubSource = Union[Path, str, io.IOBase]
-StubDest = Union[Path, io.IOBase]
+StubSource = Union[Path, str, StringIO, TextIOWrapper]
+XCompileDest = Union[Path, BytesIO]
 LineEdits = List[Tuple[str, str]]
 
 
@@ -60,7 +60,7 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
         def count_ws(line: str):
             return sum(1 for _ in itertools.takewhile(str.isspace, line))
 
-        lines = content[index - 1 : index + 2]
+        lines = content[index - 1 : index + 2]  # BUG - index out of range results in too few results returned to caller
         context = (count_ws(l) for l in lines)
         return context
 
@@ -171,7 +171,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     source_script:
         - (str): content to edit
         - (Path): path to file to edit
-        - (io.IOBase): file-like object to edit
+        - (IOBase): file-like object to edit
     keep_report (bool, optional): Keeps single report line in createstubs
             Defaults to True.
     diff (bool, optional): Print diff from edits. Defaults to False.
@@ -183,7 +183,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     source_content = ""
     if isinstance(source_script, Path):
         source_content = source_script.read_text()
-    elif isinstance(source_script, (io.StringIO, io.TextIOWrapper)):
+    elif isinstance(source_script, (StringIO, TextIOWrapper)):
         source_content = "".join(source_script.readlines())
     elif isinstance(source_script, str):  # type: ignore
         source_content = source_script
@@ -256,7 +256,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
 
 def minify(
     source: StubSource,
-    target: StubDest,
+    target: StubSource,
     keep_report: bool = True,
     diff: bool = False,
 ):
@@ -268,10 +268,11 @@ def minify(
 
         if isinstance(source, Path):
             source_buf = stack.enter_context(source.open("r"))
-        elif isinstance(source, io.IOBase):
+        elif isinstance(source, (StringIO, str)):
+            # different types of file-like objects are both acepted by minify_script
             source_buf = source
         else:
-            source_buf = io.StringIO(source)
+            raise TypeError(f"source must be str, Path, or file-like object, not {type(source)}")
 
         if isinstance(target, Path):
             if target.is_dir():
@@ -280,7 +281,7 @@ def minify(
                 else:
                     target = target / "minified.py"  # or raise error?
             target_buf = stack.enter_context(target.open("w+"))
-        elif isinstance(target, io.IOBase):  # type: ignore
+        elif isinstance(target, IOBase):  # type: ignore
             target_buf = target
         try:
             minified = minify_script(source_script=source_buf, keep_report=keep_report, diff=diff)
@@ -291,38 +292,60 @@ def minify(
 
 
 def cross_compile(
-    source: Union[Path, str],
-    target: Path,
+    source: StubSource,
+    target: XCompileDest,
     version: str = "",
 ):  # sourcery skip: assign-if-exp
     """Runs mpy-cross on a (minified) script"""
-    temp_file = None
+    # Sources can be a file, a string, or a file-like object
     if isinstance(source, Path):
         source_file = source
-    else:
+    elif isinstance(source, str):
         # create a temp file and write the source to it
-        _, temp_file = tempfile.mkstemp(suffix=".py", prefix="mpy_cross_")
-        temp_file = Path(temp_file)
-        temp_file.write_text(source)
-        source_file = temp_file
+        source_file = write_to_temp_file(source)
+    elif isinstance(source, StringIO):
+        source_file = write_to_temp_file(source.getvalue())
+    else:
+        raise TypeError(f"source must be str, Path, or file-like object, not {type(source)}")
+
+    _target = None
+    if isinstance(target, Path):
+        if target.is_dir():
+            target = target / source.name if isinstance(source, Path) else target / "minified.mpy"
+        _target = target.with_suffix(".mpy")
+    else:
+        # target must be a Path object
+        _target = get_temp_file(suffix=".mpy")
+
     cmd = ["pipx", "run", f"mpy-cross=={version}"] if version else ["pipx", "run", "mpy-cross"]
     # Add params
-    cmd += ["-O2", str(source_file), "-o", str(target), "-s", "createstubs.py"]
+    cmd += ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
     log.trace(" ".join(cmd))
-    result = subprocess.run(cmd)  # , capture_output=True, text=True)
-
+    result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode == 0:
-        log.debug(f"mpy-cross compiled to    : {target.name}")
+        log.debug(f"mpy-cross compiled to    : {_target.name}")
     else:
         log.error("mpy-cross failed to compile:")
+
+    if isinstance(target, BytesIO):
+        # copy the byte contents of the temp file to the target file-like object
+        with _target.open("rb") as f:
+            target.write(f.read())
+        # _target.unlink()
+
     return result.returncode
 
 
-def save_to_tempfile(target_buf: StubDest, minified: str):
-    "Save IO buffer to a temp file"
-    _, temp_file = tempfile.mkstemp()
+def write_to_temp_file(source: str):
+    """Writes a string to a temp file and returns the Path object"""
+    _, temp_file = tempfile.mkstemp(suffix=".py", prefix="mpy_cross_")
     temp_file = Path(temp_file)
-    assert not isinstance(target_buf, Path), "target_buf must be a file path or file object"
-    target_buf.seek(0)
-    temp_file.write_text(minified)
+    temp_file.write_text(source)
+    return temp_file
+
+
+def get_temp_file(prefix: str = "mpy_cross_", suffix: str = ".py"):
+    """Get temp file and returns the Path object"""
+    _, temp_file = tempfile.mkstemp(prefix=prefix, suffix=suffix)
+    temp_file = Path(temp_file)
     return temp_file

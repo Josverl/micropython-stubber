@@ -122,7 +122,7 @@ def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
     """
     Get list of tag of a repote github repo
     """
-    if not repo or not isinstance(repo, str) or "/" not in repo:
+    if not repo or not isinstance(repo, str) or "/" not in repo: # type: ignore
         return []
     gh_repo = GH_CLIENT.get_repo(repo)
     tags = [tag.name for tag in gh_repo.get_tags()]
