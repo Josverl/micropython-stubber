@@ -47,7 +47,7 @@ def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path)
 
     git.switch_branch("master", testrepo_micropython.as_posix())
 
-    yield git.get_tag(testrepo_micropython.as_posix()) or "xx_x"
+    yield git.get_local_tag(testrepo_micropython.as_posix()) or "xx_x"
 
 
 # TODO: Source version and tag

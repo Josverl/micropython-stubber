@@ -34,11 +34,11 @@ from .cli import stubber_cli
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.pass_context
 def cli_docstubs(
-    ctx:click.Context,
+    ctx: click.Context,
     path: str = CONFIG.repo_path.as_posix(),
     target: str = CONFIG.stub_path.as_posix(),
     black: bool = True,
-    basename:str="micropython",
+    basename: str = "micropython",
 ):
     """
     Build stubs from documentation.
@@ -54,12 +54,12 @@ def cli_docstubs(
         rst_path = Path(path) / "docs" / "library"
     else:
         rst_path = Path(path)  # or specify full path
-    v_tag = git.get_tag(rst_path.as_posix())
+    v_tag = git.get_local_tag(rst_path.as_posix())
     if not v_tag:
         # if we can't find a tag , bail
         raise ValueError("No valid Tag found")
     v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
-    release = git.get_tag(rst_path.as_posix(), abbreviate=False) or ""
+    release = git.get_local_tag(rst_path.as_posix(), abbreviate=False) or ""
 
     dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
 

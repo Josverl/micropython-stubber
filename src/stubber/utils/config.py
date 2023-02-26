@@ -71,7 +71,7 @@ class StubberConfig(Config):
         # read the versions from the git tags
         all_versions = []
         try:
-            all_versions = git.get_tags(self.repo_path / self.mpy_path, minver="v1.17")
+            all_versions = git.get_local_tags(self.repo_path / self.mpy_path, minver="v1.17")
         except Exception:
             all_versions = ["1.17", "1.18", "1.19", "1.19.1"]
         config_updates.update(all_versions=all_versions)

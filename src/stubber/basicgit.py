@@ -10,7 +10,7 @@ from loguru import logger as log
 from packaging.version import parse
 
 
-def _run_git(
+def _run_local_git(
     cmd: List[str],
     repo: Optional[Union[Path, str]] = None,
     expect_stderr=False,
@@ -46,7 +46,7 @@ def _run_git(
     return result
 
 
-def clone(remote_repo: str, path: Path, shallow:bool=False, tag: Optional[str] = None) -> bool:
+def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str] = None) -> bool:
     """git clone [--depth 1] [--branch <tag_name>] <remote> <directory>"""
     cmd = ["git", "clone"]
     if shallow:
@@ -54,13 +54,13 @@ def clone(remote_repo: str, path: Path, shallow:bool=False, tag: Optional[str] =
     if tag in ("latest", "master"):
         tag = None
     cmd += [remote_repo, "--branch", tag, str(path)] if tag else [remote_repo, str(path)]
-    if result := _run_git(cmd, expect_stderr=True, capture_output=False):
+    if result := _run_local_git(cmd, expect_stderr=True, capture_output=False):
         return result.returncode == 0
     else:
         return False
 
 
-def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) -> Union[str, None]:
+def get_local_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo
     repo Path should be in the form of : repo = "./repo/micropython"
@@ -72,13 +72,13 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
     elif isinstance(repo, str):
         repo = Path(repo)
 
-    result = _run_git(["git", "describe"], repo=repo.as_posix(), expect_stderr=True)
+    result = _run_local_git(["git", "describe"], repo=repo.as_posix(), expect_stderr=True)
     if not result:
         return None
     tag: str = result.stdout.decode("utf-8")
     tag = tag.replace("\r", "").replace("\n", "")
     if abbreviate and "-" in tag:
-        if result := _run_git(
+        if result := _run_local_git(
             ["git", "status", "--branch"],
             repo=repo.as_posix(),
             expect_stderr=True,
@@ -89,14 +89,14 @@ def get_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) ->
     return tag
 
 
-def get_tags(repo: Optional[Path] = None, minver: Optional[str] = None) -> List[str]:
+def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) -> List[str]:
     """
     get list of tag of a local repo
     """
     if not repo:
         repo = Path(".")
 
-    result = _run_git(["git", "tag", "-l"], repo=repo.as_posix(), expect_stderr=True)
+    result = _run_local_git(["git", "tag", "-l"], repo=repo.as_posix(), expect_stderr=True)
     if not result or result.returncode != 0:
         return []
     tags = result.stdout.decode("utf-8").replace("\r", "").split("\n")
@@ -111,7 +111,7 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     checkout a specific git tag
     """
     cmd = ["git", "checkout", "tags/" + tag, "--detach", "--quiet", "--force"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True, capture_output=True)
+    result = _run_local_git(cmd, repo=repo, expect_stderr=True, capture_output=True)
     if not result:
         return False
     # actually a good result
@@ -130,7 +130,7 @@ def synch_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
         ["git", "submodule", "update", "--quiet"],
     ]
     for cmd in cmds:
-        if result := _run_git(cmd, repo=repo, expect_stderr=True):
+        if result := _run_local_git(cmd, repo=repo, expect_stderr=True):
             # actually a good result
             log.debug(result.stderr.decode("utf-8"))
         else:
@@ -143,7 +143,7 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
     Checkout a specific commit
     """
     cmd = ["git", "checkout", commit_hash, "--quiet", "--force"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    result = _run_local_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return False
     # actually a good result
@@ -161,7 +161,7 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
     """
 
     cmd = ["git", "switch", "--detach", tag, "--quiet", "--force"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    result = _run_local_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return False
     # actually a good result
@@ -178,7 +178,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
     returns None
     """
     cmd = ["git", "switch", branch, "--quiet", "--force"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    result = _run_local_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         return False
     # actually a good result
@@ -198,11 +198,11 @@ def fetch(repo: Union[Path, str]) -> bool:
         raise NotADirectoryError
 
     cmd = ["git", "fetch", "--all", "--tags", "--quiet"]
-    result = _run_git(cmd, repo=repo, echo_output=False)
+    result = _run_local_git(cmd, repo=repo, echo_output=False)
     return result.returncode == 0 if result else False
 
 
-def pull(repo: Union[Path, str], branch:str="main") -> bool:
+def pull(repo: Union[Path, str], branch: str = "main") -> bool:
     """
     pull a repo origin into main
     repo should be in the form of : path/.git
@@ -214,13 +214,13 @@ def pull(repo: Union[Path, str], branch:str="main") -> bool:
     repo = Path(repo)
     # first checkout HEAD
     cmd = ["git", "checkout", branch, "--quiet", "--force"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    result = _run_local_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         log.error("error during git checkout main", result)
         return False
 
     cmd = ["git", "pull", "origin", branch, "--quiet", "--autostash"]
-    result = _run_git(cmd, repo=repo, expect_stderr=True)
+    result = _run_local_git(cmd, repo=repo, expect_stderr=True)
     if not result:
         log.error("error durign pull", result)
         return False
