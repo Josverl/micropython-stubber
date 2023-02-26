@@ -1,23 +1,47 @@
-from typing import TYPE_CHECKING, type_check_only
+"""
+This file contains the `def main()` funcion for the db variant of createstubs.py
+- type_check_only is used to avoid circular imports
+The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
+"""
+
+from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
+    import sys
     from logging import Logger
 
     @type_check_only
     class Stubber:
         path: str
+        _report: List[str]
+        modules = []
+
+        def __init__(self, path: str = "", firmware_id: str = "") -> None:
+            ...
+
+        def clean(self) -> None:
+            ...
+
+        def create_one_stub(self, modulename: str) -> bool:
+            ...
+
+        def report(self, filename: str = "modules.json"):
+            ...
+
+        def create_all_stubs(self):
+            ...
 
     @type_check_only
-    def read_path() -> str: ...
+    def read_path() -> str:
+        ...
 
     @type_check_only
-    class _gc():
+    class _gc:
         def collect(self) -> None:
-
+            ...
 
     gc: _gc
     _log: Logger
-
 
 
 ###PARTIAL###
@@ -39,27 +63,32 @@ def main():
         stubber.clean()
 
     # get list of modules to process
-    with open("modulelist" + ".txt") as f:
-        # not optimal , but works on mpremote and esp8266
-        modules = [l.strip() for l in f.read().split("\\n") if len(l.strip()) and l.strip()[0] != "#"]
+    stubber.modules = ["micropython"]
+    for p in ["", "/libs"]:
+        try:
+            with open(p + "modulelist" + ".txt") as f:
+                # not optimal , but works on mpremote and eps8266
+                stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+                break
+        except OSError:
+            pass
     gc.collect()
     # remove the ones that are already done
     modules_done = {}  # type: dict[str, str]
     try:
         with open("modulelist" + ".done") as f:
             # not optimal , but works on mpremote and esp8266
-            for line in f.read().split("\\n"):
+            for line in f.read().split("\n"):
                 line = line.strip()
                 gc.collect()
                 if len(line) > 0:
                     key, value = line.split("=", 1)
                     modules_done[key] = value
-
     except (OSError, SyntaxError):
         pass
-
     gc.collect()
-    modules = [m for m in modules if m not in modules_done.keys()]
+    # see if we can continue from where we left off
+    modules = [m for m in stubber.modules if m not in modules_done.keys()]
     gc.collect()
 
     for modulename in modules:
@@ -74,17 +103,16 @@ def main():
             machine.reset()
 
         # save the (last) result back to the database/result file
-        if ok:
-            result = stubber._report[-1]
-        else:
-            result = "failed"
+        result = stubber._report[-1] if ok else "failed"
         # -------------------------------------
         modules_done[modulename] = str(result)
         with open("modulelist" + ".done", "a") as f:
             f.write("{}={}\n".format(modulename, result))
 
     # Finished processing - load all the results , and remove the failed ones
-    if len(modules_done) > 0:
+    if modules_done:
         stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
+
+
 ###PARTIALEND###

@@ -1,3 +1,5 @@
+"""build/update the fallback 'catch-all' stubfolder"""
+
 import os
 import shutil
 from distutils.dir_util import copy_tree

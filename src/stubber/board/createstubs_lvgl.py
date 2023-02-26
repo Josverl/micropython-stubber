@@ -1,21 +1,12 @@
 """
-Create stubs for (all) modules on a MicroPython board.
+Create stubs for the lvgl modules on a MicroPython board.
 
-    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file 
-    `./modulelist.txt` that should be uploaded to the device.
-    If that cannot be found then only a single module (micropython) is stubbed.
-    In order to run this on low-memory devices two additioanl steps are recommended: 
-    - minifification, using python-minifier
-      to reduce overall size, and remove logging overhead.
-    - cross compilation, using mpy-cross, 
-      to avoid the compilation step on the micropython device 
+Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-    you can find a cross-compiled version located here: ./minified/createstubs_mem.mpy
-
+This variant was generated from createstubs.py by micropython-stubber v1.13.0
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
-
 import gc
 import logging
 import sys
@@ -23,9 +14,18 @@ import sys
 import uos as os
 from ujson import dumps
 
-__version__ = "1.11.2"
+# from utime import sleep_us
+
+__version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
+# # deal with ESP32 firmware specific implementations.
+# try:
+#     from machine import resetWDT  # type: ignore  - LoBo specific function
+# except ImportError:
+#     # machine.WDT.feed()
+#     def resetWDT():
+#         pass
 
 
 class Stubber:
@@ -33,7 +33,7 @@ class Stubber:
 
     def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
@@ -43,7 +43,7 @@ class Stubber:
         self.info = _info()
         gc.collect()
         if firmware_id:
-            self._fwid = str(firmware_id).lower()
+            self._fwid = firmware_id.lower()
         else:
             self._fwid = "{family}-{ver}-{port}".format(**self.info).lower()
         self._start_free = gc.mem_free()  # type: ignore
@@ -53,6 +53,7 @@ class Stubber:
                 path = path[:-1]
         else:
             path = get_root()
+
         self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace("//", "/")
         self._log.debug(self.path)
         try:
@@ -92,9 +93,17 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in ("int", "float", "str", "bool", "tuple", "list", "dict"):
+                if type_text in {
+                    "int",
+                    "float",
+                    "str",
+                    "bool",
+                    "tuple",
+                    "list",
+                    "dict",
+                }:
                     order = 1
-                elif type_text in ("function", "method"):
+                elif type_text in {"function", "method"}:
                     order = 2
                 elif type_text in ("class"):
                     order = 3
@@ -148,9 +157,9 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        if module_name in self.problematic:
-            self._log.warning("SKIPPING problematic module:{}".format(module_name))
-            return False
+        # if module_name in self.problematic:
+        #     self._log.warning("SKIPPING problematic module:{}".format(module_name))
+        #     return False
 
         if file_name is None:
             file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
@@ -179,7 +188,7 @@ class Stubber:
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
 
-        if not module_name in ["os", "sys", "logging", "gc"]:
+        if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
             try:
                 del new_module
@@ -248,7 +257,6 @@ class Stubber:
                 s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
                 s += indent + "        ...\n\n"
                 fp.write(s)
-            # Class Methods and functions
             elif "method" in item_type_txt or "function" in item_type_txt:
                 self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
@@ -261,15 +269,13 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent)
-                    s += "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
-            # constants of known types & values
             elif item_type_txt == "<class 'module'>":
                 # Skip imported modules
                 # fp.write("# import {}\n".format(item_name))
@@ -289,7 +295,7 @@ class Stubber:
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if not t in ["object", "set", "frozenset"]:
+                    if t not in ["object", "set", "frozenset"]:
                         # Possibly default others to item_instance object ?
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         t = "Any"
@@ -351,24 +357,27 @@ class Stubber:
         try:
             # write json by node to reduce memory requirements
             with open(f_name, "w") as f:
-                f.write("{")
-                f.write(dumps({"firmware": self.info})[1:-1])
-                f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
-                f.write(",\n")
-                f.write('"modules" :[\n')
-                start = True
-                for n in self._report:
-                    if start:
-                        start = False
-                    else:
-                        f.write(",\n")
-                    f.write(n)
-                f.write("\n]}")
+                self.write_json_node(f)
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
         except OSError:
             self._log.error("Failed to create the report.")
+
+    def write_json_node(self, f):
+        f.write("{")
+        f.write(dumps({"firmware": self.info})[1:-1])
+        f.write(",\n")
+        f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
+        f.write(",\n")
+        f.write('"modules" :[\n')
+        start = True
+        for n in self._report:
+            if start:
+                start = False
+            else:
+                f.write(",\n")
+            f.write(n)
+        f.write("\n]}")
 
 
 def ensure_folder(path: str):
@@ -377,10 +386,7 @@ def ensure_folder(path: str):
     while i != -1:
         i = path.find("/", start)
         if i != -1:
-            if i == 0:
-                p = path[0]
-            else:
-                p = path[0:i]
+            p = path[0] if i == 0 else path[:i]
             # p = partial folder
             try:
                 _ = os.stat(p)
@@ -392,17 +398,14 @@ def ensure_folder(path: str):
                     except OSError as e2:
                         # self._log.error("failed to create folder {}".format(p))
                         raise e2
-                else:
-                    # self._log.error("failed to create folder {}".format(p))
-                    raise e
         # next level deep
         start = i + 1
 
 
-def _info():
+def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
     "collect base information on this runtime"
     _n = sys.implementation.name  # type: ignore
-    _p = sys.platform if not sys.platform.startswith("pyb") else "stm32"
+    _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
     info = {
         "name": _n,  # - micropython
         "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
@@ -426,25 +429,7 @@ def _info():
 
     if sys.platform not in ("unix", "win32"):
         try:
-            u = os.uname()
-            info["sysname"] = u[0]  # u.sysname
-            info["nodename"] = u[1]  #  u.nodename
-            info["release"] = u[2]  # u.release
-            info["machine"] = u[4]  #  u.machine
-            # parse micropython build info
-            if " on " in u[3]:  # version
-                s = u[3].split(" on ")[0]
-                if info["sysname"] == "esp8266":
-                    # esp8266 has no usable info on the release
-                    if "-" in s:
-                        v = s.split("-")[0]
-                    else:
-                        v = s
-                    info["version"] = info["release"] = v.lstrip("v")
-                try:
-                    info["build"] = s.split("-")[1]
-                except IndexError:
-                    pass
+            extract_os_info(info)
         except (IndexError, AttributeError, TypeError):
             pass
 
@@ -460,6 +445,7 @@ def _info():
 
         info["family"] = "pycom"
         del _t
+
     except (ImportError, KeyError):
         pass
     if info["platform"] == "esp32_LoBo":
@@ -510,10 +496,32 @@ def _info():
         if arch:
             info["arch"] = arch
     return info
-    # spell-checker: enable
 
 
-def get_root() -> str:
+# spell-checker: enable
+
+
+def extract_os_info(info):
+    "get info from os.uname()"
+    u = os.uname()
+    info["sysname"] = u[0]  # u.sysname
+    info["nodename"] = u[1]  #  u.nodename
+    info["release"] = u[2]  # u.release
+    info["machine"] = u[4]  #  u.machine
+    # parse micropython build info
+    if " on " in u[3]:  # version
+        s = u[3].split(" on ")[0]
+        if info["sysname"] == "esp8266":
+            # esp8266 has no usable info on the release
+            v = s.split("-")[0] if "-" in s else s
+            info["version"] = info["release"] = v.lstrip("v")
+        try:
+            info["build"] = s.split("-")[1]
+        except IndexError:
+            pass
+
+
+def get_root() -> str:  # sourcery skip: use-assigned-variable
     "Determine the root folder of the device"
     try:
         c = os.getcwd()
@@ -580,23 +588,28 @@ def is_micropython() -> bool:
 
 
 def main():
-
-    stubber = Stubber(path=read_path())
-    # stubber = Stubber(path="/sd")
-    # Option: Specify a firmware name & version
-    # stubber = Stubber(firmware_id='HoverBot v1.2.1')
-    stubber.clean()
-    # Read stubs from modulelist
     try:
-        with open("modulelist" + ".txt") as f:
-            # not optimal , but works on mpremote and eps8266
-            stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
-    except OSError:
-        # fall back gracefully
-        stubber.modules = ["micropython"]
-        _log.warning("Warning: modulelist.txt could not be found.")
-    # Option: Add your own modules
-    # stubber.add_modules(['bluetooth','GPS'])
+        import lvgl  # type: ignore
+    except Exception:
+        print("\n\nNOTE: The `lvgl` module could not be found on this firmware\n\n")
+        return
+    # Specify firmware name & version
+    try:
+        fw_id = "lvgl-{0}_{1}_{2}-{3}-{4}".format(
+            lvgl.version_major(),
+            lvgl.version_minor(),
+            lvgl.version_patch(),
+            lvgl.version_info(),
+            sys.platform,
+        )
+    except Exception:
+        fw_id = "lvgl-{0}_{1}_{2}_{3}-{4}".format(8, 1, 0, "dev", sys.platform)
+    finally:
+        stubber = Stubber(firmware_id=fw_id)
+    stubber.clean()
+    # modules to stub : only lvgl specifics
+    stubber.modules = ["io", "lodepng", "rtch", "lvgl"]  # spell-checker: enable
+
     gc.collect()
 
     stubber.create_all_stubs()

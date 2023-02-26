@@ -1,3 +1,4 @@
+"""Create or update .pyi type hint files."""
 ##########################################################################################
 # stub
 ##########################################################################################
@@ -24,5 +25,5 @@ def cli_stub(source: Union[str, Path]):
 
     log.info("Generate type hint files (pyi) in folder: {}".format(source))
     OK = generate_pyi_files(Path(source))
-    do_post_processing([Path(source)], pyi=True, black=True)
+    do_post_processing([Path(source)], pyi=False, black=True)  # do not generate pyi files twice
     return 0 if OK else 1

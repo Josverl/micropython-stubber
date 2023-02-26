@@ -1,3 +1,8 @@
+"""
+Enrich firmware stubs by copying docstrings and parameter infromation from doc-stubs or python source code.
+Both (.py or .pyi) files are supported.
+"""
+
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -15,8 +20,8 @@ from stubber.utils.post import run_black
 #########################################################################################
 
 
-def enrich_file(target_path: Path, docstub_path: Path, diff:bool=False, write_back:bool=False) -> Optional[str]:
-    """\
+def enrich_file(target_path: Path, docstub_path: Path, diff: bool = False, write_back: bool = False) -> Optional[str]:
+    """
     Enrich a firmware stubs using the doc-stubs in another folder.
     Both (.py or .pyi) files are supported.
 
@@ -76,7 +81,9 @@ def enrich_file(target_path: Path, docstub_path: Path, diff:bool=False, write_ba
     return diff_code(oldcode, newcode, 5, filename=target_path.name) if diff else newcode
 
 
-def enrich_folder(source_folder: Path, docstub_path: Path, show_diff:bool=False, write_back:bool=False, require_docstub:bool=False) -> int:
+def enrich_folder(
+    source_folder: Path, docstub_path: Path, show_diff: bool = False, write_back: bool = False, require_docstub: bool = False
+) -> int:
     """\
         Enrich a folder with containing firmware stubs using the doc-stubs in another folder.
         

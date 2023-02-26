@@ -84,7 +84,7 @@ def merge_all_docstubs(
             if candidate["version"] == "latest":
                 # for the latest we do a bit more effort to get something 'good enough'
                 # try to get the board_path from the last released version as the basis
-                board_path = CONFIG.stub_path / board_folder_name(candidate, version=clean_version(CONFIG.STABLE_VERSION, flat=True))
+                board_path = CONFIG.stub_path / board_folder_name(candidate, version=clean_version(CONFIG.stable_version, flat=True))
                 # check again
                 if board_path.exists():
                     log.info(f"using {board_path.name} as the basis for {merged_path.name}")

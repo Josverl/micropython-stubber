@@ -1,3 +1,9 @@
+"""
+Freeze manifest files for micropython 1.16 and later
+uses the manifest file to generate frozen stubs
+
+"""
+
 import os
 import shutil
 from pathlib import Path

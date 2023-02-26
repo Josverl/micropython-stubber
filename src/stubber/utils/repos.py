@@ -96,8 +96,8 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         git.checkout_tag(repo=mpy_path, tag=tag)
     result = match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
 
-    log.info(f"{mpy_lib_path} {git.get_tag(mpy_path)}")
-    log.info(f"{mpy_lib_path} {git.get_tag(mpy_lib_path)}")
+    log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_path)}")
+    log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_lib_path)}")
     return result
 
 

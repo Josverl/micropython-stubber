@@ -24,7 +24,7 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
     switch(tag=tag, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
     try:
-        version = clean_version(git.get_tag(testrepo_micropython) or "v1")
+        version = clean_version(git.get_local_tag(testrepo_micropython) or "v1")
     except Exception:
         warnings.warn("Could not find the micropython version Tag - assuming v1.x")
         version = "v1"

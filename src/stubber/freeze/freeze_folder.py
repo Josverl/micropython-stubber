@@ -1,3 +1,5 @@
+"""get and parse the to-be-frozen .py modules for micropython to extract the static type information."""
+
 import glob
 import os
 import shutil

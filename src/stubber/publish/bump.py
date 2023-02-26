@@ -1,11 +1,6 @@
+"""Bump a version number to a next version"""
+
 from packaging.version import Version, parse
-
-
-# def bump_postrelease(
-#     current: Version,
-#     rc: int = 0,  # o, to bump post release, or release candidate number
-# ) -> Version:
-#     return bump_version( current, rc=rc , post_bump=True  )
 
 
 def bump_version(
@@ -19,7 +14,7 @@ def bump_version(
     rc: int = 0,  # to bump post release, or release candidate number
 ) -> Version:
     """
-    Increases the post release version number
+    Increases a version number
 
     This allows for a new stub-release to be published while still using the Major.Minor.Patch version numbers of Micropython
     if rc = 0(default) : bump post release
@@ -87,5 +82,5 @@ def bump_version(
         new = parse("".join(parts))
     except ValueError as e:
         raise ValueError(f"{''.join(parts)} is not a valid version") from e
-
+    assert isinstance(new, Version), "not a valid Version"
     return new

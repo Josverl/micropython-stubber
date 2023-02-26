@@ -21,7 +21,7 @@ from stubber.utils.config import CONFIG
     "-V",
     "versions",
     multiple=True,
-    default=[CONFIG.STABLE_VERSION],
+    default=[CONFIG.stable_version],
     show_default=True,
     help="multiple: ",
 )
