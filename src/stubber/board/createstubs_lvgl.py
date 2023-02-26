@@ -3,7 +3,7 @@ Create stubs for the lvgl modules on a MicroPython board.
 
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-This variant was generated from createstubs.py by micropython-stubber v1.12.2
+This variant was generated from createstubs.py by micropython-stubber v1.13.0
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -16,7 +16,7 @@ from ujson import dumps
 
 # from utime import sleep_us
 
-__version__ = "1.11.2"
+__version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # # deal with ESP32 firmware specific implementations.

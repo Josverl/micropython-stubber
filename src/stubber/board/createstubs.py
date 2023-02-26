@@ -12,7 +12,7 @@ from ujson import dumps
 
 # from utime import sleep_us
 
-__version__ = "1.11.2"
+__version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 # # deal with ESP32 firmware specific implementations.
@@ -146,7 +146,7 @@ class Stubber:
         self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:    # type: ignore
+    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
         """Create a Stub of a single python module
 
         Args:
@@ -265,11 +265,7 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(
-                        indent
-                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
-                        indent, item_name, ret
-                    )
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 # s += indent + "    ''\n" # EMPTY DOCSTRING
@@ -364,20 +360,20 @@ class Stubber:
             self._log.error("Failed to create the report.")
 
     def write_json_node(self, f):
-                f.write("{")
-                f.write(dumps({"firmware": self.info})[1:-1])
+        f.write("{")
+        f.write(dumps({"firmware": self.info})[1:-1])
+        f.write(",\n")
+        f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
+        f.write(",\n")
+        f.write('"modules" :[\n')
+        start = True
+        for n in self._report:
+            if start:
+                start = False
+            else:
                 f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
-                f.write(",\n")
-                f.write('"modules" :[\n')
-                start = True
-                for n in self._report:
-                    if start:
-                        start = False
-                    else:
-                        f.write(",\n")
-                    f.write(n)
-                f.write("\n]}")
+            f.write(n)
+        f.write("\n]}")
 
 
 def ensure_folder(path: str):
@@ -435,12 +431,14 @@ def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
 
     try:  # families
         from pycopy import const as _t  # type: ignore
+
         info["family"] = "pycopy"
         del _t
     except (ImportError, KeyError):
         pass
     try:  # families
         from pycom import FAT as _t  # type: ignore
+
         info["family"] = "pycom"
         del _t
 
@@ -494,6 +492,8 @@ def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
         if arch:
             info["arch"] = arch
     return info
+
+
 # spell-checker: enable
 
 
@@ -508,7 +508,7 @@ def extract_os_info(info):
     if " on " in u[3]:  # version
         s = u[3].split(" on ")[0]
         if info["sysname"] == "esp8266":
-                    # esp8266 has no usable info on the release
+            # esp8266 has no usable info on the release
             v = s.split("-")[0] if "-" in s else s
             info["version"] = info["release"] = v.lstrip("v")
         try:

@@ -37,7 +37,7 @@ C=OSError
 B='release'
 import gc as E,sys,uos as os
 from ujson import dumps as a
-__version__='1.11.2'
+__version__='v1.12.2'
 q=2
 r=2
 class Stubber:
