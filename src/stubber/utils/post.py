@@ -36,7 +36,7 @@ def run_black(path: Path, capture_output: bool = False):
     return result.returncode
 
 
-def run_autoflake(path: Path, capture_output: bool = False, progress_pyi: bool = False):
+def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = False):
     """
     run autoflake to remove unused imports
     needs to be run BEFORE black otherwise it does not recognize long import from`s.
@@ -56,11 +56,11 @@ def run_autoflake(path: Path, capture_output: bool = False, progress_pyi: bool =
     log.debug("Running autoflake on: {}".format(path))
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
     result = subprocess.run(cmd, capture_output=capture_output)
-    if result.returncode != 0:
+    if result.returncode != 0: # pragma: no cover
         log.warning(f"autoflake failed on: {path}")
         ret = result.returncode
 
-    if progress_pyi:
+    if process_pyi:
         for file in list(path.rglob("*.pyi")):
             cmd = [
                 "autoflake",
