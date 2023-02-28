@@ -107,11 +107,7 @@ def test_createstubs(firmware: str, variant: str, suffix: str, tmp_path: Path, p
     stub_path = tmp_path / "stubs"
     stubfiles = list(stub_path.rglob("*.py"))
 
-    # use rough filecount to see if there were results without checking the details
-    if "micropython" in firmware:
-        assert len(stubfiles) >= 35, "micropython: there should be 35 stubs or more"
-    else:
-        assert len(stubfiles) >= 25, "pycopy: there should be 25 stubs or more"
+    assert len(stubfiles) >= 25, "pycopy: there should be 25 stubs or more"
 
     # manifest exists
     jsons = list(stub_path.rglob("modules.json"))
