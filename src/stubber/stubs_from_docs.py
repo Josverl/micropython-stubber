@@ -25,7 +25,7 @@ def generate_from_rst(
     v_tag: str,
     release: Optional[str] = None,
     pattern: str = "*.rst",
-    suffix:str=".py",
+    suffix: str = ".py",
 ) -> int:
     # sourcery skip: remove-redundant-exception, simplify-single-exception-tuple
     if not dst_path.exists():
@@ -44,7 +44,7 @@ def generate_from_rst(
     clean_destination(dst_path)
     make_docstubs(dst_path, v_tag, release, suffix, files)
 
-    run_autoflake(dst_path, progress_pyi=True)
+    run_autoflake(dst_path, process_pyi=True)
     run_black(dst_path)
 
     # Generate a module manifest for the docstubs
@@ -59,7 +59,7 @@ def generate_from_rst(
     return len(files)
 
 
-def clean_destination(dst_path:Path):
+def clean_destination(dst_path: Path):
     """Remove all .py/.pyi files in desination folder to avoid left-behinds"""
     for f in dst_path.rglob(pattern="*.py*"):
         try:
