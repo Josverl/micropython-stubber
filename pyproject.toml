@@ -167,7 +167,7 @@ omit = [
 
     # minfied files should be excluded 
     # duplicate file names in different folders break the coverage reports
-    "*/minified/*.py",
+    # "*/minified/*.py",
 
     # dev helper script in src
     "*/src/stubber/rst/report_return.py",
@@ -178,9 +178,8 @@ omit = [
     "*/make_stub_files.py",
     "*/stubber/tools/*.py",
 
-    # codemod partials
-    "*/codemod/_partials",
-
+    # partial files for variant generation
+    "*/codemod/_partials/*.py",
 ]
 
 

@@ -1,22 +1,20 @@
 # Basic set up for poetry and GHA dependencies
 version: 2
 updates:
-
   # Maintain dependencies for micropython-stubber
   - package-ecosystem: "pip"
-    directory: "/src"
-    schedule:
-      interval: "weekly"
-    assignees:
-      - "josverl"      
-     
-
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    # Workflow files stored in the
-    # default location of `.github/workflows`  
     directory: "/"
     schedule:
       interval: "weekly"
     assignees:
-      - "josverl"      
+      - "josverl"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Workflow files stored in the
+    # default location of `.github/workflows`
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "josverl"
