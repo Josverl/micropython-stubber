@@ -54,11 +54,13 @@ examples:
 
 
 ## Where are codemods used 
+- To merge the type-rich information from a doc-stub into a firmware stub
 
-
-
-
+- To create the different variants of `createstubs.py` 
+  `stubber make-variants` 
+  This will use moding the code to: 
+  - a memory efficient version (low memory)
+  - a version that allows the MCU to restart without losing the progress ( very low memory)
 
 [libcts]: https://libcst.readthedocs.io/en/latest/index.html
-
 

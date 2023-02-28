@@ -7,7 +7,7 @@ This includes function and method parameters and descriptions, the module and cl
   
 
 ## How docstubs are generated
-The documentation stubs are generated using [`src/stubs_from_docs.py`](src/stubs_from_docs.py)
+The documentation stubs are generated using the `stubber et-docstubs` command.
 
 1) Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking
 using a custom-built parser to read and process the micropython RST files
@@ -48,8 +48,8 @@ using a custom-built parser to read and process the micropython RST files
     - if no type can be detected the type `Any` is used
 
 ### Lookup tables : 
- - [src/rst/lookup.py](src/rst/lookup.py)
-    - LOOKUP_LIST
+ - [src/stubber/rst/lookup.py](src/stubber/rst/lookup.py)
+     - LOOKUP_LIST
         - contains return types for functions and methods 
         - "module.[class.].function" : ( "type", probability)
     - NONE_VERBS
@@ -74,9 +74,9 @@ Note: black on python 3.7 does not like some function defs, this is not treated 
 ### Ordering of inter-dependent classes in the same module   
 Classes are frequently documented in a different order than thery need to be declared in a source file.
 To accomodate for this the source code is re-ordered to avoid forward references in the code.
-the coode for this is located in 
-- [src/rst/classsort.py](src/rst/classsort.py)
-- [src/rst/output_dict.py](src/rst/output_dict.py)
+The code for this is located in :
+- [src/stubber/rst/classsort.py](src/stubber/rst/classsort.py)
+- [src/stubber/rst/output_dict.py](src/stubber/rst/output_dict.py)
 
 
 ### Add GLUE imports to allow specific modules to import specific others. 

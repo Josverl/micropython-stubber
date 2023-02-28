@@ -15,26 +15,21 @@ intro.md
 50_frozen_stubs.md
 55_doc_stubs.md
 60_repos.md
+62_codemods.md
 65_scripts.md
 70_stub_overview.md
 80_references.md
 90_documentation.md
 ```
 
-```{toctree}
-:caption: 'versions and changes'
-:maxdepth: 1
-
-changelog.md
-todo.md
-
-```
 
 ```{toctree}
 :caption: 'Development:'
 :maxdepth: 1
 developing.md
 testing.md
+publish.md
+```
 api/index.rst
 ```
 
