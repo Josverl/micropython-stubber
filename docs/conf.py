@@ -16,10 +16,10 @@ from pathlib import Path
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 
 src_path = str(Path("..") / "src" / "micropython-stubber")
-if not src_path in sys.path:
+if src_path not in sys.path:
     sys.path.append(src_path)
 
 # from stubber.version import __version__ as MODULE_VERSION
@@ -91,7 +91,7 @@ suppress_warnings = ["myst.header"]
 # Generate documentation for the source code in
 # https://sphinx-autoapi.readthedocs.io/en/latest/tutorials.html#setting-up-automatic-api-documentation-generation
 
-autoapi_dirs = ["../board", "../src/stubber"]
+autoapi_dirs = ["../src/stubber"]
 autoapi_root = "api"
 autoapi_file_patterns = ["*.py"]
 autoapi_keep_files = False
@@ -107,6 +107,9 @@ autoapi_ignore = [
     "*/logging.py",  # not relevant
     "*/main.py",  # not relevant
     "*/test*.*",
+    "*_partials/*.py",
+    "*_min*",  # duplicate code
+    "*_lvgl*",  # duplicate code
 ]
 
 # -- allow for documenting micropython -------------------------------------------------
