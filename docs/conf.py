@@ -94,7 +94,7 @@ suppress_warnings = ["myst.header"]
 autoapi_dirs = ["../src/stubber"]
 autoapi_root = "api"
 autoapi_file_patterns = ["*.py"]
-autoapi_keep_files = False
+autoapi_keep_files = True  # true for debugging
 
 # only generate documentation for the useful parts
 autoapi_ignore = [
