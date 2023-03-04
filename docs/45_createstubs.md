@@ -1,4 +1,4 @@
-# createstub variants
+# Createstub Variants
 
 There are multiple variants of the script available, in 3 levels of optimisation:
 
