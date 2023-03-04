@@ -54,13 +54,13 @@ def spaces(n: int = 4) -> str:
 class SourceDict(OrderedDict):
     "(abstract) dict to store source components respecting parent child dependencies and proper definition order"
 
-    def __init__(self, base: List, indent: int = 0, body: int = 0, lf: str = "\n"):
+    def __init__(self, base: List, indent: int = 0, body: int = 0, lf: str = "\n", name=""):
         super().__init__(base)
         self.lf = lf  #  add linefeed
         self.indent = indent  # current base indent
         self._body = body  # for source body is level
         self._nr = 0  # generate incrementing line numbers
-        self.name = ""
+        self.name = name
 
     def __str__(self) -> str:
         "convert the OD into a string"
@@ -187,8 +187,8 @@ class ModuleSourceDict(SourceDict):
             indent,
             body=0,
             lf=lf,
+            name=name,
         )
-        self.name = name
 
     def sort(self):
         "make sure all classdefs are in order"
@@ -277,11 +277,10 @@ class ClassSourceDict(SourceDict):
             ],
             indent,
             body=4,  # class body  indent +4
-            lf=lf,
+            lf="\n",
+            name=name,
         )
         self.add_docstr(docstr, extra=4)
-        self.name = name
-        self.lf = "\n"
 
 
 class FunctionSourceDict(SourceDict):
@@ -319,8 +318,7 @@ class FunctionSourceDict(SourceDict):
             ],
             indent,
             body=4,  # function body indent +4
-            lf=lf,
+            lf="\n",
+            name=name,
         )
-        self.name = name
         self.add_docstr(docstr, extra=4)
-        self.lf = "\n"
