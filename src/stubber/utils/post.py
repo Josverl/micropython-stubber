@@ -12,12 +12,12 @@ from .stubmaker import generate_pyi_files
 
 def do_post_processing(stub_paths: List[Path], pyi: bool, black: bool):
     "Common post processing"
-    for pth in stub_paths:
+    for path in stub_paths:
         if pyi:
-            log.debug("Generate type hint files (pyi) in folder: {}".format(pth))
-            generate_pyi_files(pth)
+            log.debug("Generate type hint files (pyi) in folder: {}".format(path))
+            generate_pyi_files(path)
         if black:
-            run_black(pth)
+            run_black(path)
 
 
 def run_black(path: Path, capture_output: bool = False):
@@ -56,7 +56,7 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
     log.debug("Running autoflake on: {}".format(path))
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
     result = subprocess.run(cmd, capture_output=capture_output)
-    if result.returncode != 0: # pragma: no cover
+    if result.returncode != 0:  # pragma: no cover
         log.warning(f"autoflake failed on: {path}")
         ret = result.returncode
 
