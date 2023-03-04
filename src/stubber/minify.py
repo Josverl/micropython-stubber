@@ -108,10 +108,9 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
             )
             for t in prev_words
         )
-        if check and line_ws != post_ws:
-            return range(index - 1, index + 1)
+        return range(index - 1, index + 1) if check and line_ws != post_ws else None
 
-    def handle_try_except(content: List[str], index: int):
+    def handle_try_except(content: List[str], index: int) -> bool:
         """Checks if line at index is in try/except block
 
         Handles situations like this:
@@ -126,8 +125,7 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
         """
         prev = content[index - 1]
         _, line_ws, post_ws = get_whitespace_context(content, index)
-        if "except" in prev and line_ws != post_ws:
-            return True
+        return "except" in prev and line_ws != post_ws
 
     lines = []
     multilines = set()
