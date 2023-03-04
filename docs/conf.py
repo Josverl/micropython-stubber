@@ -26,7 +26,9 @@ if src_path not in sys.path:
 
 # Q&D Location
 path = Path(__file__).resolve().parents[1] / "pyproject.toml"
-pyproject = tomllib.loads(open(str(path)).read())
+with open(path) as f:
+    pyproject = tomllib.loads(f.read())
+
 MODULE_VERSION = pyproject["tool"]["poetry"]["version"]
 
 # -- Project information -----------------------------------------------------
