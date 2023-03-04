@@ -4,13 +4,14 @@ Create all variants of createstubs.py
 - and cross compile them
 """
 
-from typing import List
+import shutil
+from typing import List, Optional
 import libcst as cst
 import libcst.codemod as codemod
 from pathlib import Path
 
 from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
-from stubber.codemod.modify_list import ListChangeSet
+from stubber.codemod.modify_list import ListChangeSet  # type: ignore
 
 from loguru import logger as log
 
@@ -23,12 +24,26 @@ ALL_VARIANTS = list(CreateStubsVariant)
 def create_variants(
     base_path: Path,
     *,
+    target_path: Optional[Path] = None,
     version: str = "",
     make_variants: List[CreateStubsVariant] = ALL_VARIANTS,
 ):
     """
-    Create variants of createstubs.py and optionally minify and cross compile them
+    Create variants of createstubs.py and optionally minify and cross compile them.
+
+    Parameters
+    ----------
+    base_path : Path
+        Path to the base createstubs.py file
+    target_path : Path, optional
+        Path to write the variants to, by default None
+    version : str, optional
+        Version of mpy-cross to use, by default uses the latest version
+
     """
+    if target_path is None:
+        target_path = base_path
+
     ctx = codemod.CodemodContext()
     base_file = base_path / "createstubs.py"
     log.info(f"Reading : {base_file}")
@@ -40,9 +55,15 @@ def create_variants(
 
         suffix = "" if var == CreateStubsVariant.BASE else f"_{var.value}"
 
-        variant_path = base_path / f"createstubs{suffix}.py"
-        minified_path = base_path / f"createstubs{suffix}_min.py"
-        mpy_path = base_path / f"createstubs{suffix}_mpy.mpy"  # intentional
+        variant_path = target_path / f"createstubs{suffix}.py"
+        minified_path = target_path / f"createstubs{suffix}_min.py"
+        mpy_path = target_path / f"createstubs{suffix}_mpy.mpy"  # intentional
+
+        if var == CreateStubsVariant.BASE and target_path != base_path:
+            log.info(f"Copying base file to {variant_path}")
+            variant_path.write_text(base_txt)
+            # copy modules.txt to target_path
+            shutil.copyfile(base_path / "modulelist.txt", target_path / "modulelist.txt")
 
         if var != CreateStubsVariant.BASE:
             # No need to create base variant as it is the same as the base file
