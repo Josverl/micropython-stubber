@@ -2,13 +2,13 @@
 Codemods to create the different variants of createstubs.py
 """
 from __future__ import annotations
-from datetime import datetime
 
 from enum import Enum
 from typing import Optional, Iterator
 
 import libcst as cst
 import libcst.codemod as codemod
+from libcst.codemod._codemod import Codemod # type: ignore
 from libcst import matchers as m
 
 from stubber.codemod.modify_list import ModifyListElements, ListChangeSet
