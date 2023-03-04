@@ -1,4 +1,10 @@
-# Using stubs
+# Using Micropython stubber 
+
+This section describes ho to use micropython-stubber to create and maintain stubs for a MicroPython firmware or project.
+
+If you just want to use the stubs, then you can skip this section and instead read the documentation in the sister-repo [micropython-stubs][] section [using-the-stubs][] 
+
+
 ## Manual configuration
 
 The manual configuration, including sample configuration files is described in detail in the sister-repo [micropython-stubs][] section [using-the-stubs][]

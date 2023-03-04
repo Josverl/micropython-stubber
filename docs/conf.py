@@ -32,7 +32,7 @@ MODULE_VERSION = pyproject["tool"]["poetry"]["version"]
 # -- Project information -----------------------------------------------------
 
 project = "Micropython-Stubber"
-copyright = "2019-2021, Jos Verlinde"
+copyright = "2019-.... , Jos Verlinde"
 author = "Jos Verlinde"
 
 # The full version, including alpha/beta/rc tags
@@ -113,7 +113,7 @@ autoapi_ignore = [
 ]
 
 # -- allow for documenting micropython -------------------------------------------------
-autodoc_mock_imports = ["micropython", "uos", "uio", "utime", "ujson"]
+autodoc_mock_imports = ["micropython", "uos", "uio", "utime", "ujson", "machine", "network"]
 
 
 # -- Options for HTML output -------------------------------------------------

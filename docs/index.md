@@ -8,8 +8,7 @@
 intro.md
 10_approach.md
 15_cli.rst
-20_using.md
-30_vscode.md
+20_creating.md
 40_firmware_stubs.md
 45_createstubs.md
 50_frozen_stubs.md
