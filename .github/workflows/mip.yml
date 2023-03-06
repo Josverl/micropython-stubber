@@ -1,0 +1,44 @@
+# This workflow will :
+# update mip packages in the \mip folder
+
+name: mip
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/stubber/board/**"
+
+jobs:
+  mip:
+    runs-on: ubuntu-20.04 # ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry==1.3.1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install stubber
+        run: poetry install --with dev --no-interaction
+
+      - name: make all variants
+        run: |
+          poetry run stubber make-variants
+          poetry run stubber make-variants --target ./mip/v5 --version 1.18
+          poetry run stubber make-variants --target ./mip/v6 --version 1.19.1
+
+      - name: run test on minified/createstubs.by
+        run: |
+          poetry run pytest -m minified
+
+      - name: Commit the changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Update mip packages
