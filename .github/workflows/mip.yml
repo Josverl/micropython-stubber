@@ -26,13 +26,13 @@ jobs:
           python-version: 3.11
 
       - name: Install stubber
-        run: poetry install --no-interaction
+        run: poetry install --with dev --no-interaction
 
       - name: make all variants
         run: |
           poetry run stubber make-variants
-          poetry run stubber make-variants --target ./mip/v5 ---version 1.18
-          poetry run stubber make-variants --target ./mip/v6 ---version 1.19.1
+          poetry run stubber make-variants --target ./mip/v5 --version 1.18
+          poetry run stubber make-variants --target ./mip/v6 --version 1.19.1
 
       - name: run test on minified/createstubs.by
         run: |
