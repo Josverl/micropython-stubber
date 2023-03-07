@@ -2140,15 +2140,15 @@ files = [
 
 [[package]]
 name = "sourcery-cli"
-version = "1.0.5"
+version = "1.0.6"
 description = "Magically refactor Python"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sourcery_cli-1.0.5-py2.py3-none-macosx_10_9_universal2.whl", hash = "sha256:79bfec332c1f3a4ad5cc7eaf6705dbc88e232200b90bf29c31b1521a92d78f91"},
-    {file = "sourcery_cli-1.0.5-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:291ea8a5ae127b859a64ecc7e08bd12ec9344deca422492a18b92a853e83f55f"},
-    {file = "sourcery_cli-1.0.5-py2.py3-none-win_amd64.whl", hash = "sha256:16ec86af84502ec715baef4c8f3b57bdf8f445ec291f8ef59442f03a12ca9d82"},
+    {file = "sourcery_cli-1.0.6-py2.py3-none-macosx_10_9_universal2.whl", hash = "sha256:237a00bfc1ae52f4a605ea571c640b54cd2e30a14d58a39dfe9686c0add2f3d7"},
+    {file = "sourcery_cli-1.0.6-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:cc5ec1c5c63fca09bf10aeece61a5eddbcb76165202f555d25f6b46ec9775d6e"},
+    {file = "sourcery_cli-1.0.6-py2.py3-none-win_amd64.whl", hash = "sha256:655f8c69153a4ca64aaf1acca9feefa69beec9f190c0ef8234a8ea276c5a118f"},
 ]
 
 [[package]]
