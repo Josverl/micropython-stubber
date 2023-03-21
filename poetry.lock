@@ -661,13 +661,13 @@ gmpy2 = ["gmpy2"]
 
 [[package]]
 name = "esptool"
-version = "4.5"
+version = "4.5.1"
 description = "A serial utility to communicate & flash code to Espressif chips."
 category = "main"
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "esptool-4.5.tar.gz", hash = "sha256:eb2602e6af8cb8f6f32d5046441b3a102cd48c505e4afcf836a95a4fc39002a6"},
+    {file = "esptool-4.5.1.tar.gz", hash = "sha256:e3eb59836123e5ebf793ef639311f7d85645526487d8b1c2b51159b455106b9a"},
 ]
 
 [package.dependencies]
