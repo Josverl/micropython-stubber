@@ -231,7 +231,7 @@ def d():
 	except (e,J):return Q
 def main():
 	stubber=Stubber(path=read_path());stubber.clean();stubber.modules=[q]
-	for A in [G,'/libs']:
+	for A in [G,'/lib']:
 		try:
 			with W(A+'modulelist'+'.txt')as C:stubber.modules=[A.strip()for A in C.read().split('\n')if K(A.strip())and A.strip()[0]!='#'];break
 		except B:pass
