@@ -324,26 +324,25 @@ class ManifestFile:
 
         Optionally specify unix_ffi=True to use a module from the unix-ffi directory.
         """
-        if self._path_vars["MPY_LIB_DIR"]:
-            lib_dirs = ["micropython", "python-stdlib", "python-ecosys"]
-            if unix_ffi:
-                # Search unix-ffi only if unix_ffi=True, and make unix-ffi modules
-                # take precedence.
-                lib_dirs = ["unix-ffi"] + lib_dirs
-
-            for lib_dir in lib_dirs:
-                # Search for {lib_dir}/**/{name}/manifest.py.
-                for root, dirnames, filenames in os.walk(
-                    os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)
-                ):
-                    if os.path.basename(root) == name and "manifest.py" in filenames:
-                        self.include(root, **kwargs)
-                        return
-
-            raise ValueError("Library not found in local micropython-lib: {}".format(name))
-        else:
+        if not self._path_vars["MPY_LIB_DIR"]:
             # TODO: HTTP request to obtain URLs from manifest.json.
             raise ValueError("micropython-lib not available for require('{}').", name)
+        lib_dirs = ["micropython", "python-stdlib", "python-ecosys"]
+        if unix_ffi:
+            # Search unix-ffi only if unix_ffi=True, and make unix-ffi modules
+            # take precedence.
+            lib_dirs = ["unix-ffi"] + lib_dirs
+
+        for lib_dir in lib_dirs:
+            # Search for {lib_dir}/**/{name}/manifest.py.
+            for root, dirnames, filenames in os.walk(
+                os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)
+            ):
+                if os.path.basename(root) == name and "manifest.py" in filenames:
+                    self.include(root, **kwargs)
+                    return
+
+        raise ValueError("Library not found in local micropython-lib: {}".format(name))
 
     def package(self, package_path, files=None, base_path=".", opt=None):
         """
