@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# sourcery skip
 #
 # This file is part of the MicroPython project, http://micropython.org/
 #
@@ -28,7 +29,6 @@
 from __future__ import print_function
 
 import contextlib
-import glob
 import os
 import sys
 import tempfile
@@ -214,11 +214,7 @@ class ManifestFile:
                 raise ManifestFileError("Expected .py file")
             kind = KIND_COMPILE_AS_MPY
 
-        self._manifest_files.append(
-            ManifestOutput(
-                FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt
-            )
-        )
+        self._manifest_files.append(ManifestOutput(FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt))
 
     def _search(self, base_path, package_path, files, exts, kind, opt=None, strict=False):
         base_path = self._resolve_path(base_path)
@@ -311,9 +307,7 @@ class ManifestFile:
                 try:
                     exec(f.read(), self._manifest_globals(kwargs))
                 except Exception as er:
-                    raise ManifestFileError(
-                        "Error in manifest file: {}: {}".format(manifest_path, er)
-                    )
+                    raise ManifestFileError("Error in manifest file: {}: {}".format(manifest_path, er))
                 os.chdir(prev_cwd)
             if not top_level:
                 self._metadata.pop()
@@ -333,9 +327,7 @@ class ManifestFile:
 
             for lib_dir in lib_dirs:
                 # Search for {lib_dir}/**/{name}/manifest.py.
-                for root, dirnames, filenames in os.walk(
-                    os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)
-                ):
+                for root, dirnames, filenames in os.walk(os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)):
                     if os.path.basename(root) == name and "manifest.py" in filenames:
                         self.include(root, **kwargs)
                         return
