@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.13.0
+This variant was generated from createstubs.py by micropython-stubber v1.13.1.post1
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -603,7 +603,7 @@ def main():
     # Read stubs from modulelist in the current folder or in /libs
     # fall back to default modules
     stubber.modules = ["micropython"]
-    for p in ["", "/libs"]:
+    for p in ["", "/lib"]:
         try:
             with open(p + "modulelist" + ".txt") as f:
                 # not optimal , but works on mpremote and eps8266
