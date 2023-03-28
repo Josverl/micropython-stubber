@@ -309,9 +309,8 @@ class StubPackage:
             # for stub_type, fw_path in [s for s in self.stub_sources]:
             for n in range(len(self.stub_sources)):
                 stub_type, fw_path = self.stub_sources[n]
-
                 try:
-                    log.debug(f"Copying {stub_type.value} from {fw_path}")
+                    log.debug(f"Copying {stub_type} from {fw_path}")
                     shutil.copytree(
                         CONFIG.stub_path / fw_path,
                         self.package_path,
