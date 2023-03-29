@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# sourcery skip
 #
 # This file is part of the MicroPython project, http://micropython.org/
 #
@@ -28,7 +29,6 @@
 from __future__ import print_function
 
 import contextlib
-import glob
 import os
 import sys
 import tempfile
@@ -89,14 +89,17 @@ class ManifestMetadata:
         self.version = None
         self.description = None
         self.license = None
+        self.author = None
 
-    def update(self, description=None, version=None, license=None):
+    def update(self, description=None, version=None, license=None, author=None):
         if description:
             self.description = description
         if version:
             self.version = version
         if license:
             self.license = version
+        if author:
+            self.author = author
 
 
 # Turns a dict of options into a object with attributes used to turn the
@@ -167,6 +170,7 @@ class ManifestFile:
             "freeze_as_str": self.freeze_as_str,
             "freeze_as_mpy": self.freeze_as_mpy,
             "freeze_mpy": self.freeze_mpy,
+            # "convert_path": self._resolve_path,  # compatibility for old manifest files
             "options": IncludeOptions(**kwargs),
         }
 
@@ -244,7 +248,7 @@ class ManifestFile:
             if base_path:
                 os.chdir(prev_cwd)  # type: ignore
 
-    def metadata(self, description=None, version=None, license=None):
+    def metadata(self, description=None, version=None, license=None, author=None):
         """
         From within a manifest file, use this to set the metadata for the
         package described by current manifest.
@@ -253,7 +257,7 @@ class ManifestFile:
         to obtain the metadata for the top-level manifest file.
         """
 
-        self._metadata[-1].update(description, version, license)
+        self._metadata[-1].update(description, version, license, author)
         return self._metadata[-1]
 
     def include(self, manifest_path, top_level=False, **kwargs):
@@ -322,12 +326,12 @@ class ManifestFile:
                 lib_dirs = ["unix-ffi"] + lib_dirs
 
             for lib_dir in lib_dirs:
-                for manifest_path in glob.glob(
-                    os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir, "**", name, "manifest.py"),
-                    recursive=True,
-                ):
-                    self.include(manifest_path, **kwargs)
-                    return
+                # Search for {lib_dir}/**/{name}/manifest.py.
+                for root, dirnames, filenames in os.walk(os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)):
+                    if os.path.basename(root) == name and "manifest.py" in filenames:
+                        self.include(root, **kwargs)
+                        return
+
             raise ValueError("Library not found in local micropython-lib: {}".format(name))
         else:
             # TODO: HTTP request to obtain URLs from manifest.json.
@@ -406,28 +410,37 @@ class ManifestFile:
         `opt` is the optimisation level to pass to mpy-cross when compiling .py
         to .mpy.
         """
-        self._freeze_internal(path, script, exts=(".py", ".mpy"), kind=KIND_FREEZE_AUTO, opt=opt)
+        self._freeze_internal(
+            path,
+            script,
+            exts=(
+                ".py",
+                ".mpy",
+            ),
+            kind=KIND_FREEZE_AUTO,
+            opt=opt,
+        )
 
     def freeze_as_str(self, path):
         """
         Freeze the given `path` and all .py scripts within it as a string,
         which will be compiled upon import.
         """
-        self._search(path, None, None, exts=(".py"), kind=KIND_FREEZE_AS_STR)
+        self._search(path, None, None, exts=(".py",), kind=KIND_FREEZE_AS_STR)
 
     def freeze_as_mpy(self, path, script=None, opt=None):
         """
         Freeze the input (see above) by first compiling the .py scripts to
         .mpy files, then freezing the resulting .mpy files.
         """
-        self._freeze_internal(path, script, exts=(".py"), kind=KIND_FREEZE_AS_MPY, opt=opt)
+        self._freeze_internal(path, script, exts=(".py",), kind=KIND_FREEZE_AS_MPY, opt=opt)
 
     def freeze_mpy(self, path, script=None, opt=None):
         """
         Freeze the input (see above), which must be .mpy files that are
         frozen directly.
         """
-        self._freeze_internal(path, script, exts=(".mpy"), kind=KIND_FREEZE_MPY, opt=opt)
+        self._freeze_internal(path, script, exts=(".mpy",), kind=KIND_FREEZE_MPY, opt=opt)
 
 
 # Generate a temporary file with a line appended to the end that adds __version__.

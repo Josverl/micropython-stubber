@@ -140,5 +140,8 @@
         "--config",
         "${workspaceFolder}/pyproject.toml",
         "--verbose"
-    ]
+    ],
+    "files.exclude": {
+        "repos/micropython/lib/**": true
+    }
 }
