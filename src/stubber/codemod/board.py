@@ -4,17 +4,17 @@ Codemods to create the different variants of createstubs.py
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Iterator
+from typing import Iterator, Optional
 
 import libcst as cst
 import libcst.codemod as codemod
-from libcst.codemod._codemod import Codemod # type: ignore
 from libcst import matchers as m
-
-from stubber.codemod.modify_list import ModifyListElements, ListChangeSet
-from stubber.cst_transformer import update_module_docstr
+from libcst.codemod._codemod import Codemod  # type: ignore
+from packaging.version import Version
 
 from stubber.codemod._partials import Partial
+from stubber.codemod.modify_list import ListChangeSet, ModifyListElements
+from stubber.cst_transformer import update_module_docstr
 
 # matches on `stubber = Stubber()`
 _STUBBER_MATCHER = m.Assign(
@@ -148,7 +148,9 @@ class ModuleDocCodemod(codemod.Codemod):
     def __init__(self, context: codemod.CodemodContext, module_doc: str):
         super().__init__(context)
         if module_doc.endswith('"""\n'):
-            generated = f'\nThis variant was generated from createstubs.py by micropython-stubber v{__version__}\n"""\n'
+            generated = (
+                f'\nThis variant was generated from createstubs.py by micropython-stubber v{Version(__version__).base_version}\n"""\n'
+            )
             module_doc = module_doc[:-4] + generated
         self.module_doc = module_doc
 

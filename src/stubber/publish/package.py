@@ -11,7 +11,7 @@ from packaging.version import parse
 from pysondb import PysonDB
 
 from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
-from stubber.publish.stubpacker import StubPackage
+from stubber.publish.stubpacker import StubPackage, StubSources
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
@@ -115,13 +115,14 @@ def create_package(
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
+    stubs: StubSources = []
     if pkg_type == COMBO_STUBS:
         assert port != "", "port must be specified for combo stubs"
         stubs = combo_sources(family, port, board, ver_flat)
     elif pkg_type == DOC_STUBS:
-        stubs = [
+        stubs: StubSources = [
             (
-                "Doc stubs",
+                StubSource.DOC,
                 Path(f"{family}-{ver_flat}-docstubs"),
             ),
         ]
@@ -134,7 +135,7 @@ def create_package(
     return StubPackage(pkg_name, version=mpy_version, stubs=stubs)
 
 
-def combo_sources(family: str, port: str, board: str, ver_flat: str) -> List[Tuple[str, Path]]:
+def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSources:
     """
     Build a source set for combo stubs
         -

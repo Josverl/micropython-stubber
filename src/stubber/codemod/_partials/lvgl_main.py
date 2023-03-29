@@ -15,7 +15,7 @@ if TYPE_CHECKING:
         _report: List[str]
         modules = []
 
-        def __init__(self, path: str = "", firmware_id:str="") -> None:
+        def __init__(self, path: str = "", firmware_id: str = "") -> None:
             ...
 
         def clean(self) -> None:
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
         def report(self, filename: str = "modules.json"):
             ...
+
         def create_all_stubs(self):
             ...
 
@@ -50,6 +51,7 @@ def main():
         print("\n\nNOTE: The `lvgl` module could not be found on this firmware\n\n")
         return
     # Specify firmware name & version
+    fw_id = "lvgl"
     try:
         fw_id = "lvgl-{0}_{1}_{2}-{3}-{4}".format(
             lvgl.version_major(),
@@ -70,4 +72,6 @@ def main():
 
     stubber.create_all_stubs()
     stubber.report()
+
+
 ###PARTIALEND###
