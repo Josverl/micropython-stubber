@@ -3,7 +3,7 @@ Create stubs for the lvgl modules on a MicroPython board.
 
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-This variant was generated from createstubs.py by micropython-stubber v1.13.2.post1
+This variant was generated from createstubs.py by micropython-stubber v1.13.2
 """
 # Copyright (c) 2019-2022 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -594,6 +594,7 @@ def main():
         print("\n\nNOTE: The `lvgl` module could not be found on this firmware\n\n")
         return
     # Specify firmware name & version
+    fw_id = "lvgl"
     try:
         fw_id = "lvgl-{0}_{1}_{2}-{3}-{4}".format(
             lvgl.version_major(),
