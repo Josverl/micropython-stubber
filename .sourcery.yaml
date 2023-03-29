@@ -1,24 +1,24 @@
 rule_settings:
-  enable: 
-  - default
-  - snake-case-functions
-  - no-wildcard-imports
-  - no-long-functions
+  enable:
+    - default
+    - snake-case-functions
+    - no-wildcard-imports
+    - no-long-functions
 
-  - docstrings-for-modules
-  # - docstrings-for-functions
-  - require-parameter-annotation
+    - docstrings-for-modules
+    # - docstrings-for-functions
+    - require-parameter-annotation
 
   disable:
-  - require-return-annotation  # Pylance does infer this quite well already
-  - use-contextlib-suppress
-  - use-fstring-for-formatting
-  - use-fstring-for-concatenation
-  - do-not-use-staticmethod
-  - name-type-suffix
-  - invert-any-all
+    - require-return-annotation # Pylance does infer this quite well already
+    - use-contextlib-suppress
+    - use-fstring-for-formatting
+    - use-fstring-for-concatenation
+    - do-not-use-staticmethod
+    - name-type-suffix
+    - invert-any-all
 
-  python_version: '3.8'
+  python_version: "3.8"
 
   rule_types:
     - refactoring
@@ -27,136 +27,136 @@ rule_settings:
 
   # Specific folders and files to ignore
 ignore:
+  - src/stubber/board
+  - src/stubber/minified
+  - src/stubber/tools/manifestfile.py
+  - mip/
+  - tests/*
+  - "*_test.py"
+  - repos/
   - board
   - board/*_*.py
   - board/boot.py
   - board/main.py
   - board/logging.py
   - minified/
-  - src/stubber/board
-  - src/stubber/minified
-  - src/stubber/tools/manifestfile.py
   - "*.ipynb"
   - .venv/
-  - tests/*
-  - '*_test.py'
-  - repos/
   - .git/
   - .github/
-metrics: 
+
+metrics:
   quality_threshold: 25
 
-clone_detection: 
+clone_detection:
   min_lines: 3
   min_duplicates: 2
   identical_clones_only: false
 
-
 rules:
-- id: no-wildcard-imports
-  pattern: from ${module} import *
-  description: Do not use wildcard imports
-  explanation: |
+  - id: no-wildcard-imports
+    pattern: from ${module} import *
+    description: Do not use wildcard imports
+    explanation: |
       Use import statements for packages and modules only, not for individual classes or functions.
 
       - Use `import x` for importing packages and modules.
       - Use `from x import y` where `x` is the package prefix and `y` is the module name with no prefix.
       - Use `from x import y as z` if two modules named `y` are to be imported, if `y` conflicts with a top-level name defined in the current module, or if `y` is an inconveniently long name.
       - Use `import y as z` only when `z` is a standard abbreviation (e.g., np for numpy).
-  tags:
-    - google-python-style-guide
-    - gpsg
-    - gpsg-import
-  tests:
-    - match: from numpy import *
-    - match: from pandas.series import *
-    - match: from .something import *
-    - no-match: from math import sin
+    tags:
+      - google-python-style-guide
+      - gpsg
+      - gpsg-import
+    tests:
+      - match: from numpy import *
+      - match: from pandas.series import *
+      - match: from .something import *
+      - no-match: from math import sin
 
-# Quick Fix https://github.com/sourcery-ai/sourcery/issues/314      
-- id: require-parameter-annotation
-  pattern: |
-    def ${name}(..., ${arg}: !!!=${default?}, ...):
-        ...
-  condition: |
-    not name.starts_with("_")
-    and not arg.equals("self")
-    and not arg.equals("cls")
-    and not arg.equals("*")
-    and not arg.equals("/")
-  paths:
-    exclude:
-    - test_*.py
-    - '*_test.py'
-  description: Annotate parameter `${arg}` in public function/method `${name}` with a type annotation
-  explanation: |
-    Adding type annotations has several benefits:
-    1. It improves the documentation of the function
-    2. It allows the function to be checked for correctness
-    3. It allows checking that the function callers are passing the correct params
-    These [mypy docs](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html#functions) describe how to
-    annotate function arguments and return types.
-    From Google Style Guide [2.21](https://google.github.io/styleguide/pyguide#221-type-annotated-code)
-  tags:
-  - google-python-style-guide
-  - gpsg
-  - gpsg-type-annotations
-  tests:
-  - match: |
-      def add(a, b: int):
-        return a + b
-  - match: |
-      def f(a=1):
-        return a * 2
-  - no-match: |
-      def f() -> int:
-          pass
-  - no-match: |
-      def f(a: int, b: str):
-          pass
-  - no-match: |
-      def f(self, a: int, b: str):
-          pass
-  - no-match: |
-      def f(cls, a: int, b: str):
-          pass
-  - no-match: |
-      def f(a: int, *, b: str):
-          pass
-  - no-match: |
-      def f(a: int, /, b: str):
-          pass
+  # Quick Fix https://github.com/sourcery-ai/sourcery/issues/314
+  - id: require-parameter-annotation
+    pattern: |
+      def ${name}(..., ${arg}: !!!=${default?}, ...):
+          ...
+    condition: |
+      not name.starts_with("_")
+      and not arg.equals("self")
+      and not arg.equals("cls")
+      and not arg.equals("*")
+      and not arg.equals("/")
+    paths:
+      exclude:
+        - test_*.py
+        - "*_test.py"
+    description: Annotate parameter `${arg}` in public function/method `${name}` with a type annotation
+    explanation: |
+      Adding type annotations has several benefits:
+      1. It improves the documentation of the function
+      2. It allows the function to be checked for correctness
+      3. It allows checking that the function callers are passing the correct params
+      These [mypy docs](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html#functions) describe how to
+      annotate function arguments and return types.
+      From Google Style Guide [2.21](https://google.github.io/styleguide/pyguide#221-type-annotated-code)
+    tags:
+      - google-python-style-guide
+      - gpsg
+      - gpsg-type-annotations
+    tests:
+      - match: |
+          def add(a, b: int):
+            return a + b
+      - match: |
+          def f(a=1):
+            return a * 2
+      - no-match: |
+          def f() -> int:
+              pass
+      - no-match: |
+          def f(a: int, b: str):
+              pass
+      - no-match: |
+          def f(self, a: int, b: str):
+              pass
+      - no-match: |
+          def f(cls, a: int, b: str):
+              pass
+      - no-match: |
+          def f(a: int, *, b: str):
+              pass
+      - no-match: |
+          def f(a: int, /, b: str):
+              pass
 
-
-- id: docstrings-for-modules
-  pattern: |
-    '''!!!'''
-    ...
-  condition: pattern.in_module_scope()
-  paths:
-    exclude:
-    - test_*.py
-    - '*_test.py'
-    - '__init__.py'
-  description: Modules should have docstrings
-  explanation: |
-    Modules (Python files) should start with docstrings describing the contents and usage of the module.
-    From Google Style Guide [3.8.2](https://google.github.io/styleguide/pyguide.html#382-modules)
-  tags:
-  - google-python-style-guide
-  - gpsg
-  - gpsg-docstrings
-  tests:
-  - match: |
-      def hello():
-        print("hello")
-  - match: |
-      class Hello:
-        """Hello"""
-        def hello():
-          """Prints 'hello'"""
-          print("hello")
-  - no-match: |
-      """Hello module"""
-      def hello():
-        print("hello")
+  - id: docstrings-for-modules
+    pattern: |
+      '''!!!'''
+      ...
+    condition: pattern.in_module_scope()
+    paths:
+      exclude:
+        - test_*.py
+        - "*_test.py"
+        - "__init__.py"
+    description: Modules should have docstrings
+    explanation: |
+      Modules (Python files) should start with docstrings describing the contents and usage of the module.
+      From Google Style Guide [3.8.2](https://google.github.io/styleguide/pyguide.html#382-modules)
+    tags:
+      - google-python-style-guide
+      - gpsg
+      - gpsg-docstrings
+    tests:
+      - match: |
+          def hello():
+            print("hello")
+      - match: |
+          class Hello:
+            """Hello"""
+            def hello():
+              """Prints 'hello'"""
+              print("hello")
+      - no-match: |
+          """Hello module"""
+          def hello():
+            print("hello")
