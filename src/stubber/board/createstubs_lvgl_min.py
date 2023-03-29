@@ -229,12 +229,14 @@ def c():
 	try:A=bytes('abc',encoding='utf8');B=c.__module__;return I
 	except (d,J):return Q
 def main():
+	C='lvgl'
 	try:import lvgl as A
 	except g:return
+	B=C
 	try:B='lvgl-{0}_{1}_{2}-{3}-{4}'.format(A.version_major(),A.version_minor(),A.version_patch(),A.version_info(),sys.platform)
 	except g:B='lvgl-{0}_{1}_{2}_{3}-{4}'.format(8,1,0,'dev',sys.platform)
 	finally:stubber=Stubber(firmware_id=B)
-	stubber.clean();stubber.modules=['io','lodepng','rtch','lvgl'];E.collect();stubber.create_all_stubs();stubber.report()
+	stubber.clean();stubber.modules=['io','lodepng','rtch',C];E.collect();stubber.create_all_stubs();stubber.report()
 if __name__=='__main__'or c():
 	try:logging.basicConfig(level=logging.INFO)
 	except f:pass
