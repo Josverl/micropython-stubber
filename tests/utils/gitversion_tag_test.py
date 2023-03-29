@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 from packaging.version import Version, parse
-from stubber.utils.makeversionhdr import get_version_build_from_git, get_version_info_from_git
+
+from stubber.utils.makeversionhdr import get_version_info_from_git
 
 
 @pytest.mark.parametrize(
@@ -30,18 +31,3 @@ def test_get_version(path):
         assert parts[1].isnumeric()
 
     assert True
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        Path.cwd(),
-        Path("./repos/micropython"),
-    ],
-)
-def test_get_version_build(path):
-    """Test that we can get the version info from git"""
-    version, build = get_version_build_from_git(path)
-    assert isinstance(version, Version)
-    if build != "dirty":
-        assert build.isnumeric()

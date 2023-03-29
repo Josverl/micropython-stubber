@@ -1,11 +1,14 @@
 from pathlib import Path
-import stubber
+
 from packaging.version import parse
+
+import stubber
 
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
+assert tomllib  # - one out of two will work
 
 
 def test_package_versions_are_in_sync():
