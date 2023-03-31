@@ -36,7 +36,6 @@ exclude = [
 
 [tool.poetry.scripts]
 stubber = "stubber.stubber:stubber_cli"
-pyboard = "stubber.tools.pyboard:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -77,11 +76,11 @@ sphinx_rtd_theme = "^1.0.0"
 sphinx-autoapi = "^1.9.0"
 sphinx-click = "^4.4.0"
 attrs = "^22.1.0"
+pydeps = "^1.10.22"
 
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.20.2"
 pytest = "^7.1.2"
 pytest-mock = "^3.10.0"
 pytest-json-report = "^1.5.0"
@@ -90,7 +89,6 @@ mock = "^4.0.3"
 coverage = "^6.4.3"
 packaging = ">=21.3,<24.0"
 distro = "^1.8.0"
-pydeps = "^1.10.22"
 pytest-github-actions-annotate-failures = "^0.1.7"
 sourcery-cli = "^1.0.3"
 
