@@ -144,7 +144,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
                 if (dest_path / f.name).with_suffix(suffix).exists():
                     (dest_path / f.name).with_suffix(suffix).unlink()
 
-    # delete buitins.pyi in the package folder
+    # delete builtins.pyi in the package folder
     for name in [
         "builtins",  # creates conflicts, better removed
         "pycopy_imphook",  # is not intended to be used directly, and has an unresolved subclass

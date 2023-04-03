@@ -382,7 +382,7 @@ PARAM_FIXES = [
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {
     # machine
-    "SoftSPI": "SPI",
+    # "SoftSPI": "SPI", # BUG: SoftSPI is defined before SPI, so baseclass is not yet available
     "SoftI2C": "I2C",
     "Switch": "Pin",
     "Signal": "Pin",
@@ -401,9 +401,9 @@ CHILD_PARENT_CLASS = {
     # "WIZNET5K": "AbstractNIC",
     # -------------------------------------------------------------------------------------
     # uhashlib
-    "md5": "hash",
-    "sha1": "hash",
-    "sha265": "hash",
+    #  "md5": "hash",   # BUG: hash is not defined in the board stubs
+    # "sha1": "hash",
+    # "sha256": "hash",
     # collections
     "OrderedDict": "dict",
     "namedtuple": "tuple",

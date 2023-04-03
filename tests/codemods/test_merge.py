@@ -1,13 +1,15 @@
-import pytest
-from libcst.codemod._testing import _CodemodTest, CodemodContext, parse_module, CodemodTest, PartialParserConfig, SkipFile
-from stubber.codemod.merge_docstub import MergeCommand
-from .codemodcollector import (
-    TestCase as MyTestCase,
-    collect_test_cases,
-)
+# sourcery skip: snake-case-functions
 import difflib
-from typing import Optional, Sequence, Tuple, Dict
 from pathlib import Path
+from typing import Any, Dict, Optional, Sequence, Tuple
+
+import pytest
+from libcst.codemod._testing import CodemodContext, CodemodTest, PartialParserConfig, SkipFile, _CodemodTest, parse_module
+
+from stubber.codemod.merge_docstub import MergeCommand
+
+from .codemodcollector import TestCase as MyTestCase
+from .codemodcollector import collect_test_cases
 
 # mark all tests
 pytestmark = pytest.mark.codemod
@@ -16,9 +18,9 @@ pytestmark = pytest.mark.codemod
 class PytestCodemodTest(_CodemodTest):
     "CodeMod test that uses use _CodemodTest as the superclass as that does not inherit from unittest.TestCase which will break pytest.parametrize"
 
-    def assertEqual(self, first, second, msg=None):
+    def assertEqual(self, first: Any, second: Any, msg=None):
         """basic assertEqual implementation, not type specific."""
-        if not first == second:
+        if first != second:
             raise AssertionError(msg)
 
     def assertCodemod(

@@ -33,6 +33,7 @@ ignore:
   - mip/
   - tests/*
   - "*_test.py"
+  - tests/codemods/codemod_test_cases/**/*.*
   - repos/
   - board
   - board/*_*.py
