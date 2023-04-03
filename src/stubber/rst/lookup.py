@@ -385,6 +385,7 @@ CHILD_PARENT_CLASS = {
     "SoftSPI": "SPI",
     "SoftI2C": "I2C",
     "Switch": "Pin",
+    "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
     "FileIO": "IO",
     "textIOWrapper": "IO",
