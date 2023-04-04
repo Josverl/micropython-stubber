@@ -5,21 +5,28 @@ so they are also not present in the board stubs.
 """
 
 
+from typing import Optional
 import libcst as cst
 from libcst import matchers as m
 
-# todo: extract the call method from the docstubs
-FNDEF_PIN_CALL = '''
-def __call__(self, x: Optional[Any] = None) -> Any:
-    """
-    Pin objects are callable.  The call method provides a (fast) shortcut to set
-    and get the value of the pin.  It is equivalent to Pin.value([x]).
-    See :meth:`Pin.value` for more details.
-    """
-    ...
-'''
 
-# print(call_meth)
+# there is no simple way to re-use the code from multiple classes / methods 
+# but could be added https://stackoverflow.com/questions/17522706/how-to-pass-an-instance-variable-to-a-decorator-inside-class-definition?noredirect=1&lq=1
+# so for now, just copy the code, or use a module scoped variable - but that is not thread safe
+
+class CallFinder(m.MatcherDecoratableTransformer):
+    """Find the Pin.__call__ method and extract it from a (machine) module."""
+    class_name: str = "Pin"  # class name
+    method_name: str = "__call__"  # method name
+    def __init__(self):
+        super().__init__()
+        self.call_meth: Optional[cst.FunctionDef] = None
+
+    @m.call_if_inside(m.ClassDef(name=m.Name(class_name)))
+    @m.visit(m.FunctionDef(name=m.Name(method_name)))
+    def detect_call(self, node: cst.FunctionDef) -> None:
+        """find the  __call__ method and store it."""
+        self.call_meth = node
 
 
 class CallAdder(m.MatcherDecoratableTransformer):
@@ -27,10 +34,9 @@ class CallAdder(m.MatcherDecoratableTransformer):
     class_name = "Pin"  # class name 
     has_call = 0 # number of __call__ methods found
 
-    def __init__(self) -> None:
+    def __init__(self, call_meth :cst.FunctionDef) -> None:
         super().__init__()
-        # parse the (default) call method once
-        self.call_meth = cst.parse_statement(FNDEF_PIN_CALL)
+        self.call_meth  = call_meth
 
 
     @m.call_if_inside(m.ClassDef(name=m.Name(class_name)))

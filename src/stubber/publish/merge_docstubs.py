@@ -100,7 +100,7 @@ def merge_all_docstubs(
         log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
         # Add methods from docstubs to the firmware stubs that do not exist in the firmware stubs
-        add_machine_pin_call(merged_path)
+        add_machine_pin_call(merged_path, candidate['version'])
         if result:
             merged += 1
     log.info(f"merged {merged} of {len(candidates)} candidates")
