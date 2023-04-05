@@ -27,7 +27,6 @@ from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
-
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
 
@@ -102,7 +101,14 @@ class StubPackage:
                 self.stub_sources = stubs
 
             self._publish = True
-        self.status: Status = Status({"result": "-", "name": self.package_name, "version": self.pkg_version, "error": None})
+        self.status: Status = Status(
+            {
+                "result": "-",
+                "name": self.package_name,
+                "version": self.pkg_version,
+                "error": None,
+            }
+        )
 
     @property
     def package_path(self) -> Path:
@@ -127,7 +133,8 @@ class StubPackage:
             return self.mpy_version
         with open(_toml, "rb") as f:
             pyproject = tomllib.load(f)
-        return str(parse(pyproject["tool"]["poetry"]["version"]))
+        ver = pyproject["tool"]["poetry"]["version"]
+        return str(parse(ver)) if ver != "latest" else ver
 
     @pkg_version.setter
     def pkg_version(self, version: str) -> None:
@@ -604,7 +611,7 @@ class StubPackage:
             # todo: below is a workaround for different types, but where is the source of this difference coming from?
             msg = (
                 f"{self.package_name}: source '{name.value}' not found: {CONFIG.stub_path / path}"
-                if isinstance(name, StubSource) # type: ignore
+                if isinstance(name, StubSource)  # type: ignore
                 else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
             )
             self.status["error"] = msg
