@@ -4,6 +4,7 @@ This file contains the `def main()` funcion for the db variant of createstubs.py
 The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
 """
 
+from io import TextIOWrapper
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
@@ -28,6 +29,15 @@ if TYPE_CHECKING:
         def report(self, filename: str = "modules.json"):
             ...
 
+        def write_json_header(self, f: TextIOWrapper):
+            ...
+
+        def write_json_node(self, f: TextIOWrapper, n, first=False):
+            ...
+
+        def write_json_end(self, f):
+            ...
+
         def create_all_stubs(self):
             ...
 
@@ -49,6 +59,10 @@ def main():
     import machine  # type: ignore
 
     try:
+        gc.threshold(512)
+    except AttributeError:
+        pass
+    try:
         f = open("modulelist" + ".done", "r+b")
         was_running = True
         _log.info("Opened existing db")
@@ -56,19 +70,29 @@ def main():
         f = open("modulelist" + ".done", "w+b")
         _log.info("created new db")
         was_running = False
-
     stubber = Stubber(path=read_path())
+
+    # f_name = "{}/{}".format(stubber.path, "modules.json")
     if not was_running:
         # Only clean folder if this is a first run
         stubber.clean()
+    #     mod_fp = open(f_name, "w")
+    #     stubber.write_json_header(mod_fp)
+    #     first_json = True
+    # else:
+    #     mod_fp = open(f_name, "a")
+    #     first_json = False
 
     # get list of modules to process
     stubber.modules = ["micropython"]
     for p in ["", "/libs"]:
         try:
             with open(p + "modulelist" + ".txt") as f:
-                # not optimal , but works on mpremote and eps8266
-                stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+                for line in f.read().split("\n"):
+                    line = line.strip()
+                    if len(line) > 0 and line[0] != "#":
+                        stubber.modules.append(line)
+                gc.collect()
                 break
         except OSError:
             pass
@@ -90,11 +114,10 @@ def main():
     # see if we can continue from where we left off
     modules = [m for m in stubber.modules if m not in modules_done.keys()]
     gc.collect()
-
     for modulename in modules:
         # ------------------------------------
         # do epic shit
-        # but sometimes things fail
+        # but sometimes things fail / run out of memory and reboot
         ok = False
         try:
             ok = stubber.create_one_stub(modulename)
@@ -102,15 +125,21 @@ def main():
             # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
             machine.reset()
 
-        # save the (last) result back to the database/result file
-        result = stubber._report[-1] if ok else "failed"
+        # if ok:
+        #     stubber.write_json_node(mod_fp, modulename, first_json)
+        #     first_json = False
+
+        # # save the (last) result back to the database/result file
+        # result = stubber._report[-1] if ok else "failed"
         # -------------------------------------
-        modules_done[modulename] = str(result)
+        gc.collect()
+        modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
         with open("modulelist" + ".done", "a") as f:
-            f.write("{}={}\n".format(modulename, result))
+            f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
 
     # Finished processing - load all the results , and remove the failed ones
     if modules_done:
+        # stubber.write_json_end(mod_fp)
         stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
 

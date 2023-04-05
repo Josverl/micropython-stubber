@@ -353,30 +353,36 @@ class Stubber:
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
+        _log.info("Report file: {}".format(f_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
             with open(f_name, "w") as f:
-                self.write_json_node(f)
+                self.write_json_header(f)
+                first = True
+                for n in self._report:
+                    self.write_json_node(f, n, first)
+                    first = False
+                self.write_json_end(f)
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
         except OSError:
             self._log.error("Failed to create the report.")
 
-    def write_json_node(self, f):
+    def write_json_header(self, f):
         f.write("{")
         f.write(dumps({"firmware": self.info})[1:-1])
         f.write(",\n")
         f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
         f.write(",\n")
         f.write('"modules" :[\n')
-        start = True
-        for n in self._report:
-            if start:
-                start = False
-            else:
-                f.write(",\n")
-            f.write(n)
+
+    def write_json_node(self, f, n, first):
+        if not first:
+            f.write(",\n")
+        f.write(n)
+
+    def write_json_end(self, f):
         f.write("\n]}")
 
 

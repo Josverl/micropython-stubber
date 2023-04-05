@@ -36,9 +36,11 @@ def run(
     no_error: bool = False,
     no_info: bool = False,
     *,
+    reset_tags: Optional[List[str]] = None,
     error_tags: Optional[List[str]] = None,
     warning_tags: Optional[List[str]] = None,
     success_tags: Optional[List[str]] = None,
+    ignore_tags: Optional[List[str]] = None,
 ) -> Tuple[int, List[str]]:
     # sourcery skip: raise-specific-error
     """
@@ -62,12 +64,16 @@ def run(
     Tuple[int, List[str]]
         The return code and the output as a list of strings
     """
+    if not reset_tags:
+        reset_tags = ["rst cause:1, boot mode:"]
     if not error_tags:
         error_tags = ["Traceback ", "Error: ", "Exception: ", "ERROR :", "CRIT  :"]
     if not warning_tags:
         warning_tags = ["WARN  :"]  # , "Module not found."
     if not success_tags:
         success_tags = ["Created stubs for", "Path: /remote"]
+    if not ignore_tags:
+        ignore_tags = ['  File "<stdin>",']
 
     replace_tags = ["\x1b[1A"]
 
@@ -92,14 +98,21 @@ def run(
                 for tag in replace_tags:
                     line = line.replace(tag, "")
                 output.append(line)  # full output, no trimming
+                if any(tag in line for tag in reset_tags):
+                    raise Exception("Board reset detected")
+
                 line = line.rstrip("\n")
                 # if any of the error tags in the line
-                if any(tag in line for tag in error_tags) and not no_error:
+                if any(tag in line for tag in error_tags):
+                    if no_error:
+                        continue
                     log.error(line)
                 elif any(tag in line for tag in warning_tags):
                     log.warning(line)
                 elif any(tag in line for tag in success_tags):
                     log.success(line)
+                elif any(tag in line for tag in ignore_tags):
+                    continue
                 else:
                     if not no_info:
                         log.info(line)
@@ -184,8 +197,8 @@ class MPRemoteBoard:
             cmd = cmd.split(" ")
         prefix = ["mpremote", "connect", self.port] if self.port else ["mpremote"]
         # if connected add resume to keep state between commands
-        if self.connected:
-            prefix += ["resume"]
+        # if self.connected:
+        #     prefix += ["resume"]
         cmd = prefix + cmd
         log.debug(" ".join(cmd))
         result = run(cmd, timeout, no_error, no_info, **kwargs)
@@ -240,16 +253,28 @@ def copy_createstubs(board: MPRemoteBoard) -> bool:
     return ok
 
 
-@retry(stop=stop_after_attempt(10), wait=wait_fixed(2))
+@retry(stop=stop_after_attempt(4), wait=wait_fixed(2))
+def hard_reset(board: MPRemoteBoard) -> bool:
+    """Reset the board"""
+    rc, _ = board.run_command(["soft-reset", "exec", "import machine;machine.reset()"], timeout=5)
+    board.connected = False
+    return rc == OK
+
+
+@retry(stop=stop_after_attempt(10), wait=wait_fixed(15))
 def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
     """Run createstubs on the board"""
-    cmd_path = ["exec", 'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"']
-    board.run_command(cmd_path)
+    # hard_reset(board)
 
-    cmd = ["mount", str(dest)] if dest else []
-    # cmd += ["exec", "import createstubs_mem"]
+    # add the lib folder to the path
+    cmd_path = ["exec", 'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"']
+    board.run_command(cmd_path, timeout=5)
+
+    cmd = ["resume", "mount", str(dest)] if dest else []
+    # cmd += ["exec", "import sys;sys.path.append('/lib') if '/lib' not in sys.path else None;import createstubs_db"]
     cmd += ["exec", "import createstubs_db"]
-    rc, out = board.run_command(cmd, timeout=5 * 60)
+    board.run_command.retry.wait = wait_fixed(15)
+    rc, out = board.run_command(cmd, timeout=90)
     if rc != OK and variant == "db":
         # assume createstubs ran out of memory and try again
         raise MemoryError("Memory error, try again")
