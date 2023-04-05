@@ -29,14 +29,14 @@ test = ["coverage", "mypy", "pexpect", "ruff", "wheel"]
 
 [[package]]
 name = "astroid"
-version = "2.15.1"
+version = "2.15.2"
 description = "An abstract syntax tree for Python with inference support."
 category = "dev"
 optional = false
 python-versions = ">=3.7.2"
 files = [
-    {file = "astroid-2.15.1-py3-none-any.whl", hash = "sha256:89860bda98fe2bbd1f5d262229be7629d778ce280de68d95d4a73d1f592ad268"},
-    {file = "astroid-2.15.1.tar.gz", hash = "sha256:af4e0aff46e2868218502789898269ed95b663fba49e65d91c1e09c966266c34"},
+    {file = "astroid-2.15.2-py3-none-any.whl", hash = "sha256:dea89d9f99f491c66ac9c04ebddf91e4acf8bd711722175fe6245c0725cc19bb"},
+    {file = "astroid-2.15.2.tar.gz", hash = "sha256:6e61b85c891ec53b07471aec5878f4ac6446a41e590ede0f2ce095f39f7d49dd"},
 ]
 
 [package.dependencies]
@@ -919,19 +919,24 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "mpremote"
-version = "0.4.0"
-description = "Tool for interacting remotely with MicroPython"
+version = "0.4.0.post12+g4c901fe"
+description = "Tool for interacting remotely with MicroPython devices"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.4"
-files = [
-    {file = "mpremote-0.4.0-py3-none-any.whl", hash = "sha256:c530cdb700f4938ba14f161c6761767484f0ee65ec555d846c2334fb01c53c00"},
-    {file = "mpremote-0.4.0.tar.gz", hash = "sha256:f683b7a20be6844c771d759ab5e42a3d9162cb70a1f6fd678792526f28a906c8"},
-]
+files = []
+develop = false
 
 [package.dependencies]
+importlib-metadata = ">=1.4"
 pyserial = ">=3.3"
 
+[package.source]
+type = "git"
+url = "https://github.com/josverl/mpremote.git"
+reference = "HEAD"
+resolved_reference = "4c901fe89068fb93ad8c73f5a4e5adbbb6b26ca6"
+subdirectory = "tools/mpremote"
 [[package]]
 name = "mypy"
 version = "0.991"
@@ -1281,7 +1286,7 @@ files = [
 cffi = ">=1.4.1"
 
 [package.extras]
-docs = ["sphinx (>=1.6.5)", "sphinx-rtd-theme"]
+docs = ["sphinx (>=1.6.5)", "sphinx_rtd_theme"]
 tests = ["hypothesis (>=3.27.0)", "pytest (>=3.2.1,!=3.3.0)"]
 
 [[package]]
@@ -1308,14 +1313,14 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "pyright"
-version = "1.1.301"
+version = "1.1.302"
 description = "Command line wrapper for pyright"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.301-py3-none-any.whl", hash = "sha256:ecc3752ba8c866a8041c90becf6be79bd52f4c51f98472e4776cae6d55e12826"},
-    {file = "pyright-1.1.301.tar.gz", hash = "sha256:6ac4afc0004dca3a977a4a04a8ba25b5b5aa55f8289550697bfc20e11be0d5f2"},
+    {file = "pyright-1.1.302-py3-none-any.whl", hash = "sha256:1929e3126b664b5281dba66a789e8e04358afca48c10994ee0243b8c2a14acdf"},
+    {file = "pyright-1.1.302.tar.gz", hash = "sha256:e74a7dfbbb1d754941d015cccea8a6d29b395d8e4cb0e45dcfcaf3b6c6cfd540"},
 ]
 
 [package.dependencies]
@@ -1330,7 +1335,7 @@ name = "pyserial"
 version = "3.5"
 description = "Python Serial Port Extension"
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
@@ -2093,9 +2098,9 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-tools = ["mpremote", "esptool", "pyserial"]
+tools = ["esptool"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "86dd1ad66c18e2097d0377f32983faf3a874ee73eab7ab91dd6f165b6ea63822"
+content-hash = "305d765bb8ccc19beb6b9f7bafe106a62a9e679ac714da8a78de9232fb6466f9"
