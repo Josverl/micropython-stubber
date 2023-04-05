@@ -175,7 +175,7 @@ pkg: add data files
 - Add `= ...` to module and class level constants to avoid errors when they are used as a default value in function of nethod
 
 ## scripts:
-- script update_modulelist, - write updates to:         - board/modulelist.txt         - board/createsubs.py
+- script update_modulelist, - write updates to:         - board/modulelist.txt         - board/createstubs.py
 - bulk_stubber: Copy generated/firmwarestubs to all-stubs/* use firmware-stubs path for temp storage
 - Update BulkStubber & getserial for esp32, esp8266 and stm32
 - minify.ps1: posix paths
@@ -220,7 +220,7 @@ debug: add missing debug property
 test: fix pessimistic test and make more robust
 
 
-# createsubs v1.5.4 
+# createstubs v1.5.4 
 Better exeptions fix missed updates to mem and stub variants
 
 ## Change naming convention:
