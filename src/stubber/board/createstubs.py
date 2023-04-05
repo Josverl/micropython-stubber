@@ -1,7 +1,7 @@
 """
 Create stubs for (all) modules on a MicroPython board
 """
-# Copyright (c) 2019-2022 Jos Verlinde
+# Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import gc
 import logging
@@ -10,7 +10,10 @@ import sys
 import uos as os
 from ujson import dumps
 
-# from utime import sleep_us
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.12.2"
 ENOENT = 2
@@ -165,10 +168,10 @@ class Stubber:
         new_module = None
         try:
             new_module = __import__(module_name, None, None, ("*"))
-            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, gc.mem_free() )) # type: ignore
+            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, gc.mem_free()))  # type: ignore
 
         except ImportError:
-            self._log.warning("Skip module: {:<25} {:<79}".format( module_name, "Module not found."))
+            self._log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
             return False
 
         # Start a new file
