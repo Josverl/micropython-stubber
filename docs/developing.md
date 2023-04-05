@@ -116,9 +116,7 @@ The solution to this problem is to disable subprocess debugging using the `"subP
 This workflow will :
 
 - test the workstation scripts 
-
 - test the createstubs.py script on multiple micropython linux versions 
-
 - test the minified createstubs.py script on multiple micropython linux versions 
 
 ### run minify-pr.yml
@@ -126,8 +124,6 @@ This workflow will :
 This workflow will :
 
 - create a minified version of createstubs.py 
-
 - run a quick test on that 
-
 - and submit a PR to the branch <branch>-minify
 
