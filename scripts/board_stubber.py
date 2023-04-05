@@ -1,11 +1,8 @@
 """ 
-This script creates stubs for a connectes micropython MCU board.
+This script creates stubs for a connected micropython MCU board.
 
 # MPRemote is not working properly with ESP32 boards :-( at least on Windows)
 # this was fixed in the latest version of mpremote, not published yet on pypi
-# May need to find a way to build & include this 
-pip install git+https://github.com/micropython/micropython.git#subdirectory=tools/mpremote
-Fails on timeouts and errors in pip install 
 
 Workaround
 pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mpremote
@@ -13,13 +10,13 @@ pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mprem
 
 import subprocess
 import sys
-import time
 from pathlib import Path
 from threading import Timer
 from typing import List, NamedTuple, Optional, Tuple, Union
 
 import serial.tools.list_ports
 from loguru import logger as log
+from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 OK = 0
@@ -137,7 +134,7 @@ class MPRemoteBoard:
 
     def __init__(self, port: str = ""):
         self.port = port
-        self.uname = None
+        self.uname: Optional[UName] = None
         self.connected = False
 
     @staticmethod
@@ -148,10 +145,12 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_uname(self):
-        rc, result = self.run_command(["exec", "import os;print(os.uname())"], no_info=True)
+        rc, result = self.run_command(["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"], no_info=True)
         s = result[0]
         if "sysname=" in s:
             self.uname = eval(f"UName{s}")
+        elif s.strip() == "no.uname":
+            self.uname = UName("no.uname", "?", "?", "?", "?")
         else:
             self.uname = UName(*s[1:-1].split(", "))
         self.connected = True
@@ -234,8 +233,9 @@ def copy_createstubs(board: MPRemoteBoard) -> bool:
         ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
         "rm :lib/createstubs_mem.py",
         "rm :lib/createstubs_db.py",
-        "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
+        # "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
         "cp ./src/stubber/board/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
+        "cp ./board_info.csv :lib/board_info.csv",
     ]
 
     do = _mpy + [
@@ -273,8 +273,10 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
     # cmd += ["exec", "import sys;sys.path.append('/lib') if '/lib' not in sys.path else None;import createstubs_db"]
     cmd += ["exec", "import createstubs_db"]
     board.run_command.retry.wait = wait_fixed(15)
-    # esp32 runs slowly with remote mount, so increase timeout
-    rc, out = board.run_command(cmd, timeout=5 * 60)  # 5 minutes - avoid interupting esp32 / rp2 builds - but slows down esp8266 restarts
+    # some boards need 2-3 minutes so increase timeout
+    #  but slows down esp8266 restarts so keep that to 60 seconds
+    timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60
+    rc, out = board.run_command(cmd, timeout=timeout)
     if rc != OK and variant == "db":
         # assume createstubs ran out of memory and try again
         raise MemoryError("Memory error, try again")
@@ -314,25 +316,6 @@ def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[st
 
 
 TESTING = True
-
-
-def main():
-    # if not check_tools():
-    #     log.warning("Some tools are missing. Please install them first.")
-    #     install_tools()
-    dest = Path("./scratch/stubgen_test")
-
-    # scan boards and just work with the ones that reponded with understandable data
-    connected_boards = scan_boards(True)
-
-    # scan boards and generate stubs
-    for board in connected_boards:
-        log.info(f"Connecting to {board.port}")
-        rc, my_stubs = generate_board_stubs(dest, board)
-        if rc == OK:
-            log.success(f" ~~{len(my_stubs)} Stubs generated for {board.port}")
-        else:
-            log.error(f"Failed to generate stubs for {board.port}")
 
 
 def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
@@ -377,4 +360,23 @@ def set_loglevel(verbose: int) -> str:
 
 if __name__ == "__main__":
     set_loglevel(2)
-    main()
+    # if not check_tools():
+    #     log.warning("Some tools are missing. Please install them first.")
+    #     install_tools()
+    dest = Path("./scratch/stubgen_test")
+    # copy board_info.csv to the folder
+    # shutil.copyfile(Path("board_info.csv"), dest / "board_info.csv")
+
+    # scan boards and just work with the ones that reponded with understandable data
+    connected_boards = scan_boards(True)
+
+    print(tabulate([[b.port] + list(b.uname) for b in connected_boards]))  # type: ignore
+    # scan boards and generate stubs
+    for board in connected_boards:
+        log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
+        rc, my_stubs = generate_board_stubs(dest, board)
+        if rc == OK:
+            # todo: extract number of stubs generated and path ?
+            log.success(f"Stubs generated for {board.port}")
+        else:
+            log.error(f"Failed to generate stubs for {board.port}")

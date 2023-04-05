@@ -50,7 +50,7 @@ for path in mpy_path.glob("**/mpconfigboard.h"):
 
 print(f"Found {len(board_list)} board definitions.")
 
-print(tabulate(board_list, headers="keys"))
+print(tabulate(board_list, headers="keys")) # type: ignore
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
