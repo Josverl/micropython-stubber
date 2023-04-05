@@ -3,11 +3,11 @@ import sys
 from collections import namedtuple
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Generator, List
+from typing import Any, Dict, Generator, List
 
 import pytest
 from mock import MagicMock
-from packaging.version import parse
+from packaging.version import Version, parse
 from pytest_mock import MockerFixture
 
 try:
@@ -115,17 +115,22 @@ from testcases import fwid_test_cases
 
 # @pytest.mark.parametrize("variant", VARIANTS)
 # @pytest.mark.parametrize("location", LOCATIONS)
-@pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname, mock_modules", fwid_test_cases)
+@pytest.mark.parametrize(
+    "fwid,  sys_imp_name, sys_imp_version, sys_platform, os_uname, mock_modules",
+    fwid_test_cases,
+    ids=[e[0] for e in fwid_test_cases],
+)
 @pytest.mark.mocked
 def test_stubber_fwid(
     mock_micropython_path: Generator[str, None, None],
     # location: str,
     # variant: str,
     mocker: MockerFixture,
-    fwid: Any,
-    sys_imp_name: Any,
-    sys_platform: Any,
-    os_uname: Any,
+    fwid: str,
+    sys_imp_name: str,
+    sys_imp_version: tuple,
+    sys_platform: str,
+    os_uname: Dict,
     mock_modules: List[str],
 ):
     variant = "createstubs"
@@ -137,6 +142,7 @@ def test_stubber_fwid(
     # class.property : just pass a value
     mocker.patch(f"{mod_name}.sys.platform", sys_platform)
     mocker.patch(f"{mod_name}.sys.implementation.name", sys_imp_name)
+    mocker.patch(f"{mod_name}.sys.implementation.version", sys_imp_version)
     # class.method--> mock using function
     fake_uname = os_uname
 
@@ -144,12 +150,13 @@ def test_stubber_fwid(
         return fake_uname
 
     mocker.patch(f"{mod_name}.os.uname", mock_uname, create=True)
-    # now run the tests
-    stubber = createstubs.Stubber()
-    assert stubber is not None, "Can't create Stubber instance"
     for mod in mock_modules:
         # mock that these modules can be imported without errors
         sys.modules[mod] = MagicMock()
+
+    # now run the tests
+    stubber = createstubs.Stubber()
+    assert stubber is not None, "Can't create Stubber instance"
     info = createstubs._info()
 
     for mod in mock_modules:
@@ -160,18 +167,23 @@ def test_stubber_fwid(
     # print(info)
 
     assert info["family"] != "", "stubber.info() - No Family detected"
+    assert info["version"] != "", "stubber.info() - No clean version detected"
+    assert Version(info["version"]), "provided version is not a valid version"
+
     assert info["port"] != "", "stubber.info() - No port detected"
-    assert info["platform"] != "", "stubber.info() - No platform detected"
-    assert info["ver"] != "", "stubber.info() - No clean version detected"
+    assert info["board"] != "", "stubber.info() - No board detected"
 
-    assert stubber._fwid != "none"
-
-    # Does the firmware id match
-    assert stubber._fwid == fwid
+    new_fwid = stubber._fwid
+    assert new_fwid != "none"
 
     chars = " .()/\\:$"
     for c in chars:
         assert c not in stubber.flat_fwid, "flat_fwid must not contain '{}'".format(c)
+
+    # Does the firmware id match (at least the beginning)
+    assert new_fwid.startswith(fwid), "fwid does not match"
+
+    assert new_fwid == fwid, f"fwid: {new_fwid} does not match"
 
 
 # # throws an error on the commandline
