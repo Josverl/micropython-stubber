@@ -934,7 +934,7 @@ pyserial = ">=3.3"
 [package.source]
 type = "git"
 url = "https://github.com/josverl/mpremote.git"
-reference = "HEAD"
+reference = "main"
 resolved_reference = "4c901fe89068fb93ad8c73f5a4e5adbbb6b26ca6"
 subdirectory = "tools/mpremote"
 [[package]]
@@ -2103,4 +2103,4 @@ tools = ["esptool"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "305d765bb8ccc19beb6b9f7bafe106a62a9e679ac714da8a78de9232fb6466f9"
+content-hash = "942365ae1482126c2d5f7177ef1229dfe8ae81b44a371e75ef1277e46c70bd4f"
