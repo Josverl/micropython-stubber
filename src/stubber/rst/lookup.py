@@ -388,7 +388,7 @@ CHILD_PARENT_CLASS = {
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
     "FileIO": "IO",
-    "textIOWrapper": "IO",
+    "TextIOWrapper": "IO",
     "StringIO": "IO",
     "BytesIO": "IO",
     # uzlib
