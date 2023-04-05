@@ -2,7 +2,7 @@
 
 ## Use MIP to install createstubs on a MCU board
 
-It is possible to install the firmware stubber ( createsubs.py or one of its variants) on a MicroPython board. 
+It is possible to install the firmware stubber ( createstubs.py or one of its variants) on a MicroPython board. 
 This allows you to create the firmware stubs on the board itself, and then copy them to your PC.
 
 mip is a package manager for MicroPython. It is a command line tool that allows you to install packages on a MicroPython board.
