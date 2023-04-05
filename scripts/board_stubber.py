@@ -15,7 +15,7 @@ pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mprem
 
 
 import sys
-from typing import List, Tuple, Union
+from typing import List, NamedTuple, Tuple, Union
 from loguru import logger as log
 from pathlib import Path
 import subprocess
@@ -24,6 +24,7 @@ import serial.tools.list_ports
 import subprocess
 
 from threading import Timer
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 OK = 0
 ERROR = -1
@@ -32,8 +33,23 @@ ERROR = -1
 ###############################################################################################
 
 
-def run(cmd: List[str], timeout: int = 60, no_error=False) -> Tuple[int, List[str]]:
-    """ "Run a command and return the output and return code as a tuple"""
+def run(cmd: List[str], timeout: int = 60, no_error: bool = False) -> Tuple[int, List[str]]:
+    # sourcery skip: raise-specific-error
+    """
+    Run a command and return the output and return code as a tuple
+    Parameters
+    ----------
+    cmd : List[str]
+        The command to run
+    timeout : int, optional
+        The timeout in seconds, by default 60
+    no_error : bool, optional
+        If True, don't log errors, by default False
+    Returns
+    -------
+    Tuple[int, List[str]]
+        The return code and the output as a list of strings
+    """
     output = []
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -66,11 +82,16 @@ def run(cmd: List[str], timeout: int = 60, no_error=False) -> Tuple[int, List[st
 
 
 ###############################################################################################
+
+UName = NamedTuple("UName", sysname=str, nodename=str, release=str, version=str, machine=str)
+
+
 class MPRemoteBoard:
     """Class to run mpremote commands"""
 
     def __init__(self, port: str = ""):
         self.port = port
+        self.uname = None
 
     @staticmethod
     def connected_boards():
@@ -78,12 +99,23 @@ class MPRemoteBoard:
         devices = [p.device for p in serial.tools.list_ports.comports()]
         return sorted(devices)
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
     def connect(self, port: str = "") -> bool:
         """Connect to a board"""
         if port:
             self.port = port
         log.info(f"Connecting to {self.port}")
         return self.run_command(["connect", self.port])[0] == OK
+
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+    def get_uname(self):
+        rc, result = self.run_command(["exec", "import os;print(os.uname())"])
+        s = result[0]
+        if "sysname=" in s:
+            self.uname = eval(f"UName{s}")
+        else:
+            self.uname = UName(*s[1:-1].split(", "))
+        return rc, self.uname
 
     def disconnect(self) -> bool:
         """Disconnect from a board"""
@@ -186,23 +218,26 @@ def main():
     #     install_tools()
     dest = Path("./scratch")
 
-    for _ in range(3):
-        for mpr_port in MPRemoteBoard.connected_boards():
-            board = MPRemoteBoard(mpr_port)
+    for mpr_port in MPRemoteBoard.connected_boards():
+        board = MPRemoteBoard(mpr_port)
 
-            log.info(f"Generating stubs for {board.port}")
-            # check if the board is accesible and responsive
-            rc, _ = board.run_command(["exec", "import os;print(os.uname())"])
-            rc, _ = board.run_command("exec help('modules')", no_error=True)
+        log.info(f"Connecting to {board.port}")
 
-            if rc != OK:
-                log.error(f"Failed to connect to {board.port}")
-                continue
-            rc, my_stubs = generate_board_stubs(dest, board)
-            if rc == OK:
-                log.success(f" ~~{len(my_stubs)} Stubs generated for {board.port}")
-            else:
-                log.error(f"Failed to generate stubs for {board.port}")
+        try:
+            rc, uname = board.get_uname()
+            log.info(f"Connected to {uname.machine} {uname.release} {uname.version}")
+        except Exception as e:
+            log.error(f"Failed to get uname for {board.port}")
+            continue
+
+        if rc != OK:
+            log.error(f"Failed to connect to {board.port}")
+            continue
+        rc, my_stubs = generate_board_stubs(dest, board)
+        if rc == OK:
+            log.success(f" ~~{len(my_stubs)} Stubs generated for {board.port}")
+        else:
+            log.error(f"Failed to generate stubs for {board.port}")
 
 
 def set_loglevel(verbose: int) -> str:
@@ -215,9 +250,9 @@ def set_loglevel(verbose: int) -> str:
     log.remove()
     level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "TRACE")
     if level == "INFO":
-        format_str = "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{module: <18}</cyan> - <level>{message}</level>"
+        format_str = "<green>{time:HH:mm:ss}</green>|<level>{level: <8}</level>|<cyan>{module: <20}</cyan> - <level>{message}</level>"
     else:
-        format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+        format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level: <8}</level>|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
     log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
     # log.info(f"micropython-stubber {__version__}")
@@ -227,5 +262,3 @@ def set_loglevel(verbose: int) -> str:
 if __name__ == "__main__":
     set_loglevel(0)
     main()
-
-"WARN  :stubber :\x1b[1ASkip module: _mqtt                     Module not found.                                                              \n"
