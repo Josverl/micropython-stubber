@@ -1,11 +1,9 @@
 """partial used to read the modulelist.txt file"""
-
-
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
     import sys
-    from logging import Logger
+    import logging
 
     @type_check_only
     class Stubber:
@@ -38,19 +36,21 @@ if TYPE_CHECKING:
             ...
 
     gc: _gc
-    _log: Logger
-    stubber = Stubber(path=read_path())
+    _log = logging.getLogger("stubber")
 
+    # help type checker
+    stubber = Stubber()
 
-###PARTIAL###
+    ###PARTIAL###
 # Read stubs from modulelist in the current folder or in /libs
 # fall back to default modules
 stubber.modules = ["micropython"]
-for p in ["", "/lib"]:
+for p in ["", "/", "/lib/"]:
     try:
         with open(p + "modulelist" + ".txt") as f:
-            # not optimal , but works on mpremote and eps8266
+            # not optimal, but works on mpremote and eps8266
             stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+            _log.info("Using %smodulelist.txt", p)
             break
     except OSError:
         pass

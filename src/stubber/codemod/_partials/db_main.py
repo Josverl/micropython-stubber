@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
     import sys
-    from logging import Logger
+    import logging
 
     @type_check_only
     class Stubber:
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
             ...
 
     gc: _gc
-    _log: Logger
+    _log = logging.getLogger("stubber")
 
 
 ###PARTIAL###

@@ -603,11 +603,12 @@ def main():
     # Read stubs from modulelist in the current folder or in /libs
     # fall back to default modules
     stubber.modules = ["micropython"]
-    for p in ["", "/lib"]:
+    for p in ["", "/", "/lib/"]:
         try:
             with open(p + "modulelist" + ".txt") as f:
-                # not optimal , but works on mpremote and eps8266
+                # not optimal, but works on mpremote and eps8266
                 stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
+                _log.info("Using %smodulelist.txt", p)
                 break
         except OSError:
             pass
