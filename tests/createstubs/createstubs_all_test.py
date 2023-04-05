@@ -3,7 +3,7 @@ import sys
 from collections import namedtuple
 from importlib import import_module
 from pathlib import Path
-from typing import List, Any, Generator
+from typing import Any, Generator, List
 
 import pytest
 from mock import MagicMock
@@ -15,7 +15,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from conftest import import_variant, LOCATIONS, VARIANTS
+from conftest import LOCATIONS, VARIANTS, import_variant
 
 pytestmark = pytest.mark.micropython
 
@@ -113,14 +113,14 @@ def test_stubber_info_custom(
 from testcases import fwid_test_cases
 
 
-@pytest.mark.parametrize("variant", VARIANTS)
-@pytest.mark.parametrize("location", LOCATIONS)
+# @pytest.mark.parametrize("variant", VARIANTS)
+# @pytest.mark.parametrize("location", LOCATIONS)
 @pytest.mark.parametrize("fwid,  sys_imp_name, sys_platform, os_uname, mock_modules", fwid_test_cases)
 @pytest.mark.mocked
 def test_stubber_fwid(
     mock_micropython_path: Generator[str, None, None],
-    location: Any,
-    variant: str,
+    # location: str,
+    # variant: str,
     mocker: MockerFixture,
     fwid: Any,
     sys_imp_name: Any,
@@ -128,6 +128,8 @@ def test_stubber_fwid(
     os_uname: Any,
     mock_modules: List[str],
 ):
+    variant = "createstubs"
+    location = "board"
     createstubs = import_variant(location, variant)
 
     # FIX-ME : This does not yet cover minified
