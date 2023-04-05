@@ -3,7 +3,7 @@ Create stubs for the lvgl modules on a MicroPython board.
 
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-This variant was generated from createstubs.py by micropython-stubber v1.13.2
+This variant was generated from createstubs.py by micropython-stubber v1.13.3
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -13,6 +13,11 @@ import sys
 
 import uos as os
 from ujson import dumps
+
+try:
+    from machine import reset  # type: ignore
+except ImportError:
+    pass
 
 try:
     from collections import OrderedDict
@@ -160,9 +165,14 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        # if module_name in self.problematic:
-        #     self._log.warning("SKIPPING problematic module:{}".format(module_name))
-        #     return False
+        if gc.mem_free() < 8_500:
+            print("WARN Restart the MCU")
+            try:
+                from machine import reset
+
+                reset()
+            except ImportError:
+                pass
 
         if file_name is None:
             file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
