@@ -10,6 +10,7 @@ from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
+from stubber.publish.missing_class_methods import add_machine_pin_call
 from stubber.publish.package import GENERIC, GENERIC_L
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
@@ -96,9 +97,10 @@ def merge_all_docstubs(
                 # only continue if both folders exist
                 log.debug(f"skipping {merged_path.name}, no firmware stubs found")
                 continue
-
         log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
+        # Add methods from docstubs to the firmware stubs that do not exist in the firmware stubs
+        add_machine_pin_call(merged_path, candidate['version'])
         if result:
             merged += 1
     log.info(f"merged {merged} of {len(candidates)} candidates")
@@ -142,7 +144,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
                 if (dest_path / f.name).with_suffix(suffix).exists():
                     (dest_path / f.name).with_suffix(suffix).unlink()
 
-    # delete buitins.pyi in the package folder
+    # delete builtins.pyi in the package folder
     for name in [
         "builtins",  # creates conflicts, better removed
         "pycopy_imphook",  # is not intended to be used directly, and has an unresolved subclass

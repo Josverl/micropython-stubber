@@ -6,13 +6,14 @@
 # LICENSE file in the root directory of this source tree.
 #
 import argparse
-from loguru import logger as log
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
+from loguru import logger as log
+
 from stubber.cst_transformer import MODULE_KEY, StubTypingCollector, TypeInfo, update_def_docstr, update_module_docstr
 
 ##########################################################################################
@@ -122,7 +123,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
-            # no changes to the function
+            # no changes to the class
             return updated_node
         # update the firmware_stub from the doc_stub information
         new = self.annotations[stack_id]
@@ -132,7 +133,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # we need to be carefull not to copy over all the annotations if the types are different
         if new.def_type == "classdef":
             # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=new.decorators)
+            return updated_node.with_changes(decorators=new.decorators, bases=new.def_node.bases) # type: ignore
         else:
             # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
