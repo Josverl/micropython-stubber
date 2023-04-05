@@ -69,6 +69,7 @@ pypi-simple = "^1.0.0"
 cachetools = "^5.3.0"
 pipx = "^1.1.0"
 pyright = "^1.1.265"
+tenacity = "^8.2.2"
 
 [tool.poetry.extras]
 tools = ["esptool"]
