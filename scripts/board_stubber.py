@@ -1,12 +1,26 @@
 """ 
 This script creates stubs for a connectes micropython MCU board.
+
+
+# MPRemote is not working properly with ESP32 boards :-( at least on Windows)
+# this was fixed in the latest version of mpremote, not published yet on pypi
+# May need to find a way to build & include this 
+pip install git+https://github.com/micropython/micropython.git#subdirectory=tools/mpremote
+Fails on timeouts and errors in pip install 
+
+Workaround
+pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mpremote
+
 """
-from typing import List
+
+
+from typing import List, Union
 from loguru import logger as log
 from pathlib import Path
 import subprocess
 import sys
 import time
+import serial.tools.list_ports
 
 
 def check_tools():
@@ -22,8 +36,23 @@ def install_tools():
     pass
 
 
-def run_mpremote(port: str, cmd: List[str], *, check: bool = False):  # sourcery skip: assign-if-exp
-    """Run mpremote with the given command"""
+def run_mpremote(port: str, cmd: Union[str,List[str]], *, check: bool = False):  # sourcery skip: assign-if-exp
+    """Run mpremote with the given command
+    Parameters
+    ----------
+    port : str
+        The port the board is connected to
+    cmd : Union[str,List[str]]  
+        The command to run, either a string or a list of strings
+    check : bool, optional
+        If True, raise an exception if the command fails, by default False
+    Returns 
+    -------
+    bool
+        True if the command succeeded, False otherwise
+    """
+    if isinstance(cmd, str):
+        cmd = cmd.split(" ")
     if port:
         cmd = ["mpremote", "connect", port] + cmd
     else:
@@ -37,12 +66,11 @@ def run_mpremote(port: str, cmd: List[str], *, check: bool = False):  # sourcery
     return True
 
 
-def mip_install(port: str, name: str = "github:josverl/micropython-stubber"):
+def mip_install(name: str, port: str = ""):
     """Install a micropython package"""
     # install createstubs to the board
     cmd = ["mip", "install", name]
-    ok = run_mpremote(port, cmd)
-    return ok
+    return run_mpremote(port, cmd)
 
 
 def copy_createstubs(port: str):
@@ -51,12 +79,12 @@ def copy_createstubs(port: str):
     do = [
         "mkdir lib",
         "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
+        "cp ./src/stubber/board/createstubs_db.py :lib/createstubs_db.py",
         "cp ./src/stubber/board/logging.py :lib/logging.py",
         "cp ./src/stubber/board/modulelist.txt :lib/modulelist.txt",
     ]
     ok = True
-    for _cmd in do:
-        cmd = _cmd.split(" ")
+    for cmd in do:
         ok = run_mpremote(port, cmd, check=False)
     return ok
 
@@ -71,16 +99,20 @@ def generate_board_stubs(dest: Path, port: str = ""):
     port : str
         The port the board is connected to
     """
-    # ok = mip_install(port, "github:josverl/micropython-stubber")
-    ok = copy_createstubs(port)
+    if TESTING:
+        # ok = copy_createstubs(port)
+        ok = mip_install("github:josverl/micropython-stubber/mip/full.json@board_stubber", port)
+    else:
+        ok = mip_install("github:josverl/micropython-stubber", port)
     if not ok:
         return False
 
     time.sleep(2)
     # run createstubs _mem variant
-    # cmd = ["mount", str(dest), "exec", "print('wait...');import time;time.sleep(5);print('Done')"]
-    cmd = ["mount", str(dest), "exec", "import createstubs_mem"]
-    cmd = ["exec", "import createstubs_mem"]
+
+    cmd = ["mount", str(dest)] if dest else []
+    cmd += ["exec", "import createstubs_mem"]
+
     ok = run_mpremote(port, cmd)
     if not ok:
         return False
@@ -89,13 +121,32 @@ def generate_board_stubs(dest: Path, port: str = ""):
     return True
 
 
-#
+def get_connected_boards():
+    """Get a list of connected boards"""
+    devices = [p.device for p in serial.tools.list_ports.comports()]
+    return sorted(devices)
 
-if not check_tools():
-    log.warning("Some tools are missing. Please install them first.")
-    install_tools()
+
+TESTING = True
 
 
-dest = Path("./scratch")
+def main():
+    if not check_tools():
+        log.warning("Some tools are missing. Please install them first.")
+        install_tools()
+    dest = Path("./scratch")
 
-my_stubs = generate_board_stubs(dest)
+    for port in get_connected_boards():
+        log.info(f"Generating stubs for {port}")
+        # check if the board is accesible and responsive
+        if not run_mpremote(port, ["ls"], check=False):
+            log.error(f"Failed to connect to {port}")
+            continue
+        if my_stubs := generate_board_stubs(dest, port):
+            log.success(f"Stubs generated for {port}")
+        else:
+            log.error(f"Failed to generate stubs for {port}")
+
+
+if __name__ == "__main__":
+    main()
