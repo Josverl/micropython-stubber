@@ -48,7 +48,10 @@ class Stubber:
         if firmware_id:
             self._fwid = firmware_id.lower()
         else:
-            self._fwid = "{family}-{ver}-{port}".format(**self.info).lower()
+            if self.info["family"] == "micropython":
+                self._fwid = "{family}-{ver}-{port}-{board}".format(**self.info)
+            else:
+                self._fwid = "{family}-{ver}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
 
         if path:
@@ -354,7 +357,7 @@ class Stubber:
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
-        _log.info("Report file: {}".format(f_name))
+        self._log.info("Report file: {}".format(f_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
@@ -409,84 +412,116 @@ def ensure_folder(path: str):
         start = i + 1
 
 
-def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
-    "collect base information on this runtime"
-    _n = sys.implementation.name  # type: ignore
-    _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
-    info = {
-        "name": _n,  # - micropython
-        "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
-        "version": "0.0.0",  # major.minor.0
-        "build": "",  # parsed from version
-        "sysname": "unknown",  # esp32
-        "nodename": "unknown",  # ! not on all builds
-        "machine": "unknown",  # ! not on all builds
-        "family": _n,  # fw families, micropython , pycopy , lobo , pycom
-        "platform": _p,  # port: esp32 / win32 / linux
-        "port": _p,  # port: esp32 / win32 / linux
-        "ver": "",  # short version
-    }
+def _build(s):
+    # extract a build nr from a string
+    if not s:
+        return ""
+    if " on " in s:
+        s = s.split(" on ", 1)[0]
+    return s.split("-")[1] if "-" in s else ""
+
+
+def _info():  # type:() -> dict[str, str]
+    info = OrderedDict(
+        {
+            "family": sys.implementation.name,
+            "version": "",
+            "build": "",
+            "ver": "",
+            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "board": "GENERIC",
+            "cpu": "",
+            "mpy": "",
+            "arch": "",
+        }
+    )
     try:
-        info["release"] = ".".join([str(n) for n in sys.implementation.version])
-        info["version"] = info["release"]
-        info["name"] = sys.implementation.name
-        info["mpy"] = sys.implementation.mpy
+        info["version"] = ".".join([str(n) for n in sys.implementation.version])
     except AttributeError:
         pass
+    try:
+        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine
+        info["board"] = machine.strip()
+        info["cpu"] = machine.split("with")[1].strip()
+        info["mpy"] = (
+            sys.implementation._mpy
+            if "_mpy" in dir(sys.implementation)
+            else sys.implementation.mpy
+            if "mpy" in dir(sys.implementation)
+            else ""
+        )
+    except (AttributeError, IndexError):
+        pass
+    gc.collect()
+    try:
+        # look up the board name in the board_info.csv file
+        for filename in ["board_info.csv", "lib/board_info.csv"]:
+            if file_exists(filename):
+                b = info["board"].strip()
+                if find_board(info, b, filename):
+                    break
+                if "with" in b:
+                    b = b.split("with")[0].strip()
+                    if find_board(info, b, filename):
+                        break
+                info["board"] = "GENERIC"
+    except (AttributeError, IndexError, OSError):
+        pass
+    info["board"] = info["board"].replace(" ", "_")
+    gc.collect()
 
-    if sys.platform not in ("unix", "win32"):
+    try:
+        # extract build from uname().version if available
+        info["build"] = _build(os.uname()[3])
+        if not info["build"]:
+            # extract build from uname().release if available
+            info["build"] = _build(os.uname()[2])
+        if not info["build"] and ";" in sys.version:
+            # extract build from uname().release if available
+            info["build"] = _build(sys.version.split(";")[1])
+    except (AttributeError, IndexError):
+        pass
+    # avoid  build hashes
+    if info["build"] and len(info["build"]) > 5:
+        info["build"] = ""
+
+    if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
-            extract_os_info(info)
+            u = os.uname()
+            info["version"] = u.release
         except (IndexError, AttributeError, TypeError):
             pass
-
-    try:  # families
-        from pycopy import const as _t  # type: ignore
-
-        info["family"] = "pycopy"
-        del _t
-    except (ImportError, KeyError):
-        pass
-    try:  # families
-        from pycom import FAT as _t  # type: ignore
-
-        info["family"] = "pycom"
-        del _t
-
-    except (ImportError, KeyError):
-        pass
-    if info["platform"] == "esp32_LoBo":
-        info["family"] = "loboris"
-        info["port"] = "esp32"
-    elif info["sysname"] == "ev3":
-        # ev3 pybricks
-        info["family"] = "ev3-pybricks"
-        info["release"] = "1.0.0"
+    # detect families
+    for fam_name, mod_name, mod_thing in [
+        ("pycopy", "pycopy", "const"),
+        ("pycom", "pycom", "FAT"),
+        ("ev3-pybricks", "pybricks.hubs", "EV3Brick"),
+    ]:
         try:
-            # Version 2.0 introduces the EV3Brick() class.
-            from pybricks.hubs import EV3Brick  # type: ignore
-
-            info["release"] = "2.0.0"
-        except ImportError:
+            _t = __import__(mod_name, None, None, (mod_thing))
+            info["family"] = fam_name
+            del _t
+            break
+        except (ImportError, KeyError):
             pass
 
-    # version info
-    if info["release"]:
-        info["ver"] = "v" + info["release"].lstrip("v")
+    if info["family"] == "ev3-pybricks":
+        info["release"] = "2.0.0"
+
     if info["family"] == "micropython":
-        if info["release"] and info["release"] >= "1.10.0" and info["release"].endswith(".0"):
+        if (
+            info["version"]
+            and info["version"].endswith(".0")
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] <= "1.20.0"
+        ):
             # drop the .0 for newer releases
-            info["ver"] = info["release"][:-2]
-        else:
-            info["ver"] = info["release"]
-        # add the build nr, but avoid a git commit-id
-        if info["build"] != "" and len(info["build"]) < 4:
-            info["ver"] += "-" + info["build"]
-    if info["ver"][0] != "v":
-        info["ver"] = "v" + info["ver"]
+            info["version"] = info["version"][:-2]
+
     # spell-checker: disable
-    if "mpy" in info:  # mpy on some v1.11+ builds
+    if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
+        # .mpy architecture
         arch = [
             None,
             "x86",
@@ -502,30 +537,27 @@ def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
         ][sys_mpy >> 10]
         if arch:
             info["arch"] = arch
+        # .mpy version.minor
+        info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+    # simple to use version[-build] string
+    info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
+
     return info
 
 
-# spell-checker: enable
-
-
-def extract_os_info(info):
-    "get info from os.uname()"
-    u = os.uname()
-    info["sysname"] = u[0]  # u.sysname
-    info["nodename"] = u[1]  #  u.nodename
-    info["release"] = u[2]  # u.release
-    info["machine"] = u[4]  #  u.machine
-    # parse micropython build info
-    if " on " in u[3]:  # version
-        s = u[3].split(" on ")[0]
-        if info["sysname"] == "esp8266":
-            # esp8266 has no usable info on the release
-            v = s.split("-")[0] if "-" in s else s
-            info["version"] = info["release"] = v.lstrip("v")
-        try:
-            info["build"] = s.split("-")[1]
-        except IndexError:
-            pass
+def find_board(info: dict, board_descr: str, filename: str):
+    "Find the board in the board_info.csv file"
+    with open(filename, "r") as file:
+        # ugly code to make testable in python and micropython
+        while 1:
+            line = file.readline()
+            if not line:
+                break
+            descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
+            if descr_ == board_descr:
+                info["board"] = board_
+                return True
+    return False
 
 
 def get_root() -> str:  # sourcery skip: use-assigned-variable

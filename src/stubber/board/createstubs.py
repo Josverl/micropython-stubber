@@ -42,7 +42,7 @@ class Stubber:
         self.info = _info()
         gc.collect()
         if firmware_id:
-            self._fwid = firmware_id
+            self._fwid = firmware_id.lower()
         else:
             if self.info["family"] == "micropython":
                 self._fwid = "{family}-{ver}-{port}-{board}".format(**self.info)
@@ -353,7 +353,7 @@ class Stubber:
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
-        _log.info("Report file: {}".format(f_name))
+        self._log.info("Report file: {}".format(f_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
