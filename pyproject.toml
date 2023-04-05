@@ -59,7 +59,7 @@ typed-config = "^1.3.0"
 packaging = ">=21.3,<24.0"
 esptool = { version = "^4.4", optional = true }
 pyserial = { version = "^3.5", optional = true }
-mpremote = { git = "https://github.com/josverl/mpremote.git", subdirectory = "tools/mpremote" }
+mpremote = { git = "https://github.com/josverl/mpremote.git", subdirectory = "tools/mpremote", branch = "main" }
 pysondb-v2 = "^2.1.0"
 tomli-w = "^1.0.0"
 loguru = "^0.6.0"
