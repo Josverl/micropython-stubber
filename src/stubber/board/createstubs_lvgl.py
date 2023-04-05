@@ -5,7 +5,7 @@ Note that the stubs can be very large, and it may be best to directly store them
 
 This variant was generated from createstubs.py by micropython-stubber v1.13.2
 """
-# Copyright (c) 2019-2022 Jos Verlinde
+# Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import gc
 import logging
@@ -14,7 +14,10 @@ import sys
 import uos as os
 from ujson import dumps
 
-# from utime import sleep_us
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.12.2"
 ENOENT = 2
