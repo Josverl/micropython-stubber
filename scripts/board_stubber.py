@@ -11,16 +11,15 @@ Workaround
 pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mpremote
 """
 
+import subprocess
 import sys
-from typing import List, NamedTuple, Optional, Tuple, Union
-from loguru import logger as log
-from pathlib import Path
-import subprocess
 import time
-import serial.tools.list_ports
-import subprocess
-
+from pathlib import Path
 from threading import Timer
+from typing import List, NamedTuple, Optional, Tuple, Union
+
+import serial.tools.list_ports
+from loguru import logger as log
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 OK = 0
@@ -274,7 +273,8 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
     # cmd += ["exec", "import sys;sys.path.append('/lib') if '/lib' not in sys.path else None;import createstubs_db"]
     cmd += ["exec", "import createstubs_db"]
     board.run_command.retry.wait = wait_fixed(15)
-    rc, out = board.run_command(cmd, timeout=90)
+    # esp32 runs slowly with remote mount, so increase timeout
+    rc, out = board.run_command(cmd, timeout=5 * 60)  # 5 minutes - avoid interupting esp32 / rp2 builds - but slows down esp8266 restarts
     if rc != OK and variant == "db":
         # assume createstubs ran out of memory and try again
         raise MemoryError("Memory error, try again")
