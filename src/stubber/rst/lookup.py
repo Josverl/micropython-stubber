@@ -387,12 +387,14 @@ CHILD_PARENT_CLASS = {
     "Switch": "Pin",
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
-    "FileIO": "IO",
+    # "IOBase": "IO",  # DOCME  not in documentation
     "TextIOWrapper": "IO",
+    "FileIO": "IO",
     "StringIO": "IO",
     "BytesIO": "IO",
+    "BufferedWriter": "IOBase",  # DOCME: not in documentation
     # uzlib
-    "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
+    # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # -------------------------------------------------------------------------------------
     # network - AbstractNIC is definined in docstub network.pyi , but not actually used
     # "WLAN": "AbstractNIC",
