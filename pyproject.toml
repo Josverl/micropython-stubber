@@ -89,7 +89,6 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 coverage = "^6.4.3"
 distro = "^1.8.0"
-ipykernel = "^6.20.2"
 mock = "^4.0.3"
 pydeps = "^1.10.22"
 pytest = "^7.1.2"
