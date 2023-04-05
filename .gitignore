@@ -1,6 +1,4 @@
 # no python virtual environment
-venv*
-.env
 .venv*
 
 # no compiled python or caches
@@ -16,8 +14,10 @@ board/stubs
 minified/stubs
 all-stubs
 stubs
-# Interim storage for bulkstubber
+src/stubber/board/stubs
 firmware-stubs
+# Interim storage for bulkstubber
+
 
 # tempfolder used by get_core  
 build
@@ -44,13 +44,10 @@ docs/~$*
 node_modules
 
 
-scripts/bulk_stubber.json
-
 # ignore databases - status files
-board/modulelist.db
-minified/modulelist.db
-board/modulelist.done
-minified/modulelist.done
+scripts/bulk_stubber.json
+**/modulelist.db
+**/modulelist.done
 
 # no poetry packaging 
 dist/
@@ -62,4 +59,3 @@ tests/codemods/codemod_test_cases/**/output.py
 snippets/*/typings
 typings_test
 typings
-src/stubber/board/modulelist.done
