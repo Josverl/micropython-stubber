@@ -26,6 +26,13 @@ Installing: /lib/modules.txt
 Done
 ```
 
+
+| Other packages     | command      |
+|--------------------|--------------|
+| full/debug         | `mpremote mip install github:josverl/micropython-stubber/mip/full.json` |
+| minified (default) | `mpremote mip install github:josverl/micropython-stubber/mip/minified.json` |
+
+
 ## run createstubs
 A simple way to run createstubs is to use the `mpremote mount` command to allow the MCU board to directly access the PC's file system.
 Then you can run the createstubs.py script directly from the MCU board with outh the need to copy the created files back to the PC.
@@ -35,14 +42,17 @@ Navigate to the folder where you want to create the stubs and run the following 
 `mpremote mount . exec "import createstubs_mem"` or 
 
 
+
 ## low memory devices 
 
 If you have a low memory board, then you can install the cross-compiled variants to reduce the memory footprint durign compilation on the board:
 
 | MicroPython release | .mpy version | command |
 |---------------------|--------------|---------|
-| v1.19 and up        | 6            | `mpremote mip install github:josverl/micropython-stubber/mpy_v6.json` |
-| v1.12 - v1.18       | 5            | `mpremote mip install github:josverl/micropython-stubber/mpy_v5.json` |
+| v1.19 and up        | 6            | `mpremote mip install github:josverl/micropython-stubber/mip/mpy_v6.json` |
+| v1.12 - v1.18       | 5            | `mpremote mip install github:josverl/micropython-stubber/mip/mpy_v5.json` |
+
+
 
 ```log	
 Install github:josverl/micropython-stubber/mpy_v6.json
