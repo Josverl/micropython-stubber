@@ -23,10 +23,10 @@ S='-'
 R='sysname'
 Q='version'
 P=True
-O=ImportError
-N='v'
-M='build'
-L=KeyError
+O='v'
+N='build'
+M=KeyError
+L=ImportError
 I='.'
 K=len
 J=print
@@ -39,6 +39,8 @@ C='release'
 B=OSError
 import gc as E,sys,uos as os
 from ujson import dumps as b
+try:from collections import OrderedDict
+except L:from ucollections import OrderedDict
 __version__='v1.12.2'
 s=2
 t=2
@@ -89,24 +91,24 @@ class Stubber:
 		H=file_name;C=module_name
 		if H is D:H=K.path+A+C.replace(I,Z)+'.py'
 		if A in C:C=C.replace(A,I)
-		M=D
-		try:M=__import__(C,D,D,'*');J('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,H,E.mem_free()))
-		except O:return G
+		N=D
+		try:N=__import__(C,D,D,'*');J('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,H,E.mem_free()))
+		except L:return G
 		c(H)
-		with V(H,'w')as N:Q='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,K._fwid,K.info,__version__);N.write(Q);N.write('from typing import Any\n\n');K.write_object_stub(N,M,C,F)
+		with V(H,'w')as O:Q='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,K._fwid,K.info,__version__);O.write(Q);O.write('from typing import Any\n\n');K.write_object_stub(O,N,C,F)
 		K._report.append('{{"module": "{}", "file": "{}"}}'.format(C,H.replace('\\',A)))
 		if C not in{'os','sys','logging','gc'}:
-			try:del M
-			except (B,L):pass
+			try:del N
+			except (B,M):pass
 			try:del sys.modules[C]
-			except L:pass
+			except M:pass
 		E.collect();return P
 	def write_object_stub(N,fp,object_expr,obj_name,indent,in_class=0):
 		d='{0}{1} = {2} # type: {3}\n';c='bound_method';b='Any';R=in_class;Q=object_expr;P='Exception';H=fp;C=indent;E.collect()
 		if Q in N.problematic:return
 		S,O=N.get_obj_attributes(Q)
 		if O:J(O)
-		for (D,M,G,T,f) in S:
+		for (D,L,G,T,f) in S:
 			if D in['classmethod','staticmethod','BaseException',P]:continue
 			if G=="<class 'type'>"and K(C)<=t*4:
 				U=F;V=D.endswith(P)or D.endswith('Error')or D in['KeyboardInterrupt','StopIteration','SystemExit']
@@ -117,22 +119,22 @@ class Stubber:
 			elif n in G or m in G:
 				Z=b;a=F
 				if R>0:a='self, '
-				if c in G or c in M:A='{}@classmethod\n'.format(C)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(C,D,Z)
+				if c in G or c in L:A='{}@classmethod\n'.format(C)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(C,D,Z)
 				else:A='{}def {}({}*args, **kwargs) -> {}:\n'.format(C,D,a,Z)
 				A+=C+'    ...\n\n';H.write(A)
 			elif G=="<class 'module'>":0
 			elif G.startswith("<class '"):
 				I=G[8:-2];A=F
-				if I in[k,i,j,l,'bytearray','bytes']:A=d.format(C,D,M,I)
+				if I in[k,i,j,l,'bytearray','bytes']:A=d.format(C,D,L,I)
 				elif I in[Y,X,W]:e={Y:'{}',X:'[]',W:'()'};A=d.format(C,D,e[I],I)
 				else:
 					if I not in['object','set','frozenset']:I=b
-					A='{0}{1} : {2} ## {3} = {4}\n'.format(C,D,I,G,M)
+					A='{0}{1} : {2} ## {3} = {4}\n'.format(C,D,I,G,L)
 				H.write(A)
 			else:H.write("# all other, type = '{0}'\n".format(G));H.write(C+D+' # type: Any\n')
 		del S;del O
-		try:del D,M,G,T
-		except (B,L,h):pass
+		try:del D,L,G,T
+		except (B,M,h):pass
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
@@ -176,27 +178,27 @@ def c(path):
 					except B as G:J('failed to create folder {}'.format(D));raise G
 		E=C+1
 def _info():
-	a='0.0.0';Z='port';Y='platform';X='name';P='mpy';J='unknown';E='family';B='ver';T=sys.implementation.name;V='stm32'if sys.platform.startswith('pyb')else sys.platform;A={X:T,C:a,Q:a,M:F,R:J,p:J,q:J,E:T,Y:V,Z:V,B:F}
+	a='0.0.0';Z='port';Y='platform';X='name';P='mpy';J='unknown';E='family';B='ver';T=sys.implementation.name;V='stm32'if sys.platform.startswith('pyb')else sys.platform;A={X:T,C:a,Q:a,N:F,R:J,p:J,q:J,E:T,Y:V,Z:V,B:F}
 	try:A[C]=I.join([str(A)for A in sys.implementation.version]);A[Q]=A[C];A[X]=sys.implementation.name;A[P]=sys.implementation.mpy
 	except H:pass
 	if sys.platform not in('unix','win32'):
 		try:u(A)
 		except (U,H,TypeError):pass
 	try:from pycopy import const as G;A[E]='pycopy';del G
-	except (O,L):pass
+	except (L,M):pass
 	try:from pycom import FAT as G;A[E]='pycom';del G
-	except (O,L):pass
+	except (L,M):pass
 	if A[Y]=='esp32_LoBo':A[E]='loboris';A[Z]='esp32'
 	elif A[R]=='ev3':
 		A[E]='ev3-pybricks';A[C]='1.0.0'
 		try:from pybricks.hubs import EV3Brick;A[C]='2.0.0'
-		except O:pass
-	if A[C]:A[B]=N+A[C].lstrip(N)
+		except L:pass
+	if A[C]:A[B]=O+A[C].lstrip(O)
 	if A[E]==r:
 		if A[C]and A[C]>='1.10.0'and A[C].endswith('.0'):A[B]=A[C][:-2]
 		else:A[B]=A[C]
-		if A[M]!=F and K(A[M])<4:A[B]+=S+A[M]
-	if A[B][0]!=N:A[B]=N+A[B]
+		if A[N]!=F and K(A[N])<4:A[B]+=S+A[N]
+	if A[B][0]!=O:A[B]=O+A[B]
 	if P in A:
 		b=int(A[P]);W=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][b>>10]
 		if W:A['arch']=W
@@ -205,8 +207,8 @@ def u(info):
 	E=' on ';A=info;B=os.uname();A[R]=B[0];A[p]=B[1];A[C]=B[2];A[q]=B[4]
 	if E in B[3]:
 		D=B[3].split(E)[0]
-		if A[R]=='esp8266':F=D.split(S)[0]if S in D else D;A[Q]=A[C]=F.lstrip(N)
-		try:A[M]=D.split(S)[1]
+		if A[R]=='esp8266':F=D.split(S)[0]if S in D else D;A[Q]=A[C]=F.lstrip(O)
+		try:A[N]=D.split(S)[1]
 		except U:pass
 def get_root():
 	try:C=os.getcwd()

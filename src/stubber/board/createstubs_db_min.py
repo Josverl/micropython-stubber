@@ -21,11 +21,11 @@ U=repr
 T='-'
 S='sysname'
 R='version'
-Q=ImportError
-P='v'
-O='build'
-N=True
-M=KeyError
+Q='v'
+P='build'
+O=True
+N=KeyError
+M=ImportError
 L='.'
 K=len
 I=open
@@ -39,6 +39,8 @@ C='release'
 B=OSError
 import gc as A,sys,uos as os
 from ujson import dumps as b
+try:from collections import OrderedDict
+except M:from ucollections import OrderedDict
 __version__='v1.12.2'
 s=2
 t=2
@@ -89,22 +91,22 @@ class Stubber:
 		H=file_name;C=module_name
 		if H is D:H=K.path+E+C.replace(L,Z)+'.py'
 		if E in C:C=C.replace(E,L)
-		O=D
-		try:O=__import__(C,D,D,'*');J('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,H,A.mem_free()))
-		except Q:return G
+		P=D
+		try:P=__import__(C,D,D,'*');J('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,H,A.mem_free()))
+		except M:return G
 		c(H)
-		with I(H,'w')as P:R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,K._fwid,K.info,__version__);P.write(R);P.write('from typing import Any\n\n');K.write_object_stub(P,O,C,F)
+		with I(H,'w')as Q:R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,K._fwid,K.info,__version__);Q.write(R);Q.write('from typing import Any\n\n');K.write_object_stub(Q,P,C,F)
 		K._report.append('{{"module": "{}", "file": "{}"}}'.format(C,H.replace('\\',E)))
 		if C not in{'os','sys','logging','gc'}:
-			try:del O
-			except (B,M):pass
+			try:del P
+			except (B,N):pass
 			try:del sys.modules[C]
-			except M:pass
-		A.collect();return N
-	def write_object_stub(N,fp,object_expr,obj_name,indent,in_class=0):
+			except N:pass
+		A.collect();return O
+	def write_object_stub(M,fp,object_expr,obj_name,indent,in_class=0):
 		d='{0}{1} = {2} # type: {3}\n';c='bound_method';b='Any';R=in_class;Q=object_expr;P='Exception';H=fp;D=indent;A.collect()
-		if Q in N.problematic:return
-		S,O=N.get_obj_attributes(Q)
+		if Q in M.problematic:return
+		S,O=M.get_obj_attributes(Q)
 		if O:J(O)
 		for (E,L,G,T,f) in S:
 			if E in['classmethod','staticmethod','BaseException',P]:continue
@@ -113,7 +115,7 @@ class Stubber:
 				if V:U=P
 				C='\n{}class {}({}):\n'.format(D,E,U)
 				if V:C+=D+'    ...\n';H.write(C);return
-				H.write(C);N.write_object_stub(H,T,'{0}.{1}'.format(obj_name,E),D+'    ',R+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';H.write(C)
+				H.write(C);M.write_object_stub(H,T,'{0}.{1}'.format(obj_name,E),D+'    ',R+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';H.write(C)
 			elif n in G or m in G:
 				Z=b;a=F
 				if R>0:a='self, '
@@ -132,7 +134,7 @@ class Stubber:
 			else:H.write("# all other, type = '{0}'\n".format(G));H.write(D+E+' # type: Any\n')
 		del S;del O
 		try:del E,L,G,T
-		except (B,M,h):pass
+		except (B,N,h):pass
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
@@ -153,7 +155,7 @@ class Stubber:
 		J('Created stubs for {} modules on board {}\nPath: {}'.format(K(C._report),C._fwid,C.path));F=o.format(C.path,filename);A.collect()
 		try:
 			with I(F,'w')as D:
-				C.write_json_header(D);E=N
+				C.write_json_header(D);E=O
 				for H in C._report:C.write_json_node(D,H,E);E=G
 				C.write_json_end(D)
 			L=C._start_free-A.mem_free()
@@ -176,27 +178,27 @@ def c(path):
 					except B as G:J('failed to create folder {}'.format(C));raise G
 		D=A+1
 def _info():
-	a='0.0.0';Z='port';Y='platform';X='name';J='mpy';I='unknown';E='family';B='ver';N=sys.implementation.name;U='stm32'if sys.platform.startswith('pyb')else sys.platform;A={X:N,C:a,R:a,O:F,S:I,p:I,q:I,E:N,Y:U,Z:U,B:F}
+	a='0.0.0';Z='port';Y='platform';X='name';J='mpy';I='unknown';E='family';B='ver';O=sys.implementation.name;U='stm32'if sys.platform.startswith('pyb')else sys.platform;A={X:O,C:a,R:a,P:F,S:I,p:I,q:I,E:O,Y:U,Z:U,B:F}
 	try:A[C]=L.join([str(A)for A in sys.implementation.version]);A[R]=A[C];A[X]=sys.implementation.name;A[J]=sys.implementation.mpy
 	except H:pass
 	if sys.platform not in('unix','win32'):
 		try:u(A)
 		except (V,H,TypeError):pass
 	try:from pycopy import const as G;A[E]='pycopy';del G
-	except (Q,M):pass
+	except (M,N):pass
 	try:from pycom import FAT as G;A[E]='pycom';del G
-	except (Q,M):pass
+	except (M,N):pass
 	if A[Y]=='esp32_LoBo':A[E]='loboris';A[Z]='esp32'
 	elif A[S]=='ev3':
 		A[E]='ev3-pybricks';A[C]='1.0.0'
 		try:from pybricks.hubs import EV3Brick;A[C]='2.0.0'
-		except Q:pass
-	if A[C]:A[B]=P+A[C].lstrip(P)
+		except M:pass
+	if A[C]:A[B]=Q+A[C].lstrip(Q)
 	if A[E]==r:
 		if A[C]and A[C]>='1.10.0'and A[C].endswith('.0'):A[B]=A[C][:-2]
 		else:A[B]=A[C]
-		if A[O]!=F and K(A[O])<4:A[B]+=T+A[O]
-	if A[B][0]!=P:A[B]=P+A[B]
+		if A[P]!=F and K(A[P])<4:A[B]+=T+A[P]
+	if A[B][0]!=Q:A[B]=Q+A[B]
 	if J in A:
 		b=int(A[J]);W=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][b>>10]
 		if W:A['arch']=W
@@ -205,8 +207,8 @@ def u(info):
 	E=' on ';A=info;B=os.uname();A[S]=B[0];A[p]=B[1];A[C]=B[2];A[q]=B[4]
 	if E in B[3]:
 		D=B[3].split(E)[0]
-		if A[S]=='esp8266':F=D.split(T)[0]if T in D else D;A[R]=A[C]=F.lstrip(P)
-		try:A[O]=D.split(T)[1]
+		if A[S]=='esp8266':F=D.split(T)[0]if T in D else D;A[R]=A[C]=F.lstrip(Q)
+		try:A[P]=D.split(T)[1]
 		except V:pass
 def get_root():
 	try:A=os.getcwd()
@@ -217,7 +219,7 @@ def get_root():
 		except B:continue
 	return C
 def v(filename):
-	try:os.stat(filename);return N
+	try:os.stat(filename);return O
 	except B:return G
 def d():sys.exit(1)
 def read_path():
@@ -230,12 +232,12 @@ def read_path():
 	return path
 def e():
 	try:A=bytes('abc',encoding='utf8');B=e.__module__;return G
-	except (f,H):return N
+	except (f,H):return O
 def main():
 	P='failed';L='.done';J='modulelist';import machine as R
 	try:A.threshold(512)
 	except H:pass
-	try:D=I(J+L,'r+b');Q=N
+	try:D=I(J+L,'r+b');Q=O
 	except B:D=I(J+L,'w+b');Q=G
 	stubber=Stubber(path=read_path())
 	if not Q:stubber.clean()
@@ -257,11 +259,11 @@ def main():
 	except (B,SyntaxError):pass
 	A.collect();V=[A for A in stubber.modules if A not in E.keys()];A.collect()
 	for M in V:
-		O=G
-		try:O=stubber.create_one_stub(M)
+		N=G
+		try:N=stubber.create_one_stub(M)
 		except MemoryError:R.reset()
-		A.collect();E[M]=str(stubber._report[-1]if O else P)
-		with I(J+L,'a')as D:D.write('{}={}\n'.format(M,'ok'if O else P))
+		A.collect();E[M]=str(stubber._report[-1]if N else P)
+		with I(J+L,'a')as D:D.write('{}={}\n'.format(M,'ok'if N else P))
 	if E:stubber._report=[A for(B,A)in E.items()if A!=P];stubber.report()
 if __name__=='__main__'or e():
 	try:logging.basicConfig(level=logging.INFO)
