@@ -14,6 +14,7 @@ pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mprem
 """
 
 
+import sys
 from typing import List, Tuple, Union
 from loguru import logger as log
 from pathlib import Path
@@ -24,21 +25,14 @@ import subprocess
 
 from threading import Timer
 
-
-# def check_tools():
-#     """Check if all tools are available"""
-#     # stubber
-#     # pipx
-#     # mpremote
-#     return True
+OK = 0
+ERROR = -1
 
 
-# def install_tools():
-#     """Install all required tools"""
-#     pass
+###############################################################################################
 
 
-def run(cmd: List[str], timeout: int = 10, no_error=False) -> Tuple[List[str], int]:
+def run(cmd: List[str], timeout: int = 60, no_error=False) -> Tuple[int, List[str]]:
     """ "Run a command and return the output and return code as a tuple"""
     output = []
     try:
@@ -64,49 +58,109 @@ def run(cmd: List[str], timeout: int = 10, no_error=False) -> Tuple[List[str], i
         timer.cancel()
 
     proc.wait(timeout=1)
-    return output, proc.returncode
+    return proc.returncode, output
 
 
-def run_mpremote(port: str, cmd: Union[str, List[str]], *, no_error: bool = False):  # sourcery skip: assign-if-exp
-    """Run mpremote with the given command
-    Parameters
-    ----------
-    port : str
-        The port the board is connected to
-    cmd : Union[str,List[str]]
-        The command to run, either a string or a list of strings
-    check : bool, optional
-        If True, raise an exception if the command fails, by default False
-    Returns
-    -------
-    bool
-        True if the command succeeded, False otherwise
-    """
-    if isinstance(cmd, str):
-        cmd = cmd.split(" ")
-    if port:
-        cmd = ["mpremote", "connect", port] + cmd
-    else:
-        # cmd = ["mpremote", "resume"] + cmd
-        cmd = ["mpremote"] + cmd
+###############################################################################################
+class MPRemoteBoard:
+    """Class to run mpremote commands"""
 
-    log.info(" ".join(cmd))
-    return run(cmd, timeout=3 * 60, no_error=no_error)
+    def __init__(self, port: str = ""):
+        self.port = port
+
+    @staticmethod
+    def connected_boards():
+        """Get a list of connected boards"""
+        devices = [p.device for p in serial.tools.list_ports.comports()]
+        return sorted(devices)
+
+    def connect(self, port: str = "") -> bool:
+        """Connect to a board"""
+        if port:
+            self.port = port
+        log.info(f"Connecting to {self.port}")
+        return self.run_command(["connect", self.port])[0] == OK
+
+    def disconnect(self) -> bool:
+        """Disconnect from a board"""
+        if not self.port:
+            log.error("No port connected")
+            return False
+        log.info(f"Disconnecting from {self.port}")
+        return self.run_command(["disconnect"])[0] == OK
+
+    def run_command(self, cmd: Union[str, List[str]], *, no_error: bool = False):
+        """Run mpremote with the given command
+        Parameters
+        ----------
+        cmd : Union[str,List[str]]
+            The command to run, either a string or a list of strings
+        check : bool, optional
+            If True, raise an exception if the command fails, by default False
+        Returns
+        -------
+        bool
+            True if the command succeeded, False otherwise
+        """
+        if isinstance(cmd, str):
+            cmd = cmd.split(" ")
+        # TODO: ADD RESUME to keep state between commands
+        if self.port:
+            cmd = ["mpremote", "connect", self.port] + cmd
+        else:
+            # cmd = ["mpremote", "resume"] + cmd
+            cmd = ["mpremote"] + cmd
+
+        log.debug(" ".join(cmd))
+        return run(cmd, timeout=3 * 60, no_error=no_error)
+
+    def mip_install(self, name: str) -> bool:
+        """Install a micropython package"""
+        # install createstubs to the board
+        cmd = ["mip", "install", name]
+        return self.run_command(cmd)[0] == OK
 
 
-def mip_install(name: str, port: str = "") -> bool:
-    """Install a micropython package"""
-    # install createstubs to the board
-    cmd = ["mip", "install", name]
-    _, rc = run_mpremote(port, cmd)
-    return rc == 0
+# def run_mpremote(port: str, cmd: Union[str, List[str]], *, no_error: bool = False) -> Tuple[int, List[str]]:  # sourcery skip: assign-if-exp
+#     """Run mpremote with the given command
+#     Parameters
+#     ----------
+#     port : str
+#         The port the board is connected to
+#     cmd : Union[str,List[str]]
+#         The command to run, either a string or a list of strings
+#     check : bool, optional
+#         If True, raise an exception if the command fails, by default False
+#     Returns
+#     -------
+#     bool
+#         True if the command succeeded, False otherwise
+#     """
+#     if isinstance(cmd, str):
+#         cmd = cmd.split(" ")
+#     if port:
+#         cmd = ["mpremote", "connect", port] + cmd
+#     else:
+#         # cmd = ["mpremote", "resume"] + cmd
+#         cmd = ["mpremote"] + cmd
+
+#     log.debug(" ".join(cmd))
+#     return run(cmd, timeout=3 * 60, no_error=no_error)
 
 
-def copy_createstubs(port: str) -> bool:
-    """Copy createstubs to theboard"""
+# def mip_install(name: str, port: str = "") -> bool:
+#     """Install a micropython package"""
+#     # install createstubs to the board
+#     cmd = ["mip", "install", name]
+#     rc, _ = run_mpremote(port, cmd)
+#     return rc == 0
+
+
+def copy_createstubs(board: MPRemoteBoard) -> bool:
+    """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
     do = [
-        "mkdir lib",
+        ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
         "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
         "cp ./src/stubber/board/createstubs_db.py :lib/createstubs_db.py",
         "cp ./src/stubber/board/logging.py :lib/logging.py",
@@ -114,13 +168,13 @@ def copy_createstubs(port: str) -> bool:
     ]
     ok = True
     for cmd in do:
-        _, rc = run_mpremote(port, cmd, no_error=True)
-        if rc != 0:
+        rc, _ = board.run_command(cmd)
+        if rc != OK:
             ok = False
     return ok
 
 
-def generate_board_stubs(dest: Path, port: str = "") -> Tuple[bool, List[str]]:
+def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[str]]:
     """
     Generate the board stubs.
     Parameters
@@ -131,31 +185,26 @@ def generate_board_stubs(dest: Path, port: str = "") -> Tuple[bool, List[str]]:
         The port the board is connected to
     """
     if TESTING:
-        ok = copy_createstubs(port)
-        # ok = mip_install("github:josverl/micropython-stubber/mip/full.json@board_stubber", port)
+        ok = copy_createstubs(board)
+        # ok = board.mip_install("github:josverl/micropython-stubber/mip/full.json@board_stubber")
     else:
-        ok = mip_install("github:josverl/micropython-stubber", port)
+        ok = board.mip_install("github:josverl/micropython-stubber")
     if not ok:
-        return False, []
+        return ERROR, []
 
     time.sleep(2)
-    # run createstubs _mem variant
 
+    # TODO: run createstubs _db variant - until done
     cmd = ["mount", str(dest)] if dest else []
     cmd += ["exec", "import createstubs_mem"]
 
-    out, rc = run_mpremote(port, cmd)
-    if rc != 0:
-        return False, []
-    # post_processing(dest)
-    # TODO: read path and count stubs from output
-    return True, [out[-1]]
+    rc, out = board.run_command(cmd)
+    if rc != OK:
+        return ERROR, []
 
+    # TODO: post_processing(dest)
 
-def get_connected_boards():
-    """Get a list of connected boards"""
-    devices = [p.device for p in serial.tools.list_ports.comports()]
-    return sorted(devices)
+    return OK, out
 
 
 TESTING = True
@@ -167,19 +216,42 @@ def main():
     #     install_tools()
     dest = Path("./scratch")
 
-    for port in get_connected_boards():
-        log.info(f"Generating stubs for {port}")
+    for mpr_port in MPRemoteBoard.connected_boards():
+        board = MPRemoteBoard(mpr_port)
+
+        log.info(f"Generating stubs for {board.port}")
         # check if the board is accesible and responsive
-        if not run_mpremote(port, ["ls"]):
-            log.error(f"Failed to connect to {port}")
+        rc, _ = board.run_command("exec help('modules')", no_error=True)
+
+        if rc != OK:
+            log.error(f"Failed to connect to {board.port}")
             continue
-        ok, my_stubs = generate_board_stubs(dest, port)
-        if ok:
-            log.success(f"Stubs generated for {port}")
+        rc, my_stubs = generate_board_stubs(dest, board)
+        if rc == OK:
+            log.success(f" ~~{len(my_stubs)} Stubs generated for {board.port}")
         else:
-            log.error(f"Failed to generate stubs for {port}")
+            log.error(f"Failed to generate stubs for {board.port}")
+
+
+def set_loglevel(verbose: int) -> str:
+    """Set log level based on verbose level
+    Get the level from the verbose setting (0=INFO, 1=DEBUG, 2=TRACE)
+    Set the format string, based on the level.
+    Add the handler to the logger, with the level and format string.
+    Return the level
+    """
+    log.remove()
+    level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "TRACE")
+    if level == "INFO":
+        format_str = "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{module: <18}</cyan> - <level>{message}</level>"
+    else:
+        format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+
+    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
+    # log.info(f"micropython-stubber {__version__}")
+    return level
 
 
 if __name__ == "__main__":
-    ...
+    set_loglevel(0)
     main()
