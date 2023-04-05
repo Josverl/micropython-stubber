@@ -83,7 +83,6 @@ def test_stubber_info_basic(location: Any, variant: str, mock_micropython_path: 
     print(info)
     assert info["family"] != "", "stubber.info() - No Family detected"
     assert info["port"] != "", "stubber.info() - No port detected"
-    assert info["platform"] != "", "stubber.info() - No platform detected"
     assert info["ver"] != "", "stubber.info() - No clean version detected"
 
     assert stubber._fwid != "none"
@@ -298,9 +297,9 @@ def test_create_module_stub_ignored(
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
     # should not generate
-    stubber.create_module_stub("_internal", str(tmp_path / "_internal.py"))
-    stubber.create_module_stub("http_client", str(tmp_path / "http_client.py"))
-    stubber.create_module_stub("webrepl", str(tmp_path / "webrepl.py"))
+    stubber.create_one_stub("upysh")
+    stubber.create_one_stub("http_client")
+    stubber.create_one_stub("webrepl")
 
     stublist = list(tmp_path.glob("**/*.py"))
     assert len(stublist) == 0

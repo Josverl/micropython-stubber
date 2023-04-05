@@ -117,7 +117,7 @@ fwid_test_cases = [
     ("micropython-v1.13-95-stm32-PYBV11", "micropython", (1, 13, 0), "pyb1", pyb1_v1_13_PYB11, []),
     # RP2
     (
-        "micropython-v1.18-rp2",
+        "micropython-v1.18-rp2-PICO",
         "micropython",
         (1, 18, 0),
         "rp2",
@@ -126,7 +126,21 @@ fwid_test_cases = [
             nodename="rp2",
             release="1.18.0",
             version="v1.18-g0fff2e03f on 2020-10-03",
-            machine="rp2v1.1 with ????",
+            machine="Raspberry Pi Pico with RP2040",
+        ),
+        [],
+    ),
+    (
+        "micropython-v1.19.1-721-rp2-PICO_W",
+        "micropython",
+        (1, 19, 1),
+        "rp2",
+        UName(
+            sysname="rp2",
+            nodename="rp2",
+            release="1.19.1",
+            version="v1.19.1-721-gd5181034f on 2022-11-28",
+            machine="Raspberry Pi Pico W with RP2040",
         ),
         [],
     ),
