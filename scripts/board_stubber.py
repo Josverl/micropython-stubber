@@ -332,12 +332,7 @@ def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[st
     # MCU: add lib to path
     rc, out = run_createstubs(dest, board, variant="")
 
-    if rc != OK:
-        return ERROR, []
-
-    # TODO: post_processing(dest)
-
-    return OK, out
+    return (ERROR, []) if rc != OK else (OK, out)
 
 
 TESTING = True
