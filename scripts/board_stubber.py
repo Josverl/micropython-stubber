@@ -218,6 +218,10 @@ def copy_createstubs(board: MPRemoteBoard) -> bool:
     # copy createstubs.py to the destination folder
     _full = [
         ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
+        "rm :lib/createstubs.mpy",
+        "rm :lib/createstubs_mem.mpy",
+        "rm :lib/createstubs_db.mpy",
+        "cp ./src/stubber/board/createstubs.py :lib/createstubs.py",
         "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
         "cp ./src/stubber/board/createstubs_db.py :lib/createstubs_db.py",
         "cp ./src/stubber/board/logging.py :lib/logging.py",
@@ -225,24 +229,30 @@ def copy_createstubs(board: MPRemoteBoard) -> bool:
     # copy createstubs*_min.py to the destination folder
     _min = [
         ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
+        "cp ./src/stubber/board/createstubs_min.py :lib/createstubs.py",
         "cp ./src/stubber/board/createstubs_mem_min.py :lib/createstubs_mem.py",
         "cp ./src/stubber/board/createstubs_db_min.py :lib/createstubs_db.py",
     ]
     # copy createstubs*_mpy.mpy to the destination folder
     _mpy = [
         ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
+        "rm :lib/createstubs.py",
         "rm :lib/createstubs_mem.py",
         "rm :lib/createstubs_db.py",
-        # "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
+        "cp ./src/stubber/board/createstubs_mpy.mpy :lib/createstubs.mpy",
+        "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
         "cp ./src/stubber/board/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
-        "cp ./board_info.csv :lib/board_info.csv",
     ]
 
-    do = _mpy + [
+    _get_ready = [
         "rm :modulelist.done",
         # "cp ./scratch/modulelist.txt :lib/modulelist.txt",  # reduced set for testing
         "cp ./src/stubber/board/modulelist.txt :lib/modulelist.txt",
+        "cp ./board_info.csv :lib/board_info.csv",
     ]
+    # do = _full + _get_ready
+    # do = _min + _get_ready
+    do = _mpy + _get_ready
 
     ok = True  # assume all ok, unless one is not ok
     for cmd in do:
@@ -269,18 +279,32 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
     cmd_path = ["exec", 'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"']
     board.run_command(cmd_path, timeout=5)
 
-    cmd = ["resume", "mount", str(dest)] if dest else []
-    # cmd += ["exec", "import sys;sys.path.append('/lib') if '/lib' not in sys.path else None;import createstubs_db"]
-    cmd += ["exec", "import createstubs_db"]
+    cmd = build_cmd(dest, variant)
     board.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes so increase timeout
     #  but slows down esp8266 restarts so keep that to 60 seconds
     timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60
     rc, out = board.run_command(cmd, timeout=timeout)
+    # check last line for exception or error and raise that if found
+    if rc != OK and ":" in out[-1]:
+        raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
+
     if rc != OK and variant == "db":
         # assume createstubs ran out of memory and try again
         raise MemoryError("Memory error, try again")
     return rc, out
+
+
+def build_cmd(dest, variant):
+    """Build the import createstubs[_??] command to run on the board"""
+    cmd = ["resume", "mount", str(dest)] if dest else []
+    if variant == "db":
+        cmd += ["exec", "import createstubs_db"]
+    elif variant == "mem":
+        cmd += ["exec", "import createstubs_mem"]
+    else:
+        cmd += ["exec", "import createstubs"]
+    return cmd
 
 
 def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[str]]:
@@ -296,6 +320,7 @@ def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[st
     # HOST -> MCU : copy createstubs to board
     if TESTING:
         ok = copy_createstubs(board)
+
         # ok = board.mip_install("github:josverl/micropython-stubber/mip/full.json@board_stubber")
     else:
         ok = board.mip_install("github:josverl/micropython-stubber")
@@ -305,7 +330,7 @@ def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[st
     (dest / "modulelist.done").unlink(missing_ok=True)
 
     # MCU: add lib to path
-    rc, out = run_createstubs(dest, board)
+    rc, out = run_createstubs(dest, board, variant="")
 
     if rc != OK:
         return ERROR, []

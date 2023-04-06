@@ -8,8 +8,8 @@ from io import TextIOWrapper
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
-    import sys
     import logging
+    import sys
 
     @type_check_only
     class Stubber:
@@ -85,7 +85,7 @@ def main():
 
     # get list of modules to process
     stubber.modules = ["micropython"]
-    for p in ["", "/libs"]:
+    for p in [".", "/lib", "lib"]:
         try:
             with open(p + "modulelist" + ".txt") as f:
                 for line in f.read().split("\n"):
@@ -124,13 +124,6 @@ def main():
         except MemoryError:
             # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
             machine.reset()
-
-        # if ok:
-        #     stubber.write_json_node(mod_fp, modulename, first_json)
-        #     first_json = False
-
-        # # save the (last) result back to the database/result file
-        # result = stubber._report[-1] if ok else "failed"
         # -------------------------------------
         gc.collect()
         modules_done[modulename] = str(stubber._report[-1] if ok else "failed")

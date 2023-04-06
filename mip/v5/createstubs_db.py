@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.13.2
+This variant was generated from createstubs.py by micropython-stubber v1.13.3
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -30,6 +30,11 @@ import uos as os
 from ujson import dumps
 
 try:
+    from machine import reset  # type: ignore
+except ImportError:
+    pass
+
+try:
     from collections import OrderedDict
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
@@ -37,13 +42,6 @@ except ImportError:
 __version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
-# # deal with ESP32 firmware specific implementations.
-# try:
-#     from machine import resetWDT  # type: ignore  - LoBo specific function
-# except ImportError:
-#     # machine.WDT.feed()
-#     def resetWDT():
-#         pass
 
 
 class Stubber:
@@ -175,9 +173,14 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        # if module_name in self.problematic:
-        #     self._log.warning("SKIPPING problematic module:{}".format(module_name))
-        #     return False
+        if gc.mem_free() < 8_500:
+            print("WARN Restart the MCU")
+            try:
+                from machine import reset
+
+                reset()
+            except ImportError:
+                pass
 
         if file_name is None:
             file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
@@ -271,7 +274,7 @@ class Stubber:
                     indent + "    ",
                     in_class + 1,
                 )
-                # close with the __init__ method to make sure that the literals are defined
+                # end with the __init__ method to make sure that the literals are defined
                 # Add __init__
                 s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
                 s += indent + "        ...\n\n"
@@ -291,7 +294,6 @@ class Stubber:
                     s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
-                # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
@@ -333,7 +335,7 @@ class Stubber:
         del errors
         try:
             del item_name, item_repr, item_type_txt, item_instance  # type: ignore
-        except (OSError, KeyError, NameError):  # lgtm [py/unreachable-statement]
+        except (OSError, KeyError, NameError):
             pass
 
     @property
@@ -354,7 +356,7 @@ class Stubber:
         try:
             os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
-        except (OSError, AttributeError):  # lgtm [py/unreachable-statement]
+        except (OSError, AttributeError):
             # os.listdir fails on unix
             return
         for fn in items:
@@ -421,7 +423,7 @@ def ensure_folder(path: str):
                     try:
                         os.mkdir(p)
                     except OSError as e2:
-                        # self._log.error("failed to create folder {}".format(p))
+                        _log.error("failed to create folder {}".format(p))
                         raise e2
         # next level deep
         start = i + 1
@@ -468,20 +470,21 @@ def _info():  # type:() -> dict[str, str]
     except (AttributeError, IndexError):
         pass
     gc.collect()
-    try:
-        # look up the board name in the board_info.csv file
-        for filename in ["board_info.csv", "lib/board_info.csv"]:
-            if file_exists(filename):
-                b = info["board"].strip()
+    # try:
+    for filename in [d + "/board_info.csv" for d in [".", "/lib", "lib"]]:
+        print("look up the board name in the file", filename)
+        if file_exists(filename):
+            _log.info("Found board info file: {}".format(filename))
+            b = info["board"].strip()
+            if find_board(info, b, filename):
+                break
+            if "with" in b:
+                b = b.split("with")[0].strip()
                 if find_board(info, b, filename):
                     break
-                if "with" in b:
-                    b = b.split("with")[0].strip()
-                    if find_board(info, b, filename):
-                        break
-                info["board"] = "GENERIC"
-    except (AttributeError, IndexError, OSError):
-        pass
+            info["board"] = "GENERIC"
+    # except (AttributeError, IndexError, OSError):
+    #     pass
     info["board"] = info["board"].replace(" ", "_")
     gc.collect()
 
@@ -561,7 +564,7 @@ def _info():  # type:() -> dict[str, str]
 
 
 def find_board(info: dict, board_descr: str, filename: str):
-    "Find the board in the board_info.csv file"
+    "Find the board in the provided board_info.csv file"
     with open(filename, "r") as file:
         # ugly code to make testable in python and micropython
         while 1:
@@ -594,8 +597,9 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
 
 def file_exists(filename: str):
     try:
-        os.stat(filename)
-        return True
+        if os.stat(filename)[0] >> 14:
+            return True
+        return False
     except OSError:
         return False
 
@@ -671,7 +675,7 @@ def main():
 
     # get list of modules to process
     stubber.modules = ["micropython"]
-    for p in ["", "/libs"]:
+    for p in [".", "/lib", "lib"]:
         try:
             with open(p + "modulelist" + ".txt") as f:
                 for line in f.read().split("\n"):
@@ -710,13 +714,6 @@ def main():
         except MemoryError:
             # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
             machine.reset()
-
-        # if ok:
-        #     stubber.write_json_node(mod_fp, modulename, first_json)
-        #     first_json = False
-
-        # # save the (last) result back to the database/result file
-        # result = stubber._report[-1] if ok else "failed"
         # -------------------------------------
         gc.collect()
         modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
