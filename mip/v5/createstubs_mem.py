@@ -48,6 +48,8 @@ class Stubber:
         self._log = logging.getLogger("stubber")
         self._report = []  # type: list[str]
         self.info = _info()
+        self._log.info("Port: {}".format(self.info["port"]))
+        self._log.info("Board: {}".format(self.info["board"]))
         gc.collect()
         if firmware_id:
             self._fwid = firmware_id.lower()
@@ -174,7 +176,10 @@ class Stubber:
                 pass
 
         if file_name is None:
-            file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
+            fname = module_name.replace(".", "_") + ".py"
+            file_name = self.path + "/" + fname
+        else:
+            fname = file_name.split("/")[-1]
 
         if "/" in module_name:
             # for nested modules
@@ -184,7 +189,7 @@ class Stubber:
         new_module = None
         try:
             new_module = __import__(module_name, None, None, ("*"))
-            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, gc.mem_free()))  # type: ignore
+            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, gc.mem_free()))  # type: ignore
 
         except ImportError:
             self._log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -461,9 +466,8 @@ def _info():  # type:() -> dict[str, str]
     except (AttributeError, IndexError):
         pass
     gc.collect()
-    # try:
     for filename in [d + "/board_info.csv" for d in [".", "/lib", "lib"]]:
-        print("look up the board name in the file", filename)
+        # print("look up the board name in the file", filename)
         if file_exists(filename):
             _log.info("Found board info file: {}".format(filename))
             b = info["board"].strip()
@@ -474,8 +478,6 @@ def _info():  # type:() -> dict[str, str]
                 if find_board(info, b, filename):
                     break
             info["board"] = "GENERIC"
-    # except (AttributeError, IndexError, OSError):
-    #     pass
     info["board"] = info["board"].replace(" ", "_")
     gc.collect()
 
