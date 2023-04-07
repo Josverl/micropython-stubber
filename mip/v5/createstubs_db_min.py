@@ -269,6 +269,7 @@ def main():
 	for R in [L,t,u]:
 		try:
 			with J(R+'/modulelist.txt')as D:
+				stubber.modules=[]
 				for C in D.read().split('\n'):
 					C=C.strip()
 					if M(C)>0 and C[0]!='#':stubber.modules.append(C)

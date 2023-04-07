@@ -88,6 +88,7 @@ def main():
     for p in [".", "/lib", "lib"]:
         try:
             with open(p + "/modulelist.txt") as f:
+                stubber.modules = []  # avoid duplicates
                 for line in f.read().split("\n"):
                     line = line.strip()
                     if len(line) > 0 and line[0] != "#":

@@ -478,7 +478,7 @@ def _info():  # type:() -> dict[str, str]
     for filename in [d + "/board_info.csv" for d in [".", "/lib", "lib"]]:
         # print("look up the board name in the file", filename)
         if file_exists(filename):
-            _log.info("Found board info file: {}".format(filename))
+            # print("Found board info file: {}".format(filename))
             b = info["board"].strip()
             if find_board(info, b, filename):
                 break
@@ -680,6 +680,7 @@ def main():
     for p in [".", "/lib", "lib"]:
         try:
             with open(p + "/modulelist.txt") as f:
+                stubber.modules = []  # avoid duplicates
                 for line in f.read().split("\n"):
                     line = line.strip()
                     if len(line) > 0 and line[0] != "#":
