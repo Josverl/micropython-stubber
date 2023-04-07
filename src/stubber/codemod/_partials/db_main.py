@@ -63,11 +63,11 @@ def main():
     except AttributeError:
         pass
     try:
-        f = open("modulelist" + ".done", "r+b")
+        f = open("modulelist.done", "r+b")
         was_running = True
         _log.info("Opened existing db")
     except OSError:
-        f = open("modulelist" + ".done", "w+b")
+        f = open("modulelist.done", "w+b")
         _log.info("created new db")
         was_running = False
     stubber = Stubber(path=read_path())
@@ -87,7 +87,7 @@ def main():
     stubber.modules = ["micropython"]
     for p in [".", "/lib", "lib"]:
         try:
-            with open(p + "modulelist" + ".txt") as f:
+            with open(p + "/modulelist.txt") as f:
                 for line in f.read().split("\n"):
                     line = line.strip()
                     if len(line) > 0 and line[0] != "#":
@@ -100,7 +100,7 @@ def main():
     # remove the ones that are already done
     modules_done = {}  # type: dict[str, str]
     try:
-        with open("modulelist" + ".done") as f:
+        with open("modulelist.done") as f:
             # not optimal , but works on mpremote and esp8266
             for line in f.read().split("\n"):
                 line = line.strip()
@@ -127,7 +127,7 @@ def main():
         # -------------------------------------
         gc.collect()
         modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
-        with open("modulelist" + ".done", "a") as f:
+        with open("modulelist.done", "a") as f:
             f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
 
     # Finished processing - load all the results , and remove the failed ones
