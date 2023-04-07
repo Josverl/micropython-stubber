@@ -42,6 +42,7 @@ except ImportError:
 __version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
+LIBS = [".", "/lib", "/flash/lib", "lib"]
 
 
 class Stubber:
@@ -475,7 +476,7 @@ def _info():  # type:() -> dict[str, str]
     except (AttributeError, IndexError):
         pass
     gc.collect()
-    for filename in [d + "/board_info.csv" for d in [".", "/lib", "lib"]]:
+    for filename in [d + "/board_info.csv" for d in LIBS]:
         # print("look up the board name in the file", filename)
         if file_exists(filename):
             # print("Found board info file: {}".format(filename))
@@ -651,10 +652,6 @@ def main():
     import machine  # type: ignore
 
     try:
-        gc.threshold(512)
-    except AttributeError:
-        pass
-    try:
         f = open("modulelist.done", "r+b")
         was_running = True
         _log.info("Opened existing db")
@@ -668,18 +665,12 @@ def main():
     if not was_running:
         # Only clean folder if this is a first run
         stubber.clean()
-    #     mod_fp = open(f_name, "w")
-    #     stubber.write_json_header(mod_fp)
-    #     first_json = True
-    # else:
-    #     mod_fp = open(f_name, "a")
-    #     first_json = False
-
     # get list of modules to process
     stubber.modules = ["micropython"]
-    for p in [".", "/lib", "lib"]:
+    for p in LIBS:
         try:
             with open(p + "/modulelist.txt") as f:
+                print("Debug: list of modules: " + p + "/modulelist.txt")
                 stubber.modules = []  # avoid duplicates
                 for line in f.read().split("\n"):
                     line = line.strip()

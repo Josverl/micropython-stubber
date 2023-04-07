@@ -7,6 +7,7 @@ The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
 from io import TextIOWrapper
 from typing import TYPE_CHECKING, List, type_check_only
 
+# sourcery skip: require-parameter-annotation
 if TYPE_CHECKING:
     import logging
     import sys
@@ -53,15 +54,13 @@ if TYPE_CHECKING:
     gc: _gc
     _log = logging.getLogger("stubber")
 
+    LIBS = [".", "lib"]
+
 
 ###PARTIAL###
 def main():
     import machine  # type: ignore
 
-    try:
-        gc.threshold(512)
-    except AttributeError:
-        pass
     try:
         f = open("modulelist.done", "r+b")
         was_running = True
@@ -76,18 +75,12 @@ def main():
     if not was_running:
         # Only clean folder if this is a first run
         stubber.clean()
-    #     mod_fp = open(f_name, "w")
-    #     stubber.write_json_header(mod_fp)
-    #     first_json = True
-    # else:
-    #     mod_fp = open(f_name, "a")
-    #     first_json = False
-
     # get list of modules to process
     stubber.modules = ["micropython"]
-    for p in [".", "/lib", "lib"]:
+    for p in LIBS:
         try:
             with open(p + "/modulelist.txt") as f:
+                print("Debug: list of modules: " + p + "/modulelist.txt")
                 stubber.modules = []  # avoid duplicates
                 for line in f.read().split("\n"):
                     line = line.strip()

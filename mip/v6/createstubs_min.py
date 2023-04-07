@@ -47,6 +47,7 @@ except M:from ucollections import OrderedDict as d
 __version__='v1.12.2'
 x=2
 y=2
+z=[L,'/lib','/flash/lib','lib']
 class Stubber:
 	def __init__(A,path=F,firmware_id=F):
 		B=firmware_id
@@ -197,7 +198,7 @@ def _info():
 	try:W=sys.implementation._machine if'_machine'in Q(sys.implementation)else os.uname().machine;A[K]=W.strip();A[a]=W.split(V)[1].strip();A[G]=sys.implementation._mpy if'_mpy'in Q(sys.implementation)else sys.implementation.mpy if G in Q(sys.implementation)else B
 	except (I,R):pass
 	C.collect()
-	for J in [A+'/board_info.csv'for A in[L,'/lib','lib']]:
+	for J in [A+'/board_info.csv'for A in z]:
 		if g(J):
 			H=A[K].strip()
 			if f(A,H,J):break
