@@ -8,9 +8,12 @@ Workaround
 pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mpremote
 """
 
+import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from tempfile import mkdtemp
 from threading import Timer
 from typing import List, NamedTuple, Optional, Tuple, Union
 
@@ -19,17 +22,31 @@ from loguru import logger as log
 from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
+from stubber import utils
+from stubber.utils.config import CONFIG
+
 OK = 0
 ERROR = -1
-
+RETRIES = 3
+TESTING = False
+LOCAL_FILES = True
 
 ###############################################################################################
+
+
+# @dataclass
+# class LogTags:
+#     reset_tags: List[str]
+#     error_tags: List[str]
+#     warning_tags: List[str]
+#     success_tags: List[str]
+#     ignore_tags: List[str]
 
 
 def run(
     cmd: List[str],
     timeout: int = 60,
-    no_error: bool = False,
+    log_errors: bool = True,
     no_info: bool = False,
     *,
     reset_tags: Optional[List[str]] = None,
@@ -38,7 +55,7 @@ def run(
     success_tags: Optional[List[str]] = None,
     ignore_tags: Optional[List[str]] = None,
 ) -> Tuple[int, List[str]]:
-    # sourcery skip: raise-specific-error
+    # sourcery skip: no-long-functions
     """
     Run a command and return the output and return code as a tuple
     Parameters
@@ -47,8 +64,8 @@ def run(
         The command to run
     timeout : int, optional
         The timeout in seconds, by default 60
-    no_error : bool, optional
-        If True, don't log errors, by default False
+    log_errors : bool, optional
+        If False, don't log errors, Default: true
     no_info : bool, optional
         If True, don't log info, by default False
     error_tags : Optional[List[str]], optional
@@ -77,7 +94,7 @@ def run(
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     except FileNotFoundError as e:
-        raise Exception(f"Failed to start {cmd[0]}") from e
+        raise FileNotFoundError(f"Failed to start {cmd[0]}") from e
 
     def timed_out():
         proc.kill()
@@ -100,7 +117,7 @@ def run(
                 line = line.rstrip("\n")
                 # if any of the error tags in the line
                 if any(tag in line for tag in error_tags):
-                    if no_error:
+                    if not log_errors:
                         continue
                     log.error(line)
                 elif any(tag in line for tag in warning_tags):
@@ -112,7 +129,7 @@ def run(
                 else:
                     if not no_info:
                         log.info(line)
-        if proc.stderr and not no_error:
+        if proc.stderr and log_errors:
             for line in proc.stderr:
                 log.warning(line)
     finally:
@@ -126,16 +143,16 @@ def run(
 
 UName = NamedTuple("UName", sysname=str, nodename=str, release=str, version=str, machine=str)
 
-RETRIES = 3
-
 
 class MPRemoteBoard:
     """Class to run mpremote commands"""
 
     def __init__(self, port: str = ""):
         self.port = port
+        self.board = ""
         self.uname: Optional[UName] = None
         self.connected = False
+        self.path: Optional[Path] = None
 
     @staticmethod
     def connected_boards():
@@ -174,7 +191,7 @@ class MPRemoteBoard:
         self,
         cmd: Union[str, List[str]],
         *,
-        no_error: bool = False,
+        log_errors: bool = True,
         no_info: bool = False,
         timeout: int = 60,
         **kwargs,
@@ -195,11 +212,11 @@ class MPRemoteBoard:
             cmd = cmd.split(" ")
         prefix = ["mpremote", "connect", self.port] if self.port else ["mpremote"]
         # if connected add resume to keep state between commands
-        # if self.connected:
-        #     prefix += ["resume"]
+        if self.connected:
+            prefix += ["resume"]
         cmd = prefix + cmd
         log.debug(" ".join(cmd))
-        result = run(cmd, timeout, no_error, no_info, **kwargs)
+        result = run(cmd, timeout, log_errors, no_info, **kwargs)
         self.connected = True
         return result
 
@@ -213,11 +230,10 @@ class MPRemoteBoard:
         return result
 
 
-def copy_createstubs(board: MPRemoteBoard) -> bool:
+def copy_createstubs(board: MPRemoteBoard, variant: str, form: str) -> bool:
     """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
     _full = [
-        ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
         "rm :lib/createstubs.mpy",
         "rm :lib/createstubs_mem.mpy",
         "rm :lib/createstubs_db.mpy",
@@ -228,38 +244,41 @@ def copy_createstubs(board: MPRemoteBoard) -> bool:
     ]
     # copy createstubs*_min.py to the destination folder
     _min = [
-        ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
         "cp ./src/stubber/board/createstubs_min.py :lib/createstubs.py",
         "cp ./src/stubber/board/createstubs_mem_min.py :lib/createstubs_mem.py",
         "cp ./src/stubber/board/createstubs_db_min.py :lib/createstubs_db.py",
     ]
     # copy createstubs*_mpy.mpy to the destination folder
     _mpy = [
-        ["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"],
         "rm :lib/createstubs.py",
         "rm :lib/createstubs_mem.py",
         "rm :lib/createstubs_db.py",
-        "cp ./src/stubber/board/createstubs_mpy.mpy :lib/createstubs.mpy",
-        "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
+        # "cp ./src/stubber/board/createstubs_mpy.mpy :lib/createstubs.mpy",
+        # "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
         "cp ./src/stubber/board/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
     ]
 
+    _lib = [["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"]]
+
     _get_ready = [
         "rm :modulelist.done",
-        # "cp ./scratch/modulelist.txt :lib/modulelist.txt",  # reduced set for testing
         "cp ./src/stubber/board/modulelist.txt :lib/modulelist.txt",
         "cp ./board_info.csv :lib/board_info.csv",
     ]
-    # do = _full + _get_ready
-    # do = _min + _get_ready
-    do = _mpy + _get_ready
+    if form == "full":
+        do = _lib + _full + _get_ready
+    elif form == "min":
+        do = _lib + _min + _get_ready
+    else:
+        do = _lib + _mpy + _get_ready
 
-    ok = True  # assume all ok, unless one is not ok
+    # assume all ok, unless one is not ok
     for cmd in do:
-        rc, _ = board.run_command(cmd, no_error=True)
-        if rc != OK:
-            ok = False
-    return ok
+        rc, _ = board.run_command(cmd, log_errors=False)
+        if rc != OK and "rm" not in cmd:
+            log.error(f"Error during copy createstubs running command: {cmd}")
+            return False
+    return True
 
 
 @retry(stop=stop_after_attempt(4), wait=wait_fixed(2))
@@ -295,7 +314,7 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
     return rc, out
 
 
-def build_cmd(dest, variant):
+def build_cmd(dest: Path, variant: str = "db"):
     """Build the import createstubs[_??] command to run on the board"""
     cmd = ["resume", "mount", str(dest)] if dest else []
     if variant == "db":
@@ -307,7 +326,7 @@ def build_cmd(dest, variant):
     return cmd
 
 
-def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[str]]:
+def generate_board_stubs(dest: Path, mcu: MPRemoteBoard, variant: str = "db", form: str = "mpy") -> Tuple[int, Optional[Path]]:
     """
     Generate the board stubs.
     Parameters
@@ -318,29 +337,54 @@ def generate_board_stubs(dest: Path, board: MPRemoteBoard) -> Tuple[int, List[st
         The port the board is connected to
     """
     # HOST -> MCU : copy createstubs to board
-    if TESTING:
-        ok = copy_createstubs(board)
-
-        # ok = board.mip_install("github:josverl/micropython-stubber/mip/full.json@board_stubber")
+    if LOCAL_FILES:
+        ok = copy_createstubs(mcu, variant, form)
     else:
-        ok = board.mip_install("github:josverl/micropython-stubber")
+        # TODO: Add Branch to install from
+        ok = mcu.mip_install("github:josverl/micropython-stubber")
     if not ok and not TESTING:
-        return ERROR, []
+        log.warning("Error copying createstubs to board")
+        return ERROR, None
     # HOST: remove .done file
     (dest / "modulelist.done").unlink(missing_ok=True)
 
     # MCU: add lib to path
-    rc, out = run_createstubs(dest, board, variant="")
+    rc, out = run_createstubs(dest, mcu, variant)
 
     if rc != OK:
-        return ERROR, []
+        log.warning("Error running createstubs: %s", out)
+        return ERROR, None
 
-    # TODO: post_processing(dest)
+    # Find the output starting with 'Path: '
+    folder = get_stubfolder(out)
+    if not folder:
+        return ERROR, None
 
-    return OK, out
+    stubs_path = dest / folder
+    port, board = get_port_board(out)
+    mcu.path = stubs_path
+    mcu.board = board
+    mcu.port = port
+
+    # check the number of stubs generated
+    if len(list(stubs_path.glob("*.p*"))) < 10:
+        log.warning("Error generating stubs")
+        return ERROR, None
+
+    utils.do_post_processing([stubs_path], pyi=True, black=True)
+
+    return OK, stubs_path
 
 
-TESTING = True
+def get_stubfolder(out: List[str]):
+    return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("Path: ")]) else ""
+
+
+def get_port_board(out: List[str]):
+    return (
+        lines[-1].split("Port:")[-1].strip() if (lines := [l for l in out if l.startswith("Port: ")]) else "",
+        lines[-1].split("Board:")[-1].strip() if (lines := [l for l in out if l.startswith("Board: ")]) else "",
+    )
 
 
 def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
@@ -353,7 +397,7 @@ def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
         board = MPRemoteBoard(mpr_port)
         log.info(f"Attempt to connect to: {board.port}")
         try:
-            rc, uname = board.get_uname()
+            _, uname = board.get_uname()
             log.success(f"Detected board {uname.machine} {uname.release}")
             boards.append(board)
         except Exception:
@@ -383,25 +427,58 @@ def set_loglevel(verbose: int) -> str:
     return level
 
 
+def copy_to_repo(source: Path) -> Optional[Path]:
+    """Copy the generated stubs to the stubs repo.
+    If the destination folder exists, it is first emptied
+    when succesfull: returns the destination path - None otherwise
+    """
+    destination = CONFIG.stub_path / source.name
+    try:
+        if destination.exists() and destination.is_dir():
+            # first clean the desination folder
+            shutil.rmtree(destination)
+        # copy all files and folder from the source to the destination
+        shutil.copytree(source, destination, dirs_exist_ok=True)
+        return destination
+    except OSError as e:
+        log.error(f"Error: {source} : {e.strerror}")
+        return None
+
+
 if __name__ == "__main__":
     set_loglevel(2)
     # if not check_tools():
     #     log.warning("Some tools are missing. Please install them first.")
     #     install_tools()
-    dest = Path("./scratch/stubgen_test")
+
+    tempdir = mkdtemp(prefix="board_stubber")
+
+    dest = Path(tempdir)
     # copy board_info.csv to the folder
     # shutil.copyfile(Path("board_info.csv"), dest / "board_info.csv")
 
     # scan boards and just work with the ones that reponded with understandable data
     connected_boards = scan_boards(True)
+    if not connected_boards:
+        log.error("No micropython boards were found")
+        sys.exit(1)
 
     print(tabulate([[b.port] + list(b.uname) for b in connected_boards]))  # type: ignore
     # scan boards and generate stubs
+
+    TESTING = False
+    if not TESTING:
+        variant = "db"
+        form = "mpy"
+    else:
+        variant = ""
+        form = "full"
     for board in connected_boards:
         log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
-        rc, my_stubs = generate_board_stubs(dest, board)
+        rc, my_stubs = generate_board_stubs(dest, board, variant, form)
         if rc == OK:
-            # todo: extract number of stubs generated and path ?
             log.success(f"Stubs generated for {board.port}")
+            if destination := copy_to_repo(my_stubs):
+                log.success(f"Stubs copied to {destination}")
         else:
             log.error(f"Failed to generate stubs for {board.port}")
