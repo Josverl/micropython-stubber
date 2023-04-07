@@ -237,8 +237,8 @@ def copy_createstubs(board: MPRemoteBoard, variant: str, form: str) -> bool:
         "rm :lib/createstubs.mpy",
         "rm :lib/createstubs_mem.mpy",
         "rm :lib/createstubs_db.mpy",
-        "cp ./src/stubber/board/createstubs.py :lib/createstubs.py",
-        "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
+        # "cp ./src/stubber/board/createstubs.py :lib/createstubs.py",
+        # "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
         "cp ./src/stubber/board/createstubs_db.py :lib/createstubs_db.py",
         "cp ./src/stubber/board/logging.py :lib/logging.py",
     ]
@@ -305,7 +305,8 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
     timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60
     rc, out = board.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
-    if rc != OK and ":" in out[-1]:
+    if rc != OK and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
+        log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
     if rc != OK and variant == "db":
@@ -316,7 +317,7 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
 
 def build_cmd(dest: Path, variant: str = "db"):
     """Build the import createstubs[_??] command to run on the board"""
-    cmd = ["resume", "mount", str(dest)] if dest else []
+    cmd = ["mount", str(dest)] if dest else []
     if variant == "db":
         cmd += ["exec", "import createstubs_db"]
     elif variant == "mem":
@@ -368,7 +369,7 @@ def generate_board_stubs(dest: Path, mcu: MPRemoteBoard, variant: str = "db", fo
 
     # check the number of stubs generated
     if len(list(stubs_path.glob("*.p*"))) < 10:
-        log.warning("Error generating stubs")
+        log.warning("Error generating stubs, too few (<10)stubs were generated")
         return ERROR, None
 
     utils.do_post_processing([stubs_path], pyi=True, black=True)
@@ -463,16 +464,11 @@ if __name__ == "__main__":
         log.error("No micropython boards were found")
         sys.exit(1)
 
-    print(tabulate([[b.port] + list(b.uname) for b in connected_boards]))  # type: ignore
+    print(tabulate([[b.port] + (list(b.uname) if b.uname else ["unable to connect"]) for b in connected_boards]))  # type: ignore
     # scan boards and generate stubs
 
-    TESTING = False
-    if not TESTING:
-        variant = "db"
-        form = "mpy"
-    else:
-        variant = ""
-        form = "full"
+    variant = "db"
+    form = "mpy"
     for board in connected_boards:
         log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)

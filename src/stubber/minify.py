@@ -221,6 +221,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             ("rprint", 'self._log.info("Version: '),
             ("rprint", 'self._log.info("Port: '),
             ("rprint", 'self._log.info("Board: '),
+            ("rprint", 'print("Debug: '),
         ]
 
     content = edit_lines(source_content, edits, diff=diff)

@@ -33,6 +33,7 @@ except ImportError:
 __version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
+LIBS = [".", "/lib", "/flash/lib", "lib"]
 
 
 class Stubber:
@@ -466,7 +467,7 @@ def _info():  # type:() -> dict[str, str]
     except (AttributeError, IndexError):
         pass
     gc.collect()
-    for filename in [d + "/board_info.csv" for d in [".", "/lib", "lib"]]:
+    for filename in [d + "/board_info.csv" for d in LIBS]:
         # print("look up the board name in the file", filename)
         if file_exists(filename):
             # print("Found board info file: {}".format(filename))
