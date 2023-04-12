@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
 from threading import Timer
@@ -144,6 +145,22 @@ def run(
 UName = NamedTuple("UName", sysname=str, nodename=str, release=str, version=str, machine=str)
 
 
+class Variant(str, Enum):
+    """Variants of generatings stubs on a MCU"""
+
+    full = "full"
+    mem = "mem"
+    db = "db"
+
+
+class Form(str, Enum):
+    """Optimisation forms of scripts"""
+
+    py = "py"
+    min = "min"
+    mpy = "mpy"
+
+
 class MPRemoteBoard:
     """Class to run mpremote commands"""
 
@@ -230,15 +247,19 @@ class MPRemoteBoard:
         return result
 
 
-def copy_createstubs(board: MPRemoteBoard, variant: str, form: str) -> bool:
+def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool:
+    # sourcery skip: assign-if-exp, boolean-if-exp-identity, remove-unnecessary-cast
     """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
-    _full = [
+    _py = [
         "rm :lib/createstubs.mpy",
         "rm :lib/createstubs_mem.mpy",
         "rm :lib/createstubs_db.mpy",
-        # "cp ./src/stubber/board/createstubs.py :lib/createstubs.py",
-        # "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
+        "rm :lib/createstubs.py",
+        "rm :lib/createstubs_mem.py",
+        "rm :lib/createstubs_db.py",
+        "cp ./src/stubber/board/createstubs.py :lib/createstubs.py",
+        "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
         "cp ./src/stubber/board/createstubs_db.py :lib/createstubs_db.py",
         "cp ./src/stubber/board/logging.py :lib/logging.py",
     ]
@@ -253,8 +274,8 @@ def copy_createstubs(board: MPRemoteBoard, variant: str, form: str) -> bool:
         "rm :lib/createstubs.py",
         "rm :lib/createstubs_mem.py",
         "rm :lib/createstubs_db.py",
-        # "cp ./src/stubber/board/createstubs_mpy.mpy :lib/createstubs.mpy",
-        # "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
+        "cp ./src/stubber/board/createstubs_mpy.mpy :lib/createstubs.mpy",
+        "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
         "cp ./src/stubber/board/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
     ]
 
@@ -263,18 +284,22 @@ def copy_createstubs(board: MPRemoteBoard, variant: str, form: str) -> bool:
     _get_ready = [
         "rm :modulelist.done",
         "cp ./src/stubber/board/modulelist.txt :lib/modulelist.txt",
-        "cp ./board_info.csv :lib/board_info.csv",
+        # "cp ./board_info.csv :lib/board_info.csv",
     ]
-    if form == "full":
-        do = _lib + _full + _get_ready
-    elif form == "min":
+    if form == Form.py:
+        do = _lib + _py + _get_ready
+    elif form == Form.min:
         do = _lib + _min + _get_ready
     else:
         do = _lib + _mpy + _get_ready
 
     # assume all ok, unless one is not ok
     for cmd in do:
-        rc, _ = board.run_command(cmd, log_errors=False)
+        if isinstance(cmd, str) and cmd.startswith("rm "):
+            log_errors = False
+        else:
+            log_errors = True
+        rc, _ = board.run_command(cmd, log_errors=log_errors)
         if rc != OK and "rm" not in cmd:
             log.error(f"Error during copy createstubs running command: {cmd}")
             return False
@@ -290,7 +315,7 @@ def hard_reset(board: MPRemoteBoard) -> bool:
 
 
 @retry(stop=stop_after_attempt(10), wait=wait_fixed(15))
-def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
+def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant.db):
     """Run createstubs on the board"""
     # hard_reset(board)
 
@@ -309,25 +334,27 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: str = "db"):
         log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
-    if rc != OK and variant == "db":
+    if rc != OK and variant == Variant.db:
         # assume createstubs ran out of memory and try again
         raise MemoryError("Memory error, try again")
     return rc, out
 
 
-def build_cmd(dest: Path, variant: str = "db"):
+def build_cmd(dest: Path, variant: Variant = Variant.db):
     """Build the import createstubs[_??] command to run on the board"""
     cmd = ["mount", str(dest)] if dest else []
-    if variant == "db":
+    if variant == Variant.db:
         cmd += ["exec", "import createstubs_db"]
-    elif variant == "mem":
+    elif variant == Variant.mem:
         cmd += ["exec", "import createstubs_mem"]
     else:
         cmd += ["exec", "import createstubs"]
     return cmd
 
 
-def generate_board_stubs(dest: Path, mcu: MPRemoteBoard, variant: str = "db", form: str = "mpy") -> Tuple[int, Optional[Path]]:
+def generate_board_stubs(
+    dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.db, form: Form = Form.mpy
+) -> Tuple[int, Optional[Path]]:
     """
     Generate the board stubs.
     Parameters
@@ -348,6 +375,8 @@ def generate_board_stubs(dest: Path, mcu: MPRemoteBoard, variant: str = "db", fo
         return ERROR, None
     # HOST: remove .done file
     (dest / "modulelist.done").unlink(missing_ok=True)
+    # HOST: copy board_info.csv to destination
+    shutil.copyfile(Path("board_info.csv"), dest / "board_info.csv")
 
     # MCU: add lib to path
     rc, out = run_createstubs(dest, mcu, variant)
@@ -436,7 +465,7 @@ def copy_to_repo(source: Path) -> Optional[Path]:
     destination = CONFIG.stub_path / source.name
     try:
         if destination.exists() and destination.is_dir():
-            # first clean the desination folder
+            # first clean the destination folder
             shutil.rmtree(destination)
         # copy all files and folder from the source to the destination
         shutil.copytree(source, destination, dirs_exist_ok=True)
@@ -467,8 +496,8 @@ if __name__ == "__main__":
     print(tabulate([[b.port] + (list(b.uname) if b.uname else ["unable to connect"]) for b in connected_boards]))  # type: ignore
     # scan boards and generate stubs
 
-    variant = "db"
-    form = "mpy"
+    variant = Variant.db
+    form = Form.py
     for board in connected_boards:
         log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
@@ -476,5 +505,8 @@ if __name__ == "__main__":
             log.success(f"Stubs generated for {board.port}")
             if destination := copy_to_repo(my_stubs):
                 log.success(f"Stubs copied to {destination}")
+                # Also merge the stubs with the docstubs
+                # cmd = ["python", "-m", "stubber", "merge", "--version", "v1.19.1", "--port", "stm32", "--board", "PYBV11"]
+                # run(cmd)
         else:
             log.error(f"Failed to generate stubs for {board.port}")

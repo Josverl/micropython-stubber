@@ -33,7 +33,7 @@ except ImportError:
 __version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
-LIBS = [".", "/lib", "/flash/lib", "lib"]
+LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
 from time import sleep
 
 
