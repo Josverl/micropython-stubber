@@ -15,6 +15,10 @@
         [
             "modules.txt",
             "github:Josverl/micropython-stubber/src/stubber/board/modulelist.txt"
+        ],
+        [
+            "board_info.csv",
+            "github:Josverl/micropython-stubber/src/stubber/board/board_info.csv"
         ]
     ],
     "deps": [],

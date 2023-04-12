@@ -2,8 +2,8 @@
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
-    import sys
     import logging
+    import sys
 
     @type_check_only
     class Stubber:
@@ -40,12 +40,13 @@ if TYPE_CHECKING:
 
     # help type checker
     stubber = Stubber()
+    LIBS = [".", "lib"]
 
     ###PARTIAL###
 # Read stubs from modulelist in the current folder or in /libs
 # fall back to default modules
 stubber.modules = ["micropython"]
-for p in ["", "/", "/lib/"]:
+for p in LIBS:
     try:
         with open(p + "modulelist" + ".txt") as f:
             # not optimal, but works on mpremote and eps8266

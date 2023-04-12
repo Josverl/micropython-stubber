@@ -364,6 +364,8 @@ def generate_board_stubs(
     port : str
         The port the board is connected to
     """
+    
+    board_info_path = Path(__file__).parent / "board_info.csv"
     # HOST -> MCU : copy createstubs to board
     if LOCAL_FILES:
         ok = copy_createstubs(mcu, variant, form)
@@ -376,7 +378,7 @@ def generate_board_stubs(
     # HOST: remove .done file
     (dest / "modulelist.done").unlink(missing_ok=True)
     # HOST: copy board_info.csv to destination
-    shutil.copyfile(Path("board_info.csv"), dest / "board_info.csv")
+    shutil.copyfile(board_info_path, dest / "board_info.csv")
 
     # MCU: add lib to path
     rc, out = run_createstubs(dest, mcu, variant)

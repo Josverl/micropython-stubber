@@ -4,7 +4,7 @@ It is possible to install the firmware stubber ( createstubs.py or one of its va
 This allows you to create the firmware stubs on the board itself, and then copy them to your PC.
 
 mip is a package manager for MicroPython. It is a command line tool that allows you to install packages on a MicroPython board.
-In this case it is best to use `mpremote` that has a built-in `mip` command.
+In this case it is simplest to use `mpremote` as that has a built-in `mip` command.
 
 Make sure you have the latest version of `mpremote` installed.
 ```bash
@@ -32,6 +32,7 @@ Done
 | full/debug         | `mpremote mip install github:josverl/micropython-stubber/mip/full.json` |
 | minified (default) | `mpremote mip install github:josverl/micropython-stubber/mip/minified.json` |
 
+> Note : If you need to install from a specific branch or tag, then append `@branchname` or `@tagname` to the URL.
 
 ## run createstubs
 A simple way to run createstubs is to use the `mpremote mount` command to allow the MCU board to directly access the PC's file system.
