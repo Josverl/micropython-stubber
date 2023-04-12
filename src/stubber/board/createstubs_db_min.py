@@ -44,7 +44,7 @@ except Q:from ucollections import OrderedDict as c
 __version__='v1.12.2'
 v=2
 w=2
-d=[M,'/lib','/flash/lib','lib']
+d=[M,'/lib','/sd/lib','/flash/lib','lib']
 from time import sleep
 class Stubber:
 	def __init__(C,path=E,firmware_id=E):
