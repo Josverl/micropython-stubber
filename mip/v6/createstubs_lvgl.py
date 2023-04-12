@@ -27,7 +27,8 @@ except ImportError:
 __version__ = "v1.12.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
-LIBS = [".", "/lib", "/flash/lib", "lib"]
+LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
+from time import sleep
 
 
 class Stubber:
@@ -93,6 +94,9 @@ class Stubber:
         _errors = []
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
+            if name.startswith("_"):
+                continue
+            self._log.debug("get attribute {}".format(name))
             try:
                 val = getattr(item_instance, name)
                 # name , item_repr(value) , type as text, item_instance, order
@@ -100,15 +104,7 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in {
-                    "int",
-                    "float",
-                    "str",
-                    "bool",
-                    "tuple",
-                    "list",
-                    "dict",
-                }:
+                if type_text in {"int", "float", "str", "bool", "tuple", "list", "dict"}:
                     order = 1
                 elif type_text in {"function", "method"}:
                     order = 2
@@ -119,6 +115,11 @@ class Stubber:
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
                 _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+            except MemoryError as e:
+                print("MemoryError: {}".format(e))
+                sleep(1)
+                reset()
+
         # remove internal __
         _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
         gc.collect()
@@ -161,15 +162,6 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        if gc.mem_free() < 8_500:
-            print("WARN Restart the MCU")
-            try:
-                from machine import reset
-
-                reset()
-            except ImportError:
-                pass
-
         if file_name is None:
             fname = module_name.replace(".", "_") + ".py"
             file_name = self.path + "/" + fname
@@ -184,7 +176,8 @@ class Stubber:
         new_module = None
         try:
             new_module = __import__(module_name, None, None, ("*"))
-            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, gc.mem_free()))  # type: ignore
+            m1 = gc.mem_free()  # type: ignore
+            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
 
         except ImportError:
             self._log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -671,4 +664,6 @@ if __name__ == "__main__" or is_micropython():
     except NameError:
         pass
     if not file_exists("no_auto_stubber.txt"):
+        gc.threshold(4 * 1024)
+        gc.enable()
         main()

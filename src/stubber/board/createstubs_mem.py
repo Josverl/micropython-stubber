@@ -642,7 +642,7 @@ def main():
     # Read stubs from modulelist in the current folder or in /libs
     # fall back to default modules
     stubber.modules = ["micropython"]
-    for p in ["", "/", "/lib/"]:
+    for p in LIBS:
         try:
             with open(p + "modulelist" + ".txt") as f:
                 # not optimal, but works on mpremote and eps8266
