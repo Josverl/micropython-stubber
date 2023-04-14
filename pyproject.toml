@@ -69,7 +69,7 @@ tools = ["mpremote", "esptool", "pyserial"]
 [tool.poetry.group.docs]
 optional = true
 [tool.poetry.group.docs.dependencies]
-Sphinx = "^4.4.0"
+Sphinx = ">=4.4,<6.0"
 myst-parser = ">=0.17,<0.19"
 sphinxcontrib-mermaid = ">=0.7.1,<0.9.0"
 sphinx_rtd_theme = "^1.0.0"
