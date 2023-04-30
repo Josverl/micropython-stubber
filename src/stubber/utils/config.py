@@ -39,11 +39,11 @@ class StubberConfig(Config):
     template_path = key(key_name="template-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish/template"))
     "a Path to the publication folder that has the template files"
 
-    stable_version = key(key_name="stable-version", cast=str, required=False, default="1.19.1")
+    stable_version = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
 
     "last published stable"
 
-    all_versions = key(key_name="all-versions", cast=list, required=False, default=["1.17", "1.18", "1.19", "1.19.1"])
+    all_versions = key(key_name="all-versions", cast=list, required=False, default=["1.17", "1.18", "1.19", "1.19.1","1.20.0"])
     "list of recent versions"
 
     BLOCKED_PORTS = ["minimal", "bare-arm"]
@@ -74,7 +74,7 @@ class StubberConfig(Config):
             all_versions = git.get_tags("micropython/micropython", minver="v1.17")
         except Exception as e:
             log.warning(f"Could not read micropython versions from git: {e}")
-            all_versions = ["1.17", "1.18", "1.19", "1.19.1"]
+            all_versions = ["1.17", "1.18", "1.19", "1.19.1","1.20.0"]
         config_updates.update(all_versions=all_versions)
         config_updates.update(stable_version=all_versions[-1])
         return config_updates
