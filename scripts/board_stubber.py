@@ -365,7 +365,7 @@ def generate_board_stubs(
         The port the board is connected to
     """
     
-    board_info_path = Path(__file__).parent / "board_info.csv"
+    board_info_path = Path(__file__).parent.parent / "board_info.csv"
     # HOST -> MCU : copy createstubs to board
     if LOCAL_FILES:
         ok = copy_createstubs(mcu, variant, form)
@@ -479,10 +479,9 @@ def copy_to_repo(source: Path) -> Optional[Path]:
 
 if __name__ == "__main__":
     set_loglevel(2)
-    # if not check_tools():
-    #     log.warning("Some tools are missing. Please install them first.")
-    #     install_tools()
-
+    
+    variant = Variant.db
+    form = Form.py
     tempdir = mkdtemp(prefix="board_stubber")
 
     dest = Path(tempdir)
@@ -498,8 +497,7 @@ if __name__ == "__main__":
     print(tabulate([[b.port] + (list(b.uname) if b.uname else ["unable to connect"]) for b in connected_boards]))  # type: ignore
     # scan boards and generate stubs
 
-    variant = Variant.db
-    form = Form.py
+
     for board in connected_boards:
         log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)

@@ -41,7 +41,7 @@ try:from machine import reset
 except Q:pass
 try:from collections import OrderedDict as b
 except Q:from ucollections import OrderedDict as b
-__version__='v1.12.2'
+__version__='v1.13.4'
 u=2
 v=2
 w=[L,'/lib','/sd/lib','/flash/lib','lib']
@@ -218,7 +218,7 @@ def _info():
 		except (Q,T):pass
 	if A[N]==h:A['release']='2.0.0'
 	if A[N]==m:
-		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.20.0':A[D]=A[D][:-2]
+		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.19.9':A[D]=A[D][:-2]
 	if G in A and A[G]:
 		P=int(A[G]);X=[F,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][P>>10]
 		if X:A[a]=X
@@ -269,4 +269,7 @@ def main():
 if __name__=='__main__'or g():
 	try:logging.basicConfig(level=logging.INFO)
 	except j:pass
-	if not e('no_auto_stubber.txt'):C.threshold(4*1024);C.enable();main()
+	if not e('no_auto_stubber.txt'):
+		try:C.threshold(4*1024);C.enable()
+		except BaseException:pass
+		main()

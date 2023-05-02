@@ -76,21 +76,7 @@ def main():
         # Only clean folder if this is a first run
         stubber.clean()
     # get list of modules to process
-    stubber.modules = ["micropython"]
-    for p in LIBS:
-        try:
-            with open(p + "/modulelist.txt") as f:
-                print("Debug: list of modules: " + p + "/modulelist.txt")
-                stubber.modules = []  # avoid duplicates
-                for line in f.read().split("\n"):
-                    line = line.strip()
-                    if len(line) > 0 and line[0] != "#":
-                        stubber.modules.append(line)
-                gc.collect()
-                break
-        except OSError:
-            pass
-    gc.collect()
+    get_modulelist(stubber)
     # remove the ones that are already done
     modules_done = {}  # type: dict[str, str]
     try:
@@ -129,6 +115,25 @@ def main():
         # stubber.write_json_end(mod_fp)
         stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
+
+def get_modulelist(stubber):
+    stubber.modules = []  # avoid duplicates
+    for p in LIBS:
+        try:
+            with open(p + "/modulelist.txt") as f:
+                print("Debug: list of modules: " + p + "/modulelist.txt")
+                for line in f.read().split("\n"):
+                    line = line.strip()
+                    if len(line) > 0 and line[0] != "#":
+                        stubber.modules.append(line)
+                gc.collect()
+                break
+        except OSError:
+            pass
+    if not stubber.modules:
+        stubber.modules = ["micropython"]
+        _log.warn("Could not find modulelist.txt, using default modules")
+    gc.collect()
 
 
 ###PARTIALEND###

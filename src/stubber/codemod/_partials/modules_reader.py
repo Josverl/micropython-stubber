@@ -2,8 +2,8 @@
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
+    import gc
     import logging
-    import sys
 
     @type_check_only
     class Stubber:
@@ -35,7 +35,6 @@ if TYPE_CHECKING:
         def collect(self) -> None:
             ...
 
-    gc: _gc
     _log = logging.getLogger("stubber")
 
     # help type checker
@@ -45,14 +44,20 @@ if TYPE_CHECKING:
     ###PARTIAL###
 # Read stubs from modulelist in the current folder or in /libs
 # fall back to default modules
-stubber.modules = ["micropython"]
+stubber.modules = []  # avoid duplicates
 for p in LIBS:
     try:
-        with open(p + "modulelist" + ".txt") as f:
-            # not optimal, but works on mpremote and eps8266
-            stubber.modules = [l.strip() for l in f.read().split("\n") if len(l.strip()) and l.strip()[0] != "#"]
-            _log.info("Using %smodulelist.txt", p)
+        with open(p + "/modulelist.txt") as f:
+            print("Debug: list of modules: " + p + "/modulelist.txt")
+            for line in f.read().split("\n"):
+                line = line.strip()
+                if len(line) > 0 and line[0] != "#":
+                    stubber.modules.append(line)
+            gc.collect()
             break
     except OSError:
         pass
+if not stubber.modules:
+    stubber.modules = ["micropython"]
+    _log.warn("Could not find modulelist.txt, using default modules")
 ###PARTIALEND###

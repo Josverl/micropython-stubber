@@ -41,7 +41,7 @@ try:from machine import reset
 except Q:pass
 try:from collections import OrderedDict as c
 except Q:from ucollections import OrderedDict as c
-__version__='v1.12.2'
+__version__='v1.13.4'
 v=2
 w=2
 d=[M,'/lib','/sd/lib','/flash/lib','lib']
@@ -218,7 +218,7 @@ def _info():
 		except (Q,T):pass
 	if A[O]==j:A['release']='2.0.0'
 	if A[O]==W:
-		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.20.0':A[D]=A[D][:-2]
+		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.19.9':A[D]=A[D][:-2]
 	if G in A and A[G]:
 		N=int(A[G]);Y=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][N>>10]
 		if Y:A[b]=Y
@@ -259,36 +259,41 @@ def i():
 	except (j,H):return N
 def main():
 	K='failed';G='modulelist.done';import machine as O
-	try:D=J(G,'r+b');M=N
-	except A:D=J(G,'w+b');M=F
+	try:C=J(G,'r+b');M=N
+	except A:C=J(G,'w+b');M=F
 	stubber=Stubber(path=read_path())
 	if not M:stubber.clean()
-	stubber.modules=[W]
-	for P in d:
+	x(stubber);D={}
+	try:
+		with J(G)as C:
+			for E in C.read().split('\n'):
+				E=E.strip();B.collect()
+				if L(E)>0:P,Q=E.split('=',1);D[P]=Q
+	except (A,SyntaxError):pass
+	B.collect();R=[A for A in stubber.modules if A not in D.keys()];B.collect()
+	for H in R:
+		I=F
+		try:I=stubber.create_one_stub(H)
+		except k:O.reset()
+		B.collect();D[H]=str(stubber._report[-1]if I else K)
+		with J(G,'a')as C:C.write('{}={}\n'.format(H,'ok'if I else K))
+	if D:stubber._report=[A for(B,A)in D.items()if A!=K];stubber.report()
+def x(stubber):
+	stubber.modules=[]
+	for D in d:
 		try:
-			with J(P+'/modulelist.txt')as D:
-				stubber.modules=[]
-				for C in D.read().split('\n'):
+			with J(D+'/modulelist.txt')as E:
+				for C in E.read().split('\n'):
 					C=C.strip()
 					if L(C)>0 and C[0]!='#':stubber.modules.append(C)
 				B.collect();break
 		except A:pass
-	B.collect();E={}
-	try:
-		with J(G)as D:
-			for C in D.read().split('\n'):
-				C=C.strip();B.collect()
-				if L(C)>0:Q,R=C.split('=',1);E[Q]=R
-	except (A,SyntaxError):pass
-	B.collect();S=[A for A in stubber.modules if A not in E.keys()];B.collect()
-	for H in S:
-		I=F
-		try:I=stubber.create_one_stub(H)
-		except k:O.reset()
-		B.collect();E[H]=str(stubber._report[-1]if I else K)
-		with J(G,'a')as D:D.write('{}={}\n'.format(H,'ok'if I else K))
-	if E:stubber._report=[A for(B,A)in E.items()if A!=K];stubber.report()
+	if not stubber.modules:stubber.modules=[W];_log.warn('Could not find modulelist.txt, using default modules')
+	B.collect()
 if __name__=='__main__'or i():
 	try:logging.basicConfig(level=logging.INFO)
 	except m:pass
-	if not g('no_auto_stubber.txt'):B.threshold(4*1024);B.enable();main()
+	if not g('no_auto_stubber.txt'):
+		try:B.threshold(4*1024);B.enable()
+		except BaseException:pass
+		main()
