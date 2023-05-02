@@ -26,10 +26,11 @@ def get_base(candidate: Dict[str, str], version: Optional[str] = None):
 
 
 def board_folder_name(fw: Dict, *, version: Optional[str] = None):
-    """return the name of the firmware folder"""
+    """Return the name of the firmware folder. Can be in AnyCase."""
     base = get_base(fw, version=version)
     folder_name = f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    folder_name = folder_name.lower().replace("-generic_", "-")  # @GENERIC Prefix
+    # do not force name to lowercase
+    folder_name = folder_name.replace("-generic_", "-")  # @GENERIC Prefix
     return folder_name
 
 
@@ -51,7 +52,7 @@ def merge_all_docstubs(
 ):
     """merge docstubs and board stubs to merged stubs"""
     if versions is None:
-        versions = ["v1.19.1"]
+        versions = [CONFIG.stable_version]
     if ports is None:
         ports = ["auto"]
     if boards is None:

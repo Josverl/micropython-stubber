@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.13.3
+This variant was generated from createstubs.py by micropython-stubber v1.13.4
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -39,7 +39,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.12.2"
+__version__ = "v1.13.4"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
@@ -527,7 +527,7 @@ def _info():  # type:() -> dict[str, str]
             info["version"]
             and info["version"].endswith(".0")
             and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
-            and info["version"] <= "1.20.0"
+            and info["version"] <= "1.19.9"
         ):
             # drop the .0 for newer releases
             info["version"] = info["version"][:-2]
@@ -659,21 +659,7 @@ def main():
         # Only clean folder if this is a first run
         stubber.clean()
     # get list of modules to process
-    stubber.modules = ["micropython"]
-    for p in LIBS:
-        try:
-            with open(p + "/modulelist.txt") as f:
-                print("Debug: list of modules: " + p + "/modulelist.txt")
-                stubber.modules = []  # avoid duplicates
-                for line in f.read().split("\n"):
-                    line = line.strip()
-                    if len(line) > 0 and line[0] != "#":
-                        stubber.modules.append(line)
-                gc.collect()
-                break
-        except OSError:
-            pass
-    gc.collect()
+    get_modulelist(stubber)
     # remove the ones that are already done
     modules_done = {}  # type: dict[str, str]
     try:
@@ -714,6 +700,26 @@ def main():
         stubber.report()
 
 
+def get_modulelist(stubber):
+    stubber.modules = []  # avoid duplicates
+    for p in LIBS:
+        try:
+            with open(p + "/modulelist.txt") as f:
+                print("Debug: list of modules: " + p + "/modulelist.txt")
+                for line in f.read().split("\n"):
+                    line = line.strip()
+                    if len(line) > 0 and line[0] != "#":
+                        stubber.modules.append(line)
+                gc.collect()
+                break
+        except OSError:
+            pass
+    if not stubber.modules:
+        stubber.modules = ["micropython"]
+        _log.warn("Could not find modulelist.txt, using default modules")
+    gc.collect()
+
+
 if __name__ == "__main__" or is_micropython():
     try:
         _log = logging.getLogger("stubber")
@@ -722,6 +728,9 @@ if __name__ == "__main__" or is_micropython():
     except NameError:
         pass
     if not file_exists("no_auto_stubber.txt"):
-        gc.threshold(4 * 1024)
-        gc.enable()
+        try:
+            gc.threshold(4 * 1024)
+            gc.enable()
+        except BaseException:
+            pass
         main()

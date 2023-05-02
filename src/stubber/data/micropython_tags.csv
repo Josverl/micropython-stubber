@@ -12,4 +12,4 @@ version,            mpy_date,      lib_date,      lib_commit_hash,              
 "refs/tags/v1.18",  "Jan 16 2022", "Nov 11 2021", "cdd260f0792d04a1ded99171b4c7a2582b7856b4",  "aioble/multitests: Add multitest for shutdown handlers."
 "refs/tags/v1.19",  "Jun 16 2022", "Jun 16 2022", "db4c739863e49fc874bdaae8aa8c316c7ed4276a",  "unittest: Version 0.9.0"
 "refs/tags/v1.19.1","Jun 16 2022", "Jun 16 2022", "db4c739863e49fc874bdaae8aa8c316c7ed4276a",  "unittest: Version 0.9.0"
-
+"refs/tags/v1.20.0","Apr 26 2023", "Apr 11 2023", "c113611765278b2fc8dcf8b2f2c3513b35a69b39",  "aioble: Fix descriptor flag handling"

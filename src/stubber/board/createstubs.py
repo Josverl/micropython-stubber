@@ -20,7 +20,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.12.2"
+__version__ = "v1.13.4"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
@@ -508,7 +508,7 @@ def _info():  # type:() -> dict[str, str]
             info["version"]
             and info["version"].endswith(".0")
             and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
-            and info["version"] <= "1.20.0"
+            and info["version"] <= "1.19.9"
         ):
             # drop the .0 for newer releases
             info["version"] = info["version"][:-2]
@@ -868,6 +868,9 @@ if __name__ == "__main__" or is_micropython():
     except NameError:
         pass
     if not file_exists("no_auto_stubber.txt"):
-        gc.threshold(4 * 1024)
-        gc.enable()
+        try:
+            gc.threshold(4 * 1024)
+            gc.enable()
+        except BaseException:
+            pass
         main()

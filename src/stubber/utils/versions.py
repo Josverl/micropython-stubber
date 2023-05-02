@@ -19,8 +19,9 @@ def clean_version(
     if version in {"", "-"}:
         return version
     nibbles = version.split("-")
-    if not patch and nibbles[0] >= "1.10.0" and nibbles[0].endswith(".0"):
-        # remove the last ".0"
+    ver_ =  nibbles[0].lower().lstrip("v")
+    if not patch and ver_ >= "1.10.0" and ver_< "1.20.0" and ver_.endswith(".0"):
+        # remove the last ".0" - but only for versions between 1.10 and 1.20 (because)
         nibbles[0] = nibbles[0][:-2]
     if len(nibbles) == 1:
         version = nibbles[0]
