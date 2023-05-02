@@ -608,7 +608,7 @@ files = [
 name = "importlib-metadata"
 version = "6.6.0"
 description = "Read metadata from Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -920,8 +920,8 @@ test = ["pytest (<5.4)", "pytest-cov"]
 name = "mpremote"
 version = "0.4.0.post16+g291b219"
 description = "Tool for interacting remotely with MicroPython devices"
-category = "main"
-optional = false
+category = "dev"
+optional = true
 python-versions = ">=3.4"
 files = []
 develop = false
@@ -936,6 +936,7 @@ url = "https://github.com/Josverl/mpremote"
 reference = "HEAD"
 resolved_reference = "291b219ebc753ec71b587dcbe9c591e382b86aef"
 subdirectory = "tools/mpremote"
+
 [[package]]
 name = "mypy"
 version = "1.2.0"
@@ -1330,7 +1331,7 @@ name = "pyserial"
 version = "3.5"
 description = "Python Serial Port Extension"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
@@ -2094,7 +2095,7 @@ files = [
 name = "zipp"
 version = "3.15.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -2112,4 +2113,4 @@ tools = ["esptool"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "124487f0f81904970a9062108618b364adbee8c1895c610b8422eac9a4f223cf"
+content-hash = "38349fe9388b54f1eca93b38b7a90428cf3e377bedb4285e4b5670a7b10d83c0"
