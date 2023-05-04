@@ -158,7 +158,9 @@ class StubPackage:
     def update_pkg_version(self, production: bool) -> str:
         """Get the next version for the package"""
         return (
-            self.get_prerelease_package_version(production) if self.mpy_version == "latest" else self.get_next_package_version(production)
+            self.get_prerelease_package_version(production)
+            if self.mpy_version == "latest"
+            else self.get_next_package_version(production)
         )
 
     def get_prerelease_package_version(self, production: bool = False) -> str:
@@ -177,6 +179,8 @@ class StubPackage:
         base = Version(self.pkg_version)
         if pypi_versions := get_pypi_versions(self.package_name, production=prod, base=base):
             self.pkg_version = str(pypi_versions[-1])
+        # no puvblished package found , so we start at base version then bump 1 post release
+        self.pkg_version = Version(self.pkg_version).base_version
         return self.bump()
 
     # -----------------------------------------------
@@ -678,7 +682,9 @@ class StubPackage:
             self.pkg_version = self.update_pkg_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
-            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}")
+            log.debug(
+                f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}"
+            )
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
             if self.poetry_build():
