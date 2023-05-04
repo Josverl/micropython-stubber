@@ -8,6 +8,7 @@ Workaround
 pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mpremote
 """
 
+import json
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,7 @@ from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
+from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.utils.config import CONFIG
 
 OK = 0
@@ -166,7 +168,8 @@ class MPRemoteBoard:
 
     def __init__(self, port: str = ""):
         self.port = port
-        self.board = ""
+        # self.board = ""
+        self.firmware = {}
         self.uname: Optional[UName] = None
         self.connected = False
         self.path: Optional[Path] = None
@@ -179,7 +182,9 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_uname(self):
-        rc, result = self.run_command(["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"], no_info=True)
+        rc, result = self.run_command(
+            ["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"], no_info=True
+        )
         s = result[0]
         if "sysname=" in s:
             self.uname = eval(f"UName{s}")
@@ -364,7 +369,7 @@ def generate_board_stubs(
     port : str
         The port the board is connected to
     """
-    
+
     board_info_path = Path(__file__).parent.parent / "board_info.csv"
     # HOST -> MCU : copy createstubs to board
     if LOCAL_FILES:
@@ -393,10 +398,15 @@ def generate_board_stubs(
         return ERROR, None
 
     stubs_path = dest / folder
-    port, board = get_port_board(out)
     mcu.path = stubs_path
-    mcu.board = board
-    mcu.port = port
+    # read the modles.json file into a dict
+    try:
+        with open(stubs_path / "modules.json") as fp:
+            modules_json = json.load(fp)
+            mcu.firmware = modules_json["firmware"]
+    except FileNotFoundError:
+        log.warning("Error generating stubs, modules.json not found")
+        return ERROR, None
 
     # check the number of stubs generated
     if len(list(stubs_path.glob("*.p*"))) < 10:
@@ -412,11 +422,11 @@ def get_stubfolder(out: List[str]):
     return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("Path: ")]) else ""
 
 
-def get_port_board(out: List[str]):
-    return (
-        lines[-1].split("Port:")[-1].strip() if (lines := [l for l in out if l.startswith("Port: ")]) else "",
-        lines[-1].split("Board:")[-1].strip() if (lines := [l for l in out if l.startswith("Board: ")]) else "",
-    )
+# def get_port_board(out: List[str]):
+#     return (
+#         lines[-1].split("Port:")[-1].strip() if (lines := [l for l in out if l.startswith("Port: ")]) else "",
+#         lines[-1].split("Board:")[-1].strip() if (lines := [l for l in out if l.startswith("Board: ")]) else "",
+#     )
 
 
 def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
@@ -450,7 +460,9 @@ def set_loglevel(verbose: int) -> str:
     log.remove()
     level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "TRACE")
     if level == "INFO":
-        format_str = "<green>{time:HH:mm:ss}</green>|<level>{level: <8}</level>|<cyan>{module: <20}</cyan> - <level>{message}</level>"
+        format_str = (
+            "<green>{time:HH:mm:ss}</green>|<level>{level: <8}</level>|<cyan>{module: <20}</cyan> - <level>{message}</level>"
+        )
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level: <8}</level>|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
@@ -479,7 +491,7 @@ def copy_to_repo(source: Path) -> Optional[Path]:
 
 if __name__ == "__main__":
     set_loglevel(2)
-    
+
     variant = Variant.db
     form = Form.py
     tempdir = mkdtemp(prefix="board_stubber")
@@ -497,16 +509,26 @@ if __name__ == "__main__":
     print(tabulate([[b.port] + (list(b.uname) if b.uname else ["unable to connect"]) for b in connected_boards]))  # type: ignore
     # scan boards and generate stubs
 
-
     for board in connected_boards:
         log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
         if rc == OK:
-            log.success(f"Stubs generated for {board.port}")
+            log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
             if destination := copy_to_repo(my_stubs):
                 log.success(f"Stubs copied to {destination}")
                 # Also merge the stubs with the docstubs
-                # cmd = ["python", "-m", "stubber", "merge", "--version", "v1.19.1", "--port", "stm32", "--board", "PYBV11"]
-                # run(cmd)
+                log.info(f"Merging stubs with docstubs : {board.firmware}")
+
+                _ = merge_all_docstubs(
+                    versions=board.firmware["version"],
+                    family=board.firmware["family"],
+                    boards=board.firmware["board"],
+                    ports=board.firmware["port"],
+                    mpy_path=CONFIG.mpy_path,
+                )
+                log.success("Done")
+
+                # Then Build the package
+
         else:
             log.error(f"Failed to generate stubs for {board.port}")
