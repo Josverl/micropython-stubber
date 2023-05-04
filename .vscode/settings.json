@@ -123,7 +123,7 @@
     "files.watcherExclude": {
         "**/repos/**": true
     },
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "editor.formatOnType": false,
     "editor.formatOnSave": true,
     "yaml.schemas": {
@@ -131,7 +131,7 @@
     },
     "editor.formatOnSaveMode": "file",
     "[python]": {
-        "editor.defaultFormatter": null,
+        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.insertSpaces": true,
         "editor.tabSize": 4,
         "editor.formatOnSave": true

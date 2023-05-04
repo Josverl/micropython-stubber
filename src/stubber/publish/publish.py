@@ -30,7 +30,7 @@ def build_multiple(
     results: List[Dict[str, Any]] = []
     worklist = build_worklist(family, versions, ports, boards)
     if len(worklist) == 0:
-        log.error("Could not find any packages than can be build.")
+        log.error("Could not find any packages that can be build.")
         return results
     log.info(f"checking {len(worklist)} possible board candidates")
 
