@@ -48,7 +48,7 @@ stubber.modules = []  # avoid duplicates
 for p in LIBS:
     try:
         with open(p + "/modulelist.txt") as f:
-            print("Debug: list of modules: " + p + "/modulelist.txt")
+            print("DEBUG: list of modules: " + p + "/modulelist.txt")
             for line in f.read().split("\n"):
                 line = line.strip()
                 if len(line) > 0 and line[0] != "#":
