@@ -183,7 +183,9 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
+                module_name, self._fwid, self.info, __version__
+            )
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -220,6 +222,9 @@ class Stubber:
             # name_, repr_(value), type as text, item_instance, order
             # do not create stubs for these primitives
             if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
+                continue
+            if item_name[0].isdigit():
+                self._log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
@@ -271,7 +276,9 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
+                        indent, item_name, ret
+                    )
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
@@ -283,7 +290,6 @@ class Stubber:
                 pass
 
             elif item_type_txt.startswith("<class '"):
-
                 t = item_type_txt[8:-2]
                 s = ""
 
@@ -623,7 +629,6 @@ def is_micropython() -> bool:
 
 
 def main():
-
     stubber = Stubber(path=read_path())
     # stubber = Stubber(path="/sd")
     # Option: Specify a firmware name & version

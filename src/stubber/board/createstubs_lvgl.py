@@ -225,6 +225,9 @@ class Stubber:
             # do not create stubs for these primitives
             if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
                 continue
+            if item_name[0].isdigit():
+                self._log.warning("NameError: invalid name {}".format(item_name))
+                continue
             # Class expansion only on first 3 levels (bit of a hack)
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, item_name))
@@ -287,7 +290,6 @@ class Stubber:
                 pass
 
             elif item_type_txt.startswith("<class '"):
-
                 t = item_type_txt[8:-2]
                 s = ""
 

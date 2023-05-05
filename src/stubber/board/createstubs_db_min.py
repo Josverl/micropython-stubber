@@ -116,6 +116,7 @@ class Stubber:
 		if N:I(N)
 		for (F,K,G,S,f) in R:
 			if F in['classmethod','staticmethod','BaseException',O]:continue
+			if F[0].isdigit():continue
 			if G=="<class 'type'>"and L(E)<=w*4:
 				U=C;V=F.endswith(O)or F.endswith('Error')or F in['KeyboardInterrupt','StopIteration','SystemExit']
 				if V:U=O
