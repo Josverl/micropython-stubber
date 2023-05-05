@@ -25,7 +25,7 @@ from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
-from stubber.publish.merge_docstubs import merge_all_docstubs
+from stubber.publish.merge_docstubs import board_folder_name, get_board_path, merge_all_docstubs
 from stubber.utils.config import CONFIG
 
 OK = 0
@@ -471,12 +471,13 @@ def set_loglevel(verbose: int) -> str:
     return level
 
 
-def copy_to_repo(source: Path) -> Optional[Path]:
+def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
     """Copy the generated stubs to the stubs repo.
     If the destination folder exists, it is first emptied
     when succesfull: returns the destination path - None otherwise
     """
-    destination = CONFIG.stub_path / source.name
+    # destination = CONFIG.stub_path / source.name
+    destination = get_board_path(fw)
     try:
         if destination.exists() and destination.is_dir():
             # first clean the destination folder
@@ -514,7 +515,7 @@ if __name__ == "__main__":
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
         if rc == OK:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
-            if destination := copy_to_repo(my_stubs):
+            if destination := copy_to_repo(my_stubs, board.firmware):
                 log.success(f"Stubs copied to {destination}")
                 # Also merge the stubs with the docstubs
                 log.info(f"Merging stubs with docstubs : {board.firmware}")
