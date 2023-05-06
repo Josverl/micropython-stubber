@@ -74,7 +74,7 @@ def publish_multiple(
     return results
 
 
-def build_worklist(family: str, versions: List[str], ports: Union[List[str], str], boards: Union[List[str], str]):
+def build_worklist(family: str, versions: Union[List[str], str], ports: Union[List[str], str], boards: Union[List[str], str]):
     """Build a worklist of packages to build or publish, and filter to only the requested ports and boards"""
     if isinstance(versions, str):
         versions = [versions]

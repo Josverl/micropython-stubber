@@ -5,7 +5,7 @@ import sys
 
 import click
 from loguru import logger as log
-from stubber.utils.my_version import __version__
+from stubber import __version__
 
 
 @click.group(chain=True)

@@ -1,3 +1,4 @@
-"""read the version from pyproject or the wheels"""
+"""get the version"""
 
-from .utils.my_version import __version__
+
+__version__ = "1.13.7"
