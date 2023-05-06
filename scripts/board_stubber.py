@@ -25,7 +25,7 @@ from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
-from stubber.publish.merge_docstubs import board_folder_name, get_board_path, merge_all_docstubs
+from stubber.publish.merge_docstubs import get_board_path, merge_all_docstubs
 from stubber.utils.config import CONFIG
 
 OK = 0
@@ -37,13 +37,13 @@ LOCAL_FILES = True
 ###############################################################################################
 
 
-# @dataclass
-# class LogTags:
-#     reset_tags: List[str]
-#     error_tags: List[str]
-#     warning_tags: List[str]
-#     success_tags: List[str]
-#     ignore_tags: List[str]
+@dataclass
+class LogTags:
+    reset_tags: List[str]
+    error_tags: List[str]
+    warning_tags: List[str]
+    success_tags: List[str]
+    ignore_tags: List[str]
 
 
 def run(
@@ -115,7 +115,7 @@ def run(
                     line = line.replace(tag, "")
                 output.append(line)  # full output, no trimming
                 if any(tag in line for tag in reset_tags):
-                    raise Exception("Board reset detected")
+                    raise RuntimeError("Board reset detected")
 
                 line = line.rstrip("\n")
                 # if any of the error tags in the line
@@ -321,16 +321,18 @@ def hard_reset(board: MPRemoteBoard) -> bool:
 
 @retry(stop=stop_after_attempt(10), wait=wait_fixed(15))
 def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant.db):
-    """Run createstubs on the board"""
-    # hard_reset(board)
-
+    """
+    Run a createstubs[variant]  on the provided board.
+    Retry running the command up to 10 times, with a 15 second timeout between retries.
+    this should allow for the boards with little memory to complete even if they run out of memory.
+    """
     # add the lib folder to the path
     cmd_path = ["exec", 'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"']
     board.run_command(cmd_path, timeout=5)
 
     cmd = build_cmd(dest, variant)
     board.run_command.retry.wait = wait_fixed(15)
-    # some boards need 2-3 minutes so increase timeout
+    # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     #  but slows down esp8266 restarts so keep that to 60 seconds
     timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60
     rc, out = board.run_command(cmd, timeout=timeout)
