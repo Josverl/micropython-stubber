@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.13.5"
+version = "1.13.7"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -101,6 +101,24 @@ mpremote = { git = "https://github.com/Josverl/mpremote", subdirectory = "tools/
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry_bumpversion.file."src/stubber/__init__.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_mem.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_db.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_min.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_mem_min.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_db_min.py"]
+
+[[tool.poetry_bumpversion.replacements]]
+files = [
+    "package.json",
+    "mip/full.json",
+    "mip/minified.json",
+    "mip/mpy_v5.json",
+    "mip/mpy_v6.json",
+]
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
 [tool.pyright]
 include = ["src", "tests"]
