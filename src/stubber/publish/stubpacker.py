@@ -148,7 +148,6 @@ class StubPackage:
             with open(_toml, "rb") as f:
                 pyproject = tomllib.load(f)
             pyproject["tool"]["poetry"]["version"] = version
-
             # update the version in the toml file
             with open(_toml, "wb") as output:
                 tomli_w.dump(pyproject, output)
@@ -666,8 +665,7 @@ class StubPackage:
         ok = self.update_package()
         self.status["version"] = self.pkg_version
         if not ok:
-            log.warning(f"{self.package_name}: skipping as build failed")
-            self.status["error"] = "Build failed"
+            log.info(f"{self.package_name}: skip - Could not update package")
             return False
         # If there are changes to the package, then publish it
         if self.is_changed():
@@ -691,7 +689,7 @@ class StubPackage:
                 self.status["result"] = "Build OK"
             else:
                 log.warning(f"{self.package_name}: skipping as build failed")
-                self.status["error"] = "Build failed"
+                self.status["error"] = "Poetry build failed"
                 return False
         return True
 
