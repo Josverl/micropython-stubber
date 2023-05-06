@@ -2,15 +2,15 @@
     "urls": [
         [
             "createstubs_mpy.mpy",
-            "github:josverl/micropython-stubber/mip/v5/createstubs_mpy.mpy"
+            "github:josverl/micropython-stubber/mip/v5/createstubs.mpy"
         ],
         [
             "createstubs_db_mpy.mpy",
-            "github:Josverl/micropython-stubber/mip/v5/createstubs_db_mpy.mpy"
+            "github:Josverl/micropython-stubber/mip/v5/createstubs_db.mpy"
         ],
         [
             "createstubs_mem_mpy.mpy",
-            "github:Josverl/micropython-stubber/mip/v5/createstubs_mem_mpy.mpy"
+            "github:Josverl/micropython-stubber/mip/v5/createstubs_mem.mpy"
         ],
         [
             "modulelist.txt",
@@ -22,5 +22,5 @@
         ]
     ],
     "deps": [],
-    "version": "1.11.2"
+    "version": "1.13.7"
 }

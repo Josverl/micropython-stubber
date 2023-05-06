@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from .my_version import __version__
+from .. import __version__
 from .versions import clean_version
 
 # # log = logging.getLogger(__name__)
