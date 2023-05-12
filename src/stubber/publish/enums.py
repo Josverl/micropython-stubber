@@ -14,6 +14,14 @@ class StubSource(str, Enum):
     MERGED = "Merged stubs"
     "stubs built by merging the information from doc-stubs and firmware-stubs"
 
+    def __str__(self):
+        # Always force string values
+        return self.value
+
+    def __repr__(self):
+        # Always force string values
+        return self.value
+
 
 ALL_TYPES = ["combo", "doc", "core", "firmware"]
 COMBO_STUBS = ALL_TYPES[0]
