@@ -493,10 +493,10 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
 
 
 if __name__ == "__main__":
-    set_loglevel(2)
+    set_loglevel(0)
 
     variant = Variant.db
-    form = Form.py
+    form = Form.mpy
     tempdir = mkdtemp(prefix="board_stubber")
 
     dest = Path(tempdir)
