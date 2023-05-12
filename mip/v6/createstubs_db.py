@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.13.4
+This variant was generated from createstubs.py by micropython-stubber v1.13.7
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
@@ -109,7 +109,7 @@ class Stubber:
         _errors = []
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
-            if name.startswith("_"):
+            if name.startswith("_") and not name in self.modules:
                 continue
             self._log.debug("get attribute {}".format(name))
             try:
@@ -136,7 +136,8 @@ class Stubber:
                 reset()
 
         # remove internal __
-        _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
+        # _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
+        _result = sorted([i for i in _result if not (i[0].startswith("__"))], key=lambda x: x[4])
         gc.collect()
         return _result, _errors
 

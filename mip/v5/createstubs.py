@@ -90,7 +90,7 @@ class Stubber:
         _errors = []
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
-            if name.startswith("_"):
+            if name.startswith("_") and not name in self.modules:
                 continue
             self._log.debug("get attribute {}".format(name))
             try:
@@ -117,7 +117,8 @@ class Stubber:
                 reset()
 
         # remove internal __
-        _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
+        # _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
+        _result = sorted([i for i in _result if not (i[0].startswith("__"))], key=lambda x: x[4])
         gc.collect()
         return _result, _errors
 
