@@ -8,9 +8,10 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Tuple
 
-import stubber.basicgit as git
 from loguru import logger as log
+from packaging.version import Version
 
+import stubber.basicgit as git
 from stubber.utils.config import CONFIG
 
 # # log = logging.getLogger(__name__)
@@ -43,12 +44,10 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
 
 def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     """
-    Read a csv with the micropython version and matchin micropython-lib commit-hashes
+    Read a csv with the micropython version and matching micropython-lib commit-hashes
     these can be used to make sure that the correct micropython-lib version is checked out.
 
     filename is relative to the 'stubber' package
-
-    TODO: it would be nice if micropython-lib had matching commit-tags
 
         git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags
     """
@@ -63,7 +62,9 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
         reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
         rows = list(reader)
         # create a dict version --> commit_hash
-        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
+        version_commit = {
+            row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")
+        }
     # add default
     version_commit = defaultdict(lambda: "master", version_commit)
     return version_commit
@@ -72,12 +73,24 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
 def match_lib_with_mpy(version_tag: str, lib_path: Path):
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
-    log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
-    return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
+    #  check if micropython-lib has matching tags
+    if Version(version_tag) >= Version("v1.20.0"):
+        # TODO:if version is v1.12.0 or newer
+        #   then use submodules to checkout the correct version of micropython-lib
+        #   git submodule update lib/micropython-lib
+        #   or use the new git tags to checkout the correct version of micropython-lib
+        # else
+        # clean the submodules for just to be sure
+        #   git submodule foreach --recursive git clean -xfd
+        #   use the micropython_tags.csv to find the correct commit hash
+        return git.checkout_tag(version_tag, lib_path)
+    else:
+        log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
+        return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 
 def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
-    """Fetch updates , then switch to the provided tag"""
+    """Fetch updates, then switch to the provided tag"""
     log.info("fetch updates")
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
@@ -96,7 +109,7 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         git.checkout_tag(repo=mpy_path, tag=tag)
     result = match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
 
-    log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_path)}")
+    log.info(f"{mpy_path} {git.get_local_tag(mpy_path)}")
     log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_lib_path)}")
     return result
 
