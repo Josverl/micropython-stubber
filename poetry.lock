@@ -1304,14 +1304,14 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "pyright"
-version = "1.1.301"
+version = "1.1.308"
 description = "Command line wrapper for pyright"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.301-py3-none-any.whl", hash = "sha256:ecc3752ba8c866a8041c90becf6be79bd52f4c51f98472e4776cae6d55e12826"},
-    {file = "pyright-1.1.301.tar.gz", hash = "sha256:6ac4afc0004dca3a977a4a04a8ba25b5b5aa55f8289550697bfc20e11be0d5f2"},
+    {file = "pyright-1.1.308-py3-none-any.whl", hash = "sha256:40a541d21000d256bbd076f4337fc93d4265a92c63f06e5bedf893d77afb234d"},
+    {file = "pyright-1.1.308.tar.gz", hash = "sha256:7858a32d08555f8894931e2dc9571126cdc417e78e096f5be13e9418d8aed1e9"},
 ]
 
 [package.dependencies]
