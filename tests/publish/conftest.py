@@ -1,26 +1,37 @@
 """pytest fixtures for publish tests"""
 
-from pathlib import Path
 import shutil
+from pathlib import Path
+
 import pytest
+from pysondb import PysonDB
 from pytest_mock import MockerFixture
 
+from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import create_package
 
 from .fakeconfig import FakeConfig
 
 
-from stubber.publish.enums import COMBO_STUBS
-from pysondb import PysonDB
-
-
 @pytest.fixture
-def fake_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
+def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
+    """\
+        Create a fake package for testing
+        - use the test config
+        - use specified version or defaults to 1.19.1
+        - specify version using a marker: @pytest.mark.version("1.20.0")
+        
+        """
     # use the test config - in two places
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
-    version = "1.19.1"
+    if "version" in request.keywords:
+        # use specified version
+        version = request.keywords["version"].args[0]
+    else:
+        # use default version
+        version = "1.19.1"
     pkg = create_package("micropython-fake-stubs", mpy_version=version, port="esp32", pkg_type=COMBO_STUBS)
     pkg._publish = False
     pkg.create_license()

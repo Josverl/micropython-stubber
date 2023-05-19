@@ -173,13 +173,15 @@ class StubPackage:
         else:
             raise ValueError("cannot determine next version number micropython")
 
-    def get_next_package_version(self, prod: bool = False) -> str:
+    def get_next_package_version(self, prod: bool = False, rc=False) -> str:
         """Get the next version for the package."""
         base = Version(self.pkg_version)
         if pypi_versions := get_pypi_versions(self.package_name, production=prod, base=base):
+            # get the latest version from pypi
             self.pkg_version = str(pypi_versions[-1])
-        # no puvblished package found , so we start at base version then bump 1 post release
-        self.pkg_version = Version(self.pkg_version).base_version
+        else:
+            # no published package found , so we start at base version then bump 1 post release
+            self.pkg_version = Version(self.pkg_version).base_version
         return self.bump()
 
     # -----------------------------------------------
