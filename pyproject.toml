@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.13.7"
+version = "1.13.8"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -96,6 +96,7 @@ pytest-metadata = "^2.0.2"
 pytest-mock = "^3.10.0"
 sourcery-cli = "^1.0.3"
 mpremote = { git = "https://github.com/Josverl/mpremote", subdirectory = "tools/mpremote", optional = true }
+ipykernel = "^6.23.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
