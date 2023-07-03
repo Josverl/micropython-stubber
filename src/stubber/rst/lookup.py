@@ -101,7 +101,7 @@ LOOKUP_LIST = {
     "machine.UART.irq": ("Any", 0.95),  # no IRQ type defined
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
-    "micropython.const": ("int", 0.95),  # const is always an int
+    "micropython.const": ("Union[int, bytes, str, Tuple]", 0.95),  # since 1.19 can also be string , bytes or tuple 
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
