@@ -3,6 +3,7 @@ Create stubs for (all) modules on a MicroPython board
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
+# sourcery skip: use-contextlib-suppress
 import gc
 import logging
 import sys
@@ -510,15 +511,13 @@ def _info():  # type:() -> dict[str, str]
     if info["family"] == "ev3-pybricks":
         info["release"] = "2.0.0"
 
-    if info["family"] == "micropython":
-        if (
-            info["version"]
-            and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
-            and info["version"] <= "1.19.9"
-        ):
-            # drop the .0 for newer releases
-            info["version"] = info["version"][:-2]
+    if info["family"] == "micropython" and (
+                info["version"]
+                and info["version"].endswith(".0")
+                and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+                and info["version"] <= "1.19.9"
+            ):
+        info["version"] = info["version"][:-2]
 
     # spell-checker: disable
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds

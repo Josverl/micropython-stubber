@@ -79,10 +79,11 @@ class SourceDict(OrderedDict):
                 out += str(code)
         return out
 
-    def __add__(self, dict: SourceDict):
+    def __add__(self, other: SourceDict):
+        "Aallows instances of the SourceDict class to be added together using the + operator or the += operator."
         # sd = sd + function
         # sd += function
-        self.update({dict.name: dict})
+        self.update({other.name: other})
         return self
 
     def add_docstr(self, docstr: Union[str, List[str]], extra: int = 0):
@@ -175,7 +176,15 @@ class SourceDict(OrderedDict):
 
 class ModuleSourceDict(SourceDict):
     def __init__(self, name: str, indent=0, lf: str = "\n"):
-        "set correct order a module definition to allow adding class variables"
+        """The ModuleSourceDict class is used to represent a Python module as a dictionary of its components, 
+        such as its docstring, version, comments, imports, constants, classes, and functions. 
+        The class has several methods,  
+            sort() which sorts the components of the module in the correct order for a module definition to allow adding class variables, 
+            find() which finds a class node based on its name, 
+            classes() which returns a list of the class names in parent-child order, 
+            add_import() which adds a list of imports to the module. 
+        The __str__() method is also defined to return a string representation of the module.
+        """
         super().__init__(
             [
                 ("docstr", [EMPTY_DOCSTR]),

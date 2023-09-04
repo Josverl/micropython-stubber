@@ -70,7 +70,6 @@ from typing import List, Optional, Tuple
 
 from loguru import logger as log
 
-
 from stubber.rst import (
     CHILD_PARENT_CLASS,
     MODULE_GLUE,
@@ -84,7 +83,6 @@ from stubber.rst import (
 )
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
-
 
 SEPERATOR = "::"
 
@@ -240,7 +238,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def clean_docstr(block:List[str]):
+    def clean_docstr(block: List[str]):
         """Clean up a docstring"""
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
@@ -264,7 +262,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def add_link_to_docsstr(block:List[str]):
+    def add_link_to_docsstr(block: List[str]):
         """Add clickable hyperlinks to CPython docpages"""
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
@@ -316,7 +314,9 @@ class RSTParser(RSTReader):
     PARAM_RE_FIXES = [
         Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
         Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
-        Fix(r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True),  # fix: network - AbstractNIC.connect
+        Fix(
+            r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+        ),  # fix: network - AbstractNIC.connect
     ]
 
     def __init__(self, v_tag: str) -> None:
@@ -581,7 +581,9 @@ class RSTParser(RSTReader):
             params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
+            )
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -730,7 +732,7 @@ class RSTWriter(RSTParser):
         return super().write_file(filename)
 
     def prepare_output(self):
-        "clean up some trailing spaces and commas"
+        "Remove trailing spaces and commas from the output."
         lines = str(self.output_dict).splitlines(keepends=True)
         self.output = lines
         for i in range(len(self.output)):
