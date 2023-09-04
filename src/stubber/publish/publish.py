@@ -4,14 +4,14 @@ prepare a set of stub files for publishing to PyPi
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
 from typing import Any, Dict, List, Union
+
 from loguru import logger as log
 
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.database import get_database
 from stubber.publish.enums import COMBO_STUBS
-from stubber.publish.package import get_package
+from stubber.publish.package import GENERIC_U, get_package
 from stubber.utils.config import CONFIG
-from stubber.publish.package import GENERIC_U
 
 
 def build_multiple(
@@ -30,7 +30,7 @@ def build_multiple(
     results: List[Dict[str, Any]] = []
     worklist = build_worklist(family, versions, ports, boards)
     if len(worklist) == 0:
-        log.error("Could not find any packages than can be build.")
+        log.error("Could not find any packages that can be build.")
         return results
     log.info(f"checking {len(worklist)} possible board candidates")
 
@@ -74,7 +74,9 @@ def publish_multiple(
     return results
 
 
-def build_worklist(family: str, versions: List[str], ports: Union[List[str], str], boards: Union[List[str], str]):
+def build_worklist(
+    family: str, versions: Union[List[str], str], ports: Union[List[str], str], boards: Union[List[str], str]
+):
     """Build a worklist of packages to build or publish, and filter to only the requested ports and boards"""
     if isinstance(versions, str):
         versions = [versions]

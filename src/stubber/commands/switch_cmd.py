@@ -2,10 +2,12 @@
 switch to a specific version of the micropython repos
 """
 
+
 from pathlib import Path
 from typing import Optional, Union
 
 import click
+
 import stubber.basicgit as git
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos, repo_paths
@@ -18,7 +20,12 @@ from .cli import stubber_cli
 
 
 # get version list from Git tags in the repo that is provided on the command line
-VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + ["latest"]
+
+try:
+    VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + ["latest"]
+except Exception:
+    # offline fallback
+    VERSION_LIST = ["v1.91.1", "v1.20.0", "latest"]
 
 
 @stubber_cli.command(name="switch")

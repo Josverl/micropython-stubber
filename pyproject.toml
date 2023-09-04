@@ -8,12 +8,19 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.13.4"
+version = "1.13.8"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
 readme = "readme.md"
-keywords = ["Micropython", "stubs", "vscode", "static type check"]
+keywords = [
+    "MicroPython",
+    "stubs",
+    "vscode",
+    "pyright",
+    "linting",
+    "static type check",
+]
 documentation = "https://micropython-stubber.readthedocs.io/"
 homepage = "https://github.com/Josverl/micropython-stubber#readme"
 repository = "https://github.com/Josverl/micropython-stubber"
@@ -45,57 +52,74 @@ mypy = "1.2.0"
 black = ">=22.10,<23.0"
 libcst = "^0.4.9"
 autoflake = ">=1.7,<3.0"
-click = "^8.1.3"
-importlib-metadata = { version = ">=1,<7", python = "<3.8" }
-tomli = { version = "^2.0.1", python = "<3.11" }
-typed-config = "^1.3.0"
-packaging = ">=21.3,<24.0"
-esptool = { version = "^4.4", optional = true }
-pyserial = { version = "^3.5", optional = true }
-mpremote = { version = ">=0.4.0", optional = true }
-pysondb-v2 = "^2.1.0"
-tomli-w = "^1.0.0"
-loguru = "^0.6.0"
-pygithub = "^1.57"
-tabulate = "^0.9.0"
-pypi-simple = "^1.0.0"
 cachetools = "^5.3.0"
+click = "^8.1.3"
+esptool = { version = "^4.4", optional = true }
+importlib-metadata = { version = "^1.0", python = "<3.8" }
+loguru = "^0.6.0"
+packaging = ">=21.3,<24.0"
 pipx = "^1.1.0"
+pygithub = "^1.57"
+pypi-simple = "^1.0.0"
 pyright = "^1.1.265"
+pysondb-v2 = "^2.1.0"
+tabulate = "^0.9.0"
+tenacity = "^8.2.2"
+tomli = { version = "^2.0.1", python = "<3.11" }
+tomli-w = "^1.0.0"
+typed-config = "^1.3.0"
 
 [tool.poetry.extras]
-tools = ["mpremote", "esptool", "pyserial"]
+tools = ["esptool"]
 
 [tool.poetry.group.docs]
 optional = true
 [tool.poetry.group.docs.dependencies]
 Sphinx = ">=4.4,<6.0"
 myst-parser = ">=0.17,<0.19"
-sphinxcontrib-mermaid = ">=0.7.1,<0.9.0"
 sphinx_rtd_theme = "^1.0.0"
 sphinx-autoapi = "^1.9.0"
 sphinx-click = "^4.4.0"
-attrs = "^22.1.0"
-pydeps = "^1.10.22"
+sphinxcontrib-mermaid = ">=0.7.1,<0.9.0"
 
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
+coverage = "^6.4.3"
+distro = "^1.8.0"
+mock = "^4.0.3"
+pydeps = "^1.10.22"
 pytest = "^7.1.2"
-pytest-mock = "^3.10.0"
+pytest-github-actions-annotate-failures = "^0.1.7"
 pytest-json-report = "^1.5.0"
 pytest-metadata = "^2.0.2"
-mock = ">=4.0.3,<6.0.0"
-coverage = ">=6.4.3,<8.0.0"
-packaging = ">=21.3,<24.0"
-distro = "^1.8.0"
-pytest-github-actions-annotate-failures = "^0.1.7"
+pytest-mock = "^3.10.0"
 sourcery-cli = "^1.0.3"
+mpremote = { git = "https://github.com/Josverl/mpremote", subdirectory = "tools/mpremote", optional = true }
+ipykernel = "^6.23.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry_bumpversion.file."src/stubber/__init__.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_mem.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_db.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_min.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_mem_min.py"]
+[tool.poetry_bumpversion.file."src/stubber/board/createstubs_db_min.py"]
+
+[[tool.poetry_bumpversion.replacements]]
+files = [
+    "package.json",
+    "mip/full.json",
+    "mip/minified.json",
+    "mip/mpy_v5.json",
+    "mip/mpy_v6.json",
+]
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
 [tool.pyright]
 include = ["src", "tests"]
@@ -184,7 +208,6 @@ python_files = ["test_*.py", "*_test.py"]
 testpaths = ["tests", "src"]
 junit_family = "xunit1"
 
-# Remove pytest-cov
 addopts = "-v -sv  -m 'not basicgit'"
 
 markers = [

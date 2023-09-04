@@ -1,6 +1,6 @@
 """Test candidates.py"""
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List, Union
 
 import pytest
 
@@ -133,7 +133,7 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
         ("micropython", ["latest", "v1.18"], "auto", "NUCLEO_F091RC", 2),  # find v1.18 NUCLEO_F091RC boards
     ],
 )
-def test_worklist(family, versions, ports, boards, count):
+def test_worklist(family:str, versions:Union[List[str],str], ports:str, boards:str, count:int):
     wl = build_worklist(family=family, versions=versions, ports=ports, boards=boards)
     assert isinstance(wl, list)
     msg = ", ".join(sorted([f"{l['version']}-{l['port']}-{l['board']}" for l in wl]))

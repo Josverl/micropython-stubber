@@ -26,14 +26,7 @@ def test_clean_version_build(commit, build, clean):
     assert utils.clean_version(commit, build=build) == clean
 
 
-def test_clean_version():
-    assert utils.clean_version("-") == "-"
-    assert utils.clean_version("0.0") == "v0.0"
-    assert utils.clean_version("1.9.3") == "v1.9.3"
-    assert utils.clean_version("v1.9.3") == "v1.9.3"
-    assert utils.clean_version("v1.10.0") == "v1.10"
-    assert utils.clean_version("v1.13.0") == "v1.13"
-    #    assert utils.clean_version("v1.13.0-103-gb137d064e") == "v1.13-Latest"
+def test_clean_version_special():
     assert utils.clean_version("v1.13.0-103-gb137d064e") == "latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True) == "v1.13-103"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True) == "v1.13-103-gb137d064e"
@@ -53,6 +46,24 @@ def test_clean_version():
         utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True, commit=True, flat=True, drop_v=True)
         == "1_13_0-103-gb137d064e"
     )
+
+@pytest.mark.parametrize(
+    "input, expected",
+    [
+        ("-","-"),
+        ("0.0" ,"v0.0"),
+        ("1.9.3" ,"v1.9.3"),
+        ("v1.9.3" ,"v1.9.3"),
+        ("v1.10.0" ,"v1.10"),
+        ("v1.13.0" ,"v1.13"),
+        ("1.13.0" ,"v1.13"),
+        ("v1.20.0" ,"v1.20.0"),
+        ("1.20.0" ,"v1.20.0"),
+    ]
+)   
+def test_clean_version(input:str, expected:str):
+    assert utils.clean_version(input) == expected
+
 
 
 # make stub file
@@ -74,7 +85,9 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
             py_files.remove(pyi.with_suffix(".py"))
         except ValueError:
             pass
-    assert len(py_files) == 0, "py and pyi files should match 1:1 and stored in the same folder"
+    assert (
+        not py_files
+    ), "py and pyi files should match 1:1 and stored in the same folder"
 
 
 # post processing

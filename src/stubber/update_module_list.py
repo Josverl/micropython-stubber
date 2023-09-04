@@ -9,7 +9,7 @@ for this :
 - remove test modules, ending in `_test`
 - write updates to:
     - board/modulelist.txt
-    - board/createsubs.py 
+    - board/createstubs.py 
 
 - TODO: remove the frozen modules from this list
 - TODO: bump patch number if there are actual changes

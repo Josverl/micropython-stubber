@@ -1,0 +1,10 @@
+{
+    "urls": [
+        [
+            "createstubs.py",
+            "http://localhost:8000/mip/v6/createstubs.py"
+        ]
+    ],
+    "deps": [],
+    "version": "1.13.7"
+}

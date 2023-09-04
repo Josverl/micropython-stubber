@@ -3,17 +3,15 @@ Simple Git module, where needed via powershell
 
 Some of the functions are based on the gitpython module
 """
+import os
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Union
 
+import cachetools.func
+from github import Github
 from loguru import logger as log
 from packaging.version import parse
-
-from github import Github
-import cachetools.func
-import os
-
 
 # Token with no permissions
 PAT_NO_ACCESS = "github_pat" + "_11AAHPVFQ0IwtAmfc3cD5Z" + "_xOVII22ErRzzZ7xwwxRcNotUu4krMMbjinQcsMxjnWkYFBIDRWFlZMaHSqq"
@@ -122,9 +120,14 @@ def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
     """
     Get list of tag of a repote github repo
     """
-    if not repo or not isinstance(repo, str) or "/" not in repo: # type: ignore
+    if not repo or not isinstance(repo, str) or "/" not in repo:  # type: ignore
         return []
-    gh_repo = GH_CLIENT.get_repo(repo)
+    try:
+        gh_repo = GH_CLIENT.get_repo(repo)
+    except ConnectionError as e:
+        # TODO: unable to capture the exeption
+        log.warning(f"Unable to get tags - {e}")
+        return []
     tags = [tag.name for tag in gh_repo.get_tags()]
     if minver:
         tags = [tag for tag in tags if parse(tag) >= parse(minver)]
