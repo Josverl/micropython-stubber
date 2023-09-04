@@ -14,7 +14,9 @@ from typing import Optional, Union
 
 from loguru import logger as log
 
-from . import __version__, utils
+from . import __version__
+
+from . import utils
 from .utils.config import CONFIG
 
 # # log = logging.getLogger(__name__)

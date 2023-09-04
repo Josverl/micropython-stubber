@@ -26,10 +26,11 @@ def get_base(candidate: Dict[str, str], version: Optional[str] = None):
 
 
 def board_folder_name(fw: Dict, *, version: Optional[str] = None):
-    """return the name of the firmware folder"""
+    """Return the name of the firmware folder. Can be in AnyCase."""
     base = get_base(fw, version=version)
     folder_name = f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    folder_name = folder_name.lower().replace("-generic_", "-")  # @GENERIC Prefix
+    # do not force name to lowercase
+    folder_name = folder_name.replace("-generic_", "-").replace("-GENERIC_", "-")  # remove GENERIC Prefix
     return folder_name
 
 
@@ -51,7 +52,7 @@ def merge_all_docstubs(
 ):
     """merge docstubs and board stubs to merged stubs"""
     if versions is None:
-        versions = ["v1.19.1"]
+        versions = [CONFIG.stable_version]
     if ports is None:
         ports = ["auto"]
     if boards is None:
@@ -85,7 +86,9 @@ def merge_all_docstubs(
             if candidate["version"] == "latest":
                 # for the latest we do a bit more effort to get something 'good enough'
                 # try to get the board_path from the last released version as the basis
-                board_path = CONFIG.stub_path / board_folder_name(candidate, version=clean_version(CONFIG.stable_version, flat=True))
+                board_path = CONFIG.stub_path / board_folder_name(
+                    candidate, version=clean_version(CONFIG.stable_version, flat=True)
+                )
                 # check again
                 if board_path.exists():
                     log.info(f"using {board_path.name} as the basis for {merged_path.name}")
@@ -100,7 +103,7 @@ def merge_all_docstubs(
         log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
         # Add methods from docstubs to the firmware stubs that do not exist in the firmware stubs
-        add_machine_pin_call(merged_path, candidate['version'])
+        add_machine_pin_call(merged_path, candidate["version"])
         if result:
             merged += 1
     log.info(f"merged {merged} of {len(candidates)} candidates")

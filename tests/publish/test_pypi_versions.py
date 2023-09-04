@@ -2,7 +2,7 @@ from packaging.version import Version
 from stubber.publish.pypi import get_pypi_versions
 
 
-def test_get_pypi_versions():
+def test_get_pypi_versions():  # sourcery skip: extract-duplicate-method
     versions = get_pypi_versions("micropython-esp32-stubs", production=False)
     assert isinstance(versions, list)
     assert len(versions) > 0

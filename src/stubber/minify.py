@@ -5,14 +5,13 @@ Minimizes and cross-compiles a MicroPyton file.
 import itertools
 import subprocess
 import tempfile
+from contextlib import ExitStack
+from io import BytesIO, IOBase, StringIO, TextIOWrapper
 from pathlib import Path
 from typing import List, Tuple, Union
-from contextlib import ExitStack
-from io import BytesIO, StringIO, IOBase, TextIOWrapper
-
-from loguru import logger as log
 
 import python_minifier
+from loguru import logger as log
 
 # Type Aliases for minify
 StubSource = Union[Path, str, StringIO, TextIOWrapper]
@@ -218,6 +217,11 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             ("rprint", 'self._log.warning("{}Skip module:'),
             ("rprint", 'self._log.info("Clean/remove files in folder:'),
             ("rprint", 'self._log.info("Created stubs for'),
+            ("rprint", 'self._log.info("Family: '),
+            ("rprint", 'self._log.info("Version: '),
+            ("rprint", 'self._log.info("Port: '),
+            ("rprint", 'self._log.info("Board: '),
+            ("rprint", 'print("Debug: '),
         ]
 
     content = edit_lines(source_content, edits, diff=diff)

@@ -1,7 +1,7 @@
 """
 Create stubs for (all) modules on a MicroPython board
 """
-# Copyright (c) 2019-2022 Jos Verlinde
+# Copyright (c) 2019-2023 Jos Verlinde
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import gc
 import logging
@@ -10,18 +10,21 @@ import sys
 import uos as os
 from ujson import dumps
 
-# from utime import sleep_us
+try:
+    from machine import reset  # type: ignore
+except ImportError:
+    pass
 
-__version__ = "v1.12.2"
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ucollections import OrderedDict  # type: ignore
+
+__version__ = "v1.13.7"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
-# # deal with ESP32 firmware specific implementations.
-# try:
-#     from machine import resetWDT  # type: ignore  - LoBo specific function
-# except ImportError:
-#     # machine.WDT.feed()
-#     def resetWDT():
-#         pass
+LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
+from time import sleep
 
 
 class Stubber:
@@ -37,11 +40,16 @@ class Stubber:
         self._log = logging.getLogger("stubber")
         self._report = []  # type: list[str]
         self.info = _info()
+        self._log.info("Port: {}".format(self.info["port"]))
+        self._log.info("Board: {}".format(self.info["board"]))
         gc.collect()
         if firmware_id:
             self._fwid = firmware_id.lower()
         else:
-            self._fwid = "{family}-{ver}-{port}".format(**self.info).lower()
+            if self.info["family"] == "micropython":
+                self._fwid = "{family}-{ver}-{port}-{board}".format(**self.info)
+            else:
+                self._fwid = "{family}-{ver}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
 
         if path:
@@ -82,6 +90,9 @@ class Stubber:
         _errors = []
         self._log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
+            if name.startswith("_") and not name in self.modules:
+                continue
+            self._log.debug("get attribute {}".format(name))
             try:
                 val = getattr(item_instance, name)
                 # name , item_repr(value) , type as text, item_instance, order
@@ -89,15 +100,7 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in {
-                    "int",
-                    "float",
-                    "str",
-                    "bool",
-                    "tuple",
-                    "list",
-                    "dict",
-                }:
+                if type_text in {"int", "float", "str", "bool", "tuple", "list", "dict"}:
                     order = 1
                 elif type_text in {"function", "method"}:
                     order = 2
@@ -108,8 +111,14 @@ class Stubber:
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
                 _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+            except MemoryError as e:
+                print("MemoryError: {}".format(e))
+                sleep(1)
+                reset()
+
         # remove internal __
-        _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
+        # _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
+        _result = sorted([i for i in _result if not (i[0].startswith("__"))], key=lambda x: x[4])
         gc.collect()
         return _result, _errors
 
@@ -135,15 +144,12 @@ class Stubber:
 
         file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
         gc.collect()
-        m1 = gc.mem_free()  # type: ignore
-        self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, file_name, m1))
         result = False
         try:
             result = self.create_module_stub(module_name, file_name)
         except OSError:
             return False
         gc.collect()
-        self._log.debug("Memory     : {:>20} {:>6X}".format(m1, m1 - gc.mem_free()))  # type: ignore
         return result
 
     def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
@@ -153,12 +159,11 @@ class Stubber:
         - module_name (str): name of the module to document. This module will be imported.
         - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
         """
-        # if module_name in self.problematic:
-        #     self._log.warning("SKIPPING problematic module:{}".format(module_name))
-        #     return False
-
         if file_name is None:
-            file_name = self.path + "/" + module_name.replace(".", "_") + ".py"
+            fname = module_name.replace(".", "_") + ".py"
+            file_name = self.path + "/" + fname
+        else:
+            fname = file_name.split("/")[-1]
 
         if "/" in module_name:
             # for nested modules
@@ -168,16 +173,20 @@ class Stubber:
         new_module = None
         try:
             new_module = __import__(module_name, None, None, ("*"))
+            m1 = gc.mem_free()  # type: ignore
+            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
+
         except ImportError:
-            # move one line up to overwrite
-            self._log.warning("{}Skip module: {:<25} {:<79}".format("\u001b[1A", module_name, "Module not found."))
+            self._log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
             return False
 
         # Start a new file
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
+                module_name, self._fwid, self.info, __version__
+            )
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -215,6 +224,9 @@ class Stubber:
             # do not create stubs for these primitives
             if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
                 continue
+            if item_name[0].isdigit():
+                self._log.warning("NameError: invalid name {}".format(item_name))
+                continue
             # Class expansion only on first 3 levels (bit of a hack)
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 self._log.debug("{0}class {1}:".format(indent, item_name))
@@ -248,7 +260,7 @@ class Stubber:
                     indent + "    ",
                     in_class + 1,
                 )
-                # close with the __init__ method to make sure that the literals are defined
+                # end with the __init__ method to make sure that the literals are defined
                 # Add __init__
                 s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
                 s += indent + "        ...\n\n"
@@ -265,10 +277,11 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
+                        indent, item_name, ret
+                    )
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
-                # s += indent + "    ''\n" # EMPTY DOCSTRING
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
@@ -278,7 +291,6 @@ class Stubber:
                 pass
 
             elif item_type_txt.startswith("<class '"):
-
                 t = item_type_txt[8:-2]
                 s = ""
 
@@ -310,7 +322,7 @@ class Stubber:
         del errors
         try:
             del item_name, item_repr, item_type_txt, item_instance  # type: ignore
-        except (OSError, KeyError, NameError):  # lgtm [py/unreachable-statement]
+        except (OSError, KeyError, NameError):
             pass
 
     @property
@@ -331,7 +343,7 @@ class Stubber:
         try:
             os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
-        except (OSError, AttributeError):  # lgtm [py/unreachable-statement]
+        except (OSError, AttributeError):
             # os.listdir fails on unix
             return
         for fn in items:
@@ -349,30 +361,36 @@ class Stubber:
         "create json with list of exported modules"
         self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
+        self._log.info("Report file: {}".format(f_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
             with open(f_name, "w") as f:
-                self.write_json_node(f)
+                self.write_json_header(f)
+                first = True
+                for n in self._report:
+                    self.write_json_node(f, n, first)
+                    first = False
+                self.write_json_end(f)
             used = self._start_free - gc.mem_free()  # type: ignore
             self._log.info("Memory used: {0} Kb".format(used // 1024))
         except OSError:
             self._log.error("Failed to create the report.")
 
-    def write_json_node(self, f):
+    def write_json_header(self, f):
         f.write("{")
         f.write(dumps({"firmware": self.info})[1:-1])
         f.write(",\n")
         f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
         f.write(",\n")
         f.write('"modules" :[\n')
-        start = True
-        for n in self._report:
-            if start:
-                start = False
-            else:
-                f.write(",\n")
-            f.write(n)
+
+    def write_json_node(self, f, n, first):
+        if not first:
+            f.write(",\n")
+        f.write(n)
+
+    def write_json_end(self, f):
         f.write("\n]}")
 
 
@@ -392,90 +410,120 @@ def ensure_folder(path: str):
                     try:
                         os.mkdir(p)
                     except OSError as e2:
-                        # self._log.error("failed to create folder {}".format(p))
+                        _log.error("failed to create folder {}".format(p))
                         raise e2
         # next level deep
         start = i + 1
 
 
-def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
-    "collect base information on this runtime"
-    _n = sys.implementation.name  # type: ignore
-    _p = "stm32" if sys.platform.startswith("pyb") else sys.platform
-    info = {
-        "name": _n,  # - micropython
-        "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
-        "version": "0.0.0",  # major.minor.0
-        "build": "",  # parsed from version
-        "sysname": "unknown",  # esp32
-        "nodename": "unknown",  # ! not on all builds
-        "machine": "unknown",  # ! not on all builds
-        "family": _n,  # fw families, micropython , pycopy , lobo , pycom
-        "platform": _p,  # port: esp32 / win32 / linux
-        "port": _p,  # port: esp32 / win32 / linux
-        "ver": "",  # short version
-    }
+def _build(s):
+    # extract a build nr from a string
+    if not s:
+        return ""
+    if " on " in s:
+        s = s.split(" on ", 1)[0]
+    return s.split("-")[1] if "-" in s else ""
+
+
+def _info():  # type:() -> dict[str, str]
+    info = OrderedDict(
+        {
+            "family": sys.implementation.name,
+            "version": "",
+            "build": "",
+            "ver": "",
+            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "board": "GENERIC",
+            "cpu": "",
+            "mpy": "",
+            "arch": "",
+        }
+    )
     try:
-        info["release"] = ".".join([str(n) for n in sys.implementation.version])
-        info["version"] = info["release"]
-        info["name"] = sys.implementation.name
-        info["mpy"] = sys.implementation.mpy
+        info["version"] = ".".join([str(n) for n in sys.implementation.version])
     except AttributeError:
         pass
+    try:
+        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine
+        info["board"] = machine.strip()
+        info["cpu"] = machine.split("with")[1].strip()
+        info["mpy"] = (
+            sys.implementation._mpy
+            if "_mpy" in dir(sys.implementation)
+            else sys.implementation.mpy
+            if "mpy" in dir(sys.implementation)
+            else ""
+        )
+    except (AttributeError, IndexError):
+        pass
+    gc.collect()
+    for filename in [d + "/board_info.csv" for d in LIBS]:
+        # print("look up the board name in the file", filename)
+        if file_exists(filename):
+            # print("Found board info file: {}".format(filename))
+            b = info["board"].strip()
+            if find_board(info, b, filename):
+                break
+            if "with" in b:
+                b = b.split("with")[0].strip()
+                if find_board(info, b, filename):
+                    break
+            info["board"] = "GENERIC"
+    info["board"] = info["board"].replace(" ", "_")
+    gc.collect()
 
-    if sys.platform not in ("unix", "win32"):
+    try:
+        # extract build from uname().version if available
+        info["build"] = _build(os.uname()[3])
+        if not info["build"]:
+            # extract build from uname().release if available
+            info["build"] = _build(os.uname()[2])
+        if not info["build"] and ";" in sys.version:
+            # extract build from uname().release if available
+            info["build"] = _build(sys.version.split(";")[1])
+    except (AttributeError, IndexError):
+        pass
+    # avoid  build hashes
+    if info["build"] and len(info["build"]) > 5:
+        info["build"] = ""
+
+    if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
-            extract_os_info(info)
+            u = os.uname()
+            info["version"] = u.release
         except (IndexError, AttributeError, TypeError):
             pass
-
-    try:  # families
-        from pycopy import const as _t  # type: ignore
-
-        info["family"] = "pycopy"
-        del _t
-    except (ImportError, KeyError):
-        pass
-    try:  # families
-        from pycom import FAT as _t  # type: ignore
-
-        info["family"] = "pycom"
-        del _t
-
-    except (ImportError, KeyError):
-        pass
-    if info["platform"] == "esp32_LoBo":
-        info["family"] = "loboris"
-        info["port"] = "esp32"
-    elif info["sysname"] == "ev3":
-        # ev3 pybricks
-        info["family"] = "ev3-pybricks"
-        info["release"] = "1.0.0"
+    # detect families
+    for fam_name, mod_name, mod_thing in [
+        ("pycopy", "pycopy", "const"),
+        ("pycom", "pycom", "FAT"),
+        ("ev3-pybricks", "pybricks.hubs", "EV3Brick"),
+    ]:
         try:
-            # Version 2.0 introduces the EV3Brick() class.
-            from pybricks.hubs import EV3Brick  # type: ignore
-
-            info["release"] = "2.0.0"
-        except ImportError:
+            _t = __import__(mod_name, None, None, (mod_thing))
+            info["family"] = fam_name
+            del _t
+            break
+        except (ImportError, KeyError):
             pass
 
-    # version info
-    if info["release"]:
-        info["ver"] = "v" + info["release"].lstrip("v")
+    if info["family"] == "ev3-pybricks":
+        info["release"] = "2.0.0"
+
     if info["family"] == "micropython":
-        if info["release"] and info["release"] >= "1.10.0" and info["release"].endswith(".0"):
+        if (
+            info["version"]
+            and info["version"].endswith(".0")
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] <= "1.19.9"
+        ):
             # drop the .0 for newer releases
-            info["ver"] = info["release"][:-2]
-        else:
-            info["ver"] = info["release"]
-        # add the build nr, but avoid a git commit-id
-        if info["build"] != "" and len(info["build"]) < 4:
-            info["ver"] += "-" + info["build"]
-    if info["ver"][0] != "v":
-        info["ver"] = "v" + info["ver"]
+            info["version"] = info["version"][:-2]
+
     # spell-checker: disable
-    if "mpy" in info:  # mpy on some v1.11+ builds
+    if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
+        # .mpy architecture
         arch = [
             None,
             "x86",
@@ -491,30 +539,27 @@ def _info():  # sourcery skip: extract-duplicate-method, use-named-expression
         ][sys_mpy >> 10]
         if arch:
             info["arch"] = arch
+        # .mpy version.minor
+        info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+    # simple to use version[-build] string
+    info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
+
     return info
 
 
-# spell-checker: enable
-
-
-def extract_os_info(info):
-    "get info from os.uname()"
-    u = os.uname()
-    info["sysname"] = u[0]  # u.sysname
-    info["nodename"] = u[1]  #  u.nodename
-    info["release"] = u[2]  # u.release
-    info["machine"] = u[4]  #  u.machine
-    # parse micropython build info
-    if " on " in u[3]:  # version
-        s = u[3].split(" on ")[0]
-        if info["sysname"] == "esp8266":
-            # esp8266 has no usable info on the release
-            v = s.split("-")[0] if "-" in s else s
-            info["version"] = info["release"] = v.lstrip("v")
-        try:
-            info["build"] = s.split("-")[1]
-        except IndexError:
-            pass
+def find_board(info: dict, board_descr: str, filename: str):
+    "Find the board in the provided board_info.csv file"
+    with open(filename, "r") as file:
+        # ugly code to make testable in python and micropython
+        while 1:
+            line = file.readline()
+            if not line:
+                break
+            descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
+            if descr_ == board_descr:
+                info["board"] = board_
+                return True
+    return False
 
 
 def get_root() -> str:  # sourcery skip: use-assigned-variable
@@ -536,8 +581,9 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
 
 def file_exists(filename: str):
     try:
-        os.stat(filename)
-        return True
+        if os.stat(filename)[0] >> 14:
+            return True
+        return False
     except OSError:
         return False
 
@@ -584,7 +630,6 @@ def is_micropython() -> bool:
 
 
 def main():
-
     stubber = Stubber(path=read_path())
     # stubber = Stubber(path="/sd")
     # Option: Specify a firmware name & version
@@ -829,4 +874,9 @@ if __name__ == "__main__" or is_micropython():
     except NameError:
         pass
     if not file_exists("no_auto_stubber.txt"):
+        try:
+            gc.threshold(4 * 1024)
+            gc.enable()
+        except BaseException:
+            pass
         main()

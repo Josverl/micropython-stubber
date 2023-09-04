@@ -1,10 +1,10 @@
 # Use MIP to install createstubs on a MCU board
 
-It is possible to install the firmware stubber ( createsubs.py or one of its variants) on a MicroPython board. 
+It is possible to install the firmware stubber ( createstubs.py or one of its variants) on a MicroPython board. 
 This allows you to create the firmware stubs on the board itself, and then copy them to your PC.
 
 mip is a package manager for MicroPython. It is a command line tool that allows you to install packages on a MicroPython board.
-In this case it is best to use `mpremote` that has a built-in `mip` command.
+In this case it is simplest to use `mpremote` as that has a built-in `mip` command.
 
 Make sure you have the latest version of `mpremote` installed.
 ```bash
@@ -26,6 +26,14 @@ Installing: /lib/modules.txt
 Done
 ```
 
+
+| Other packages     | command      |
+|--------------------|--------------|
+| full/debug         | `mpremote mip install github:josverl/micropython-stubber/mip/full.json` |
+| minified (default) | `mpremote mip install github:josverl/micropython-stubber/mip/minified.json` |
+
+> Note : If you need to install from a specific branch or tag, then append `@branchname` or `@tagname` to the URL.
+
 ## run createstubs
 A simple way to run createstubs is to use the `mpremote mount` command to allow the MCU board to directly access the PC's file system.
 Then you can run the createstubs.py script directly from the MCU board with outh the need to copy the created files back to the PC.
@@ -35,14 +43,17 @@ Navigate to the folder where you want to create the stubs and run the following 
 `mpremote mount . exec "import createstubs_mem"` or 
 
 
+
 ## low memory devices 
 
 If you have a low memory board, then you can install the cross-compiled variants to reduce the memory footprint durign compilation on the board:
 
 | MicroPython release | .mpy version | command |
 |---------------------|--------------|---------|
-| v1.19 and up        | 6            | `mpremote mip install github:josverl/micropython-stubber/mpy_v6.json` |
-| v1.12 - v1.18       | 5            | `mpremote mip install github:josverl/micropython-stubber/mpy_v5.json` |
+| v1.19 and up        | 6            | `mpremote mip install github:josverl/micropython-stubber/mip/mpy_v6.json` |
+| v1.12 - v1.18       | 5            | `mpremote mip install github:josverl/micropython-stubber/mip/mpy_v5.json` |
+
+
 
 ```log	
 Install github:josverl/micropython-stubber/mpy_v6.json

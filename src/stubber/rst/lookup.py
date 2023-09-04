@@ -101,7 +101,7 @@ LOOKUP_LIST = {
     "machine.UART.irq": ("Any", 0.95),  # no IRQ type defined
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
-    "micropython.const": ("int", 0.95),  # const is always an int
+    "micropython.const": ("Union[int, bytes, str, Tuple]", 0.95),  # since 1.19 can also be string , bytes or tuple 
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
@@ -387,12 +387,14 @@ CHILD_PARENT_CLASS = {
     "Switch": "Pin",
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
+    # "IOBase": "IO",  # DOCME  not in documentation
+    "TextIOWrapper": "IO",
     "FileIO": "IO",
-    "textIOWrapper": "IO",
     "StringIO": "IO",
     "BytesIO": "IO",
+    "BufferedWriter": "IOBase",  # DOCME: not in documentation
     # uzlib
-    "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
+    # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # -------------------------------------------------------------------------------------
     # network - AbstractNIC is definined in docstub network.pyi , but not actually used
     # "WLAN": "AbstractNIC",
