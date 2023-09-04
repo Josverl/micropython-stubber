@@ -782,7 +782,7 @@ class RSTWriter(RSTParser):
         return super().write_file(filename)
 
     def prepare_output(self):
-        "clean up some trailing spaces and commas"
+        "Remove trailing spaces and commas from the output."
         lines = str(self.output_dict).splitlines(keepends=True)
         self.output = lines
         for i in range(len(self.output)):
