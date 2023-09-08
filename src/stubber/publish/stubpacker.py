@@ -166,7 +166,8 @@ class StubPackage:
         """Get the next prerelease version for the package."""
         rc = 1
         if describe := get_git_describe(CONFIG.mpy_path.as_posix()):
-            ver, rc, _ = describe.split("-")
+            # use versiontag and the nummer of commits since the last tag
+            ver, rc, _= describe.split("-", 2)
             base = bump_version(Version(ver), minor_bump=True)
             rc = int(rc)
             return str(bump_version(base, rc=rc))
