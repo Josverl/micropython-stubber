@@ -205,7 +205,7 @@ class Stubber:
             # todo: improve header
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
             fp.write(s)
-            fp.write("from typing import Any\n\n")
+            fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
@@ -238,8 +238,8 @@ class Stubber:
 
         for item_name, item_repr, item_type_txt, item_instance, _ in items:
             # name_, repr_(value), type as text, item_instance, order
-            # do not create stubs for these primitives
             if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
+                # do not create stubs for these primitives
                 continue
             if item_name[0].isdigit():
                 self._log.warning("NameError: invalid name {}".format(item_name))
@@ -282,12 +282,12 @@ class Stubber:
                 s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
                 s += indent + "        ...\n\n"
                 fp.write(s)
-            elif "method" in item_type_txt or "function" in item_type_txt:
-                self._log.debug("# def {1} function or method, type = '{0}'".format(item_type_txt, item_name))
+            elif any(word in item_type_txt for word in ["method", "function", "closure"]):
+                self._log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
                 # will accept any number of params
-                # return type Any
-                ret = "Any"
+                # return type Any/Incomplete
+                ret = "Incomplete"
                 first = ""
                 # Self parameter only on class methods/functions
                 if in_class > 0:
@@ -321,7 +321,7 @@ class Stubber:
                     if t not in ["object", "set", "frozenset"]:
                         # Possibly default others to item_instance object ?
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
-                        t = "Any"
+                        t = "Incomplete"
                     # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                     s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
@@ -331,7 +331,7 @@ class Stubber:
                 self._log.debug("# all other, type = '{0}'".format(item_type_txt))
                 fp.write("# all other, type = '{0}'\n".format(item_type_txt))
 
-                fp.write(indent + item_name + " # type: Any\n")
+                fp.write(indent + item_name + " # type: Incomplete\n")
 
         del items
         del errors
