@@ -189,9 +189,7 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
-                module_name, self._fwid, self.info, __version__
-            )
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
             fp.write(s)
             fp.write("from typing import Any\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -282,9 +280,7 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
-                        indent, item_name, ret
-                    )
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
