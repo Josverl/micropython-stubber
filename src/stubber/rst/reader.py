@@ -70,7 +70,6 @@ from typing import List, Optional, Tuple
 
 from loguru import logger as log
 
-
 from stubber.rst import (
     CHILD_PARENT_CLASS,
     MODULE_GLUE,
@@ -84,7 +83,6 @@ from stubber.rst import (
 )
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
-
 
 SEPERATOR = "::"
 
@@ -149,7 +147,11 @@ class FileReadWriter:
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
+        while (
+            not self.is_balanced(newline)
+            and self.line_no >= 0
+            and (self.line_no + append + 1) <= self.max_line
+        ):
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
@@ -164,6 +166,15 @@ class FileReadWriter:
 
 
 class RSTReader(FileReadWriter):
+    docstring_anchors = [
+        ".. note::",
+        ".. data:: Arguments:",
+        ".. data:: Options:",
+        ".. data:: Returns:",
+        ".. data:: Raises:",
+    ]
+    # considered part of the docstrings
+
     def __init__(self):
         self.current_module = ""
         self.current_class = ""
@@ -195,9 +206,18 @@ class RSTReader(FileReadWriter):
 
     @property
     def at_anchor(self) -> bool:
-        "Stop at anchor ( however .. note: should be added)"
-        _l = self.rst_text[self.line_no].lstrip()
-        return _l.startswith("..") and not _l.startswith(".. note:")
+        "Stop at anchor '..something' ( however .. note: and ..data:: should be added)"
+        line = self.rst_text[self.line_no].lstrip()
+        # anchors that are considered part of the docstring
+        # Check if the line starts with '..' but not any of the docstring_anchors.
+        if line.startswith(".."):
+            for anchor in self.docstring_anchors:
+                if line.startswith(anchor):
+                    return False
+            return True
+        return False
+
+        # return _l.startswith("..") and not any(_l.startswith(a) for a in self.docstring_anchors)
 
     @property
     def at_heading(self) -> bool:
@@ -240,7 +260,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def clean_docstr(block:List[str]):
+    def clean_docstr(block: List[str]):
         """Clean up a docstring"""
         # if a Quoted Literal Block , then remove the first character of each line
         # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
@@ -264,7 +284,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def add_link_to_docsstr(block:List[str]):
+    def add_link_to_docsstr(block: List[str]):
         """Add clickable hyperlinks to CPython docpages"""
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
@@ -282,8 +302,9 @@ class RSTReader(FileReadWriter):
                 r"\g<1>`\g<url>",
                 _l,
             )
-            # Clean up note
+            # Clean up note and other docstring anchors
             _l = _l.replace(".. note:: ", "``Note:`` ")
+            _l = _l.replace(".. data:: ", "")
             # clean up unsupported escape sequences in rst
             _l = _l.replace(r"\ ", " ")
             _l = _l.replace(r"\*", "*")
@@ -313,10 +334,17 @@ class RSTParser(RSTReader):
     """
 
     target = ".py"  # py/pyi
+    # TODO: Move to lookup.py
     PARAM_RE_FIXES = [
-        Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
-        Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
-        Fix(r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True),  # fix: network - AbstractNIC.connect
+        Fix(
+            r"\[angle, time=0\]", "[angle], time=0", is_re=True
+        ),  # fix: method:: Servo.angle([angle, time=0])
+        Fix(
+            r"\[speed, time=0\]", "[speed], time=0", is_re=True
+        ),  # fix: .. method:: Servo.speed([speed, time=0])
+        Fix(
+            r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+        ),  # fix: network - AbstractNIC.connect
     ]
 
     def __init__(self, v_tag: str) -> None:
@@ -372,13 +400,15 @@ class RSTParser(RSTReader):
             params = params.replace("*, ...", "*args, **kwargs")
             params = params.replace("...", "*args, **kwargs")
 
-        return params
+        return params.strip()
 
     @staticmethod
     def apply_fix(fix: Fix, params: str, name: str = ""):
         if fix.module and fix.module != name:
             return params
-        return re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
+        return (
+            re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
+        )
 
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
@@ -440,7 +470,10 @@ class RSTParser(RSTReader):
                 version = "latest"
             else:
                 version = self.source_tag.replace("_", ".")
-            docstr[0] = docstr[0] + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            docstr[0] = (
+                docstr[0]
+                + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            )
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -472,7 +505,9 @@ class RSTParser(RSTReader):
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=this_function, module=self.current_module
+            )
 
             # defaults
             name = params = ""
@@ -558,11 +593,15 @@ class RSTParser(RSTReader):
             except ValueError:
                 name = this_method
                 params = ")"
+            is_async = "async" in name
             self.current_function = name
             # self.writeln(f"# method:: {name}")
             if "." in name:
                 # todo deal with longer / deeper classes
                 class_name = name.split(".")[0]
+                # ESPnow.rst has a few methods that are written as `async AIOESPNow.__anext__()`
+                if is_async:
+                    class_name = class_name.replace("async ", "").strip()
                 # update current for out-of sequence method processing
                 self.current_class = class_name
             else:
@@ -581,7 +620,9 @@ class RSTParser(RSTReader):
             params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
+            )
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -601,6 +642,7 @@ class RSTParser(RSTReader):
                     indent=parent_class.indent + 4,
                     definition=[f"def {name}(cls, {params} -> {ret_type}:"],
                     docstr=docstr,
+                    is_async=is_async,
                 )
             elif rst_hint == "staticmethod":
                 method = FunctionSourceDict(
@@ -609,6 +651,7 @@ class RSTParser(RSTReader):
                     indent=parent_class.indent + 4,
                     definition=[f"def {name}({params} -> {ret_type}:"],
                     docstr=docstr,
+                    is_async=is_async,
                 )
             else:  # just plain method
                 method = FunctionSourceDict(
@@ -616,6 +659,7 @@ class RSTParser(RSTReader):
                     indent=parent_class.indent + 4,
                     definition=[f"def {name}(self, {params} -> {ret_type}:"],
                     docstr=docstr,
+                    is_async=is_async,
                 )
             parent_class += method
 
@@ -636,6 +680,7 @@ class RSTParser(RSTReader):
 
     def parse_name(self, line: Optional[str] = None):
         "get the constant/function/class name from a line with an identifier"
+        # '.. data:: espnow.MAX_DATA_LEN(=250)\n'
         if line:
             return line.split(SEPERATOR)[-1].strip()
         else:
@@ -665,10 +710,13 @@ class RSTParser(RSTReader):
         # now advance the linecounter
         self.line_no += counter - 1
         # clean up before returning
-        return [n.strip() for n in names if n.strip() != "etc."]
+        names = [n.strip() for n in names if n.strip() != "etc."]  # remove etc.
+        return names
 
     def parse_data(self):
-        "proces ..data:: lines ( one or more)"
+        """process ..data:: lines ( one or more)
+        Note: some data islands are included in the docstring of the module/class/function as the ESPNow documentation started to use this pattern.
+        """
         log.trace(f"# {self.line.rstrip()}")
         # Get one or more names
         names = self.parse_names()
@@ -678,9 +726,11 @@ class RSTParser(RSTReader):
 
         # deal with documentation wildcards
         for name in names:
-            r_type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
+            r_type = return_type_from_context(
+                docstring=docstr, signature=name, module=self.current_module, literal=True
+            )
             if r_type in ["None"]:  # None does not make sense
-                r_type = "Any"  # perhaps default to Int ?
+                r_type = "Any"  # TODO: perhaps default to Incomplete/ Unknown / int
             name = self.strip_prefixes(name)
             self.output_dict.add_constant_smart(name=name, type=r_type, docstr=docstr)
 

@@ -11,10 +11,11 @@ from stubber.codemod.utils import ScopeableMatcherTransformer
 @dataclass
 class ListChangeSet:
     """Describes a set of changes to be made to a list.
-        - add: a list of elements to add to the list
-        - remove: a list of elements to remove from the list
-        - replace: if True, the list will be replaced with the elements in add
+    - add: a list of elements to add to the list
+    - remove: a list of elements to remove from the list
+    - replace: if True, the list will be replaced with the elements in add
     """
+
     add: Sequence[cst.BaseExpression] = field(default_factory=list)
     remove: Sequence[m.BaseMatcherNode] = field(default_factory=list)
     replace: bool = False
@@ -30,9 +31,10 @@ class ListChangeSet:
 
 class ModifyListElements(ScopeableMatcherTransformer):
     """
-    Modifies the elements of a list (i.e, of modules to stub or exclude), 
+    Modifies the elements of a list (i.e, of modules to stub or exclude),
     adding and removing elements as specified in the change_set.
     """
+
     change_set: ListChangeSet
 
     def __init__(self, *, change_set: ListChangeSet):
