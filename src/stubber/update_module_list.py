@@ -68,7 +68,7 @@ def read_modules(path: Optional[Path] = None) -> Set[str]:
 #     return _wrapped
 
 
-def main():
+def update_module_list():
     """
     helper script
     generate a few lines of code with all modules to be stubbed by createstubs
@@ -144,4 +144,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    update_module_list()
