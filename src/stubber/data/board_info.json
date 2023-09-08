@@ -17,99 +17,43 @@
     },
     {
         "port": "esp32",
-        "board": "ESP32_S2_WROVER",
-        "board_name": "ESP32-S2-WROVER",
-        "mcu_name": "ESP32-S2",
-        "description": "ESP32-S2-WROVER with ESP32-S2",
-        "path": "repos/micropython/ports/esp32/boards/ESP32_S2_WROVER/mpconfigboard.h"
+        "board": "ARDUINO_NANO_ESP32",
+        "board_name": "Arduino Nano ESP32",
+        "mcu_name": "ESP32S3",
+        "description": "Arduino Nano ESP32 with ESP32S3",
+        "path": "repos/micropython/ports/esp32/boards/ARDUINO_NANO_ESP32/mpconfigboard.h"
     },
     {
         "port": "esp32",
-        "board": "GENERIC",
-        "board_name": "ESP32 module",
+        "board": "ESP32_GENERIC",
+        "board_name": "Generic ESP32 module",
         "mcu_name": "ESP32",
-        "description": "ESP32 module with ESP32",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC/mpconfigboard.h"
+        "description": "Generic ESP32 module with ESP32",
+        "path": "repos/micropython/ports/esp32/boards/ESP32_GENERIC/mpconfigboard.h"
     },
     {
         "port": "esp32",
-        "board": "GENERIC_C3",
+        "board": "ESP32_GENERIC_C3",
         "board_name": "ESP32C3 module",
         "mcu_name": "ESP32C3",
         "description": "ESP32C3 module with ESP32C3",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_C3/mpconfigboard.h"
+        "path": "repos/micropython/ports/esp32/boards/ESP32_GENERIC_C3/mpconfigboard.h"
     },
     {
         "port": "esp32",
-        "board": "GENERIC_C3_USB",
-        "board_name": "ESP32C3 module",
-        "mcu_name": "ESP32C3",
-        "description": "ESP32C3 module with ESP32C3",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_C3_USB/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_D2WD",
-        "board_name": "Generic ESP32-D2WD module",
-        "mcu_name": "ESP32-D2WD",
-        "description": "Generic ESP32-D2WD module with ESP32-D2WD",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_D2WD/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_OTA",
-        "board_name": "4MB/OTA module",
-        "mcu_name": "ESP32",
-        "description": "4MB/OTA module with ESP32",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_OTA/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_S2",
-        "board_name": "ESP32S2 module",
+        "board": "ESP32_GENERIC_S2",
+        "board_name": "Generic ESP32S2 module",
         "mcu_name": "ESP32S2",
-        "description": "ESP32S2 module with ESP32S2",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_S2/mpconfigboard.h"
+        "description": "Generic ESP32S2 module with ESP32S2",
+        "path": "repos/micropython/ports/esp32/boards/ESP32_GENERIC_S2/mpconfigboard.h"
     },
     {
         "port": "esp32",
-        "board": "GENERIC_S3",
-        "board_name": "ESP32S3 module",
+        "board": "ESP32_GENERIC_S3",
+        "board_name": "Generic ESP32S3 module",
         "mcu_name": "ESP32S3",
-        "description": "ESP32S3 module with ESP32S3",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_S3/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_S3_SPIRAM",
-        "board_name": "ESP32S3 module (spiram)",
-        "mcu_name": "ESP32S3",
-        "description": "ESP32S3 module (spiram) with ESP32S3",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_S3_SPIRAM/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_S3_SPIRAM_OCT",
-        "board_name": "ESP32S3 module (spiram octal)",
-        "mcu_name": "ESP32S3",
-        "description": "ESP32S3 module (spiram octal) with ESP32S3",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_S3_SPIRAM_OCT/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_SPIRAM",
-        "board_name": "ESP32 module (spiram)",
-        "mcu_name": "ESP32",
-        "description": "ESP32 module (spiram) with ESP32",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_SPIRAM/mpconfigboard.h"
-    },
-    {
-        "port": "esp32",
-        "board": "GENERIC_UNICORE",
-        "board_name": "ESP32 Unicore module",
-        "mcu_name": "ESP32-UNICORE",
-        "description": "ESP32 Unicore module with ESP32-UNICORE",
-        "path": "repos/micropython/ports/esp32/boards/GENERIC_UNICORE/mpconfigboard.h"
+        "description": "Generic ESP32S3 module with ESP32S3",
+        "path": "repos/micropython/ports/esp32/boards/ESP32_GENERIC_S3/mpconfigboard.h"
     },
     {
         "port": "esp32",
@@ -193,6 +137,14 @@
     },
     {
         "port": "esp32",
+        "board": "UM_NANOS3",
+        "board_name": "NanoS3",
+        "mcu_name": "ESP32-S3-FN8",
+        "description": "NanoS3 with ESP32-S3-FN8",
+        "path": "repos/micropython/ports/esp32/boards/UM_NANOS3/mpconfigboard.h"
+    },
+    {
+        "port": "esp32",
         "board": "UM_PROS3",
         "board_name": "ProS3",
         "mcu_name": "ESP32-S3",
@@ -225,27 +177,19 @@
     },
     {
         "port": "esp8266",
-        "board": "GENERIC",
+        "board": "ESP8266_GENERIC",
         "board_name": "ESP module",
         "mcu_name": "ESP8266",
         "description": "ESP module with ESP8266",
-        "path": "repos/micropython/ports/esp8266/boards/GENERIC/mpconfigboard.h"
+        "path": "repos/micropython/ports/esp8266/boards/ESP8266_GENERIC/mpconfigboard.h"
     },
     {
-        "port": "esp8266",
-        "board": "GENERIC_1M",
-        "board_name": "ESP module (1M)",
-        "mcu_name": "ESP8266",
-        "description": "ESP module (1M) with ESP8266",
-        "path": "repos/micropython/ports/esp8266/boards/GENERIC_1M/mpconfigboard.h"
-    },
-    {
-        "port": "esp8266",
-        "board": "GENERIC_512K",
-        "board_name": "ESP module (512K)",
-        "mcu_name": "ESP8266",
-        "description": "ESP module (512K) with ESP8266",
-        "path": "repos/micropython/ports/esp8266/boards/GENERIC_512K/mpconfigboard.h"
+        "port": "mimxrt",
+        "board": "ADAFRUIT_METRO_M7",
+        "board_name": "Adafruit Metro M7",
+        "mcu_name": "MIMXRT1011DAE5A",
+        "description": "Adafruit Metro M7 with MIMXRT1011DAE5A",
+        "path": "repos/micropython/ports/mimxrt/boards/ADAFRUIT_METRO_M7/mpconfigboard.h"
     },
     {
         "port": "mimxrt",
@@ -337,227 +281,235 @@
     },
     {
         "port": "nrf",
-        "board": "actinius_icarus",
+        "board": "ACTINIUS_ICARUS",
         "board_name": "Actinius Icarus",
         "mcu_name": "NRF9160",
         "description": "Actinius Icarus with NRF9160",
-        "path": "repos/micropython/ports/nrf/boards/actinius_icarus/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/ACTINIUS_ICARUS/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "arduino_nano_33_ble_sense",
+        "board": "ARDUINO_NANO_33_BLE_SENSE",
         "board_name": "Arduino Nano 33 BLE Sense",
         "mcu_name": "NRF52840",
         "description": "Arduino Nano 33 BLE Sense with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/arduino_nano_33_ble_sense/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/ARDUINO_NANO_33_BLE_SENSE/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "arduino_primo",
+        "board": "ARDUINO_PRIMO",
         "board_name": "Arduino Primo",
         "mcu_name": "NRF52832",
         "description": "Arduino Primo with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/arduino_primo/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/ARDUINO_PRIMO/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "blueio_tag_evim",
+        "board": "BLUEIO_TAG_EVIM",
         "board_name": "BLUEIO-TAG-EVIM",
         "mcu_name": "NRF52832",
         "description": "BLUEIO-TAG-EVIM with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/blueio_tag_evim/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/BLUEIO_TAG_EVIM/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "dvk_bl652",
+        "board": "DVK_BL652",
         "board_name": "DVK-BL652",
         "mcu_name": "NRF52832",
         "description": "DVK-BL652 with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/dvk_bl652/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/DVK_BL652/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "evk_nina_b1",
+        "board": "EVK_NINA_B1",
         "board_name": "EVK_NINA_B1",
         "mcu_name": "NRF52832",
         "description": "EVK_NINA_B1 with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/evk_nina_b1/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/EVK_NINA_B1/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "evk_nina_b3",
+        "board": "EVK_NINA_B3",
         "board_name": "EVK_NINA_B3",
         "mcu_name": "NRF52840",
         "description": "EVK_NINA_B3 with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/evk_nina_b3/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/EVK_NINA_B3/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "feather52",
+        "board": "FEATHER52",
         "board_name": "Bluefruit nRF52 Feather",
         "mcu_name": "NRF52832",
         "description": "Bluefruit nRF52 Feather with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/feather52/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/FEATHER52/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "ibk_blyst_nano",
+        "board": "IBK_BLYST_NANO",
         "board_name": "IBK-BLYST-NANO",
         "mcu_name": "NRF52832",
         "description": "IBK-BLYST-NANO with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/ibk_blyst_nano/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/IBK_BLYST_NANO/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "idk_blyst_nano",
+        "board": "IDK_BLYST_NANO",
         "board_name": "IDK-BLYST-NANO",
         "mcu_name": "NRF52832",
         "description": "IDK-BLYST-NANO with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/idk_blyst_nano/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/IDK_BLYST_NANO/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "microbit",
+        "board": "MICROBIT",
         "board_name": "micro:bit",
         "mcu_name": "NRF51822",
         "description": "micro:bit with NRF51822",
-        "path": "repos/micropython/ports/nrf/boards/microbit/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/MICROBIT/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "nrf52840-mdk-usb-dongle",
+        "board": "NRF52840_MDK_USB_DONGLE",
         "board_name": "MDK-USB-DONGLE",
         "mcu_name": "NRF52840",
         "description": "MDK-USB-DONGLE with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/nrf52840-mdk-usb-dongle/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/NRF52840_MDK_USB_DONGLE/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "particle_xenon",
+        "board": "PARTICLE_XENON",
         "board_name": "XENON",
         "mcu_name": "NRF52840",
         "description": "XENON with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/particle_xenon/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PARTICLE_XENON/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10000",
+        "board": "PCA10000",
         "board_name": "PCA10000",
         "mcu_name": "NRF51822",
         "description": "PCA10000 with NRF51822",
-        "path": "repos/micropython/ports/nrf/boards/pca10000/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10000/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10001",
+        "board": "PCA10001",
         "board_name": "PCA10001",
         "mcu_name": "NRF51822",
         "description": "PCA10001 with NRF51822",
-        "path": "repos/micropython/ports/nrf/boards/pca10001/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10001/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10028",
+        "board": "PCA10028",
         "board_name": "PCA10028",
         "mcu_name": "NRF51822",
         "description": "PCA10028 with NRF51822",
-        "path": "repos/micropython/ports/nrf/boards/pca10028/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10028/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10031",
+        "board": "PCA10031",
         "board_name": "PCA10031",
         "mcu_name": "NRF51822",
         "description": "PCA10031 with NRF51822",
-        "path": "repos/micropython/ports/nrf/boards/pca10031/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10031/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10040",
+        "board": "PCA10040",
         "board_name": "PCA10040",
         "mcu_name": "NRF52832",
         "description": "PCA10040 with NRF52832",
-        "path": "repos/micropython/ports/nrf/boards/pca10040/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10040/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10056",
+        "board": "PCA10056",
         "board_name": "PCA10056",
         "mcu_name": "NRF52840",
         "description": "PCA10056 with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/pca10056/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10056/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10059",
+        "board": "PCA10059",
         "board_name": "PCA10059",
         "mcu_name": "NRF52840",
         "description": "PCA10059 with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/pca10059/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10059/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "pca10090",
+        "board": "PCA10090",
         "board_name": "PCA10090",
         "mcu_name": "NRF9160",
         "description": "PCA10090 with NRF9160",
-        "path": "repos/micropython/ports/nrf/boards/pca10090/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/PCA10090/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "seeed_xiao_nrf52",
+        "board": "SEEED_XIAO_NRF52",
         "board_name": "XIAO nRF52840 Sense",
         "mcu_name": "NRF52840",
         "description": "XIAO nRF52840 Sense with NRF52840",
-        "path": "repos/micropython/ports/nrf/boards/seeed_xiao_nrf52/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/SEEED_XIAO_NRF52/mpconfigboard.h"
     },
     {
         "port": "nrf",
-        "board": "wt51822_s4at",
+        "board": "WT51822_S4AT",
         "board_name": "WT51822-S4AT",
         "mcu_name": "NRF51822",
         "description": "WT51822-S4AT with NRF51822",
-        "path": "repos/micropython/ports/nrf/boards/wt51822_s4at/mpconfigboard.h"
+        "path": "repos/micropython/ports/nrf/boards/WT51822_S4AT/mpconfigboard.h"
+    },
+    {
+        "port": "renesas-ra",
+        "board": "EK_RA4M1",
+        "board_name": "EK-RA4M1",
+        "mcu_name": "RA4M1",
+        "description": "EK-RA4M1 with RA4M1",
+        "path": "repos/micropython/ports/renesas-ra/boards/EK_RA4M1/mpconfigboard.h"
+    },
+    {
+        "port": "renesas-ra",
+        "board": "EK_RA4W1",
+        "board_name": "EK-RA4W1",
+        "mcu_name": "RA4W1",
+        "description": "EK-RA4W1 with RA4W1",
+        "path": "repos/micropython/ports/renesas-ra/boards/EK_RA4W1/mpconfigboard.h"
+    },
+    {
+        "port": "renesas-ra",
+        "board": "EK_RA6M1",
+        "board_name": "EK-RA6M1",
+        "mcu_name": "RA6M1",
+        "description": "EK-RA6M1 with RA6M1",
+        "path": "repos/micropython/ports/renesas-ra/boards/EK_RA6M1/mpconfigboard.h"
+    },
+    {
+        "port": "renesas-ra",
+        "board": "EK_RA6M2",
+        "board_name": "EK-RA6M2",
+        "mcu_name": "RA6M2",
+        "description": "EK-RA6M2 with RA6M2",
+        "path": "repos/micropython/ports/renesas-ra/boards/EK_RA6M2/mpconfigboard.h"
     },
     {
         "port": "renesas-ra",
         "board": "RA4M1_CLICKER",
-        "board_name": "RA4M1_CLICKER",
+        "board_name": "RA4M1 CLICKER",
         "mcu_name": "RA4M1",
-        "description": "RA4M1_CLICKER with RA4M1",
+        "description": "RA4M1 CLICKER with RA4M1",
         "path": "repos/micropython/ports/renesas-ra/boards/RA4M1_CLICKER/mpconfigboard.h"
     },
     {
         "port": "renesas-ra",
-        "board": "RA4M1_EK",
-        "board_name": "RA4M1_EK",
-        "mcu_name": "RA4M1",
-        "description": "RA4M1_EK with RA4M1",
-        "path": "repos/micropython/ports/renesas-ra/boards/RA4M1_EK/mpconfigboard.h"
-    },
-    {
-        "port": "renesas-ra",
-        "board": "RA4W1_EK",
-        "board_name": "RA4W1_EK",
-        "mcu_name": "RA4W1",
-        "description": "RA4W1_EK with RA4W1",
-        "path": "repos/micropython/ports/renesas-ra/boards/RA4W1_EK/mpconfigboard.h"
-    },
-    {
-        "port": "renesas-ra",
-        "board": "RA6M1_EK",
-        "board_name": "RA6M1_EK",
-        "mcu_name": "RA6M1",
-        "description": "RA6M1_EK with RA6M1",
-        "path": "repos/micropython/ports/renesas-ra/boards/RA6M1_EK/mpconfigboard.h"
-    },
-    {
-        "port": "renesas-ra",
-        "board": "RA6M2_EK",
-        "board_name": "RA6M2_EK",
-        "mcu_name": "RA6M2",
-        "description": "RA6M2_EK with RA6M2",
-        "path": "repos/micropython/ports/renesas-ra/boards/RA6M2_EK/mpconfigboard.h"
+        "board": "VK_RA6M5",
+        "board_name": "VK-RA6M5",
+        "mcu_name": "RA6M5",
+        "description": "VK-RA6M5 with RA6M5",
+        "path": "repos/micropython/ports/renesas-ra/boards/VK_RA6M5/mpconfigboard.h"
     },
     {
         "port": "rp2",
@@ -609,22 +561,6 @@
     },
     {
         "port": "rp2",
-        "board": "PICO",
-        "board_name": "Raspberry Pi Pico",
-        "mcu_name": "-",
-        "description": "Raspberry Pi Pico",
-        "path": "repos/micropython/ports/rp2/boards/PICO/mpconfigboard.h"
-    },
-    {
-        "port": "rp2",
-        "board": "PICO_W",
-        "board_name": "Raspberry Pi Pico W",
-        "mcu_name": "-",
-        "description": "Raspberry Pi Pico W",
-        "path": "repos/micropython/ports/rp2/boards/PICO_W/mpconfigboard.h"
-    },
-    {
-        "port": "rp2",
         "board": "PIMORONI_PICOLIPO_16MB",
         "board_name": "Pimoroni Pico LiPo 16MB",
         "mcu_name": "-",
@@ -646,6 +582,22 @@
         "mcu_name": "-",
         "description": "Pimoroni Tiny 2040",
         "path": "repos/micropython/ports/rp2/boards/PIMORONI_TINY2040/mpconfigboard.h"
+    },
+    {
+        "port": "rp2",
+        "board": "RPI_PICO",
+        "board_name": "Raspberry Pi Pico",
+        "mcu_name": "-",
+        "description": "Raspberry Pi Pico",
+        "path": "repos/micropython/ports/rp2/boards/RPI_PICO/mpconfigboard.h"
+    },
+    {
+        "port": "rp2",
+        "board": "RPI_PICO_W",
+        "board_name": "Raspberry Pi Pico W",
+        "mcu_name": "-",
+        "description": "Raspberry Pi Pico W",
+        "path": "repos/micropython/ports/rp2/boards/RPI_PICO_W/mpconfigboard.h"
     },
     {
         "port": "rp2",
@@ -721,6 +673,14 @@
     },
     {
         "port": "samd",
+        "board": "ADAFRUIT_METRO_M4_EXPRESS",
+        "board_name": "Metro M4 Express Airlift",
+        "mcu_name": "SAMD51J19A",
+        "description": "Metro M4 Express Airlift with SAMD51J19A",
+        "path": "repos/micropython/ports/samd/boards/ADAFRUIT_METRO_M4_EXPRESS/mpconfigboard.h"
+    },
+    {
+        "port": "samd",
         "board": "ADAFRUIT_TRINKET_M0",
         "board_name": "Trinket M0",
         "mcu_name": "SAMD21E18A",
@@ -774,6 +734,22 @@
         "mcu_name": "STM32F405RG",
         "description": "Adafruit Feather STM32F405 with STM32F405RG",
         "path": "repos/micropython/ports/stm32/boards/ADAFRUIT_F405_EXPRESS/mpconfigboard.h"
+    },
+    {
+        "port": "stm32",
+        "board": "ARDUINO_GIGA",
+        "board_name": "GIGA",
+        "mcu_name": "STM32H747",
+        "description": "GIGA with STM32H747",
+        "path": "repos/micropython/ports/stm32/boards/ARDUINO_GIGA/mpconfigboard.h"
+    },
+    {
+        "port": "stm32",
+        "board": "ARDUINO_NICLA_VISION",
+        "board_name": "NICLAVISION",
+        "mcu_name": "STM32H747",
+        "description": "NICLAVISION with STM32H747",
+        "path": "repos/micropython/ports/stm32/boards/ARDUINO_NICLA_VISION/mpconfigboard.h"
     },
     {
         "port": "stm32",
@@ -1001,6 +977,14 @@
     },
     {
         "port": "stm32",
+        "board": "NUCLEO_H723ZG",
+        "board_name": "NUCLEO_H723ZG",
+        "mcu_name": "STM32H723ZGT6",
+        "description": "NUCLEO_H723ZG with STM32H723ZGT6",
+        "path": "repos/micropython/ports/stm32/boards/NUCLEO_H723ZG/mpconfigboard.h"
+    },
+    {
+        "port": "stm32",
         "board": "NUCLEO_H743ZI",
         "board_name": "NUCLEO_H743ZI",
         "mcu_name": "STM32H743",
@@ -1054,6 +1038,14 @@
         "mcu_name": "STM32L476RG",
         "description": "NUCLEO-L476RG with STM32L476RG",
         "path": "repos/micropython/ports/stm32/boards/NUCLEO_L476RG/mpconfigboard.h"
+    },
+    {
+        "port": "stm32",
+        "board": "NUCLEO_L4A6ZG",
+        "board_name": "NUCLEO-L4A6ZG",
+        "mcu_name": "STM32L4A6ZG",
+        "description": "NUCLEO-L4A6ZG with STM32L4A6ZG",
+        "path": "repos/micropython/ports/stm32/boards/NUCLEO_L4A6ZG/mpconfigboard.h"
     },
     {
         "port": "stm32",
@@ -1206,6 +1198,14 @@
         "mcu_name": "STM32F746",
         "description": "F7DISC with STM32F746",
         "path": "repos/micropython/ports/stm32/boards/STM32F7DISC/mpconfigboard.h"
+    },
+    {
+        "port": "stm32",
+        "board": "STM32H573I_DK",
+        "board_name": "STM32H573I-DK",
+        "mcu_name": "STM32H573IIK3Q",
+        "description": "STM32H573I-DK with STM32H573IIK3Q",
+        "path": "repos/micropython/ports/stm32/boards/STM32H573I_DK/mpconfigboard.h"
     },
     {
         "port": "stm32",
