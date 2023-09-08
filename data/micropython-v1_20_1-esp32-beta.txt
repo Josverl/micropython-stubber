@@ -1,0 +1,17 @@
+# MicroPython v1.20.0-449-g0bafdaf5f on 2023-09-05; Generic ESP32 module with SPIRAM with ESP32
+__main__          bluetooth         hashlib           re
+_asyncio          btree             heapq             select
+_boot             builtins          inisetup          socket
+_espnow           cmath             io                ssl
+_onewire          collections       json              struct
+_thread           cryptolib         machine           sys
+_webrepl          deflate           math              time
+apa106            dht               micropython       uasyncio
+array             ds18x20           mip/__init__      uctypes
+asyncio/__init__  errno             neopixel          umqtt/robust
+asyncio/core      esp               network           umqtt/simple
+asyncio/event     esp32             ntptime           upysh
+asyncio/funcs     espnow            onewire           urequests
+asyncio/lock      flashbdev         os                webrepl
+asyncio/stream    framebuf          platform          webrepl_setup
+binascii          gc                random            websocket
