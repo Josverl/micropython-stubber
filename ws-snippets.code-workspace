@@ -25,10 +25,14 @@
             "name": "snippets/rp2"
         },
         {
-            "path": "board",
+            "path": "board"
         },
         {
-            "path": "minified",
+            "path": "minified"
+        },
+        {
+            "name": "serial:/COM7",
+            "uri": "serial://com7/"
         }
     ],
     "settings": {
@@ -58,6 +62,10 @@
             "stubs",
             "__*",
             ".*"
-        ]
+        ],
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.black-formatter"
+        },
+        "python.formatting.provider": "black"
     }
 }

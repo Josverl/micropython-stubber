@@ -57,7 +57,8 @@ but can also be imported with a `u` prefix
 """
 
 # Some classes are documented as functions
-# This table is used to try to correct the errors in the documentation.
+# This table is used to try to correct the errors in the documentation,
+#  or adapt the human readable documentation to machine readable.
 # it is applied to each .rst file after loading the contents.
 
 RST_DOC_FIXES: List[Tuple[str, str]] = [
@@ -78,6 +79,15 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
     # for static type analysis this is best considered as a Class, so morph them before processing.
     # uselect.rst
     (".. function:: poll(", ".. class:: poll("),
+    # ESPNow.rst - multiple methods on a single line, split to multiline
+    (
+        "AIOESPNow._aiter__() / async AIOESPNow.__anext__()",
+        "AIOESPNow._aiter__()\n\n\n.. method:: async AIOESPNow.__anext__()",
+    ),
+    # (
+    #     ".. data:: ESPNow.peers_table",
+    #     ".. method:: ",
+    # ),
 ]
 
 
@@ -322,6 +332,11 @@ PARAM_FIXES = [
     #     # def __init__(self, dest, *, freq, duty_u16, duty_ns) -> None: ...
     #     def __init__(self, dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0) -> None: ...
     Fix(
+        "dest, *, freq, duty_u16, duty_ns, invert",
+        "dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0, invert=False",
+    ),
+    # most specific fix first
+    Fix(
         "dest, *, freq, duty_u16, duty_ns",
         "dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0",
     ),
@@ -402,6 +417,8 @@ PARAM_FIXES = [
     ),
     # # This is a cleanup something that went wrong before
     # Fix("**kwargs: Optional[Any]","**kwargs")
+    # ------ ESPNow.rst uses   (ESP32 only) after the class / function prototype
+    Fix(r"\(ESP\d+\s+only\)", "", is_re=True),  # ESP32 / ESP8266 Only
 ]
 
 # List of classes and their parent classes that should be added to the class definition
@@ -435,4 +452,15 @@ CHILD_PARENT_CLASS = {
     "OrderedDict": "dict",
     "namedtuple": "tuple",
     "deque": "Queue",
+    # ESPNow
+    "AIOESPNow": "ESPNow",
 }
+
+
+# TODO : implement the execution of this list during merge
+#  - this is a list of functions, classes methods and constantsn  that are not detected at runtime, but are avaialble and documented
+# the standard merge only adds documentation to detected functions.
+FORCE_NON_DETECED = [
+    ("btree", "Btree", ["esp32", "esp8266"]),  # Is not detected runtime
+    ("espnow", "ESPNow.peers_table", ["esp32"]),  # Is not detected runtime
+]
