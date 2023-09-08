@@ -5,18 +5,18 @@ Create all variants of createstubs.py
 """
 
 import shutil
+from pathlib import Path
 from typing import List, Optional
+
 import libcst as cst
 import libcst.codemod as codemod
-from pathlib import Path
+from loguru import logger as log
 
 from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet  # type: ignore
-
-from loguru import logger as log
-
+from stubber.minify import cross_compile, minify
+from stubber.update_module_list import update_module_list
 from stubber.utils.post import run_black
-from stubber.minify import minify, cross_compile
 
 ALL_VARIANTS = list(CreateStubsVariant)
 
@@ -27,6 +27,7 @@ def create_variants(
     target_path: Optional[Path] = None,
     version: str = "",
     make_variants: List[CreateStubsVariant] = ALL_VARIANTS,
+    update_modules: bool = True,
 ):
     """
     Create variants of createstubs.py and optionally minify and cross compile them.
@@ -43,6 +44,8 @@ def create_variants(
     """
     if target_path is None:
         target_path = base_path
+    if update_modules:
+        update_module_list()
 
     ctx = codemod.CodemodContext()
     base_file = base_path / "createstubs.py"
