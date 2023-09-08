@@ -63,7 +63,7 @@ class SourceDict(OrderedDict):
         self.name = name
 
     def __str__(self) -> str:
-        "convert the OD into a string"
+        "convert the OD into a string ( the to be generated source code )"
         out = ""
         for item in self.items():
             code = item[1]
@@ -118,7 +118,13 @@ class SourceDict(OrderedDict):
             line = spaces(self.indent + self._body) + line
         self.update({"constants": self["constants"] + [line]})
 
-    def add_constant_smart(self, name: str, type: str = "Any", docstr: Optional[List[str]] = None, autoindent: bool = True):
+    def add_constant_smart(
+        self,
+        name: str,
+        type: str = "",
+        docstr: Optional[List[str]] = None,
+        autoindent: bool = True,
+    ):
         """add literal / constant to the constant scope of this block, or a class in this block"""
         if docstr is None:
             docstr = []
@@ -129,14 +135,61 @@ class SourceDict(OrderedDict):
             cls_dict: ClassSourceDict = self[classfullname]
             cls_dict.add_constant_smart(const_name, type, docstr)
         else:
-            line = f"# {name}: {type}" if "*" in name else f"{name}: {type}"
+            # does the constant contain an = , then it has a value
+            value = None
+            if "=" in name:
+                # in ESPNow.rst there is a constant with a value between brackets : 'MAX_DATA_LEN(=250)'
+                # remove brackets from constant values
+                name = name.replace("(", "").replace(")", "")
+                name, value = name.split("=", 1)
+                # determine more specific type from value
+                if type in ["Any", ""]:
+                    try:
+                        value_ = eval(value)
+                        if isinstance(value_, bool):
+                            type = "bool"
+                        elif isinstance(value_, int):
+                            type = "int"
+                        if isinstance(value_, float):
+                            type = "float"
+                        elif isinstance(value_, str):
+                            type = "str"
+                        elif isinstance(value_, tuple):
+                            type = "Tuple"
+                        elif isinstance(value_, dict):
+                            type = "Dict"
+                        elif isinstance(value_, list):
+                            type = "List"
+                    except Exception:
+                        pass
+
             # assign a value so constant can be used as default value
-            if type == "Any":
-                line += " = ..."
-            elif type == "int":
-                line += " = 1"
-            elif type == "str":
-                line += ' = ""'
+            if not value:
+                if type == "Any":
+                    value = "..."
+            #     # if type == "bool":
+            #     #     value = "True"
+            #     # if type == "int":
+            #     #     value = "1"
+            #     # if type == "float":
+            #     #     value = "1.0"
+            #     if type == "str":
+            #         value = '""'
+            #     elif type == "Tuple":
+            #         value = "()"
+            #     elif type == "Dict":
+            #         value = "{}"
+            #     elif type == "List":
+            #         value = "[]"
+            if "*" in name:
+                #  - if name starts with * it is a type annotation
+                line = f"# {name}: {type}"
+            elif not value:
+                line = f"{name}: {type}"
+            elif type:
+                line = f"{name}: {type} = {value}"
+            else:
+                line = f"{name} = {value}"
 
             _docstr = docstr
             if autoindent:
@@ -221,6 +274,10 @@ class ModuleSourceDict(SourceDict):
         self.update(new)
 
     def __str__(self):
+        """\
+        sort in the correct parent-child order,
+        then convert to string (the code)
+        """
         self.sort()
         return super().__str__()
 
@@ -256,7 +313,15 @@ class ModuleSourceDict(SourceDict):
 
 
 class ClassSourceDict(SourceDict):
-    def __init__(self, name: str, *, docstr: Optional[List[str]] = None, init: str = "", indent: int = 0, lf="\n"):
+    def __init__(
+        self,
+        name: str,
+        *,
+        docstr: Optional[List[str]] = None,
+        init: str = "",
+        indent: int = 0,
+        lf="\n",
+    ):
         "set correct order for class and exception definitions to allow adding class variables"
         # Defaults
         if docstr is None:
@@ -293,6 +358,7 @@ class FunctionSourceDict(SourceDict):
         indent: int = 0,
         decorators: Optional[List[str]] = None,
         lf="\n",
+        is_async: bool = False,
     ):
         "set correct order for function and method definitions"
         # defaults
@@ -304,7 +370,10 @@ class FunctionSourceDict(SourceDict):
             decorators = []
 
         # add indent
-        _def = [spaces(indent) + l for l in definition]
+        if is_async:
+            _def = [spaces(indent) + "async " + l for l in definition]
+        else:
+            _def = [spaces(indent) + l for l in definition]
 
         # add ...
         super().__init__(
