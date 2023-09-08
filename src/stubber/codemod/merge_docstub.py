@@ -124,7 +124,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         full_module_name = empty_mod.code_for_node(imp.module)  # type: ignore
                         log.trace(f"add: from {full_module_name} import *")
                         AddImportsVisitor.add_needed_import(
-                            self.context, module=full_module_name, obj="*", 
+                            self.context,
+                            module=full_module_name,
+                            obj="*",
                         )
 
         # update the docstring.
@@ -143,9 +145,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(
-        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
-    ) -> cst.ClassDef:
+    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
@@ -170,9 +170,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(
-        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
-    ) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
 
         stack_id = tuple(self.stack)

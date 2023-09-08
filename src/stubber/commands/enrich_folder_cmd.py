@@ -36,8 +36,8 @@ from .cli import stubber_cli
 def cli_enrich_folder(
     stubs_folder: Union[str, Path],
     docstubs_folder: Union[str, Path],
-    diff:bool=False,
-    dry_run:bool=False,
+    diff: bool = False,
+    dry_run: bool = False,
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
