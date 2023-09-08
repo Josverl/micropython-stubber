@@ -1,15 +1,19 @@
 # The esp32 module:
 import esp32
 
-esp32.hall_sensor()  # read the internal hall sensor
+# esp32.hall_sensor()  # read the internal hall sensor
+# Hal sensor (magnetometer) has been removed
+# https://github.com/micropython/micropython/pull/11528
+
 esp32.raw_temperature()  # read the internal temperature of the MCU, in Fahrenheit
 esp32.ULP()  # access to the Ultra-Low-Power Co-processor
 
 
 # RMT
 
-import esp32
 from machine import Pin
+
+import esp32
 
 rmt = esp32.RMT(0, pin=Pin(18), clock_div=8)
 print(rmt)

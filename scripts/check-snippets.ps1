@@ -1,44 +1,68 @@
 
-# $version = "v1.19.1"
-# stubber merge --version $version
 
+$version = "v1.20.0"
 $version = "latest"
-stubber merge --version $version
-# stubber switch $version
-#stubber get-docstubs
-stubber merge --version $version
-stubber publish --test-pypi --version $version --port rp2 --board pico_w --dry-run
+$flatversion = $version -replace "\.", "_"
 
-# stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
-
-$ports = @("esp32", "esp8266", "stm32", "rp2")
-# $ports = @("esp32")
+$ports = @("esp32")
+$ports = @("esp32", "esp8266", "stm32", "rp2", "samd")
 $ports = @("rp2")
-$results = @()
-foreach ($port in $ports) {
-    $stub_source = ".\repos\micropython-stubs\publish\micropython-v1_19_1-$port-stubs"
+$do_docstubs = $false
+$do_merge = $True
+$do_build = $true
 
-    
-    # port specifics
-    $snippets_dir = ".\snippets\$port"
-    $typings_dir = "$snippets_dir\typings"
-    rd $typings_dir -r  -ea silentlycontinue
-    pip install -U $stub_source --target $typings_dir --no-user 
-    $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
-    $results += $result
-    $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
 
-    $snippets_dir = ".\snippets\common"
-    $typings_dir = "$snippets_dir\typings"
-    rd $typings_dir -r  -ea silentlycontinue
-    pip install -U $stub_source --target $typings_dir --no-user 
-    $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
-    $results += $result
-    $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
+echo "--------------------------------------------------------"
+echo "version: $version"
+echo "flatversion: $flatversion"
+echo "ports: $ports"
+
+if ($do_docstubs) {
+    echo "--------------------------------------------------------"
+    echo "docstubs"
+    echo "--------------------------------------------------------"
+    stubber switch $version
+    stubber get-docstubs
+}
+if ($do_merge ) {
+    echo "--------------------------------------------------------"
+    echo "merge"
+    echo "--------------------------------------------------------"
+    foreach ($port in $ports) {
+        stubber -v merge --version $version --port $port
+    }
+}
+if ($do_build) {
+    echo "--------------------------------------------------------"
+    echo "build"
+    echo "--------------------------------------------------------"
+
+    foreach ($port in $ports) {
+        stubber -v build --version $version --port $port
+    }
+    # stubber build --version $version --port rp2 --board pico_w 
+    # stubber publish --test-pypi --version $version --port auto --board um_tinypico --dry-run
 }
 
 
 
+$results = @()
+foreach ($port in $ports) {
+    $stub_source = ".\repos\micropython-stubs\publish\micropython-$flatversion-$port-stubs"
+    echo "--------------------------------------------------------"
+    echo "port: $port"
+    echo "stub_source: $stub_source"
+    echo "--------------------------------------------------------"
+
+    foreach ($snippets_dir in @(".\snippets\$port", ".\snippets\common", ".\snippets\stdlib")) {
+        $typings_dir = "$snippets_dir\typings"
+        rd $typings_dir -r  -ea silentlycontinue
+        pip install -U $stub_source --target $typings_dir --no-user 
+        $result = pyright --project $snippets_dir --outputjson | convertfrom-json 
+        $results += $result
+        $result.generalDiagnostics | select severity, message, rule, file | ft  -AutoSize | out-host
+    }
+}
 
 
 
