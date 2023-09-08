@@ -67,7 +67,14 @@ def publish_multiple(
 
     for todo in worklist:
         if package := get_package(db, **todo):
-            package.publish(db=db, clean=clean, force=force, build=build, production=production, dry_run=dry_run)
+            package.publish(
+                db=db,
+                clean=clean,
+                force=force,
+                build=build,
+                production=production,
+                dry_run=dry_run,
+            )
             results.append(package.status)
         else:
             log.error(f"Failed to create package for {todo}")
@@ -75,7 +82,10 @@ def publish_multiple(
 
 
 def build_worklist(
-    family: str, versions: Union[List[str], str], ports: Union[List[str], str], boards: Union[List[str], str]
+    family: str,
+    versions: Union[List[str], str],
+    ports: Union[List[str], str],
+    boards: Union[List[str], str],
 ):
     """Build a worklist of packages to build or publish, and filter to only the requested ports and boards"""
     if isinstance(versions, str):

@@ -5,15 +5,16 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
-import stubber.basicgit as git
-
 from helpers import read_stub
+
+import stubber.basicgit as git
 
 pytestmark = pytest.mark.doc_stubs
 
+from stubber.rst.reader import TYPING_IMPORT, RSTWriter
+
 # SOT
 from stubber.stubs_from_docs import generate_from_rst
-from stubber.rst.reader import RSTWriter, TYPING_IMPORT
 
 XFAIL_DOCFIX = True  # True to not fail on missing doc fixes
 
@@ -27,7 +28,13 @@ def pyright_results(rst_stubs, pytestconfig: pytest.Config) -> Dict[str, Dict]:
     "Run pyright over folder with rst generated stubs, and return the results"
     # TODO: this fails if the nodeJS version of pyright is installed , and only works for the SLOWER pip install Pyright
     test_config = pytestconfig.rootpath / "tests/pyrightconfig.json"
-    cmd = ["pyright", "--project", test_config.absolute().as_posix(), "--outputjson", rst_stubs.as_posix()]
+    cmd = [
+        "pyright",
+        "--project",
+        test_config.absolute().as_posix(),
+        "--outputjson",
+        rst_stubs.as_posix(),
+    ]
     try:
         # run pyright in the docstub folder to allow modules to import each other.
         result = subprocess.run(cmd, shell=False, capture_output=True, cwd=rst_stubs.as_posix())
@@ -52,7 +59,9 @@ def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path)
 
 # TODO: Source version and tag
 @pytest.fixture(scope="module")
-def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path):
+def rst_stubs(
+    tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path
+):
     "Generate stubs from RST files - once for this module"
     v_tag = micropython_repo
     # setup our on folder for testing
@@ -181,7 +190,10 @@ def test_rst_parse_class_10(line: str):
         ("(block_device or path)", "(block_device_or_path)"),
         # network - AbstractNIC.connect
         # ("([service_id, key=None, *, ...])", "(service_id, key=None, *args, **kwargs: Optional[Any])"), # old - incorrect
-        ("([service_id, key=None, *, ...])", "(service_id: Optional[Any]=None, key: Optional[Any]=None, *args, **kwargs)"),  # New
+        (
+            "([service_id, key=None, *, ...])",
+            "(service_id: Optional[Any]=None, key: Optional[Any]=None, *args, **kwargs)",
+        ),  # New
         ("(block_num, buf, offset)", "(block_num, buf, offset: Optional[int] = 0)"),
         ("(key, mode[, IV])", "(key, mode, IV: Optional[Any]=None)"),
         ("([(ip, subnet, gateway, dns)])", "(configtuple: Optional[Any]=None)"),
@@ -192,6 +204,8 @@ def test_rst_parse_class_10(line: str):
         # with assignments
         ("(id4, foo=-1, [bar])", "(id4, foo=-1, bar: Optional[Any]=None)"),
         # ("(id5, foo=-1, [bar=2])","(id5, foo=-1, bar: Optional[Any]=2)"),
+        # ESPNow extra notation
+        ("ESPNow.config('param')   (ESP32 only)", "ESPNow.config(param)"),
     ],
 )
 def test_fix_param(param_in, expected):
@@ -288,9 +302,16 @@ def test_pyright_Non_default_follows_default(pyright_results, capsys):
 def test_pyright_undefined_variable(pyright_results, capsys):
     "use pyright to check the validity of the generated stubs"
     issues: List[Dict] = pyright_results["generalDiagnostics"]
-    issues = list(filter(lambda diag: "rule" in diag.keys() and diag["rule"] == "reportUndefinedVariable", issues))
+    issues = list(
+        filter(
+            lambda diag: "rule" in diag.keys() and diag["rule"] == "reportUndefinedVariable",
+            issues,
+        )
+    )
     for issue in issues:
-        print(f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  ")
+        print(
+            f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  "
+        )
     assert len(issues) == 0, "there should be no `Undefined Variables`"
 
 
@@ -337,14 +358,17 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
     issues = list(filter(lambda diag: diag["severity"] == "error", issues))
     issues = list(
         filter(
-            lambda diag: diag["rule"] == "reportGeneralTypeIssues" and "is obscured by a declaration" in diag["message"],
+            lambda diag: diag["rule"] == "reportGeneralTypeIssues"
+            and "is obscured by a declaration" in diag["message"],
             issues,
         )
     )
     for issue in issues:
         print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
 
-    assert len(issues) == 0, f"There are {len(issues)} function or class defs that obscure earlier defs"
+    assert (
+        len(issues) == 0
+    ), f"There are {len(issues)} function or class defs that obscure earlier defs"
 
 
 @pytest.mark.docfix
@@ -354,7 +378,9 @@ def test_doc_deepsleep_stub(rst_stubs):
     content = read_stub(rst_stubs, "machine.py")
     # return type omitted as this is tested seperately
     found = any(line.startswith("def deepsleep(time_ms") for line in content)
-    assert found, "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
+    assert (
+        found
+    ), "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
 
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
@@ -373,7 +399,12 @@ def test_doc_socket_class_def(rst_stubs: Path):
     found = any(line.startswith("class socket") for line in content)
     assert found, "(u)socket.socket classdef should be generated"
 
-    found = any(line.lstrip().startswith("def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP") for line in content)
+    found = any(
+        line.lstrip().startswith(
+            "def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP"
+        )
+        for line in content
+    )
     assert found, "(u)socket.socket __init__ should be generated"
 
 

@@ -4,10 +4,11 @@ from typing import List, Union
 
 import click
 from loguru import logger as log
+from tabulate import tabulate
+
 from stubber.commands.cli import stubber_cli
 from stubber.publish.package import GENERIC_U
 from stubber.publish.publish import build_multiple
-from tabulate import tabulate
 from stubber.utils.config import CONFIG
 
 
@@ -84,5 +85,5 @@ def cli_build(
         clean=clean,
     )
     # log the number of results with no error
-    log.info(f"Built {len([r for r in results if not r['error']])} stubs")
+    log.info(f"Built {len([r for r in results if not r['error']])} stub packages")
     print(tabulate(results, headers="keys"))

@@ -62,11 +62,7 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
         reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
         rows = list(reader)
         # create a dict version --> commit_hash
-        version_commit = {
-            row["version"].split("/")[-1]: row["lib_commit_hash"]
-            for row in rows
-            if row["version"].startswith("refs/tags/")
-        }
+        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
     # add default
     version_commit = defaultdict(lambda: "master", version_commit)
     return version_commit
@@ -89,9 +85,7 @@ def match_lib_with_mpy(version_tag: str, lib_path: Path):
         #   use the micropython_tags.csv to find the correct commit hash
         return git.checkout_tag(version_tag, lib_path)
     else:
-        log.info(
-            f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
-        )
+        log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
         return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 
