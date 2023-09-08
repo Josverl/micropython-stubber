@@ -1647,7 +1647,7 @@ dev = ["twine (>=3.4.1)"]
 name = "pyserial"
 version = "3.5"
 description = "Python Serial Port Extension"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
@@ -2578,4 +2578,4 @@ tools = ["esptool"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "e87ead9794b330834b284ca054d62cfba789220f96583e2faef676a1b2e00bd9"
+content-hash = "63a744b45877293a6e4db59a36c47cce98c7a39eb3956b79648dea2cac30a327"
