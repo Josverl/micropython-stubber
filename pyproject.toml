@@ -68,6 +68,7 @@ tenacity = "^8.2.2"
 tomli = { version = "^2.0.1", python = "<3.11" }
 tomli-w = "^1.0.0"
 typed-config = "^1.3.0"
+pyserial = "^3.5"
 
 [tool.poetry.extras]
 tools = ["esptool"]
