@@ -157,9 +157,7 @@ class StubPackage:
     def update_pkg_version(self, production: bool) -> str:
         """Get the next version for the package"""
         return (
-            self.get_prerelease_package_version(production)
-            if self.mpy_version == "latest"
-            else self.get_next_package_version(production)
+            self.get_prerelease_package_version(production) if self.mpy_version == "latest" else self.get_next_package_version(production)
         )
 
     def get_prerelease_package_version(self, production: bool = False) -> str:
@@ -167,7 +165,7 @@ class StubPackage:
         rc = 1
         if describe := get_git_describe(CONFIG.mpy_path.as_posix()):
             # use versiontag and the nummer of commits since the last tag
-            ver, rc, _= describe.split("-", 2)
+            ver, rc, _ = describe.split("-", 2)
             base = bump_version(Version(ver), minor_bump=True)
             rc = int(rc)
             return str(bump_version(base, rc=rc))
@@ -683,9 +681,7 @@ class StubPackage:
             self.pkg_version = self.update_pkg_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
-            log.debug(
-                f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}"
-            )
+            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}")
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
             if self.poetry_build():

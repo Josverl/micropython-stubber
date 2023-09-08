@@ -10,14 +10,17 @@ import libcst as cst
 from libcst import matchers as m
 
 
-# there is no simple way to re-use the code from multiple classes / methods 
+# there is no simple way to re-use the code from multiple classes / methods
 # but could be added https://stackoverflow.com/questions/17522706/how-to-pass-an-instance-variable-to-a-decorator-inside-class-definition?noredirect=1&lq=1
 # so for now, just copy the code, or use a module scoped variable - but that is not thread safe
 
+
 class CallFinder(m.MatcherDecoratableTransformer):
     """Find the Pin.__call__ method and extract it from a (machine) module."""
+
     class_name: str = "Pin"  # class name
     method_name: str = "__call__"  # method name
+
     def __init__(self):
         super().__init__()
         self.call_meth: Optional[cst.FunctionDef] = None
@@ -31,13 +34,13 @@ class CallFinder(m.MatcherDecoratableTransformer):
 
 class CallAdder(m.MatcherDecoratableTransformer):
     """Add a __call__ method to a class if it is missing."""
-    class_name = "Pin"  # class name 
-    has_call = 0 # number of __call__ methods found
 
-    def __init__(self, call_meth :cst.FunctionDef) -> None:
+    class_name = "Pin"  # class name
+    has_call = 0  # number of __call__ methods found
+
+    def __init__(self, call_meth: cst.FunctionDef) -> None:
         super().__init__()
-        self.call_meth  = call_meth
-
+        self.call_meth = call_meth
 
     @m.call_if_inside(m.ClassDef(name=m.Name(class_name)))
     @m.visit(m.FunctionDef(name=m.Name("__call__")))
