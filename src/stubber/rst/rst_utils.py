@@ -35,9 +35,10 @@ to do:
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/Ni8g2z/2
 
-from loguru import logger as log
 import re
 from typing import Dict, List, Optional, Union
+
+from loguru import logger as log
 
 from .lookup import LOOKUP_LIST, NONE_VERBS
 
@@ -58,12 +59,14 @@ __all__ = [
 
 # all possible Types needed
 TYPING_IMPORT: List[str] = [
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, OrderedDict",
     "from _typeshed import Incomplete",
 ]
 
 # --------------------------------------
 # Confidence levels
+# these heuristics are based a significant amout of manual testing,
+# and not based on any statistical analysis
 
 C_DEFAULT = 0  # Any , the default for all
 C_NONE = 0.1 + C_DEFAULT  # better than the default Any
@@ -79,6 +82,7 @@ C_BOOL = C_GENERIC
 C_FLOAT = C_GENERIC
 C_STR = C_GENERIC
 
+# tehere is a bit of logic - but mostly empirical
 C_NONE_RETURN = C_GENERIC
 C_OBJECTS = 0.01 + C_GENERIC
 
@@ -103,8 +107,8 @@ WEIGHT_GETS = 1.5  # For docstring Gets
 
 # --------------------------------------
 
-# base has a confidence that is
-BASE = {"type": "Any", "confidence": C_BASE, "match": None}
+# base has a confidence that is quite low, but better than rubbish
+BASE = {"type": "Incomplete", "confidence": C_BASE, "match": None}
 
 # --------------------------------------
 # Regexes
@@ -134,7 +138,13 @@ def dist_rate(i: int) -> float:
 WORD_TERMINATORS = ".,!;:?"
 
 
-def simple_candidates(type: str, match_string: str, keywords: List[str], rate: float = 0.5, exclude: Optional[List[str]] = None):
+def simple_candidates(
+    type: str,
+    match_string: str,
+    keywords: List[str],
+    rate: float = 0.5,
+    exclude: Optional[List[str]] = None,
+):
     """
     find and rate possible types and confidence weighting for simple types.
     Case sensitive
@@ -162,7 +172,13 @@ def simple_candidates(type: str, match_string: str, keywords: List[str], rate: f
     return candidates
 
 
-def compound_candidates(type: str, match_string: str, keywords: List[str], rate: float = 0.85, exclude: Optional[List[str]] = None):
+def compound_candidates(
+    type: str,
+    match_string: str,
+    keywords: List[str],
+    rate: float = 0.85,
+    exclude: Optional[List[str]] = None,
+):
     """
     find and rate possible types and confidence weighting for compound types that can have a subscription.
     Case sensitive
@@ -206,7 +222,9 @@ def compound_candidates(type: str, match_string: str, keywords: List[str], rate:
         result["type"] = f"{type}[{sub}]" if sub else f"{type}"
         confidence = confidence * dist_rate(i)  # distance weighting
         result["confidence"] = confidence
-        log.trace(f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}")
+        log.trace(
+            f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}"
+        )
 
         candidates.append(result)
     return candidates
@@ -241,18 +259,18 @@ def object_candidates(match_string: str, rate: float = 0.81, exclude: Optional[L
         words = match_string.split(" ")  # Return <multiple words object>
         if kw in words:
             pos = words.index(kw)
-            obj = "Any" if pos == 0 else words[pos - 1]
+            obj = "Incomplete" if pos == 0 else words[pos - 1]
             if obj in ("stream-like", "file"):
                 obj = "IO"  # needs from typing import IO
             elif obj == "callback":
-                obj = "Callable[..., Any]"  # requires additional 'from typing import Callable'
+                obj = "Callable[..., Incomplete]"  # requires additional 'from typing import Callable'
             else:
                 # clean
                 obj = re.sub(r"[^a-z.A-Z0-9]", "", obj)
             result = BASE.copy()
             result["type"] = obj
             if obj in ["an", "any"]:  # "Return an / any object"
-                result["type"] = "Any"
+                result["type"] = "Incomplete"
                 confidence += 0.10  # abstract , but very good
             elif obj[0].islower():
                 confidence -= 0.20  # not so good
@@ -292,9 +310,13 @@ def distill_return(return_text: str) -> List[Dict]:
 
     candidates += compound_candidates("Generator", match_string, ["generator"], C_GENERATOR)
     candidates += compound_candidates("Iterator", match_string, ["iterator"], C_ITERATOR)
-    candidates += compound_candidates("List", match_string, ["a list of", "list of", "an array"], C_LIST)
+    candidates += compound_candidates(
+        "List", match_string, ["a list of", "list of", "an array"], C_LIST
+    )
 
-    candidates += simple_candidates("Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT)
+    candidates += simple_candidates(
+        "Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT
+    )
     candidates += simple_candidates(
         "Tuple",
         match_string,
@@ -314,7 +336,9 @@ def distill_return(return_text: str) -> List[Dict]:
         C_TUPLE,
     )
 
-    candidates += simple_candidates("int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT)
+    candidates += simple_candidates(
+        "int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
+    )
 
     candidates += simple_candidates(
         "int",
@@ -369,7 +393,9 @@ def distill_return(return_text: str) -> List[Dict]:
     # OK, better than just string
     candidates += simple_candidates("bytes", match_string, ["bytes", "byte string"], C_BYTES)
 
-    candidates += simple_candidates("bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL)
+    candidates += simple_candidates(
+        "bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL
+    )
     candidates += simple_candidates(
         "float",
         match_string,
@@ -387,7 +413,9 @@ def distill_return(return_text: str) -> List[Dict]:
         C_FLOAT,
     )
 
-    candidates += simple_candidates("str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR)
+    candidates += simple_candidates(
+        "str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR
+    )
 
     candidates += simple_candidates("str", match_string, ["name", "names"], C_STR_NAMES)
     ## "? contains 'None if there is no'  --> Union[Null, xxx]"
@@ -404,11 +432,17 @@ def distill_return(return_text: str) -> List[Dict]:
     return candidates
 
 
-def return_type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False):
+def return_type_from_context(
+    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+):
     try:
-        return str(_type_from_context(module=module, signature=signature, docstring=docstring, literal=literal)["type"])
+        return str(
+            _type_from_context(
+                module=module, signature=signature, docstring=docstring, literal=literal
+            )["type"]
+        )
     except Exception:
-        return "Any"
+        return "Incomplete"
 
 
 def _type_from_context(
@@ -455,7 +489,7 @@ def _type_from_context(
     function_re = re.compile(r"[\w|.]+(?=\()")
 
     # matches: List[re.Match] = []
-    candidates: List[Dict] = [{"match": "default", "type": "Any", "confidence": 0}]
+    candidates: List[Dict] = [{"match": "default", "type": "Incomplete", "confidence": 0}]
 
     # if the signature contains a return type , then use that and do nothing else.
     if "->" in signature:
