@@ -5,6 +5,10 @@
             "name": "stubber rootfolder"
         },
         {
+            "path": "snippets/stdlib",
+            "name": "snippets/stdlib"
+        },
+        {
             "path": "snippets/common",
             "name": "snippets/common"
         },
@@ -25,14 +29,20 @@
             "name": "snippets/rp2"
         },
         {
-            "path": "board"
+            "name": "snippets/samd",
+            "path": "snippets/samd"
         },
         {
-            "path": "minified"
+            "name": "board",
+            "path": "src/stubber/board"
         },
         {
             "name": "serial:/COM7",
             "uri": "serial://com7/"
+        },
+        {
+            "name": "serial:/COM4",
+            "uri": "serial://com4"
         }
     ],
     "settings": {
