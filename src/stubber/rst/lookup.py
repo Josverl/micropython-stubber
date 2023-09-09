@@ -1,11 +1,6 @@
-"""
-this is an list with manual overrides for function returns that could not efficiently be determined 
-from their docstring description 
-Format: a dictionary with :
-- key = module.[class.]function name
-- value : two-tuple with ( return type , priority )
 
-"""
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 # These are shown to import
 __all__ = [
     "LOOKUP_LIST",
@@ -16,13 +11,18 @@ __all__ = [
     "RST_DOC_FIXES",
     "DOCSTUB_SKIP",
     "U_MODULES",
+    "DEFAULT_BOARDS",
+    # "FORCE_NON_DETECED",
 ]
-
-
+# The default board for the ports 
 # modules documented with base name only
-from dataclasses import dataclass
-from typing import List, Optional, Tuple
-
+DEFAULT_BOARDS :Dict[str,List[str]]= {
+    "stm32": ["stm32-PYBV11"],
+    "esp32": ["esp32-GENERIC", "esp32",],
+    "esp8266": ["esp8266-GENERIC","esp8266"],
+    "rp2": ["rp2-PICO","rp2-PICO_W"],
+    "samd": ["samd-SEEED_WIO_TERMINAL"],
+}
 
 @dataclass
 class Fix:
@@ -99,6 +99,13 @@ DOCSTUB_SKIP = [
 ]
 
 # contains return types for functions and methods that are not clearly documented.
+"""
+this is an list with manual overrides for function returns that could not efficiently be determined 
+from their docstring description 
+Format: a dictionary with :
+- key = module.[class.]function name
+- value : two-tuple with ( return type , priority )
+"""
 LOOKUP_LIST = {
     "builtins.bytes": ("bytes", 0.95),
     "builtins.from_bytes": ("int", 0.95),
@@ -133,10 +140,16 @@ LOOKUP_LIST = {
     "stm.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
     "stm.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
     "stm.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
-    #
-    # "machine.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
-    # "machine.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
-    # "machine.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
+
+    # Onewire documented mostly in sourcecode
+    "_onewire.reset": ("bool", 0.95),
+    "_onewire.scan": ("List[int]", 0.95),
+    "_onewire.readbit": ("int", 0.95),
+    "_onewire.readbyte": ("int", 0.95),
+    "_onewire.writebyte": ("None", 0.95),
+    "_onewire.writebit": ("None", 0.95),
+    "_onewire.crc8": ("int", 0.95),
+
 }
 
 
@@ -242,12 +255,6 @@ PARAM_FIXES = [
         "(hostname, port, lambda)",
         "tuple[str,int,Callable]",
     ),
-    # ussl. TODO
-    # wrap_socket(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=CERT_NONE, ca_certs=None, do_handshake=True)
-    # (
-    #     "cert_reqs=CERT_NONE",
-    #     "cert_reqs=None",
-    # ),
     # # network
     # # WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
     # Fix(
