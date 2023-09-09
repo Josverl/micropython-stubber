@@ -13,8 +13,8 @@
     "verboseOutput": false,
     // section 2 - required settings
     "typeCheckingMode": "basic", // ["off", "basic", "strict"]: Specifies the default rule set to use
-    "typeshedPath": "../snippets/common/typings",
-    "stubPath": "../snippets/common/typings",
+    "typeshedPath": "typings",
+    "stubPath": "typings",
     // section 3 - set code quality checks 
     "reportMissingImports": "error",
     "reportGeneralTypeIssues": "error", // interesting
@@ -31,5 +31,5 @@
     "reportWildcardImportFromLibrary": "none",
     "reportUnknownArgumentType": "none",
     "reportSelfClsParameterName": "none",
-    "reportMissingModuleSource": "none",
+    "reportMissingModuleSource": "none"
 }
