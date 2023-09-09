@@ -7,7 +7,7 @@ import gc
 import logging
 import sys
 
-import uos as os
+import os
 from ujson import dumps
 
 try:
