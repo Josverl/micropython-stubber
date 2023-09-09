@@ -23,7 +23,7 @@ using a custom-built parser to read and process the micropython RST files
     - Coroutines are identified based tag "This is a Coroutine". Then if the return type was Foo, it will be transformed to : Coroutine[Foo]
     - a static Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring. 
     - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
-    - if no type can be detected the type `Any` is used
+    - if no type can be detected the type `Any` or `Incomplete` is used
 
 The generated stub files are formatted using `black` and checked for validity using `pyright`
 Note: black on python 3.7 does not like some function defs 
@@ -106,9 +106,11 @@ class FileReadWriter:
         # ignore Unicode decoding issues
         with open(filename, errors="ignore", encoding="utf8") as file:
             self.rst_text = file.readlines()
-        # Replace incorrect defenitions in .rst files with better ones
+        # Replace incorrect definitions in .rst files with better ones
         for FIX in RST_DOC_FIXES:
             self.rst_text = [line.replace(FIX[0], FIX[1]) for line in self.rst_text]
+        # some lines now may have \n sin them , so re-join and re-split the lines
+        self.rst_text = "".join(self.rst_text).splitlines(keepends=True)
 
         self.filename = filename.as_posix()  # use fwd slashes in origin
         self.max_line = len(self.rst_text) - 1
@@ -172,6 +174,7 @@ class RSTReader(FileReadWriter):
         ".. data:: Options:",
         ".. data:: Returns:",
         ".. data:: Raises:",
+        ".. admonition::",
     ]
     # considered part of the docstrings
 
@@ -244,7 +247,7 @@ class RSTReader(FileReadWriter):
         try:
             while (
                 self.line_no < len(self.rst_text)
-                and not self.at_anchor  # stop at next anchor ( however .. note: should be added)
+                and not self.at_anchor  # stop at next anchor ( however .. note: and a few other anchors should be added)
                 and not self.at_heading  # stop at next heading
             ):
                 line = self.rst_text[self.line_no]
@@ -269,11 +272,14 @@ class RSTReader(FileReadWriter):
             if all(l.startswith(q_char) for l in block):
                 # all lines start with the same character, so skip that character
                 block = [l[1:] for l in block]
+        # rstrip all lines
+        block = [l.rstrip() for l in block]
         # remove empty lines at beginning/end of block
-        if len(block) and len(block[0]) == 0:
+        while len(block) and len(block[0]) == 0:
             block = block[1:]
-        if len(block) and len(block[-1]) == 0:
+        while len(block) and len(block[-1]) == 0:
             block = block[:-1]
+
         # Clean up Synopsis
         if len(block) and ":synopsis:" in block[0]:
             block[0] = re.sub(
@@ -305,6 +311,7 @@ class RSTReader(FileReadWriter):
             # Clean up note and other docstring anchors
             _l = _l.replace(".. note:: ", "``Note:`` ")
             _l = _l.replace(".. data:: ", "")
+            _l = _l.replace(".. admonition:: ", "")
             # clean up unsupported escape sequences in rst
             _l = _l.replace(r"\ ", " ")
             _l = _l.replace(r"\*", "*")
@@ -528,22 +535,16 @@ class RSTParser(RSTReader):
                     name = name[len(f"{mod}.") :]
             # fixup parameters
             params = self.fix_parameters(params, name)
-            # assume no functions in classes
+            # ASSUME no functions in classes,
+            # so with ther cursor at a function this probably means that we are no longer in a class
             self.leave_class()
-            # if function name is the same as the module
-            # then this is probably documenting a class ()
 
-            # if the function name matches the module name then threat this as a class.
-            if name in self.module_names:
-                # 'Promote' function to class
-                self.create_update_class(name, params, docstr)
-            else:
-                fn_def = FunctionSourceDict(
-                    name=f"def {name}",
-                    definition=[f"def {name}({params} -> {ret_type}:"],
-                    docstr=docstr,
-                )
-                self.output_dict += fn_def
+            fn_def = FunctionSourceDict(
+                name=f"def {name}",
+                definition=[f"def {name}({params} -> {ret_type}:"],
+                docstr=docstr,
+            )
+            self.output_dict += fn_def
 
     def parse_class(self):
         log.trace(f"# {self.line.rstrip()}")
@@ -572,7 +573,6 @@ class RSTParser(RSTReader):
     def parse_method(self):
         name = ""
         this_method = ""
-        # params = ")"
         ## py:staticmethod  - py:classmethod - py:decorator
         # ref: https://sphinx-tutorial.readthedocs.io/cheatsheet/
         log.trace(f"# {self.line.rstrip()}")
@@ -730,7 +730,7 @@ class RSTParser(RSTReader):
                 docstring=docstr, signature=name, module=self.current_module, literal=True
             )
             if r_type in ["None"]:  # None does not make sense
-                r_type = "Any"  # TODO: perhaps default to Incomplete/ Unknown / int
+                r_type = "Incomplete"  # Default to Incomplete/ Unknown / int
             name = self.strip_prefixes(name)
             self.output_dict.add_constant_smart(name=name, type=r_type, docstr=docstr)
 

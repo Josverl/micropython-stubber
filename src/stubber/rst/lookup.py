@@ -1,6 +1,6 @@
-
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+
 # These are shown to import
 __all__ = [
     "LOOKUP_LIST",
@@ -14,15 +14,16 @@ __all__ = [
     "DEFAULT_BOARDS",
     # "FORCE_NON_DETECED",
 ]
-# The default board for the ports 
+# The default board for the ports
 # modules documented with base name only
-DEFAULT_BOARDS :Dict[str,List[str]]= {
+DEFAULT_BOARDS: Dict[str, List[str]] = {
     "stm32": ["stm32-PYBV11"],
-    "esp32": ["esp32-GENERIC", "esp32",],
-    "esp8266": ["esp8266-GENERIC","esp8266"],
-    "rp2": ["rp2-PICO","rp2-PICO_W"],
+    "esp32": ["esp32-GENERIC", "esp32"],
+    "esp8266": ["esp8266-GENERIC", "esp8266"],
+    "rp2": ["rp2-PICO", "rp2-PICO_W"],
     "samd": ["samd-SEEED_WIO_TERMINAL"],
 }
+
 
 @dataclass
 class Fix:
@@ -62,6 +63,8 @@ but can also be imported with a `u` prefix
 # it is applied to each .rst file after loading the contents.
 
 RST_DOC_FIXES: List[Tuple[str, str]] = [
+    # remove rst highlights from docstrings
+    (":class: attention\n", ""),
     # ------------------------------------------------------------------------------------------------
     # re.rst - function and class with the same name
     # todo: issue https://github.com/micropython/micropython/issues/8273
@@ -81,8 +84,8 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
     (".. function:: poll(", ".. class:: poll("),
     # ESPNow.rst - multiple methods on a single line, split to multiline
     (
-        "AIOESPNow._aiter__() / async AIOESPNow.__anext__()",
-        "AIOESPNow._aiter__()\n\n\n.. method:: async AIOESPNow.__anext__()",
+        ".. method:: AIOESPNow._aiter__() / async AIOESPNow.__anext__()",
+        ".. method:: AIOESPNow._aiter__()\n            async AIOESPNow.__anext__()",
     ),
     # (
     #     ".. data:: ESPNow.peers_table",
@@ -111,6 +114,7 @@ LOOKUP_LIST = {
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
+    "collections.namedtuple": ("NamedTuple", 0.95),
     "gc.collect": ("None", 0.95),
     "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
@@ -140,7 +144,6 @@ LOOKUP_LIST = {
     "stm.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
     "stm.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
     "stm.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
-
     # Onewire documented mostly in sourcecode
     "_onewire.reset": ("bool", 0.95),
     "_onewire.scan": ("List[int]", 0.95),
@@ -149,7 +152,6 @@ LOOKUP_LIST = {
     "_onewire.writebyte": ("None", 0.95),
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
-
 }
 
 
