@@ -515,7 +515,7 @@ if __name__ == "__main__":
     for board in connected_boards:
         log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
-        if rc == OK:
+        if rc == OK and my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
             if destination := copy_to_repo(my_stubs, board.firmware):
                 log.success(f"Stubs copied to {destination}")
