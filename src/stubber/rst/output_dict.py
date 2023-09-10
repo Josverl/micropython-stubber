@@ -143,7 +143,7 @@ class SourceDict(OrderedDict):
                 name = name.replace("(", "").replace(")", "")
                 name, value = name.split("=", 1)
                 # determine more specific type from value
-                if type in ["Any", ""]:
+                if type in {"Any", ""}:
                     try:
                         value_ = eval(value)
                         if isinstance(value_, bool):
@@ -163,7 +163,6 @@ class SourceDict(OrderedDict):
                     except Exception:
                         pass
 
-            # assign a value so constant can be used as default value
             if not value:
                 if type == "Any":
                     value = "..."
