@@ -59,7 +59,7 @@ __all__ = [
 
 # all possible Types needed
 TYPING_IMPORT: List[str] = [
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, OrderedDict",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple",
     "from _typeshed import Incomplete",
 ]
 
