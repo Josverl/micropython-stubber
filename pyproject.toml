@@ -228,6 +228,8 @@ markers = [
     "win32: run test only on Windows",
     "linux: run test only on linux",
     "darwin: run test only on Mac",
+    "1.19.0: run test only on 1.19.0",
+    "1.20.0: run test only on 1.20.0",
 ]
 
 # coverage reports
