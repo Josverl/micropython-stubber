@@ -260,6 +260,9 @@ class RSTReader(FileReadWriter):
         block = self.clean_docstr(block)
         # add clickable hyperlinks to CPython docpages
         block = self.add_link_to_docsstr(block)
+        # make sure the first char of the first line is a capital
+        if len(block) > 0 and len(block[0]) > 0:
+            block[0] = block[0][0].upper() + block[0][1:]
         return block
 
     @staticmethod
@@ -295,13 +298,13 @@ class RSTReader(FileReadWriter):
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
-            # Optionally link to python 3.4 / 3.5 documentation
+            # Link to python 3 documentation
             _l = re.sub(
                 r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|\s]*)`)[.]?",
                 r"\g<1> https://docs.python.org/3/library/\g<mod>.html .",
                 block[i],
             )
-            # RST hyperlink format is not clickable in v
+            # RST hyperlink format is not clickable in VSCode so convert to markdown format
             # https://regex101.com/r/5RN8rj/1
             _l = re.sub(
                 r"(.*)(?P<url><https://docs\.python\.org/.*>)(`_)",
@@ -312,6 +315,7 @@ class RSTReader(FileReadWriter):
             _l = _l.replace(".. note:: ", "``Note:`` ")
             _l = _l.replace(".. data:: ", "")
             _l = _l.replace(".. admonition:: ", "")
+            _l = _l.replace("|see_cpython_module|", "CPython module:")
             # clean up unsupported escape sequences in rst
             _l = _l.replace(r"\ ", " ")
             _l = _l.replace(r"\*", "*")
@@ -368,6 +372,7 @@ class RSTParser(RSTReader):
 
     def fix_parameters(self, params: str, name: str = "") -> str:
         """Patch / correct the documentation parameter notation to a supported format that works for linting.
+        - params is the string containing the parameters as documented in the rst file
         - name is the name of the function or method or Class
         """
         params = params.strip()
@@ -477,10 +482,9 @@ class RSTParser(RSTReader):
                 version = "latest"
             else:
                 version = self.source_tag.replace("_", ".")
-            docstr[0] = (
-                docstr[0]
-                + f". See: https://docs.micropython.org/en/{version}/library/{module_name}.html"
-            )
+            docstr[
+                0
+            ] = f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")

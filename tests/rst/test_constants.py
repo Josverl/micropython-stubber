@@ -133,16 +133,16 @@ def test_class_constants():
     assert len(r.output) > 1
     expected = [
         "class Pin():",
-        "    IN: Any = ...",
-        "    OUT: Any = ...",
+        "    IN: Incomplete",
+        "    OUT: Incomplete",
         '    """Selects the pin mode."""',
-        "    OPEN_DRAIN: Any = ...",
-        "    ALT: Any = ...",
+        "    OPEN_DRAIN: Incomplete",
+        "    ALT: Incomplete",
         '    """\\',
         "    Selects whether there is a pull up/down resistor.  Use the value",
         "    ``None`` for no pull.",
         '    """',
-        "    # JOKER_*: Any = ...",
+        "    # JOKER_*: Incomplete",
         '    """Test wildcard handling."""',
     ]
     lines = [l.rstrip() for l in r.output]
