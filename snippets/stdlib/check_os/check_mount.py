@@ -7,14 +7,14 @@ import machine
 # Mount SD to /sd
 sdcard = object()
 
-os.mount(sdcard, "/sd")  # type: ignore - BUG https://github.com/Josverl/micropython-stubber/issues/270
+os.mount(sdcard, "/sd") 
 print("SD Card mounted")
 
 sd = 1
-os.mount(sd, "/sd")  # type: ignore - BUG https://github.com/Josverl/micropython-stubber/issues/270
+os.mount(sd, "/sd")  
 
 os.listdir("/sd")  # list directory contents
 
-os.umount("/sd")  # type: ignore - BUG https://github.com/Josverl/micropython-stubber/issues/270
+os.umount("/sd") 
 
 
