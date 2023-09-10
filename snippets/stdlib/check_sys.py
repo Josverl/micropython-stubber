@@ -23,10 +23,10 @@ print(sys.implementation)
 exc = Exception
 sys.print_exception(exc)
 
-
+port = sys.platform
 if port in ["unix", "windows"]:
 
     def byebye():
         print("so long")
 
-    previous = sys.atexit(byebye)
+    previous = sys.atexit(byebye) # type: ignore

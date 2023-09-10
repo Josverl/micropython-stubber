@@ -16,7 +16,7 @@ print(os_uname.release)
 print(os_uname.machine)
 print(os_uname.version)
 
-assert_type(os_uname, Union[tuple, os.uname_result])
+assert_type(os_uname, os.uname_result)
 assert_type(os_uname.sysname, str)
 assert_type(os_uname.nodename, str)
 assert_type(os_uname.release, str)
