@@ -64,8 +64,8 @@ def test_number_sequence():
     r.prepare_output()
     # check
     assert len(r.output) > 1
-    # todo: use regex to match
-    constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and " = " in l])
+    # TODO: use regex to match
+    constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and ": " in l])
     assert constants == 8
 
 
@@ -87,13 +87,13 @@ def test_comma_sequence():
     r.parse()
     r.prepare_output()
     # todo: use regex to match
-    constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and " = " in l])
+    constants = len([l for l in r.output_dict["constants"] if not l.startswith('"""') and ": " in l])
     assert constants == 2
 
     # check that etc is not found
-    etc = "etc. : Any\n" in r.output
-    eexist = "EEXIST: Any = ...\n" in r.output
-    eagain = "EAGAIN: Any = ...\n" in r.output
+    etc = "etc. : Incomplete\n" in r.output
+    eexist = "EEXIST: Incomplete\n" in r.output
+    eagain = "EAGAIN: Incomplete\n" in r.output
     assert not etc
     assert eexist
     assert eagain

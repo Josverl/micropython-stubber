@@ -46,7 +46,7 @@
         "docstring": [
             "   Flush any data in cache to the underlying stream."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "module": "btree",
         "confidence": 0
     },
@@ -60,7 +60,7 @@
             "",
             "   Standard dictionary methods."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "module": "btree",
         "confidence": 0
     },
@@ -70,7 +70,7 @@
             "   A BTree object can be iterated over directly (similar to a dictionary)",
             "   to get access to all keys in order."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "module": "btree",
         "confidence": 0.2
     },
@@ -93,7 +93,7 @@
             "   by passing *flags* of `btree.DESC`. The flags values can be ORed",
             "   together."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "module": "btree",
         "confidence": 0
     },
@@ -103,7 +103,7 @@
             "   The argument *name* should be a string, and this function deletes the named",
             "   attribute from the object given by *obj*."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "module": "builtins",
         "confidence": 0
     },
@@ -546,7 +546,7 @@
             "   Parse the JSON *str* and return an object.  Raises :exc:`ValueError` if the",
             "   string is not correctly formed."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 0.1,
         "match": "<re.Match object; span=(28, 113), match='return an object.  Raises :exc:`ValueError` if th>",
         "module": "ujson",
@@ -669,7 +669,7 @@
             "        of *offset*, read bytes from the device into *buf* (an array of bytes).",
             "        The number of bytes to read is given by the length of *buf*."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 0,
         "match": "None",
         "module": "uos",
@@ -741,7 +741,7 @@
             "   function will return the previous value set by this function, which is",
             "   initially ``None``."
         ],
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 0.3,
         "module": "usys",
         "class": "",
@@ -847,7 +847,7 @@
             "The following methods are not part of the core Pin API and only implemented on certain ports."
         ],
         "docstring_len": 1886,
-        "type": "Callable[..., Any]",
+        "type": "Callable[..., Incomplete]",
         "confidence": 1.4400000000000002,
         "match": "<re.Match object; span=(1768, 1793), match='returns a callback object'>",
         "module": "machine",
@@ -1020,7 +1020,7 @@
             "   case the peripheral assumes more bytes are going to be read in a later call)."
         ],
         "docstring_len": 384,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 0.95,
         "match": "<re.Match object; span=(80, 107), match='read is the length of *buf*'>",
         "module": "machine",
@@ -1063,7 +1063,7 @@
             "   The default optimisation level is usually level 0."
         ],
         "docstring_len": 839,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 1.4400000000000002,
         "match": "<re.Match object; span=(116, 132), match='returns ``None``'>",
         "module": "micropython",
@@ -1079,7 +1079,7 @@
             "   the IRQ to its original state."
         ],
         "docstring_len": 216,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 0.36000000000000004,
         "match": "<re.Match object; span=(34, 64), match='Returns the previous IRQ state'>",
         "module": "pyb",
@@ -1124,7 +1124,7 @@
             "   it does not return to the calling program until the buffer is full."
         ],
         "docstring_len": 1769,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 0.5,
         "match": "<re.Match object; span=(3, 72), match='Read analog values into ``buf`` at a rate set by >",
         "module": "pyb",
@@ -1253,7 +1253,7 @@
             "        argument is specified, even if it is zero."
         ],
         "docstring_len": 1096,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 2.8499999999999996,
         "match": "uos.writeblocks",
         "module": "uos",
@@ -1286,7 +1286,7 @@
             "    Returns an IRQ object."
         ],
         "docstring_len": 323,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 1.0467600000000001,
         "match": "<re.Match object; span=(305, 326), match='Returns an IRQ object'>",
         "module": "network",
@@ -1299,7 +1299,7 @@
             "    Chooses and returns one item at random from *sequence* (tuple, list or any object that supports the subscript operation)."
         ],
         "docstring_len": 0,
-        "type": "Any",
+        "type": "Incomplete",
         "confidence": 1,
         "match": "",
         "module": "random",

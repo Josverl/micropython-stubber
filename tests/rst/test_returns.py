@@ -14,7 +14,7 @@ pytestmark = pytest.mark.doc_stubs
 @pytest.mark.parametrize(
     "signature, docstring, expected_type, confidence",
     [
-        (".. function:: heap_unlock()", "", "Any", 0),
+        (".. function:: heap_unlock()", "", "Incomplete", 0),
         (".. function:: heap_unlock()->None", "", "None", 1),
         (".. function:: heap_unlock()->None:", "", "None", 1),
         (".. function:: heap_unlock()->None: ", "", "None", 1),

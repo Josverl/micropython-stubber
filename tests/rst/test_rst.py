@@ -90,25 +90,19 @@ def test_rst_all(tmp_path, micropython_repo, testrepo_micropython: Path):
     assert x > 0, "should generate at least 1 file"
 
 
-EXP_10 = [
-    "def wake_on_ext0(pin, level) -> Any:",
-    "def wake_on_ext0(pin, level) -> Any:",
-]
-
-
 @pytest.mark.parametrize(
     "filename, expected",
     [
         (
             "tests/rst/data/function_10.rst",
             [
-                "def wake_on_ext0(pin, level) -> Any:",
+                "def wake_on_ext0(pin, level) -> Incomplete:",
             ],
         ),
         (
             "tests/rst/data/function_11.rst",
             [
-                "def wake_on_ext0(pin, level) -> Any:",
+                "def wake_on_ext0(pin, level) -> Incomplete:",
             ],
         ),
         (
@@ -153,8 +147,8 @@ CLASS_10 = [
         "    @classmethod",
         "    def find(cls, type=TYPE_APP, subtype=0xff, label=None) -> List:",
         "    def info(self) -> Tuple:",
-        "    def readblocks(self, block_num, buf, offset: Optional[int] = 0) -> Any:",
-        "    def writeblocks(self, block_num, buf, offset: Optional[int] = 0) -> Any:",
+        "    def readblocks(self, block_num, buf, offset: Optional[int] = 0) -> Incomplete:",
+        "    def writeblocks(self, block_num, buf, offset: Optional[int] = 0) -> Incomplete:",
     ],
 )
 # def test_rst_parse_class_10(expected: List[str]):

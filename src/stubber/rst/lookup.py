@@ -114,16 +114,16 @@ LOOKUP_LIST = {
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
-    "collections.namedtuple": ("NamedTuple", 0.95),
+    "collections.namedtuple": ("stdlib_NamedTuple", 0.95),
     "gc.collect": ("None", 0.95),
     "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.Signal.value": ("int", 0.95),
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
-    "machine.UART.irq": ("Any", 0.95),  # no IRQ type defined
+    "machine.UART.irq": ("Incomplete", 0.95),  # no IRQ type defined
     "math.isnan": ("bool", 0.95),
-    "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
+    "micropython.opt_level": ("Incomplete", 0.95),  # Not clear in docstring
     # since 1.19 const can also be string , bytes or tuple
     "micropython.const": ("Union[int, bytes, str, float,Tuple]", 1),
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
@@ -133,7 +133,7 @@ LOOKUP_LIST = {
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
-    "uos.listdir": ("List[Any]", 0.95),
+    "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "usys.exit": ("NoReturn", 0.95),  # never returns
@@ -212,7 +212,11 @@ NONE_VERBS = [
 MODULE_GLUE = {
     "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
-    "collections": ["from queue import Queue"],  # dequeu is a subclass
+    "collections": [
+        "from queue import Queue",
+        "from stdlib.collections import  OrderedDict as stdlib_OrderedDict, deque as stdlib_deque",
+        "from typing_extensions import NamedTuple as stdlib_NamedTuple",
+    ],  # dequeu is a subclass
     "os": [
         # "from stdlib.os import uname_result",  # uname returns uname_result
         "from stdlib.os import *  # type: ignore",  # integrate STDLIB
@@ -428,6 +432,9 @@ PARAM_FIXES = [
     # Fix("**kwargs: Optional[Any]","**kwargs")
     # ------ ESPNow.rst uses   (ESP32 only) after the class / function prototype
     Fix(r"\(ESP\d+\s+only\)", "", is_re=True),  # ESP32 / ESP8266 Only
+    # os.mount - optional parameters
+    # fsobj, mount_point, *, readonly)
+    Fix("fsobj, mount_point, *, readonly)", "fsobj, mount_point, *, readonly=False)"),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
@@ -458,9 +465,9 @@ CHILD_PARENT_CLASS = {
     # "sha1": "hash",
     # "sha256": "hash",
     # collections
-    "OrderedDict": "dict",
+    "OrderedDict": "stdlib_OrderedDict",
     "namedtuple": "tuple",
-    "deque": "Queue",
+    "deque": "stdlib_deque",
     # ESPNow
     "AIOESPNow": "ESPNow",
 }
