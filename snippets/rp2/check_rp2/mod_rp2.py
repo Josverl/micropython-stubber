@@ -1,5 +1,7 @@
 # ref : https://docs.micropython.org/en/latest/rp2/quickref.html
 
-
-from machine import Pin
 import rp2
+
+
+# set your Wifi country code
+rp2.country('NL')

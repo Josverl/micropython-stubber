@@ -1,76 +1,56 @@
 ﻿[
     {
         "version":  "1.1.310",
-        "time":  "1694355221842",
+        "time":  "1694385068388",
         "generalDiagnostics":  [
 
                                ],
         "summary":  {
-                        "filesAnalyzed":  12,
+                        "filesAnalyzed":  13,
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.451,
+                        "timeInSec":  0.64,
                         "port":  "esp32",
                         "snip_folder":  "esp32"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355222974",
+        "time":  "1694385069559",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_const.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"utime\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"onewire\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"mount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"umount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_signal.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp32; snip_folder=common}"
+
                                ],
         "summary":  {
                         "filesAnalyzed":  8,
-                        "errorCount":  21,
+                        "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.398,
+                        "timeInSec":  0.562,
                         "port":  "esp32",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355224750",
+        "time":  "1694385070982",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=stdlib}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=stdlib}"
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=stdlib}",
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  10,
+                        "filesAnalyzed":  13,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.985,
+                        "timeInSec":  0.85,
                         "port":  "esp32",
                         "snip_folder":  "stdlib"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355225807",
+        "time":  "1694385071935",
         "generalDiagnostics":  [
 
                                ],
@@ -79,67 +59,47 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.285,
+                        "timeInSec":  0.374,
                         "port":  "esp8266",
                         "snip_folder":  "esp8266"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355226959",
+        "time":  "1694385072885",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_const.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"utime\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"onewire\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"mount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"umount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_signal.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=esp8266; snip_folder=common}"
+
                                ],
         "summary":  {
                         "filesAnalyzed":  8,
-                        "errorCount":  21,
+                        "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.416,
+                        "timeInSec":  0.376,
                         "port":  "esp8266",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355228337",
+        "time":  "1694385074065",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=stdlib}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=stdlib}"
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=stdlib}",
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  10,
+                        "filesAnalyzed":  13,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.68,
+                        "timeInSec":  0.612,
                         "port":  "esp8266",
                         "snip_folder":  "stdlib"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355229363",
+        "time":  "1694385075052",
         "generalDiagnostics":  [
 
                                ],
@@ -148,129 +108,89 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.32,
+                        "timeInSec":  0.401,
                         "port":  "stm32",
                         "snip_folder":  "stm32"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355230427",
+        "time":  "1694385076027",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_const.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"utime\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"onewire\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"mount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"umount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_signal.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=stm32; snip_folder=common}"
+
                                ],
         "summary":  {
                         "filesAnalyzed":  8,
-                        "errorCount":  21,
+                        "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.372,
+                        "timeInSec":  0.386,
                         "port":  "stm32",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355231808",
+        "time":  "1694385077244",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=stdlib}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=stdlib}"
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=stdlib}",
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  10,
+                        "filesAnalyzed":  13,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.648,
+                        "timeInSec":  0.612,
                         "port":  "stm32",
                         "snip_folder":  "stdlib"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355232880",
+        "time":  "1694385078314",
         "generalDiagnostics":  [
-
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\rp2\\check_rp2\\mod_rp2.py; severity=error; message=\"country\" is not a known member of module \"rp2\"; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=rp2}"
                                ],
         "summary":  {
                         "filesAnalyzed":  7,
-                        "errorCount":  0,
+                        "errorCount":  1,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.369,
+                        "timeInSec":  0.449,
                         "port":  "rp2",
                         "snip_folder":  "rp2"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355234007",
+        "time":  "1694385079294",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_const.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"utime\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"onewire\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"mount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_machine.py; severity=error; message=\"umount\" is not a known member of module \"os\"; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_micropython.py; severity=error; message=Import \"micropython\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\common\\check_signal.py; severity=error; message=Import \"machine\" could not be resolved; range=; rule=reportMissingImports; port=rp2; snip_folder=common}"
+
                                ],
         "summary":  {
                         "filesAnalyzed":  8,
-                        "errorCount":  21,
+                        "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.386,
+                        "timeInSec":  0.394,
                         "port":  "rp2",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694355235470",
+        "time":  "1694385080460",
         "generalDiagnostics":  [
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=stdlib}",
-                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=stdlib}"
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=stdlib}",
+                                   "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  10,
+                        "filesAnalyzed":  13,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.722,
+                        "timeInSec":  0.607,
                         "port":  "rp2",
                         "snip_folder":  "stdlib"
                     }
