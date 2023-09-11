@@ -214,10 +214,7 @@ class RSTReader(FileReadWriter):
         # anchors that are considered part of the docstring
         # Check if the line starts with '..' but not any of the docstring_anchors.
         if line.startswith(".."):
-            for anchor in self.docstring_anchors:
-                if line.startswith(anchor):
-                    return False
-            return True
+            return not any(line.startswith(anchor) for anchor in self.docstring_anchors)
         return False
 
         # return _l.startswith("..") and not any(_l.startswith(a) for a in self.docstring_anchors)
