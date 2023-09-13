@@ -1,23 +1,23 @@
 ﻿[
     {
         "version":  "1.1.310",
-        "time":  "1694385628134",
+        "time":  "1694389144075",
         "generalDiagnostics":  [
 
                                ],
         "summary":  {
-                        "filesAnalyzed":  14,
+                        "filesAnalyzed":  20,
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.728,
+                        "timeInSec":  0.698,
                         "port":  "esp32",
                         "snip_folder":  "esp32"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385629371",
+        "time":  "1694389145206",
         "generalDiagnostics":  [
 
                                ],
@@ -26,31 +26,31 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.613,
+                        "timeInSec":  0.51,
                         "port":  "esp32",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385631006",
+        "time":  "1694389146735",
         "generalDiagnostics":  [
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=stdlib}",
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp32; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  13,
+                        "filesAnalyzed":  14,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  1.024,
+                        "timeInSec":  0.893,
                         "port":  "esp32",
                         "snip_folder":  "stdlib"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385632073",
+        "time":  "1694389147683",
         "generalDiagnostics":  [
 
                                ],
@@ -59,14 +59,14 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.413,
+                        "timeInSec":  0.337,
                         "port":  "esp8266",
                         "snip_folder":  "esp8266"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385633145",
+        "time":  "1694389148689",
         "generalDiagnostics":  [
 
                                ],
@@ -75,31 +75,31 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.455,
+                        "timeInSec":  0.397,
                         "port":  "esp8266",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385634515",
+        "time":  "1694389149878",
         "generalDiagnostics":  [
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=stdlib}",
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=esp8266; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  13,
+                        "filesAnalyzed":  14,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.729,
+                        "timeInSec":  0.602,
                         "port":  "esp8266",
                         "snip_folder":  "stdlib"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385635562",
+        "time":  "1694389150876",
         "generalDiagnostics":  [
 
                                ],
@@ -108,14 +108,14 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.43,
+                        "timeInSec":  0.374,
                         "port":  "stm32",
                         "snip_folder":  "stm32"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385636632",
+        "time":  "1694389151871",
         "generalDiagnostics":  [
 
                                ],
@@ -124,31 +124,31 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.439,
+                        "timeInSec":  0.386,
                         "port":  "stm32",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385638027",
+        "time":  "1694389153126",
         "generalDiagnostics":  [
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=stdlib}",
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=stm32; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  13,
+                        "filesAnalyzed":  14,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.735,
+                        "timeInSec":  0.654,
                         "port":  "stm32",
                         "snip_folder":  "stdlib"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385639177",
+        "time":  "1694389154182",
         "generalDiagnostics":  [
 
                                ],
@@ -157,14 +157,14 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.525,
+                        "timeInSec":  0.394,
                         "port":  "rp2",
                         "snip_folder":  "rp2"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385640246",
+        "time":  "1694389155171",
         "generalDiagnostics":  [
 
                                ],
@@ -173,24 +173,24 @@
                         "errorCount":  0,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.444,
+                        "timeInSec":  0.405,
                         "port":  "rp2",
                         "snip_folder":  "common"
                     }
     },
     {
         "version":  "1.1.310",
-        "time":  "1694385641610",
+        "time":  "1694389156388",
         "generalDiagnostics":  [
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=stdlib}",
                                    "@{file=C:\\develop\\MyPython\\micropython-stubber\\snippets\\stdlib\\check_collections\\check_namedtuple.py; severity=error; message=Object of type \"NamedTuple\" is not callable; range=; rule=reportGeneralTypeIssues; port=rp2; snip_folder=stdlib}"
                                ],
         "summary":  {
-                        "filesAnalyzed":  13,
+                        "filesAnalyzed":  14,
                         "errorCount":  2,
                         "warningCount":  0,
                         "informationCount":  0,
-                        "timeInSec":  0.718,
+                        "timeInSec":  0.635,
                         "port":  "rp2",
                         "snip_folder":  "stdlib"
                     }

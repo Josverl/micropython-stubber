@@ -1,32 +1,40 @@
 {
     "folders": [
         {
-            "path": ".",
-            "name": "stubber rootfolder"
+            "name": "stubber rootfolder",
+            "path": "."
         },
         {
-            "path": "snippets/stdlib",
-            "name": "snippets/stdlib"
+            "name": "snippets/stdlib",
+            "path": "snippets/stdlib"
         },
         {
-            "path": "snippets/common",
-            "name": "snippets/common"
+            "name": "snippets/common",
+            "path": "snippets/common"
         },
         {
-            "path": "snippets/stm32",
-            "name": "snippets/stm32"
+            "name": "bundle-networking",
+            "path": "snippets/bundle-networking"
         },
         {
-            "path": "snippets/esp32",
-            "name": "snippets/esp32"
+            "name": "snippets/stm32",
+            "path": "snippets/stm32"
         },
         {
-            "path": "snippets/esp8266",
-            "name": "snippets/esp8266"
+            "name": "snippets/esp32",
+            "path": "snippets/esp32"
         },
         {
-            "path": "snippets/rp2",
-            "name": "snippets/rp2"
+            "name": "snippets/esp8266",
+            "path": "snippets/esp8266"
+        },
+        {
+            "name": "snippets/rp2",
+            "path": "snippets/rp2"
+        },
+        {
+            "name": "wip_todo",
+            "path": "snippets/wip_todo"
         },
         {
             "name": "snippets/samd",
@@ -42,7 +50,7 @@
         },
         {
             "name": "serial:/COM4",
-            "uri": "serial://com4"
+            "uri": "serial://com4/"
         }
     ],
     "settings": {
@@ -76,6 +84,32 @@
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter"
         },
-        "python.formatting.provider": "black"
+        "python.formatting.provider": "black",
+        "workbench.colorCustomizations": {
+            "activityBar.activeBackground": "#2942fa",
+            "activityBar.background": "#2942fa",
+            "activityBar.foreground": "#e7e7e7",
+            "activityBar.inactiveForeground": "#e7e7e799",
+            "activityBarBadge.background": "#fb6375",
+            "activityBarBadge.foreground": "#15202b",
+            "commandCenter.border": "#e7e7e799",
+            "editorGroup.border": "#2942fa",
+            "panel.border": "#2942fa",
+            "sash.hoverBorder": "#2942fa",
+            "statusBar.background": "#0521eb",
+            "statusBar.foreground": "#e7e7e7",
+            "statusBarItem.hoverBackground": "#2942fa",
+            "statusBarItem.remoteBackground": "#0521eb",
+            "statusBarItem.remoteForeground": "#e7e7e7",
+            "tab.activeBorder": "#2942fa",
+            "titleBar.activeBackground": "#0521eb",
+            "titleBar.activeForeground": "#e7e7e7",
+            "titleBar.inactiveBackground": "#0521eb99",
+            "titleBar.inactiveForeground": "#e7e7e799"
+        },
+        "peacock.color": "#0521eb",
+        "files.associations": {
+            "**/pyrightconfig.json": "jsonc"
+        }
     }
 }
