@@ -11,7 +11,8 @@ import stubber.basicgit as git
 
 pytestmark = pytest.mark.doc_stubs
 
-from stubber.rst.reader import TYPING_IMPORT, RSTWriter
+from stubber.rst.lookup import TYPING_IMPORT
+from stubber.rst.reader import RSTWriter
 
 # SOT
 from stubber.stubs_from_docs import generate_from_rst
