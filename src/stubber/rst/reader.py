@@ -401,7 +401,8 @@ class RSTParser(RSTReader):
         # ###########################################################################################################
 
         for fix in PARAM_FIXES:
-            params = self.apply_fix(fix, params, name)
+            if fix.module == self.current_module or not fix.module:
+                params = self.apply_fix(fix, params, name)
 
         # # formatting
         # # fixme: ... not allowed in .py
@@ -413,7 +414,7 @@ class RSTParser(RSTReader):
 
     @staticmethod
     def apply_fix(fix: Fix, params: str, name: str = ""):
-        if fix.module and fix.module != name:
+        if fix.name and fix.name != name:
             return params
         return (
             re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
