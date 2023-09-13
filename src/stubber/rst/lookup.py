@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 # These are shown to import
 __all__ = [
+    "TYPING_IMPORT",
     "LOOKUP_LIST",
     "NONE_VERBS",
     "CHILD_PARENT_CLASS",
@@ -12,8 +13,17 @@ __all__ = [
     "DOCSTUB_SKIP",
     "U_MODULES",
     "DEFAULT_BOARDS",
+
     # "FORCE_NON_DETECED",
 ]
+
+# all possible Types needed
+TYPING_IMPORT: List[str] = [
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
+    "from _typeshed import Incomplete",
+]
+
+
 # The default board for the ports
 # modules documented with base name only
 DEFAULT_BOARDS: Dict[str, List[str]] = {
@@ -27,7 +37,14 @@ DEFAULT_BOARDS: Dict[str, List[str]] = {
 
 @dataclass
 class Fix:
-    """A fix for a parameter or return type in the documentation that is needed to render it to a valid type annotation"""
+    """A fix for a parameter or return type in the documentation that is needed to render it to a valid type annotation
+
+    - from_ : the string or regex that should be fixed
+    - to : the improved version to replace it with
+    - module : filter the fix to be only applied to a specific module
+    - name : filter the fix to be only applied to a specific member
+    - is_re : the from_ string is a regular expression
+    """
 
     from_: str
     "The string or regex that should be fixed"
@@ -35,6 +52,8 @@ class Fix:
     "The improved version to replace it with"
     module: Optional[str] = None
     "Filter the fix to be only applied to a specific module"
+    name: Optional[str] = None
+    "Filter the fix to be only applied to a specific module member"
     is_re: bool = False
     "the from_ string is a regular expression"
 
@@ -87,10 +106,6 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
         ".. method:: AIOESPNow._aiter__() / async AIOESPNow.__anext__()",
         ".. method:: AIOESPNow._aiter__()\n            async AIOESPNow.__anext__()",
     ),
-    # (
-    #     ".. data:: ESPNow.peers_table",
-    #     ".. method:: ",
-    # ),
 ]
 
 
@@ -125,7 +140,7 @@ LOOKUP_LIST = {
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Incomplete", 0.95),  # Not clear in docstring
     # since 1.19 const can also be string , bytes or tuple
-    "micropython.const": ("Union[int, bytes, str, float,Tuple]", 1),
+    "micropython.const": ("Const_T", 1),  # const: 1 -  paired with param typing
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
@@ -224,6 +239,9 @@ MODULE_GLUE = {
     "io": ["from stdlib.io import *  # type: ignore"],  # integrate STDLIB
     "socket": ["from stdlib.socket import *  # type: ignore"],  # integrate STDLIB
     "ssl": ["from stdlib.ssl import *  # type: ignore"],  # integrate STDLIB
+    # const: 3 -  paired with param and return typing
+    "micropython": ["Const_T = TypeVar('Const_T',int, float, str, bytes, Tuple) # constant"],
+    #
     # "builtins": ["from stdlib.builtins import *"],  # integrate STDLIB
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
 }
@@ -267,7 +285,10 @@ PARAM_FIXES = [
     #     "config=['dhcp' or configtuple]",
     #     "config: Union[str,Tuple]='dhcp'"
     # ),
-    Fix("config='dhcp' or configtuple: Optional[Any]=None", "config: Union[str,Tuple]='dhcp'"),
+    Fix(
+        "config='dhcp' or configtuple: Optional[Any]=None",
+        "config: Union[str,Tuple]='dhcp'",
+    ),
     # (
     #     "='dhcp' or configtuple: Optional[Any]=None",
     #     ": Union[str,Tuple]='dhcp'",
@@ -378,19 +399,23 @@ PARAM_FIXES = [
     # machine.UART
     #     def __init__(self, id, ...) -> None: ...
     #     def __init__(self, id, *args, **kwargs) -> None: ...
-    Fix("id, ...", "id, *args, **kwargs", "UART.__init__"),
+    Fix(
+        "id, ...",
+        "id, *args, **kwargs",
+        name="UART.__init__",
+    ),
     # machine.SPI
     #     #    def __init__(self, id, *args) -> None: ...
     #     def __init__(self, id, *args, **kwargs) -> None: ...
-    Fix("id, ...", "id, *args, **kwargs", "SPI.__init__"),
+    Fix("id, ...", "id, *args, **kwargs", name="SPI.__init__"),
     # machine.Signal
     # def __init__(self, pin_obj, invert=False) -> None: ...
     # def __init__(self, pin_obj, *args, invert=False) -> None: ...
-    Fix("pin_obj, invert", "pin_obj, *args, invert", "Signal.__init__"),
+    Fix("pin_obj, invert", "pin_obj, *args, invert", name="Signal.__init__"),
     # machine.Timer
     # def __init__(self, id, /, *args) -> None: ...
     # def init(self,id, *, mode=PERIODIC, period=-1, callback=None) -> None: ...
-    Fix("id, /, ...", "id=-1, *args, **kwargs", "Timer.__init__"),
+    Fix("id, /, ...", "id=-1, *args, **kwargs", name="Timer.__init__"),
     # --------------------------------------------------------------------
     # pyb
     # def freq(sysclk, hclk, pclk1, pclk2) -> Tuple:
@@ -402,7 +427,7 @@ PARAM_FIXES = [
     Fix(
         "id, *args",
         "id, *, freq=-1, prescaler=-1, period=-1, mode=UP, div=1, callback=None, deadtime=0",
-        "Timer.__init__",
+        name="Timer.__init__",
     ),
     # Timer.channel
     # def channel(self, channel, mode, *args) -> Any:
@@ -434,7 +459,12 @@ PARAM_FIXES = [
     Fix(r"\(ESP\d+\s+only\)", "", is_re=True),  # ESP32 / ESP8266 Only
     # os.mount - optional parameters
     # fsobj, mount_point, *, readonly)
-    Fix("fsobj, mount_point, *, readonly)", "fsobj, mount_point, *, readonly=False)"),
+    Fix(
+        "fsobj, mount_point, *, readonly)",
+        "fsobj, mount_point, *, readonly=False)",
+    ),
+    # micropython.const
+    Fix("expr)", "expr:Const_T)", name="const"),  # const: 3 - paired with return typing
 ]
 
 # List of classes and their parent classes that should be added to the class definition

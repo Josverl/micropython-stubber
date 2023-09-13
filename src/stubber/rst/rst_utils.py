@@ -40,7 +40,7 @@ from typing import Dict, List, Optional, Union
 
 from loguru import logger as log
 
-from .lookup import LOOKUP_LIST, NONE_VERBS
+from .lookup import LOOKUP_LIST, NONE_VERBS, TYPING_IMPORT
 
 # These are shown to import
 __all__ = [
@@ -57,11 +57,6 @@ __all__ = [
 # logging
 # # log = logging.getLogger(__name__)
 
-# all possible Types needed
-TYPING_IMPORT: List[str] = [
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple",
-    "from _typeshed import Incomplete",
-]
 
 # --------------------------------------
 # Confidence levels
