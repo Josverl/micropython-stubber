@@ -41,7 +41,7 @@ _IRQ_ENCRYPTION_UPDATE = const(28)
 _IRQ_GET_SECRET = const(29)
 _IRQ_SET_SECRET = const(30)
 
-# TODO  Add coumentation
+# TODO  Add documentation
 _IRQ_PASSKEY_ACTION = -1
 
 
@@ -77,14 +77,6 @@ _FLAG_READ_AUTHORIZED = const(0x0800)
 _FLAG_WRITE_ENCRYPTED = const(0x1000)
 _FLAG_WRITE_AUTHENTICATED = const(0x2000)
 _FLAG_WRITE_AUTHORIZED = const(0x4000)
-
-# TODO: Document 'FLAG_INDICATE', 'FLAG_NOTIFY', 'FLAG_READ', 'FLAG_WRITE', 'FLAG_WRITE_NO_RESPONSE',
-# MicroPython v1.18 on 2022-01-17; ESP32 module (spiram) with ESP32
-# Type "help()" for more information.
-# >>> import bluetooth
-# >>> dir(bluetooth)
-# ['__class__', '__name__', 'BLE', 'FLAG_INDICATE', 'FLAG_NOTIFY', 'FLAG_READ', 'FLAG_WRITE', 'FLAG_WRITE_NO_RESPONSE', 'UUID']
-
 
 HR_UUID = bluetooth.UUID(0x180D)
 HR_CHAR = (
@@ -227,6 +219,7 @@ def bt_irq(event, data):
         # If key is None, return the index'th value of this sec_type.
         # Otherwise return the corresponding value for this sec_type and key.
         sec_type, index, key = data
+        value = sec_type
         return value
     elif event == _IRQ_SET_SECRET:
         # Save a secret to the store for this sec_type and key.

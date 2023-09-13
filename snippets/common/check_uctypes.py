@@ -1,8 +1,6 @@
-# type: ignore
-# FIXME: uctypes module ignore for now : other issues to solve first
 """
 Sample from micropython documentaton
-ref: https://docs.micropython.org/en/v1.18/library/uctypes.html
+ref: https://docs.micropython.org/en/latest/library/uctypes.html
 """
 
 # make it work
@@ -11,6 +9,7 @@ f = open("elf_file.bin")
 
 import uctypes
 
+#------------------------------------------------------------------------------------
 # Example 1: Subset of ELF file header
 # https://wikipedia.org/wiki/Executable_and_Linkable_Format#File_header
 ELF_HEADER = {
@@ -21,12 +20,17 @@ ELF_HEADER = {
 
 # "f" is an ELF file opened in binary mode
 buf = f.read(uctypes.sizeof(ELF_HEADER, uctypes.LITTLE_ENDIAN))
-header = uctypes.struct(uctypes.addressof(buf), ELF_HEADER, uctypes.LITTLE_ENDIAN)
-assert header.EI_MAG == b"\x7fELF"
-assert header.EI_DATA == 1, "Oops, wrong endianness. Could retry with uctypes.BIG_ENDIAN."
-print("machine:", hex(header.e_machine))
+header = uctypes.struct(
+    uctypes.addressof(buf),
+    ELF_HEADER,
+    uctypes.LITTLE_ENDIAN,
+)
+assert header.EI_MAG == b"\x7fELF" # type: ignore # TODO: uctypes known member does not work
+assert header.EI_DATA == 1, "Oops, wrong endianness. Could retry with uctypes.BIG_ENDIAN." # type: ignore # TODO: uctypes known member does not work
+print("machine:", hex(header.e_machine))# type: ignore # TODO: uctypes known member does not work
 
 
+#------------------------------------------------------------------------------------
 # Example 2: In-memory data structure, with pointers
 COORD = {
     "x": 0 | uctypes.FLOAT32,
@@ -40,11 +44,19 @@ STRUCT1 = {
 }
 
 # Suppose you have address of a structure of type STRUCT1 in "addr"
+addr = uctypes.struct(
+    uctypes.addressof(buf),
+    STRUCT1
+)
 # uctypes.NATIVE is optional (used by default)
-struct1 = uctypes.struct(addr, STRUCT1, uctypes.NATIVE)
-print("x:", struct1.ptr[0].x)
+struct1 = uctypes.struct(
+    addr,
+    STRUCT1,
+    uctypes.NATIVE,
+)
+print("x:", struct1.ptr[0].x) # type: ignore # TODO: uctypes known member does not work
 
-
+#------------------------------------------------------------------------------------
 # Example 3: Access to CPU registers. Subset of STM32F4xx WWDG block
 WWDG_LAYOUT = {
     "WWDG_CR": (
@@ -67,6 +79,7 @@ WWDG_LAYOUT = {
 
 WWDG = uctypes.struct(0x40002C00, WWDG_LAYOUT)
 
-WWDG.WWDG_CFR.WDGTB = 0b10
-WWDG.WWDG_CR.WDGA = 1
-print("Current counter:", WWDG.WWDG_CR.T)
+WWDG.WWDG_CFR.WDGTB = 0b10  # type: ignore # TODO: uctypes known member does not work
+WWDG.WWDG_CR.WDGA = 1  # type: ignore # TODO: uctypes known member does not work
+print("Current counter:", WWDG.WWDG_CR.T) # type: ignore # TODO: uctypes known member does not work
+

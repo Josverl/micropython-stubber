@@ -107,42 +107,6 @@ wdt = WDT(timeout=5000)
 wdt.feed()
 
 
-# Deep-sleep mode
-
-import machine
-
-# check if the device woke from a deep sleep
-if machine.reset_cause() == machine.DEEPSLEEP_RESET:  # type: ignore - not on all ports
-    print("woke from a deep sleep")
-
-# put the device to sleep for 10 seconds
-machine.deepsleep(10000)
-
-# SD card
-import machine, os
-
-# Slot 2 uses pins sck=18, cs=5, miso=19, mosi=23
-sd = machine.SDCard(slot=2)
-
-os.mount(sd, "/sd")  # mount
-os.listdir("/sd")  # list directory contents
-os.umount("/sd")  # eject
-
-# OneWire driver
-
-from machine import Pin
-import onewire
-
-ow = onewire.OneWire(Pin(12))  # create a OneWire bus on GPIO12
-ow.scan()  # return a list of devices on the bus
-ow.reset()  # reset the bus
-ow.readbyte()  # read a byte
-ow.writebyte(0x12)  # write a byte on the bus
-ow.write("123")  # write bytes on the bus
-ow.select_rom(b"12345678")  # select a specific device by its ROM code
-
-# DS18S20 and DS18B20 devices:
-
 
 # Capacitive touch
 
