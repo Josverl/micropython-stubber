@@ -5,9 +5,9 @@ Create stubs for (all) modules on a MicroPython board
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import gc
 import logging
+import os
 import sys
 
-import os
 from ujson import dumps
 
 try:
@@ -81,7 +81,7 @@ class Stubber:
             "example_pub_button.py",
         ]
         # there is no option to discover modules from micropython, list is read from an external file.
-        self.modules = []
+        self.modules = []  # type: list[str]
 
     def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
@@ -110,7 +110,11 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+                _errors.append(
+                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
+                        name, item_instance, e
+                    )
+                )
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -174,22 +178,31 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            self._log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
+            self._log.info(
+                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
+            )
 
         except ImportError:
-            self._log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
+            self._log.warning(
+                "Skip module: {:<25} {:<79}".format(module_name, "Module not found.")
+            )
             return False
 
         # Start a new file
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
+            info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
+                module_name, self._fwid, info_, __version__
+            )
             fp.write(s)
             fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
+        self._report.append(
+            '{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/"))
+        )
 
         if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
@@ -204,7 +217,9 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
+    def write_object_stub(
+        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
+    ):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -264,7 +279,11 @@ class Stubber:
                 s += indent + "        ...\n\n"
                 fp.write(s)
             elif any(word in item_type_txt for word in ["method", "function", "closure"]):
-                self._log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
+                self._log.debug(
+                    "# def {1} function/method/closure, type = '{0}'".format(
+                        item_type_txt, item_name
+                    )
+                )
                 # module Function or class method
                 # will accept any number of params
                 # return type Any/Incomplete
@@ -275,9 +294,13 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(
+                        indent
+                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
+                        indent, item_name, first, ret
+                    )
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self._log.debug("\n" + s)
@@ -304,7 +327,9 @@ class Stubber:
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         t = "Incomplete"
                     # Requires Python 3.6 syntax, which is OK for the stubs/pyi
-                    s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                    s = "{0}{1} : {2} ## {3} = {4}\n".format(
+                        indent, item_name, t, item_type_txt, item_repr
+                    )
                 fp.write(s)
                 self._log.debug("\n" + s)
             else:
@@ -355,7 +380,11 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self._log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
+        self._log.info(
+            "Created stubs for {} modules on board {}\nPath: {}".format(
+                len(self._report), self._fwid, self.path
+            )
+        )
         f_name = "{}/{}".format(self.path, filename)
         self._log.info("Report file: {}".format(f_name))
         gc.collect()
@@ -428,7 +457,9 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": "stm32"
+            if sys.platform.startswith("pyb")
+            else sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
@@ -440,7 +471,11 @@ def _info():  # type:() -> dict[str, str]
     except AttributeError:
         pass
     try:
-        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine
+        machine = (
+            sys.implementation._machine
+            if "_machine" in dir(sys.implementation)
+            else os.uname().machine
+        )
         info["board"] = machine.strip()
         info["cpu"] = machine.split("with")[1].strip()
         info["mpy"] = (
@@ -510,7 +545,8 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"]
+            >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # drop the .0 for newer releases
@@ -883,7 +919,7 @@ if __name__ == "__main__" or is_micropython():
         pass
     if not file_exists("no_auto_stubber.txt"):
         try:
-            gc.threshold(4 * 1024)
+            gc.threshold(4 * 1024)  # type: ignore
             gc.enable()
         except BaseException:
             pass
