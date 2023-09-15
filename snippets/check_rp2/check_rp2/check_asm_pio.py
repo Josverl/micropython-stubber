@@ -1,5 +1,5 @@
 # type: ignore
-# FIXME: rp2.PIO - The functions defined in the asm_pio decorator are not recognized by pyright.
+# TODO: rp2.PIO - The functions defined in the asm_pio decorator are not recognized by pyright.
 # ignore for now : other issues to solve first
 """
 Sample from micropython documentaton
@@ -8,8 +8,8 @@ Sample from micropython documentaton
 # ref : https://docs.micropython.org/en/latest/rp2/quickref.html#programmable-io-pio
 """
 
-from machine import Pin
 import rp2
+from machine import Pin
 
 
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)
@@ -27,6 +27,7 @@ def blink_1hz():
     label("delay_low")
     nop()[29]
     jmp(x_dec, "delay_low")
+
 
 # Create the StateMachine with the blink_1hz program, outputting on Pin(25).
 sm = rp2.StateMachine(0, blink_1hz, freq=2000, set_base=Pin(6))
