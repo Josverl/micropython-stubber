@@ -1,0 +1,4 @@
+"file","severity","message","range","rule","port","folder"
+"C:\develop\MyPython\micropython-stubber\snippets\feat_networking\check_network\check_country.py","error","""country"" is not a known member of module ""network""","@{start=; end=}","reportGeneralTypeIssues","esp8266","networking"
+"C:\develop\MyPython\micropython-stubber\snippets\feat_micropython\check_gc.py","error","""threshold"" is not a known member of module ""gc""","@{start=; end=}","reportGeneralTypeIssues","samd","micropython"
+"C:\develop\MyPython\micropython-stubber\snippets\feat_micropython\check_machine\check_deepsleep.py","error","""deepsleep"" is not a known member of module ""machine""","@{start=; end=}","reportGeneralTypeIssues","samd","micropython"

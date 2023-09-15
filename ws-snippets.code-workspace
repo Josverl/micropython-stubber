@@ -1,10 +1,6 @@
 {
     "folders": [
         {
-            "name": "stubber rootfolder",
-            "path": "."
-        },
-        {
             "name": "snippets/stdlib",
             "path": "snippets/stdlib"
         },
@@ -33,28 +29,20 @@
             "path": "snippets/rp2"
         },
         {
-            "name": "wip_todo",
-            "path": "snippets/wip_todo"
-        },
-        {
             "name": "snippets/samd",
             "path": "snippets/samd"
         },
         {
-            "name": "board",
-            "path": "src/stubber/board"
+            "name": "wip_todo",
+            "path": "snippets/wip_todo"
         },
         {
-            "name": "serial:/COM7",
-            "uri": "serial://com7/"
-        },
-        {
-            "name": "serial:/COM4",
-            "uri": "serial://com4/"
+            "name": "snippets",
+            "path": "snippets"
         }
     ],
     "settings": {
-        "python.analysis.logLevel": "Trace",
+        "python.analysis.logLevel": "Information",
         "terminal.integrated.persistentSessionReviveProcess": "never",
         "todo-tree.filtering.ignoreGitSubmodules": true,
         "todo-tree.filtering.excludeGlobs": [
@@ -84,7 +72,6 @@
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter"
         },
-        "python.formatting.provider": "black",
         "workbench.colorCustomizations": {
             "activityBar.activeBackground": "#2942fa",
             "activityBar.background": "#2942fa",
@@ -110,6 +97,20 @@
         "peacock.color": "#0521eb",
         "files.associations": {
             "**/pyrightconfig.json": "jsonc"
-        }
+        },
+        "python.languageServer": "Pylance",
+        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.exclude": [
+            "**/typings"
+        ],
+        "python.analysis.diagnosticMode": "workspace",
+        "python.analysis.ignore": [
+            "**/typings",
+            "**\\typings"
+        ],
+        "python.analysis.typeshedPaths": [
+            "typings"
+        ],
+        "powershell.cwd": "c:\\develop\\MyPython\\micropython-stubber\\snippets",
     }
 }

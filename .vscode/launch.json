@@ -33,6 +33,14 @@
             "args": [
                 "-v",
                 "-v",
+                "get-docstubs",
+                // "build",
+                // "--version",
+                // "latest",
+                // "--port",
+                // "esp32",
+                // "--board",
+                // "generic",
                 // "build",
                 // "publish",
                 // "--test-pypi",
@@ -43,8 +51,8 @@
                 // "--board",
                 // "PICO_W",
                 // "--build",
-                "switch",
-                "v1.20.0"
+                // "switch",
+                // "v1.20.0"
                 // "get-frozen",
                 // "--version",
                 // "v1.19.1",
@@ -61,8 +69,6 @@
                 // "--test-pypi",
                 // "--version",
                 // "1.18",
-                // "--port",
-                // "esp32",
                 // "--force",
                 // "clone"
                 // "${input:cmdlineParams}"
