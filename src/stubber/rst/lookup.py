@@ -13,7 +13,6 @@ __all__ = [
     "DOCSTUB_SKIP",
     "U_MODULES",
     "DEFAULT_BOARDS",
-
     # "FORCE_NON_DETECED",
 ]
 
@@ -50,10 +49,10 @@ class Fix:
     "The string or regex that should be fixed"
     to: str
     "The improved version to replace it with"
-    module: Optional[str] = None
-    "Filter the fix to be only applied to a specific module"
     name: Optional[str] = None
     "Filter the fix to be only applied to a specific module member"
+    module: Optional[str] = None
+    "Filter the fix to be only applied to a specific module"
     is_re: bool = False
     "the from_ string is a regular expression"
 
@@ -141,6 +140,9 @@ LOOKUP_LIST = {
     "micropython.opt_level": ("Incomplete", 0.95),  # Not clear in docstring
     # since 1.19 const can also be string , bytes or tuple
     "micropython.const": ("Const_T", 1),  # const: 1 -  paired with param typing
+    "micropython.heap_lock": ("int", 1),
+    "micropython.heap_unlock": ("int", 1),
+    "micropython.heap_locked": ("bool", 1),
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
@@ -394,7 +396,7 @@ PARAM_FIXES = [
     Fix(
         "param",
         "*args, **kwargs",
-        "WLAN.config",
+        name="WLAN.config",
     ),
     # machine.UART
     #     def __init__(self, id, ...) -> None: ...
