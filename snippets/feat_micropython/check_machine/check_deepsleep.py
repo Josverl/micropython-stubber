@@ -11,6 +11,6 @@ if machine.reset_cause() == machine.DEEPSLEEP_RESET:  # type: ignore - not on al
 
 # put the device to deep sleep for 10 seconds
 
-machine.deepsleep(10000)
+machine.deepsleep(10000)  # type: ignore # TODO : micropython.machine -  samd has no machine.deepsleep() method
 # detect that deep sleep never returns
 assert False, "Deep sleep never returns"
