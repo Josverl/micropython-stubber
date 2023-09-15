@@ -1,3 +1,7 @@
+"""
+Lookup tables for the rst documentation stubber
+"""
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -16,15 +20,16 @@ __all__ = [
     # "FORCE_NON_DETECED",
 ]
 
-# all possible Types needed
+# all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
     "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
     "from _typeshed import Incomplete",
 ]
 
 
-# The default board for the ports
-# modules documented with base name only
+# The default board for the ports  modules documented with base name only
+# TODO: these are not yest used in the stubber logic
+# ESP32-GENERIC is curently hardcoded
 DEFAULT_BOARDS: Dict[str, List[str]] = {
     "stm32": ["stm32-PYBV11"],
     "esp32": ["esp32-GENERIC", "esp32"],
@@ -75,17 +80,18 @@ List of modules that are documented with the base name only,
 but can also be imported with a `u` prefix
 """
 
-# Some classes are documented as functions
 # This table is used to try to correct the errors in the documentation,
 #  or adapt the human readable documentation to machine readable.
 # it is applied to each .rst file after loading the contents.
+# also applies correction for some classes are documented as functions
 
 RST_DOC_FIXES: List[Tuple[str, str]] = [
     # remove rst highlights from docstrings
     (":class: attention\n", ""),
     # ------------------------------------------------------------------------------------------------
     # re.rst - function and class with the same name
-    # todo: issue https://github.com/micropython/micropython/issues/8273
+    # done: issue https://github.com/micropython/micropython/issues/8273
+    # TODO: Create PR fix class Match
     (".. method:: match.", ".. method:: Match."),
     ("            match.end", "            Match.end"),
     # ------------------------------------------------------------------------------------------------
