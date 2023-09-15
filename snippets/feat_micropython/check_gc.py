@@ -1,5 +1,3 @@
-# BUG : https://github.com/Josverl/micropython-stubber/issues/270
-
 # ref: https://learn.adafruit.com/Memory-saving-tips-for-CircuitPython/ram-saving-tips
 
 import gc
@@ -20,7 +18,7 @@ print("Code section 1-2 used {} bytes".format(start_mem - end_mem))
 
 # https://docs.micropython.org/en/latest/reference/constrained.html#the-heap
 gc.collect()
-gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+gc.threshold(gc.mem_free() // 4 + gc.mem_alloc()) # type: ignore # TODO : micropython.gc - samd has no gc.threshold() method
 
 
 # https://docs.micropython.org/en/latest/reference/constrained.html#reporting

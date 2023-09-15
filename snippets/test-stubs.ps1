@@ -138,12 +138,19 @@ foreach ($port in $ports) {
 # resore working directory
 cd $prior_cwd
 
-echo "========================================================"
-
-$results | select -expand generalDiagnostics | ? { $_.severity -eq "error" } | select port, folder, severity, rule, file, message | ft -Wrap | out-host
-echo "========================================================"
-
+$problems = $results | select -expand generalDiagnostics | ? { $_.severity -eq "error" }
 # Write results to file
-$results | select -expand generalDiagnostics | ? { $_.severity -eq "error" } | Export-Csv -Path $snippetsroot\results.csv -NoTypeInformation 
+$problems | Export-Csv -Path $snippetsroot\results.csv -NoTypeInformation 
 # And to .json
 $results | ConvertTo-Json -Depth 10 | Out-File $snippetsroot\results.json -Force
+
+echo "========================================================"
+if ( $problems.length -eq 0) {
+    echo "SUCCESS - No errors found"
+}
+else {
+    $problems | select port, folder, severity, rule, file, message | ft -Wrap | out-host
+    exit(1)
+}
+echo "========================================================"
+

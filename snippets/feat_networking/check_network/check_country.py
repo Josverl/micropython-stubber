@@ -2,6 +2,5 @@
 
 import network
 
-
 # set your Wifi country code
-network.country('NL')
+network.country("NL")  # type: ignore # TODO : micropython.network -  esp8266 has no network.country() method
