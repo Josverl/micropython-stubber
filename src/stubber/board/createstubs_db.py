@@ -24,9 +24,9 @@ This variant was generated from createstubs.py by micropython-stubber v1.13.8
 # pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
 import gc
 import logging
+import os
 import sys
 
-import uos as os
 from ujson import dumps
 
 try:
@@ -100,7 +100,7 @@ class Stubber:
             "example_pub_button.py",
         ]
         # there is no option to discover modules from micropython, list is read from an external file.
-        self.modules = []
+        self.modules = []  # type: list[str]
 
     def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
@@ -203,7 +203,8 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             # todo: improve header
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, self.info, __version__)
+            info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
             fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -732,7 +733,7 @@ if __name__ == "__main__" or is_micropython():
         pass
     if not file_exists("no_auto_stubber.txt"):
         try:
-            gc.threshold(4 * 1024)
+            gc.threshold(4 * 1024)  # type: ignore
             gc.enable()
         except BaseException:
             pass
