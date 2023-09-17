@@ -17,6 +17,7 @@ if ($do_merge) {
 
 $snippetsroot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workplaceroot = Split-Path -Parent ($snippetsroot)
+$stubs_repo = join-path $workplaceroot "repos\micropython-stubs"
 
 $prior_cwd = Get-Location
 cd $workplaceroot
@@ -33,7 +34,7 @@ if ($do_docstubs) {
     stubber switch $version
     stubber get-docstubs
     # update micropython-core from recent docstubs
-    stubber enrich -s $workplaceroot\repos\micropython-stubs\stubs\micropython-core -ds $workplaceroot\repos\micropython-stubs\stubs\micropython-$flatversion-docstubs
+    stubber enrich -s $stubs_repo\stubs\micropython-core -ds $stubs_repo\stubs\micropython-$flatversion-docstubs
 }
 
 
@@ -63,7 +64,7 @@ if ($do_build) {
 
 foreach ($port in $ports) {
 
-    $stub_source = "$workplaceroot\repos\micropython-stubs\publish\micropython-$flatversion-$port-stubs"
+    $stub_source = "$stubs_repo\publish\micropython-$flatversion-$port-stubs"
     $typings_cache_dir = "$workplaceroot\snippets\typings_$port"
     echo "--------------------------------------------------------"
     echo "port: $port"
