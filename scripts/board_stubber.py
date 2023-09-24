@@ -12,6 +12,7 @@ import json
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -95,7 +96,9 @@ def run(
 
     output = []
     try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
+        )
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Failed to start {cmd[0]}") from e
 
@@ -183,7 +186,8 @@ class MPRemoteBoard:
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_uname(self):
         rc, result = self.run_command(
-            ["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"], no_info=True
+            ["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"],
+            no_info=True,
         )
         s = result[0]
         if "sysname=" in s:
@@ -256,6 +260,9 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
     # sourcery skip: assign-if-exp, boolean-if-exp-identity, remove-unnecessary-cast
     """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
+    origin = "./src/stubber/board"
+    origin = "./micropython-stubber-1.7.0/minified"
+
     _py = [
         "rm :lib/createstubs.mpy",
         "rm :lib/createstubs_mem.mpy",
@@ -263,32 +270,38 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
         "rm :lib/createstubs.py",
         "rm :lib/createstubs_mem.py",
         "rm :lib/createstubs_db.py",
-        "cp ./src/stubber/board/createstubs.py :lib/createstubs.py",
-        "cp ./src/stubber/board/createstubs_mem.py :lib/createstubs_mem.py",
-        "cp ./src/stubber/board/createstubs_db.py :lib/createstubs_db.py",
-        "cp ./src/stubber/board/logging.py :lib/logging.py",
+        f"cp {origin}/createstubs.py :lib/createstubs.py",
+        f"cp {origin}/createstubs_mem.py :lib/createstubs_mem.py",
+        f"cp {origin}/createstubs_db.py :lib/createstubs_db.py",
+        f"cp {origin}/logging.py :lib/logging.py",
     ]
     # copy createstubs*_min.py to the destination folder
     _min = [
-        "cp ./src/stubber/board/createstubs_min.py :lib/createstubs.py",
-        "cp ./src/stubber/board/createstubs_mem_min.py :lib/createstubs_mem.py",
-        "cp ./src/stubber/board/createstubs_db_min.py :lib/createstubs_db.py",
+        f"cp {origin}/createstubs_min.py :lib/createstubs.py",
+        f"cp {origin}/createstubs_mem_min.py :lib/createstubs_mem.py",
+        f"cp {origin}/createstubs_db_min.py :lib/createstubs_db.py",
     ]
     # copy createstubs*_mpy.mpy to the destination folder
     _mpy = [
         "rm :lib/createstubs.py",
         "rm :lib/createstubs_mem.py",
         "rm :lib/createstubs_db.py",
-        "cp ./src/stubber/board/createstubs_mpy.mpy :lib/createstubs.mpy",
-        "cp ./src/stubber/board/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
-        "cp ./src/stubber/board/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
+        f"cp {origin}/createstubs_mpy.mpy :lib/createstubs.mpy",
+        f"cp {origin}/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
+        f"cp {origin}/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
     ]
 
-    _lib = [["exec", "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')"]]
+    _lib = [
+        [
+            "exec",
+            "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')",
+        ]
+    ]
 
     _get_ready = [
         "rm :modulelist.done",
-        "cp ./src/stubber/board/modulelist.txt :lib/modulelist.txt",
+        # "rm :lib/modulelist.txt",
+        f"cp {origin}/modulelist.txt :lib/modulelist.txt",
         # "cp ./board_info.csv :lib/board_info.csv",
     ]
     if form == Form.py:
@@ -327,17 +340,34 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
     this should allow for the boards with little memory to complete even if they run out of memory.
     """
     # add the lib folder to the path
-    cmd_path = ["exec", 'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"']
+    cmd_path = [
+        "exec",
+        'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"',
+    ]
     board.run_command(cmd_path, timeout=5)
 
+    log.info(f"Resetting {board.port} {board.uname[4] if board.uname else ''}")
+    board.run_command("reset", timeout=5)
+
+    time.sleep(2)
+
+    log.info(
+        f"Running createstubs {variant} on {board.port} {board.uname[4] if board.uname else ''}"
+    )
     cmd = build_cmd(dest, variant)
+
     board.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     #  but slows down esp8266 restarts so keep that to 60 seconds
     timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60
     rc, out = board.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
-    if rc != OK and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
+    if (
+        rc != OK
+        and ":" in out[-1]
+        and not out[-1].startswith("INFO")
+        and not out[-1].startswith("WARN")
+    ):
         log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
@@ -421,7 +451,11 @@ def generate_board_stubs(
 
 
 def get_stubfolder(out: List[str]):
-    return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("Path: ")]) else ""
+    return (
+        lines[-1].split("/remote/")[-1].strip()
+        if (lines := [l for l in out if l.startswith("Path: ")])
+        else ""
+    )
 
 
 # def get_port_board(out: List[str]):
@@ -462,13 +496,13 @@ def set_loglevel(verbose: int) -> str:
     log.remove()
     level = {0: "INFO", 1: "DEBUG", 2: "TRACE"}.get(verbose, "TRACE")
     if level == "INFO":
-        format_str = (
-            "<green>{time:HH:mm:ss}</green>|<level>{level: <8}</level>|<cyan>{module: <20}</cyan> - <level>{message}</level>"
-        )
+        format_str = "<green>{time:HH:mm:ss}</green>|<level>{level: <8}</level>|<cyan>{module: <20}</cyan> - <level>{message}</level>"
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level: <8}</level>|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
-    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
+    log.add(
+        sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str
+    )
     # log.info(f"micropython-stubber {__version__}")
     return level
 
