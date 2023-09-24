@@ -19,6 +19,25 @@ XCompileDest = Union[Path, BytesIO]
 LineEdits = List[Tuple[str, str]]
 
 
+def get_whitespace_context(content: List[str], index: int):
+    """Get whitespace count of lines surrounding index"""
+    if not content:
+        raise ValueError()
+    if index < 0 or index > len(content):
+        raise IndexError()
+    if len(content) == 1:
+        return [0, 0]
+
+    def count_ws(line: str):
+        return sum(1 for _ in itertools.takewhile(str.isspace, line))
+
+    lines = content[max(0, index) : min(index + 2, len(content))]
+    context = [count_ws(l) for l in lines]
+    if len(context) < 2:
+        context.append(context[0])
+    return context
+
+
 def edit_lines(content: str, edits: LineEdits, diff: bool = False):
     # sourcery skip: no-long-functions
     """Edit string by list of edits
@@ -49,19 +68,13 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
             return l.replace(split[0].strip(), "print")
         return l.replace(x, "print")
 
+    def keepprint(l: str, x: str):  # type: ignore
+        """Replace 'print' with 'print '"""
+        return l.replace("print(", "print (")
+
     def rpass(l: str, x: str):  # type: ignore
         """Replace with pass"""
         return l.replace(x, "pass")
-
-    def get_whitespace_context(content: List[str], index: int):
-        """Get whitespace count of lines surrounding index"""
-
-        def count_ws(line: str):
-            return sum(1 for _ in itertools.takewhile(str.isspace, line))
-
-        lines = content[index - 1 : index + 2]  # BUG - index out of range results in too few results returned to caller
-        context = (count_ws(l) for l in lines)
-        return context
 
     def handle_multiline(content: List[str], index: int):
         """Handles edits that require multiline comments
@@ -97,7 +110,7 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
         if ahead_index > 1:  # pragma: no cover
             return range(index, look_ahead + 1)
         prev = content[index - 1]
-        _, line_ws, post_ws = get_whitespace_context(content, index)
+        line_ws, post_ws = get_whitespace_context(content, index)
         prev_words = prev.strip().strip(":").split()
         check = any(
             t
@@ -123,7 +136,7 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
 
         """
         prev = content[index - 1]
-        _, line_ws, post_ws = get_whitespace_context(content, index)
+        line_ws, post_ws = get_whitespace_context(content, index)
         return "except" in prev and line_ws != post_ws
 
     lines = []
@@ -131,9 +144,9 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
     content_l = content.splitlines(keepends=True)
     for line in content_l:
         _line = line
-        for edit, text in edits:
-            if text in line:
-                if edit == "comment":
+        for edit_action, match_text in edits:
+            if match_text in line:
+                if edit_action == "comment":
                     l_index = content_l.index(line)
                     # Check if edit spans multiple lines
                     mline = handle_multiline(content_l, l_index)
@@ -142,10 +155,10 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
                         break
                     # Check if line is only statement in try/except
                     if handle_try_except(content_l, l_index):
-                        edit = "rpass"
-                        text = line.strip()
-                func = eval(edit)  # pylint: disable= eval-used
-                line = func(line, text)
+                        edit_action = "rpass"
+                        match_text = line.strip()
+                func = eval(edit_action)  # pylint: disable= eval-used
+                line = func(line, match_text)
                 if line != _line:
                     if diff:
                         print(f"\n- {_line.strip()}")
@@ -185,33 +198,28 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     elif isinstance(source_script, str):  # type: ignore
         source_content = source_script
     else:
-        raise TypeError(f"source_script must be str, Path, or file-like object, not {type(source_script)}")
+        raise TypeError(
+            f"source_script must be str, Path, or file-like object, not {type(source_script)}"
+        )
 
     if not source_content:
         raise ValueError("No source content")
 
     edits: LineEdits = [
-        ("comment", "print"),
+        ("keepprint", "print('Debug: "),
+        ("keepprint", "print('DEBUG: "),
+        ("keepprint", 'print("Debug: '),
+        ("keepprint", 'print("DEBUG: '),
+        ("comment", "print("),
         ("comment", "import logging"),
         # report keepers may be inserted here
         # do report errors
         ("rprint", "self._log.error"),
         ("rprint", "_log.error"),
-        #  remove first full
-        ("comment", "self._log ="),
-        ("comment", "self._log("),
-        ("comment", "self._log.debug"),
-        ("comment", "self._log.info"),
-        ("comment", "self._log.warning"),
-        # then short versions
-        ("comment", "_log ="),
-        ("comment", "_log.debug"),
-        ("comment", "_log.info"),
-        ("comment", "_log.warning"),
     ]
     if keep_report:
         # insert report keepers after the comment modifiers
-        edits[2:2] = [
+        edits += [
             # keepers
             ("rprint", 'self._log.info("Stub module: '),
             ("rprint", 'self._log.warning("{}Skip module:'),
@@ -221,8 +229,21 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             ("rprint", 'self._log.info("Version: '),
             ("rprint", 'self._log.info("Port: '),
             ("rprint", 'self._log.info("Board: '),
-            ("rprint", 'print("Debug: '),
         ]
+    else:
+        edits += [
+            #  remove first full
+            ("comment", "self._log ="),
+            ("comment", "self._log("),
+            ("comment", "self._log.debug"),
+            ("comment", "self._log.info"),
+            ("comment", "self._log.warning"),
+            # then short versions
+            ("comment", "_log ="),
+            ("comment", "_log.debug"),
+            ("comment", "_log.info"),
+            ("comment", "_log.warning"),
+        ] + edits
 
     content = edit_lines(source_content, edits, diff=diff)
 
@@ -267,7 +288,6 @@ def minify(
     target_buf = None
 
     with ExitStack() as stack:
-
         if isinstance(source, Path):
             source_buf = stack.enter_context(source.open("r"))
         elif isinstance(source, (StringIO, str)):

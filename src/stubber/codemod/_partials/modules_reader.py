@@ -38,26 +38,31 @@ if TYPE_CHECKING:
     _log = logging.getLogger("stubber")
 
     # help type checker
-    stubber = Stubber()
-    LIBS = [".", "lib"]
+    stubber: Stubber = None  # type: ignore
+    LIBS: List[str] = [".", "lib"]
 
-    ###PARTIAL###
+# sourcery skip: use-named-expression
+###PARTIAL###
 # Read stubs from modulelist in the current folder or in /libs
 # fall back to default modules
 stubber.modules = []  # avoid duplicates
 for p in LIBS:
     try:
+        _1 = gc.mem_free()  # type: ignore
         with open(p + "/modulelist.txt") as f:
-            print("DEBUG: list of modules: " + p + "/modulelist.txt")
-            for line in f.read().split("\n"):
+            print("Debug: List of modules: " + p + "/modulelist.txt")
+            line = f.readline()
+            while line:
                 line = line.strip()
                 if len(line) > 0 and line[0] != "#":
                     stubber.modules.append(line)
-            gc.collect()
+                line = f.readline()
+            gc.collect()  # type: ignore
+            print("Debug: Used memory to load modulelist.txt: " + str(_1 - gc.mem_free()) + " bytes")  # type: ignore
             break
-    except OSError:
+    except Exception:
         pass
 if not stubber.modules:
     stubber.modules = ["micropython"]
-    _log.warn("Could not find modulelist.txt, using default modules")
+    print("Could not find modulelist.txt, using default modules")
 ###PARTIALEND###
