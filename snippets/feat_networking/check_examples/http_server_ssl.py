@@ -86,8 +86,8 @@ def main(use_stream=True):
             except Exception as e:
                 print("Exception serving request:", e)
         else:
-            print(client_s.recv(4096))
-            client_s.send(CONTENT % counter)
+            print(client_s.recv(4096))  # type: ignore # not supported by design of MicroPython
+            client_s.send(CONTENT % counter)  # type: ignore # not supported by design of MicroPython
         client_s.close()
         counter += 1
         print()

@@ -39,6 +39,12 @@
         {
             "name": "feat_networking",
             "path": "feat_networking"
+        },
+        {
+            "path": "feat_espnow"
+        },
+        {
+            "path": "wip_todo"
         }
     ],
     "settings": {

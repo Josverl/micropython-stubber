@@ -216,18 +216,6 @@ print("{first} {last}".format(**data))
 "{: d}".format((-23))
 
 
-# Datetime
-# New style formatting also allows objects to control their own rendering. This for example allows datetime objects to be formatted inline:
-# This operation is not available with old-style formatting.
-# TODO: Add MicroPython Date and Time Format sample
-
-
-# ------------------------------
-# Handling errors
-# Try/catch
-# todo: add example with different errors
-# ------------------------------
-
 # try:
 #     #main code
 #     ...
@@ -331,27 +319,7 @@ log.info("debug message")
 log.debug("debug value{}".format(x))
 
 
-# ------------------------------
-# Class using Python's with statement for managing resources that need to be cleaned up.
-# The problem with using an explicit close() or deinit() statement is that you have to
-# worry about people forgetting to call it at all or forgetting to place it in a finally block
-# to prevent a resource leak when an exception occurs.
-# ------------------------------
-class SkeletonFixture:
-    def __init__(self):
-        pass
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.deinit()
-
-    def deinit(self):
-        pass
-
-    def method(self):
-        pass
 
 
 # example use
@@ -369,84 +337,9 @@ with SkeletonFixture() as fixture:
 # --------------------------------------
 # Connect to the network (ESP32 / ESP8622)
 # --------------------------------------
-import network, utime
-
-# create station interface - Standard WiFi client
-wlan = network.WLAN(network.STA_IF)
-wlan.config(dhcp_hostname="foo-bar-baz")
-wlan.active(True)
-wlan.connect("micropython", "micropython")
-
-# Note that this may take some time, so we need to wait
-# Wait 5 sec or until connected
-tmo = 50
-while not wlan.isconnected():
-    utime.sleep_ms(100)
-    tmo -= 1
-    if tmo == 0:
-        break
-
-# check if the station is connected to an AP
-if wlan.isconnected():
-    print("=== Station Connected to WiFi \n")
-    config = wlan.ifconfig()
-    print("IP:{0}, Network mask:{1}, Router:{2}, DNS: {3}".format(*config))
-else:
-    print("!!! Not able to connect to WiFi")
 
 
-# --------------------------------------
-# Get curent time from the internet - MicroPython
-# get current time from NTP
-# --------------------------------------
-from machine import RTC
 
-rtc = RTC()
-
-
-def cb_sync():
-    "sync with ntp periodically"
-    ntptime2.settime(tzoffset=-1)  # set the rtc datetime from the remote server
-
-
-tim_ntp = Timer(-1)
-tim_ntp.init(period=60 * 60 * 1000, mode=Timer.PERIODIC, callback=cb_sync)
-
-cb_sync()
-
-dt = rtc.datetime()  # get the date and time in UTC
-print("{4:02}:{5:02}:{6:02}".format(*dt))
-
-
-def wifiscan():
-    "Scan for accesspointsand display them sorted by network strength"
-    import network  # pylint: disable=import-error
-
-    wlan = network.WLAN(network.STA_IF)
-    _ = wlan.active(True)
-
-    # Scan WiFi network and return the list of available access points.
-    # If the optional argument hidden is set to True the hidden access points (not broadsasting SSID) will also be scanned.
-    # Each list entry is a tuple with the following items:
-    # (ssid, bssid, primary_chan, rssi (signal Strength), auth_mode, auth_mode_string, hidden)
-    _networks = wlan.scan(True)
-    # sort on signal strength
-    _networks = sorted(_networks, key=lambda x: x[3], reverse=True)
-    # string to define columns and formatting
-    _f = "{0:<32} {2:>8} {3:>8} {5:15} {6:>8}"
-    print(_f.format("SSID", "mac", "Channel", "Signal", "0", "Authmode", "Hidden"))
-    for row in _networks:
-        print(_f.format(*row))
-    del _f
-
-
-# --------------------------------
-# define and use an array of bytes
-# --------------------------------
-from array import array
-
-dmx_message = array("B", [0] * 100)
-print(dmx_message[42])
 
 # -------------------------------------------------------------
 #  Identifying the slowest section of code

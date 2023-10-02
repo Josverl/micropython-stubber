@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "dgb pytest --discoveronly",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                ".",
+                "--collect-only",
+                "--capture=no",
+            ],
+            "cwd": "${workspaceFolder}/snippets",
+            "justMyCode": false
+        },
+        {
             "name": "Python: file as Module",
             "type": "python",
             "request": "launch",

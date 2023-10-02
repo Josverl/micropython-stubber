@@ -206,7 +206,19 @@ exclude = '''
 minversion = "7.0"
 python_functions = ["test_", "*_test"]
 python_files = ["test_*.py", "*_test.py"]
-testpaths = ["tests", "src"]
+testpaths = ["tests", "src", "snippets"]
+norecursedirs = [
+    "repos",
+    "typings*",
+    ".svn",
+    "_build",
+    "tmp*",
+    ".*",
+    "build",
+    "dist",
+    "{arch}",
+    "*.egg",
+]
 junit_family = "xunit1"
 
 addopts = "-v -sv  -m 'not basicgit'"
