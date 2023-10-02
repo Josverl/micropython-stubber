@@ -63,7 +63,9 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
         rows = list(reader)
         # create a dict version --> commit_hash
         version_commit = {
-            row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")
+            row["version"].split("/")[-1]: row["lib_commit_hash"]
+            for row in rows
+            if row["version"].startswith("refs/tags/")
         }
     # add default
     version_commit = defaultdict(lambda: "master", version_commit)
@@ -74,7 +76,9 @@ def match_lib_with_mpy(version_tag: str, lib_path: Path):
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     #  check if micropython-lib has matching tags
-    if Version(version_tag) >= Version("v1.20.0"):
+    if version_tag == "latest":
+        git.checkout_commit("master", lib_path)
+    elif Version(version_tag) >= Version("v1.20.0"):
         # TODO:if version is v1.12.0 or newer
         #   then use submodules to checkout the correct version of micropython-lib
         #   git submodule update lib/micropython-lib
@@ -85,7 +89,9 @@ def match_lib_with_mpy(version_tag: str, lib_path: Path):
         #   use the micropython_tags.csv to find the correct commit hash
         return git.checkout_tag(version_tag, lib_path)
     else:
-        log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
+        log.info(
+            f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
+        )
         return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 

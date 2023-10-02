@@ -26,14 +26,16 @@ from typing import List, Optional, Tuple
 
 @dataclass
 class Fix:
+    """A fix for a parameter or return type in the documentation that is needed to render it to a valid type annotation"""
+
     from_: str
-    "the thing that should be fixed"
+    "The string or regex that should be fixed"
     to: str
-    "the improved version"
+    "The improved version to replace it with"
     module: Optional[str] = None
-    "Only valid for the named module"
+    "Filter the fix to be only applied to a specific module"
     is_re: bool = False
-    "is a regex"
+    "the from_ string is a regular expression"
 
 
 U_MODULES = [
@@ -101,7 +103,8 @@ LOOKUP_LIST = {
     "machine.UART.irq": ("Any", 0.95),  # no IRQ type defined
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Any", 0.95),  # Not clear in docstring
-    "micropython.const": ("Union[int, bytes, str, Tuple]", 0.95),  # since 1.19 can also be string , bytes or tuple 
+    # since 1.19 const can also be string , bytes or tuple
+    "micropython.const": ("Union[int, bytes, str, float,Tuple]", 1),
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
@@ -120,6 +123,10 @@ LOOKUP_LIST = {
     "stm.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
     "stm.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
     "stm.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
+    #
+    # "machine.mem8": ("bytearray", 0.95),  # Read/write 8 bits of memory.
+    # "machine.mem16": ("bytearray", 0.95),  # Read/write 16 bits of memory.
+    # "machine.mem32": ("bytearray", 0.95),  # Read/write 32 bits of memory.
 }
 
 
@@ -181,15 +188,16 @@ MODULE_GLUE = {
     "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
     "collections": ["from queue import Queue"],  # dequeu is a subclass
-    "os": ["from stdlib.os import uname_result"],  # uname returns uname_result
+    "os": [
+        # "from stdlib.os import uname_result",  # uname returns uname_result
+        "from stdlib.os import *  # type: ignore",  # integrate STDLIB
+    ],
+    "io": ["from stdlib.io import *  # type: ignore"],  # integrate STDLIB
+    "socket": ["from stdlib.socket import *  # type: ignore"],  # integrate STDLIB
+    "ssl": ["from stdlib.ssl import *  # type: ignore"],  # integrate STDLIB
+    # "builtins": ["from stdlib.builtins import *"],  # integrate STDLIB
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
 }
-
-# manual fixes needed for parameters ( micropython v.16 & v1.17)
-# [
-#   ( "from", "to"),
-#   ( "from", "to", "optional function, Class or Class.Method"),
-# ]
 
 
 PARAM_FIXES = [
@@ -304,17 +312,26 @@ PARAM_FIXES = [
     # esp32.RMT
     #     # def write_pulses(self, duration, data=True) -> Any:
     #     def write_pulses(self, duration, data:Union[bool,int]=True) -> Any:
-    Fix("duration, data=True", "duration, data:Union[bool,int]=True"),
+    Fix(
+        "duration, data=True",
+        "duration, data:Union[bool,int]=True",
+    ),
     # --------------------------------------------------------------------
     # machine
     # machine.PWM
     #     # def __init__(self, dest, *, freq, duty_u16, duty_ns) -> None: ...
     #     def __init__(self, dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0) -> None: ...
-    Fix("dest, *, freq, duty_u16, duty_ns", "dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0"),
+    Fix(
+        "dest, *, freq, duty_u16, duty_ns",
+        "dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0",
+    ),
     # machine.ADC
     #     # def __init__(self, id, *, sample_ns, atten) -> None: ...
     #     def __init__(self, id, *, sample_ns:Optional[int]=0, atten:Optional[int]=ATTN_0DB) -> None: ...
-    Fix("id, *, sample_ns, atten", "id, *, sample_ns:Optional[int]=0, atten:Optional[int]=ATTN_0DB"),
+    Fix(
+        "id, *, sample_ns, atten",
+        "id, *, sample_ns:Optional[int]=0, atten:Optional[int]=ATTN_0DB",
+    ),
     # machine.I2C
     #     # def __init__(self, id, *, scl, sda, freq=400000) -> None: ...
     #     def __init__(self, id=-1, *, scl:Optional[Pin]=None, sda:Optional[Pin]=None, freq=400000) -> None: ...
@@ -325,7 +342,11 @@ PARAM_FIXES = [
     # network.WLAN
     # def config(self, param) -> Any:
     # def config(self, *args, **kwargs) -> Any:
-    Fix("param", "*args, **kwargs", "WLAN.config"),
+    Fix(
+        "param",
+        "*args, **kwargs",
+        "WLAN.config",
+    ),
     # machine.UART
     #     def __init__(self, id, ...) -> None: ...
     #     def __init__(self, id, *args, **kwargs) -> None: ...
@@ -374,7 +395,11 @@ PARAM_FIXES = [
         "bank, mode, fifo, params, *, rtr=None, extframe=False",
     ),
     # DOC: DocUpdate ? deal with overloads for Flash and Partition .readblock/writeblocks
-    Fix(r"\s*block_num, buf, offset\s*\)", "block_num, buf, offset: Optional[int] = 0)", is_re=True),
+    Fix(
+        r"\s*block_num, buf, offset\s*\)",
+        "block_num, buf, offset: Optional[int] = 0)",
+        is_re=True,
+    ),
     # # This is a cleanup something that went wrong before
     # Fix("**kwargs: Optional[Any]","**kwargs")
 ]
