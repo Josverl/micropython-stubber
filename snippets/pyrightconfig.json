@@ -1,0 +1,20 @@
+{
+    // do not perform type checking from the snippets folder root to avoid conflicts with other workspaces
+    "include": [
+        "nothing_at_all"
+    ],
+    "exclude": [
+        "check_*",
+        "feat_*",
+        ".*",
+        "**/typings"
+    ],
+    "ignore": [
+        "**/typings"
+    ],
+    "pythonVersion": "3.8",
+    "pythonPlatform": "Linux",
+    "verboseOutput": false,
+    "typeCheckingMode": "none",
+    "reportMissingModuleSource": "none"
+}

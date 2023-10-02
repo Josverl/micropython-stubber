@@ -82,7 +82,7 @@ def install_stubs(portboard, version, stub_source, pytestconfig, flatversion, ts
         cmd = f"pip install micropython-{portboard}-stubs=={version.lower().lstrip('v')}.* --target {tsc_path} --no-user"
     else:
         foldername = f"micropython-{flatversion}-{portboard}-stubs"
-        stubsource = pytestconfig.rootpath / f"repos/micropython-stubs/publish/{foldername}"
+        stubsource = pytestconfig.inipath.parent / f"repos/micropython-stubs/publish/{foldername}"
         cmd = f"pip install {stubsource} --target {tsc_path} --no-user"
     try:
         subprocess.run(cmd, shell=False, check=True, capture_output=True, text=True)
@@ -96,9 +96,9 @@ def install_stubs(portboard, version, stub_source, pytestconfig, flatversion, ts
 
 @pytest.fixture(scope="function")
 def snip_path(feature: str, pytestconfig) -> Path:
-    snip_path = pytestconfig.rootpath / "snippets" / f"feat_{feature}"
+    snip_path = pytestconfig.inipath.parent / "snippets" / f"feat_{feature}"
     if not snip_path.exists():
-        snip_path = pytestconfig.rootpath / "snippets" / f"check_{feature}"
+        snip_path = pytestconfig.inipath.parent / "snippets" / f"check_{feature}"
     return snip_path
 
 
