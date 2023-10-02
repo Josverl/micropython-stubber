@@ -36,6 +36,9 @@ def pytest_generate_tests(metafunc: pytest.Metafunc):
     args_lst = []
     for src in SOURCES:
         for version in VERSIONS:
+            # skip latest for pypi
+            if src == "pypi" and version == "latest":
+                continue
             for portboard in PORTBOARD_FEATURES.keys():
                 port = portboard.split("-")[0]
                 args_lst.append([src, version, portboard, port])
