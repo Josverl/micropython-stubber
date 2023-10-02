@@ -42,7 +42,7 @@ def test_minify_file_to_folder(tmp_path: Path, pytestconfig: pytest.Config):
 
 
 def test_minify_str_to_folder(tmp_path: Path, pytestconfig: pytest.Config):
-    "string -> folder"
+    """string -> folder"""
 
     result = minify(source=SOURCE, target=tmp_path)
     assert result == 0
