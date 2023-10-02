@@ -1,9 +1,12 @@
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 import pytest
 from loguru import logger as log
+
+MAX_CACHE_AGE = 24 * 60 * 60
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -35,6 +38,7 @@ def type_stub_cache_path(
     version: str,
     stub_source: str,
     pytestconfig: pytest.Config,
+    request: pytest.FixtureRequest,
 ) -> Path:
     """
     Installs a copy of the type stubs for the given portboard and version.
@@ -43,9 +47,32 @@ def type_stub_cache_path(
 
     log.trace(f"setup install type_stubs to cache: {stub_source}, {version}, {portboard}")
     flatversion = version.replace(".", "_")
-    cache_path = pytestconfig.rootpath / "snippets" / "typings_cache"
-    tsc_path = cache_path / f"typings_{flatversion}_{portboard}_stub_{stub_source}"
-    # clean up prior
+    cache_key = f"stubber/{stub_source}/{version}/{portboard}"
+    # cache_path = pytestconfig.rootpath / "snippets" / "typings_cache"
+    tsc_path = request.config.cache.makedir(
+        f"typings_{flatversion}_{portboard}_stub_{stub_source}"
+    )
+    # check if stubs are already installed to the cache
+    if (tsc_path / "micropython.pyi").exists():
+        # check if stubs are in the cache
+        timestamp = request.config.cache.get(cache_key, None)
+        # if timestamp is not older than 24 hours, use cache
+
+        if timestamp and timestamp > (time.time() - MAX_CACHE_AGE):
+            log.trace(f"Using cached type stubs for {portboard} {version}")
+            return tsc_path
+
+    ok = install_stubs(portboard, version, stub_source, pytestconfig, flatversion, tsc_path)
+    if not ok:
+        pytest.skip(f"Could not install stubs for {portboard} {version}")
+    # add the timestamp to the cache
+    request.config.cache.set(cache_key, time.time())
+    return tsc_path
+
+
+def install_stubs(portboard, version, stub_source, pytestconfig, flatversion, tsc_path) -> bool:
+    "Expensive / Slow function"
+    # clean up prior install to avoid stale files
     if tsc_path.exists():
         shutil.rmtree(tsc_path, ignore_errors=True)
     # use pip to install type stubs
@@ -63,8 +90,8 @@ def type_stub_cache_path(
         # skip test if source connot be found
         print(f"{e.stderr}")
         pytest.skip(f"{e.stderr}")
-    #
-    return tsc_path
+        return False
+    return True
 
 
 @pytest.fixture(scope="function")
