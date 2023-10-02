@@ -45,6 +45,9 @@
         },
         {
             "path": "wip_todo"
+        },
+        {
+            "path": "."
         }
     ],
     "settings": {
@@ -87,6 +90,6 @@
             "titleBar.inactiveForeground": "#e7e7e799"
         },
         "peacock.color": "#eb117e",
-        "powershell.cwd": "c:\\develop\\MyPython\\micropython-stubber\\snippets"
+        "testExplorer.useNativeTesting": true
     },
 }
