@@ -16,7 +16,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from conftest import LOCATIONS, VARIANTS, import_variant
+from shared import LOCATIONS, VARIANTS, import_variant
 
 pytestmark = pytest.mark.micropython
 

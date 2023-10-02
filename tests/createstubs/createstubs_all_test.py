@@ -15,7 +15,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from conftest import LOCATIONS, VARIANTS, import_variant
+from shared import LOCATIONS, VARIANTS, import_variant
 
 pytestmark = pytest.mark.micropython
 
@@ -73,8 +73,9 @@ def test_stubber_Class_available(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-def test_stubber_info_basic(location: Any, variant: str, mock_micropython_path: Generator[str, None, None]):
-
+def test_stubber_info_basic(
+    location: Any, variant: str, mock_micropython_path: Generator[str, None, None]
+):
     createstubs = import_variant(location, variant)
     stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
@@ -94,7 +95,10 @@ def test_stubber_info_basic(location: Any, variant: str, mock_micropython_path: 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
 def test_stubber_info_custom(
-    location: Any, variant: str, fx_add_minified_path: Generator[str, None, None], mock_micropython_path: Generator[str, None, None]
+    location: Any,
+    variant: str,
+    fx_add_minified_path: Generator[str, None, None],
+    mock_micropython_path: Generator[str, None, None],
 ):
     createstubs = import_variant(location, variant)
 
