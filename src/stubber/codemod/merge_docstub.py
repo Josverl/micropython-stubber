@@ -14,7 +14,13 @@ from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
 from loguru import logger as log
 
-from stubber.cst_transformer import MODULE_KEY, StubTypingCollector, TypeInfo, update_def_docstr, update_module_docstr
+from stubber.cst_transformer import (
+    MODULE_KEY,
+    StubTypingCollector,
+    TypeInfo,
+    update_def_docstr,
+    update_module_docstr,
+)
 
 ##########################################################################################
 # # log = logging.getLogger(__name__)
@@ -68,6 +74,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         ] = {}
 
         self.stub_imports: Dict[str, ImportItem] = {}
+        self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
         # parse the doc-stub file
         if self.stub_source:
             try:
@@ -86,6 +93,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # Store the imports that were added to the stub file
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
+            self.all_imports = import_collector.all_imports
 
     # ------------------------------------------------------------------------
 
@@ -93,15 +101,31 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """Update the Module docstring"""
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
-            _imp = self.stub_imports[k]
-            log.trace(f"import {k} = {_imp}")
+            imp = self.stub_imports[k]
+            log.trace(f"add: import {k} = {imp}")
             AddImportsVisitor.add_needed_import(
                 self.context,
-                module=_imp.module_name,
-                obj=_imp.obj_name,
-                asname=_imp.alias,
-                relative=_imp.relative,
+                module=imp.module_name,
+                obj=imp.obj_name,
+                asname=imp.alias,
+                relative=imp.relative,
             )
+
+        # add `from module import *` from the doc-stub
+        # FIXME: this cases a problem if there is also a 'from module import foobar' in the firmware stub
+        # also all comments get removed from the import
+        if self.all_imports:
+            for imp in self.all_imports:
+                if isinstance(imp, cst.ImportFrom):
+                    # perhaps this is an import from *
+                    if isinstance(imp.names, cst.ImportStar):
+                        # bit of a hack to get the full module name
+                        empty_mod = cst.parse_module("")
+                        full_module_name = empty_mod.code_for_node(imp.module)  # type: ignore
+                        log.trace(f"add: from {full_module_name} import *")
+                        AddImportsVisitor.add_needed_import(
+                            self.context, module=full_module_name, obj="*", 
+                        )
 
         # update the docstring.
         if MODULE_KEY not in self.annotations:
@@ -119,7 +143,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    def leave_ClassDef(
+        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+    ) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
@@ -133,7 +159,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # we need to be carefull not to copy over all the annotations if the types are different
         if new.def_type == "classdef":
             # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=new.decorators, bases=new.def_node.bases) # type: ignore
+            return updated_node.with_changes(decorators=new.decorators, bases=new.def_node.bases)  # type: ignore
         else:
             # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
@@ -144,7 +170,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
 
         stack_id = tuple(self.stack)
