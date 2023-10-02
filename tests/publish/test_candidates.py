@@ -4,7 +4,9 @@ from typing import Generator, List, Union
 
 import pytest
 
-from stubber.publish.candidates import COMBO_STUBS, DOC_STUBS, docstub_candidates, frozen_candidates, subfolder_names, version_candidates
+from stubber.publish.candidates import (COMBO_STUBS, DOC_STUBS,
+                                        docstub_candidates, frozen_candidates,
+                                        subfolder_names, version_candidates)
 from stubber.publish.publish import build_worklist
 
 
@@ -124,9 +126,9 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
         ("micropython", "v1.19.1", "esp8266", "GENERIC", 1),  # find v1.18 ESP8266 ports
         ("micropython", "v1.19.1", "esp8266", "generic", 1),  # find v1.18 ESP8266 ports
         ("micropython", "v1.18", "stm32", "auto", 56),  # find v1.18 STM32 boards
-        ("micropython", "v1.17", "auto", "auto", 124),  # find all v1.17 ports & boards
-        ("micropython", "v1.18", "auto", "auto", 139),  # find all v1.18 ports & boards
-        ("micropython", "v1.19.1", "auto", "auto", 157),  # find all v1.18 ports & boards
+        ("micropython", "v1.17", "auto", "auto", 125),  # find all v1.17 ports & boards
+        ("micropython", "v1.18", "auto", "auto", 140),  # find all v1.18 ports & boards
+        ("micropython", "v1.19.1", "auto", "auto", 158),  # find all v1.18 ports & boards
         ("micropython", "v1.18", "auto", "NUCLEO_F091RC", 1),  # find v1.18 NUCLEO_F091RC boards
         ("micropython", ["v1.18"], "auto", "NUCLEO_F091RC", 1),  # find v1.18 NUCLEO_F091RC fix test numbers
         ("micropython", ["latest"], "auto", "NUCLEO_F091RC", 1),  # find v1.18 NUCLEO_F091RC boards
