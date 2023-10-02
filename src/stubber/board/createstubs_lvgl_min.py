@@ -35,7 +35,7 @@ E=None
 D='version'
 F=OSError
 B=''
-import gc as C,sys,uos as os
+import gc as C,os,sys
 from ujson import dumps as a
 try:from machine import reset
 except P:pass
@@ -101,7 +101,7 @@ class Stubber:
 		try:M=__import__(A,E,E,'*');Q=C.mem_free();J('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(A,K,Q))
 		except P:return H
 		c(D)
-		with W(D,'w')as N:R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(A,I._fwid,I.info,__version__);N.write(R);N.write('from typing import Any\nfrom _typeshed import Incomplete\n\n');I.write_object_stub(N,M,A,B)
+		with W(D,'w')as N:R=str(I.info).replace('OrderedDict(',B).replace('})','}');U='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(A,I._fwid,R,__version__);N.write(U);N.write('from typing import Any\nfrom _typeshed import Incomplete\n\n');I.write_object_stub(N,M,A,B)
 		I._report.append('{{"module": "{}", "file": "{}"}}'.format(A,D.replace('\\',G)))
 		if A not in{'os','sys','logging','gc'}:
 			try:del M

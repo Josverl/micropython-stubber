@@ -6,7 +6,11 @@
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.testing.pytestArgs": [
-        "tests"
+        "snippets",
+        "tests",
+        "src",
+        "--new-first",
+        "--no-header"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
@@ -140,5 +144,7 @@
         "--config",
         "${workspaceFolder}/pyproject.toml",
         "--verbose"
-    ]
+    ],
+    "python.analysis.enablePytestExtra": true,
+    "testExplorer.addToEditorContextMenu": true
 }

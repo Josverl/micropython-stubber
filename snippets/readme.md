@@ -19,13 +19,46 @@ stubber merge --version latest
 stubber build --version latest
 .\snippets\install-stubs.ps1
 ```
+## Test with pytest
+
+There is a custom pytest configuration in `conftests.py` that will automatically download and copy the relevant stubs to the `typings` folder in the various `check_xxxx` and  `feat_yyyy` folders.
+
+The configuration of these test is part of the `test_snippets.py` file in the `snippets` folder.
+
+Example of running the tests:
+- run all tests (using any cached stubs - Max lifetime = 24 Hr) :  
+  `pytest ./snippets`
+
+- run all tests - but clear the cache first : :  
+  `pytest ./snippets --cache-clear`
+
+- run a single test :  
+  `pytest snippets\test_snippets.py::test_pyright[local-v1.20.0-stm32-stdlib]`
+
+- run a single test but clear the cache first : :  
+  `pytest --cache-clear snippets\test_snippets.py::test_pyright[local-v1.20.0-stm32-stdlib]`
+
 ## Test with pyright (used by the Pylance VSCode extension)
 
 ```powershell	
 .\snippets\check-stubs.ps1
 ```
 
-Below is a relevant section from pypy's testing readme.md### How the tests work
+
+### Naming convention
+
+Use the same top-level name for the module / package you would like to test.
+Use the `check_${thing}.py` naming pattern for individual test files.
+
+By default, test cases go into a file with the same name as the stub file, prefixed with `check_`.
+For example: `stdlib/check_contextlib.py`.
+
+If that file becomes too big, we instead create a directory with files named after individual objects being tested.
+For example: `stdlib/builtins/check_dict.py`.
+
+
+### How the tests work
+Below is a relevant section from pypy's testing readme.md
 
 The code in this directory is not intended to be directly executed. Instead,
 type checkers are run on the code, to check that typing errors are
@@ -53,14 +86,3 @@ For more information on using `assert_type` and
 annotations,
 [this page](https://typing.readthedocs.io/en/latest/source/quality.html#testing-using-assert-type-and-warn-unused-ignores)
 provides a useful guide.
-
-### Naming convention
-
-Use the same top-level name for the module / package you would like to test.
-Use the `check_${thing}.py` naming pattern for individual test files.
-
-By default, test cases go into a file with the same name as the stub file, prefixed with `check_`.
-For example: `stdlib/check_contextlib.py`.
-
-If that file becomes too big, we instead create a directory with files named after individual objects being tested.
-For example: `stdlib/builtins/check_dict.py`.
