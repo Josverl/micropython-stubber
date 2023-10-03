@@ -13,8 +13,10 @@ ow.write(b"123")  # write bytes on the bus
 ow.select_rom(b"12345678")  # select a specific device by its ROM code
 
 assert_type(ow, onewire.OneWire)
-assert_type(ow.write(b"123"), None)
-assert_type(ow.select_rom(b"12345678"), None)
+
+# there was no onewire documatation before 1.19.1
+# assert_type(ow.write(b"123"), None)
+# assert_type(ow.select_rom(b"12345678"), None)
 
 # assert_type(ow.scan(), list)
 # assert_type(ow.reset(), None)
