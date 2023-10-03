@@ -158,7 +158,7 @@ LOOKUP_LIST = {
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
-    "ssl.ssl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
+    "ssl.ssl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket #TODO: or wrapped-socket object ?
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "usys.exit": ("NoReturn", 0.95),  # never returns
     "utime.sleep_ms": (

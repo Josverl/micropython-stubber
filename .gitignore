@@ -61,3 +61,4 @@ snippets/*/typings
 typings_test
 typings
 empty
+**/*_lock.file

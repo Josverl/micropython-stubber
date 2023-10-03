@@ -41,19 +41,22 @@
             "path": "feat_networking"
         },
         {
+            "name": "feat_espnow",
             "path": "feat_espnow"
         },
         {
+            "name": "wip_todo",
             "path": "wip_todo"
         },
         {
+            "name": "snippets",
             "path": "."
         }
     ],
     "settings": {
         "python.languageServer": "Pylance",
         "python.analysis.typeCheckingMode": "basic",
-        "python.analysis.diagnosticMode": "workspace",
+        "python.analysis.diagnosticMode": "openFilesOnly",
         "python.autoComplete.extraPaths": [
             "${workspacePath}/typings",
         ],
@@ -90,6 +93,8 @@
             "titleBar.inactiveForeground": "#e7e7e799"
         },
         "peacock.color": "#eb117e",
-        "testExplorer.useNativeTesting": true
+        "testExplorer.useNativeTesting": true,
+        "python.analysis.enableSyncServer": false,
+        "python.testing.autoTestDiscoverOnSaveEnabled": false
     },
 }

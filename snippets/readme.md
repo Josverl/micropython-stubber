@@ -13,10 +13,20 @@ You can update / install the type-stubs in the various typings folders by runnin
 
 ```powershell
 # Update the type stubs
+foreach ($version in @( "latest", "v1.20.0", "v1.19.1", "v1.18.0", "v1.17.0" )) {
+    stubber switch $version
+    stubber get-docstubs 
+    stubber merge --version $version
+    stubber build --version $version
+}
+
+```	
+
 stubber switch latest
 stubber get-docstubs 
 stubber merge --version latest
 stubber build --version latest
+
 .\snippets\install-stubs.ps1
 ```
 ## Test with pytest
