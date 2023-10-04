@@ -57,16 +57,11 @@
         "python.languageServer": "Pylance",
         "python.analysis.typeCheckingMode": "basic",
         "python.analysis.diagnosticMode": "openFilesOnly",
-        "python.autoComplete.extraPaths": [
-            "${workspacePath}/typings",
-        ],
-        "python.analysis.typeshedPaths": [
-            // only first path is used
-            "${workspacePath}/typings_esp32"
-        ],
         "python.analysis.diagnosticSeverityOverrides": {
             "reportMissingModuleSource": "none"
         },
+        // "python.autoComplete.extraPaths": [],
+        // "python.analysis.typeshedPaths": [],
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter"
         },
