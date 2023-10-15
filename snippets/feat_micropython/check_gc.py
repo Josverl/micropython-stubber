@@ -18,7 +18,8 @@ print("Code section 1-2 used {} bytes".format(start_mem - end_mem))
 
 # https://docs.micropython.org/en/latest/reference/constrained.html#the-heap
 gc.collect()
-gc.threshold(gc.mem_free() // 4 + gc.mem_alloc()) # type: ignore # TODO : micropython.gc - samd has no gc.threshold() method
+gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())  # stubs-ignore: port=='samd'
+# TODO : micropython.gc - samd has no gc.threshold() method
 
 
 # https://docs.micropython.org/en/latest/reference/constrained.html#reporting

@@ -5,17 +5,19 @@
 #   - using StateMachine.exec
 
 import time
-from machine import Pin
+
 import rp2
+from machine import Pin
+
 
 # Define an empty program that uses a single set pin.
-@rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)
+@rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)  # micropython-stubs>=1.20.0
 def prog():
     pass
 
 
 # Construct the StateMachine, binding Pin(25) to the set pin.
-sm = rp2.StateMachine(0, prog, set_base=Pin(6))
+sm = rp2.StateMachine(0, prog, set_base=Pin(6))  # stubs-ignore: version<=1.20.0
 
 # Turn on the set pin via an exec instruction.
 sm.exec("set(pins, 1)")

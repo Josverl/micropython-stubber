@@ -1,4 +1,4 @@
-import ffi  # type: ignore # TODO: unix/linux stubs
+import ffi  # stub-ignore :port!='unix'
 import uctypes
 
 libc = ffi.open("libc.so.6")
