@@ -9,6 +9,9 @@ import fasteners
 import pytest
 from packaging.version import Version
 
+# only snippets tests
+pytestmark = pytest.mark.snippets
+
 log = logging.getLogger()
 
 CORE = ["micropython", "stdlib"]

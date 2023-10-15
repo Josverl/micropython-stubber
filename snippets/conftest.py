@@ -18,6 +18,7 @@
 
 """
 
+import json
 import shutil
 import subprocess
 import time
@@ -27,6 +28,7 @@ import fasteners
 import pytest
 from loguru import logger as log
 
+SNIPPETS_PREFIX = "snippets/"
 MAX_CACHE_AGE = 24 * 60 * 60
 
 
@@ -208,3 +210,29 @@ def copy_type_stubs(
             if typings_path.exists():
                 shutil.rmtree(typings_path, ignore_errors=True)
             shutil.copytree(type_stub_cache_path, typings_path)
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config: pytest.Config):
+    stats = {}
+    for status in ["passed", "failed", "xfailed", "skipped"]:
+        stats[status] = snipcount(terminalreporter, status)
+    # simple straigth forward scoring
+    stats["snippet_score"] = int(stats["passed"] - stats["failed"])
+    if stats["snippet_score"] >= 0:
+        # Write stats to file
+        (config.rootpath / "coverage").mkdir(exist_ok=True)
+        with open(config.rootpath / "coverage" / "snippet_score.json", "w") as f:
+            json.dump(stats, f, indent=4)
+
+        print("----------------- terminal summary -----------------")
+        print(json.dumps(stats, indent=4))
+        print("----------------------------------------------------")
+
+
+def snipcount(terminalreporter, status: str):
+    # Count the number of test snippets that have a given status
+    if not terminalreporter.stats.get(status, []):
+        return 0
+    return len(
+        [rep for rep in terminalreporter.stats[status] if rep.nodeid.startswith(SNIPPETS_PREFIX)]
+    )
