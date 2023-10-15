@@ -222,7 +222,10 @@ norecursedirs = [
 ]
 junit_family = "xunit1"
 
-addopts = "-v -sv  -m 'not basicgit'"
+addopts = "--verbose --capture=no -m 'not basicgit'"
+# --numprocesses=auto 
+# -m MARKEXPR           Only run tests matching given mark expression. For example: -m 'mark1 and not mark2'.
+# -n --numprocesses=numprocesses - 
 
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
