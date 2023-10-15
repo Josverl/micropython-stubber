@@ -99,6 +99,9 @@ sourcery-cli = "^1.0.3"
 mpremote = { git = "https://github.com/Josverl/mpremote", subdirectory = "tools/mpremote", optional = true }
 ipykernel = "^6.23.1"
 fasteners = "^0.19"
+python-dotenv = "^1.0.0"
+
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -6,7 +6,7 @@ env:
   GH_TOKEN_VARS: ${{ secrets.GH_TOKEN_VARS }}
 
 jobs:
-  test:
+  test_snippets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
       #----------------------------------------------
       # install project
       #----------------------------------------------
-      - name: Install dependencies
+      - name: Install dependencies for group test
         run: poetry install --with dev --no-interaction
 
       #----------------------------------------------
@@ -35,7 +35,7 @@ jobs:
       - name: test the snippets
         continue-on-error: true
         run: |
-          pytest -m 'snippets'
+          poetry run pytest -m 'snippets'
 
       - name: compare and update
         run: |
