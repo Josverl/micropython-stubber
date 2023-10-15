@@ -133,7 +133,7 @@ spi.send_recv("hello")  # send and receive 5 bytes
 
 
 can = CAN(1, CAN.LOOPBACK)
-can.setfilter(0, CAN.LIST16, 0, (123, 124, 125, 126))
+can.setfilter(0, CAN.LIST16, 0, (123, 124, 125, 126)) # stubs-ignore : version<=1.18.0
 can.send("message!", 123)  # send a message with id 123
 can.recv(0)  # receive message on FIFO 0
 

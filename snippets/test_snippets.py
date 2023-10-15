@@ -36,7 +36,7 @@ PORTBOARD_FEATURES = {
 }
 
 SOURCES = ["local", "pypi"]
-VERSIONS = ["latest", "v1.21.0", "v1.20.0"]  # , "v1.19.1"]
+VERSIONS = ["latest", "v1.21.0", "v1.20.0", "v1.19.1", "v1.18"]
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc):
@@ -123,8 +123,8 @@ def stub_ignore(line, version, port, board, linter="pyright"):
     try:
         # transform : version>=1.20.1 to version>=Version('1.20.1') using a regular expression
         condition = re.sub(r"(\d+\.\d+\.\d+)", r"Version('\1')", condition.strip())
-        print(condition)
         result = eval(condition, context)
+        print(f"Conditional validation: {condition} -> {result}")
     except Exception as e:
         log.warning(f"Incorrect stubs-ignore condition: `{condition}`\ncaused: {e}")
         result = None
@@ -156,7 +156,7 @@ def test_pyright(
         try:
             # run pyright in the folder with the check_scripts to allow modules to import each other.
             result = subprocess.run(
-                cmd, shell=False, capture_output=True, cwd=snip_path.as_posix()
+                cmd, shell=True, capture_output=True, cwd=snip_path.as_posix()
             )
         except OSError as e:
             raise e
