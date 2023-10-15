@@ -30,22 +30,26 @@
 #             print("Waiting", t.time())
 # """
 
-from utime import sleep, sleep_ms, ticks_ms, ticks_diff
+from utime import sleep, sleep_ms, ticks_diff, ticks_ms
+
 
 class TimeoutError(Exception):
     pass
+
 
 # A timer generator: on each iteration, yield milliseconds since the first call.
 def _timer_ms():
     start = ticks_ms()
     while True:
-        reset = (yield ticks_diff(ticks_ms(), start))
+        reset = yield ticks_diff(ticks_ms(), start)
         if type(reset) in [int, float]:
             start = ticks_ms() - reset
+
 
 # Reset the start value of a timer
 def reset(timer, time_ms=0):
     timer.send(time_ms)
+
 
 # A timeout generator (milliseconds)
 def _timeout_ms(timer, timeout_ms):
@@ -54,6 +58,7 @@ def _timeout_ms(timer, timeout_ms):
             break
         yield dt
 
+
 # Add a busy sleep on every iteration through the timer.
 def _sleep_ms(timer, delay_ms):
     for i, dt in enumerate(timer):
@@ -61,14 +66,17 @@ def _sleep_ms(timer, delay_ms):
         if delay_ms:
             sleep_ms((i + 1) * delay_ms - next(timer))
 
+
 # Make a timer generator which raises exception if the timeout is reached
 def _raise_on_timeout(timer, exc=True):
     yield from timer
-    raise TimeoutError if exc is True else exc # type: ignore
+    raise TimeoutError if exc is True else exc  # type: ignore
+
 
 # Make a timer generator a countdown timer
 def _countdown(timer, start):
     return (start - dt for dt in timer)
+
 
 def check(timer):
     try:
@@ -77,11 +85,14 @@ def check(timer):
     except StopIteration:
         return False
 
+
 def is_expired(timer):
     return not check(timer)
 
+
 def start(timer):
     return next(timer)
+
 
 # Construct a timer/timeout generator in milliseconds
 def timer_ms(timeout_ms, sleep_ms=0, countdown=False, exc=None):
@@ -96,15 +107,15 @@ def timer_ms(timeout_ms, sleep_ms=0, countdown=False, exc=None):
             timer = _raise_on_timeout(timer, exc)
     return timer
 
+
 def countdown_timer_ms(t=0, sleep_ms=0, exc=None):
     return timer_ms(t, sleep_ms, True, exc)
 
+
 # Construct a timer/timeout generator in seconds
 def timer_s(timeout_s, sleep_s=0, countdown=False, exc=None):
-    return (
-        dt / 1000
-        for dt in
-        timer_ms(timeout_s * 1000, sleep_s * 1000, countdown, exc))
+    return (dt / 1000 for dt in timer_ms(timeout_s * 1000, sleep_s * 1000, countdown, exc))
+
 
 class Timer:
     def __init__(self, timeout):
@@ -113,7 +124,7 @@ class Timer:
 
     def start(self):
         self.timer = enumerate(timer_ms(self.timeout, exc=True))
-        return next(self.timer)     # This starts the timer!
+        return next(self.timer)  # This starts the timer!
 
     def reset(self):
         self.timer = enumerate(timer_ms(self.timeout, exc=True))
@@ -127,7 +138,7 @@ class Timer:
         return dt is not None
 
     def check_wait(self, delay_ms=0):
-        i, dt = next(self.timer) # type: ignore
+        i, dt = next(self.timer)  # type: ignore
         if i > 0 and delay_ms:
             sleep_ms(delay_ms)
         return dt is not None
@@ -140,5 +151,3 @@ class Timer:
         if isinstance(exc_value, TimeoutError):
             self.timer = None
             return True
-
-
