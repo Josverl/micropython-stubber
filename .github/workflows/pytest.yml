@@ -75,7 +75,7 @@ jobs:
       - name: Test with pytest
         if: always()
         run: |
-          poetry run coverage run -m pytest tests -m "not basicgit" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          poetry run coverage run -m pytest tests -m "not basicgit" -m "not snippets" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Coverage lcov
         if: always() # ignore previous error

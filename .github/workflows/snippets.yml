@@ -1,0 +1,42 @@
+name: snippet_score
+on: [push, pull_request, workflow_dispatch]
+env:
+  # Setting an environment variable with the value of a configuration variable
+  SNIPPET_SCORE: ${{ vars.SNIPPET_SCORE }}
+  GH_TOKEN_VARS: ${{ secrets.GH_TOKEN_VARS }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      #----------------------------------------------
+
+      - name: Install poetry # poetry is not in the default image
+        run: pipx install poetry==1.3.1
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x" # Replace with the Python version you're using
+
+      #----------------------------------------------
+      # install project
+      #----------------------------------------------
+      - name: Install dependencies
+        run: poetry install --with dev --no-interaction
+
+      #----------------------------------------------
+      # stubber clone
+      # repos needed for tests
+      #----------------------------------------------
+      - name: stubber clone
+        run: poetry run stubber clone --add-stubs
+
+      - name: test the snippets
+        continue-on-error: true
+        run: |
+          pytest -m 'snippets'
+
+      - name: compare and update
+        run: |
+          python .github/workflows/compare_score.py

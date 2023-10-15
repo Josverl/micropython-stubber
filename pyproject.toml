@@ -223,6 +223,7 @@ norecursedirs = [
 junit_family = "xunit1"
 
 addopts = "--verbose --capture=no -m 'not basicgit'"
+#  -m 'not snippets'
 # --numprocesses=auto 
 # -m MARKEXPR           Only run tests matching given mark expression. For example: -m 'mark1 and not mark2'.
 # -n --numprocesses=numprocesses - 
@@ -232,6 +233,7 @@ markers = [
     "integration: Integration tests (slower)",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "mocked: to replace/compensate for most of the slow and git tests",
+    "snippets: test snippets to check the stubs",
     #
     "minified: marks test of the minified version of createstubs",
     "minify: marks test of the minification of createstubs",
