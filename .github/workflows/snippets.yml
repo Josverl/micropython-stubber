@@ -39,4 +39,4 @@ jobs:
 
       - name: compare and update
         run: |
-          python .github/workflows/compare_score.py
+          poetry run python .github/workflows/compare_score.py

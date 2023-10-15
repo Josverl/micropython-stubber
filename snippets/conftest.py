@@ -153,7 +153,7 @@ def install_stubs(
         cmd = f"pip install {stubsource} --target {tsc_path} --no-user"
 
     try:
-        subprocess.run(cmd, shell=False, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
         # skip test if source connot be found
         print(f"{e.stderr}")
