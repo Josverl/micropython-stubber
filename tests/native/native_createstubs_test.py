@@ -17,11 +17,11 @@ os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
 if os_distro_version in ["linux-ubuntu-20.04", "linux-debian-11"]:
     # Default = 20.04 - focal
     fw_list = [
-        "ubuntu_20_04/micropython_v1_11",
-        "ubuntu_20_04/micropython_v1_12",
-        "ubuntu_20_04/micropython_v1_14",
-        "ubuntu_20_04/micropython_v1_15",
-        "ubuntu_20_04/micropython_v1_16",
+        # "ubuntu_20_04/micropython_v1_11",
+        # "ubuntu_20_04/micropython_v1_12",
+        # "ubuntu_20_04/micropython_v1_14",
+        # "ubuntu_20_04/micropython_v1_15",
+        # "ubuntu_20_04/micropython_v1_16",
         "ubuntu_20_04/micropython_v1_17",
         "ubuntu_20_04/micropython_v1_18",
     ]
