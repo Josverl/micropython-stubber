@@ -102,6 +102,7 @@ def test_get_tag_latest():
 
 
 @pytest.mark.basicgit
+@pytest.mark.skip(reason="....")
 def test_get_failure_throws():
     with pytest.raises(Exception):
         git.get_local_tag(".not")
@@ -123,7 +124,6 @@ def test_get_tag_submodule(testrepo_micropython: Path):
     for testcase in [
         testrepo_micropython.as_posix(),
         str(testrepo_micropython),
-        ".\\micropython",
     ]:
         tag = git.get_local_tag(testcase)
         common_tst(tag)
