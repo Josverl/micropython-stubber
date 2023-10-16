@@ -158,7 +158,10 @@ LOOKUP_LIST = {
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
-    "ssl.ssl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket #TODO: or wrapped-socket object ?
+    "ssl.ssl.wrap_socket": (
+        "IO",
+        0.95,
+    ),  # undocumented class ssl.SSLSocket #TODO: or wrapped-socket object ?
     "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
     "usys.exit": ("NoReturn", 0.95),  # never returns
     "utime.sleep_ms": (
@@ -176,6 +179,8 @@ LOOKUP_LIST = {
     "_onewire.writebyte": ("None", 0.95),
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
+    # espnow
+    "espnow.ESPNOW.recv": ("List", 0.95),  # list / ? tuple of bytestrings
 }
 
 
@@ -464,8 +469,6 @@ PARAM_FIXES = [
     ),
     # # This is a cleanup something that went wrong before
     # Fix("**kwargs: Optional[Any]","**kwargs")
-    # ------ ESPNow.rst uses   (ESP32 only) after the class / function prototype
-    Fix(r"\(ESP\d+\s+only\)", "", is_re=True),  # ESP32 / ESP8266 Only
     # os.mount - optional parameters
     # fsobj, mount_point, *, readonly)
     Fix(
@@ -473,7 +476,15 @@ PARAM_FIXES = [
         "fsobj, mount_point, *, readonly=False)",
     ),
     # micropython.const
-    Fix("expr)", "expr:Const_T)", name="const"),  # const: 3 - paired with return typing
+    Fix("expr)", "expr:Const_T)", name="const"),  # const: 3 - paired with return typing,
+    # ------ ESPNow.rst uses   (ESP32 only) after the class / function prototype
+    Fix(r"\(ESP\d+\s+only\)", "", is_re=True),  # ESP32 / ESP8266 Only
+    # espnow.ESPNow.send is missing several params
+    Fix(
+        "msg)",
+        "peer, msg,mac=None,sync=True)",
+        name="ESPNow.send",
+    ),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
