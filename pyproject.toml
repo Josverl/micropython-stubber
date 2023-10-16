@@ -77,7 +77,7 @@ tools = ["esptool"]
 optional = true
 [tool.poetry.group.docs.dependencies]
 Sphinx = ">=4.4,<6.0"
-myst-parser = ">=0.17,<0.19"
+myst-parser = ">=0.17,<1.1"
 sphinx_rtd_theme = "^1.0.0"
 sphinx-autoapi = "^1.9.0"
 sphinx-click = "^4.4.0"
