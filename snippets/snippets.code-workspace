@@ -92,4 +92,9 @@
         "python.analysis.enableSyncServer": false,
         "python.testing.autoTestDiscoverOnSaveEnabled": false
     },
+    "extensions": {
+        "recommendations": [
+            "ms-python.black-formatter"
+        ]
+    },
 }
