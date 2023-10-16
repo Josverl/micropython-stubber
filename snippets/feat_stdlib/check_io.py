@@ -4,8 +4,8 @@ from typing import Any, IO, Optional
 
 alloc_size = 512
 
-buffer = io.StringIO(alloc_size)
-buffer = io.BytesIO(alloc_size)
+buffer = io.StringIO(alloc_size) # stub-ignore: version=<1.18.0
+buffer = io.BytesIO(alloc_size) # stub-ignore: version=<1.18.0
 
 stream = open("file")
 

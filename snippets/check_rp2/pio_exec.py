@@ -11,7 +11,7 @@ from machine import Pin
 
 
 # Define an empty program that uses a single set pin.
-@rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)  # micropython-stubs>=1.20.0
+@rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)  # stubs-ignore:  version<1.20.0
 def prog():
     pass
 
