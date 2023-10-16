@@ -27,7 +27,12 @@ def test_get_version(path):
         ver = parse(parts[0])
         assert isinstance(ver, Version)
     if len(parts) >= 3:
-        # second part must be an integer
-        assert parts[1].isnumeric()
+        if parts[1] == 'preview':
+            assert parts[2].isnumeric()
+        else:
+            # second part must be an integer
+            assert parts[1].isnumeric()
+        # Changed from 1.22.0
+        # Third part must be an integer
 
     assert True
