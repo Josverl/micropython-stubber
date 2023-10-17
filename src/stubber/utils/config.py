@@ -16,7 +16,9 @@ class StubberConfig(Config):
     stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
     "a Path to the stubs directory"
     # relative to stubs folder
-    fallback_path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
+    fallback_path = key(
+        key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback")
+    )
     "a Path to the fallback stubs directory"
 
     # ------------------------------------------------------------------------------------------
@@ -27,23 +29,40 @@ class StubberConfig(Config):
     mpy_path = key(key_name="mpy-path", cast=Path, required=False, default=Path("micropython"))
     "a Path to the micropython folder in the repos directory"
 
-    mpy_lib_path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
+    mpy_lib_path = key(
+        key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib")
+    )
     "a Path to the micropython-lib folder in the repos directory"
 
     # mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("./micropython-stubs"))
     # "a Path to the micropython-stubs folder in the repos directory"
 
-    publish_path = key(key_name="publish-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish"))
+    publish_path = key(
+        key_name="publish-path",
+        cast=Path,
+        required=False,
+        default=Path("./repos/micropython-stubs/publish"),
+    )
     "a Path to the folder where all stub publication artefacts are stored"
 
-    template_path = key(key_name="template-path", cast=Path, required=False, default=Path("./repos/micropython-stubs/publish/template"))
+    template_path = key(
+        key_name="template-path",
+        cast=Path,
+        required=False,
+        default=Path("./repos/micropython-stubs/publish/template"),
+    )
     "a Path to the publication folder that has the template files"
 
     stable_version = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
 
     "last published stable"
 
-    all_versions = key(key_name="all-versions", cast=list, required=False, default=["1.17", "1.18", "1.19", "1.19.1", "1.20.0"])
+    all_versions = key(
+        key_name="all-versions",
+        cast=list,
+        required=False,
+        default=["1.17", "1.18", "1.19", "1.19.1", "1.20.0"],
+    )
     "list of recent versions"
 
     BLOCKED_PORTS = ["minimal", "bare-arm"]
@@ -74,9 +93,11 @@ class StubberConfig(Config):
             all_versions = git.get_tags("micropython/micropython", minver="v1.17")
         except Exception as e:
             log.warning(f"Could not read micropython versions from git: {e}")
-            all_versions = ["1.17", "1.18", "1.19", "1.19.1", "1.20.0"]
+            all_versions = ["1.19", "1.19.1", "1.20.0", "1.21.0"]
         config_updates.update(all_versions=all_versions)
-        config_updates.update(stable_version=all_versions[-1])
+        config_updates.update(
+            stable_version=[v for v in all_versions if not v.endswith("preview")][-1]
+        )  # second last version - last version is the preview version
         return config_updates
 
 
@@ -98,7 +119,9 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     # add provider sources to the config
     config.add_source(EnvironmentConfigSource())
     if use_toml:
-        config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
+        config.add_source(
+            TomlConfigSource(filename, prefix=prefix, must_exist=must_exist)
+        )  # ,"tools.micropython-stubber"))
     config.read()
     return config
 
