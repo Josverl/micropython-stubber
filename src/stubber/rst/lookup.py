@@ -22,7 +22,7 @@ __all__ = [
 
 # all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar, Iterator",
     "from _typeshed import Incomplete",
 ]
 
@@ -180,7 +180,7 @@ LOOKUP_LIST = {
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
     # espnow
-    "espnow.ESPNOW.recv": ("List", 0.95),  # list / ? tuple of bytestrings
+    "espnow.ESPNow.recv": ("List", 0.95),  # list / ? tuple of bytestrings
 }
 
 
@@ -485,6 +485,11 @@ PARAM_FIXES = [
         "peer, msg,mac=None,sync=True)",
         name="ESPNow.send",
     ),
+    Fix(
+        "msg)",
+        "peer, msg,mac=None,sync=True)",
+        name="ESPNow.asend",
+    ),
 ]
 
 # List of classes and their parent classes that should be added to the class definition
@@ -519,6 +524,7 @@ CHILD_PARENT_CLASS = {
     "namedtuple": "tuple",
     "deque": "stdlib_deque",
     # ESPNow
+    "ESPNow": "ESPNowBase,Iterator",
     "AIOESPNow": "ESPNow",
 }
 
