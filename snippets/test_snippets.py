@@ -14,7 +14,7 @@ pytestmark = pytest.mark.snippets
 
 log = logging.getLogger()
 
-CORE = ["micropython", "stdlib"]
+CORE = ["micropython", "stdlib", "uasyncio>=1.18.0"]
 
 # features that are not supported by all ports or boards and/or require a specific version
 # version notation is >= or <=
@@ -25,14 +25,14 @@ PORTBOARD_FEATURES = {
     "esp8266": CORE + ["networking"],  # TODO: New board stubs for esp8266, "espnow>=1.21.0"],
     "samd": CORE,
     "samd-seeed_wio_terminal": CORE,
-    "samd-ADAFRUIT_ITSYBITSY_M4_EXPRESS": CORE,
+    # "samd-ADAFRUIT_ITSYBITSY_M4_EXPRESS": CORE,
     "rp2": CORE,
-    "rp2-pico<=1.20.0": CORE,   # renamed later to rp2-rpi_pico
+    "rp2-pico<=1.20.0": CORE,  # renamed later to rp2-rpi_pico
+    "rp2-pico_w<=1.20.0": CORE + ["networking"],
+    #
     "rp2-rpi_pico>=1.21.0": CORE,
-    "rp2-pico_w==1.20.0": CORE + ["networking"],
-    "rp2-pico_w>=1.21.0": CORE + ["networking"],
-    "rp2-rpi_pico_w>=1.20.0": CORE + ["networking", "bluetooth>=1.20.0"],
-    "rp2-pimoroni_picolipo_16mb": CORE,
+    "rp2-rpi_pico_w>=1.21.0": CORE + ["networking", "bluetooth>=1.21.0"],
+    # "rp2-pimoroni_picolipo_16mb": CORE,
 }
 
 SOURCES = ["local", "pypi"]
