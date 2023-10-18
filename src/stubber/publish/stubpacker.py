@@ -30,6 +30,15 @@ from stubber.utils.versions import clean_version
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
 
+# indicates which stubs will be skipped when copying for these stub sources
+STUB_SKIPPER = {
+    StubSource.FROZEN: ["espnow"],
+    StubSource.FIRMWARE: ["builtins"],
+    StubSource.DOC: [],
+    StubSource.CORE: [],
+    
+}
+
 
 class StubPackage:
     """
@@ -174,7 +183,7 @@ class StubPackage:
             rc = parts[1] if parts[1].isdigit() else parts[2] if parts[2].isdigit() else 1
             rc = int(rc)
             if parts[1] != "preview":
-                # old style - still need to guess the version 
+                # old style - still need to guess the version
                 base = bump_version(Version(ver), minor_bump=True)
             else:
                 base = Version(ver)
@@ -283,12 +292,12 @@ class StubPackage:
     def update_sources(stub_sources: StubSources) -> StubSources:
         """
         Update the stub sources to:
-        - use the -merged folder for the firmware sources
-        - and fallback to use the GENERIC folder for the frozen sources
+        - FIRMWARE: prefer -merged stubs over bare firmware stubs
+        - FROZEN: fallback to use the GENERIC folder for the frozen sources if no board specific folder exists
         """
         updated_sources = []
         for stub_type, fw_path in stub_sources:
-            # update to use -merged
+            # prefer -merged stubs over bare firmwre stubs
             if stub_type == StubSource.FIRMWARE:
                 # Check if -merged folder exists and use that instead
                 if fw_path.name.endswith("-merged"):
@@ -319,42 +328,48 @@ class StubPackage:
          - 3 - remove *.py files from the package folder
         """
         try:
-            # update to -menrge and fallback to GENERIC
+            # update to -merged and fallback to GENERIC
             self.stub_sources = self.update_sources(self.stub_sources)
             # Check if all stub source folders exist
-            for stub_type, fw_path in self.stub_sources:
-                if not (
-                    CONFIG.stub_path / fw_path
-                ).exists():  # and stub_type != StubSource.FROZEN:
+            for stub_type, src_path in self.stub_sources:
+                if not (CONFIG.stub_path / src_path).exists():
                     raise FileNotFoundError(
-                        f"Could not find stub source folder {CONFIG.stub_path / fw_path}"
+                        f"Could not find stub source folder {CONFIG.stub_path / src_path}"
                     )
 
             # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
             # for stub_type, fw_path in [s for s in self.stub_sources]:
             for n in range(len(self.stub_sources)):
-                stub_type, fw_path = self.stub_sources[n]
+                stub_type, src_path = self.stub_sources[n]
                 try:
-                    log.debug(f"Copying {stub_type} from {fw_path}")
-                    shutil.copytree(
-                        CONFIG.stub_path / fw_path,
-                        self.package_path,
-                        symlinks=True,
-                        dirs_exist_ok=True,
-                    )
+                    log.debug(f"Copying {stub_type} from {src_path}")
+                    self.copy_folder(stub_type, src_path)
                 except OSError as e:
                     if stub_type != StubSource.FROZEN:
                         raise FileNotFoundError(
-                            f"Could not find stub source folder {fw_path}"
+                            f"Could not find stub source folder {src_path}"
                         ) from e
                     else:
-                        log.debug(f"Error copying stubs from : {CONFIG.stub_path / fw_path}, {e}")
+                        log.debug(f"Error copying stubs from : {CONFIG.stub_path / src_path}, {e}")
         finally:
             # 3 - clean up a little bit
             # delete all the .py files in the package folder if there is a corresponding .pyi file
             for f in self.package_path.rglob("*.py"):
                 if f.with_suffix(".pyi").exists():
                     f.unlink()
+
+    def copy_folder(self, stub_type: StubSource, src_path: Path):
+        Path(self.package_path).mkdir(parents=True, exist_ok=True)
+        for item in (CONFIG.stub_path / src_path).rglob("*"):
+            if item.is_file():
+                # filter the 'poorly' decorated files
+                if stub_type in STUB_SKIPPER:
+                    if item.stem in STUB_SKIPPER[stub_type]:
+                        continue
+
+                target = Path(self.package_path) / item.relative_to(CONFIG.stub_path / src_path)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(item.read_bytes())
 
     def create_readme(self) -> None:
         """
