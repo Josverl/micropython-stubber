@@ -27,10 +27,10 @@ PORTBOARD_FEATURES = {
     "samd-seeed_wio_terminal": CORE,
     "samd-ADAFRUIT_ITSYBITSY_M4_EXPRESS": CORE,
     "rp2": CORE,
-    "rp2-RPI_PICO": CORE,
-    # TODO new board stubs for rp2-pico_w
-    # TODO new board stubs for rp2-rpi_pico_w
-    "rp2-pico_w>=1.20.0": CORE + ["networking"],
+    "rp2-pico<=1.20.0": CORE,   # renamed later to rp2-rpi_pico
+    "rp2-rpi_pico>=1.21.0": CORE,
+    "rp2-pico_w==1.20.0": CORE + ["networking"],
+    "rp2-pico_w>=1.21.0": CORE + ["networking"],
     "rp2-rpi_pico_w>=1.20.0": CORE + ["networking", "bluetooth>=1.20.0"],
     "rp2-pimoroni_picolipo_16mb": CORE,
 }
