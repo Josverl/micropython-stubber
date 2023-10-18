@@ -24,7 +24,7 @@ build
 
 # ignore test coverage reports
 .coverage*
-coverage/*
+**/coverage/*
 cov.xml
 
 # no  test results 
@@ -62,3 +62,4 @@ typings_test
 typings
 empty
 **/*_lock.file
+

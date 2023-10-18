@@ -98,3 +98,16 @@ For more information on using `assert_type` and
 annotations,
 [this page](https://typing.readthedocs.io/en/latest/source/quality.html#testing-using-assert-type-and-warn-unused-ignores)
 provides a useful guide.
+
+## Caching of packages
+
+In order to reducte the time needed to run the tests of the snippets, we cache the packages in the `.pytest_cache` folder.
+this makes use of the `pytest_cache` plugin : https://pypi.org/project/pytest-cache/
+
+The cache lifetime for each package is 24 hours, after which it will be re-downloaded.
+The cache can be cleared by:
+ -  running the following command: `pytest --clearcache`
+ - deleting the `.pytest_cache` folder
+ - By pressing the 'refresh-test' 🔄️ button in the test explorer. 
+   Note:  This is a side-effect/bug of the current version (v2023.18.0) of the python explorer extension.
+
