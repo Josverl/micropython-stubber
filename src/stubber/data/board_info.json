@@ -465,6 +465,14 @@
     },
     {
         "port": "renesas-ra",
+        "board": "ARDUINO_PORTENTA_C33",
+        "board_name": "PORTENTA C33",
+        "mcu_name": "RA6M5",
+        "description": "PORTENTA C33 with RA6M5",
+        "path": "repos/micropython/ports/renesas-ra/boards/ARDUINO_PORTENTA_C33/mpconfigboard.h"
+    },
+    {
+        "port": "renesas-ra",
         "board": "EK_RA4M1",
         "board_name": "EK-RA4M1",
         "mcu_name": "RA4M1",
