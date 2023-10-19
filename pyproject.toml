@@ -100,6 +100,7 @@ mpremote = { git = "https://github.com/Josverl/mpremote", subdirectory = "tools/
 ipykernel = "^6.23.1"
 fasteners = "^0.19"
 python-dotenv = "^1.0.0"
+pydocstyle = "^6.3.0"
 
 
 
