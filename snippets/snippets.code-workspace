@@ -51,6 +51,9 @@
         {
             "name": "snippets",
             "path": "."
+        },
+        {
+            "path": "feat_uasyncio"
         }
     ],
     "settings": {
