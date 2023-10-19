@@ -44,9 +44,13 @@
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
-                "-v",
-                "-v",
-                "get-docstubs",
+                // "-v",
+                // "-v",
+                "get-frozen",
+                "--version",
+                "latest",
+                // "--port",
+                // "get-docstubs",
                 // "build",
                 // "--version",
                 // "latest",
@@ -66,10 +70,6 @@
                 // "--build",
                 // "switch",
                 // "v1.20.0"
-                // "get-frozen",
-                // "--version",
-                // "v1.19.1",
-                // "--port",
                 // "--dry-run",
                 //
                 // "minify",
