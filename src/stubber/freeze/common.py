@@ -1,4 +1,4 @@
-"""common functions for freeze stub generation"""
+"""common functions for frozen stub generation"""
 
 import re
 import shutil
