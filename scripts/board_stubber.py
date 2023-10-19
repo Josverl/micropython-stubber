@@ -261,7 +261,7 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
     """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
     origin = "./src/stubber/board"
-    origin = "./micropython-stubber-1.7.0/minified"
+    # origin = "./micropython-stubber-1.7.0/minified"
 
     _py = [
         "rm :lib/createstubs.mpy",
@@ -402,7 +402,8 @@ def generate_board_stubs(
         The port the board is connected to
     """
 
-    board_info_path = Path(__file__).parent.parent / "board_info.csv"
+    # board_info_path = Path(__file__).parent.parent / "board_info.csv"
+    board_info_path = Path(__file__).parent.parent / "src/stubber/data/board_info.csv"
     # HOST -> MCU : copy createstubs to board
     if LOCAL_FILES:
         ok = copy_createstubs(mcu, variant, form)
