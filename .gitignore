@@ -63,3 +63,5 @@ typings
 empty
 **/*_lock.file
 
+# do not check in any downloaded firmwares
+**/firmware
