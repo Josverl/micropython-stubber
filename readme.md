@@ -35,9 +35,30 @@ With that in place, VSCode will understand MicroPython for the most part, and he
 
 Note that the above is not limited to VSCode and pylint, but it happens to be the combination that I use. 
 
-A lot of subs have already been generated and are shared on github or other means,  so it is quite likely that you can just grab a copy be be productive in a few minutes.
+A lot of subs have already been generated and are shared on PyPi, github or pre-installed by a tool, so it is quite likely that you can just grab a copy be be productive in a few minutes.
 
-For now you will need to [configure this by hand](#manual-configuration), or use the [micropy cli` tool](#using-micropy-cli)
+## To install the stubs from PyPI
+This section describes how to install the stubs from PyPI, and how to use them in your project.
+If you want to create or maintain stub - please see the next section.
+
+- Install in a typings folder (recommended) 
+  `pip install -U micropython-<port>[-<board>]stubs --no-user --target ./typings`
+- Install in a venv (after activating) 
+  `pip install -U micropython-<port>[-<board>]stubs --no-user`
+
+Examples:
+``` bash
+pip install -U micropython-stm32-stubs
+
+# Install stubs for a specific version.
+pip install -U micropython-esp32-stubs==1.20.0.*
+
+# Install stubs for a specific board.
+pip install -U micropython-rp2-pico_w-stubs
+```
+
+For more details how to use the stubs please refer to [the documentation on RTD](https://micropython-stubs.readthedocs.io/en/latest/20_using.html)
+
 
 1. The sister-repo [**MicroPython-stubs**][stubs-repo] contains [all stubs][all-stubs] I have collected with the help of others, and which can be used directly.
 That repo also contains examples configuration files that can be easily adopted to your setup.
@@ -48,9 +69,9 @@ You should use micropy-cli to consume stubs from that repo.
 The (stretch) goal is to create a VSCode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
 
 
-## Install and basic usage
+## Install and basic usage of the stubber tool
 
-``` sh
+``` bash
 pip install micropython-stubber
 
 # go to your working folder 
