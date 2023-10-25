@@ -29,7 +29,13 @@ from .cli import stubber_cli
     show_default=True,
 )
 @click.option(
-    "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
+    "--version",
+    "--Version",
+    "-V",
+    "version",
+    default="",
+    # default=[CONFIG.stable_version],
+    show_default=True,
 )
 @click.option(
     "--pyi/--no-pyi",
@@ -59,6 +65,7 @@ def cli_get_frozen(
     stub_paths: List[Path] = []
 
     if version:
+        version = utils.clean_version(version, drop_v=False)
         result = fetch_repos(version, CONFIG.mpy_path, CONFIG.mpy_lib_path)
         if not result:
             return -1
@@ -78,17 +85,23 @@ def cli_get_frozen(
         stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path
     )
     # Also enrich the frozen modules from the doc stubs if available
-    #
+
     # first create .pyi files so they can be enriched
     utils.do_post_processing(stub_paths, pyi, False)
     family = "micropython"
     docstubs_path = (
-        Path(CONFIG.stub_path) / f"{family}-{utils.clean_version(version, drop_v=False)}-docstubs"
+        Path(CONFIG.stub_path)
+        / f"{family}-{utils.clean_version(version, drop_v=False, flat=True)}-docstubs"
     )
-    log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
-    _ = enrich_folder(
-        stub_path, docstubs_path, show_diff=False, write_back=True, require_docstub=False
-    )
+    if docstubs_path.exists():
+        log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
+        merged = enrich_folder(
+            stub_path, docstubs_path, show_diff=False, write_back=True, require_docstub=False
+        )
+        if merged:
+            log.info(f"Enriched {merged} frozen modules from docstubs")
+    else:
+        log.info(f"No docstubs found at {docstubs_path}")
 
     log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, False, black)
