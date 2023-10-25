@@ -142,6 +142,9 @@ LOOKUP_LIST = {
     "machine.Signal.value": ("int", 0.95),
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
     "machine.UART.irq": ("Incomplete", 0.95),  # no IRQ type defined
+    "machine.UART.write": ("Union[int,None]", 0.95),
+    "machine.UART.readinto": ("Union[int,None]", 0.95),
+    "machine.UART.readline": ("Union[str,None]", 0.95),
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Incomplete", 0.95),  # Not clear in docstring
     # since 1.19 const can also be string , bytes or tuple
@@ -180,7 +183,7 @@ LOOKUP_LIST = {
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
     # espnow
-    "espnow.ESPNow.recv": ("List", 0.95),  # list / ? tuple of bytestrings
+    "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]", 0.95),  # list / ? tuple of bytestrings
 }
 
 
