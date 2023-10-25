@@ -1003,7 +1003,7 @@
             "   Return value: number of bytes written or ``None`` on timeout."
         ],
         "docstring_len": 103,
-        "type": "int",
+        "type": "Union[int,None]",
         "confidence": 0.18000000000000002,
         "match": "<re.Match object; span=(45, 57), match='Return value'>",
         "module": "machine",
