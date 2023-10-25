@@ -183,7 +183,7 @@ LOOKUP_LIST = {
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
     # espnow
-    "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]", 0.95),  # list / ? tuple of bytestrings
+    "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]]", 0.95),  # list / ? tuple of bytestrings
 }
 
 
