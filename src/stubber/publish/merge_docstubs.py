@@ -86,7 +86,7 @@ def merge_all_docstubs(
         merged_path = get_merged_path(candidate)
 
         if not board_path.exists():
-            log.info(f"no firmware stubs found in {board_path}")
+            log.debug(f"no firmware stubs found in {board_path}")
             if candidate["version"] == "latest":
                 # for the latest we do a bit more effort to get something 'good enough'
                 # try to get the board_path from the last released version as the basis

@@ -15,7 +15,7 @@ pytestmark = pytest.mark.cli
 
 
 def test_cmd_help():
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
     result = runner.invoke(stubber.stubber_cli, ["--help"])
     assert result.exit_code == 0
@@ -135,7 +135,7 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
 
     # fetch latest
     assert m_fetch.call_count == 3
-    # TODO: Use Fakeconfig to test path
+    # TODO: Use Fake config to test path
     m_fetch.assert_any_call(Path("repos/micropython"))
     m_fetch.assert_any_call(Path("repos/micropython-lib"))
 
@@ -199,7 +199,7 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_minify(mocker: MockerFixture):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
     mock_minify: MagicMock = mocker.MagicMock(return_value=0)
     mocker.patch("stubber.commands.minify_cmd.minify", mock_minify)
@@ -211,7 +211,7 @@ def test_cmd_minify(mocker: MockerFixture):
 
 @pytest.mark.mocked
 def test_cmd_minify_all(mocker: MockerFixture):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
     mock_minify: MagicMock = mocker.MagicMock(return_value=0)
     mocker.patch("stubber.commands.minify_cmd.minify", mock_minify)
@@ -226,7 +226,7 @@ def test_cmd_minify_all(mocker: MockerFixture):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_stub(mocker: MockerFixture):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
     # m_generate: MagicMock = mocker.patch("stubber.commands.stub_cmd.generate_pyi_files", autospec=True, return_value=True)
     m_generate: MagicMock = mocker.MagicMock(return_value=True)
@@ -247,7 +247,7 @@ def test_cmd_stub(mocker: MockerFixture):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
 
     m_get_local_tag: MagicMock = mocker.patch(
@@ -264,7 +264,7 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
         stubber.stubber_cli, ["get-frozen", "--stub-folder", tmp_path.as_posix()]
     )
     assert result.exit_code == 0
-    # FIXME : test failes in CI
+    # FIXME : test fails in CI
     m_freeze_any.assert_called_once()
     m_get_local_tag.assert_called_once()
 
@@ -277,7 +277,7 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_get_lobo(mocker: MockerFixture, tmp_path: Path):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
 
     mock: MagicMock = mocker.patch("stubber.get_lobo.get_frozen", autospec=True)
@@ -296,7 +296,7 @@ def test_cmd_get_lobo(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
     mock: MagicMock = mocker.patch("stubber.get_cpython.get_core", autospec=True)
     mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
@@ -318,7 +318,7 @@ def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
 
     m_get_l_tag: MagicMock = mocker.patch(
@@ -351,7 +351,7 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
 ##########################################################################################
 @pytest.mark.mocked
 def test_cmd_fallback(mocker: MockerFixture, tmp_path: Path):
-    # check basic commandline sanity check
+    # check basic command line sanity check
     runner = CliRunner()
 
     mock: MagicMock = mocker.patch(
