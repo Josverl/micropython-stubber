@@ -1,5 +1,5 @@
 """
-Enrich firmware stubs by copying docstrings and parameter infromation from doc-stubs or python source code.
+Enrich firmware stubs by copying docstrings and parameter information from doc-stubs or python source code.
 Both (.py or .pyi) files are supported.
 """
 
@@ -10,7 +10,6 @@ from libcst.codemod import CodemodContext, diff_code, exec_transform_with_pretty
 from libcst.tool import _default_config  # type: ignore
 from loguru import logger as log
 
-# from stubber.codemod.merge_docstub import MergeCommand
 import stubber.codemod.merge_docstub as merge_docstub
 from stubber.utils.post import run_black
 
@@ -61,13 +60,13 @@ def enrich_file(
 
     log.debug(f"Merge {target_path} from {docstub_file}")
     # read source file
-    oldcode = target_path.read_text()
+    old_code = target_path.read_text()
 
     codemod_instance = merge_docstub.MergeCommand(context, stub_file=docstub_file)
     if not (
-        newcode := exec_transform_with_prettyprint(
+        new_code := exec_transform_with_prettyprint(
             codemod_instance,
-            oldcode,
+            old_code,
             # include_generated=False,
             generated_code_marker=config["generated_code_marker"],
             # format_code=not args.no_format,
@@ -79,8 +78,8 @@ def enrich_file(
     if write_back:
         log.trace(f"Write back enriched file {target_path}")
         # write updated code to file
-        target_path.write_text(newcode, encoding="utf-8")
-    return diff_code(oldcode, newcode, 5, filename=target_path.name) if diff else newcode
+        target_path.write_text(new_code, encoding="utf-8")
+    return diff_code(old_code, new_code, 5, filename=target_path.name) if diff else new_code
 
 
 def enrich_folder(
@@ -101,9 +100,7 @@ def enrich_folder(
         raise FileNotFoundError(f"Docstub folder {docstub_path} does not exist")
     count = 0
     # list all the .py and .pyi files in the source folder
-    source_files = sorted(
-        list(source_path.rglob("**/*.py")) + list(source_path.rglob("**/*.pyi"))
-    )
+    source_files = sorted(list(source_path.rglob("**/*.py")) + list(source_path.rglob("**/*.pyi")))
     for source_file in source_files:
         try:
             diff = enrich_file(source_file, docstub_path, diff=True, write_back=write_back)
@@ -116,7 +113,7 @@ def enrich_folder(
             if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub file found for {source_file}")) from e
     # run black on the destination folder
-    # no Autoflake as this removes some relevan (unused) imports
     run_black(source_path)
+    # DO NOT run Autoflake as this removes some relevant (unused) imports
 
     return count

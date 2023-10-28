@@ -9,7 +9,10 @@ from mypy.errors import CompileError
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(
-    pyversion=(3, 8),  # documentation uses position-only argument indicator which requires 3.8 or higher
+    pyversion=(
+        3,
+        8,
+    ),  # documentation uses position-only argument indicator which requires 3.8 or higher
     no_import=False,
     include_private=True,
     doc_dir="",
@@ -58,16 +61,18 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     """
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
     # NOTE: FIX 1 add __init__.py to umqtt
-    if (modules_folder / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
+    if (
+        modules_folder / "umqtt/robust.py"
+    ).exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
         log.debug("add missing : umqtt/__init__.py")
         with open(modules_folder / "umqtt" / "__init__.py", "a") as f:
             f.write("")
 
-    modlist = list(modules_folder.glob("**/modules.json"))
+    module_list = list(modules_folder.glob("**/modules.json"))
     r = True
-    if len(modlist) > 1:
-        # try to process each module seperatlely
-        for mod_manifest in modlist:
+    if len(module_list) > 1:
+        # try to process each module separately
+        for mod_manifest in module_list:
             ## generate fyi files for folder
             r = r and generate_pyi_files(mod_manifest.parent)
     else:  # one or less module manifests
@@ -100,8 +105,8 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         py_files = list(modules_folder.rglob("*.py"))
         pyi_files = list(modules_folder.rglob("*.pyi"))
 
-        worklist = pyi_files.copy()
-        for pyi in worklist:
+        work_list = pyi_files.copy()
+        for pyi in work_list:
             # remove all py files that have been stubbed successfully from the list
             try:
                 py_files.remove(pyi.with_suffix(".py"))
