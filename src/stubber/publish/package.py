@@ -27,7 +27,9 @@ log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 
-def package_name(pkg_type: str, *, port: str = "", board: str = "", family: str = "micropython", **kwargs) -> str:
+def package_name(
+    pkg_type: str, *, port: str = "", board: str = "", family: str = "micropython", **kwargs
+) -> str:
     "generate a package name for the given package type"
     if pkg_type == COMBO_STUBS:
         # # {family}-{port}-{board}-stubs
@@ -80,7 +82,9 @@ def get_package(
     )
 
 
-def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str) -> Union[Dict, None]:
+def get_package_info(
+    db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str
+) -> Union[Dict, None]:
     """
     get a package's record from the json db if it can be found
     matches om the package name and version
@@ -88,7 +92,9 @@ def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version:
         mpy_version: micropython/firmware version (1.18)
     """
     # find in the database
-    recs = db.get_by_query(query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name)
+    recs = db.get_by_query(
+        query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name
+    )
     # dict to list
     recs = [{"id": key, "data": recs[key]} for key in recs]
     # sort
@@ -120,7 +126,7 @@ def create_package(
         assert port != "", "port must be specified for combo stubs"
         stubs = combo_sources(family, port, board, ver_flat)
     elif pkg_type == DOC_STUBS:
-        stubs: StubSources = [
+        stubs = [
             (
                 StubSource.DOC,
                 Path(f"{family}-{ver_flat}-docstubs"),
@@ -157,11 +163,15 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
             # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
             # that would also require the port - board - variant to be discoverable runtime
             StubSource.MERGED,
-            Path(f"{family}-{ver_flat}-{port}-merged") if board_l in GENERIC else Path(f"{family}-{ver_flat}-{port}-{board_l}-merged"),
+            Path(f"{family}-{ver_flat}-{port}-merged")
+            if board_l in GENERIC
+            else Path(f"{family}-{ver_flat}-{port}-{board_l}-merged"),
         ),
         (
             StubSource.FROZEN,
-            Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper(),  # BOARD in source frozen path needs to be UPPERCASE
+            Path(f"{family}-{ver_flat}-frozen")
+            / port
+            / board_u.upper(),  # BOARD in source frozen path needs to be UPPERCASE
         ),
         (
             StubSource.CORE,

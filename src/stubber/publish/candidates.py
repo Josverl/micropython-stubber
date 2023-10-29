@@ -38,7 +38,11 @@ def subfolder_names(path: Path):
 
 
 def version_candidates(
-    suffix: str, prefix: str = r".*", *, path: Path = CONFIG.stub_path, oldest: str = OLDEST_VERSION
+    suffix: str,
+    prefix: str = r".*",
+    *,
+    path: Path = CONFIG.stub_path,
+    oldest: str = OLDEST_VERSION,
 ) -> Generator[str, None, None]:
     "get a list of versions for the given family and suffix"
     if path.exists():
@@ -91,8 +95,8 @@ def list_micropython_port_boards(
 def frozen_candidates(
     family: str = "micropython",
     versions: Union[str, List[str]] = V_LATEST,
-    ports: Union[str, List[str]] = "auto",
-    boards: Union[str, List[str]] = "auto",
+    ports: Union[str, List[str]] = "all",
+    boards: Union[str, List[str]] = "all",
     *,
     path: Path = CONFIG.stub_path,
 ) -> Generator[Dict[str, Any], None, None]:
@@ -125,7 +129,9 @@ def frozen_candidates(
                 # lookup the (frozen) micropython ports
                 ports = list_frozen_ports(family, version, path=path)
             else:
-                raise NotImplementedError(f"auto ports not implemented for family {family}")  # pragma: no cover
+                raise NotImplementedError(
+                    f"auto ports not implemented for family {family}"
+                )  # pragma: no cover
             # elif family == "pycom":
             #     ports = ["esp32"]
             # elif family == "lobo":
@@ -134,7 +140,13 @@ def frozen_candidates(
         for port in ports:
             port_path = path / f"{family}-{version}-frozen" / port
             if port_path.exists():
-                yield {"family": family, "version": version, "port": port, "board": GENERIC_L, "pkg_type": COMBO_STUBS}
+                yield {
+                    "family": family,
+                    "version": version,
+                    "port": port,
+                    "board": GENERIC_L,
+                    "pkg_type": COMBO_STUBS,
+                }
             # if not auto_board:
             #     for board in boards:
             #         port_path = board_path/ "board" / board
@@ -152,7 +164,9 @@ def frozen_candidates(
 
                 else:
                     # raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
-                    raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
+                    raise NotImplementedError(
+                        f"auto boards not implemented for family {family}"
+                    )  # pragma: no cover
                 # elif family == "pycom":
                 #     boards = ["wipy", "lopy", "gpy", "fipy"]
             # ---------------------------------------------------------------------------
@@ -166,12 +180,21 @@ def frozen_candidates(
                     "RELEASE",
                     "GENERIC_512K",
                 ]:
-                    yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
+                    yield {
+                        "family": family,
+                        "version": version,
+                        "port": port,
+                        "board": board,
+                        "pkg_type": COMBO_STUBS,
+                    }
 
 
 def is_auto(thing: Union[None, str, List[str]]):
     "Is this version/port/board specified as 'auto' ?"
-    return isinstance(thing, str) and thing == "auto" or isinstance(thing, list) and "auto" in thing
+    if isinstance(thing, str):
+        return thing in ["auto", "all"]
+    if isinstance(thing, list):
+        return any(i in ["auto", "all"] for i in thing)
 
 
 def docstub_candidates(
@@ -182,10 +205,10 @@ def docstub_candidates(
     """
     Generate a list of possible documentation stub candidates for the given family and version.
 
-    Note that the folders do not need to exist, with the exeption of auto which will scan the stubs folder for versions of docstubs
+    Note that the folders do not need to exist, with the exception of auto which will scan the stubs folder for versions of docstubs
     """
     if isinstance(versions, str):
-        if versions == "auto":  # auto with vprefix ...
+        if is_auto(versions):  # auto with vprefix ...
             versions = list(version_candidates(suffix="docstubs", prefix=family, path=path))
         else:
             versions = [versions]
@@ -196,7 +219,11 @@ def docstub_candidates(
 
 
 def board_candidates(
-    family: str = "micropython", versions: Union[str, List[str]] = V_LATEST, *, mpy_path: Path = CONFIG.mpy_path, pt: str = FIRMWARE_STUBS
+    family: str = "micropython",
+    versions: Union[str, List[str]] = V_LATEST,
+    *,
+    mpy_path: Path = CONFIG.mpy_path,
+    pt: str = FIRMWARE_STUBS,
 ):
     """
     generate a list of possible board stub candidates for the given family and version.
@@ -209,7 +236,7 @@ def board_candidates(
     versions = [clean_version(v, flat=False) for v in versions]
 
     for version in versions:
-        # check out the micropthon repo for this version
+        # check out the micropython repo for this version
         if version in ["latest", "master"]:
             r = git.switch_branch(repo=mpy_path, branch="master")
         else:
@@ -219,10 +246,22 @@ def board_candidates(
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
             # Yield the generic port exactly one time
-            yield {"family": family, "version": version, "port": port, "board": GENERIC_U, "pkg_type": pt}
+            yield {
+                "family": family,
+                "version": version,
+                "port": port,
+                "board": GENERIC_U,
+                "pkg_type": pt,
+            }
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
                 if board not in GENERIC:
-                    yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": pt}
+                    yield {
+                        "family": family,
+                        "version": version,
+                        "port": port,
+                        "board": board,
+                        "pkg_type": pt,
+                    }
 
 
 def filter_list(
@@ -241,5 +280,10 @@ def filter_list(
         worklist = [i for i in worklist if i["port"].lower() in ports_]
     if boards and not is_auto(boards):
         boards_ = [i.lower() for i in boards]
-        worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_", "") in boards_]
+        worklist = [
+            i
+            for i in worklist
+            if i["board"].lower() in boards_
+            or i["board"].lower().replace("generic_", "") in boards_
+        ]
     return worklist
