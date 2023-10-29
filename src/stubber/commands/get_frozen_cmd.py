@@ -95,10 +95,13 @@ def cli_get_frozen(
     )
     if docstubs_path.exists():
         log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
-        merged = enrich_folder(
-            stub_path, docstubs_path, show_diff=False, write_back=True, require_docstub=False
-        )
-        if merged:
+        if merged := enrich_folder(
+            stub_path,
+            docstubs_path,
+            show_diff=False,
+            write_back=True,
+            require_docstub=False,
+        ):
             log.info(f"Enriched {merged} frozen modules from docstubs")
     else:
         log.info(f"No docstubs found at {docstubs_path}")
