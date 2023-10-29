@@ -12,45 +12,8 @@ from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.missing_class_methods import add_machine_pin_call
 from stubber.publish.package import GENERIC, GENERIC_L
+from stubber.publish.pathnames import DEFAULT_BOARDS, get_base, get_board_path, get_merged_path
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version
-
-## Helper function
-
-
-def get_base(candidate: Dict[str, str], version: Optional[str] = None):
-    if version:
-        version = clean_version(version, flat=True)
-    else:
-        version = clean_version(candidate["version"], flat=True)
-    base = f"{candidate['family']}-{version}"
-    return base.lower()
-
-
-def board_folder_name(fw: Dict, *, version: Optional[str] = None):
-    """Return the name of the firmware folder. Can be in AnyCase."""
-    base = get_base(fw, version=version)
-    folder_name = (
-        f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    )
-    # do NOT force name to lowercase
-    # remove GENERIC Prefix
-    folder_name = folder_name.replace("-generic_", "-").replace("-GENERIC_", "-")
-    return folder_name
-
-
-def get_board_path(candidate: Dict):
-    board_path = CONFIG.stub_path / board_folder_name(candidate)
-
-    if candidate["version"] == "latest" and not board_path.exists():
-        log.debug(f"no board stubs found for {candidate['version']}, trying stable")
-        board_path = CONFIG.stub_path / board_folder_name(candidate, version=CONFIG.stable_version)
-
-    return board_path
-
-
-def get_merged_path(fw: Dict):
-    return CONFIG.stub_path / (board_folder_name(fw) + "-merged")
 
 
 def merge_all_docstubs(
@@ -65,7 +28,7 @@ def merge_all_docstubs(
     if versions is None:
         versions = [CONFIG.stable_version]
     if ports is None:
-        ports = ["auto"]
+        ports = ["all"]
     if boards is None:
         boards = [GENERIC_L]
     if isinstance(versions, str):
@@ -84,6 +47,9 @@ def merge_all_docstubs(
         log.error("No candidates found")
         return
     for candidate in candidates:
+        # use the default board for the port
+        if candidate["board"] in GENERIC:
+            candidate["board"] = DEFAULT_BOARDS[candidate["port"]][0]
         # check if we have board stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths
