@@ -1,5 +1,5 @@
 # type: ignore
-# todo: micropython.asm_thumb - document that the opcodes are note recognized 
+# todo: micropython.asm_thumb - document that the opcodes are not recognized 
 # this is similar to the rp2.PIO_asm() method
 
 # flash LED #1 using inline assembler
