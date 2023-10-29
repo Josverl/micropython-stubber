@@ -17,7 +17,7 @@ from stubber.utils.config import CONFIG
 def build_multiple(
     family: str = "micropython",
     versions: List[str] = ["v1.19.1"],
-    ports: List[str] = ["auto"],
+    ports: List[str] = ["all"],
     boards: List[str] = [GENERIC_U],
     production: bool = False,
     clean: bool = False,
@@ -46,7 +46,7 @@ def build_multiple(
 def publish_multiple(
     family: str = "micropython",
     versions: List[str] = ["v1.19.1"],
-    ports: List[str] = ["auto"],
+    ports: List[str] = ["all"],
     boards: List[str] = [GENERIC_U],
     production: bool = False,
     clean: bool = False,

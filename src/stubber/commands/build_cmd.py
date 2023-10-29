@@ -29,7 +29,7 @@ from stubber.utils.config import CONFIG
     "-p",
     "ports",
     multiple=True,
-    default=["auto"],
+    default=["all"],
     show_default=True,
     help="multiple: ",
 )
@@ -38,7 +38,7 @@ from stubber.utils.config import CONFIG
     "-b",
     "boards",
     multiple=True,
-    default=[GENERIC_U],  # or "auto" ?
+    default=[GENERIC_U],  # or "all" ?
     show_default=True,
     help="multiple: ",
 )
