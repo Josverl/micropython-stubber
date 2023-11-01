@@ -19,7 +19,7 @@ from packaging.version import parse
 
 import stubber.basicgit as git
 from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
-from stubber.publish.package import GENERIC, GENERIC_L, GENERIC_U
+from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version, micropython_versions
 

@@ -9,8 +9,9 @@ from loguru import logger as log
 
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.database import get_database
+from stubber.publish.defaults import GENERIC_U
 from stubber.publish.enums import COMBO_STUBS
-from stubber.publish.package import GENERIC_U, get_package
+from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
 
 

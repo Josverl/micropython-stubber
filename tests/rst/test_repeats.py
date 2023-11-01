@@ -138,7 +138,7 @@ def test_sequence_3():
     r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
-    r.rst_text = SEQ_3.splitlines(keepends=True)
+    r.rst_text = SEQ_3.splitlines(keepends=True) # type: ignore
     r.filename = "testdata.py"
     r.current_module = "testdata"
     r.max_line = len(r.rst_text) - 1
@@ -181,7 +181,7 @@ def test_sequence_functions():
     r = RSTWriter()
     # Plug in test data
 
-    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)
+    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True) # type: ignore
     r.filename = "re.py"
     r.current_module = "re"
     r.max_line = len(r.rst_text) - 1
@@ -234,7 +234,7 @@ def test_sequence_methods():
     r = RSTWriter()
     # Plug in test data
 
-    r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True)
+    r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True) # type: ignore
     r.filename = "re.py"
     r.current_module = "re"
     r.max_line = len(r.rst_text) - 1
