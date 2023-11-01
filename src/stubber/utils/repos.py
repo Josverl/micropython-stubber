@@ -68,7 +68,7 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     return version_commit
 
 
-def match_lib_with_mpy(version_tag: str, lib_path: Path) -> Bool:
+def match_lib_with_mpy(version_tag: str, lib_path: Path) -> bool:
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     #  check if micropython-lib has matching tags
