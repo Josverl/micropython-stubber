@@ -1,4 +1,3 @@
-
 # Welcome to MicroPython-Stubber!
 
 ```{toctree}
@@ -16,12 +15,11 @@ intro.md
 55_doc_stubs.md
 60_repos.md
 62_codemods.md
-65_scripts.md
+65_bulk_stubber.md
 70_stub_overview.md
 80_references.md
 90_documentation.md
 ```
-
 
 ```{toctree}
 :caption: 'Development:'
@@ -30,7 +28,9 @@ developing.md
 testing.md
 publish.md
 ```
+
 api/index.rst
+
 ```
 
 # Indices and tables
@@ -38,3 +38,4 @@ api/index.rst
 - {ref}`genindex`
 - {ref}`modindex`
 - {ref}`search`
+```
