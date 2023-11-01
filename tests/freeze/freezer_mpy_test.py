@@ -15,7 +15,7 @@ from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 
 # Module Under Test
 from stubber.freeze.get_frozen import freeze_any, get_manifests
-from stubber.publish.package import GENERIC_L, GENERIC_U
+from stubber.publish.defaults import GENERIC_L, GENERIC_U
 from stubber.utils.repos import switch
 
 # pylint: disable=wrong-import-position,import-error

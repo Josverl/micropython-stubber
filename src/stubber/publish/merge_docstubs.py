@@ -12,7 +12,8 @@ from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.missing_class_methods import add_machine_pin_call
 from stubber.publish.package import GENERIC, GENERIC_L
-from stubber.publish.pathnames import DEFAULT_BOARDS, get_base, get_board_path, get_merged_path
+from stubber.publish.defaults import DEFAULT_BOARDS
+from stubber.publish.pathnames import  get_base, get_board_path, get_merged_path
 from stubber.utils.config import CONFIG
 
 

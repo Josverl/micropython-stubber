@@ -10,17 +10,11 @@ from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
 
+from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.stubpacker import StubPackage, StubSources
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-
-GENERIC_L = "generic"
-"generic lowercase"
-GENERIC_U = "GENERIC"
-"GENERIC uppercase"
-GENERIC = {GENERIC_L, GENERIC_U}
-"GENERIC eithercase"
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()
@@ -144,8 +138,6 @@ def create_package(
 def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSources:
     """
     Build a source set for combo stubs
-        -
-
     """
     # Use lower case for paths to avoid case sensitive issues
     port = port.lower()
@@ -155,26 +147,27 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     board_u = board_l.upper()
     board_l = board_l.replace("generic_", "")  # @GENERIC Prefix
 
+    # StubSource.FIRMWARE,
+    # Path(f"{family}-{ver_flat}-{port}"),
+    # TODO: look for the most specific firmware stub folder that is available ?
+    # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
+    # that would also require the port - board - variant to be discoverable runtime
+
+    if board_l in GENERIC:
+        merged_path = Path(f"{family}-{ver_flat}-{port}-merged")
+        if not merged_path.exists():
+            board_l = default_board(port)
+            merged_path = Path(f"{family}-{ver_flat}-{port}-{board_l}-merged")
+    else:
+        merged_path = Path(f"{family}-{ver_flat}-{port}-{board_l}-merged")
+
+    # BOARD in source frozen path needs to be UPPERCASE
+    frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()
+    # TODO : Add version to core stubs
+    core_path = Path(f"{family}-core")
+
     return [
-        (
-            # StubSource.FIRMWARE,
-            # Path(f"{family}-{ver_flat}-{port}"),
-            # TODO: look for the most specific firmware stub folder that is available ?
-            # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
-            # that would also require the port - board - variant to be discoverable runtime
-            StubSource.MERGED,
-            Path(f"{family}-{ver_flat}-{port}-merged")
-            if board_l in GENERIC
-            else Path(f"{family}-{ver_flat}-{port}-{board_l}-merged"),
-        ),
-        (
-            StubSource.FROZEN,
-            Path(f"{family}-{ver_flat}-frozen")
-            / port
-            / board_u.upper(),  # BOARD in source frozen path needs to be UPPERCASE
-        ),
-        (
-            StubSource.CORE,
-            Path(f"{family}-core"),  # TODO : Add version to core stubs
-        ),
+        (StubSource.MERGED, merged_path),
+        (StubSource.FROZEN, frozen_path),
+        (StubSource.CORE, core_path),
     ]

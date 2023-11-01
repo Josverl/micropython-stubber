@@ -8,19 +8,10 @@ from typing import Dict, List, Optional
 
 from loguru import logger as log
 
-from stubber.publish.package import GENERIC, GENERIC_L
+from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 
-# The default board for the ports modules documented with base name only
-# ESP32-GENERIC is currently hardcoded
-DEFAULT_BOARDS: Dict[str, List[str]] = {
-    "stm32": ["PYBV11"],
-    "esp32": ["GENERIC"],
-    "esp8266": ["GENERIC"],
-    "rp2": ["PICO"],
-    "samd": ["SEEED_WIO_TERMINAL"],
-}
 
 
 ## Helper functions
