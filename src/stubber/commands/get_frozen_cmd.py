@@ -47,6 +47,7 @@ def cli_get_frozen(
     if version:
         result = fetch_repos(version, CONFIG.mpy_path, CONFIG.mpy_lib_path)
         if not result:
+            log.error("Failed to fetch repos for version: {} for micropython folder: {} and micropython-lib folder: {}".format(version, CONFIG.mpy_path.as_posix(), CONFIG.mpy_lib_path.as_posix()))
             return -1
     else:
         version = utils.clean_version(git.get_local_tag(CONFIG.mpy_path.as_posix()) or "0.0")
