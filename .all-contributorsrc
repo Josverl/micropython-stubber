@@ -223,6 +223,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "samskiter",
+      "name": "Sam Duke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1271643?v=4",
+      "profile": "https://github.com/samskiter",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#11---contributions)",
@@ -232,5 +241,6 @@
   "repoHost": "https://github.com",
   "skipCi": true,
   "commitConvention": "none",
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "commitType": "docs"
 }
