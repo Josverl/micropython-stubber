@@ -46,7 +46,8 @@
             "args": [
                 "-v",
                 "-v",
-                "get-docstubs",
+                "switch",
+                "v1.20.0",
                 // "build",
                 // "--version",
                 // "latest",
