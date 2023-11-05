@@ -140,6 +140,7 @@ def stub_ignore(line, version, port, board, linter="pyright", is_source=True) ->
         id, condition = comment.split(":")
         if id.strip() != "stubs-ignore":
             return False
+        condition = condition.strip()
     else:
         condition = line.strip()
     if condition.lower().startswith("skip"):
