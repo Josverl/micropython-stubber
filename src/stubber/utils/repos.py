@@ -72,22 +72,25 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     return version_commit
 
 
-def match_lib_with_mpy(version_tag: str, lib_path: Path) -> bool:
+def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool:
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     #  check if micropython-lib has matching tags
     if version_tag == "latest":
-        return git.checkout_commit("master", lib_path)
+        # micropython-lib is now a submodule
+        result = git.checkout_commit("master", lib_path)
+        if not result:
+            log.error("Could not checkout micropython-lib @master")
+            return False
+
+        return git.sync_submodules(mpy_path)
     elif Version(version_tag) >= Version("v1.20.0"):
-        # TODO:if version is v1.12.0 or newer
-        #   then use submodules to checkout the correct version of micropython-lib
-        #   git submodule update lib/micropython-lib
-        #   or use the new git tags to checkout the correct version of micropython-lib
-        # else
-        # clean the submodules for just to be sure
-        #   git submodule foreach --recursive git clean -xfd
-        #   use the micropython_tags.csv to find the correct commit hash
-        return git.checkout_tag(version_tag, lib_path)
+        # micropython-lib is now a submodule
+        result = git.checkout_tag(version_tag, lib_path)
+        if not result:
+            log.error("Could not checkout micropython-lib @master")
+            return False
+        return git.sync_submodules(mpy_path)
     else:
         log.info(
             f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
@@ -113,10 +116,16 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
-    result = match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
+    result = match_lib_with_mpy(version_tag=tag, mpy_path=mpy_path, lib_path=mpy_lib_path)
 
-    log.info(f"{mpy_path} {git.get_local_tag(mpy_path)}")
-    log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_lib_path)}")
+    log.info(f"{str(mpy_path):<40} {git.get_local_tag(mpy_path)}")
+    log.info(f"{str(mpy_lib_path):<40} {git.get_local_tag(mpy_lib_path)}")
+    try:
+        sub_mod_path = mpy_path / "lib/micropython-lib"
+        if (sub_mod_path / ".git").exists():
+            log.info(f"{str(sub_mod_path):<40} {git.get_local_tag(sub_mod_path)}")
+    except Exception:
+        pass
     return result
 
 
