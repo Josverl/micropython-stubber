@@ -4,16 +4,15 @@ Merge firmware stubs and docstubs into a single folder
 
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
+from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.missing_class_methods import add_machine_pin_call
-from stubber.publish.package import GENERIC, GENERIC_L
-from stubber.publish.defaults import DEFAULT_BOARDS
-from stubber.publish.pathnames import  get_base, get_board_path, get_merged_path
+from stubber.publish.pathnames import get_base, get_board_path, get_merged_path
 from stubber.utils.config import CONFIG
 
 
@@ -50,7 +49,7 @@ def merge_all_docstubs(
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
-            candidate["board"] = DEFAULT_BOARDS[candidate["port"]][0]
+            candidate["board"] = default_board(candidate["port"])
         # check if we have board stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths
