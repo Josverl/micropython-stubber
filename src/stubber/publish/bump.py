@@ -66,7 +66,7 @@ def bump_version(
             parts.append(f".a{rc}")
         # ----------------------------------------------------------------------
         # post
-        if post_bump and rc == 0:
+        elif post_bump :
             parts.append(".post1" if current.post is None else f".post{current.post + 1}")
         # ----------------------------------------------------------------------
         # Development release

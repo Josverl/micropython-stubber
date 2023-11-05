@@ -72,13 +72,12 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     return version_commit
 
 
-def match_lib_with_mpy(version_tag: str, lib_path: Path):
+def match_lib_with_mpy(version_tag: str, lib_path: Path) -> bool:
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     #  check if micropython-lib has matching tags
     if version_tag == "latest":
-        git.checkout_commit("master", lib_path)
-        return git.get_local_tag(lib_path)
+        return git.checkout_commit("master", lib_path)
     elif Version(version_tag) >= Version("v1.20.0"):
         # TODO:if version is v1.12.0 or newer
         #   then use submodules to checkout the correct version of micropython-lib
