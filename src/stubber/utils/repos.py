@@ -39,7 +39,7 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
-    match_lib_with_mpy(version_tag=tag, lib_path=mpy_lib_path)
+    match_lib_with_mpy(version_tag=tag, mpy_path=mpy_path, lib_path=mpy_lib_path)
 
 
 def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
