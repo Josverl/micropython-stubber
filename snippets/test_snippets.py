@@ -46,7 +46,7 @@ PORTBOARD_FEATURES = {
     # "rp2-pimoroni_picolipo_16mb": CORE,
 }
 
-SOURCES = ["local", "pypi"]
+SOURCES = ["local"] # , "pypi"] # do not pull from PyPI all the time
 VERSIONS = [
     "latest",
     "v1.21.0",
