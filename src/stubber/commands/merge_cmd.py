@@ -5,6 +5,7 @@ from typing import List, Union
 
 import click
 from loguru import logger as log
+
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.package import GENERIC_L
 from stubber.utils.config import CONFIG
@@ -20,7 +21,7 @@ from .cli import stubber_cli
     "-V",
     "versions",
     multiple=True,
-    default=["auto"],
+    default=["all"],
     # type=click.Choice(ALL_VERSIONS),
     show_default=True,
     help="'latest', 'auto', or one or more versions",
@@ -30,7 +31,7 @@ from .cli import stubber_cli
     "-p",
     "ports",
     multiple=True,
-    default=["auto"],
+    default=["all"],
     show_default=True,
     help="multiple: ",
 )
@@ -39,7 +40,7 @@ from .cli import stubber_cli
     "-b",
     "boards",
     multiple=True,
-    default=[GENERIC_L],  # or "auto" ?
+    default=[GENERIC_L],  # or "all" ?
     show_default=True,
     help="multiple: ",
 )
@@ -60,4 +61,6 @@ def cli_merge_docstubs(
         versions = list(versions)
     # single version should be a string
     log.info(f"Merge docstubs for {family} {versions}")
-    _ = merge_all_docstubs(versions=versions, family=family, boards=boards, ports=ports, mpy_path=CONFIG.mpy_path)
+    _ = merge_all_docstubs(
+        versions=versions, family=family, boards=boards, ports=ports, mpy_path=CONFIG.mpy_path
+    )

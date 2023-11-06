@@ -26,9 +26,13 @@ def test_merge_all_docstubs_mocked(mocker, tmp_path, pytestconfig):
         ],
     )
     m_copy_and_merge_docstubs: MagicMock = mocker.patch("stubber.publish.merge_docstubs.copy_and_merge_docstubs", autospec=True)
+    m_add_machine_pin_call: MagicMock = mocker.patch("stubber.publish.merge_docstubs.add_machine_pin_call", autospec=True)
+
+    # mock pathlib.Path.exists to return True so there is no dependency of folders existing on the test system
+    mocker.patch("stubber.publish.merge_docstubs.Path.exists", autospec=True, return_value=True)
 
     result = merge_all_docstubs(["v1.18", "v1.19"])
-
+    assert result == 2
     assert m_board_candidates.call_count == 1
     assert m_copy_and_merge_docstubs.call_count == 2
 

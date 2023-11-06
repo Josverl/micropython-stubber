@@ -97,7 +97,7 @@
     "markiscodecoverage.searchCriteria": "results/coverage*.lcov",
     "debug.allowBreakpointsEverywhere": true,
     "debug.terminal.clearBeforeReusing": true,
-    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticSeverityOverrides": {
         "reportUnusedVariable": "warning",
         "reportUnusedImport": "warning",

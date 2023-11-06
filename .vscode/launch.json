@@ -46,7 +46,8 @@
             "args": [
                 "-v",
                 "-v",
-                "get-docstubs",
+                "switch",
+                "v1.20.0",
                 // "build",
                 // "--version",
                 // "latest",
@@ -66,10 +67,6 @@
                 // "--build",
                 // "switch",
                 // "v1.20.0"
-                // "get-frozen",
-                // "--version",
-                // "v1.19.1",
-                // "--port",
                 // "--dry-run",
                 //
                 // "minify",

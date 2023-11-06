@@ -56,21 +56,21 @@ mpy_v1_9_4 = UName(
     machine="ESP32 module with ESP32",
 )
 
-mpy_v1_11_8_esp8622 = UName(
+mpy_v1_11_8_esp8266 = UName(
     sysname="esp8266",
     nodename="esp8266",
     release="2.2.0-dev(9422289)",
     version="v1.11-8-g48dcbbe60 on 2019-05-29",
     machine="ESP module with ESP8266",
 )
-mpy_v1_11_esp8622 = UName(
+mpy_v1_11_esp8266 = UName(
     sysname="esp8266",
     nodename="esp8266",
     release="2.2.0-dev(9422289)",
     version="v1.11 on 2019-05-29",
     machine="ESP module with ESP8266",
 )
-mpy_v1_17_esp8622_GEN = UName(
+mpy_v1_17_esp8266_GEN = UName(
     sysname="esp8266",
     nodename="esp8266",
     release="2.0.0(5a875ba)",
@@ -108,16 +108,45 @@ fwid_test_cases = [
     # mpy esp32
     ("micropython-v1.9.4-esp32-GENERIC", "micropython", (1, 9, 4), "esp32", mpy_v1_9_4, []),
     ("micropython-v1.10-esp32-GENERIC", "micropython", (1, 10, 0), "esp32", mpy_v1_10, []),
-    ("micropython-v1.13-103-esp32-GENERIC_SPIRAM", "micropython", (1, 13, 0), "esp32", mpy_v1_13_build, []),
-    # mpy esp8622
-    ("micropython-v1.11-esp8622-GENERIC", "micropython", (1, 11, 0), "esp8622", mpy_v1_11_esp8622, []),
-    ("micropython-v1.11-8-esp8622-GENERIC", "micropython", (1, 11, 0), "esp8622", mpy_v1_11_8_esp8622, []),
-    ("micropython-v1.17-esp8622-GENERIC", "micropython", (1, 17, 0), "esp8622", mpy_v1_17_esp8622_GEN, []),
+    # ("micropython-v1.13-103-esp32-GENERIC_SPIRAM", "micropython", (1, 13, 0), "esp32", mpy_v1_13_build, []),
+    (
+        "micropython-v1.13-103-esp32-GENERIC",
+        "micropython",
+        (1, 13, 0),
+        "esp32",
+        mpy_v1_13_build,
+        [],
+    ),
+    # mpy esp8266
+    (
+        "micropython-v1.11-esp8266-GENERIC",
+        "micropython",
+        (1, 11, 0),
+        "esp8266",
+        mpy_v1_11_esp8266,
+        [],
+    ),
+    (
+        "micropython-v1.11-8-esp8266-GENERIC",
+        "micropython",
+        (1, 11, 0),
+        "esp8266",
+        mpy_v1_11_8_esp8266,
+        [],
+    ),
+    (
+        "micropython-v1.17-esp8266-GENERIC",
+        "micropython",
+        (1, 17, 0),
+        "esp8266",
+        mpy_v1_17_esp8266_GEN,
+        [],
+    ),
     # mpy pyb1
     ("micropython-v1.13-95-stm32-PYBV11", "micropython", (1, 13, 0), "pyb1", pyb1_v1_13_PYB11, []),
     # RP2
     (
-        "micropython-v1.18-rp2-PICO",
+        "micropython-v1.18-rp2-RPI_PICO",
         "micropython",
         (1, 18, 0),
         "rp2",
@@ -131,7 +160,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.19.1-721-rp2-PICO_W",
+        "micropython-v1.19.1-721-rp2-RPI_PICO_W",
         "micropython",
         (1, 19, 1),
         "rp2",

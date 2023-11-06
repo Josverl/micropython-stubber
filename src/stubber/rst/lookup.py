@@ -16,8 +16,6 @@ __all__ = [
     "RST_DOC_FIXES",
     "DOCSTUB_SKIP",
     "U_MODULES",
-    "DEFAULT_BOARDS",
-    # "FORCE_NON_DETECED",
 ]
 
 # all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
@@ -25,18 +23,6 @@ TYPING_IMPORT: List[str] = [
     "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar, Iterator",
     "from _typeshed import Incomplete",
 ]
-
-
-# The default board for the ports  modules documented with base name only
-# TODO: these are not yest used in the stubber logic
-# ESP32-GENERIC is curently hardcoded
-DEFAULT_BOARDS: Dict[str, List[str]] = {
-    "stm32": ["stm32-PYBV11"],
-    "esp32": ["esp32-GENERIC", "esp32"],
-    "esp8266": ["esp8266-GENERIC", "esp8266"],
-    "rp2": ["rp2-PICO", "rp2-PICO_W"],
-    "samd": ["samd-SEEED_WIO_TERMINAL"],
-}
 
 
 @dataclass
@@ -142,6 +128,9 @@ LOOKUP_LIST = {
     "machine.Signal.value": ("int", 0.95),
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
     "machine.UART.irq": ("Incomplete", 0.95),  # no IRQ type defined
+    "machine.UART.write": ("Union[int,None]", 0.95),
+    "machine.UART.readinto": ("Union[int,None]", 0.95),
+    "machine.UART.readline": ("Union[str,None]", 0.95),
     "math.isnan": ("bool", 0.95),
     "micropython.opt_level": ("Incomplete", 0.95),  # Not clear in docstring
     # since 1.19 const can also be string , bytes or tuple
@@ -180,7 +169,7 @@ LOOKUP_LIST = {
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
     # espnow
-    "espnow.ESPNow.recv": ("List", 0.95),  # list / ? tuple of bytestrings
+    "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]]", 0.95),  # list / ? tuple of bytestrings
 }
 
 
