@@ -24,4 +24,6 @@ esp.flash_read(byte_offset, len(buffer))
 pin = Pin(18)
 grb_buf = (1, 20, 2, 40)
 is800khz = False
-esp.neopixel_write(pin, grb_buf, is800khz)  # type: ignore # TODO: investigate
+esp.neopixel_write(pin, grb_buf, is800khz)  
+
+# type: ignore # TODO: investigate

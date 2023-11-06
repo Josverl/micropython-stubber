@@ -25,6 +25,10 @@
             "path": "check_unix"
         },
         {
+            "name": "feat_uasyncio",
+            "path": "feat_uasyncio"
+        },
+        {
             "name": "feat_micropython",
             "path": "feat_micropython"
         },
@@ -53,7 +57,7 @@
             "path": "."
         },
         {
-            "path": "feat_uasyncio"
+            "path": "../repos/micropython-stubs"
         }
     ],
     "settings": {

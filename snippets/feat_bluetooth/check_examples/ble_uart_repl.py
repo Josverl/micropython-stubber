@@ -15,7 +15,7 @@ from micropython import const
 _MP_STREAM_POLL = const(3)
 _MP_STREAM_POLL_RD = const(0x0001)
 
-# TODO: Remove this when STM32 gets machine.Timer.
+# Remove this when STM32 gets machine.Timer.
 if hasattr(machine, "Timer"):
     _timer = machine.Timer(-1)
 else:
