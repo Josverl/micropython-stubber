@@ -1,4 +1,4 @@
-"""common functions for freeze stub generation"""
+"""common functions for frozen stub generation"""
 
 import re
 import shutil
@@ -7,7 +7,7 @@ from typing import Tuple
 
 from loguru import logger as log
 
-from stubber.publish.package import GENERIC_U
+from stubber.publish.defaults import GENERIC_U
 
 
 def get_portboard(manifest_path: Path):

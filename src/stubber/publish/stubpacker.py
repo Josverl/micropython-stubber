@@ -36,7 +36,6 @@ STUB_SKIPPER = {
     StubSource.FIRMWARE: ["builtins"],
     StubSource.DOC: [],
     StubSource.CORE: [],
-    
 }
 
 
@@ -49,6 +48,7 @@ class StubPackage:
         - package_path - the path to the folder where the package info will be stored ('./publish').
         - pkg_version - the version of the package as used on PyPi (semver). Is stored directly in the `pyproject.toml` file
         - pyproject - the contents of the `pyproject.toml` file
+        
     methods:
         - from_json - load the package from json
         - to_json - return the package as json
@@ -175,7 +175,7 @@ class StubPackage:
         """Get the next prerelease version for the package."""
         rc = 1
         if describe := get_git_describe(CONFIG.mpy_path.as_posix()):
-            # use versiontag and the nummer of commits since the last tag
+            # use versiontag and the number of commits since the last tag
             # "v1.19.1-841-g3446"
             # 'v1.22.0-preview-19-g8eb7721b4'
             parts = describe.split("-", 3)
@@ -233,7 +233,7 @@ class StubPackage:
     def to_dict(self) -> dict:
         """return the package as a dict to store in the jsondb
 
-        need to simplify some of the Objects to allow serialisation to json
+        need to simplify some of the Objects to allow serialization to json
         - the paths to posix paths
         - the version (semver) to a string
         - toml file to list of lines
@@ -297,7 +297,7 @@ class StubPackage:
         """
         updated_sources = []
         for stub_type, fw_path in stub_sources:
-            # prefer -merged stubs over bare firmwre stubs
+            # prefer -merged stubs over bare firmware stubs
             if stub_type == StubSource.FIRMWARE:
                 # Check if -merged folder exists and use that instead
                 if fw_path.name.endswith("-merged"):

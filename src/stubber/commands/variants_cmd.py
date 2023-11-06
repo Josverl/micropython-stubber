@@ -1,6 +1,5 @@
 """Create all variant of createstubs*.py."""
 from pathlib import Path
-from typing import Optional
 
 import click
 from loguru import logger as log

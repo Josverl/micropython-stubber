@@ -46,7 +46,7 @@ PORTBOARD_FEATURES = {
     # "rp2-pimoroni_picolipo_16mb": CORE,
 }
 
-SOURCES = ["local", "pypi"]
+SOURCES = ["local"] # , "pypi"] # do not pull from PyPI all the time
 VERSIONS = [
     "latest",
     "v1.21.0",
@@ -140,6 +140,7 @@ def stub_ignore(line, version, port, board, linter="pyright", is_source=True) ->
         id, condition = comment.split(":")
         if id.strip() != "stubs-ignore":
             return False
+        condition = condition.strip()
     else:
         condition = line.strip()
     if condition.lower().startswith("skip"):

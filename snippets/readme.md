@@ -1,8 +1,10 @@
 # Validation Snippets
 
 This folder contains a collection of code snippets to help validate the quality of the stubs by providing some code to validate.
+Think of this as 'End to End' tests or integration tests for the stubs.
 
-please read : https://typing.readthedocs.io/en/latest/source/quality.html#testing-using-assert-type-and-warn-unused-ignores
+
+Please read : https://typing.readthedocs.io/en/latest/source/quality.html#testing-using-assert-type-and-warn-unused-ignores
 
 ## Usage
 
@@ -14,9 +16,9 @@ You can update / install the type-stubs in the various typings folders by runnin
 ```powershell
 # Update the type stubs
 # , "v1.18.0", "v1.17.0"
-foreach ($version in @( "latest", "v1.20.0", "v1.19.1" )) {
-    stubber switch $version
-    stubber get-docstubs 
+foreach ($version in @( "latest","v1.21.0", "v1.20.0", "v1.19.1" )) {
+    stubber get-docstubs --version $version
+    stubber get-frozen --version $version
     stubber merge --version $version --port auto --board auto
     stubber build --version $version --port auto --board auto
 }

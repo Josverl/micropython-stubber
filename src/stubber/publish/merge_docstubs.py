@@ -4,45 +4,16 @@ Merge firmware stubs and docstubs into a single folder
 
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
+from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.missing_class_methods import add_machine_pin_call
-from stubber.publish.package import GENERIC, GENERIC_L
+from stubber.publish.pathnames import get_base, get_board_path, get_merged_path
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version
-
-## Helper function
-
-
-def get_base(candidate: Dict[str, str], version: Optional[str] = None):
-    if not version:
-        version = clean_version(candidate["version"], flat=True)
-    base = f"{candidate['family']}-{version}"
-    return base.lower()
-
-
-def board_folder_name(fw: Dict, *, version: Optional[str] = None):
-    """Return the name of the firmware folder. Can be in AnyCase."""
-    base = get_base(fw, version=version)
-    folder_name = (
-        f"{base}-{fw['port']}" if fw["board"] in GENERIC else f"{base}-{fw['port']}-{fw['board']}"
-    )
-    # do NOT force name to lowercase
-    # remove GENERIC Prefix
-    folder_name = folder_name.replace("-generic_", "-").replace("-GENERIC_", "-")
-    return folder_name
-
-
-def get_board_path(fw: Dict):
-    return CONFIG.stub_path / board_folder_name(fw)
-
-
-def get_merged_path(fw: Dict):
-    return CONFIG.stub_path / (board_folder_name(fw) + "-merged")
 
 
 def merge_all_docstubs(
@@ -57,7 +28,7 @@ def merge_all_docstubs(
     if versions is None:
         versions = [CONFIG.stable_version]
     if ports is None:
-        ports = ["auto"]
+        ports = ["all"]
     if boards is None:
         boards = [GENERIC_L]
     if isinstance(versions, str):
@@ -76,32 +47,22 @@ def merge_all_docstubs(
         log.error("No candidates found")
         return
     for candidate in candidates:
+        # use the default board for the port
+        if candidate["board"] in GENERIC:
+            candidate["board"] = default_board(candidate["port"])
         # check if we have board stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
-        if not doc_path.exists():
-            log.warning(f"No docstubs found for {candidate['version']}")
-            continue
         # src and dest paths
         board_path = get_board_path(candidate)
         merged_path = get_merged_path(candidate)
 
+        # only continue if both folders exist
+        if not doc_path.exists():
+            log.warning(f"No docstubs found for {candidate['version']}")
+            continue
         if not board_path.exists():
-            log.info(f"no firmware stubs found in {board_path}")
-            if candidate["version"] == "latest":
-                # for the latest we do a bit more effort to get something 'good enough'
-                # try to get the board_path from the last released version as the basis
-                board_path = CONFIG.stub_path / board_folder_name(candidate, version="latest")
-                # check again
-                if board_path.exists():
-                    log.info(f"using {board_path.name} as the basis for {merged_path.name}")
-                else:
-                    # only continue if both folders exist
-                    log.debug(f"skipping {merged_path.name}, no firmware stubs found")
-                    continue
-            else:
-                # only continue if both folders exist
-                log.debug(f"skipping {merged_path.name}, no firmware stubs found")
-                continue
+            log.debug(f"skipping {merged_path.name}, no firmware stubs found")
+            continue
         log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
         # Add methods from docstubs to the firmware stubs that do not exist in the firmware stubs

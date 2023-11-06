@@ -14,7 +14,11 @@ from loguru import logger as log
 from packaging.version import parse
 
 # Token with no permissions
-PAT_NO_ACCESS = "github_pat" + "_11AAHPVFQ0IwtAmfc3cD5Z" + "_xOVII22ErRzzZ7xwwxRcNotUu4krMMbjinQcsMxjnWkYFBIDRWFlZMaHSqq"
+PAT_NO_ACCESS = (
+    "github_pat"
+    + "_11AAHPVFQ0IwtAmfc3cD5Z"
+    + "_xOVII22ErRzzZ7xwwxRcNotUu4krMMbjinQcsMxjnWkYFBIDRWFlZMaHSqq"
+)
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(PAT)
 
@@ -31,7 +35,9 @@ def _run_local_git(
         if repo:
             if isinstance(repo, str):
                 repo = Path(repo)
-            result = subprocess.run(cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix())
+            result = subprocess.run(
+                cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix()
+            )
         else:
             result = subprocess.run(cmd, capture_output=capture_output, check=True)
     except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
@@ -42,11 +48,14 @@ def _run_local_git(
         return None
     if result.stderr and result.stderr != b"":
         stderr = result.stderr.decode("utf-8")
+        if "cloning into" in stderr.lower():
+            # log.info(stderr)
+            expect_stderr = True
         if "warning" in stderr.lower():
             log.warning(stderr)
             expect_stderr = True
         elif capture_output and echo_output:  # pragma: no cover
-            log.error(stderr)
+            log.info(stderr)
         if not expect_stderr:
             raise ChildProcessError(stderr)
 
@@ -69,7 +78,9 @@ def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str
         return False
 
 
-def get_local_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) -> Union[str, None]:
+def get_local_tag(
+    repo: Optional[Union[str, Path]] = None, abbreviate: bool = True
+) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo
     repo Path should be in the form of : repo = "./repo/micropython"
@@ -81,7 +92,11 @@ def get_local_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = Tr
     elif isinstance(repo, str):
         repo = Path(repo)
 
-    result = _run_local_git(["git", "describe"], repo=repo.as_posix(), expect_stderr=True)
+    result = _run_local_git(
+        ["git", "describe", "--tags"],
+        repo=repo.as_posix(),
+        expect_stderr=True,
+    )
     if not result:
         return None
     tag: str = result.stdout.decode("utf-8")
@@ -149,13 +164,14 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     return True
 
 
-def synch_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
+def sync_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
     """
-    make sure any submodules are in syncj
+    make sure any submodules are in sync
     """
     cmds = [
         ["git", "submodule", "sync", "--quiet"],
-        ["git", "submodule", "update", "--quiet"],
+        # ["git", "submodule", "update", "--quiet"],
+        ["git", "submodule", "update", "--init", "lib/micropython-lib"],
     ]
     for cmd in cmds:
         if result := _run_local_git(cmd, repo=repo, expect_stderr=True):
@@ -176,7 +192,6 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
         return False
     # actually a good result
     log.debug(result.stderr.decode("utf-8"))
-    synch_submodules(repo)
     return True
 
 
@@ -194,7 +209,6 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
         return False
     # actually a good result
     log.debug(result.stderr.decode("utf-8"))
-    synch_submodules(repo)
     return True
 
 
@@ -211,7 +225,6 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
         return False
     # actually a good result
     log.debug(result.stderr.decode("utf-8"))
-    synch_submodules(repo)
     return True
 
 

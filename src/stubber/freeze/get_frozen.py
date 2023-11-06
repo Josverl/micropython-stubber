@@ -54,7 +54,7 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     Add a comment to the top of each file in the path
     using a codemod
     """
-    # todo: #305 add comment line to each file with the micropython version it was generated from
+    #TODO: #305 add comment line to each file with the micropython version it was generated from
     # frozen_stub_path
     # python -m libcst.tool codemod --include-stubs --no-format  add_comment.AddComment .\repos\micropython-stubs\stubs\micropython-v1_19_1-frozen\ --comment "# Micropython 1.19.1 frozen stubs"
     pass

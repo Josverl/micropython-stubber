@@ -43,7 +43,7 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
     note: is run file-by-file to include processing .pyi files
     """
     ret = 0
-    cmd = [
+    autoflake_cmd = [
         "autoflake",
         "-r",
         "--in-place",
@@ -55,14 +55,14 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
     ]
     log.debug("Running autoflake on: {}".format(path))
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-    result = subprocess.run(cmd, capture_output=capture_output)
+    result = subprocess.run(autoflake_cmd, capture_output=capture_output, shell=True)
     if result.returncode != 0:  # pragma: no cover
         log.warning(f"autoflake failed on: {path}")
         ret = result.returncode
 
     if process_pyi:
         for file in list(path.rglob("*.pyi")):
-            cmd = [
+            autoflake_cmd = [
                 "autoflake",
                 "-r",
                 "--in-place",
@@ -74,7 +74,7 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
             ]
             log.debug("Running autoflake on: {}".format(path))
             # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-            result = subprocess.run(cmd, capture_output=capture_output)
+            result = subprocess.run(autoflake_cmd, capture_output=capture_output)
             if result.returncode != 0:
                 log.warning(f"autoflake failed on: {file}")
                 ret = result.returncode
