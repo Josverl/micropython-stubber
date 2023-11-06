@@ -62,7 +62,6 @@ __exec_task = asyncio.create_task(__code())
                 try:
                     return await exec_task # type: ignore # pyright/mypy doesn't like the await here
                 except asyncio.CancelledError: # stubs-ignore: port=="esp32" 
-                    # TODO: Investigate difference for ESP32
                     pass
             finally:
                 intr_task.cancel()

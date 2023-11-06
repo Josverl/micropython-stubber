@@ -25,9 +25,10 @@ header = uctypes.struct(
     ELF_HEADER,
     uctypes.LITTLE_ENDIAN,
 )
-assert header.EI_MAG == b"\x7fELF" # type: ignore # TODO: uctypes - known member does not work
-assert header.EI_DATA == 1, "Oops, wrong endianness. Could retry with uctypes.BIG_ENDIAN." # type: ignore # TODO: uctypes - known member does not work
-print("machine:", hex(header.e_machine))# type: ignore # TODO: uctypes - known member does not work
+# TODO: uctypes - known member does not work
+assert header.EI_MAG == b"\x7fELF" # type: ignore #  uctypes - known member does not work
+assert header.EI_DATA == 1, "Oops, wrong endianness. Could retry with uctypes.BIG_ENDIAN." # type: ignore #  uctypes - known member does not work
+print("machine:", hex(header.e_machine))# type: ignore #  uctypes - known member does not work
 
 
 #------------------------------------------------------------------------------------
@@ -54,7 +55,7 @@ struct1 = uctypes.struct(
     STRUCT1,
     uctypes.NATIVE,
 )
-print("x:", struct1.ptr[0].x) # type: ignore # TODO: uctypes - known member does not work
+print("x:", struct1.ptr[0].x) # type: ignore # uctypes - known member does not work
 
 #------------------------------------------------------------------------------------
 # Example 3: Access to CPU registers. Subset of STM32F4xx WWDG block
@@ -79,7 +80,7 @@ WWDG_LAYOUT = {
 
 WWDG = uctypes.struct(0x40002C00, WWDG_LAYOUT)
 
-WWDG.WWDG_CFR.WDGTB = 0b10  # type: ignore # TODO: uctypes - known member does not work
-WWDG.WWDG_CR.WDGA = 1  # type: ignore # TODO: uctypes - known member does not work
-print("Current counter:", WWDG.WWDG_CR.T) # type: ignore # TODO: uctypes - known member does not work
+WWDG.WWDG_CFR.WDGTB = 0b10  # type: ignore #  uctypes - known member does not work
+WWDG.WWDG_CR.WDGA = 1  # type: ignore #  uctypes - known member does not work
+print("Current counter:", WWDG.WWDG_CR.T) # type: ignore # uctypes - known member does not work
 
