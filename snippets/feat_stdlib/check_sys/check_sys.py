@@ -21,7 +21,7 @@ print(sys.implementation)
 
 # Micropython Extensions
 exc = Exception
-sys.print_exception(exc)
+sys.print_exception(exc) # stubs-ignore: linter in ["mypy"]
 
 port = sys.platform
 if port in ["unix", "windows"]:
