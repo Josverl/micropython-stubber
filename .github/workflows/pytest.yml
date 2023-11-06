@@ -24,6 +24,9 @@ jobs:
   run_tests:
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      JUPYTER_PLATFORM_DIRS: "1"
+      # fix:  DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
 
     strategy:
       fail-fast: false

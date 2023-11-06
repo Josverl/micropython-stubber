@@ -2,7 +2,7 @@ import micropython
 
 # https://docs.micropython.org/en/v1.20.0/reference/speed_python.html?highlight=viper#the-viper-code-emitter
 # Casting operators are currently: int, bool, uint, ptr, ptr8, ptr16 and ptr32.
-# TODO: micropython.viper - add support for casting operators
+# todo: micropython.viper - add support for casting operators
 
 
 @micropython.viper
