@@ -31,8 +31,8 @@ assert_type(impl, NamedTuple)  # type: ignore # TODO sys.implementation is not a
 #             else ""
 #         )
 
-# TODO - add this to stubs
-TODO = """
+# TODO - improve sys.implementation in stubs
+_ = """
 file sys.pyi
 
 implementation: _mpy_implementation
