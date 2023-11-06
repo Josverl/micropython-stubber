@@ -29,7 +29,7 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
 
     targets = []
     scripts = glob.glob(mpy_folder + "/ports/**/modules/*.py", recursive=True)
-    if len(scripts) > 0:
+    if scripts:
         # clean target folder
         shutil.rmtree(stub_folder, ignore_errors=True)
     for script in scripts:
