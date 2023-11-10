@@ -30,23 +30,32 @@
       ]
     },
     {
-      "login": "thonny",
-      "name": "Thonny, Python IDE for beginners",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/46202078?v=4",
-      "profile": "https://thonny.org/",
-      "contributions": [
-        "ideas",
-        "research"
-      ]
+        "login": "thonny",
+        "name": "Thonny, Python IDE for beginners",
+        "avatar_url": "https://avatars1.githubusercontent.com/u/46202078?v=4",
+        "profile": "https://thonny.org/",
+        "contributions": [
+            "ideas",
+            "research"
+        ]
     },
     {
-      "login": "micropython",
-      "name": "MicroPython",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/6298560?v=4",
-      "profile": "https://micropython.org/",
+        "login": "micropython",
+        "name": "MicroPython",
+        "avatar_url": "https://avatars1.githubusercontent.com/u/6298560?v=4",
+        "profile": "https://micropython.org/",
+        "contributions": [
+            "data",
+            "stubs"
+        ]
+    },
+    {
+      "login": "pyright",
+      "name": "pyright",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6154722?v=4",
+      "profile": "https://github.com/microsoft/pyright",
       "contributions": [
-        "data",
-        "stubs"
+        "tool"
       ]
     },
     {
