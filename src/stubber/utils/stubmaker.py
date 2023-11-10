@@ -27,6 +27,8 @@ STUBGEN_OPT = stubgen.Options(
     verbose=True,
     quiet=False,
     export_less=False,
+    inspect = False, # inspect needs to import the module in CPython, which is not possible for frozen modules
+    include_docstrings = True # include existing docstrings with the stubs
 )
 
 
