@@ -515,6 +515,8 @@ CHILD_PARENT_CLASS = {
     # ESPNow
     "ESPNow": "ESPNowBase,Iterator",
     "AIOESPNow": "ESPNow",
+    # array
+    "array": "List",
 }
 
 
