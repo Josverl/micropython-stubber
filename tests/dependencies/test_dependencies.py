@@ -14,8 +14,8 @@ from packaging import version
 @pytest.mark.parametrize(
     "tool_name, tool_version",
     [
-        ("autoflake", "1.4"),
-        ("black", "21.12b0"),
+        ("autoflake", "2.2.1"),
+        ("black", "22.12.0"),
         ("pyright", "1.1"),
     ],
 )
