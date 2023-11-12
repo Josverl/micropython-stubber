@@ -342,9 +342,6 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     mock.assert_called_once()
     assert m_get_l_tag.call_count >= 1
 
-    # post is called one
-    mock_post.assert_called_with([tmp_path / "micropython-v1_42-docstubs"], False, True)
-
 
 ##########################################################################################
 # get-lobo

@@ -9,13 +9,8 @@ from typing import List, Optional
 
 from loguru import logger as log
 
-from stubber.utils.post import run_autoflake, run_black
-
 from stubber import utils
-from stubber.rst import (
-    DOCSTUB_SKIP,
-    U_MODULES,
-)
+from stubber.rst import DOCSTUB_SKIP, U_MODULES
 from stubber.rst.reader import RSTWriter
 
 
@@ -26,6 +21,7 @@ def generate_from_rst(
     release: Optional[str] = None,
     pattern: str = "*.rst",
     suffix: str = ".py",
+    black: bool = True,
 ) -> int:
     # sourcery skip: remove-redundant-exception, simplify-single-exception-tuple
     if not dst_path.exists():
@@ -46,7 +42,6 @@ def generate_from_rst(
 
     log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing([dst_path], True, black)
-
 
     # Generate a module manifest for the docstubs
     utils.make_manifest(
