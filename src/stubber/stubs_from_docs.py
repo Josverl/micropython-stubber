@@ -44,8 +44,9 @@ def generate_from_rst(
     clean_destination(dst_path)
     make_docstubs(dst_path, v_tag, release, suffix, files)
 
-    run_autoflake(dst_path, process_pyi=True)
-    run_black(dst_path)
+    log.info("::group:: start post processing of retrieved stubs")
+    utils.do_post_processing([dst_path], True, black)
+
 
     # Generate a module manifest for the docstubs
     utils.make_manifest(
