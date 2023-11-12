@@ -55,10 +55,13 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
     ]
     log.debug("Running autoflake on: {}".format(path))
     # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-    result = subprocess.run(autoflake_cmd, capture_output=capture_output, shell=True)
+    result = subprocess.run(autoflake_cmd, capture_output=capture_output, shell=False)
     if result.returncode != 0:  # pragma: no cover
-        log.warning(f"autoflake failed on: {path}")
-        ret = result.returncode
+        # retry with shell=True
+        result = subprocess.run(autoflake_cmd, capture_output=capture_output, shell=True)
+        if result.returncode != 0:  # pragma: no cover
+            log.warning(f"autoflake failed on: {path}")
+            ret = result.returncode
 
     if process_pyi:
         for file in list(path.rglob("*.pyi")):
@@ -72,7 +75,7 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
                 "-v",
                 "-v",  # show some feedback
             ]
-            log.debug("Running autoflake on: {}".format(path))
+            log.trace("Running autoflake on: {}".format(path))
             # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
             result = subprocess.run(autoflake_cmd, capture_output=capture_output)
             if result.returncode != 0:
