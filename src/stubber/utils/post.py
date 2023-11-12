@@ -48,8 +48,7 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
         return -1
     log.info(f"Running autoflake on: {path}")
     # create a list of files to be formatted
-    files: List[str] = []
-    files.extend([str(f) for f in path.rglob("*.py")])
+    files: List[str] = [str(f) for f in path.rglob("*.py")]
     if process_pyi:
         files.extend([str(f) for f in path.rglob("*.pyi")])
 
