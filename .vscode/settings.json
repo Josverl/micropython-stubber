@@ -146,5 +146,9 @@
         "--verbose"
     ],
     "python.analysis.enablePytestExtra": true,
-    "testExplorer.addToEditorContextMenu": true
+    "testExplorer.addToEditorContextMenu": true,
+    // profiler
+    "austin.mode": "Wall time",
+    "austin.binaryMode": true,
+    "austin.interval": 300
 }

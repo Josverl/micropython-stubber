@@ -65,3 +65,6 @@ empty
 
 # do not check in any downloaded firmwares
 **/firmware
+# profiling output
+*.austin
+*.prof

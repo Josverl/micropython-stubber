@@ -86,7 +86,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         sg_opt.files = [str(modules_folder)]
         sg_opt.output_dir = str(modules_folder)
         try:
-            stubgen.generate_stubs(sg_opt)
+            stubgen.generate_stubs(sg_opt) # TODO PERF: Approx 50% of time is spent here during get-frozen
         except (ValueError, SystemExit) as e:
             # the only way to know if an error was encountered by generate_stubs
             # mypy.errors.CompileError and others ?
