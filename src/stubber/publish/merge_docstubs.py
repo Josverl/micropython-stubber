@@ -49,7 +49,7 @@ def merge_all_docstubs(
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
-            candidate["board"] = default_board(candidate["port"])
+            candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
         # check if we have board stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths

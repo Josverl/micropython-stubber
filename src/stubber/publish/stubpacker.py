@@ -48,7 +48,7 @@ class StubPackage:
         - package_path - the path to the folder where the package info will be stored ('./publish').
         - pkg_version - the version of the package as used on PyPi (semver). Is stored directly in the `pyproject.toml` file
         - pyproject - the contents of the `pyproject.toml` file
-        
+
     methods:
         - from_json - load the package from json
         - to_json - return the package as json
@@ -165,11 +165,11 @@ class StubPackage:
 
     def update_pkg_version(self, production: bool) -> str:
         """Get the next version for the package"""
-        return (
-            self.get_prerelease_package_version(production)
-            if self.mpy_version == "latest"
-            else self.get_next_package_version(production)
-        )
+        if self.mpy_version == "latest":
+            next_ver = self.get_prerelease_package_version(production)
+        else:
+            next_ver = self.get_next_package_version(production)
+        return next_ver
 
     def get_prerelease_package_version(self, production: bool = False) -> str:
         """Get the next prerelease version for the package."""

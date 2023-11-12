@@ -156,10 +156,12 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     if board_l in GENERIC:
         merged_path = Path(f"{family}-{ver_flat}-{port}-merged")
         if not merged_path.exists():
-            board_l = default_board(port)
-            merged_path = Path(f"{family}-{ver_flat}-{port}-{board_l}-merged")
+            board = default_board(port, ver_flat)
+            board_l = board.lower()
+            board_u = board
+            merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged")
     else:
-        merged_path = Path(f"{family}-{ver_flat}-{port}-{board_l}-merged")
+        merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged")
 
     # BOARD in source frozen path needs to be UPPERCASE
     frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()
