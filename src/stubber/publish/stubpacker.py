@@ -22,6 +22,7 @@ from packaging.version import Version, parse
 from pysondb import PysonDB
 
 from stubber.publish.bump import bump_version
+from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
@@ -66,6 +67,9 @@ class StubPackage:
     def __init__(
         self,
         package_name: str,
+        port: str,
+        *,
+        board: str = GENERIC_U,
         version: str = "0.0.1",
         description: str = "MicroPython stubs",
         stubs: Optional[StubSources] = None,
@@ -89,9 +93,10 @@ class StubPackage:
             STUB_PATH - root-relative path to the folder where the stubs are stored ('./stubs').
 
         """
+        self.port = port
+        self.board = board
         if json_data is not None:
             self.from_dict(json_data)
-
         else:
             # store essentials
             # self.package_path = package_path
@@ -288,15 +293,14 @@ class StubPackage:
         self.create_readme()
         self.create_license()
 
-    @staticmethod
-    def update_sources(stub_sources: StubSources) -> StubSources:
+    def update_sources(self) -> StubSources:
         """
         Update the stub sources to:
         - FIRMWARE: prefer -merged stubs over bare firmware stubs
         - FROZEN: fallback to use the GENERIC folder for the frozen sources if no board specific folder exists
         """
         updated_sources = []
-        for stub_type, fw_path in stub_sources:
+        for stub_type, fw_path in self.stub_sources:
             # prefer -merged stubs over bare firmware stubs
             if stub_type == StubSource.FIRMWARE:
                 # Check if -merged folder exists and use that instead
@@ -314,6 +318,18 @@ class StubPackage:
                     updated_sources.append((stub_type, fw_path))
                 else:
                     updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+            elif stub_type == StubSource.MERGED:
+                # Use the default board folder instead of the GENERIC board folder (if it exists)
+                if self.board.upper() == GENERIC_U:
+                    family = fw_path.name.split("-")[0]
+                    # TODO: use function the get the path
+                    default_path = Path(
+                        f"{family}-{clean_version(self.mpy_version, flat=True)}-{self.port}-{default_board(self.port, self.mpy_version)}-merged"
+                    )
+                    if (CONFIG.stub_path / default_path).exists():
+                        fw_path = default_path
+                updated_sources.append((stub_type, fw_path))
+                # ---------
             else:
                 updated_sources.append((stub_type, fw_path))
         return updated_sources
@@ -329,7 +345,7 @@ class StubPackage:
         """
         try:
             # update to -merged and fallback to GENERIC
-            self.stub_sources = self.update_sources(self.stub_sources)
+            self.stub_sources = self.update_sources()
             # Check if all stub source folders exist
             for stub_type, src_path in self.stub_sources:
                 if not (CONFIG.stub_path / src_path).exists():
@@ -638,17 +654,17 @@ class StubPackage:
         Check if (all) the packages sources exist.
         """
         ok = True
-        for name, path in self.update_sources(self.stub_sources):
-            if (CONFIG.stub_path / path).exists():
+        for stub_type, src_path in self.update_sources():
+            if (CONFIG.stub_path / src_path).exists():
                 continue
-            if name == StubSource.FROZEN:
+            if stub_type == StubSource.FROZEN:
                 # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
                 continue
             # todo: below is a workaround for different types, but where is the source of this difference coming from?
             msg = (
-                f"{self.package_name}: source '{name.value}' not found: {CONFIG.stub_path / path}"
-                if isinstance(name, StubSource)  # type: ignore
-                else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
+                f"{self.package_name}: source '{stub_type.value}' not found: {CONFIG.stub_path / src_path}"
+                if isinstance(stub_type, StubSource)  # type: ignore
+                else f"{self.package_name}: source '{stub_type}' not found: {CONFIG.stub_path / src_path}"
             )
             self.status["error"] = msg
             log.debug(msg)
@@ -771,7 +787,7 @@ class StubPackage:
         self.update_pkg_version(production=production)
         # Publish the package to PyPi, Test-PyPi or Github
         if self.is_changed() or force:
-            if self.mpy_version == "latest":
+            if self.mpy_version == "latest" and production and not force:
                 log.warning(
                     "version: `latest` package will only be available on Github, and not published to PyPi."
                 )

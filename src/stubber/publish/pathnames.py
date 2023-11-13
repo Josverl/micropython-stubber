@@ -8,10 +8,10 @@ from typing import Dict, List, Optional
 
 from loguru import logger as log
 
+from stubber.publish.defaults import default_board
 from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
-
 
 
 ## Helper functions
@@ -28,12 +28,13 @@ def board_folder_name(fw: Dict, *, version: Optional[str] = None) -> str:
     """Return the name of the firmware folder. Can be in AnyCase."""
     base = get_base(fw, version=version)
     if fw["board"] in GENERIC:
-        folder_name = f"{base}-{fw['port']}"
+        board = default_board(fw["port"], fw["version"])
+        folder_name = f"{base}-{fw['port']}-{board}"
     else:
         folder_name = f"{base}-{fw['port']}-{fw['board']}"
     # do NOT force name to lowercase
     # remove GENERIC Prefix
-    folder_name = folder_name.replace("-generic_", "-").replace("-GENERIC_", "-")
+    # folder_name = folder_name.replace("-generic_", "-").replace("-GENERIC_", "-")
     return folder_name
 
 

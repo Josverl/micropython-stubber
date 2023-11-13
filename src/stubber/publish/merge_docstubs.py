@@ -49,7 +49,9 @@ def merge_all_docstubs(
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
-            candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
+            candidate["board"] = default_board(
+                port=candidate["port"], version=candidate["version"]
+            )
         # check if we have board stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths
@@ -61,9 +63,9 @@ def merge_all_docstubs(
             log.warning(f"No docstubs found for {candidate['version']}")
             continue
         if not board_path.exists():
-            log.debug(f"skipping {merged_path.name}, no firmware stubs found")
+            log.info(f"skipping {merged_path.name}, no firmware stubs found")
             continue
-        log.info(f"Merge docstubs for {merged_path.name} {candidate['version']}")
+        log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
         # Add methods from docstubs to the firmware stubs that do not exist in the firmware stubs
         # Add the __call__ method to the machine.Pin and pyb.Pin class

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
+
 from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.package import create_package, package_name
 from stubber.publish.stubpacker import StubPackage
@@ -17,7 +18,7 @@ from .fakeconfig import FakeConfig
     "family, pkg, port, board, expected",
     [
         ("micropython", COMBO_STUBS, "esp32", "GENERIC", "micropython-esp32-stubs"),
-        ("micropython", COMBO_STUBS, "esp32", "GENERIC_S3", "micropython-esp32-s3-stubs"),
+        ("micropython", COMBO_STUBS, "esp32", "GENERIC_S3", "micropython-esp32-generic_s3-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "generic", "micropython-esp32-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
         ("micropython", COMBO_STUBS, "esp32", "tiny", "micropython-esp32-tiny-stubs"),
@@ -47,7 +48,9 @@ def test_package_name(family, pkg, port, board, expected):
     ],
 )
 # CORE_STUBS
-def test_create_package(tmp_path, pytestconfig, pkg_type, port, board, mocker, monkeypatch: pytest.MonkeyPatch):
+def test_create_package(
+    tmp_path, pytestconfig, pkg_type, port, board, mocker, monkeypatch: pytest.MonkeyPatch
+):
     """ "
     test Create a new package with the DOC_STUBS type
     - test the different methods to manipulate the package on disk
@@ -86,7 +89,9 @@ def test_create_package(tmp_path, pytestconfig, pkg_type, port, board, mocker, m
         # stub_source="./all-stubs",  # for debugging
     )
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, publish_path=publish_path, stub_path=stub_path, pkg_type=pkg_type)
+    run_common_package_tests(
+        package, pkg_name, publish_path=publish_path, stub_path=stub_path, pkg_type=pkg_type
+    )
 
 
 read_db_data = [
@@ -145,21 +150,33 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
 
     mpy_version = "v1.18"
     pkg_name = "foo-bar-stubs"
+    port = "foo"
+    board = "bar"
     # todo: include stubs in the test data
     # note uses `stubs` relative to the stubs_folder
-
-    package = StubPackage(pkg_name, version=mpy_version, json_data=json)
+    package = StubPackage(pkg_name, port, board=board, version=mpy_version, json_data=json)
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, config.publish_path, stub_path=config.stub_path, pkg_type=None, test_build=False)
+    run_common_package_tests(
+        package,
+        pkg_name,
+        config.publish_path,
+        stub_path=config.stub_path,
+        pkg_type=None,
+        test_build=False,
+    )
 
 
-def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True):
+def run_common_package_tests(
+    package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True
+):
     # sourcery skip: no-long-functions
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
     # Package path
-    assert package.package_path.relative_to(publish_path), "package path should be relative to publish path"
+    assert package.package_path.relative_to(
+        publish_path
+    ), "package path should be relative to publish path"
     assert (package.package_path).exists()
     assert (package.package_path / "pyproject.toml").exists()
     # package path is all lowercase
@@ -197,12 +214,16 @@ def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path,
         return
 
     package.copy_stubs()
-    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
+    filelist = list((package.package_path).rglob("*.py")) + list(
+        (package.package_path).rglob("*.pyi")
+    )
     assert len(filelist) >= 1
 
     # do it all at once
     package.update_package_files()
-    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
+    filelist = list((package.package_path).rglob("*.py")) + list(
+        (package.package_path).rglob("*.pyi")
+    )
     assert len(filelist) >= 1
 
     package.update_included_stubs()
@@ -222,9 +243,13 @@ def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path,
         built = package.poetry_build()
         assert built
         assert (package.package_path / "dist").exists(), "Distribution folder should exist"
-        filelist = list((package.package_path / "dist").glob("*.whl")) + list((package.package_path / "dist").glob("*.tar.gz"))
+        filelist = list((package.package_path / "dist").glob("*.whl")) + list(
+            (package.package_path / "dist").glob("*.tar.gz")
+        )
         assert len(filelist) >= 2
 
     package.clean()
-    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
+    filelist = list((package.package_path).rglob("*.py")) + list(
+        (package.package_path).rglob("*.pyi")
+    )
     assert len(filelist) == 0

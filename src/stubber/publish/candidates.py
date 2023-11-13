@@ -271,7 +271,7 @@ def filter_list(
     # versions: Optional[Union[List[str], str]] = None,
 ):
     """
-    filter a list of candidates down to the ones we want, based on the ports and boars specified (case insensitive)
+    filter a list of candidates down to the ones we want, based on the ports and boards specified (case insensitive)
     for board also match using a 'GENERIC_' prefix, so board 's3' will match candidate 'GENERIC_S3'
     """
     worklist = [i for i in worklist if i["board"] != ""]
