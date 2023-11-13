@@ -230,7 +230,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             ("rprint", 'self._log.info("Port: '),
             ("rprint", 'self._log.info("Board: '),
             # all others
-            ("comment", 'self._log.'),
+            ("comment", "self._log."),
             ("comment", "_log ="),
         ]
     else:
@@ -307,7 +307,7 @@ def minify(
                     target = target / "minified.py"  # or raise error?
             target_buf = stack.enter_context(target.open("w+"))
         elif isinstance(target, IOBase):  # type: ignore
-            target_buf = target 
+            target_buf = target
         try:
             minified = minify_script(source_script=source_buf, keep_report=keep_report, diff=diff)
             target_buf.write(minified)
