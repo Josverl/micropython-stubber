@@ -168,7 +168,7 @@ class StubPackage:
         except FileNotFoundError as e:
             raise FileNotFoundError(f"pyproject.toml file not found at {_toml}") from e
 
-    def update_pkg_version(self, production: bool) -> str:
+    def next_pkg_version(self, production: bool) -> str:
         """Get the next version for the package"""
         if self.mpy_version == "latest":
             next_ver = self.get_prerelease_package_version(production)
@@ -475,6 +475,7 @@ class StubPackage:
             try:
                 with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                     _pyproject = tomllib.load(f)
+                # note: can be 'latest' which is not semver
                 _pyproject["tool"]["poetry"]["version"] = self.mpy_version
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
@@ -587,7 +588,7 @@ class StubPackage:
             return False
         # todo: call poetry directly to improve error handling
         try:
-            log.trace(f"poetry {parameters} starting")
+            log.debug(f"poetry {parameters} starting")
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
@@ -597,7 +598,7 @@ class StubPackage:
                 universal_newlines=True,
             )
             log.trace(f"poetry {parameters} completed")
-        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
+        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover # InvalidVersion
             log.error("Exception on process, {}".format(e))
             return False
         except subprocess.CalledProcessError as e:  # pragma: no cover
@@ -671,7 +672,7 @@ class StubPackage:
             ok = False
         return ok
 
-    def update_package(self) -> bool:
+    def update_package(self, production: bool) -> bool:
         """Update the package .pyi files, if all the sources are available"""
         log.info(f"- Update {self.package_path.name}")
         log.trace(f"{self.package_path.as_posix()}")
@@ -689,12 +690,13 @@ class StubPackage:
         try:
             self.update_package_files()
             self.update_included_stubs()
-            self.check()
+            # for a new package the version could be 'latest', which is not a valid semver, so update
+            self.pkg_version = self.next_pkg_version(production)
+            return self.check()
         except Exception as e:  # pragma: no cover
             log.error(f"{self.package_name}: {e}")
             self.status["error"] = str(e)
             return False
-        return True
 
     def build(
         self,
@@ -715,10 +717,11 @@ class StubPackage:
         """
         log.info(f"Build: {self.package_path.name}")
 
-        ok = self.update_package()
+        ok = self.update_package(production)
         self.status["version"] = self.pkg_version
         if not ok:
-            log.info(f"{self.package_name}: skip - Could not update package")
+            log.info(f"{self.package_name}: skip - Could not build/update package")
+            self.status["error"] = "Could not build/update package"
             return False
         # If there are changes to the package, then publish it
         if self.is_changed():
@@ -730,7 +733,7 @@ class StubPackage:
         if self.is_changed() or force:
             #  Build the distribution files
             old_ver = self.pkg_version
-            self.pkg_version = self.update_pkg_version(production)
+            self.pkg_version = self.next_pkg_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
             log.debug(
@@ -784,7 +787,7 @@ class StubPackage:
             log.debug(f"{self.package_name}: skip publishing")
             return False
 
-        self.update_pkg_version(production=production)
+        self.next_pkg_version(production=production)
         # Publish the package to PyPi, Test-PyPi or Github
         if self.is_changed() or force:
             if self.mpy_version == "latest" and production and not force:
