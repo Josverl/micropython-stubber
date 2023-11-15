@@ -118,11 +118,9 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             except ValueError:
                 log.debug(f"no matching py for : {str(pyi)}")
 
-        # now stub the remaining , unless this has run per file already
-        if not run_per_file:
-            # note in some cases this will try a file twice
-            for py in py_files:
-                r = r and generate_pyi_from_file(py)
-                # todo: report failures by adding to module manifest
+        # note in some cases this will try a file twice - but that is better than failing
+        for py in py_files:
+            r = r and generate_pyi_from_file(py)
+            # todo: report failures by adding to module manifest
 
     return r
