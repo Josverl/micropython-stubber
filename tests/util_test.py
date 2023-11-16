@@ -118,7 +118,7 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
         "stubber.utils.post.subprocess.run", autospec=True, return_value=return_val
     )
 
-    utils.do_post_processing([dest], pyi=True, black=True)
+    utils.do_post_processing([dest], stubgen=True, black=True, autoflake=False)
 
     m_generate_pyi_files.assert_called_once()
     m_spr.assert_called_once()
