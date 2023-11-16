@@ -8,11 +8,11 @@ from stubber.utils.versions import clean_version
 # (newer to older)
 
 DEFAULT_BOARDS: Dict[str, List[str]] = {
-    "stm32": ["PYBV11"],
-    "esp32": ["ESP32_GENERIC", "GENERIC"],
-    "esp8266": ["ESP8266_GENERIC", "GENERIC"],
-    "rp2": ["RPI_PICO", "PICO"],
-    "samd": ["SEEED_WIO_TERMINAL"],
+    "stm32": ["PYBV11", ""],
+    "esp32": ["ESP32_GENERIC", "GENERIC", ""],  #  "GENERIC_SPIRAM",
+    "esp8266": ["ESP8266_GENERIC", "GENERIC", ""],
+    "rp2": ["RPI_PICO", "PICO", ""],
+    "samd": ["SEEED_WIO_TERMINAL", ""],
 }
 
 GENERIC_L = "generic"
@@ -28,9 +28,14 @@ def default_board(port: str, version="latest") -> str:  # sourcery skip: assign-
     ver_flat = clean_version(version, flat=True)
     if port in DEFAULT_BOARDS:
         for board in DEFAULT_BOARDS[port]:
+            base = (
+                f"micropython-{ver_flat}-{port}-{board}"
+                if board
+                else f"micropython-{ver_flat}-{port}"
+            )
             # check if we have a (merged)stub for this version and port
-            if (CONFIG.stub_path / f"micropython-{ver_flat}-{port}-{board}-merged").exists() or (
-                CONFIG.stub_path / f"micropython-{ver_flat}-{port}-{board}"
+            if (CONFIG.stub_path / f"{base}-merged").exists() or (
+                CONFIG.stub_path / base
             ).exists():
                 return board
         # fallback to first listed board
