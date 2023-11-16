@@ -29,9 +29,9 @@ def board_folder_name(fw: Dict, *, version: Optional[str] = None) -> str:
     base = get_base(fw, version=version)
     if fw["board"] in GENERIC:
         board = default_board(fw["port"], fw["version"])
-        folder_name = f"{base}-{fw['port']}-{board}"
     else:
-        folder_name = f"{base}-{fw['port']}-{fw['board']}"
+        board = fw["board"]
+    folder_name = f"{base}-{fw['port']}-{board}" if board else f"{base}-{fw['port']}"
     # do NOT force name to lowercase
     # remove GENERIC Prefix
     # folder_name = folder_name.replace("-generic_", "-").replace("-GENERIC_", "-")

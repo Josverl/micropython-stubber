@@ -40,12 +40,12 @@ def merge_all_docstubs(
 
     candidates = list(board_candidates(versions=versions, family=family))
     candidates = filter_list(candidates, ports, boards)
-    log.info(f"checking {len(candidates)} possible board candidates")
-
-    merged = 0
     if not candidates:
         log.error("No candidates found")
         return
+
+    log.info(f"checking {len(candidates)} possible board candidates")
+    merged = 0
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
@@ -63,7 +63,7 @@ def merge_all_docstubs(
             log.warning(f"No docstubs found for {candidate['version']}")
             continue
         if not board_path.exists():
-            log.info(f"skipping {merged_path.name}, no firmware stubs found")
+            log.info(f"skipping {merged_path.name}, no firmware stubs found in {board_path}")
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
