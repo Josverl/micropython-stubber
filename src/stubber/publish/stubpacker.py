@@ -194,7 +194,8 @@ class StubPackage:
                 base = Version(ver)
             return str(bump_version(base, rc=rc))
         else:
-            raise ValueError("cannot determine next version number micropython")
+            return "99.99.99post99"
+            # raise ValueError("cannot determine next version number micropython")
 
     def get_next_package_version(self, prod: bool = False, rc=False) -> str:
         """Get the next version for the package."""
@@ -721,7 +722,8 @@ class StubPackage:
         self.status["version"] = self.pkg_version
         if not ok:
             log.info(f"{self.package_name}: skip - Could not build/update package")
-            self.status["error"] = "Could not build/update package"
+            if not self.status["error"]:
+                self.status["error"] = "Could not build/update package"
             return False
         # If there are changes to the package, then publish it
         if self.is_changed():

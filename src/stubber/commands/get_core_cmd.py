@@ -28,12 +28,22 @@ from .cli import stubber_cli
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
-@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
-@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
+@click.option(
+    "--stubgen/--no-stubgen",
+    default=True,
+    help="run stubgen to create .pyi files for the (new) frozen modules",
+    show_default=True,
+)
+@click.option(
+    "--black/--no-black",
+    default=True,
+    help="Run black on the (new) frozen modules",
+    show_default=True,
+)
 def cli_get_core(
     stub_folder: str = CONFIG.stub_path.as_posix(),
     # core_type: str = "pycopy",  # pycopy or Micropython CPython stubs
-    pyi: bool = True,
+    stubgen: bool = True,
     black: bool = True,
 ):
     """
@@ -48,9 +58,11 @@ def cli_get_core(
         req_filename = f"requirements-core-{core_type}.txt"
         stub_path = Path(stub_folder) / f"cpython_core-{core_type}"
 
-        get_cpython.get_core(stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type)
+        get_cpython.get_core(
+            stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type
+        )
         stub_paths.append(stub_path)
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, pyi, black, autoflake=True)
+    utils.do_post_processing(stub_paths, stubgen=stubgen, black=black, autoflake=True)
     log.info("::group:: Done")

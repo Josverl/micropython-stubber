@@ -219,14 +219,43 @@ class RSTReader(FileReadWriter):
 
         # return _l.startswith("..") and not any(_l.startswith(a) for a in self.docstring_anchors)
 
-    @property
-    def at_heading(self) -> bool:
+    # @property
+    def at_heading(self, large=False) -> bool:
         "stop at heading"
-        _l = self.rst_text[min(self.line_no + 1, self.max_line - 1)]
+        u_line = self.rst_text[min(self.line_no + 1, self.max_line - 1)].rstrip()
         # Heading  ---, ==, ~~~
-        return _l.startswith("--") or _l.startswith("==") or _l.startswith("~~")
+        underlined = (
+            u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
+        )
+        if underlined and self.line_no > 0:
+            # check if previous line is a heading
+            line = self.rst_text[self.line_no].strip()
+            if line:
+                # module docstrings can be a bit larger than normal
+                if not large and len(line) == len(u_line):
+                    # heading is same length as underlined
+                    # for most docstrings that is a sensible boundary
+                    return True
+                line = line.split()[0]
+                # stopwords in headings
+                return line.lower() in [
+                    "classes",
+                    "functions",
+                    "methods",
+                    "constants",
+                    "exceptions",
+                    "constructors",
+                    "class",
+                    "common",
+                    "general",
+                    # below are tuning based on module level docstrings
+                    "time",
+                    "pio",
+                    "memory",
+                ]
+        return False
 
-    def read_docstring(self) -> List[str]:
+    def read_docstring(self, large: bool = False) -> List[str]:
         """Read a textblock that will be used as a docstring, or used to process a toc tree
         The textblock is terminated at the following RST line structures/tags
             .. <anchor>
@@ -245,7 +274,7 @@ class RSTReader(FileReadWriter):
             while (
                 self.line_no < len(self.rst_text)
                 and not self.at_anchor  # stop at next anchor ( however .. note: and a few other anchors should be added)
-                and not self.at_heading  # stop at next heading
+                and not self.at_heading(large)  # stop at next heading
             ):
                 line = self.rst_text[self.line_no]
                 block.append(line.rstrip())
@@ -471,7 +500,7 @@ class RSTParser(RSTReader):
         self.current_module = module_name
         self.current_function = self.current_class = ""
         # get module docstring
-        docstr = self.read_docstring()
+        docstr = self.read_docstring(large=True)
 
         if len(docstr) > 0:
             # Add link to online documentation
@@ -479,7 +508,9 @@ class RSTParser(RSTReader):
             if "nightly" in self.source_tag:
                 version = "latest"
             else:
-                version = self.source_tag.replace("_", ".")
+                version = self.source_tag.replace(
+                    "_", "."
+                )  # TODO Use clean_version(self.source_tag)
             docstr[
                 0
             ] = f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"

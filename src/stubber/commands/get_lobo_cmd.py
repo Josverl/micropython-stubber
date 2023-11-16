@@ -21,11 +21,21 @@ from stubber.utils.config import CONFIG
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     show_default=True,
 )
-@click.option("--pyi/--no-pyi", default=True, help="Create .pyi files for the (new) frozen modules", show_default=True)
-@click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
+@click.option(
+    "--pyi/--no-pyi",
+    default=True,
+    help="Create .pyi files for the (new) frozen modules",
+    show_default=True,
+)
+@click.option(
+    "--black/--no-black",
+    default=True,
+    help="Run black on the (new) frozen modules",
+    show_default=True,
+)
 def cli_get_lobo(
     stub_folder: str = CONFIG.stub_path.as_posix(),
-    stubgen: bool = True,
+    pyi: bool = True,
     black: bool = True,
 ):
     """
@@ -44,5 +54,5 @@ def cli_get_lobo(
     stub_paths = [stub_path]
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, stubgen, black, autoflake=False)
+    utils.do_post_processing(stub_paths, stubgen=pyi, black=black, autoflake=True)
     log.info("::group:: Done")

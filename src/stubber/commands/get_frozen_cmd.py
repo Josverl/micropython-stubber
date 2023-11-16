@@ -113,5 +113,5 @@ def cli_get_frozen(
         log.info(f"No docstubs found at {docstubs_path}")
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, False, black=black, autoflake=autoflake)
+    utils.do_post_processing(stub_paths, stubgen=False, black=black, autoflake=autoflake)
     log.info("::group:: Done")
