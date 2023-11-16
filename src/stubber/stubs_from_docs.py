@@ -41,7 +41,7 @@ def generate_from_rst(
     make_docstubs(dst_path, v_tag, release, suffix, files)
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing([dst_path], True, black)
+    utils.do_post_processing([dst_path], pyi=False, black=black)  # do not run stubgen
 
     # Generate a module manifest for the docstubs
     utils.make_manifest(
