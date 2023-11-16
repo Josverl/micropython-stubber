@@ -25,7 +25,7 @@ from stubber.utils.config import CONFIG
 @click.option("--black/--no-black", default=True, help="Run black on the (new) frozen modules", show_default=True)
 def cli_get_lobo(
     stub_folder: str = CONFIG.stub_path.as_posix(),
-    pyi: bool = True,
+    stubgen: bool = True,
     black: bool = True,
 ):
     """
@@ -44,5 +44,5 @@ def cli_get_lobo(
     stub_paths = [stub_path]
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, pyi, black)
+    utils.do_post_processing(stub_paths, stubgen, black, autoflake=False)
     log.info("::group:: Done")

@@ -38,9 +38,9 @@ from .cli import stubber_cli
     show_default=True,
 )
 @click.option(
-    "--pyi/--no-pyi",
+    "--stubgen/--no-stubgen",
     default=True,
-    help="Create .pyi files for the (new) frozen modules",
+    help="Run stubgen to create .pyi files for the (new) frozen modules",
     show_default=True,
 )
 @click.option(
@@ -53,8 +53,9 @@ def cli_get_frozen(
     stub_folder: str = CONFIG.stub_path.as_posix(),
     # path: str = config.repo_path.as_posix(),
     version: str = "",
-    pyi: bool = True,
+    stubgen: bool = True,
     black: bool = True,
+    autoflake: bool = True,
 ):
     """
     Get the frozen stubs for MicroPython.
@@ -68,7 +69,11 @@ def cli_get_frozen(
         version = utils.clean_version(version, drop_v=False)
         result = fetch_repos(version, CONFIG.mpy_path, CONFIG.mpy_lib_path)
         if not result:
-            log.error("Failed to fetch repos for version: {} for micropython folder: {} and micropython-lib folder: {}".format(version, CONFIG.mpy_path.as_posix(), CONFIG.mpy_lib_path.as_posix()))
+            log.error(
+                "Failed to fetch repos for version: {} for micropython folder: {} and micropython-lib folder: {}".format(
+                    version, CONFIG.mpy_path.as_posix(), CONFIG.mpy_lib_path.as_posix()
+                )
+            )
             return -1
     else:
         version = utils.clean_version(git.get_local_tag(CONFIG.mpy_path.as_posix()) or "0.0")
@@ -88,7 +93,7 @@ def cli_get_frozen(
     # Also enrich the frozen modules from the doc stubs if available
 
     # first create .pyi files so they can be enriched
-    utils.do_post_processing(stub_paths, pyi, False)
+    utils.do_post_processing(stub_paths, stubgen=stubgen, black=False, autoflake=False)
     family = "micropython"
     docstubs_path = (
         Path(CONFIG.stub_path)
@@ -108,5 +113,5 @@ def cli_get_frozen(
         log.info(f"No docstubs found at {docstubs_path}")
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, False, black)
+    utils.do_post_processing(stub_paths, False, black=black, autoflake=autoflake)
     log.info("::group:: Done")

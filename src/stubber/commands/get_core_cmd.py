@@ -52,5 +52,5 @@ def cli_get_core(
         stub_paths.append(stub_path)
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, pyi, black)
+    utils.do_post_processing(stub_paths, pyi, black, autoflake=True)
     log.info("::group:: Done")
