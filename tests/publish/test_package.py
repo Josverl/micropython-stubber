@@ -37,6 +37,14 @@ def test_package_name(family, pkg, port, board, expected):
 
 # test creating a DOC_STUBS package
 @pytest.mark.parametrize(
+    "version",
+    [
+        "v1.21.0",
+        "v1.20.0",
+        "v1.19.1",
+    ],
+)
+@pytest.mark.parametrize(
     "pkg_type, port, board",
     [
         (DOC_STUBS, None, None),
@@ -49,7 +57,7 @@ def test_package_name(family, pkg, port, board, expected):
 )
 # CORE_STUBS
 def test_create_package(
-    tmp_path, pytestconfig, pkg_type, port, board, mocker, monkeypatch: pytest.MonkeyPatch
+    tmp_path, pytestconfig, version, pkg_type, port, board, mocker, monkeypatch: pytest.MonkeyPatch
 ):
     """ "
     test Create a new package with the DOC_STUBS type
@@ -75,7 +83,7 @@ def test_create_package(
     # insert test config
     mocker.patch("stubber.publish.stubpacker.CONFIG", config)
 
-    mpy_version = "v1.18"
+    mpy_version = "v1.21.0"
     family = "micropython"
     pkg_name = f"foobar-{pkg_type}-stubs"
 

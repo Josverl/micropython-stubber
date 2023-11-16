@@ -238,7 +238,9 @@ def test_cmd_stub(mocker: MockerFixture):
 
     m_generate.assert_called_once_with(Path("."))
     m_postprocessing.assert_called_once()
-    m_postprocessing.assert_called_once_with([Path(".")], pyi=False, black=True)
+    m_postprocessing.assert_called_once_with(
+        [Path(".")], stubgen=False, black=True, autoflake=False
+    )
     assert result.exit_code == 0
 
 
@@ -268,8 +270,18 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
     m_freeze_any.assert_called_once()
     m_get_local_tag.assert_called_once()
 
-    m_post.assert_any_call([tmp_path / "micropython-v1_42-frozen"], True, False)
-    m_post.assert_any_call([tmp_path / "micropython-v1_42-frozen"], False, True)
+    m_post.assert_any_call(
+        [tmp_path / "micropython-v1_42-frozen"],
+        stubgen=True,
+        black=False,
+        autoflake=False,
+    )
+    m_post.assert_any_call(
+        [tmp_path / "micropython-v1_42-frozen"],
+        stubgen=False,
+        black=True,
+        autoflake=True,
+    )
 
 
 ##########################################################################################
@@ -280,14 +292,17 @@ def test_cmd_get_lobo(mocker: MockerFixture, tmp_path: Path):
     # check basic command line sanity check
     runner = CliRunner()
 
-    mock: MagicMock = mocker.patch("stubber.get_lobo.get_frozen", autospec=True)
+    mock_get_frozen: MagicMock = mocker.patch("stubber.get_lobo.get_frozen", autospec=True)
     mock_post: MagicMock = mocker.patch("stubber.utils.do_post_processing", autospec=True)
 
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["get-lobo", "--stub-folder", tmp_path.as_posix()])
-    mock.assert_called_once()
+    assert result.exit_code == 0
+    mock_get_frozen.assert_called_once()
     mock_post.assert_called_once()
-    mock_post.assert_called_once_with([tmp_path / "loboris-v3_2_24-frozen"], True, True)
+    mock_post.assert_called_once_with(
+        [tmp_path / "loboris-v3_2_24-frozen"], stubgen=True, black=True, autoflake=True
+    )
     assert result.exit_code == 0
 
 
@@ -309,7 +324,10 @@ def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
 
     # post is called one
     mock_post.assert_called_with(
-        [tmp_path / "cpython_core-pycopy", tmp_path / "cpython_core-micropython"], True, True
+        [tmp_path / "cpython_core-pycopy", tmp_path / "cpython_core-micropython"],
+        stubgen=True,
+        black=True,
+        autoflake=True,
     )
 
 
