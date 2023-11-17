@@ -27,8 +27,8 @@ STUBGEN_OPT = stubgen.Options(
     verbose=True,
     quiet=False,
     export_less=False,
-    inspect = False, # inspect needs to import the module in CPython, which is not possible for frozen modules
-    include_docstrings = True # include existing docstrings with the stubs
+    inspect=False,  # inspect needs to import the module in CPython, which is not possible for frozen modules
+    include_docstrings=True,  # include existing docstrings with the stubs
 )
 
 
@@ -81,20 +81,22 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         ## generate fyi files for folder
         log.debug("::group::[stubgen] running stubgen on {0}".format(modules_folder))
 
-        Error_Found = False
+        run_per_file = False
         sg_opt = STUBGEN_OPT
         sg_opt.files = [str(modules_folder)]
         sg_opt.output_dir = str(modules_folder)
         try:
             stubgen.generate_stubs(sg_opt)
-        except (ValueError, SystemExit) as e:
+        except (Exception, CompileError, SystemExit) as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise e
             # the only way to know if an error was encountered by generate_stubs
             # mypy.errors.CompileError and others ?
             # TODO: Extract info from e.code or e.args[0]
             log.warning(e.args[0])
-            Error_Found = True
+            run_per_file = True
 
-        if Error_Found:
+        if run_per_file:
             # in case of failure ( duplicate module in subfolder) then Plan B
             # - run stubgen on each *.py
             log.debug("::group::[stubgen] Failure on folder, attempt to run stubgen per file")
@@ -116,8 +118,7 @@ def generate_pyi_files(modules_folder: Path) -> bool:
             except ValueError:
                 log.debug(f"no matching py for : {str(pyi)}")
 
-        # now stub the rest
-        # note in some cases this will try a file twice
+        # note in some cases this will try a file twice - but that is better than failing
         for py in py_files:
             r = r and generate_pyi_from_file(py)
             # todo: report failures by adding to module manifest

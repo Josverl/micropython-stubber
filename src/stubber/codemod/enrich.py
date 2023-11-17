@@ -44,10 +44,13 @@ def enrich_file(
     for ext in [".py", ".pyi"]:
         candidates = list(docstub_path.rglob(target_path.stem + ext))
         if target_path.stem[0].lower() == "u":
-            # also look for candidates without leading u
+            # also look for candidates without leading u ( usys.py <- sys.py)
+            candidates += list(docstub_path.rglob(target_path.stem[1:] + ext))
+        elif target_path.stem[0] == "_":
+            # also look for candidates without leading _ ( _rp2.py <- rp2.py )
             candidates += list(docstub_path.rglob(target_path.stem[1:] + ext))
         else:
-            # also look for candidates with leading u
+            # also look for candidates with leading u ( sys.py <- usys.py)
             candidates += list(docstub_path.rglob("u" + target_path.stem + ext))
 
     for docstub_file in candidates:

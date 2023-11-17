@@ -12,7 +12,9 @@ from pysondb import PysonDB
 
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_hash(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
+def test_hash(
+    mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage
+):
     pkg = fake_package
 
     pkg.update_package_files()
@@ -61,7 +63,7 @@ def test_update_package(fake_package: StubPackage):
     changed_after_update = pkg.is_changed()
     assert changed_after_update, "should be changed initially"
 
-    ok = pkg.update_package()
+    ok = pkg.update_package(production=True)
     assert ok, "should be ok"
 
     changed_after_update = pkg.is_changed()
@@ -97,7 +99,9 @@ def test_update_package(fake_package: StubPackage):
 
 
 @pytest.mark.integration
-def test_build_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
+def test_build_package(
+    mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage
+):
     pkg = fake_package
 
     result = pkg.build(production=False, force=False)
@@ -116,11 +120,19 @@ def test_build_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pyte
 
 
 @pytest.mark.integration
-def test_publish_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage, temp_db: PysonDB):
+def test_publish_package(
+    mocker: MockerFixture,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    fake_package: StubPackage,
+    temp_db: PysonDB,
+):
     pkg = fake_package
     db = temp_db
 
-    m_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_publish: MagicMock = mocker.patch(
+        "stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True
+    )
 
     # allow the publishing logic to run during test
     pkg._publish = True  # type: ignore
@@ -142,14 +154,18 @@ def test_publish_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: py
     assert m_publish.called, "should call poetry publish"
 
     # check is the hashes are added to the database
-    recs = db.get_by_query(query=lambda x: x["mpy_version"] == pkg.mpy_version and x["name"] == pkg.package_name)
+    recs = db.get_by_query(
+        query=lambda x: x["mpy_version"] == pkg.mpy_version and x["name"] == pkg.package_name
+    )
     # dict to list
     recs = [{"id": key, "data": recs[key]} for key in recs]
     # sort
     packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
 
     assert packages[-1]["data"]["name"] == pkg.package_name, "should be the same package name"
-    assert packages[-1]["data"]["pkg_version"] == pkg.pkg_version, "should be the same package version"
+    assert (
+        packages[-1]["data"]["pkg_version"] == pkg.pkg_version
+    ), "should be the same package version"
     assert packages[-1]["data"]["mpy_version"] == pkg.mpy_version, "should be the same mpy version"
     assert packages[-1]["data"]["hash"] == pkg.hash, "should be the same hash"
     assert packages[-1]["data"]["stub_hash"] == pkg.stub_hash, "should be the same stub hash"

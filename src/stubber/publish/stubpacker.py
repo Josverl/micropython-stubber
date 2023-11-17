@@ -22,6 +22,7 @@ from packaging.version import Version, parse
 from pysondb import PysonDB
 
 from stubber.publish.bump import bump_version
+from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
@@ -48,7 +49,7 @@ class StubPackage:
         - package_path - the path to the folder where the package info will be stored ('./publish').
         - pkg_version - the version of the package as used on PyPi (semver). Is stored directly in the `pyproject.toml` file
         - pyproject - the contents of the `pyproject.toml` file
-        
+
     methods:
         - from_json - load the package from json
         - to_json - return the package as json
@@ -66,6 +67,9 @@ class StubPackage:
     def __init__(
         self,
         package_name: str,
+        port: str,
+        *,
+        board: str = GENERIC_U,
         version: str = "0.0.1",
         description: str = "MicroPython stubs",
         stubs: Optional[StubSources] = None,
@@ -89,9 +93,10 @@ class StubPackage:
             STUB_PATH - root-relative path to the folder where the stubs are stored ('./stubs').
 
         """
+        self.port = port
+        self.board = board
         if json_data is not None:
             self.from_dict(json_data)
-
         else:
             # store essentials
             # self.package_path = package_path
@@ -163,13 +168,13 @@ class StubPackage:
         except FileNotFoundError as e:
             raise FileNotFoundError(f"pyproject.toml file not found at {_toml}") from e
 
-    def update_pkg_version(self, production: bool) -> str:
+    def next_pkg_version(self, production: bool) -> str:
         """Get the next version for the package"""
-        return (
-            self.get_prerelease_package_version(production)
-            if self.mpy_version == "latest"
-            else self.get_next_package_version(production)
-        )
+        if self.mpy_version == "latest":
+            next_ver = self.get_prerelease_package_version(production)
+        else:
+            next_ver = self.get_next_package_version(production)
+        return next_ver
 
     def get_prerelease_package_version(self, production: bool = False) -> str:
         """Get the next prerelease version for the package."""
@@ -189,7 +194,8 @@ class StubPackage:
                 base = Version(ver)
             return str(bump_version(base, rc=rc))
         else:
-            raise ValueError("cannot determine next version number micropython")
+            return "99.99.99post99"
+            # raise ValueError("cannot determine next version number micropython")
 
     def get_next_package_version(self, prod: bool = False, rc=False) -> str:
         """Get the next version for the package."""
@@ -288,15 +294,14 @@ class StubPackage:
         self.create_readme()
         self.create_license()
 
-    @staticmethod
-    def update_sources(stub_sources: StubSources) -> StubSources:
+    def update_sources(self) -> StubSources:
         """
         Update the stub sources to:
         - FIRMWARE: prefer -merged stubs over bare firmware stubs
         - FROZEN: fallback to use the GENERIC folder for the frozen sources if no board specific folder exists
         """
         updated_sources = []
-        for stub_type, fw_path in stub_sources:
+        for stub_type, fw_path in self.stub_sources:
             # prefer -merged stubs over bare firmware stubs
             if stub_type == StubSource.FIRMWARE:
                 # Check if -merged folder exists and use that instead
@@ -314,6 +319,18 @@ class StubPackage:
                     updated_sources.append((stub_type, fw_path))
                 else:
                     updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+            elif stub_type == StubSource.MERGED:
+                # Use the default board folder instead of the GENERIC board folder (if it exists)
+                if self.board.upper() == GENERIC_U:
+                    family = fw_path.name.split("-")[0]
+                    # TODO: use function the get the path
+                    default_path = Path(
+                        f"{family}-{clean_version(self.mpy_version, flat=True)}-{self.port}-{default_board(self.port, self.mpy_version)}-merged"
+                    )
+                    if (CONFIG.stub_path / default_path).exists():
+                        fw_path = default_path
+                updated_sources.append((stub_type, fw_path))
+                # ---------
             else:
                 updated_sources.append((stub_type, fw_path))
         return updated_sources
@@ -329,7 +346,7 @@ class StubPackage:
         """
         try:
             # update to -merged and fallback to GENERIC
-            self.stub_sources = self.update_sources(self.stub_sources)
+            self.stub_sources = self.update_sources()
             # Check if all stub source folders exist
             for stub_type, src_path in self.stub_sources:
                 if not (CONFIG.stub_path / src_path).exists():
@@ -459,6 +476,7 @@ class StubPackage:
             try:
                 with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                     _pyproject = tomllib.load(f)
+                # note: can be 'latest' which is not semver
                 _pyproject["tool"]["poetry"]["version"] = self.mpy_version
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
@@ -571,7 +589,7 @@ class StubPackage:
             return False
         # todo: call poetry directly to improve error handling
         try:
-            log.trace(f"poetry {parameters} starting")
+            log.debug(f"poetry {parameters} starting")
             subprocess.run(
                 ["poetry"] + parameters,
                 cwd=self.package_path,
@@ -581,7 +599,7 @@ class StubPackage:
                 universal_newlines=True,
             )
             log.trace(f"poetry {parameters} completed")
-        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
+        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover # InvalidVersion
             log.error("Exception on process, {}".format(e))
             return False
         except subprocess.CalledProcessError as e:  # pragma: no cover
@@ -638,24 +656,24 @@ class StubPackage:
         Check if (all) the packages sources exist.
         """
         ok = True
-        for name, path in self.update_sources(self.stub_sources):
-            if (CONFIG.stub_path / path).exists():
+        for stub_type, src_path in self.update_sources():
+            if (CONFIG.stub_path / src_path).exists():
                 continue
-            if name == StubSource.FROZEN:
+            if stub_type == StubSource.FROZEN:
                 # not a blocking issue if there are no frozen stubs, perhaps this port/board does not have any
                 continue
             # todo: below is a workaround for different types, but where is the source of this difference coming from?
             msg = (
-                f"{self.package_name}: source '{name.value}' not found: {CONFIG.stub_path / path}"
-                if isinstance(name, StubSource)  # type: ignore
-                else f"{self.package_name}: source '{name}' not found: {CONFIG.stub_path / path}"
+                f"{self.package_name}: source '{stub_type.value}' not found: {CONFIG.stub_path / src_path}"
+                if isinstance(stub_type, StubSource)  # type: ignore
+                else f"{self.package_name}: source '{stub_type}' not found: {CONFIG.stub_path / src_path}"
             )
             self.status["error"] = msg
             log.debug(msg)
             ok = False
         return ok
 
-    def update_package(self) -> bool:
+    def update_package(self, production: bool) -> bool:
         """Update the package .pyi files, if all the sources are available"""
         log.info(f"- Update {self.package_path.name}")
         log.trace(f"{self.package_path.as_posix()}")
@@ -673,12 +691,13 @@ class StubPackage:
         try:
             self.update_package_files()
             self.update_included_stubs()
-            self.check()
+            # for a new package the version could be 'latest', which is not a valid semver, so update
+            self.pkg_version = self.next_pkg_version(production)
+            return self.check()
         except Exception as e:  # pragma: no cover
             log.error(f"{self.package_name}: {e}")
             self.status["error"] = str(e)
             return False
-        return True
 
     def build(
         self,
@@ -699,10 +718,12 @@ class StubPackage:
         """
         log.info(f"Build: {self.package_path.name}")
 
-        ok = self.update_package()
+        ok = self.update_package(production)
         self.status["version"] = self.pkg_version
         if not ok:
-            log.info(f"{self.package_name}: skip - Could not update package")
+            log.info(f"{self.package_name}: skip - Could not build/update package")
+            if not self.status["error"]:
+                self.status["error"] = "Could not build/update package"
             return False
         # If there are changes to the package, then publish it
         if self.is_changed():
@@ -714,7 +735,7 @@ class StubPackage:
         if self.is_changed() or force:
             #  Build the distribution files
             old_ver = self.pkg_version
-            self.pkg_version = self.update_pkg_version(production)
+            self.pkg_version = self.next_pkg_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
             log.debug(
@@ -768,10 +789,10 @@ class StubPackage:
             log.debug(f"{self.package_name}: skip publishing")
             return False
 
-        self.update_pkg_version(production=production)
+        self.next_pkg_version(production=production)
         # Publish the package to PyPi, Test-PyPi or Github
         if self.is_changed() or force:
-            if self.mpy_version == "latest":
+            if self.mpy_version == "latest" and production and not force:
                 log.warning(
                     "version: `latest` package will only be available on Github, and not published to PyPi."
                 )

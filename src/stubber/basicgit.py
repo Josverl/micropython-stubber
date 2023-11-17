@@ -1,7 +1,7 @@
 """
 Simple Git module, where needed via powershell
 
-Some of the functions are based on the gitpython module
+Some of the functions are based on the PyGithub module
 """
 import os
 import subprocess
@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import cachetools.func
-from github import Github
+from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse
 
@@ -20,7 +20,7 @@ PAT_NO_ACCESS = (
     + "_xOVII22ErRzzZ7xwwxRcNotUu4krMMbjinQcsMxjnWkYFBIDRWFlZMaHSqq"
 )
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
-GH_CLIENT = Github(PAT)
+GH_CLIENT = Github(auth=Auth.Token(PAT))
 
 
 def _run_local_git(
