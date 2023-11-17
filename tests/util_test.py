@@ -29,41 +29,52 @@ def test_clean_version_build(commit, build, clean):
 def test_clean_version_special():
     assert utils.clean_version("v1.13.0-103-gb137d064e") == "latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True) == "v1.13-103"
-    assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True) == "v1.13-103-gb137d064e"
+    assert (
+        utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True)
+        == "v1.13-103-gb137d064e"
+    )
     # with path
     #    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "v1.13.0-Latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True) == "v1.13.0-103"
     # with commit
-    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True, commit=True) == "v1.13.0-103-gb137d064e"
+    assert (
+        utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True, commit=True)
+        == "v1.13.0-103-gb137d064e"
+    )
     # FLats
     #    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "v1_13-Latest"
     assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "latest"
-    assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True, flat=True) == "v1_13-103-gb137d064e"
+    assert (
+        utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True, flat=True)
+        == "v1_13-103-gb137d064e"
+    )
 
     # all options , no V for version
     assert (
-        utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True, commit=True, flat=True, drop_v=True)
+        utils.clean_version(
+            "v1.13.0-103-gb137d064e", patch=True, build=True, commit=True, flat=True, drop_v=True
+        )
         == "1_13_0-103-gb137d064e"
     )
+
 
 @pytest.mark.parametrize(
     "input, expected",
     [
-        ("-","-"),
-        ("0.0" ,"v0.0"),
-        ("1.9.3" ,"v1.9.3"),
-        ("v1.9.3" ,"v1.9.3"),
-        ("v1.10.0" ,"v1.10"),
-        ("v1.13.0" ,"v1.13"),
-        ("1.13.0" ,"v1.13"),
-        ("v1.20.0" ,"v1.20.0"),
-        ("1.20.0" ,"v1.20.0"),
-    ]
-)   
-def test_clean_version(input:str, expected:str):
+        ("-", "-"),
+        ("0.0", "v0.0"),
+        ("1.9.3", "v1.9.3"),
+        ("v1.9.3", "v1.9.3"),
+        ("v1.10.0", "v1.10"),
+        ("v1.13.0", "v1.13"),
+        ("1.13.0", "v1.13"),
+        ("v1.20.0", "v1.20.0"),
+        ("1.20.0", "v1.20.0"),
+    ],
+)
+def test_clean_version(input: str, expected: str):
     assert utils.clean_version(input) == expected
-
 
 
 # make stub file
@@ -71,7 +82,9 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
     source = pytestconfig.rootpath / "tests/data/stubs-ok"
     dest = tmp_path / "stubs"
     shutil.copytree(source, dest)
+    # -------------
     result = utils.generate_pyi_files(dest)
+    # -------------
     assert result == True
     py_count = len(list(Path(dest).glob("**/*.py")))
     pyi_count = len(list(Path(dest).glob("**/*.pyi")))
@@ -85,9 +98,7 @@ def test_make_stub_files_OK(tmp_path, pytestconfig):
             py_files.remove(pyi.with_suffix(".py"))
         except ValueError:
             pass
-    assert (
-        not py_files
-    ), "py and pyi files should match 1:1 and stored in the same folder"
+    assert not py_files, "py and pyi files should match 1:1 and stored in the same folder"
 
 
 # post processing
@@ -98,12 +109,16 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     dest = tmp_path / "stubs"
     # shutil.copytree(source, dest)
 
-    m_generate_pyi_files: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
+    m_generate_pyi_files: MagicMock = mocker.patch(
+        "stubber.utils.post.generate_pyi_files", autospec=True
+    )
     return_val = SimpleNamespace()
     return_val.returncode = 0
-    m_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value=return_val)
+    m_spr: MagicMock = mocker.patch(
+        "stubber.utils.post.subprocess.run", autospec=True, return_value=return_val
+    )
 
-    utils.do_post_processing([dest], pyi=True, black=True)
+    utils.do_post_processing([dest], stubgen=True, black=True, autoflake=False)
 
     m_generate_pyi_files.assert_called_once()
     m_spr.assert_called_once()
@@ -153,4 +168,6 @@ def test_make_stub_files_issues(tmp_path, pytestconfig):
         except ValueError:
             pass
 
-    assert len(py_files) == PROBLEMATIC, "py and pyi files should match 1:1 and stored in the same folder"
+    assert (
+        len(py_files) == PROBLEMATIC
+    ), "py and pyi files should match 1:1 and stored in the same folder"

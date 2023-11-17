@@ -446,7 +446,7 @@ def generate_board_stubs(
         log.warning("Error generating stubs, too few (<10)stubs were generated")
         return ERROR, None
 
-    utils.do_post_processing([stubs_path], pyi=True, black=True)
+    utils.do_post_processing([stubs_path], stubgen=True, black=True, autoflake=True)
 
     return OK, stubs_path
 

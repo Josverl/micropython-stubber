@@ -29,7 +29,8 @@ def package_name(
         # # {family}-{port}-{board}-stubs
         name = f"{family}-{port}-{board}-stubs".lower()
         name = name.replace("-generic-stubs", "-stubs")
-        name = name.replace("-generic_", "-")  # @GENERIC Prefix
+        # Use explicit generic_ names for the stubs
+        # name = name.replace("-generic_", "-")  # @GENERIC Prefix
         return name
     elif pkg_type == DOC_STUBS:
         return f"{family}-doc-stubs".lower()
@@ -37,10 +38,11 @@ def package_name(
         return f"{family}-core-stubs".lower()
     # # {family}-{port}-{board}-{type}-stubs
     name = f"{family}-{port}-{board}-{pkg_type}-stubs".lower()
-    # remove -generic- from the name
-    name = name.replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
-    # remove -genetic_ from the name
-    name = name.replace("-generic_", "-")  # @GENERIC Prefix
+    # Use explicit generic_ names for the stubs
+    # # remove -generic- from the name
+    # name = name.replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
+    # # remove -genetic_ from the name
+    # name = name.replace("-generic_", "-")  # @GENERIC Prefix
     return name
 
 
@@ -63,7 +65,7 @@ def get_package(
         mpy_version=version,
     ):
         # create package from the information retrieved from the database
-        return StubPackage(pkg_name, version=version, json_data=package_info)
+        return StubPackage(pkg_name, port, board=board, version=version, json_data=package_info)
 
     log.debug(f"No package found for {pkg_name} in database, creating new package")
     return create_package(
@@ -132,7 +134,7 @@ def create_package(
     else:
         raise NotImplementedError(type)
 
-    return StubPackage(pkg_name, version=mpy_version, stubs=stubs)
+    return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stubs=stubs)
 
 
 def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSources:
@@ -156,10 +158,12 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     if board_l in GENERIC:
         merged_path = Path(f"{family}-{ver_flat}-{port}-merged")
         if not merged_path.exists():
-            board_l = default_board(port)
-            merged_path = Path(f"{family}-{ver_flat}-{port}-{board_l}-merged")
+            board = default_board(port, ver_flat)
+            board_l = board.lower()
+            board_u = board
+            merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged")
     else:
-        merged_path = Path(f"{family}-{ver_flat}-{port}-{board_l}-merged")
+        merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged")
 
     # BOARD in source frozen path needs to be UPPERCASE
     frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()
