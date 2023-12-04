@@ -318,7 +318,8 @@ class StubPackage:
                 if (CONFIG.stub_path / fw_path).exists():
                     updated_sources.append((stub_type, fw_path))
                 else:
-                    updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+                    if fw_path.with_name("GENERIC").exists():
+                        updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
             elif stub_type == StubSource.MERGED:
                 # Use the default board folder instead of the GENERIC board folder (if it exists)
                 if self.board.upper() == GENERIC_U:
