@@ -24,6 +24,8 @@ if os_distro_version in ["linux-ubuntu-20.04", "linux-debian-11"]:
         # "ubuntu_20_04/micropython_v1_16",
         "ubuntu_20_04/micropython_v1_17",
         "ubuntu_20_04/micropython_v1_18",
+        "ubuntu_20_04/micropython_v1_20_0",
+        "ubuntu_20_04/micropython_v1_21_0",
     ]
 elif os_distro_version in ["linux-ubuntu-18.04"]:
     # 18.04 - bionic
@@ -36,6 +38,9 @@ elif os_distro_version in ["linux-ubuntu-18.04"]:
 elif sys.platform == "win32":
     fw_list = [
         "windows/micropython_v1_18.exe",
+        "windows/micropython_v1_20_0.exe",
+        "windows/micropython_v1_21_0.exe",
+        "windows/micropython_v1_22_0_preview.exe",
     ]
 
 
@@ -60,13 +65,15 @@ elif sys.platform == "win32":
     "firmware",
     fw_list,
 )
-def test_createstubs(firmware: str, variant: str, suffix: str, tmp_path: Path, pytestconfig: Config):
+def test_createstubs(
+    firmware: str, variant: str, suffix: str, tmp_path: Path, pytestconfig: Config
+):
     "run createstubs in the native (linux/windows) version of micropython"
 
     # skip this on windows - python 3.7
     # TODO: why does it not work?
-    if sys.platform == "win32":  # and sys.version_info[0] == 3 and sys.version_info[0] == 7:
-        pytest.skip(reason="Test does not work well on Windows ....")
+    # if sys.platform == "win32":  # and sys.version_info[0] == 3 and sys.version_info[0] == 7:
+    #     pytest.skip(reason="Test does not work well on Windows ....")
 
     # all createstub variants are in the same folder
     script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
@@ -120,7 +127,9 @@ def test_createstubs(firmware: str, variant: str, suffix: str, tmp_path: Path, p
     for x in ["firmware", "stubber", "modules"]:
         assert x in manifest.keys(), "module manifest should contain firmware, stubber , modules"
 
-    assert len(manifest["modules"]) - len(stubfiles) == 0, "number of modules must match count of stubfiles."
+    assert (
+        len(manifest["modules"]) - len(stubfiles) == 0
+    ), "number of modules must match count of stubfiles."
     # Delete databaseafter the test
     if variant == "createstubs_db":
         (script_path / "modulelist.done").unlink(missing_ok=False)  # MUST exist
