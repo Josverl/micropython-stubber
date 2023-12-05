@@ -6,9 +6,7 @@
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.testing.pytestArgs": [
-        "snippets",
         "tests",
-        "src",
         "--new-first",
         "--no-header"
     ],

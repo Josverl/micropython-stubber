@@ -45,9 +45,9 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-v",
-                "-v",
-                "switch",
-                "v1.20.0",
+                "make-variants",
+                // "switch",
+                // "v1.20.0",
                 // "build",
                 // "--version",
                 // "latest",
