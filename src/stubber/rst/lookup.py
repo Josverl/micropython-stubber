@@ -20,7 +20,7 @@ __all__ = [
 
 # all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar, Iterator",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
     "from _typeshed import Incomplete",
 ]
 
