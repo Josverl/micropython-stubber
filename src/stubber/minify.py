@@ -80,17 +80,17 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
         """Handles edits that require multiline comments
 
         Example:
-            self._log.debug("info: {} {}".format(
+            self.log.debug("info: {} {}".format(
                 1,
                 2
             ))
-        Here, only commenting out the first self._log line will raise
+        Here, only commenting out the first self.log line will raise
         an error. So this function returns all lines that need to
         be commented out instead.
 
         It also checks for situations such as this:
             if condition:
-                self._log.debug('message')
+                self.log.debug('message')
 
         Here, since the only functionality of the conditional is the call log,
         both lines would be returned to comment out.
@@ -129,9 +129,9 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
             try:
                 something()
             except:
-                self._log.debug('some message')
+                self.log.debug('some message')
 
-        Simply removing the self._log call would create a syntax error,
+        Simply removing the self.log call would create a syntax error,
         which is what this function checks for.
 
         """
@@ -214,33 +214,33 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
         ("comment", "import logging"),
         # report keepers may be inserted here
         # do report errors
-        ("rprint", "self._log.error"),
-        ("rprint", "_log.error"),
+        ("rprint", "self.log.error"),
+        ("rprint", "log.error"),
     ]
     if keep_report:
         # insert report keepers after the comment modifiers
         edits += [
             # keepers
-            ("rprint", 'self._log.info("Stub module: '),
-            ("rprint", 'self._log.warning("{}Skip module:'),
-            ("rprint", 'self._log.info("Clean/remove files in folder:'),
-            ("rprint", 'self._log.info("Created stubs for'),
-            ("rprint", 'self._log.info("Family: '),
-            ("rprint", 'self._log.info("Version: '),
-            ("rprint", 'self._log.info("Port: '),
-            ("rprint", 'self._log.info("Board: '),
+            ("rprint", 'self.log.info("Stub module: '),
+            ("rprint", 'self.log.warning("{}Skip module:'),
+            ("rprint", 'self.log.info("Clean/remove files in folder:'),
+            ("rprint", 'self.log.info("Created stubs for'),
+            ("rprint", 'self.log.info("Family: '),
+            ("rprint", 'self.log.info("Version: '),
+            ("rprint", 'self.log.info("Port: '),
+            ("rprint", 'self.log.info("Board: '),
             # all others
-            ("comment", "self._log."),
+            ("comment", "self.log."),
             ("comment", "_log ="),
         ]
     else:
         edits += [
             #  remove first full
-            ("comment", "self._log ="),
-            ("comment", "self._log("),
-            ("comment", "self._log.debug"),
-            ("comment", "self._log.info"),
-            ("comment", "self._log.warning"),
+            ("comment", "self.log ="),
+            ("comment", "self.log("),
+            ("comment", "self.log.debug"),
+            ("comment", "self.log.info"),
+            ("comment", "self.log.warning"),
             # then short versions
             ("comment", "_log ="),
             ("comment", "_log.debug"),
@@ -342,15 +342,15 @@ def cross_compile(
         # target must be a Path object
         _target = get_temp_file(suffix=".mpy")
 
-    cmd = ["pipx", "run", f"mpy-cross=={version}"] if version else ["pipx", "run", "mpy-cross"]
-    # Add params
-    cmd += ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
-    log.trace(" ".join(cmd))
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = pipx_mpy_cross(version, source_file, _target)
+    if result.stderr and "No matching distribution found for mpy-cross==" in result.stderr:
+        log.warning(f"mpy-cross=={version} not found, using latest")
+        result = pipx_mpy_cross("latest", source_file, _target)
+
     if result.returncode == 0:
         log.debug(f"mpy-cross compiled to    : {_target.name}")
     else:
-        log.error("mpy-cross failed to compile:")
+        log.error(f"mpy-cross failed to compile:{result.returncode} \n{result.stderr}")
 
     if isinstance(target, BytesIO):
         # copy the byte contents of the temp file to the target file-like object
@@ -359,6 +359,21 @@ def cross_compile(
         # _target.unlink()
 
     return result.returncode
+
+
+def pipx_mpy_cross(version, source_file, _target):
+    """Run mpy-cross using pipx"""
+    if version == "latest":
+        version = ""
+    if version:
+        version = "==" + version
+
+    cmd = ["pipx", "run", f"mpy-cross{version}"] if version else ["pipx", "run", "mpy-cross"]
+    # Add params
+    cmd += ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
+    log.trace(" ".join(cmd))
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return result
 
 
 def write_to_temp_file(source: str):
