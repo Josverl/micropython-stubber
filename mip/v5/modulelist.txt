@@ -2,8 +2,10 @@
 # used by the memory optimised createstubs_mem.py
 WM8960
 _OTA
+_asyncio
 _boot_fat
 _coap
+_espnow
 _flash_control_OTA
 _main_pybytes
 _mqtt
@@ -39,10 +41,17 @@ aioble/l2cap
 aioble/peripheral
 aioble/security
 aioble/server
+aioespnow
 ak8963
 apa102
 apa106
 array
+asyncio/__init__
+asyncio/core
+asyncio/event
+asyncio/funcs
+asyncio/lock
+asyncio/stream
 binascii
 bluetooth
 breakout_as7262
@@ -73,6 +82,7 @@ collections
 crypto
 cryptolib
 curl
+deflate
 dht
 display
 display_driver_utils
@@ -82,6 +92,7 @@ errno
 esp
 esp32
 espidf
+espnow
 flashbdev
 framebuf
 freesans20
@@ -117,6 +128,7 @@ microWebSrv
 microWebTemplate
 micropython
 mip
+mip/__init__
 motor
 mpu6500
 mpu9250
