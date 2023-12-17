@@ -1,5 +1,6 @@
 """Pre/Post Processing for createstubs.py"""
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
 
@@ -25,15 +26,17 @@ def run_black(path: Path, capture_output: bool = False):
     """
     run black to format the code / stubs
     """
+    log.debug("Running black on: {}".format(path))
     cmd = [
+        sys.executable,
+        "-m",
         "black",
         path.as_posix(),
         "--line-length",
         "140",
     ]
-    log.debug("Running black on: {}".format(path))
-    # subprocess.run(cmd, capture_output=log.level >= logging.INFO)
-    result = subprocess.run(cmd, capture_output=capture_output)
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
     return result.returncode
 
 

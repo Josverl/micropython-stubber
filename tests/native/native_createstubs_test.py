@@ -69,12 +69,6 @@ def test_createstubs(
     firmware: str, variant: str, suffix: str, tmp_path: Path, pytestconfig: Config
 ):
     "run createstubs in the native (linux/windows) version of micropython"
-
-    # skip this on windows - python 3.7
-    # TODO: why does it not work?
-    # if sys.platform == "win32":  # and sys.version_info[0] == 3 and sys.version_info[0] == 7:
-    #     pytest.skip(reason="Test does not work well on Windows ....")
-
     # all createstub variants are in the same folder
     script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
     script_name = variant + suffix + ".py"
