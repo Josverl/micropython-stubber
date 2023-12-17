@@ -64,10 +64,10 @@ def main():
     try:
         f = open("modulelist.done", "r+b")
         was_running = True
-        _log.info("Opened existing db")
+        print("Opened existing db")
     except OSError:
         f = open("modulelist.done", "w+b")
-        _log.info("created new db")
+        print("created new db")
         was_running = False
     stubber = Stubber(path=read_path())
 
@@ -115,6 +115,7 @@ def main():
         # stubber.write_json_end(mod_fp)
         stubber._report = [v for _, v in modules_done.items() if v != "failed"]
         stubber.report()
+
 
 def get_modulelist(stubber):
     stubber.modules = []  # avoid duplicates

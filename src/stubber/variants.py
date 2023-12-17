@@ -85,7 +85,7 @@ def create_variants(
 
         # Minify file with pyminifier
         log.info(f"Minifying to {minified_path.name}")
-        minify(variant_path, minified_path, keep_report=True, diff=False)
+        minify(variant_path, minified_path, keep_report=False, diff=False)
 
         # str -> path
         # read minified file

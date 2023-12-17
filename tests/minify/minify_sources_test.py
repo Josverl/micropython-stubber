@@ -1,7 +1,9 @@
 from io import StringIO
 from pathlib import Path
 from typing import List
+
 import pytest
+
 from stubber.minify import minify
 
 # mark all tests
@@ -23,6 +25,7 @@ print("test")
 
 x = 1
 '''
+
 
 # test minify with different sources and targets
 # sources:              Targets:
@@ -77,8 +80,9 @@ def test_minify_strio_to_strio(tmp_path: Path, pytestconfig: pytest.Config):
 
 def check_results(content: List[str]):
     for line in content:
-        assert line.find("._log") == -1, "Failed: all references to ._log have been removed"
-    # # not sure why this was/is needed 
+        assert line.find("._log") == -1, "Not all references to ._log have been removed"
+        assert line.find(".log") == -1, "Not all references to .log have been removed"
+    # # not sure why this was/is needed
     # check if there is a line with 'import gc'
     # assert any(line.find("import gc") != -1 for line in content), "failed: gc is still imported"
     # assert any(line.find("from ujson import dumps") != -1 for line in content), "failed: dumps is still imported"
