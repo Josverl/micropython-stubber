@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -22,12 +23,16 @@ def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Confi
     with open(tmp_path / source) as f:
         content = f.readlines()
     for line in content:
-        assert line.find("._log") == -1, "all references to ._log have been removed"
+        assert line.find("._log") == -1, "Not all references to ._log have been removed"
+        assert line.find(".log") == -1, "Not all references to .log have been removed"
+        # assert line.find("logging") == -1, "Not all references to .logging have been removed"
 
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.mocked
-def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, pytestconfig: pytest.Config):
+def test_minification_quick(
+    tmp_path: Path, source: str, mocker: MockerFixture, pytestconfig: pytest.Config
+):
     "test the rest of the minification functions using mocks to reduce the time needed"
     # load process.py in the same python environment
     source_path = pytestconfig.rootpath / "src" / "stubber" / "board" / source
