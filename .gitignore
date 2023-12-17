@@ -65,3 +65,4 @@ empty
 
 # do not check in any downloaded firmwares
 **/firmware
+tmp_minified.py

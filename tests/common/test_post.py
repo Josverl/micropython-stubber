@@ -1,6 +1,3 @@
-import subprocess
-from pathlib import Path
-
 from stubber.utils.post import run_black
 
 
