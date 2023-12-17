@@ -651,10 +651,10 @@ def main():
     try:
         f = open("modulelist.done", "r+b")
         was_running = True
-        _log.info("Opened existing db")
+        print("Opened existing db")
     except OSError:
         f = open("modulelist.done", "w+b")
-        _log.info("created new db")
+        print("created new db")
         was_running = False
     stubber = Stubber(path=read_path())
 

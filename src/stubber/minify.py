@@ -230,7 +230,8 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             ("rprint", 'self.log.info("Port: '),
             ("rprint", 'self.log.info("Board: '),
             # all others
-            ("comment", "self.log."),
+            ("comment", "self.log"),
+            ("comment", "_log."),
             ("comment", "_log ="),
         ]
     else:
@@ -249,6 +250,11 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
         ] + edits
 
     content = edit_lines(source_content, edits, diff=diff)
+
+    if 1:
+        # write to temp file for debugging
+        with open("tmp_minified.py", "w+") as f:
+            f.write(content)
 
     source = python_minifier.minify(
         content,
