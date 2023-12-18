@@ -27,6 +27,7 @@ class TransformError(Exception):
 
 
 MODULE_KEY = ("__module",)
+MODDOC_KEY = ("__module_docstring",)
 
 # debug helper
 _m = cst.parse_module("")
@@ -43,8 +44,9 @@ class StubTypingCollector(cst.CSTVisitor):
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            Union[TypeInfo, str],  
+            Union[TypeInfo, str],
         ] = {}
+        self.comments :List[str] = []
 
     # ------------------------------------------------------------
     def visit_Module(self, node: cst.Module) -> bool:
@@ -53,6 +55,14 @@ class StubTypingCollector(cst.CSTVisitor):
         if docstr:
             self.annotations[MODULE_KEY] = docstr
         return True
+    def visit_Comment(self, node: cst.Comment) -> None:
+        """
+        connect comments from the source
+        """
+        comment = node.value
+        if comment.startswith("# MCU: ") or comment.startswith("# Stubber:"):
+            # very basic way to detect the stubber comments that we want to copy over
+            self.comments.append(comment)
 
     # ------------------------------------------------------------
     #  keep track of the the (class, method) names to the stack
