@@ -5,11 +5,6 @@
     //////////////////////////////////////////////////////////////
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
-    "python.testing.pytestArgs": [
-        "tests",
-        "--new-first",
-        "--no-header"
-    ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "peacock.color": "#613206",
@@ -144,5 +139,6 @@
         "--verbose"
     ],
     "python.analysis.enablePytestExtra": true,
-    "testExplorer.addToEditorContextMenu": true
+    "testExplorer.addToEditorContextMenu": true,
+    "todo-tree.tree.scanMode": "open files"
 }
