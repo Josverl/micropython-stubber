@@ -1,5 +1,6 @@
 """Build and packaging defaults for stubber"""
 from typing import Dict, List
+
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 

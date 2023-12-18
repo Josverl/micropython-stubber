@@ -1,0 +1,9 @@
+# MicroPython v1.22.0-preview.208.gb5449b0f0.dirty on 2023-12-04; JS with Emscripten
+
+__main__          deflate           json              select
+_asyncio          errno             math              struct
+array             framebuf          micropython       sys
+binascii          gc                os                time
+builtins          hashlib           platform          uctypes
+cmath             heapq             random
+collections       io                re
