@@ -181,7 +181,17 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # we need to be carefull not to copy over all the annotations if the types are different
         if doc_stub.def_type == "classdef":
             # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=doc_stub.decorators, bases=doc_stub.def_node.bases)  # type: ignore
+            # combine the decorators from the doc-stub and the firmware stub
+            new_decorators = []
+            if doc_stub.decorators:
+                new_decorators.extend(doc_stub.decorators)
+            if updated_node.decorators:
+                new_decorators.extend(updated_node.decorators)
+
+            return updated_node.with_changes(
+                decorators=new_decorators,
+                bases=doc_stub.def_node.bases,  # type: ignore
+            )
         else:
             # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
@@ -214,7 +224,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             params_txt = empty_module.code_for_node(original_node.params)
             overwrite_params = params_txt in [
                 "",
-                # "...",
+                # TODO:  "...",
                 "*args, **kwargs",
                 "self",
                 "self, *args, **kwargs",
@@ -223,7 +233,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             overwrite_return = True
             if (
                 original_node.returns
-            ):  # and isinstance(original_node.returns.annotation, cst.Return):
+            ):  # TODO: and isinstance(original_node.returns.annotation, cst.Return):
                 try:
                     overwrite_return = original_node.returns.annotation.value in [
                         "Incomplete",
@@ -232,9 +242,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
                     ]
                 except AttributeError:
                     pass
+            # combine the decorators from the doc-stub and the firmware stub
+            new_decorators = []
+            if doc_stub.decorators:
+                new_decorators.extend(doc_stub.decorators)
+            if updated_node.decorators:
+                new_decorators.extend(updated_node.decorators)
 
             return updated_node.with_changes(
-                decorators=doc_stub.decorators,
+                decorators=new_decorators,
                 params=doc_stub.params if overwrite_params else updated_node.params,
                 returns=doc_stub.returns if overwrite_return else updated_node.returns,
             )
