@@ -8,7 +8,7 @@ import pytest
 
 class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
-    after: str  # The source code after the transformation.
+    expected: str  # The source code after the transformation.
     doc_stub: str  # The stub to apply
     stub_file: str  # The path to stub file to apply
     output: Path = None  # where to save the output for testing the tests
@@ -30,8 +30,8 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
         before_files = list(test_case_directory.glob("before.py")) + list(
             test_case_directory.glob("before.pyi")
         )
-        after_files = list(test_case_directory.glob("after.py")) + list(
-            test_case_directory.glob("after.pyi")
+        after_files = list(test_case_directory.glob("expected.py")) + list(
+            test_case_directory.glob("expected.pyi")
         )
         doc_stubs = list(test_case_directory.glob("doc_stub.py")) + list(
             test_case_directory.glob("doc_stub.pyi")
@@ -43,7 +43,7 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
         with open(before_files[0]) as file:
             before = file.read()
         with open(after_files[0]) as file:
-            after = file.read()
+            expected = file.read()
         with open(doc_stubs[0]) as file:
             doc_stub = file.read()
 
@@ -57,8 +57,8 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
                 TestCase(
                     path=test_case_directory,
                     before=before,
-                    after=after,
                     doc_stub=doc_stub,
+                    expected=expected,
                     stub_file=doc_stubs[0],
                     output=output,
                 ),

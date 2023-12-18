@@ -4,7 +4,14 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Tuple
 
 import pytest
-from libcst.codemod._testing import CodemodContext, CodemodTest, PartialParserConfig, SkipFile, _CodemodTest, parse_module
+from libcst.codemod._testing import (
+    CodemodContext,
+    CodemodTest,
+    PartialParserConfig,
+    SkipFile,
+    _CodemodTest,
+    parse_module,
+)
 
 from stubber.codemod.merge_docstub import MergeCommand
 
@@ -58,7 +65,11 @@ class PytestCodemodTest(_CodemodTest):
         transform_instance = self.TRANSFORM(context, *args, **kwargs)
         input_tree = parse_module(
             CodemodTest.make_fixture_data(before),
-            config=(PartialParserConfig(python_version=python_version) if python_version is not None else PartialParserConfig()),
+            config=(
+                PartialParserConfig(python_version=python_version)
+                if python_version is not None
+                else PartialParserConfig()
+            ),
         )
         try:
             output_tree = transform_instance.transform_module(input_tree)
@@ -99,7 +110,7 @@ class TestMergeDocStubs(PytestCodemodTest):
 
         self.assertCodemod(
             test_case.before,
-            test_case.after,
+            test_case.expected,
             stub_file=test_case.stub_file,
             save_output=test_case.output,
         )
