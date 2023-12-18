@@ -51,38 +51,38 @@ class MergeCommand(VisitorBasedCodemodCommand):
         arg_parser.add_argument(
             # "-sf",
             "--stubfile",
-            dest="stub_file",
+            dest="docstub_file",
             metavar="PATH",
             help="The path to the doc-stub file",
             type=str,
             required=True,
         )
 
-    def __init__(self, context: CodemodContext, stub_file: Union[Path, str]) -> None:
+    def __init__(self, context: CodemodContext, docstub_file: Union[Path, str]) -> None:
         """initialize the base class with context, and save our args."""
         super().__init__(context)
         self.replace_functiondef_with_classdef = True
         # stack for storing the canonical name of the current function/method
         self.stack: List[str] = []
         # stubfile is the path to the doc-stub file
-        self.stub_path = Path(stub_file)
+        self.docstub_path = Path(docstub_file)
         # read the stub file from the path
-        self.stub_source = self.stub_path.read_text(encoding="utf-8")
+        self.docstub_source = self.docstub_path.read_text(encoding="utf-8")
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            TypeInfo,  # value: TypeInfo
+            Union[TypeInfo, str],  # value: TypeInfo
         ] = {}
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
         # parse the doc-stub file
-        if self.stub_source:
+        if self.docstub_source:
             try:
                 # parse the doc-stub file
-                stub_tree = cst.parse_module(self.stub_source)
+                stub_tree = cst.parse_module(self.docstub_source)
             except cst.ParserSyntaxError as e:
-                log.error(f"Error parsing {self.stub_path}: {e}")
+                log.error(f"Error parsing {self.docstub_path}: {e}")
                 return
             # create the collectors
             typing_collector = StubTypingCollector()
@@ -136,9 +136,29 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         # update/replace  module docstrings
         # todo: or should we add / merge the docstrings?
-        new = self.annotations[MODULE_KEY]
+        docstub_docstr = self.annotations[MODULE_KEY]
+        assert isinstance(docstub_docstr, str)
+        src_docstr = original_node.get_docstring()
+        if src_docstr and docstub_docstr.strip() == src_docstr.strip():
+            # docstrings are the same, no need to update
+            return updated_node
+        if src_docstr:
+            new_docstr = f'"""\n{docstub_docstr}\n\n---\n{src_docstr}\n"""'
+        else:
+            new_docstr = f'"""\n{docstub_docstr}\n"""'
 
-        return update_module_docstr(updated_node, new.docstr_node)
+        docstr_node = cst.SimpleStatementLine(
+            body=[
+                cst.Expr(
+                    value=cst.SimpleString(
+                        value=new_docstr,
+                    )
+                )
+            ]
+        )
+
+        return update_module_docstr(updated_node, docstr_node)
+        # return update_module_docstr(updated_node, new.docstr_node)
 
     # ------------------------------------------------------------
 

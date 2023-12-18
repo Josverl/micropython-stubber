@@ -1,6 +1,5 @@
-"""
-module docstring
-"""
+"The same module docstring."
+
 def foo():
     ''
     ...

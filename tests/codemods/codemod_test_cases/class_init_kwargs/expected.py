@@ -1,5 +1,5 @@
 """
-__init__ arguments from docstubs
+__init__ arguments
 """
 
 

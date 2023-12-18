@@ -1,5 +1,8 @@
 """
-module docstring
+docstub module docstring
+
+---
+before module docstring
 """
 
 def foo():
