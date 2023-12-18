@@ -194,13 +194,27 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # Same type, we can copy over the annotations
             # params that should  not be overwritten by the doc-stub ?
             params_txt = empty_module.code_for_node(original_node.params)
-            overwrite_params = params_txt in ["self, *args, **kwargs", "*args, **kwargs", ""]
+            overwrite_params = params_txt in [
+                "",
+                "*args, **kwargs",
+                "self",
+                "self, *args, **kwargs",
+            ]
+            # return that should not be overwritten by the doc-stub ?
             overwrite_return = True
+            if original_node.returns:
+                try:
+                    overwrite_return = original_node.returns.annotation.value in [
+                        "Incomplete",
+                        "Any",
+                    ]
+                except AttributeError:
+                    pass
 
             return updated_node.with_changes(
                 decorators=doc_stub.decorators,
                 params=doc_stub.params if overwrite_params else updated_node.params,
-                returns=doc_stub.returns if overwrite_return else None,
+                returns=doc_stub.returns if overwrite_return else updated_node.returns,
             )
 
         elif doc_stub.def_type == "classdef":
