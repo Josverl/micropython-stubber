@@ -120,7 +120,7 @@ LOOKUP_LIST = {
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
-    "collections.namedtuple": ("stdlib_NamedTuple", 0.95),
+    "collections.namedtuple": ("stdlib_namedtuple", 0.95),
     "gc.collect": ("None", 0.95),
     "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
@@ -232,8 +232,7 @@ MODULE_GLUE = {
     "esp32": ["from __future__ import annotations"],  # Class methods return Class
     "collections": [
         "from queue import Queue",
-        "from stdlib.collections import  OrderedDict as stdlib_OrderedDict, deque as stdlib_deque",
-        "from typing_extensions import NamedTuple as stdlib_NamedTuple",
+        "from stdlib.collections import OrderedDict as stdlib_OrderedDict, deque as stdlib_deque, namedtuple as stdlib_namedtuple",
     ],  # dequeu is a subclass
     "os": [
         # "from stdlib.os import uname_result",  # uname returns uname_result
