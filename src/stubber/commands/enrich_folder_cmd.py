@@ -6,6 +6,7 @@ from typing import Union
 
 import click
 from loguru import logger as log
+
 from stubber.codemod.enrich import enrich_folder
 from stubber.utils.config import CONFIG
 
@@ -18,8 +19,8 @@ from .cli import stubber_cli
     "-s",
     "stubs_folder",
     default=CONFIG.stub_path.as_posix(),
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="folder containing the firmware stubs to be updated",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True),
+    help="File or folder containing the firmware stubs to be updated",
     show_default=True,
 )
 @click.option(
@@ -27,21 +28,43 @@ from .cli import stubber_cli
     "-ds",
     "docstubs_folder",
     default=CONFIG.stub_path.as_posix(),
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help="folder containing the docstubs to be applied",
+    type=click.Path(exists=True, file_okay=True, dir_okay=True),
+    help="File or folder containing the docstubs to be applied",
     show_default=True,
 )
 @click.option("--diff", default=False, help="Show diff", show_default=True, is_flag=True)
-@click.option("--dry-run", default=False, help="Dry run does not write the files back", show_default=True, is_flag=True)
+@click.option(
+    "--dry-run",
+    default=False,
+    help="Dry run does not write the files back",
+    show_default=True,
+    is_flag=True,
+)
+@click.option(
+    "--package-name",
+    "-p",
+    "package_name",
+    default="",
+    help="Package name to be enriched (Optional)",
+    show_default=True,
+)
 def cli_enrich_folder(
     stubs_folder: Union[str, Path],
     docstubs_folder: Union[str, Path],
     diff: bool = False,
     dry_run: bool = False,
+    package_name: str = "",
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
     """
     write_back = not dry_run
     log.info(f"Enriching {stubs_folder} with {docstubs_folder}")
-    _ = enrich_folder(Path(stubs_folder), Path(docstubs_folder), show_diff=diff, write_back=write_back, require_docstub=False)
+    _ = enrich_folder(
+        Path(stubs_folder),
+        Path(docstubs_folder),
+        show_diff=diff,
+        write_back=write_back,
+        require_docstub=False,
+        package_name=package_name,
+    )
