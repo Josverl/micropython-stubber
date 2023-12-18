@@ -83,7 +83,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 stub_tree = cst.parse_module(self.docstub_source)
             except cst.ParserSyntaxError as e:
                 log.error(f"Error parsing {self.docstub_path}: {e}")
-                return
+                raise ValueError(f"Error parsing {self.docstub_path}: {e}") from e
             # create the collectors
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)
@@ -143,9 +143,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # docstrings are the same, no need to update
             return updated_node
         if src_docstr:
-            new_docstr = f'"""\n{docstub_docstr}\n\n---\n{src_docstr}\n"""'
+            new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
         else:
-            new_docstr = f'"""\n{docstub_docstr}\n"""'
+            new_docstr = f'"""\n' + docstub_docstr + '\n"""'
 
         docstr_node = cst.SimpleStatementLine(
             body=[
@@ -156,9 +156,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 )
             ]
         )
-
         return update_module_docstr(updated_node, docstr_node)
-        # return update_module_docstr(updated_node, new.docstr_node)
 
     # ------------------------------------------------------------
 
@@ -175,14 +173,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the class
             return updated_node
         # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
+        doc_stub = self.annotations[stack_id]
+        assert not isinstance(doc_stub, str)
         # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node)
+        updated_node = update_def_docstr(updated_node, doc_stub.docstr_node)
         # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "classdef":
+        if doc_stub.def_type == "classdef":
             # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=new.decorators, bases=new.def_node.bases)  # type: ignore
+            return updated_node.with_changes(decorators=doc_stub.decorators, bases=doc_stub.def_node.bases)  # type: ignore
         else:
             # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
@@ -197,7 +196,6 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
     ) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
-
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
@@ -205,7 +203,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             return updated_node
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id]
-
+        assert not isinstance(doc_stub, str)
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
         # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
@@ -216,17 +214,21 @@ class MergeCommand(VisitorBasedCodemodCommand):
             params_txt = empty_module.code_for_node(original_node.params)
             overwrite_params = params_txt in [
                 "",
+                # "...",
                 "*args, **kwargs",
                 "self",
                 "self, *args, **kwargs",
             ]
             # return that should not be overwritten by the doc-stub ?
             overwrite_return = True
-            if original_node.returns:
+            if (
+                original_node.returns
+            ):  # and isinstance(original_node.returns.annotation, cst.Return):
                 try:
                     overwrite_return = original_node.returns.annotation.value in [
                         "Incomplete",
                         "Any",
+                        "...",
                     ]
                 except AttributeError:
                     pass

@@ -40,17 +40,14 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
             print("Incorrect test file layout in folder", test_case_directory)
             continue
         # read the test files and add them to the test cases
-        with open(before_files[0]) as file:
+        with open(before_files[0], encoding="utf-8") as file:
             before = file.read()
-        with open(after_files[0]) as file:
+        with open(after_files[0], encoding="utf-8") as file:
             expected = file.read()
-        with open(doc_stubs[0]) as file:
+        with open(doc_stubs[0], encoding="utf-8") as file:
             doc_stub = file.read()
 
-        if 1:  # enable output for testing
-            output = test_case_directory.joinpath("output.py")
-        else:
-            output = None
+        output = test_case_directory.joinpath("output.py")
 
         test_cases.append(
             pytest.param(
