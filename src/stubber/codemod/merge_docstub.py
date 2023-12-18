@@ -25,6 +25,7 @@ from stubber.cst_transformer import (
 ##########################################################################################
 # # log = logging.getLogger(__name__)
 #########################################################################################
+empty_module = cst.parse_module("")
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -145,7 +146,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    def leave_ClassDef(
+        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+    ) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
@@ -170,7 +173,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
 
         stack_id = tuple(self.stack)
@@ -179,24 +184,30 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the function
             return updated_node
         # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
+        doc_stub = self.annotations[stack_id]
 
         # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node, new.def_node)
+        updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
         # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "funcdef":
-            # Same type, we can copy over all the annotations
+        if doc_stub.def_type == "funcdef":
+            # Same type, we can copy over the annotations
+            # params that should  not be overwritten by the doc-stub ?
+            params_txt = empty_module.code_for_node(original_node.params)
+            overwrite_params = params_txt in ["self, *args, **kwargs", "*args, **kwargs", ""]
+            overwrite_return = True
+
             return updated_node.with_changes(
-                params=new.params,
-                returns=new.returns,
-                decorators=new.decorators,
+                decorators=doc_stub.decorators,
+                params=doc_stub.params if overwrite_params else updated_node.params,
+                returns=doc_stub.returns if overwrite_return else None,
             )
-        elif new.def_type == "classdef":
+
+        elif doc_stub.def_type == "classdef":
             # Different type: ClassDef != FuncDef ,
-            if new.def_node and self.replace_functiondef_with_classdef:
+            if doc_stub.def_node and self.replace_functiondef_with_classdef:
                 # replace the functiondef with the classdef from the stub file
-                return new.def_node
+                return doc_stub.def_node
             # for now just return the updated node
             return updated_node
         else:

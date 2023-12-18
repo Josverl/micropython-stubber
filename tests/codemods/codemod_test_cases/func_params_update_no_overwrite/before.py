@@ -3,7 +3,7 @@ simple functions
 """
 
 
-def foo(*args, **kwargs):
+def foo(x=1, y=2):
     ...
 
 
