@@ -111,6 +111,6 @@ class TestMergeDocStubs(PytestCodemodTest):
         self.assertCodemod(
             test_case.before,
             test_case.expected,
-            stub_file=test_case.stub_file,
+            docstub_file=test_case.stub_file,
             save_output=test_case.output,
         )

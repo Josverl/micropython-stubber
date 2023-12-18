@@ -1,5 +1,5 @@
 """
-docstub module docstring
+The same module docstring.
 """
 
 

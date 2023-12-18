@@ -76,7 +76,7 @@ def enrich_file(
     # read source file
     old_code = target_path.read_text()
 
-    codemod_instance = merge_docstub.MergeCommand(context, stub_file=docstub_file)
+    codemod_instance = merge_docstub.MergeCommand(context, docstub_file=docstub_file)
     if not (
         new_code := exec_transform_with_prettyprint(
             codemod_instance,
