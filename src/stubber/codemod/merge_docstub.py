@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
+from libcst.helpers.module import insert_header_comments
 from loguru import logger as log
 
 from stubber.cst_transformer import (
@@ -73,6 +74,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             Tuple[str, ...],  # key: tuple of canonical class/function name
             Union[TypeInfo, str],  # value: TypeInfo
         ] = {}
+        self.comments: List[str] = []
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
@@ -90,7 +92,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # visit the doc-stub file with all collectors
             stub_tree.visit(typing_collector)
             self.annotations = typing_collector.annotations
-
+            self.comments = typing_collector.comments
             # Store the imports that were added to the stub file
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
@@ -99,7 +101,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
     # ------------------------------------------------------------------------
 
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        """Update the Module docstring"""
+        """
+        This method is responsible for updating the module node after processing it in the codemod.
+        It performs the following tasks:
+        1. Adds any needed imports from the doc-stub.
+        2. Adds `from module import *` from the doc-stub.
+        3. Updates the module docstring.
+        4. Updates the comments in the module.
+
+        :param original_node: The original module node.
+        :param updated_node: The updated module node after processing.
+        :return: The updated module node.
+        """
+        # --------------------------------------------------------------------
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
             imp = self.stub_imports[k]
@@ -129,7 +143,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                             module=full_module_name,
                             obj="*",
                         )
-
+        # --------------------------------------------------------------------
         # update the docstring.
         if MODULE_KEY not in self.annotations:
             return updated_node
@@ -138,25 +152,30 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # todo: or should we add / merge the docstrings?
         docstub_docstr = self.annotations[MODULE_KEY]
         assert isinstance(docstub_docstr, str)
-        src_docstr = original_node.get_docstring()
-        if src_docstr and docstub_docstr.strip() == src_docstr.strip():
-            # docstrings are the same, no need to update
-            return updated_node
-        if src_docstr:
-            new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
-        else:
-            new_docstr = f'"""\n' + docstub_docstr + '\n"""'
+        src_docstr = original_node.get_docstring() or ""
+        if src_docstr or docstub_docstr:
+            if docstub_docstr.strip() != src_docstr.strip():
+                if src_docstr:
+                    new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
+                else:
+                    new_docstr = f'"""\n' + docstub_docstr + '\n"""'
 
-        docstr_node = cst.SimpleStatementLine(
-            body=[
-                cst.Expr(
-                    value=cst.SimpleString(
-                        value=new_docstr,
-                    )
+                docstr_node = cst.SimpleStatementLine(
+                    body=[
+                        cst.Expr(
+                            value=cst.SimpleString(
+                                value=new_docstr,
+                            )
+                        )
+                    ]
                 )
-            ]
-        )
-        return update_module_docstr(updated_node, docstr_node)
+                updated_node = update_module_docstr(updated_node, docstr_node)
+        # --------------------------------------------------------------------
+        # update the comments
+        updated_node = insert_header_comments(updated_node, self.comments)
+
+        return updated_node
+        # --------------------------------------------------------------------
 
     # ------------------------------------------------------------
 
@@ -224,18 +243,16 @@ class MergeCommand(VisitorBasedCodemodCommand):
             params_txt = empty_module.code_for_node(original_node.params)
             overwrite_params = params_txt in [
                 "",
-                # TODO:  "...",
+                "...",
                 "*args, **kwargs",
                 "self",
                 "self, *args, **kwargs",
             ]
             # return that should not be overwritten by the doc-stub ?
             overwrite_return = True
-            if (
-                original_node.returns
-            ):  # TODO: and isinstance(original_node.returns.annotation, cst.Return):
+            if original_node.returns:
                 try:
-                    overwrite_return = original_node.returns.annotation.value in [
+                    overwrite_return = original_node.returns.annotation.value in [  # type: ignore
                         "Incomplete",
                         "Any",
                         "...",
