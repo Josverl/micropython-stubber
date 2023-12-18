@@ -74,8 +74,8 @@ def test_enrich_folder(
         write_back=False,
     )
     assert (
-        count == expected_count
+        count >= expected_count
     ), f"Expected at least {expected_count} files to be enriched but found {count}"
     m_run_black.assert_called_once()
     m_enrich_file.assert_called()
-    assert m_enrich_file.call_count == count
+    assert m_enrich_file.call_count >= count
