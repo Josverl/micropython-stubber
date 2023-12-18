@@ -27,7 +27,7 @@ For example::
     addr = socket.getaddrinfo('micropython.org', 80)[0][-1]
     s = socket.socket()
     s.connect(addr)
-    s.send(b'GET / HTTP/1.1\r\nHost: micropython.org\r\n\r\n')
+    s.send(b'GET / HTTP/1.1  Host: micropython.org')
     data = s.recv(1000)
     s.close()
 """
@@ -38,7 +38,9 @@ For example::
 # + module: network.WLANWiPy.rst
 # + module: network.CC3K.rst
 # + module: network.WIZNET5K.rst
-from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union
+from typing import (IO, Any, Callable, Coroutine, Dict, Generator, Iterator,
+                    List, NoReturn, Optional, Tuple, Union)
+
 
 class AbstractNIC:
     """
