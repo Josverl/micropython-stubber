@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 from packaging.version import parse
 
 
-from stubber.publish.stubpacker import StubPackage
+from stubber.publish.stubpackage import StubPackage
 from pysondb import PysonDB
 
 

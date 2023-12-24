@@ -4,7 +4,7 @@ import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
 
-from stubber.publish.stubpacker import StubPackage
+from stubber.publish.stubpackage import StubPackage
 
 
 # -------------------------------------------------------------------
@@ -85,7 +85,7 @@ def _tst_version(mocker, fake_package, p_published, p_base, expected):
 
     mocker.patch.object(pkg, "calculate_hash", side_effect=m_calc_hash, autospec=True)
     # package with a few published versions
-    m_pypi_ver: MagicMock = mocker.patch("stubber.publish.stubpacker.get_pypi_versions", autospec=True, return_value=p_published)  # type: ignore
+    m_pypi_ver: MagicMock = mocker.patch("stubber.publish.stubpackage.get_pypi_versions", autospec=True, return_value=p_published)  # type: ignore
     pkg.create_update_pyproject_toml()
     pkg.mpy_version = p_base
     pkg.hash = None

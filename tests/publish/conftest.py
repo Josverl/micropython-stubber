@@ -25,7 +25,7 @@ def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: p
     # use the test config - in two places
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     if "version" in request.keywords:
         # use specified version
         version = request.keywords["version"].args[0]
