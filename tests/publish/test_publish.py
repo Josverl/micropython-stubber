@@ -1,13 +1,13 @@
 """Test publish module - refactored"""
 from pathlib import Path
+
 import pytest
 from mock import MagicMock
-from pytest_mock import MockerFixture
 from packaging.version import parse
-
+from pysondb import PysonDB
+from pytest_mock import MockerFixture
 
 from stubber.publish.stubpackage import StubPackage
-from pysondb import PysonDB
 
 
 @pytest.mark.mocked
@@ -18,7 +18,7 @@ def test_hash(
     pkg = fake_package
 
     pkg.update_package_files()
-    stub_count = pkg.update_included_stubs()
+    stub_count = pkg.update_pyproject_stubs()
     assert stub_count > 0
 
     calc_hash_md = pkg.calculate_hash(include_md=True)
@@ -63,7 +63,7 @@ def test_update_package(fake_package: StubPackage):
     changed_after_update = pkg.is_changed()
     assert changed_after_update, "should be changed initially"
 
-    ok = pkg.update_package(production=True)
+    ok = pkg.update_distribution(production=True)
     assert ok, "should be ok"
 
     changed_after_update = pkg.is_changed()
@@ -104,7 +104,7 @@ def test_build_package(
 ):
     pkg = fake_package
 
-    result = pkg.build(production=False, force=False)
+    result = pkg.build_distribution(production=False, force=False)
 
     assert result, "should be ok"
 
@@ -136,7 +136,7 @@ def test_publish_package(
 
     # allow the publishing logic to run during test
     pkg._publish = True  # type: ignore
-    result = pkg.publish(production=False, force=False, db=db)
+    result = pkg.publish_distribution_ifchanged(production=False, force=False, db=db)
 
     assert result, "should be ok"
 

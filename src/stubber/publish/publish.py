@@ -37,7 +37,7 @@ def build_multiple(
 
     for todo in worklist:
         if package := get_package(db, **todo):
-            package.build(force=force, production=production)
+            package.build_distribution(force=force, production=production)
             results.append(package.status)
         else:
             log.error(f"Failed to create package for {todo}")
@@ -68,7 +68,7 @@ def publish_multiple(
 
     for todo in worklist:
         if package := get_package(db, **todo):
-            package.publish(
+            package.publish_distribution_ifchanged(
                 db=db,
                 clean=clean,
                 force=force,
