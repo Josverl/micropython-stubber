@@ -234,7 +234,7 @@ def run_common_package_tests(
     )
     assert len(filelist) >= 1
 
-    package.update_included_stubs()
+    package.update_pyproject_stubs()
     stubs_in_pkg = package.pyproject["tool"]["poetry"]["packages"]  # type: ignore
     assert len(stubs_in_pkg) >= 1
 
