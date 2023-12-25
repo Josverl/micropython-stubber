@@ -93,5 +93,5 @@ def _tst_version(mocker, fake_package, p_published, p_base, expected):
 
     assert pkg.is_changed(), "should be changed initially"
 
-    next_ver = pkg.get_next_package_version()
-    assert next_ver == expected
+    next_ver = pkg._get_next_package_version()
+    assert next_ver == expected, f"expected {expected} got {next_ver}"

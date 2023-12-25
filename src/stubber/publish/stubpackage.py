@@ -7,6 +7,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import tenacity
+
 from stubber.basicgit import get_git_describe
 
 try:
@@ -32,26 +34,44 @@ Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
 
 # indicates which stubs will be skipped when copying for these stub sources
-STUB_SKIPPER = {
-    StubSource.FROZEN: ["espnow"],
+STUBS_COPY_FILTER = {
+    StubSource.FROZEN: [
+        "espnow",  # merged stubs + documentation of the espnow module is better than the info in the forzen stubs
+    ],
     StubSource.FIRMWARE: [
         "builtins",
-        # "collections",
+        "collections",  # collections must be in stdlib
     ],
-    StubSource.DOC: [],
-    StubSource.CORE: [],
+    StubSource.MERGED: [
+        "collections",  # collections must be in stdlib
+    ],
 }
 
 
 class VersionedPackage(object):
     """
-    A package with a version
+    Represents a versioned package.
+
+    Attributes:
+        package_name (str): The name of the package.
+        mpy_version (str): The MicroPython version.
+
+    Methods:
+        __init__(self, package_name: str, mpy_version: str): Initializes a new instance of the VersionedPackage class.
+        is_preview(self): Checks if the package is a preview version.
+        pkg_version(self) -> str: Returns the version of the package.
+        pkg_version(self, version: str) -> None: Sets the version of the package.
+        get_prerelease_package_version(self, production: bool = False) -> str: Gets the next prerelease version for the package.
+        get_next_package_version(self, prod: bool = False, rc=False) -> str: Gets the next version for the package.
+        next_pkg_version(self, production: bool) -> str: Gets the next version for the package.
+        bump(self, *, rc: int = 0) -> str: Bumps the postrelease version of the package.
     """
 
-    def __init__(self, package_name: str, mpy_version: str):
+    def __init__(self, package_name: str, *, mpy_version: str):
         super().__init__()
-        self.package_name = package_name
-        self.mpy_version = mpy_version
+        self.package_name: str = package_name
+        self.mpy_version: str = mpy_version
+        self._pkg_version: str = mpy_version
 
     def __str__(self) -> str:
         return f"{self.package_name}=={self.mpy_version}"
@@ -68,22 +88,29 @@ class VersionedPackage(object):
     @property
     def pkg_version(self) -> str:
         "return the version of the package"
-        raise NotImplementedError
+        return self._pkg_version
 
     @pkg_version.setter
     def pkg_version(self, version: str) -> None:
-        raise NotImplementedError
+        "set the version of the package"
+        self._pkg_version = version
 
-    def next_pkg_version(self, production: bool) -> str:
+    def next_package_version(self, production: bool) -> str:
         # sourcery skip: assign-if-exp
         """Get the next version for the package"""
-        if self.mpy_version == "latest":
-            return self.get_prerelease_package_version(production)
+        if self.is_preview():
+            return self._get_next_preview_package_version(production)
         else:
-            return self.get_next_package_version(production)
+            return self._get_next_package_version(production)
 
-    def get_prerelease_package_version(self, production: bool = False) -> str:
-        """Get the next prerelease version for the package."""
+    def is_preview(self):
+        return self.mpy_version == "latest" or "preview" in self.mpy_version
+
+    def _get_next_preview_package_version(self, production: bool = False) -> str:
+        """
+        Get the next prerelease version for the package.
+        this is used for preview versions of micropython (-preview, formerly known as 'latest')
+        """
         rc = 1
         if not (describe := get_git_describe(CONFIG.mpy_path.as_posix())):
             return "99.99.99post99"
@@ -100,7 +127,7 @@ class VersionedPackage(object):
         return str(bump_version(base, rc=rc))
         # raise ValueError("cannot determine next version number micropython")
 
-    def get_next_package_version(self, prod: bool = False, rc=False) -> str:
+    def _get_next_package_version(self, prod: bool = False, rc=False) -> str:
         """Get the next version for the package."""
         base = Version(self.pkg_version)
         if pypi_versions := get_pypi_versions(self.package_name, production=prod, base=base):
@@ -114,7 +141,7 @@ class VersionedPackage(object):
     def bump(self, *, rc: int = 0) -> str:
         """
         bump the postrelease version of the package, and write the change to disk
-        if rc > 1, the version is bumped to the specified release candidate
+        if rc >= 1, the version is bumped to the specified release candidate
         """
         try:
             current = Version(self.pkg_version)
@@ -128,8 +155,47 @@ class VersionedPackage(object):
 
 class Builder(VersionedPackage):
     """
-    core functionality for building a package
+    Builder class for creating and updating MicroPython stub packages.
+
+    Args:
+        package_name (str): The name of the package.
+        mpy_version (str, optional): The version of MicroPython. Defaults to "0.0.1".
+        port (str): The port for the package.
+        board (str, optional): The board for the package. Defaults to GENERIC_U.
+        description (str, optional): The description of the package. Defaults to "MicroPython stubs".
+        stubs (Optional[StubSources], optional): The stub sources for the package. Defaults to None.
+
+    Attributes:
+        package_name (str): The name of the package.
+        mpy_version (str): The version of MicroPython.
+        port (str): The port for the package.
+        board (str): The board for the package.
+        description (str): The description of the package.
+        stub_sources (Optional[StubSources]): The stub sources for the package.
+        hash (None): The hash of all the files in the package.
+        stub_hash (None): The hash of the stub files.
+
+    Properties:
+        package_path (Path): The package path based on the package name and version, relative to the publish folder.
+        toml_path (Path): The path to the `pyproject.toml` file.
+        pyproject (Union[Dict[str, Any], None]): The parsed pyproject.toml or None.
+
+    Methods:
+        create_update_pyproject_toml(): Create or update/overwrite a `pyproject.toml` file.
+        check(): Check if the package is valid.
+        clean(): Remove the stub files from the package folder.
+        copy_stubs(): Copy files from all listed stub folders to the package folder.
+        update_package_files(): Update the stub-only package for a specific version of MicroPython.
+        write_package_json(): Write the package.json file to disk.
+        to_dict(): Return the package as a dict to store in the jsondb.
+        from_dict(json_data: Dict): Load the package from a dict (from the jsondb).
+        calculate_hash(include_md: bool = True): Create a SHA1 hash of all files in the package.
+        update_hashes(): Update the package hashes.
+        is_changed(include_md: bool = True): Check if the package has changed.
     """
+
+    # BUF_SIZE is totally arbitrary,
+    BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
 
     def __init__(
         self,
@@ -153,7 +219,7 @@ class Builder(VersionedPackage):
         self.hash = None  # intial hash
         """Hash of all the files in the package"""
         self.stub_hash = None  # intial hash
-        """hash of the the stub files"""
+        """Hash of all .pyi files"""
 
     @property
     def package_path(self) -> Path:
@@ -264,9 +330,8 @@ class Builder(VersionedPackage):
         for item in (CONFIG.stub_path / src_path).rglob("*"):
             if item.is_file():
                 # filter the 'poorly' decorated files
-                if stub_type in STUB_SKIPPER:
-                    if item.stem in STUB_SKIPPER[stub_type]:
-                        continue
+                if stub_type in STUBS_COPY_FILTER and item.stem in STUBS_COPY_FILTER[stub_type]:
+                    continue
 
                 target = Path(self.package_path) / item.relative_to(CONFIG.stub_path / src_path)
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -344,13 +409,10 @@ class Builder(VersionedPackage):
         Create a SHA1 hash of all files in the package, excluding the pyproject.toml file itself.
         the hash is based on the content of the .py/.pyi and .md files in the package.
         if include_md is False , the .md files are not hased, allowing the files in the packeges to be compared simply
-        As a single has is created across all files, the files are sorted prior to hashing to ensure that the hash is stable.
+        As a single hash is created across all files, the files are sorted prior to hashing to ensure that the hash is stable.
 
-        A changed hash will not indicate which of the files in the package have been changed.
+        Note: A changed hash will not indicate which of the files in the package have been changed.
         """
-        # BUF_SIZE is totally arbitrary,
-        BUF_SIZE = 65536 * 16  # lets read stuff in 16 x 64kb chunks!
-
         file_hash = hashlib.sha1()
         # Stubs Only
         files = list((self.package_path).rglob("**/*.pyi"))
@@ -361,18 +423,33 @@ class Builder(VersionedPackage):
                 # do not include [self.toml_file]
             )
         for file in sorted(files):
-            # TODO: Extract function to allow for retry on file not found
             try:
-                with open(file, "rb") as f:
-                    while True:
-                        data = f.read(BUF_SIZE)
-                        if not data:
-                            break
-                        file_hash.update(data)
+                # retry on file not found
+                self.add_file_hash(file, file_hash)
             except FileNotFoundError:
                 log.warning(f"File not found {file}")
                 # ignore file not found errors to allow the hash to be created WHILE GIT / VIRUS SCANNERS HOLD LINGERING FILES
         return file_hash.hexdigest()
+
+    @tenacity.retry(wait=tenacity.wait_fixed(0.2), stop=tenacity.stop_after_attempt(3))
+    def add_file_hash(self, file, file_hash):
+        """
+        Adds the hash of a file to the given file hash object.
+        If an error occurs, the file is retried up to 3 times with a 0.2 second delay
+
+        Args:
+            file (str): The path to the file.
+            file_hash (hashlib._Hash): The file hash object to update.
+
+        Returns:
+            None
+        """
+        with open(file, "rb") as f:
+            while True:
+                if data := f.read(Builder.BUF_SIZE):
+                    file_hash.update(data)
+                else:
+                    break
 
     def update_hashes(self, ret=False) -> None:
         """Update the package hashes. Resets is_changed() to False"""
@@ -717,6 +794,7 @@ class StubPackage(PoetryBuilder):
         - FROZEN: fallback to use the GENERIC folder for the frozen sources if no board specific folder exists
         """
         updated_sources = []
+        # TODO: find a way to simplify this code as this is a bit magic (and hard to understand)
         for stub_type, fw_path in self.stub_sources:
             # prefer -merged stubs over bare firmware stubs
             if stub_type == StubSource.FIRMWARE:
@@ -739,7 +817,6 @@ class StubPackage(PoetryBuilder):
                 # Use the default board folder instead of the GENERIC board folder (if it exists)
                 if self.board.upper() == GENERIC_U:
                     family = fw_path.name.split("-")[0]
-                    # TODO: use function the get the path
                     default_path = Path(
                         f"{family}-{clean_version(self.mpy_version, flat=True)}-{self.port}-{default_board(self.port, self.mpy_version)}-merged"
                     )
@@ -772,7 +849,7 @@ class StubPackage(PoetryBuilder):
             self.update_package_files()
             self.update_pyproject_stubs()
             # for a new package the version could be 'latest', which is not a valid semver, so update
-            self.pkg_version = self.next_pkg_version(production)
+            self.pkg_version = self.next_package_version(production)
             return self.check()
         except Exception as e:  # pragma: no cover
             log.error(f"{self.package_name}: {e}")
@@ -815,7 +892,7 @@ class StubPackage(PoetryBuilder):
         if self.is_changed() or force:
             #  Build the distribution files
             old_ver = self.pkg_version
-            self.pkg_version = self.next_pkg_version(production)
+            self.pkg_version = self.next_package_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
             log.debug(
@@ -869,7 +946,7 @@ class StubPackage(PoetryBuilder):
             log.debug(f"{self.package_name}: skip publishing")
             return False
 
-        self.next_pkg_version(production=production)
+        self.next_package_version(production=production)
         # Publish the package to PyPi, Test-PyPi or Github
         if self.is_changed():
             if self.mpy_version == "latest" and production and not force:
