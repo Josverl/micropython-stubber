@@ -93,7 +93,8 @@ def get_local_tag(
         repo = Path(repo)
 
     result = _run_local_git(
-        ["git", "describe", "--tags"],
+        # ["git", "describe", "--tags"],
+        ["git", "describe", "--tags", "--dirty", "--always", "--match", "v[1-9].*"],
         repo=repo.as_posix(),
         expect_stderr=True,
     )
@@ -269,7 +270,8 @@ def pull(repo: Union[Path, str], branch: str = "main") -> bool:
 
 
 def get_git_describe(folder: Optional[str] = None):
-    """ "based on MicroPython makeversionhdr
+    """
+    Based on MicroPython makeversionhdr.py
     returns : current git tag, commits ,commit hash : "v1.19.1-841-g3446"
     """
     # Note: git describe doesn't work if no tag is available
