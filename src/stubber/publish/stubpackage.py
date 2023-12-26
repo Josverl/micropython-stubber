@@ -120,10 +120,18 @@ class VersionedPackage(object):
             return "99.99.99post99"
         # use versiontag and the number of commits since the last tag
         # "v1.19.1-841-g3446"
+        # 'v1.20.0-dirty'
         # 'v1.22.0-preview-19-g8eb7721b4'
         parts = describe.split("-", 3)
         ver = parts[0]
-        rc = parts[1] if parts[1].isdigit() else parts[2] if parts[2].isdigit() else 1
+        if len(parts) > 1:
+            rc = (
+                parts[1]
+                if parts[1].isdigit()
+                else parts[2]
+                if len(parts) > 2 and parts[2].isdigit()
+                else 1
+            )
         rc = int(rc)
         base = (
             bump_version(Version(ver), minor_bump=True) if parts[1] != "preview" else Version(ver)
