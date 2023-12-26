@@ -49,16 +49,16 @@ class Fix:
 
 
 U_MODULES = [
-    "os",
-    "time",
     "array",
     "binascii",
     "io",
     "json",
+    "os",
     "select",
-    "socket",
     "ssl",
     "struct",
+    "socket",
+    "time",
     "zlib",
 ]
 """
