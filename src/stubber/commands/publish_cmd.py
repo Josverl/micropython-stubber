@@ -96,6 +96,11 @@ def cli_publish(
     ports = list(ports)
     boards = list(boards)
 
+    if len(versions) > 1:
+        raise NotImplementedError(
+            "Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487"
+        )
+
     # db = get_database(publish_path=CONFIG.publish_path, production=production)
     destination = "pypi" if production else "test-pypi"
     log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
