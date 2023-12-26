@@ -102,6 +102,8 @@ def build_worklist(
     worklist = filter_list(worklist, ports, boards)
 
     for b in boards:
+        if b == "auto":
+            continue
         if not any(i for i in worklist if i["board"].lower() == b.lower()):
             log.warning(f"Could not find any package candidate for board {b}")
     return worklist
