@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 
 from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
 from stubber.publish.package import create_package, package_name
-from stubber.publish.stubpacker import StubPackage
+from stubber.publish.stubpackage import StubPackage
 
 from .fakeconfig import FakeConfig
 
@@ -81,7 +81,7 @@ def test_create_package(
     # # resd config
     # TEST_CONFIG = readconfig(pytestconfig.rootpath / "tests/publish/data/config.yaml")
     # insert test config
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
 
     mpy_version = "v1.21.0"
     family = "micropython"
@@ -154,7 +154,7 @@ read_db_data = [
 def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
     # setup test configuration
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
 
     mpy_version = "v1.18"
     pkg_name = "foo-bar-stubs"
@@ -234,7 +234,7 @@ def run_common_package_tests(
     )
     assert len(filelist) >= 1
 
-    package.update_included_stubs()
+    package.update_pyproject_stubs()
     stubs_in_pkg = package.pyproject["tool"]["poetry"]["packages"]  # type: ignore
     assert len(stubs_in_pkg) >= 1
 

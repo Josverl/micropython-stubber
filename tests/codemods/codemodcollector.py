@@ -1,6 +1,6 @@
 import ast
-from pathlib import Path
 import os
+from pathlib import Path
 from typing import Any, List, NamedTuple, Tuple
 
 import pytest
@@ -8,8 +8,8 @@ import pytest
 
 class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
-    after: str  # The source code after the transformation.
-    stub: str  # The stub to apply
+    expected: str  # The source code after the transformation.
+    doc_stub: str  # The stub to apply
     stub_file: str  # The path to stub file to apply
     output: Path = None  # where to save the output for testing the tests
     path: Path = None  # where are the tests
@@ -27,33 +27,36 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
 
     test_cases: List = []
     for test_case_directory in root_test_cases_directory.iterdir():
-        before_files = list(test_case_directory.glob("before.py")) + list(test_case_directory.glob("before.pyi"))
-        after_files = list(test_case_directory.glob("after.py")) + list(test_case_directory.glob("after.pyi"))
-        stub_files = list(test_case_directory.glob("stub.py")) + list(test_case_directory.glob("stub.pyi"))
-        if len(before_files) != 1 or len(after_files) != 1 or len(stub_files) != 1:
+        before_files = list(test_case_directory.glob("before.py")) + list(
+            test_case_directory.glob("before.pyi")
+        )
+        after_files = list(test_case_directory.glob("expected.py")) + list(
+            test_case_directory.glob("expected.pyi")
+        )
+        doc_stubs = list(test_case_directory.glob("doc_stub.py")) + list(
+            test_case_directory.glob("doc_stub.pyi")
+        )
+        if len(before_files) != 1 or len(after_files) != 1 or len(doc_stubs) != 1:
             print("Incorrect test file layout in folder", test_case_directory)
             continue
         # read the test files and add them to the test cases
-        with open(before_files[0]) as file:
+        with open(before_files[0], encoding="utf-8") as file:
             before = file.read()
-        with open(after_files[0]) as file:
-            after = file.read()
-        with open(stub_files[0]) as file:
-            stub = file.read()
+        with open(after_files[0], encoding="utf-8") as file:
+            expected = file.read()
+        with open(doc_stubs[0], encoding="utf-8") as file:
+            doc_stub = file.read()
 
-        if 1:  # enable output for testing
-            output = test_case_directory.joinpath("output.py")
-        else:
-            output = None
+        output = test_case_directory.joinpath("output.py")
 
         test_cases.append(
             pytest.param(
                 TestCase(
                     path=test_case_directory,
                     before=before,
-                    after=after,
-                    stub=stub,
-                    stub_file=stub_files[0],
+                    doc_stub=doc_stub,
+                    expected=expected,
+                    stub_file=doc_stubs[0],
                     output=output,
                 ),
                 id=test_case_directory.name,

@@ -4,7 +4,14 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Tuple
 
 import pytest
-from libcst.codemod._testing import CodemodContext, CodemodTest, PartialParserConfig, SkipFile, _CodemodTest, parse_module
+from libcst.codemod._testing import (
+    CodemodContext,
+    CodemodTest,
+    PartialParserConfig,
+    SkipFile,
+    _CodemodTest,
+    parse_module,
+)
 
 from stubber.codemod.merge_docstub import MergeCommand
 
@@ -15,13 +22,28 @@ from .codemodcollector import collect_test_cases
 pytestmark = pytest.mark.codemod
 
 
+def print_diff(before: str, after: str):
+    diff = difflib.unified_diff(
+        before.splitlines(keepends=True),
+        after.splitlines(keepends=True),
+        lineterm="",
+    )
+    for line in diff:
+        print(line)
+
+
 class PytestCodemodTest(_CodemodTest):
     "CodeMod test that uses use _CodemodTest as the superclass as that does not inherit from unittest.TestCase which will break pytest.parametrize"
 
     def assertEqual(self, first: Any, second: Any, msg=None):
         """basic assertEqual implementation, not type specific."""
-        if first != second:
-            raise AssertionError(msg)
+        assert isinstance(first, str)
+        assert isinstance(second, str)
+        first_ = first.replace("\n", "").replace("\r", "")
+        second_ = second.replace("\n", "").replace("\r", "")
+        if first_ != second_:
+            print_diff(first, second)
+            raise AssertionError(msg or f"Actual output did not match expected output")
 
     def assertCodemod(
         self,
@@ -39,18 +61,20 @@ class PytestCodemodTest(_CodemodTest):
         Given a before and after code string, and any args/kwargs that should
         be passed to the codemod constructor specified in
         :attr:`~CodemodTest.TRANSFORM`, validate that the codemod executes as
-        expected. Verify that the codemod completes successfully, unless the
+        expected.
+
+        Verify that the codemod completes successfully, unless the
         ``expected_skip`` option is set to ``True``, in which case verify that
         the codemod skips.  Optionally, a :class:`CodemodContext` can be provided.
         If none is specified, a default, empty context is created for you.
+
         Additionally, the python version for the code parser can be overridden
         to a valid python version string such as `"3.6"`. If none is specified,
-        the version of the interpreter running your tests will be used. Also, a
-        list of warning strings can be specified and :meth:`~CodemodTest.assertCodemod`
+        the version of the interpreter running your tests will be used.
+
+        Also, a list of warning strings can be specified and :meth:`~CodemodTest.assertCodemod`
         will verify that the codemod generates those warnings in the order
         specified. If it is left out, warnings are not checked.
-
-
         """
 
         context = context_override if context_override is not None else CodemodContext()
@@ -58,13 +82,17 @@ class PytestCodemodTest(_CodemodTest):
         transform_instance = self.TRANSFORM(context, *args, **kwargs)
         input_tree = parse_module(
             CodemodTest.make_fixture_data(before),
-            config=(PartialParserConfig(python_version=python_version) if python_version is not None else PartialParserConfig()),
+            config=(
+                PartialParserConfig(python_version=python_version)
+                if python_version is not None
+                else PartialParserConfig()
+            ),
         )
         try:
             output_tree = transform_instance.transform_module(input_tree)
 
             if save_output:
-                with open(save_output, "w") as file:
+                with open(save_output, "w", encoding="utf-8") as file:
                     file.write(output_tree.code)
         except SkipFile:
             if not expected_skip:
@@ -99,7 +127,7 @@ class TestMergeDocStubs(PytestCodemodTest):
 
         self.assertCodemod(
             test_case.before,
-            test_case.after,
-            stub_file=test_case.stub_file,
+            test_case.expected,
+            docstub_file=test_case.stub_file,
             save_output=test_case.output,
         )

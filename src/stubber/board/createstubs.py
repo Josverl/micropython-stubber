@@ -2,7 +2,7 @@
 Create stubs for (all) modules on a MicroPython board
 """
 # Copyright (c) 2019-2023 Jos Verlinde
-# pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
+
 import gc
 import logging
 import os
@@ -20,7 +20,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.15.1"
+__version__ = "v1.16.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]

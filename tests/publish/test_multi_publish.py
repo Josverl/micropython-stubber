@@ -1,11 +1,13 @@
 """Test publish module"""
 from pathlib import Path
+
 import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
-from .fakeconfig import FakeConfig
 
 from stubber.publish.publish import publish_multiple
+
+from .fakeconfig import FakeConfig
 
 
 @pytest.mark.mocked
@@ -19,7 +21,7 @@ def test_publish_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig: 
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     m_is_changed: MagicMock = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)  # type: ignore
 
     m_check: MagicMock = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
@@ -50,7 +52,7 @@ def test_publish_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig: py
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     m_is_changed: MagicMock = mocker.patch(
         "stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False
     )
@@ -84,7 +86,7 @@ def test_publish_build(mocker: MockerFixture, tmp_path: Path, pytestconfig: pyte
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     m_is_changed: MagicMock = mocker.patch(
         "stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False
     )
@@ -118,7 +120,7 @@ def test_publish_build_force(mocker: MockerFixture, tmp_path: Path, pytestconfig
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     m_is_changed: MagicMock = mocker.patch(
         "stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False
     )
@@ -154,7 +156,7 @@ def test_publish_force(mocker: MockerFixture, tmp_path: Path, pytestconfig: pyte
     # use the test config
     config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
     mocker.patch("stubber.publish.publish.CONFIG", config)
-    mocker.patch("stubber.publish.stubpacker.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     m_is_changed: MagicMock = mocker.patch(
         "stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False
     )
