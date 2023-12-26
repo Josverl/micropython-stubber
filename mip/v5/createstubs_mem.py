@@ -12,7 +12,7 @@
 This variant was generated from createstubs.py by micropython-stubber v1.15.2
 """
 # Copyright (c) 2019-2023 Jos Verlinde
-# pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
+
 import gc
 import logging
 import os

@@ -2,7 +2,7 @@
 Create stubs for (all) modules on a MicroPython board
 """
 # Copyright (c) 2019-2023 Jos Verlinde
-# pylint: disable= invalid-name, missing-function-docstring, import-outside-toplevel, logging-not-lazy
+
 import gc
 import logging
 import os
