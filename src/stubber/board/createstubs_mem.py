@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.15.2
+This variant was generated from createstubs.py by micropython-stubber v1.16.0
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
