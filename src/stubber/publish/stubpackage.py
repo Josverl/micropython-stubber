@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import tenacity
 
 from stubber.basicgit import get_git_describe
+from stubber.publish.helpers import get_module_docstring
 
 try:
     import tomllib  # type: ignore
@@ -46,6 +47,9 @@ STUBS_COPY_FILTER = {
         "collections",  # collections must be in stdlib
     ],
 }
+
+# these modules will be replaced by a simple import statement to import from stdlib
+STDLIB_UMODULES = ["ucollections"]
 
 
 class VersionedPackage(object):
@@ -324,6 +328,20 @@ class Builder(VersionedPackage):
             for f in self.package_path.rglob("*.py"):
                 if f.with_suffix(".pyi").exists():
                     f.unlink()
+            self.update_umodules()
+
+    def update_umodules(self):
+        """
+        Replace the STDLIB umodules with a simple import statement
+        in order to allow the typecheckers to resove the stdlib modules in the usual stdlib location.
+        """
+        for f in self.package_path.rglob("*.pyi"):
+            if f.stem in STDLIB_UMODULES:
+                # read the docstring of the module
+                docstring = get_module_docstring(f) or ""
+                comment = "# import module from stdlib/module"
+                # replace the file with a simple import statement
+                f.write_text(f'"""\n{docstring}\n"""\n{comment}\nfrom {f.stem[1:]} import *')
 
     def copy_folder(self, stub_type: StubSource, src_path: Path):
         Path(self.package_path).mkdir(parents=True, exist_ok=True)
