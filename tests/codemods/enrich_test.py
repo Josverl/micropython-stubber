@@ -1,7 +1,10 @@
 from pathlib import Path
 
 import pytest
-from stubber.codemod.enrich import enrich_folder, enrich_file
+from mock import MagicMock
+from pytest_mock import MockerFixture
+
+from stubber.codemod.enrich import enrich_file, enrich_folder
 
 # mark all tests
 pytestmark = pytest.mark.codemod
@@ -29,11 +32,50 @@ def test_enrich_file_with_stub(source_file: Path, expected: bool):
         assert len(diff) > 0, "change to the stub was expected but not found"
 
 
-def test_enrich_folder():
+@pytest.mark.parametrize(
+    "source_folder, docstub_folder, expected_count",
+    [
+        (
+            Path("./tests/data/stub_merge/micropython-v1_18-esp32"),
+            Path("./tests/data/stub_merge/micropython-v1_18-docstubs"),
+            22,
+        ),
+        (
+            Path("./tests/data/stub_merge/micropython-v1_18-esp32/micropython.pyi"),
+            Path("./tests/data/stub_merge/micropython-v1_18-docstubs"),
+            1,
+        ),
+        (
+            Path("./tests/data/stub_merge/micropython-v1_18-esp32/uplatform.pyi"),
+            Path("./tests/data/stub_merge/micropython-v1_18-docstubs"),
+            1,
+        ),
+        (
+            Path("./tests/data/stub_merge/micropython-v1_18-esp32/micropython.pyi"),
+            Path("./tests/data/stub_merge/micropython-v1_18-docstubs/micropython.pyi"),
+            1,
+        ),
+        # Add more test cases if needed
+    ],
+)
+def test_enrich_folder(
+    source_folder: Path, docstub_folder: Path, expected_count: int, mocker: MockerFixture
+):
+    m_enrich_file = mocker.patch(
+        "stubber.codemod.enrich.enrich_file", return_value="OK", autospec=True
+    )
+    m_run_black = mocker.patch(
+        "stubber.codemod.enrich.run_black", return_value=None, autospec=True
+    )
     count = enrich_folder(
-        Path("./tests/data/stub_merge/micropython-v1_18-esp32"),
-        Path("./tests/data/stub_merge/micropython-v1_18-docstubs"),
+        source_folder,
+        docstub_folder,
         show_diff=False,
         write_back=False,
     )
-    assert count >= 18
+    assert (
+        count >= expected_count
+    ), f"Expected at least {expected_count} files to be enriched but found {count}"
+    m_run_black.assert_called_once()
+    m_enrich_file.assert_called()
+    assert m_enrich_file.call_count >= count

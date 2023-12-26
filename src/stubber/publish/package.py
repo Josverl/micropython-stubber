@@ -12,7 +12,7 @@ from pysondb import PysonDB
 
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
-from stubber.publish.stubpacker import StubPackage, StubSources
+from stubber.publish.stubpackage import StubPackage, StubSources
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
 

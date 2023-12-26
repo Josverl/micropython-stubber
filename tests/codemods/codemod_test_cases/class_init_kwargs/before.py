@@ -25,5 +25,5 @@ class SPI:
     def readinto(self, *args, **kwargs) -> Any:
         ...
 
-    def __init__(self, *argv, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         ...

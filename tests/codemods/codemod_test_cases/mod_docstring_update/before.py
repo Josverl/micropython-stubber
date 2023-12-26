@@ -1,4 +1,4 @@
-"before mod docstring"
+"before module docstring"
 
 def foo():
     ''

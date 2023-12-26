@@ -20,7 +20,11 @@ from stubber.utils.post import run_black
 
 
 def enrich_file(
-    target_path: Path, docstub_path: Path, diff: bool = False, write_back: bool = False
+    target_path: Path,
+    docstub_path: Path,
+    diff: bool = False,
+    write_back: bool = False,
+    package_name="",
 ) -> Optional[str]:
     """
     Enrich a firmware stubs using the doc-stubs in another folder.
@@ -37,21 +41,28 @@ def enrich_file(
     """
     config: Dict[str, Any] = _default_config()
     context = CodemodContext()
+    if not package_name:
+        package_name = (
+            target_path.stem if target_path.stem != "__init__" else target_path.parent.stem
+        )
 
     # find a matching doc-stub file in the docstub_path
     docstub_file = None
-    candidates = []
-    for ext in [".py", ".pyi"]:
-        candidates = list(docstub_path.rglob(target_path.stem + ext))
-        if target_path.stem[0].lower() == "u":
-            # also look for candidates without leading u ( usys.py <- sys.py)
-            candidates += list(docstub_path.rglob(target_path.stem[1:] + ext))
-        elif target_path.stem[0] == "_":
-            # also look for candidates without leading _ ( _rp2.py <- rp2.py )
-            candidates += list(docstub_path.rglob(target_path.stem[1:] + ext))
-        else:
-            # also look for candidates with leading u ( sys.py <- usys.py)
-            candidates += list(docstub_path.rglob("u" + target_path.stem + ext))
+    if docstub_path.is_file():
+        candidates = [docstub_path]
+    else:
+        candidates = []
+        for ext in [".py", ".pyi"]:
+            candidates = list(docstub_path.rglob(package_name + ext))
+            if package_name[0].lower() == "u":
+                # also look for candidates without leading u ( usys.py <- sys.py)
+                candidates += list(docstub_path.rglob(package_name[1:] + ext))
+            elif package_name[0] == "_":
+                # also look for candidates without leading _ ( _rp2.py <- rp2.py )
+                candidates += list(docstub_path.rglob(package_name[1:] + ext))
+            else:
+                # also look for candidates with leading u ( sys.py <- usys.py)
+                candidates += list(docstub_path.rglob("u" + package_name + ext))
 
     for docstub_file in candidates:
         if docstub_file.exists():
@@ -65,7 +76,7 @@ def enrich_file(
     # read source file
     old_code = target_path.read_text()
 
-    codemod_instance = merge_docstub.MergeCommand(context, stub_file=docstub_file)
+    codemod_instance = merge_docstub.MergeCommand(context, docstub_file=docstub_file)
     if not (
         new_code := exec_transform_with_prettyprint(
             codemod_instance,
@@ -91,6 +102,7 @@ def enrich_folder(
     show_diff: bool = False,
     write_back: bool = False,
     require_docstub: bool = False,
+    package_name: str = "",
 ) -> int:
     """\
         Enrich a folder with containing firmware stubs using the doc-stubs in another folder.
@@ -98,15 +110,26 @@ def enrich_folder(
         Returns the number of files enriched.
     """
     if not source_path.exists():
-        raise FileNotFoundError(f"Source folder {source_path} does not exist")
+        raise FileNotFoundError(f"Source {source_path} does not exist")
     if not docstub_path.exists():
-        raise FileNotFoundError(f"Docstub folder {docstub_path} does not exist")
+        raise FileNotFoundError(f"Docstub {docstub_path} does not exist")
     count = 0
     # list all the .py and .pyi files in the source folder
-    source_files = sorted(list(source_path.rglob("**/*.py")) + list(source_path.rglob("**/*.pyi")))
+    if source_path.is_file():
+        source_files = [source_path]
+    else:
+        source_files = sorted(
+            list(source_path.rglob("**/*.py")) + list(source_path.rglob("**/*.pyi"))
+        )
     for source_file in source_files:
         try:
-            diff = enrich_file(source_file, docstub_path, diff=True, write_back=write_back)
+            diff = enrich_file(
+                source_file,
+                docstub_path,
+                diff=True,
+                write_back=write_back,
+                package_name=package_name,
+            )
             if diff:
                 count += 1
                 if show_diff:

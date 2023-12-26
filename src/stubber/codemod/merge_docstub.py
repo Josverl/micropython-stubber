@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
+from libcst.helpers.module import insert_header_comments
 from loguru import logger as log
 
 from stubber.cst_transformer import (
@@ -25,6 +26,7 @@ from stubber.cst_transformer import (
 ##########################################################################################
 # # log = logging.getLogger(__name__)
 #########################################################################################
+empty_module = cst.parse_module("")
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -50,46 +52,47 @@ class MergeCommand(VisitorBasedCodemodCommand):
         arg_parser.add_argument(
             # "-sf",
             "--stubfile",
-            dest="stub_file",
+            dest="docstub_file",
             metavar="PATH",
             help="The path to the doc-stub file",
             type=str,
             required=True,
         )
 
-    def __init__(self, context: CodemodContext, stub_file: Union[Path, str]) -> None:
+    def __init__(self, context: CodemodContext, docstub_file: Union[Path, str]) -> None:
         """initialize the base class with context, and save our args."""
         super().__init__(context)
         self.replace_functiondef_with_classdef = True
         # stack for storing the canonical name of the current function/method
         self.stack: List[str] = []
         # stubfile is the path to the doc-stub file
-        self.stub_path = Path(stub_file)
+        self.docstub_path = Path(docstub_file)
         # read the stub file from the path
-        self.stub_source = self.stub_path.read_text(encoding="utf-8")
+        self.docstub_source = self.docstub_path.read_text(encoding="utf-8")
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            TypeInfo,  # value: TypeInfo
+            Union[TypeInfo, str],  # value: TypeInfo
         ] = {}
+        self.comments: List[str] = []
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
         # parse the doc-stub file
-        if self.stub_source:
+        if self.docstub_source:
             try:
                 # parse the doc-stub file
-                stub_tree = cst.parse_module(self.stub_source)
+                stub_tree = cst.parse_module(self.docstub_source)
             except cst.ParserSyntaxError as e:
-                log.error(f"Error parsing {self.stub_path}: {e}")
-                return
+                log.error(f"Error parsing {self.docstub_path}: {e}")
+                raise ValueError(f"Error parsing {self.docstub_path}: {e}") from e
             # create the collectors
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)
             # visit the doc-stub file with all collectors
             stub_tree.visit(typing_collector)
             self.annotations = typing_collector.annotations
-
+            self.comments = typing_collector.comments
             # Store the imports that were added to the stub file
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
@@ -98,7 +101,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
     # ------------------------------------------------------------------------
 
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        """Update the Module docstring"""
+        """
+        This method is responsible for updating the module node after processing it in the codemod.
+        It performs the following tasks:
+        1. Adds any needed imports from the doc-stub.
+        2. Adds `from module import *` from the doc-stub.
+        3. Updates the module docstring.
+        4. Updates the comments in the module.
+
+        :param original_node: The original module node.
+        :param updated_node: The updated module node after processing.
+        :return: The updated module node.
+        """
+        # --------------------------------------------------------------------
         # add any needed imports from the doc-stub
         for k in self.stub_imports.keys():
             imp = self.stub_imports[k]
@@ -128,16 +143,39 @@ class MergeCommand(VisitorBasedCodemodCommand):
                             module=full_module_name,
                             obj="*",
                         )
-
+        # --------------------------------------------------------------------
         # update the docstring.
         if MODULE_KEY not in self.annotations:
             return updated_node
 
         # update/replace  module docstrings
         # todo: or should we add / merge the docstrings?
-        new = self.annotations[MODULE_KEY]
+        docstub_docstr = self.annotations[MODULE_KEY]
+        assert isinstance(docstub_docstr, str)
+        src_docstr = original_node.get_docstring() or ""
+        if src_docstr or docstub_docstr:
+            if docstub_docstr.strip() != src_docstr.strip():
+                if src_docstr:
+                    new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
+                else:
+                    new_docstr = f'"""\n' + docstub_docstr + '\n"""'
 
-        return update_module_docstr(updated_node, new.docstr_node)
+                docstr_node = cst.SimpleStatementLine(
+                    body=[
+                        cst.Expr(
+                            value=cst.SimpleString(
+                                value=new_docstr,
+                            )
+                        )
+                    ]
+                )
+                updated_node = update_module_docstr(updated_node, docstr_node)
+        # --------------------------------------------------------------------
+        # update the comments
+        updated_node = insert_header_comments(updated_node, self.comments)
+
+        return updated_node
+        # --------------------------------------------------------------------
 
     # ------------------------------------------------------------
 
@@ -145,21 +183,34 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    def leave_ClassDef(
+        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+    ) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
             # no changes to the class
             return updated_node
         # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
+        doc_stub = self.annotations[stack_id]
+        assert not isinstance(doc_stub, str)
         # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node)
+        updated_node = update_def_docstr(updated_node, doc_stub.docstr_node)
         # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "classdef":
+        if doc_stub.def_type == "classdef":
             # Same type, we can copy over all the annotations
-            return updated_node.with_changes(decorators=new.decorators, bases=new.def_node.bases)  # type: ignore
+            # combine the decorators from the doc-stub and the firmware stub
+            new_decorators = []
+            if doc_stub.decorators:
+                new_decorators.extend(doc_stub.decorators)
+            if updated_node.decorators:
+                new_decorators.extend(updated_node.decorators)
+
+            return updated_node.with_changes(
+                decorators=new_decorators,
+                bases=doc_stub.def_node.bases,  # type: ignore
+            )
         else:
             # Different type: ClassDef != FuncDef ,
             # for now just return the updated node
@@ -170,33 +221,62 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
-
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
             # no changes to the function
             return updated_node
         # update the firmware_stub from the doc_stub information
-        new = self.annotations[stack_id]
-
+        doc_stub = self.annotations[stack_id]
+        assert not isinstance(doc_stub, str)
         # first update the docstring
-        updated_node = update_def_docstr(updated_node, new.docstr_node, new.def_node)
+        updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
         # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
-        if new.def_type == "funcdef":
-            # Same type, we can copy over all the annotations
+        if doc_stub.def_type == "funcdef":
+            # Same type, we can copy over the annotations
+            # params that should  not be overwritten by the doc-stub ?
+            params_txt = empty_module.code_for_node(original_node.params)
+            overwrite_params = params_txt in [
+                "",
+                "...",
+                "*args, **kwargs",
+                "self",
+                "self, *args, **kwargs",
+            ]
+            # return that should not be overwritten by the doc-stub ?
+            overwrite_return = True
+            if original_node.returns:
+                try:
+                    overwrite_return = original_node.returns.annotation.value in [  # type: ignore
+                        "Incomplete",
+                        "Any",
+                        "...",
+                    ]
+                except AttributeError:
+                    pass
+            # combine the decorators from the doc-stub and the firmware stub
+            new_decorators = []
+            if doc_stub.decorators:
+                new_decorators.extend(doc_stub.decorators)
+            if updated_node.decorators:
+                new_decorators.extend(updated_node.decorators)
+
             return updated_node.with_changes(
-                params=new.params,
-                returns=new.returns,
-                decorators=new.decorators,
+                decorators=new_decorators,
+                params=doc_stub.params if overwrite_params else updated_node.params,
+                returns=doc_stub.returns if overwrite_return else updated_node.returns,
             )
-        elif new.def_type == "classdef":
+
+        elif doc_stub.def_type == "classdef":
             # Different type: ClassDef != FuncDef ,
-            if new.def_node and self.replace_functiondef_with_classdef:
+            if doc_stub.def_node and self.replace_functiondef_with_classdef:
                 # replace the functiondef with the classdef from the stub file
-                return new.def_node
+                return doc_stub.def_node
             # for now just return the updated node
             return updated_node
         else:
