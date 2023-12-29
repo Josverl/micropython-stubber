@@ -455,15 +455,20 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32"
-            if sys.platform.startswith("pyb")
-            else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
             "arch": "",
         }
     )
+    # change port names to be consistent with the repo
+    if info["port"].startswith("pyb"):
+        info["port"] = "stm32"
+    elif info["port"] == "win32":
+        info["port"] = "windows"
+    elif info["port"] == "linux":
+        info["port"] = "unix"
     try:
         info["version"] = ".".join([str(n) for n in sys.implementation.version])
     except AttributeError:
@@ -715,6 +720,7 @@ def main():
         "ak8963",
         "apa102",
         "apa106",
+        "argparse",
         "array",
         "asyncio/__init__",
         "asyncio/core",
@@ -763,6 +769,7 @@ def main():
         "esp32",
         "espidf",
         "espnow",
+        "ffi",
         "flashbdev",
         "framebuf",
         "freesans20",
@@ -799,6 +806,7 @@ def main():
         "micropython",
         "mip",
         "mip/__init__",
+        "mip/__main__",
         "motor",
         "mpu6500",
         "mpu9250",
@@ -826,6 +834,7 @@ def main():
         "queue",
         "random",
         "requests",
+        "requests/__init__",
         "rp2",
         "rtch",
         "samd",
@@ -838,6 +847,7 @@ def main():
         "stm",
         "struct",
         "sys",
+        "termios",
         "time",
         "tpcalib",
         "uarray",

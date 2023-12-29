@@ -3,7 +3,7 @@ Create stubs for the lvgl modules on a MicroPython board.
 
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-This variant was generated from createstubs.py by micropython-stubber v1.15.2
+This variant was generated from createstubs.py by micropython-stubber v1.16.1
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.15.2a0"
+__version__ = "v1.16.1"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
@@ -433,13 +433,20 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
             "arch": "",
         }
     )
+    # change port names to be consistent with the repo
+    if info["port"].startswith("pyb"):
+        info["port"] = "stm32"
+    elif info["port"] == "win32":
+        info["port"] = "windows"
+    elif info["port"] == "linux":
+        info["port"] = "unix"
     try:
         info["version"] = ".".join([str(n) for n in sys.implementation.version])
     except AttributeError:

@@ -192,7 +192,7 @@ fwid_test_cases = [
     # ("loboris-v3.2.24-esp32", "micropython", (3,2, 24), "esp32_LoBo", lobo_bt_ram, []),
     # ev3_pybricks_1_0_0
     (
-        "ev3-pybricks-v2.0.0-linux",
+        "ev3-pybricks-v2.0.0-unix",
         "",
         (2, 0, 0),
         "linux",
