@@ -1350,6 +1350,17 @@ files = [
 ]
 
 [[package]]
+name = "mypy-gitlab-code-quality"
+version = "1.1.0"
+description = "Simple script to generate gitlab code quality report from output of mypy."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mypy-gitlab-code-quality-1.1.0.tar.gz", hash = "sha256:be06b0def23b11f9ba10dda368cdb15f6320b9beb59b02d72642185630ee80e1"},
+    {file = "mypy_gitlab_code_quality-1.1.0-py3-none-any.whl", hash = "sha256:9890808b69a9e079ee852c482612c10008b39c767c96c5bab55aa9a0a4a970ba"},
+]
+
+[[package]]
 name = "myst-parser"
 version = "2.0.0"
 description = "An extended [CommonMark](https://spec.commonmark.org/) compliant parser,"
@@ -2832,4 +2843,4 @@ tools = ["esptool"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "ee6df37bd45c65f0310859e34384f39280277bd79ad4626d4a6cb8b78fc4b9ab"
+content-hash = "c50aeb884d95ce20b37e9029f0a4bef89154e8d3d80c2386b5ee28c4f7b8e771"
