@@ -441,7 +441,7 @@ def _info():  # type:() -> dict[str, str]
         }
     )
     # change port names to be consistent with the repo
-    if info["port"] == "pyb":
+    if info["port"].startswith("pyb"):
         info["port"] = "stm32"
     elif info["port"] == "win32":
         info["port"] = "windows"

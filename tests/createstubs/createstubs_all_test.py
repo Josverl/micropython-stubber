@@ -192,7 +192,9 @@ def test_stubber_fwid(
         assert c not in stubber.flat_fwid, "flat_fwid must not contain '{}'".format(c)
 
     # Does the firmware id match (at least the part before the last -)
-    assert new_fwid.startswith(fwid.rsplit("-", 1)[0]), "fwid does not match"
+    assert new_fwid.startswith(
+        fwid.rsplit("-", 1)[0]
+    ), f"fwid: {new_fwid} does not start with {fwid.rsplit('-', 1)[0]}"
 
     if not "esp8266" in fwid:
         # TODO: Fix FWID logic with esp8266
