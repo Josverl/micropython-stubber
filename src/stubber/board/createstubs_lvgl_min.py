@@ -40,7 +40,7 @@ from ujson import dumps as a
 try:from machine import reset
 except N:pass
 try:from collections import OrderedDict as b
-except M:from ucollections import OrderedDict as b
+except N:from ucollections import OrderedDict as b
 __version__='v1.16.0'
 u=2
 v=2
@@ -190,7 +190,7 @@ def T(s):
 	return s.split('-')[1]if'-'in s else B
 def _info():
 	k='ev3-pybricks';j='pycom';i='pycopy';h='unix';g='win32';f='GENERIC';c='arch';a='cpu';Z='ver';W='with';K='mpy';G='port';F='build';A=b({L:sys.implementation.name,D:B,F:B,Z:B,G:sys.platform,J:f,a:B,K:B,c:B})
-	if A[G]=='pyb':A[G]='stm32'
+	if A[G].startswith('pyb'):A[G]='stm32'
 	elif A[G]==g:A[G]='windows'
 	elif A[G]=='linux':A[G]=h
 	try:A[D]=I.join([str(A)for A in sys.implementation.version])
