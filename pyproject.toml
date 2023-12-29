@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.16.0"
+version = "1.16.1"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -70,6 +70,7 @@ tomli-w = "^1.0.0"
 typed-config = "^1.3.0"
 pyserial = "^3.5"
 executing = "^2.0.1"
+mypy-gitlab-code-quality = "^1.1.0"
 
 [tool.poetry.extras]
 tools = ["esptool"]
