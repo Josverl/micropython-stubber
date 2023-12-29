@@ -22,10 +22,10 @@ R=len
 Q=KeyError
 P=IndexError
 O=dir
-N=print
-M=ImportError
-L=True
-K='family'
+M=print
+N=ImportError
+K=True
+L='family'
 J='board'
 I='.'
 H=AttributeError
@@ -38,10 +38,10 @@ B=''
 import gc as C,os,sys
 from ujson import dumps as a
 try:from machine import reset
-except M:pass
+except N:pass
 try:from collections import OrderedDict as b
-except M:from ucollections import OrderedDict as b
-__version__='v1.15.2a0'
+except N:from ucollections import OrderedDict as b
+__version__='v1.16.1'
 u=2
 v=2
 w=[I,'/lib','/sd/lib','/flash/lib','lib']
@@ -54,7 +54,7 @@ class Stubber:
 		except H:pass
 		A._report=[];A.info=_info();C.collect()
 		if B:A._fwid=B.lower()
-		elif A.info[K]==l:A._fwid='{family}-{ver}-{port}-{board}'.format(**A.info)
+		elif A.info[L]==l:A._fwid='{family}-{ver}-{port}-{board}'.format(**A.info)
 		else:A._fwid='{family}-{ver}-{port}'.format(**A.info)
 		A._start_free=C.mem_free()
 		if path:
@@ -62,7 +62,7 @@ class Stubber:
 		else:path=get_root()
 		A.path='{}/stubs/{}'.format(path,A.flat_fwid).replace('//',G)
 		try:c(path+G)
-		except F:N('error creating stub folder {}'.format(path))
+		except F:M('error creating stub folder {}'.format(path))
 		A.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.modules=[]
 	def get_obj_attributes(L,item_instance):
 		I=item_instance;D=[];J=[]
@@ -97,29 +97,29 @@ class Stubber:
 		if H is E:O=D.replace(I,S)+'.py';H=J.path+G+O
 		else:O=H.split(G)[-1]
 		if G in D:D=D.replace(G,I)
-		K=E
-		try:K=__import__(D,E,E,'*');T=C.mem_free()
-		except M:return A
+		L=E
+		try:L=__import__(D,E,E,'*');T=C.mem_free()
+		except N:return A
 		c(H)
-		with V(H,'w')as N:P=str(J.info).replace('OrderedDict(',B).replace('})','}');R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(D,J._fwid,P,__version__);N.write(R);N.write('from typing import Any\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(N,K,D,B)
+		with V(H,'w')as M:P=str(J.info).replace('OrderedDict(',B).replace('})','}');R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(D,J._fwid,P,__version__);M.write(R);M.write('from typing import Any\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(M,L,D,B)
 		J._report.append('{{"module": "{}", "file": "{}"}}'.format(D,H.replace('\\',G)))
 		if D not in{'os','sys','logging','gc'}:
-			try:del K
+			try:del L
 			except(F,Q):pass
 			try:del sys.modules[D]
 			except Q:pass
-		C.collect();return L
+		C.collect();return K
 	def write_object_stub(K,fp,object_expr,obj_name,indent,in_class=0):
-		d='{0}{1} = {2} # type: {3}\n';c='bound_method';b='Incomplete';P=in_class;O=object_expr;M='Exception';H=fp;D=indent;C.collect()
+		d='{0}{1} = {2} # type: {3}\n';c='bound_method';b='Incomplete';P=in_class;O=object_expr;N='Exception';H=fp;D=indent;C.collect()
 		if O in K.problematic:return
 		S,L=K.get_obj_attributes(O)
-		if L:N(L)
+		if L:M(L)
 		for(E,J,G,T,f)in S:
-			if E in['classmethod','staticmethod','BaseException',M]:continue
+			if E in['classmethod','staticmethod','BaseException',N]:continue
 			if E[0].isdigit():continue
 			if G=="<class 'type'>"and R(D)<=v*4:
-				U=B;V=E.endswith(M)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
-				if V:U=M
+				U=B;V=E.endswith(N)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
+				if V:U=N
 				A='\n{}class {}({}):\n'.format(D,E,U)
 				if V:A+=D+'    ...\n';H.write(A);return
 				H.write(A);K.write_object_stub(H,T,'{0}.{1}'.format(obj_name,E),D+'    ',P+1);A=D+'    def __init__(self, *argv, **kwargs) -> None:\n';A+=D+'        ...\n\n';H.write(A)
@@ -161,11 +161,11 @@ class Stubber:
 		G=s.format(B.path,filename);C.collect()
 		try:
 			with V(G,'w')as D:
-				B.write_json_header(D);E=L
+				B.write_json_header(D);E=K
 				for H in B._report:B.write_json_node(D,H,E);E=A
 				B.write_json_end(D)
 			I=B._start_free-C.mem_free()
-		except F:N('Failed to create the report.')
+		except F:M('Failed to create the report.')
 	def write_json_header(B,f):A='firmware';f.write('{');f.write(a({A:B.info})[1:-1]);f.write(Z);f.write(a({t:{D:__version__},'stubtype':A})[1:-1]);f.write(Z);f.write('"modules" :[\n')
 	def write_json_node(A,f,n,first):
 		if not first:f.write(Z)
@@ -181,7 +181,7 @@ def c(path):
 			except F as D:
 				if D.args[0]==u:
 					try:os.mkdir(B)
-					except F as E:N('failed to create folder {}'.format(B));raise E
+					except F as E:M('failed to create folder {}'.format(B));raise E
 		C=A+1
 def T(s):
 	A=' on '
@@ -189,20 +189,23 @@ def T(s):
 	if A in s:s=s.split(A,1)[0]
 	return s.split('-')[1]if'-'in s else B
 def _info():
-	h='ev3-pybricks';g='pycom';f='pycopy';c='GENERIC';a='arch';Z='cpu';Y='ver';V='with';G='mpy';F='build';A=b({K:sys.implementation.name,D:B,F:B,Y:B,'port':'stm32'if sys.platform.startswith('pyb')else sys.platform,J:c,Z:B,G:B,a:B})
+	k='ev3-pybricks';j='pycom';i='pycopy';h='unix';g='win32';f='GENERIC';c='arch';a='cpu';Z='ver';W='with';K='mpy';G='port';F='build';A=b({L:sys.implementation.name,D:B,F:B,Z:B,G:sys.platform,J:f,a:B,K:B,c:B})
+	if A[G].startswith('pyb'):A[G]='stm32'
+	elif A[G]==g:A[G]='windows'
+	elif A[G]=='linux':A[G]=h
 	try:A[D]=I.join([str(A)for A in sys.implementation.version])
 	except H:pass
-	try:W=sys.implementation._machine if'_machine'in O(sys.implementation)else os.uname().machine;A[J]=W.strip();A[Z]=W.split(V)[1].strip();A[G]=sys.implementation._mpy if'_mpy'in O(sys.implementation)else sys.implementation.mpy if G in O(sys.implementation)else B
+	try:X=sys.implementation._machine if'_machine'in O(sys.implementation)else os.uname().machine;A[J]=X.strip();A[a]=X.split(W)[1].strip();A[K]=sys.implementation._mpy if'_mpy'in O(sys.implementation)else sys.implementation.mpy if K in O(sys.implementation)else B
 	except(H,P):pass
 	C.collect()
-	for N in[A+'/board_info.csv'for A in w]:
-		if e(N):
-			L=A[J].strip()
-			if d(A,L,N):break
-			if V in L:
-				L=L.split(V)[0].strip()
-				if d(A,L,N):break
-			A[J]=c
+	for U in[A+'/board_info.csv'for A in w]:
+		if e(U):
+			M=A[J].strip()
+			if d(A,M,U):break
+			if W in M:
+				M=M.split(W)[0].strip()
+				if d(A,M,U):break
+			A[J]=f
 	A[J]=A[J].replace(' ',S);C.collect()
 	try:
 		A[F]=T(os.uname()[3])
@@ -210,27 +213,27 @@ def _info():
 		if not A[F]and';'in sys.version:A[F]=T(sys.version.split(';')[1])
 	except(H,P):pass
 	if A[F]and R(A[F])>5:A[F]=B
-	if A[D]==B and sys.platform not in('unix','win32'):
-		try:i=os.uname();A[D]=i.release
+	if A[D]==B and sys.platform not in(h,g):
+		try:m=os.uname();A[D]=m.release
 		except(P,H,TypeError):pass
-	for(j,k,m)in[(f,f,'const'),(g,g,'FAT'),(h,'pybricks.hubs','EV3Brick')]:
-		try:n=__import__(k,E,E,m);A[K]=j;del n;break
-		except(M,Q):pass
-	if A[K]==h:A['release']='2.0.0'
-	if A[K]==l:
+	for(n,o,p)in[(i,i,'const'),(j,j,'FAT'),(k,'pybricks.hubs','EV3Brick')]:
+		try:q=__import__(o,E,E,p);A[L]=n;del q;break
+		except(N,Q):pass
+	if A[L]==k:A['release']='2.0.0'
+	if A[L]==l:
 		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.19.9':A[D]=A[D][:-2]
-	if G in A and A[G]:
-		U=int(A[G]);X=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][U>>10]
-		if X:A[a]=X
-		A[G]='v{}.{}'.format(U&255,U>>8&3)
-	A[Y]=f"v{A[D]}-{A[F]}"if A[F]else f"v{A[D]}";return A
+	if K in A and A[K]:
+		V=int(A[K]);Y=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][V>>10]
+		if Y:A[c]=Y
+		A[K]='v{}.{}'.format(V&255,V>>8&3)
+	A[Z]=f"v{A[D]}-{A[F]}"if A[F]else f"v{A[D]}";return A
 def d(info,board_descr,filename):
 	with V(filename,'r')as C:
 		while 1:
 			B=C.readline()
 			if not B:break
 			D,E=B.split(',')[0].strip(),B.split(',')[1].strip()
-			if D==board_descr:info[J]=E;return L
+			if D==board_descr:info[J]=E;return K
 	return A
 def get_root():
 	try:A=os.getcwd()
@@ -242,7 +245,7 @@ def get_root():
 	return B
 def e(filename):
 	try:
-		if os.stat(filename)[0]>>14:return L
+		if os.stat(filename)[0]>>14:return K
 		return A
 	except F:return A
 def f():sys.exit(1)
@@ -256,7 +259,7 @@ def read_path():
 	return path
 def g():
 	try:B=bytes('abc',encoding='utf8');C=g.__module__;return A
-	except(h,H):return L
+	except(h,H):return K
 def main():
 	D='lvgl'
 	try:import lvgl as A

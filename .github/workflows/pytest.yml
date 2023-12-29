@@ -95,7 +95,7 @@ jobs:
       # .lcov to  artefacts (available for download)
       # .XML  to Codecov
       #----------------------------------------------
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always() # ignore previous error
         with:
           path: results/

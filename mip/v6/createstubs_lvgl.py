@@ -3,7 +3,7 @@ Create stubs for the lvgl modules on a MicroPython board.
 
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-This variant was generated from createstubs.py by micropython-stubber v1.15.2
+This variant was generated from createstubs.py by micropython-stubber v1.16.0
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.15.2a0"
+__version__ = "v1.16.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]

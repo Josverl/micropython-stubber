@@ -190,20 +190,23 @@ def U(s):
 	if A in s:s=s.split(A,1)[0]
 	return s.split('-')[1]if'-'in s else C
 def _info():
-	k='ev3-pybricks';j='pycom';i='pycopy';f='GENERIC';c='arch';b='cpu';a='ver';V='with';G='mpy';F='build';A=d({O:sys.implementation.name,D:C,F:C,a:C,'port':'stm32'if sys.platform.startswith('pyb')else sys.platform,K:f,b:C,G:C,c:C})
+	n='ev3-pybricks';m='pycom';l='pycopy';k='unix';j='win32';i='GENERIC';f='arch';c='cpu';b='ver';Y='with';I='mpy';G='port';F='build';A=d({O:sys.implementation.name,D:C,F:C,b:C,G:sys.platform,K:i,c:C,I:C,f:C})
+	if A[G].startswith('pyb'):A[G]='stm32'
+	elif A[G]==j:A[G]='windows'
+	elif A[G]=='linux':A[G]=k
 	try:A[D]=J.join([W(A)for A in sys.implementation.version])
 	except H:pass
-	try:Y=sys.implementation._machine if'_machine'in Q(sys.implementation)else os.uname().machine;A[K]=Y.strip();A[b]=Y.split(V)[1].strip();A[G]=sys.implementation._mpy if'_mpy'in Q(sys.implementation)else sys.implementation.mpy if G in Q(sys.implementation)else C
+	try:Z=sys.implementation._machine if'_machine'in Q(sys.implementation)else os.uname().machine;A[K]=Z.strip();A[c]=Z.split(Y)[1].strip();A[I]=sys.implementation._mpy if'_mpy'in Q(sys.implementation)else sys.implementation.mpy if I in Q(sys.implementation)else C
 	except(H,R):pass
 	B.collect()
-	for M in[A+'/board_info.csv'for A in e]:
-		if h(M):
-			I=A[K].strip()
-			if g(A,I,M):break
-			if V in I:
-				I=I.split(V)[0].strip()
-				if g(A,I,M):break
-			A[K]=f
+	for N in[A+'/board_info.csv'for A in e]:
+		if h(N):
+			M=A[K].strip()
+			if g(A,M,N):break
+			if Y in M:
+				M=M.split(Y)[0].strip()
+				if g(A,M,N):break
+			A[K]=i
 	A[K]=A[K].replace(' ',T);B.collect()
 	try:
 		A[F]=U(os.uname()[3])
@@ -211,20 +214,20 @@ def _info():
 		if not A[F]and';'in sys.version:A[F]=U(sys.version.split(';')[1])
 	except(H,R):pass
 	if A[F]and L(A[F])>5:A[F]=C
-	if A[D]==C and sys.platform not in('unix','win32'):
-		try:l=os.uname();A[D]=l.release
+	if A[D]==C and sys.platform not in(k,j):
+		try:o=os.uname();A[D]=o.release
 		except(R,H,TypeError):pass
-	for(m,n,o)in[(i,i,'const'),(j,j,'FAT'),(k,'pybricks.hubs','EV3Brick')]:
-		try:p=__import__(n,E,E,o);A[O]=m;del p;break
+	for(p,q,r)in[(l,l,'const'),(m,m,'FAT'),(n,'pybricks.hubs','EV3Brick')]:
+		try:s=__import__(q,E,E,r);A[O]=p;del s;break
 		except(P,S):pass
-	if A[O]==k:A['release']='2.0.0'
+	if A[O]==n:A['release']='2.0.0'
 	if A[O]==X:
 		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.19.9':A[D]=A[D][:-2]
-	if G in A and A[G]:
-		N=int(A[G]);Z=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][N>>10]
-		if Z:A[c]=Z
-		A[G]='v{}.{}'.format(N&255,N>>8&3)
-	A[a]=f"v{A[D]}-{A[F]}"if A[F]else f"v{A[D]}";return A
+	if I in A and A[I]:
+		V=int(A[I]);a=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][V>>10]
+		if a:A[f]=a
+		A[I]='v{}.{}'.format(V&255,V>>8&3)
+	A[b]=f"v{A[D]}-{A[F]}"if A[F]else f"v{A[D]}";return A
 def g(info,board_descr,filename):
 	with I(filename,'r')as B:
 		while 1:
