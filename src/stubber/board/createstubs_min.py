@@ -44,7 +44,7 @@ try:from machine import reset
 except N:pass
 try:from collections import OrderedDict as d
 except N:from ucollections import OrderedDict as d
-__version__='v1.16.1'
+__version__='v1.16.2'
 x=2
 y=2
 z=[I,'/lib','/sd/lib','/flash/lib','lib']
