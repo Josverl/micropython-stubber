@@ -512,7 +512,7 @@ CHILD_PARENT_CLASS = {
     "namedtuple": "tuple",
     "deque": "stdlib_deque",
     # ESPNow
-    "ESPNow": "ESPNowBase,Iterator",
+    "ESPNow": "ESPNowBase,Iterator", # causes issue with mypy 
     "AIOESPNow": "ESPNow",
     # array
     "array": "List",
