@@ -129,7 +129,7 @@ def collect_boardinfo(mpy_path: Path, version: str) -> List[Board]:
     return board_list
 
 
-def write_files(board_list: List[Board], *, folder: Path = Path("src/stubber/data")):
+def write_files(board_list: List[Board], *, folder: Path):
     """Writes the board information to JSON and CSV files.
 
     Args:
@@ -167,10 +167,8 @@ def get_board_list(versions: List[str], mpy_path: Path):
     print("Total number of boards found:", len(board_list))
     seen = set()
     board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
-    board_list.sort(key=lambda x: x.description)
+    board_list.sort(key=lambda x: x.description.lower())
     print("Unique board descriptions found:", len(board_list))
-    print(f" found OTA  = {'Generic ESP32 module with OTA' in seen}")
-    print(f" found UNICORE  = {'ESP32-UNICORE' in seen}")
     return board_list
 
 
@@ -196,7 +194,7 @@ def main():
     board_list = get_board_list(versions, mpy_path)
 
     print(tabulate(board_list, headers="keys"))  # type: ignore
-    write_files(board_list)
+    write_files(board_list, folder=Path("src/stubber/data"))
 
 
 if __name__ == "__main__":

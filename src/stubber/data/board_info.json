@@ -117,15 +117,6 @@
         "version": "v1.10"
     },
     {
-        "description": "BLUEIO-TAG-EVIM with NRF52832",
-        "port": "nrf",
-        "board": "blueio_tag_evim",
-        "board_name": "BLUEIO-TAG-EVIM",
-        "mcu_name": "NRF52832",
-        "path": "ports/nrf/boards/blueio_tag_evim/mpconfigboard.h",
-        "version": "v1.11"
-    },
-    {
         "description": "Bluefruit nRF52 Feather with NRF52832",
         "port": "nrf",
         "board": "feather52",
@@ -133,6 +124,15 @@
         "mcu_name": "NRF52832",
         "path": "ports/nrf/boards/feather52/mpconfigboard.h",
         "version": "v1.10"
+    },
+    {
+        "description": "BLUEIO-TAG-EVIM with NRF52832",
+        "port": "nrf",
+        "board": "blueio_tag_evim",
+        "board_name": "BLUEIO-TAG-EVIM",
+        "mcu_name": "NRF52832",
+        "path": "ports/nrf/boards/blueio_tag_evim/mpconfigboard.h",
+        "version": "v1.11"
     },
     {
         "description": "Cerb40 with STM32F405RG",
@@ -225,15 +225,6 @@
         "version": "v1.12"
     },
     {
-        "description": "ESP32 Unicore module with ESP32-UNICORE",
-        "port": "esp32",
-        "board": "GENERIC_UNICORE",
-        "board_name": "ESP32 Unicore module",
-        "mcu_name": "ESP32-UNICORE",
-        "path": "ports/esp32/boards/GENERIC_UNICORE/mpconfigboard.h",
-        "version": "v1.20.0"
-    },
-    {
         "description": "ESP32 module (spiram) with ESP32",
         "port": "esp32",
         "board": "GENERIC_SPIRAM",
@@ -250,6 +241,15 @@
         "mcu_name": "ESP32",
         "path": "ports/esp32/boards/GENERIC/mpconfigboard.h",
         "version": "v1.12"
+    },
+    {
+        "description": "ESP32 Unicore module with ESP32-UNICORE",
+        "port": "esp32",
+        "board": "GENERIC_UNICORE",
+        "board_name": "ESP32 Unicore module",
+        "mcu_name": "ESP32-UNICORE",
+        "path": "ports/esp32/boards/GENERIC_UNICORE/mpconfigboard.h",
+        "version": "v1.20.0"
     },
     {
         "description": "ESP32-D2WD",
@@ -324,6 +324,15 @@
         "version": "v1.18"
     },
     {
+        "description": "Espruino Pico with STM32F401CD",
+        "port": "stm32",
+        "board": "ESPRUINO_PICO",
+        "board_name": "Espruino Pico",
+        "mcu_name": "STM32F401CD",
+        "path": "ports/stm32/boards/ESPRUINO_PICO/mpconfigboard.h",
+        "version": "v1.10"
+    },
+    {
         "description": "EVK_NINA_B1 with NRF52832",
         "port": "nrf",
         "board": "evk_nina_b1",
@@ -340,15 +349,6 @@
         "mcu_name": "NRF52840",
         "path": "ports/nrf/boards/evk_nina_b3/mpconfigboard.h",
         "version": "v1.16"
-    },
-    {
-        "description": "Espruino Pico with STM32F401CD",
-        "port": "stm32",
-        "board": "ESPRUINO_PICO",
-        "board_name": "Espruino Pico",
-        "mcu_name": "STM32F401CD",
-        "path": "ports/stm32/boards/ESPRUINO_PICO/mpconfigboard.h",
-        "version": "v1.10"
     },
     {
         "description": "F411DISC with STM32F411",
@@ -441,15 +441,6 @@
         "version": "v1.19.1"
     },
     {
-        "description": "GIGA with STM32H747",
-        "port": "stm32",
-        "board": "ARDUINO_GIGA",
-        "board_name": "GIGA",
-        "mcu_name": "STM32H747",
-        "path": "ports/stm32/boards/ARDUINO_GIGA/mpconfigboard.h",
-        "version": "v1.20.0"
-    },
-    {
         "description": "Generic ESP32 module with ESP32",
         "port": "esp32",
         "board": "ESP32_GENERIC",
@@ -513,6 +504,15 @@
         "version": "v1.21.0"
     },
     {
+        "description": "GIGA with STM32H747",
+        "port": "stm32",
+        "board": "ARDUINO_GIGA",
+        "board_name": "GIGA",
+        "mcu_name": "STM32H747",
+        "path": "ports/stm32/boards/ARDUINO_GIGA/mpconfigboard.h",
+        "version": "v1.20.0"
+    },
+    {
         "description": "HydraBus1.0 with STM32F4",
         "port": "stm32",
         "board": "HYDRABUS",
@@ -520,6 +520,87 @@
         "mcu_name": "STM32F4",
         "path": "ports/stm32/boards/HYDRABUS/mpconfigboard.h",
         "version": "v1.10"
+    },
+    {
+        "description": "i.MX RT1010 EVK with MIMXRT1011DAE5A",
+        "port": "mimxrt",
+        "board": "MIMXRT1010_EVK",
+        "board_name": "i.MX RT1010 EVK",
+        "mcu_name": "MIMXRT1011DAE5A",
+        "path": "ports/mimxrt/boards/MIMXRT1010_EVK/mpconfigboard.h",
+        "version": "v1.13"
+    },
+    {
+        "description": "i.MX RT1015 EVK with MIMXRT1015DAF5A",
+        "port": "mimxrt",
+        "board": "MIMXRT1015_EVK",
+        "board_name": "i.MX RT1015 EVK",
+        "mcu_name": "MIMXRT1015DAF5A",
+        "path": "ports/mimxrt/boards/MIMXRT1015_EVK/mpconfigboard.h",
+        "version": "v1.19.1"
+    },
+    {
+        "description": "i.MX RT1020 EVK with MIMXRT1021DAG5A",
+        "port": "mimxrt",
+        "board": "MIMXRT1020_EVK",
+        "board_name": "i.MX RT1020 EVK",
+        "mcu_name": "MIMXRT1021DAG5A",
+        "path": "ports/mimxrt/boards/MIMXRT1020_EVK/mpconfigboard.h",
+        "version": "v1.13"
+    },
+    {
+        "description": "i.MX RT1050 EVK with MIMXRT1052DVL6B",
+        "port": "mimxrt",
+        "board": "MIMXRT1050_EVK",
+        "board_name": "i.MX RT1050 EVK",
+        "mcu_name": "MIMXRT1052DVL6B",
+        "path": "ports/mimxrt/boards/MIMXRT1050_EVK/mpconfigboard.h",
+        "version": "v1.15"
+    },
+    {
+        "description": "i.MX RT1050 EVKB with MIMXRT1052DVL6B",
+        "port": "mimxrt",
+        "board": "MIMXRT1050_EVKB",
+        "board_name": "i.MX RT1050 EVKB",
+        "mcu_name": "MIMXRT1052DVL6B",
+        "path": "ports/mimxrt/boards/MIMXRT1050_EVKB/mpconfigboard.h",
+        "version": "v1.17"
+    },
+    {
+        "description": "i.MX RT1050 EVKB-A1 with MIMXRT1052DVL6B",
+        "port": "mimxrt",
+        "board": "MIMXRT1050_EVK",
+        "board_name": "i.MX RT1050 EVKB-A1",
+        "mcu_name": "MIMXRT1052DVL6B",
+        "path": "ports/mimxrt/boards/MIMXRT1050_EVK/mpconfigboard.h",
+        "version": "v1.18"
+    },
+    {
+        "description": "i.MX RT1060 EVK with MIMXRT1062DVJ6A",
+        "port": "mimxrt",
+        "board": "MIMXRT1060_EVK",
+        "board_name": "i.MX RT1060 EVK",
+        "mcu_name": "MIMXRT1062DVJ6A",
+        "path": "ports/mimxrt/boards/MIMXRT1060_EVK/mpconfigboard.h",
+        "version": "v1.13"
+    },
+    {
+        "description": "i.MX RT1064 EVK with MIMXRT1064DVL6A",
+        "port": "mimxrt",
+        "board": "MIMXRT1064_EVK",
+        "board_name": "i.MX RT1064 EVK",
+        "mcu_name": "MIMXRT1064DVL6A",
+        "path": "ports/mimxrt/boards/MIMXRT1064_EVK/mpconfigboard.h",
+        "version": "v1.14"
+    },
+    {
+        "description": "i.MX RT1170 EVK with MIMXRT1176DVMAA",
+        "port": "mimxrt",
+        "board": "MIMXRT1170_EVK",
+        "board_name": "i.MX RT1170 EVK",
+        "mcu_name": "MIMXRT1176DVMAA",
+        "path": "ports/mimxrt/boards/MIMXRT1170_EVK/mpconfigboard.h",
+        "version": "v1.20.0"
     },
     {
         "description": "IBK-BLYST-NANO with NRF52832",
@@ -573,6 +654,15 @@
         "board_name": "L496G-DISCO",
         "mcu_name": "STM32L496",
         "path": "ports/stm32/boards/STM32L496GDISC/mpconfigboard.h",
+        "version": "v1.10"
+    },
+    {
+        "description": "LaunchPad with CC3200",
+        "port": "cc3200",
+        "board": "LAUNCHXL",
+        "board_name": "LaunchPad",
+        "mcu_name": "CC3200",
+        "path": "ports/cc3200/boards/LAUNCHXL/mpconfigboard.h",
         "version": "v1.10"
     },
     {
@@ -639,15 +729,6 @@
         "version": "v1.18"
     },
     {
-        "description": "LaunchPad with CC3200",
-        "port": "cc3200",
-        "board": "LAUNCHXL",
-        "board_name": "LaunchPad",
-        "mcu_name": "CC3200",
-        "path": "ports/cc3200/boards/LAUNCHXL/mpconfigboard.h",
-        "version": "v1.10"
-    },
-    {
         "description": "M5Stack ATOM with ESP32-PICO-D4",
         "port": "esp32",
         "board": "M5STACK_ATOM",
@@ -666,15 +747,6 @@
         "version": "v1.13"
     },
     {
-        "description": "MIKROE_CLICKER2_STM32 with STM32F407",
-        "port": "stm32",
-        "board": "MIKROE_CLICKER2_STM32",
-        "board_name": "MIKROE_CLICKER2_STM32",
-        "mcu_name": "STM32F407",
-        "path": "ports/stm32/boards/MIKROE_CLICKER2_STM32/mpconfigboard.h",
-        "version": "v1.12"
-    },
-    {
         "description": "Metro M4 Express Airlift with SAMD51J19A",
         "port": "samd",
         "board": "ADAFRUIT_METRO_M4_EXPRESS",
@@ -684,6 +756,15 @@
         "version": "v1.21.0"
     },
     {
+        "description": "micro:bit with NRF51822",
+        "port": "nrf",
+        "board": "microbit",
+        "board_name": "micro:bit",
+        "mcu_name": "NRF51822",
+        "path": "ports/nrf/boards/microbit/mpconfigboard.h",
+        "version": "v1.10"
+    },
+    {
         "description": "MikroE Quail with STM32F427VI",
         "port": "stm32",
         "board": "MIKROE_QUAIL",
@@ -691,6 +772,15 @@
         "mcu_name": "STM32F427VI",
         "path": "ports/stm32/boards/MIKROE_QUAIL/mpconfigboard.h",
         "version": "v1.18"
+    },
+    {
+        "description": "MIKROE_CLICKER2_STM32 with STM32F407",
+        "port": "stm32",
+        "board": "MIKROE_CLICKER2_STM32",
+        "board_name": "MIKROE_CLICKER2_STM32",
+        "mcu_name": "STM32F407",
+        "path": "ports/stm32/boards/MIKROE_CLICKER2_STM32/mpconfigboard.h",
+        "version": "v1.12"
     },
     {
         "description": "Mini SAM M4 with SAMD51G19A",
@@ -709,6 +799,24 @@
         "mcu_name": "STM32F405RG",
         "path": "ports/stm32/boards/NADHAT_PYBF405/mpconfigboard.h",
         "version": "v1.12"
+    },
+    {
+        "description": "NanoS3 with ESP32-S3-FN8",
+        "port": "esp32",
+        "board": "UM_NANOS3",
+        "board_name": "NanoS3",
+        "mcu_name": "ESP32-S3-FN8",
+        "path": "ports/esp32/boards/UM_NANOS3/mpconfigboard.h",
+        "version": "v1.21.0"
+    },
+    {
+        "description": "NetduinoPlus2 with STM32F405RG",
+        "port": "stm32",
+        "board": "NETDUINO_PLUS_2",
+        "board_name": "NetduinoPlus2",
+        "mcu_name": "STM32F405RG",
+        "path": "ports/stm32/boards/NETDUINO_PLUS_2/mpconfigboard.h",
+        "version": "v1.10"
     },
     {
         "description": "NICLAVISION with STM32H747",
@@ -945,22 +1053,13 @@
         "version": "v1.10"
     },
     {
-        "description": "NanoS3 with ESP32-S3-FN8",
+        "description": "Olimex ESP32 ETH with ESP32",
         "port": "esp32",
-        "board": "UM_NANOS3",
-        "board_name": "NanoS3",
-        "mcu_name": "ESP32-S3-FN8",
-        "path": "ports/esp32/boards/UM_NANOS3/mpconfigboard.h",
-        "version": "v1.21.0"
-    },
-    {
-        "description": "NetduinoPlus2 with STM32F405RG",
-        "port": "stm32",
-        "board": "NETDUINO_PLUS_2",
-        "board_name": "NetduinoPlus2",
-        "mcu_name": "STM32F405RG",
-        "path": "ports/stm32/boards/NETDUINO_PLUS_2/mpconfigboard.h",
-        "version": "v1.10"
+        "board": "OLIMEX_ESP32_POE",
+        "board_name": "Olimex ESP32 ETH",
+        "mcu_name": "ESP32",
+        "path": "ports/esp32/boards/OLIMEX_ESP32_POE/mpconfigboard.h",
+        "version": "v1.20.0"
     },
     {
         "description": "OLIMEX STM32-E407 with STM32F407",
@@ -979,15 +1078,6 @@
         "mcu_name": "STM32F407",
         "path": "ports/stm32/boards/OLIMEX_H407/mpconfigboard.h",
         "version": "v1.18"
-    },
-    {
-        "description": "Olimex ESP32 ETH with ESP32",
-        "port": "esp32",
-        "board": "OLIMEX_ESP32_POE",
-        "board_name": "Olimex ESP32 ETH",
-        "mcu_name": "ESP32",
-        "path": "ports/esp32/boards/OLIMEX_ESP32_POE/mpconfigboard.h",
-        "version": "v1.20.0"
     },
     {
         "description": "PCA10000 with NRF51822",
@@ -1080,6 +1170,15 @@
         "version": "v1.19.1"
     },
     {
+        "description": "ProS3 with ESP32-S3",
+        "port": "esp32",
+        "board": "UM_PROS3",
+        "board_name": "ProS3",
+        "mcu_name": "ESP32-S3",
+        "path": "ports/esp32/boards/UM_PROS3/mpconfigboard.h",
+        "version": "v1.19.1"
+    },
+    {
         "description": "PYBD-SF2W with STM32F722IEK",
         "port": "stm32",
         "board": "PYBD_SF2",
@@ -1161,15 +1260,6 @@
         "version": "v1.10"
     },
     {
-        "description": "ProS3 with ESP32-S3",
-        "port": "esp32",
-        "board": "UM_PROS3",
-        "board_name": "ProS3",
-        "mcu_name": "ESP32-S3",
-        "path": "ports/esp32/boards/UM_PROS3/mpconfigboard.h",
-        "version": "v1.19.1"
-    },
-    {
         "description": "RA4M1 CLICKER with RA4M1",
         "port": "renesas-ra",
         "board": "RA4M1_CLICKER",
@@ -1242,24 +1332,6 @@
         "version": "v1.12"
     },
     {
-        "description": "STM32H573I-DK with STM32H573IIK3Q",
-        "port": "stm32",
-        "board": "STM32H573I_DK",
-        "board_name": "STM32H573I-DK",
-        "mcu_name": "STM32H573IIK3Q",
-        "path": "ports/stm32/boards/STM32H573I_DK/mpconfigboard.h",
-        "version": "v1.21.0"
-    },
-    {
-        "description": "STM32H7B3I-DK with STM32H7B3LIH6Q",
-        "port": "stm32",
-        "board": "STM32H7B3I_DK",
-        "board_name": "STM32H7B3I-DK",
-        "mcu_name": "STM32H7B3LIH6Q",
-        "path": "ports/stm32/boards/STM32H7B3I_DK/mpconfigboard.h",
-        "version": "v1.18"
-    },
-    {
         "description": "Seeed ARCH MIX with MIMXRT1052DVL5B",
         "port": "mimxrt",
         "board": "SEEED_ARCH_MIX",
@@ -1287,6 +1359,15 @@
         "version": "v1.17"
     },
     {
+        "description": "Sparkfun SAMD51 Thing Plus with SAMD51J20A",
+        "port": "samd",
+        "board": "SPARKFUN_SAMD51_THING_PLUS",
+        "board_name": "Sparkfun SAMD51 Thing Plus",
+        "mcu_name": "SAMD51J20A",
+        "path": "ports/samd/boards/SPARKFUN_SAMD51_THING_PLUS/mpconfigboard.h",
+        "version": "v1.20.0"
+    },
+    {
         "description": "SparkFun STM32 MicroMod Processor with STM32F405RG",
         "port": "stm32",
         "board": "SPARKFUN_MICROMOD_STM32",
@@ -1296,13 +1377,22 @@
         "version": "v1.17"
     },
     {
-        "description": "Sparkfun SAMD51 Thing Plus with SAMD51J20A",
-        "port": "samd",
-        "board": "SPARKFUN_SAMD51_THING_PLUS",
-        "board_name": "Sparkfun SAMD51 Thing Plus",
-        "mcu_name": "SAMD51J20A",
-        "path": "ports/samd/boards/SPARKFUN_SAMD51_THING_PLUS/mpconfigboard.h",
-        "version": "v1.20.0"
+        "description": "STM32H573I-DK with STM32H573IIK3Q",
+        "port": "stm32",
+        "board": "STM32H573I_DK",
+        "board_name": "STM32H573I-DK",
+        "mcu_name": "STM32H573IIK3Q",
+        "path": "ports/stm32/boards/STM32H573I_DK/mpconfigboard.h",
+        "version": "v1.21.0"
+    },
+    {
+        "description": "STM32H7B3I-DK with STM32H7B3LIH6Q",
+        "port": "stm32",
+        "board": "STM32H7B3I_DK",
+        "board_name": "STM32H7B3I-DK",
+        "mcu_name": "STM32H7B3LIH6Q",
+        "path": "ports/stm32/boards/STM32H7B3I_DK/mpconfigboard.h",
+        "version": "v1.18"
     },
     {
         "description": "Teensy 4.0 with MIMXRT1062DVJ6A",
@@ -1413,13 +1503,13 @@
         "version": "v1.21.0"
     },
     {
-        "description": "WT51822-S4AT with NRF51822",
-        "port": "nrf",
-        "board": "wt51822_s4at",
-        "board_name": "WT51822-S4AT",
-        "mcu_name": "NRF51822",
-        "path": "ports/nrf/boards/wt51822_s4at/mpconfigboard.h",
-        "version": "v1.10"
+        "description": "Wio Terminal D51R with SAMD51P19A",
+        "port": "samd",
+        "board": "SEEED_WIO_TERMINAL",
+        "board_name": "Wio Terminal D51R",
+        "mcu_name": "SAMD51P19A",
+        "path": "ports/samd/boards/SEEED_WIO_TERMINAL/mpconfigboard.h",
+        "version": "v1.18"
     },
     {
         "description": "WiPy with CC3200",
@@ -1431,13 +1521,13 @@
         "version": "v1.10"
     },
     {
-        "description": "Wio Terminal D51R with SAMD51P19A",
-        "port": "samd",
-        "board": "SEEED_WIO_TERMINAL",
-        "board_name": "Wio Terminal D51R",
-        "mcu_name": "SAMD51P19A",
-        "path": "ports/samd/boards/SEEED_WIO_TERMINAL/mpconfigboard.h",
-        "version": "v1.18"
+        "description": "WT51822-S4AT with NRF51822",
+        "port": "nrf",
+        "board": "wt51822_s4at",
+        "board_name": "WT51822-S4AT",
+        "mcu_name": "NRF51822",
+        "path": "ports/nrf/boards/wt51822_s4at/mpconfigboard.h",
+        "version": "v1.10"
     },
     {
         "description": "XENON with NRF52840",
@@ -1456,95 +1546,5 @@
         "mcu_name": "NRF52840",
         "path": "ports/nrf/boards/seeed_xiao_nrf52/mpconfigboard.h",
         "version": "v1.20.0"
-    },
-    {
-        "description": "i.MX RT1010 EVK with MIMXRT1011DAE5A",
-        "port": "mimxrt",
-        "board": "MIMXRT1010_EVK",
-        "board_name": "i.MX RT1010 EVK",
-        "mcu_name": "MIMXRT1011DAE5A",
-        "path": "ports/mimxrt/boards/MIMXRT1010_EVK/mpconfigboard.h",
-        "version": "v1.13"
-    },
-    {
-        "description": "i.MX RT1015 EVK with MIMXRT1015DAF5A",
-        "port": "mimxrt",
-        "board": "MIMXRT1015_EVK",
-        "board_name": "i.MX RT1015 EVK",
-        "mcu_name": "MIMXRT1015DAF5A",
-        "path": "ports/mimxrt/boards/MIMXRT1015_EVK/mpconfigboard.h",
-        "version": "v1.19.1"
-    },
-    {
-        "description": "i.MX RT1020 EVK with MIMXRT1021DAG5A",
-        "port": "mimxrt",
-        "board": "MIMXRT1020_EVK",
-        "board_name": "i.MX RT1020 EVK",
-        "mcu_name": "MIMXRT1021DAG5A",
-        "path": "ports/mimxrt/boards/MIMXRT1020_EVK/mpconfigboard.h",
-        "version": "v1.13"
-    },
-    {
-        "description": "i.MX RT1050 EVK with MIMXRT1052DVL6B",
-        "port": "mimxrt",
-        "board": "MIMXRT1050_EVK",
-        "board_name": "i.MX RT1050 EVK",
-        "mcu_name": "MIMXRT1052DVL6B",
-        "path": "ports/mimxrt/boards/MIMXRT1050_EVK/mpconfigboard.h",
-        "version": "v1.15"
-    },
-    {
-        "description": "i.MX RT1050 EVKB with MIMXRT1052DVL6B",
-        "port": "mimxrt",
-        "board": "MIMXRT1050_EVKB",
-        "board_name": "i.MX RT1050 EVKB",
-        "mcu_name": "MIMXRT1052DVL6B",
-        "path": "ports/mimxrt/boards/MIMXRT1050_EVKB/mpconfigboard.h",
-        "version": "v1.17"
-    },
-    {
-        "description": "i.MX RT1050 EVKB-A1 with MIMXRT1052DVL6B",
-        "port": "mimxrt",
-        "board": "MIMXRT1050_EVK",
-        "board_name": "i.MX RT1050 EVKB-A1",
-        "mcu_name": "MIMXRT1052DVL6B",
-        "path": "ports/mimxrt/boards/MIMXRT1050_EVK/mpconfigboard.h",
-        "version": "v1.18"
-    },
-    {
-        "description": "i.MX RT1060 EVK with MIMXRT1062DVJ6A",
-        "port": "mimxrt",
-        "board": "MIMXRT1060_EVK",
-        "board_name": "i.MX RT1060 EVK",
-        "mcu_name": "MIMXRT1062DVJ6A",
-        "path": "ports/mimxrt/boards/MIMXRT1060_EVK/mpconfigboard.h",
-        "version": "v1.13"
-    },
-    {
-        "description": "i.MX RT1064 EVK with MIMXRT1064DVL6A",
-        "port": "mimxrt",
-        "board": "MIMXRT1064_EVK",
-        "board_name": "i.MX RT1064 EVK",
-        "mcu_name": "MIMXRT1064DVL6A",
-        "path": "ports/mimxrt/boards/MIMXRT1064_EVK/mpconfigboard.h",
-        "version": "v1.14"
-    },
-    {
-        "description": "i.MX RT1170 EVK with MIMXRT1176DVMAA",
-        "port": "mimxrt",
-        "board": "MIMXRT1170_EVK",
-        "board_name": "i.MX RT1170 EVK",
-        "mcu_name": "MIMXRT1176DVMAA",
-        "path": "ports/mimxrt/boards/MIMXRT1170_EVK/mpconfigboard.h",
-        "version": "v1.20.0"
-    },
-    {
-        "description": "micro:bit with NRF51822",
-        "port": "nrf",
-        "board": "microbit",
-        "board_name": "micro:bit",
-        "mcu_name": "NRF51822",
-        "path": "ports/nrf/boards/microbit/mpconfigboard.h",
-        "version": "v1.10"
     }
 ]
