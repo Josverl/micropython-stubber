@@ -13,15 +13,15 @@ from tabulate import tabulate
 import stubber.basicgit as git
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Board:
     """MicroPython Board definition"""
 
+    description: str
     port: str
     board: str
     board_name: str
     mcu_name: str
-    description: str
     path: Path
     version: str = ""
 
@@ -42,10 +42,13 @@ class EnhancedJSONEncoder(json.JSONEncoder):
 
 RE_BOARD_NAME = re.compile(r"#define MICROPY_HW_BOARD_NAME\s+\"(.+)\"")
 RE_MCU_NAME = re.compile(r"#define MICROPY_HW_MCU_NAME\s+\"(.+)\"")
+RE_CMAKE_BOARD_NAME = re.compile(r"MICROPY_HW_BOARD_NAME\s?=\s?\"(?P<variant>[\w\s\S]*)\"")
+RE_CMAKE_MCU_NAME = re.compile(r"MICROPY_HW_MCU_NAME\s?=\s?\"(?P<variant>[\w\s\S]*)\"")
+# TODO: normal make files
 
 
 def collect_boardinfo(mpy_path: Path, version: str) -> List[Board]:
-    """Collects board information from mpconfigboard.h files.
+    """Collects board name and decriptions from mpconfigboard.h files.
 
     Args:
         mpy_path (Path): The path to the MicroPython repository.
@@ -55,7 +58,8 @@ def collect_boardinfo(mpy_path: Path, version: str) -> List[Board]:
         List[Board]: A list of Board objects containing the board information.
     """
     board_list: List[Board] = []
-    for path in mpy_path.glob("**/mpconfigboard.h"):
+    # look in boards
+    for path in mpy_path.glob("ports/**/mpconfigboard.h"):
         board = path.parent.name
         port = path.parent.parent.parent.name
         with open(path, "r") as f:
@@ -69,9 +73,59 @@ def collect_boardinfo(mpy_path: Path, version: str) -> List[Board]:
                     mcu_name = match[1]
                     found += 1
                 if found == 2:
-                    break
-        description = f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
-        board_list.append(Board(port, board, board_name, mcu_name, description, path, version))
+                    description = (
+                        f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
+                    )
+                    board_list.append(
+                        Board(
+                            port=port,
+                            board=board,
+                            board_name=board_name,
+                            mcu_name=mcu_name,
+                            description=description,
+                            path=path.relative_to(mpy_path),
+                            version=version,
+                        )
+                    )
+                    found = 0
+    # look for variants in the .cmake files
+    for path in mpy_path.glob("ports/**/mpconfigboard.cmake"):
+        board = path.parent.name
+        port = path.parent.parent.parent.name
+        with open(path, "r") as f:
+            board_name = mcu_name = "-"
+            found = 0
+            for line in f:
+                line = line.strip()
+                if match := RE_CMAKE_BOARD_NAME.match(line):
+                    description = match["variant"]
+                    board_list.append(
+                        Board(
+                            port=port,
+                            board=board,
+                            board_name=board_name,
+                            mcu_name=mcu_name,
+                            description=description,
+                            path=path.relative_to(mpy_path),
+                            version=version,
+                        )
+                    )
+                elif match := RE_CMAKE_MCU_NAME.match(line):
+                    description = match["variant"]
+                    board_list.append(
+                        Board(
+                            port=port,
+                            board=board,
+                            board_name=board_name,
+                            mcu_name=mcu_name,
+                            description=description,
+                            path=path.relative_to(mpy_path),
+                            version=version,
+                        )
+                    )
+
+    # look for variants in the Makefile files
+
     return board_list
 
 
@@ -110,11 +164,13 @@ def get_board_list(versions: List[str], mpy_path: Path):
         board_list += new_ones
 
     # sort the board_list by description and board
-    board_list.sort(key=lambda x: (x.description, x.board))
     print("Total number of boards found:", len(board_list))
     seen = set()
     board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
+    board_list.sort(key=lambda x: x.description)
     print("Unique board descriptions found:", len(board_list))
+    print(f" found OTA  = {'Generic ESP32 module with OTA' in seen}")
+    print(f" found UNICORE  = {'ESP32-UNICORE' in seen}")
     return board_list
 
 
