@@ -20,7 +20,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.16.0"
+__version__ = "v1.16.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
@@ -32,11 +32,10 @@ class Stubber:
 
     def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
-        self.log = None
         self.log = logging.getLogger("stubber")
         self._report = []  # type: list[str]
         self.info = _info()
@@ -455,15 +454,20 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32"
-            if sys.platform.startswith("pyb")
-            else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
             "arch": "",
         }
     )
+    # change port names to be consistent with the repo
+    if info["port"].startswith("pyb"):
+        info["port"] = "stm32"
+    elif info["port"] == "win32":
+        info["port"] = "windows"
+    elif info["port"] == "linux":
+        info["port"] = "unix"
     try:
         info["version"] = ".".join([str(n) for n in sys.implementation.version])
     except AttributeError:
@@ -472,7 +476,7 @@ def _info():  # type:() -> dict[str, str]
         machine = (
             sys.implementation._machine
             if "_machine" in dir(sys.implementation)
-            else os.uname().machine
+            else os.uname().machine  # type: ignore
         )
         info["board"] = machine.strip()
         info["cpu"] = machine.split("with")[1].strip()
@@ -503,10 +507,10 @@ def _info():  # type:() -> dict[str, str]
 
     try:
         # extract build from uname().version if available
-        info["build"] = _build(os.uname()[3])
+        info["build"] = _build(os.uname()[3])  # type: ignore
         if not info["build"]:
             # extract build from uname().release if available
-            info["build"] = _build(os.uname()[2])
+            info["build"] = _build(os.uname()[2])  # type: ignore
         if not info["build"] and ";" in sys.version:
             # extract build from uname().release if available
             info["build"] = _build(sys.version.split(";")[1])
@@ -518,7 +522,7 @@ def _info():  # type:() -> dict[str, str]
 
     if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
-            u = os.uname()
+            u = os.uname()  # type: ignore
             info["version"] = u.release
         except (IndexError, AttributeError, TypeError):
             pass
@@ -715,6 +719,7 @@ def main():
         "ak8963",
         "apa102",
         "apa106",
+        "argparse",
         "array",
         "asyncio/__init__",
         "asyncio/core",
@@ -763,6 +768,7 @@ def main():
         "esp32",
         "espidf",
         "espnow",
+        "ffi",
         "flashbdev",
         "framebuf",
         "freesans20",
@@ -799,6 +805,7 @@ def main():
         "micropython",
         "mip",
         "mip/__init__",
+        "mip/__main__",
         "motor",
         "mpu6500",
         "mpu9250",
@@ -826,6 +833,7 @@ def main():
         "queue",
         "random",
         "requests",
+        "requests/__init__",
         "rp2",
         "rtch",
         "samd",
@@ -838,6 +846,7 @@ def main():
         "stm",
         "struct",
         "sys",
+        "termios",
         "time",
         "tpcalib",
         "uarray",
