@@ -41,7 +41,7 @@ try:from machine import reset
 except O:pass
 try:from collections import OrderedDict as d
 except O:from ucollections import OrderedDict as d
-__version__='v1.16.0'
+__version__='v1.16.2'
 v=2
 w=2
 e=[I,'/lib','/sd/lib','/flash/lib','lib']
@@ -189,20 +189,23 @@ def U(s):
 	if A in s:s=s.split(A,1)[0]
 	return s.split('-')[1]if'-'in s else C
 def _info():
-	k='ev3-pybricks';j='pycom';i='pycopy';f='GENERIC';c='arch';b='cpu';a='ver';V='with';G='mpy';F='build';A=d({M:sys.implementation.name,D:C,F:C,a:C,'port':'stm32'if sys.platform.startswith('pyb')else sys.platform,J:f,b:C,G:C,c:C})
+	n='ev3-pybricks';m='pycom';l='pycopy';k='unix';j='win32';i='GENERIC';f='arch';c='cpu';b='ver';Y='with';K='mpy';G='port';F='build';A=d({M:sys.implementation.name,D:C,F:C,b:C,G:sys.platform,J:i,c:C,K:C,f:C})
+	if A[G].startswith('pyb'):A[G]='stm32'
+	elif A[G]==j:A[G]='windows'
+	elif A[G]=='linux':A[G]=k
 	try:A[D]=I.join([W(A)for A in sys.implementation.version])
 	except H:pass
-	try:Y=sys.implementation._machine if'_machine'in P(sys.implementation)else os.uname().machine;A[J]=Y.strip();A[b]=Y.split(V)[1].strip();A[G]=sys.implementation._mpy if'_mpy'in P(sys.implementation)else sys.implementation.mpy if G in P(sys.implementation)else C
+	try:Z=sys.implementation._machine if'_machine'in P(sys.implementation)else os.uname().machine;A[J]=Z.strip();A[c]=Z.split(Y)[1].strip();A[K]=sys.implementation._mpy if'_mpy'in P(sys.implementation)else sys.implementation.mpy if K in P(sys.implementation)else C
 	except(H,Q):pass
 	B.collect()
-	for N in[A+'/board_info.csv'for A in e]:
-		if h(N):
-			K=A[J].strip()
-			if g(A,K,N):break
-			if V in K:
-				K=K.split(V)[0].strip()
-				if g(A,K,N):break
-			A[J]=f
+	for R in[A+'/board_info.csv'for A in e]:
+		if h(R):
+			N=A[J].strip()
+			if g(A,N,R):break
+			if Y in N:
+				N=N.split(Y)[0].strip()
+				if g(A,N,R):break
+			A[J]=i
 	A[J]=A[J].replace(' ',T);B.collect()
 	try:
 		A[F]=U(os.uname()[3])
@@ -210,20 +213,20 @@ def _info():
 		if not A[F]and';'in sys.version:A[F]=U(sys.version.split(';')[1])
 	except(H,Q):pass
 	if A[F]and L(A[F])>5:A[F]=C
-	if A[D]==C and sys.platform not in('unix','win32'):
-		try:l=os.uname();A[D]=l.release
+	if A[D]==C and sys.platform not in(k,j):
+		try:o=os.uname();A[D]=o.release
 		except(Q,H,TypeError):pass
-	for(m,n,o)in[(i,i,'const'),(j,j,'FAT'),(k,'pybricks.hubs','EV3Brick')]:
-		try:p=__import__(n,E,E,o);A[M]=m;del p;break
+	for(p,q,r)in[(l,l,'const'),(m,m,'FAT'),(n,'pybricks.hubs','EV3Brick')]:
+		try:s=__import__(q,E,E,r);A[M]=p;del s;break
 		except(O,S):pass
-	if A[M]==k:A['release']='2.0.0'
+	if A[M]==n:A['release']='2.0.0'
 	if A[M]==X:
 		if A[D]and A[D].endswith('.0')and A[D]>='1.10.0'and A[D]<='1.19.9':A[D]=A[D][:-2]
-	if G in A and A[G]:
-		R=int(A[G]);Z=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][R>>10]
-		if Z:A[c]=Z
-		A[G]='v{}.{}'.format(R&255,R>>8&3)
-	A[a]=f"v{A[D]}-{A[F]}"if A[F]else f"v{A[D]}";return A
+	if K in A and A[K]:
+		V=int(A[K]);a=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][V>>10]
+		if a:A[f]=a
+		A[K]='v{}.{}'.format(V&255,V>>8&3)
+	A[b]=f"v{A[D]}-{A[F]}"if A[F]else f"v{A[D]}";return A
 def g(info,board_descr,filename):
 	with R(filename,'r')as C:
 		while 1:
