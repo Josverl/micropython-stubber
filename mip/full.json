@@ -1,30 +1,30 @@
 {
-    "urls": [
-        [
-            "createstubs.py",
-            "github:josverl/micropython-stubber/src/stubber/board/createstubs.py"
-        ],
-        [
-            "createstubs_db.py",
-            "github:Josverl/micropython-stubber/src/stubber/board/createstubs_db.py"
-        ],
-        [
-            "createstubs_mem.py",
-            "github:Josverl/micropython-stubber/src/stubber/board/createstubs_mem.py"
-        ],
-        [
-            "logging.py",
-            "github:Josverl/micropython-stubber/src/stubber/board/logging.py"
-        ],
-        [
-            "modules.txt",
-            "github:Josverl/micropython-stubber/src/stubber/board/modulelist.txt"
-        ],
-        [
-            "board_info.csv",
-            "github:Josverl/micropython-stubber/src/stubber/board/board_info.csv"
-        ]
+  "urls": [
+    [
+      "createstubs.py",
+      "github:josverl/micropython-stubber/src/stubber/board/createstubs.py"
     ],
-    "deps": [],
-    "version": "1.16.2"
+    [
+      "createstubs_db.py",
+      "github:Josverl/micropython-stubber/src/stubber/board/createstubs_db.py"
+    ],
+    [
+      "createstubs_mem.py",
+      "github:Josverl/micropython-stubber/src/stubber/board/createstubs_mem.py"
+    ],
+    [
+      "logging.py",
+      "github:Josverl/micropython-stubber/src/stubber/board/logging.py"
+    ],
+    [
+      "modulelist.txt",
+      "github:Josverl/micropython-stubber/src/stubber/board/modulelist.txt"
+    ],
+    [
+      "board_info.csv",
+      "github:Josverl/micropython-stubber/src/stubber/board/board_info.csv"
+    ]
+  ],
+  "deps": [],
+  "version": "1.16.2"
 }
