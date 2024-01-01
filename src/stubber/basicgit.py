@@ -196,7 +196,7 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
     return True
 
 
-def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
+def switch_tag(tag: Union[str, Path], repo: Optional[Union[Path, str]] = None) -> bool:
     """
     switch to the specified version tag of a local repo
     repo should be in the form of : path/.git
