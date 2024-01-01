@@ -1,11 +1,5 @@
 """ 
 This script creates stubs for a connected micropython MCU board.
-
-# MPRemote is not working properly with ESP32 boards :-( at least on Windows)
-# this was fixed in the latest version of mpremote, not published yet on pypi
-
-Workaround
-pip install git+https://github.com/josverl/mpremote.git#subdirectory=tools/mpremote
 """
 
 import json
@@ -33,8 +27,10 @@ OK = 0
 ERROR = -1
 RETRIES = 3
 TESTING = False
-LOCAL_FILES = True
+LOCAL_FILES = False
 
+###############################################################################################
+reset_before = False
 ###############################################################################################
 
 
@@ -327,7 +323,8 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
 @retry(stop=stop_after_attempt(4), wait=wait_fixed(2))
 def hard_reset(board: MPRemoteBoard) -> bool:
     """Reset the board"""
-    rc, _ = board.run_command(["soft-reset", "exec", "import machine;machine.reset()"], timeout=5)
+    # do not run  "exec", "import machine;machine.reset()" as it will hang an esp32
+    rc, _ = board.run_command(["reset"], timeout=5)
     board.connected = False
     return rc == OK
 
@@ -346,10 +343,10 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
     ]
     board.run_command(cmd_path, timeout=5)
 
-    log.info(f"Resetting {board.port} {board.uname[4] if board.uname else ''}")
-    board.run_command("reset", timeout=5)
-
-    time.sleep(2)
+    if reset_before:
+        log.info(f"Resetting {board.port} {board.uname[4] if board.uname else ''}")
+        board.run_command("reset", timeout=5)
+        time.sleep(2)
 
     log.info(
         f"Running createstubs {variant} on {board.port} {board.uname[4] if board.uname else ''}"
@@ -408,8 +405,15 @@ def generate_board_stubs(
     if LOCAL_FILES:
         ok = copy_createstubs(mcu, variant, form)
     else:
-        # TODO: Add Branch to install from
-        ok = mcu.mip_install("github:josverl/micropython-stubber")
+        if form == Form.min:
+            location = "github:josverl/micropython-stubber/mip/minified.json"
+        elif form == Form.mpy:
+            location = "github:josverl/micropython-stubber/mip/mpy_v6.json"
+        else:
+            location = "github:josverl/micropython-stubber/mip/full.json"
+
+        ok = mcu.mip_install(location)
+
     if not ok and not TESTING:
         log.warning("Error copying createstubs to board")
         return ERROR, None
@@ -530,8 +534,8 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
 if __name__ == "__main__":
     set_loglevel(0)
 
-    variant = Variant.db
-    form = Form.mpy
+    variant = Variant.mem
+    form = Form.min
     tempdir = mkdtemp(prefix="board_stubber")
 
     dest = Path(tempdir)
