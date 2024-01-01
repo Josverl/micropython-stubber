@@ -45,6 +45,7 @@ aioespnow
 ak8963
 apa102
 apa106
+argparse
 array
 asyncio/__init__
 asyncio/core
@@ -93,6 +94,7 @@ esp
 esp32
 espidf
 espnow
+ffi
 flashbdev
 framebuf
 freesans20
@@ -129,6 +131,7 @@ microWebTemplate
 micropython
 mip
 mip/__init__
+mip/__main__
 motor
 mpu6500
 mpu9250
@@ -156,6 +159,7 @@ qrcode
 queue
 random
 requests
+requests/__init__
 rp2
 rtch
 samd
@@ -168,6 +172,7 @@ ssl
 stm
 struct
 sys
+termios
 time
 tpcalib
 uarray
