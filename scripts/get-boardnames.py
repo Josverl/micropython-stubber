@@ -1,10 +1,16 @@
-from dataclasses import dataclass, is_dataclass, asdict
+"""
+Collects board name and description information from MicroPython and writes it to JSON and CSV files.
+"""
 
-from pathlib import Path
-import re
-from typing import List
-from tabulate import tabulate
 import json
+import re
+from dataclasses import asdict, dataclass, is_dataclass
+from pathlib import Path
+from typing import List
+
+from tabulate import tabulate
+
+import stubber.basicgit as git
 
 
 @dataclass
@@ -17,44 +23,11 @@ class Board:
     mcu_name: str
     description: str
     path: Path
-
-
-# look for all mpconfigboard.h files and extract the board name
-# from the #define MICROPY_HW_BOARD_NAME "PYBD_SF6"
-# and the #define MICROPY_HW_MCU_NAME "STM32F767xx"
-
-mpy_path = Path("repos/micropython")
-re_board_name = re.compile(r"#define MICROPY_HW_BOARD_NAME\s+\"(.+)\"")
-re_mcu_name = re.compile(r"#define MICROPY_HW_MCU_NAME\s+\"(.+)\"")
-
-
-board_list: List[Board] = []
-
-for path in mpy_path.glob("**/mpconfigboard.h"):
-    board = path.parent.name
-    port = path.parent.parent.parent.name
-    with open(path, "r") as f:
-        board_name = mcu_name = "-"
-        found = 0
-        for line in f:
-            if match := re_board_name.match(line):
-                board_name = match[1]
-                found += 1
-            elif match := re_mcu_name.match(line):
-                mcu_name = match[1]
-                found += 1
-            if found == 2:
-                break
-    description = f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
-    board_list.append(Board(port, board, board_name, mcu_name, description, path))
-
-print(f"Found {len(board_list)} board definitions.")
-
-print(tabulate(board_list, headers="keys")) # type: ignore
+    version: str = ""
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
-    def default(self, o):
+    def default(self, o: object):
         if is_dataclass(o):
             return asdict(o)
         elif isinstance(o, Path):
@@ -62,12 +35,113 @@ class EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-# write the list to json file
-with open("src/stubber/data/board_info.json", "w") as f:
-    json.dump(board_list, f, indent=4, cls=EnhancedJSONEncoder)
+# look for all mpconfigboard.h files and extract the board name
+# from the #define MICROPY_HW_BOARD_NAME "PYBD_SF6"
+# and the #define MICROPY_HW_MCU_NAME "STM32F767xx"
 
-# create a csv with only the board and the description of the board_list
-with open("src/stubber/data/board_info.csv", "w") as f:
-    f.write("board,description\n")
-    for board in board_list:
-        f.write(f"{board.description},{board.board}\n")
+
+RE_BOARD_NAME = re.compile(r"#define MICROPY_HW_BOARD_NAME\s+\"(.+)\"")
+RE_MCU_NAME = re.compile(r"#define MICROPY_HW_MCU_NAME\s+\"(.+)\"")
+
+
+def collect_boardinfo(mpy_path: Path, version: str) -> List[Board]:
+    """Collects board information from mpconfigboard.h files.
+
+    Args:
+        mpy_path (Path): The path to the MicroPython repository.
+        version (str): The version of MicroPython.
+
+    Returns:
+        List[Board]: A list of Board objects containing the board information.
+    """
+    board_list: List[Board] = []
+    for path in mpy_path.glob("**/mpconfigboard.h"):
+        board = path.parent.name
+        port = path.parent.parent.parent.name
+        with open(path, "r") as f:
+            board_name = mcu_name = "-"
+            found = 0
+            for line in f:
+                if match := RE_BOARD_NAME.match(line):
+                    board_name = match[1]
+                    found += 1
+                elif match := RE_MCU_NAME.match(line):
+                    mcu_name = match[1]
+                    found += 1
+                if found == 2:
+                    break
+        description = f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
+        board_list.append(Board(port, board, board_name, mcu_name, description, path, version))
+    return board_list
+
+
+def write_files(board_list: List[Board], *, folder: Path = Path("src/stubber/data")):
+    """Writes the board information to JSON and CSV files.
+
+    Args:
+        board_list (List[Board]): The list of Board objects.
+    """
+    # write the list to json file
+    with open(folder / "board_info.json", "w") as f:
+        json.dump(board_list, f, indent=4, cls=EnhancedJSONEncoder)
+
+    # create a csv with only the board and the description of the board_list
+    with open(folder / "board_info.csv", "w") as f:
+        f.write("board,description\n")
+        for board in board_list:
+            f.write(f"{board.description},{board.board}\n")
+
+
+def get_board_list(versions: List[str], mpy_path: Path):
+    """Gets the list of boards for multiple versions of MicroPython.
+
+    Args:
+        versions (List[str]): The list of MicroPython versions.
+        mpy_path (Path): The path to the MicroPython repository.
+
+    Returns:
+        List[Board]: The list of Board objects.
+    """
+    board_list: List[Board] = []
+    for version in versions:
+        print(git.checkout_tag(tag=version, repo=mpy_path))
+        new_ones = collect_boardinfo(mpy_path, version)
+        print(f"Found {len(new_ones)} board definitions for {version}.")
+        board_list += new_ones
+
+    # sort the board_list by description and board
+    board_list.sort(key=lambda x: (x.description, x.board))
+    print("Total number of boards found:", len(board_list))
+    seen = set()
+    board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
+    print("Unique board descriptions found:", len(board_list))
+    return board_list
+
+
+def main():
+    """Main function to collect and write board information."""
+    mpy_path = Path("repos/micropython")
+    versions = [
+        "v1.22.0",
+        "v1.21.0",
+        "v1.20.0",
+        "v1.19.1",
+        "v1.18",
+        "v1.17",
+        "v1.16",
+        "v1.15",
+        "v1.14",
+        "v1.13",
+        "v1.12",
+        "v1.11",
+        "v1.10",
+    ]
+    versions.reverse()
+    board_list = get_board_list(versions, mpy_path)
+
+    print(tabulate(board_list, headers="keys"))  # type: ignore
+    write_files(board_list)
+
+
+if __name__ == "__main__":
+    main()
