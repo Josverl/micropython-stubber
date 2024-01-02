@@ -469,7 +469,7 @@ def _info():  # type:() -> dict[str, str]
     elif info["port"] == "linux":
         info["port"] = "unix"
     try:
-        info["version"] = ".".join([str(n) for n in sys.implementation.version])
+        info["version"] = ".".join([str(n) for n in sys.implementation.version]).rstrip(".")
     except AttributeError:
         pass
     try:
@@ -478,7 +478,8 @@ def _info():  # type:() -> dict[str, str]
             if "_machine" in dir(sys.implementation)
             else os.uname().machine  # type: ignore
         )
-        info["board"] = "with".join(_machine.split("with")[:-1]).strip()
+        # info["board"] = "with".join(_machine.split("with")[:-1]).strip()
+        info["board"] = _machine
         info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
             sys.implementation._mpy
@@ -575,16 +576,15 @@ def read_boardname(info, desc: str = ""):
         # print("look up the board name in the file", filename)
         if file_exists(filename):
             descr = desc or info["board"].strip()
-            print("searching info file: {}".format(filename))
-            if find_board(info, descr, filename):
+            pos = descr.rfind(" with")
+            if pos != -1:
+                short_descr = descr[:pos].strip()
+            else:
+                short_descr = ""
+            print("searching info file: {} for: '{}' or '{}'".format(filename, descr, short_descr))
+            if find_board(info, descr, filename, short_descr):
                 found = True
                 break
-            if "with" in descr:
-                descr = descr.split("with")[0].strip()
-                print("searching for: {}".format(descr))
-                if find_board(info, descr, filename):
-                    found = True
-                    break
     if not found:
         print("Board not found, guessing board name")
         descr = desc or info["board"].strip()
@@ -596,18 +596,30 @@ def read_boardname(info, desc: str = ""):
     gc.collect()
 
 
-def find_board(info: dict, board_descr: str, filename: str):
+def find_board(info: dict, descr: str, filename: str, short_descr: str):
     "Find the board in the provided board_info.csv file"
+    short_hit = ""
     with open(filename, "r") as file:
         # ugly code to make testable in python and micropython
+        # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
         while 1:
             line = file.readline()
             if not line:
                 break
             descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
-            if descr_ == board_descr:
+            if descr_ == descr:
                 info["board"] = board_
                 return True
+            elif short_descr and descr_ == short_descr:
+                if "with" in short_descr:
+                    # Good enough - no need to trawl the entire file
+                    info["board"] = board_
+                    return True
+                # good enough if not found in the rest of the file (but slow)
+                short_hit = board_
+    if short_hit:
+        info["board"] = short_hit
+        return True
     return False
 
 
