@@ -469,7 +469,7 @@ def _info():  # type:() -> dict[str, str]
     elif info["port"] == "linux":
         info["port"] = "unix"
     try:
-        info["version"] = ".".join([str(n) for n in sys.implementation.version])
+        info["version"] = ".".join([str(n) for n in sys.implementation.version]).rstrip(".")
     except AttributeError:
         pass
     try:
