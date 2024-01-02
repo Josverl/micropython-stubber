@@ -93,7 +93,11 @@ def run(
     output = []
     try:
         proc = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            encoding="utf-8",
         )
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Failed to start {cmd[0]}") from e
@@ -165,13 +169,15 @@ class Form(str, Enum):
 class MPRemoteBoard:
     """Class to run mpremote commands"""
 
-    def __init__(self, port: str = ""):
-        self.port = port
+    def __init__(self, serialport: str = ""):
+        self.serialport = serialport
         # self.board = ""
         self.firmware = {}
         self.uname: Optional[UName] = None
         self.connected = False
         self.path: Optional[Path] = None
+        self.description = ""
+        self.version = ""
 
     @staticmethod
     def connected_boards():
@@ -180,7 +186,40 @@ class MPRemoteBoard:
         return sorted(devices)
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
+    def get_mcu_info(self):
+        # TODO: switch from uname to sys.implementation os the primary source of info
+        rc, result = self.run_command(
+            [
+                "exec",
+                "import sys;print(repr(sys.implementation) if 'implementation' in dir(sys) else 'no.implementation');print(sys.platform)",
+            ],
+            no_info=True,
+        )
+        if rc == 0:
+            s = result[0]
+            if "name=" in s:
+                implementation = eval(f"dict{s}")
+                self.version = ".".join([str(n) for n in implementation["version"]])
+                self.description = implementation["_machine"]
+            if len(result) > 1:
+                self.port = result[1].strip()
+
+    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_uname(self):
+        # TODO: switch from uname to sys.implementation os the primary source of info
+        rc, result = self.run_command(
+            [
+                "exec",
+                "import sys;print(repr(sys.implementation) if 'implementation' in dir(sys) else 'no.implementation')",
+            ],
+            no_info=True,
+        )
+        s = result[0]
+        if "name=" in s:
+            implementation = eval(f"dict{s}")
+            version = ".".join([str(n) for n in implementation["version"]])
+            UName("implementation", implementation.name, version, version, "?")
+
         rc, result = self.run_command(
             ["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"],
             no_info=True,
@@ -199,11 +238,11 @@ class MPRemoteBoard:
         """Disconnect from a board"""
         if not self.connected:
             return True
-        if not self.port:
+        if not self.serialport:
             log.error("No port connected")
             self.connected = False
             return False
-        log.info(f"Disconnecting from {self.port}")
+        log.info(f"Disconnecting from {self.serialport}")
         result = self.run_command(["disconnect"])[0] == OK
         self.connected = False
         return result
@@ -232,7 +271,7 @@ class MPRemoteBoard:
         """
         if isinstance(cmd, str):
             cmd = cmd.split(" ")
-        prefix = ["mpremote", "connect", self.port] if self.port else ["mpremote"]
+        prefix = ["mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
         # if connected add resume to keep state between commands
         if self.connected:
             prefix += ["resume"]
@@ -259,7 +298,6 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
     origin = "./src/stubber/board"
 
     _py = [
-        "rm :no_auto_stubber.txt",
         "rm :lib/createstubs.mpy",
         "rm :lib/createstubs_mem.mpy",
         "rm :lib/createstubs_db.mpy",
@@ -296,9 +334,8 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
 
     _get_ready = [
         "rm :modulelist.done",
-        # "rm :lib/modulelist.txt",
+        "rm :no_auto_stubber.txt",
         f"cp {origin}/modulelist.txt :lib/modulelist.txt",
-        # "cp ./board_info.csv :lib/board_info.csv",
     ]
     if form == Form.py:
         do = _lib + _py + _get_ready
@@ -344,19 +381,20 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
     board.run_command(cmd_path, timeout=5)
 
     if reset_before:
-        log.info(f"Resetting {board.port} {board.uname[4] if board.uname else ''}")
+        log.info(f"Resetting {board.serialport} {board.uname[4] if board.uname else ''}")
         board.run_command("reset", timeout=5)
         time.sleep(2)
 
     log.info(
-        f"Running createstubs {variant} on {board.port} {board.uname[4] if board.uname else ''}"
+        f"Running createstubs {variant} on {board.serialport} {board.uname[4] if board.uname else ''} using temp path: {dest}"
     )
     cmd = build_cmd(dest, variant)
 
     board.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
+    # esp32s3 > 240 seconds with mounted fs
     #  but slows down esp8266 restarts so keep that to 60 seconds
-    timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60  # type: ignore
+    timeout = 60 if board.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = board.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
     if (
@@ -387,7 +425,11 @@ def build_cmd(dest: Path, variant: Variant = Variant.db):
 
 
 def generate_board_stubs(
-    dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.db, form: Form = Form.mpy
+    dest: Path,
+    mcu: MPRemoteBoard,
+    variant: Variant = Variant.db,
+    form: Form = Form.mpy,
+    host_mounted=True,
 ) -> Tuple[int, Optional[Path]]:
     """
     Generate the board stubs.
@@ -399,7 +441,6 @@ def generate_board_stubs(
         The port the board is connected to
     """
 
-    # board_info_path = Path(__file__).parent.parent / "board_info.csv"
     board_info_path = Path(__file__).parent.parent / "src/stubber/data/board_info.csv"
     # HOST -> MCU : copy createstubs to board
     if LOCAL_FILES:
@@ -417,17 +458,27 @@ def generate_board_stubs(
     if not ok and not TESTING:
         log.warning("Error copying createstubs to board")
         return ERROR, None
-    # HOST: remove .done file
-    (dest / "modulelist.done").unlink(missing_ok=True)
-    # HOST: copy board_info.csv to destination
-    shutil.copyfile(board_info_path, dest / "board_info.csv")
 
-    # MCU: add lib to path
-    rc, out = run_createstubs(dest, mcu, variant)
+    if host_mounted:
+        # HOST: remove .done file
+        (dest / "modulelist.done").unlink(missing_ok=True)
+        # HOST: copy board_info.csv to destination
+        shutil.copyfile(board_info_path, dest / "board_info.csv")
+    else:
+        cmd = f"cp {board_info_path} :board_info.csv"
+        rc, _ = board.run_command(cmd)
+        if rc != OK and "rm" not in cmd:
+            log.error(f"Error during copy createstubs running command: {cmd}")
+
+    rc, out = run_createstubs(dest, mcu, variant)  # , host_mounted=host_mounted)
 
     if rc != OK:
         log.warning("Error running createstubs: %s", out)
         return ERROR, None
+
+    if not host_mounted:
+        # Waiting for MPRemote to support copying folder from board to host
+        raise NotImplementedError("TODO: Copy stubs from board to host")
 
     # Find the output starting with 'Path: '
     folder = get_stubfolder(out)
@@ -478,13 +529,13 @@ def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
     boards = []
     for mpr_port in MPRemoteBoard.connected_boards():
         board = MPRemoteBoard(mpr_port)
-        log.info(f"Attempt to connect to: {board.port}")
+        log.info(f"Attempt to connect to: {board.serialport}")
         try:
-            _, uname = board.get_uname()
-            log.success(f"Detected board {uname.machine} {uname.release}")
+            board.get_mcu_info()
+            log.success(f"Detected board {board.description} {board.version}")
             boards.append(board)
         except Exception:
-            log.error(f"Failed to get uname for {board.port}")
+            log.error(f"Failed to get mcu_info for {board.serialport}")
             if optimistic:
                 boards.append(board)
             continue
@@ -539,8 +590,6 @@ if __name__ == "__main__":
     tempdir = mkdtemp(prefix="board_stubber")
 
     dest = Path(tempdir)
-    # copy board_info.csv to the folder
-    # shutil.copyfile(Path("board_info.csv"), dest / "board_info.csv")
 
     # scan boards and just work with the ones that reponded with understandable data
     connected_boards = scan_boards(True)
@@ -548,11 +597,11 @@ if __name__ == "__main__":
         log.error("No micropython boards were found")
         sys.exit(1)
 
-    print(tabulate([[b.port] + (list(b.uname) if b.uname else ["unable to connect"]) for b in connected_boards]))  # type: ignore
+    print(tabulate([[b.serialport, b.port, b.description, b.version] for b in connected_boards]))  # type: ignore
     # scan boards and generate stubs
 
     for board in connected_boards:
-        log.info(f"Connecting to {board.port} {board.uname[4] if board.uname else ''}")
+        log.info(f"Connecting to {board.serialport} {board.uname[4] if board.uname else ''}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
         if rc == OK and my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
@@ -573,4 +622,4 @@ if __name__ == "__main__":
                 # Then Build the package
 
         else:
-            log.error(f"Failed to generate stubs for {board.port}")
+            log.error(f"Failed to generate stubs for {board.serialport}")
