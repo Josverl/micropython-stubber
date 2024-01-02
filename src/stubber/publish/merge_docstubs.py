@@ -120,8 +120,8 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
         "pycopy_imphook",  # is not intended to be used directly, and has an unresolved subclass
     ]:
         for suffix in [".py", ".pyi"]:
-            if (dest_path / name).with_suffix(suffix).exists():
-                (dest_path / name).with_suffix(suffix).unlink()
+            if (dest_path / name).with_suffix(suffix).exists(): # type: ignore
+                (dest_path / name).with_suffix(suffix).unlink() # type: ignore
 
     # 2 - Enrich the firmware stubs with the document stubs
     result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
