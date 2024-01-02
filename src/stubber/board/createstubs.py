@@ -478,7 +478,8 @@ def _info():  # type:() -> dict[str, str]
             if "_machine" in dir(sys.implementation)
             else os.uname().machine  # type: ignore
         )
-        info["board"] = "with".join(_machine.split("with")[:-1]).strip()
+        # info["board"] = "with".join(_machine.split("with")[:-1]).strip()
+        info["board"] = _machine
         info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
             sys.implementation._mpy
@@ -575,13 +576,13 @@ def read_boardname(info, desc: str = ""):
         # print("look up the board name in the file", filename)
         if file_exists(filename):
             descr = desc or info["board"].strip()
-            print("searching info file: {}".format(filename))
+            print("searching info file: {} for: '{}'".format(filename, descr))
             if find_board(info, descr, filename):
                 found = True
                 break
             if "with" in descr:
                 descr = descr.split("with")[0].strip()
-                print("searching for: {}".format(descr))
+                print("search(2) for: '{}'".format(descr))
                 if find_board(info, descr, filename):
                     found = True
                     break
