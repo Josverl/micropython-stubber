@@ -18,6 +18,15 @@
         "version": "v1.13"
     },
     {
+        "description": "Adafruit Feather RP2040",
+        "port": "rp2",
+        "board": "ADAFRUIT_FEATHER_RP2040",
+        "board_name": "Adafruit Feather RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/ADAFRUIT_FEATHER_RP2040/mpconfigboard.h",
+        "version": "v1.15"
+    },
+    {
         "description": "Adafruit Feather STM32F405 with STM32F405RG",
         "port": "stm32",
         "board": "ADAFRUIT_F405_EXPRESS",
@@ -27,6 +36,15 @@
         "version": "v1.12"
     },
     {
+        "description": "Adafruit ItsyBitsy RP2040",
+        "port": "rp2",
+        "board": "ADAFRUIT_ITSYBITSY_RP2040",
+        "board_name": "Adafruit ItsyBitsy RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/ADAFRUIT_ITSYBITSY_RP2040/mpconfigboard.h",
+        "version": "v1.17"
+    },
+    {
         "description": "Adafruit Metro M7 with MIMXRT1011DAE5A",
         "port": "mimxrt",
         "board": "ADAFRUIT_METRO_M7",
@@ -34,6 +52,15 @@
         "mcu_name": "MIMXRT1011DAE5A",
         "path": "ports/mimxrt/boards/ADAFRUIT_METRO_M7/mpconfigboard.h",
         "version": "v1.21.0"
+    },
+    {
+        "description": "Adafruit QT Py RP2040",
+        "port": "rp2",
+        "board": "ADAFRUIT_QTPY_RP2040",
+        "board_name": "Adafruit QT Py RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/ADAFRUIT_QTPY_RP2040/mpconfigboard.h",
+        "version": "v1.17"
     },
     {
         "description": "Arduino GIGA R1 WiFi with STM32H747",
@@ -61,6 +88,15 @@
         "mcu_name": "ESP32S3",
         "path": "ports/esp32/boards/ARDUINO_NANO_ESP32/mpconfigboard.h",
         "version": "v1.21.0"
+    },
+    {
+        "description": "Arduino Nano RP2040 Connect",
+        "port": "rp2",
+        "board": "ARDUINO_NANO_RP2040_CONNECT",
+        "board_name": "Arduino Nano RP2040 Connect",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/ARDUINO_NANO_RP2040_CONNECT/mpconfigboard.h",
+        "version": "v1.18"
     },
     {
         "description": "Arduino Nicla Vision with STM32H747",
@@ -439,6 +475,15 @@
         "mcu_name": "ESP32-S3",
         "path": "ports/esp32/boards/UM_FEATHERS3/mpconfigboard.h",
         "version": "v1.19.1"
+    },
+    {
+        "description": "GARATRONIC_PYBSTICK26_RP2040",
+        "port": "rp2",
+        "board": "GARATRONIC_PYBSTICK26_RP2040",
+        "board_name": "GARATRONIC_PYBSTICK26_RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/GARATRONIC_PYBSTICK26_RP2040/mpconfigboard.h",
+        "version": "v1.18"
     },
     {
         "description": "Generic ESP32 module with ESP32",
@@ -1053,6 +1098,24 @@
         "version": "v1.10"
     },
     {
+        "description": "NUCLEO_H743ZI2",
+        "port": "stm32",
+        "board": "NUCLEO_H743ZI2",
+        "board_name": "NUCLEO_H743ZI2",
+        "mcu_name": "-",
+        "path": "ports/stm32/boards/NUCLEO_H743ZI2/mpconfigboard.h",
+        "version": "v1.17"
+    },
+    {
+        "description": "nullbits Bit-C PRO",
+        "port": "rp2",
+        "board": "NULLBITS_BIT_C_PRO",
+        "board_name": "nullbits Bit-C PRO",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/NULLBITS_BIT_C_PRO/mpconfigboard.h",
+        "version": "v1.20.0"
+    },
+    {
         "description": "Olimex ESP32 ETH with ESP32",
         "port": "esp32",
         "board": "OLIMEX_ESP32_POE",
@@ -1150,6 +1213,51 @@
         "mcu_name": "NRF9160",
         "path": "ports/nrf/boards/pca10090/mpconfigboard.h",
         "version": "v1.12"
+    },
+    {
+        "description": "Pimoroni Pico LiPo 16MB",
+        "port": "rp2",
+        "board": "PIMORONI_PICOLIPO_16MB",
+        "board_name": "Pimoroni Pico LiPo 16MB",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/PIMORONI_PICOLIPO_16MB/mpconfigboard.h",
+        "version": "v1.17"
+    },
+    {
+        "description": "Pimoroni Pico LiPo 4MB",
+        "port": "rp2",
+        "board": "PIMORONI_PICOLIPO_4MB",
+        "board_name": "Pimoroni Pico LiPo 4MB",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/PIMORONI_PICOLIPO_4MB/mpconfigboard.h",
+        "version": "v1.17"
+    },
+    {
+        "description": "Pimoroni Tiny 2040",
+        "port": "rp2",
+        "board": "PIMORONI_TINY2040",
+        "board_name": "Pimoroni Tiny 2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/PIMORONI_TINY2040/mpconfigboard.h",
+        "version": "v1.17"
+    },
+    {
+        "description": "Pololu 3pi+ 2040 Robot",
+        "port": "rp2",
+        "board": "POLOLU_3PI_2040_ROBOT",
+        "board_name": "Pololu 3pi+ 2040 Robot",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/POLOLU_3PI_2040_ROBOT/mpconfigboard.h",
+        "version": "v1.22.0"
+    },
+    {
+        "description": "Pololu Zumo 2040 Robot",
+        "port": "rp2",
+        "board": "POLOLU_ZUMO_2040_ROBOT",
+        "board_name": "Pololu Zumo 2040 Robot",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/POLOLU_ZUMO_2040_ROBOT/mpconfigboard.h",
+        "version": "v1.22.0"
     },
     {
         "description": "PORTENTA C33 with RA6M5",
@@ -1314,6 +1422,24 @@
         "version": "v1.19.1"
     },
     {
+        "description": "Raspberry Pi Pico",
+        "port": "rp2",
+        "board": "PICO",
+        "board_name": "Raspberry Pi Pico",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/PICO/mpconfigboard.h",
+        "version": "v1.15"
+    },
+    {
+        "description": "Raspberry Pi Pico W",
+        "port": "rp2",
+        "board": "PICO_W",
+        "board_name": "Raspberry Pi Pico W",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/PICO_W/mpconfigboard.h",
+        "version": "v1.20.0"
+    },
+    {
         "description": "RT1010-Py-DevKIT with MIMXRT1011DAE5A",
         "port": "mimxrt",
         "board": "OLIMEX_RT1010",
@@ -1350,6 +1476,15 @@
         "version": "v1.18"
     },
     {
+        "description": "Silicognition RP2040-Shim",
+        "port": "rp2",
+        "board": "SIL_RP2040_SHIM",
+        "board_name": "Silicognition RP2040-Shim",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/SIL_RP2040_SHIM/mpconfigboard.h",
+        "version": "v1.22.0"
+    },
+    {
         "description": "Silicognition wESP32 with ESP32",
         "port": "esp32",
         "board": "SIL_WESP32",
@@ -1357,6 +1492,15 @@
         "mcu_name": "ESP32",
         "path": "ports/esp32/boards/SIL_WESP32/mpconfigboard.h",
         "version": "v1.17"
+    },
+    {
+        "description": "SparkFun Pro Micro RP2040",
+        "port": "rp2",
+        "board": "SPARKFUN_PROMICRO",
+        "board_name": "SparkFun Pro Micro RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/SPARKFUN_PROMICRO/mpconfigboard.h",
+        "version": "v1.16"
     },
     {
         "description": "Sparkfun SAMD51 Thing Plus with SAMD51J20A",
@@ -1375,6 +1519,15 @@
         "mcu_name": "STM32F405RG",
         "path": "ports/stm32/boards/SPARKFUN_MICROMOD_STM32/mpconfigboard.h",
         "version": "v1.17"
+    },
+    {
+        "description": "SparkFun Thing Plus RP2040",
+        "port": "rp2",
+        "board": "SPARKFUN_THINGPLUS",
+        "board_name": "SparkFun Thing Plus RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/SPARKFUN_THINGPLUS/mpconfigboard.h",
+        "version": "v1.16"
     },
     {
         "description": "STM32H573I-DK with STM32H573IIK3Q",
@@ -1501,6 +1654,33 @@
         "mcu_name": "RA6M5",
         "path": "ports/renesas-ra/boards/VK_RA6M5/mpconfigboard.h",
         "version": "v1.21.0"
+    },
+    {
+        "description": "W5100S-EVB-Pico",
+        "port": "rp2",
+        "board": "W5100S_EVB_PICO",
+        "board_name": "W5100S-EVB-Pico",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/W5100S_EVB_PICO/mpconfigboard.h",
+        "version": "v1.19.1"
+    },
+    {
+        "description": "W5500-EVB-Pico",
+        "port": "rp2",
+        "board": "W5500_EVB_PICO",
+        "board_name": "W5500-EVB-Pico",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/W5500_EVB_PICO/mpconfigboard.h",
+        "version": "v1.20.0"
+    },
+    {
+        "description": "WeAct Studio RP2040",
+        "port": "rp2",
+        "board": "WEACTSTUDIO",
+        "board_name": "WeAct Studio RP2040",
+        "mcu_name": "-",
+        "path": "ports/rp2/boards/WEACTSTUDIO/mpconfigboard.h",
+        "version": "v1.20.0"
     },
     {
         "description": "Wio Terminal D51R with SAMD51P19A",
