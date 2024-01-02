@@ -27,7 +27,7 @@ OK = 0
 ERROR = -1
 RETRIES = 3
 TESTING = False
-LOCAL_FILES = False
+LOCAL_FILES = True
 
 ###############################################################################################
 reset_before = False
@@ -257,9 +257,9 @@ def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool
     """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
     origin = "./src/stubber/board"
-    # origin = "./micropython-stubber-1.7.0/minified"
 
     _py = [
+        "rm :no_auto_stubber.txt",
         "rm :lib/createstubs.mpy",
         "rm :lib/createstubs_mem.mpy",
         "rm :lib/createstubs_db.mpy",
@@ -356,7 +356,7 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
     board.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     #  but slows down esp8266 restarts so keep that to 60 seconds
-    timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60
+    timeout = 60 if board.uname.nodename == "esp8266" else 4 * 60  # type: ignore
     rc, out = board.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
     if (
@@ -534,8 +534,8 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
 if __name__ == "__main__":
     set_loglevel(0)
 
-    variant = Variant.mem
-    form = Form.min
+    variant = Variant.full
+    form = Form.py  # BUG : Minified geeft problemen ?
     tempdir = mkdtemp(prefix="board_stubber")
 
     dest = Path(tempdir)
