@@ -439,7 +439,7 @@ def _info():  # type:() -> dict[str, str]
             "build": "",
             "ver": "",
             "port": sys.platform,  # port: esp32 / win32 / linux / stm32
-            "board": "GENERIC",
+            "board": "UNKNOWN",
             "cpu": "",
             "mpy": "",
             "arch": "",
@@ -453,13 +453,13 @@ def _info():  # type:() -> dict[str, str]
     elif info["port"] == "linux":
         info["port"] = "unix"
     try:
-        info["version"] = ".".join([str(n) for n in sys.implementation.version])
+        info["version"] = ".".join([str(n) for n in sys.implementation.version]).rstrip(".")
     except AttributeError:
         pass
     try:
-        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
-        info["board"] = machine.strip()
-        info["cpu"] = machine.split("with")[1].strip()
+        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
+        info["board"] = "with".join(_machine.split("with")[:-1]).strip()
+        info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
             sys.implementation._mpy
             if "_mpy" in dir(sys.implementation)
@@ -470,19 +470,7 @@ def _info():  # type:() -> dict[str, str]
     except (AttributeError, IndexError):
         pass
     gc.collect()
-    for filename in [d + "/board_info.csv" for d in LIBS]:
-        # print("look up the board name in the file", filename)
-        if file_exists(filename):
-            # print("Found board info file: {}".format(filename))
-            b = info["board"].strip()
-            if find_board(info, b, filename):
-                break
-            if "with" in b:
-                b = b.split("with")[0].strip()
-                if find_board(info, b, filename):
-                    break
-            info["board"] = "GENERIC"
-    info["board"] = info["board"].replace(" ", "_")
+    read_boardname(info)
     gc.collect()
 
     try:
@@ -558,6 +546,33 @@ def _info():  # type:() -> dict[str, str]
     info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
 
     return info
+
+
+def read_boardname(info, desc: str = ""):
+    found = False
+    for filename in [d + "/board_info.csv" for d in LIBS]:
+        # print("look up the board name in the file", filename)
+        if file_exists(filename):
+            descr = desc or info["board"].strip()
+            print("searching info file: {}".format(filename))
+            if find_board(info, descr, filename):
+                found = True
+                break
+            if "with" in descr:
+                descr = descr.split("with")[0].strip()
+                print("searching for: {}".format(descr))
+                if find_board(info, descr, filename):
+                    found = True
+                    break
+    if not found:
+        print("Board not found, guessing board name")
+        descr = desc or info["board"].strip()
+        if "with " + info["cpu"].upper() in descr:
+            # remove the with cpu part
+            descr = descr.split("with " + info["cpu"].upper())[0].strip()
+        info["board"] = descr
+    info["board"] = info["board"].replace(" ", "_")
+    gc.collect()
 
 
 def find_board(info: dict, board_descr: str, filename: str):
