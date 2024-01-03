@@ -21,6 +21,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
 from stubber.publish.merge_docstubs import get_board_path, merge_all_docstubs
+from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
 OK = 0
@@ -142,12 +143,10 @@ def run(
         timer.cancel()
 
     proc.wait(timeout=1)
-    return proc.returncode, output
+    return proc.returncode or 0, output
 
 
 ###############################################################################################
-
-UName = NamedTuple("UName", sysname=str, nodename=str, release=str, version=str, machine=str)
 
 
 class Variant(str, Enum):
@@ -173,7 +172,7 @@ class MPRemoteBoard:
         self.serialport = serialport
         # self.board = ""
         self.firmware = {}
-        self.uname: Optional[UName] = None
+
         self.connected = False
         self.path: Optional[Path] = None
         self.description = ""
@@ -187,7 +186,7 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_mcu_info(self):
-        # TODO: switch from uname to sys.implementation os the primary source of info
+        # switched from uname to sys.implementation as the primary source of info
         rc, result = self.run_command(
             [
                 "exec",
@@ -195,7 +194,7 @@ class MPRemoteBoard:
             ],
             no_info=True,
         )
-        if rc == 0:
+        if rc == OK:
             s = result[0]
             if "name=" in s:
                 implementation = eval(f"dict{s}")
@@ -203,36 +202,8 @@ class MPRemoteBoard:
                 self.description = implementation["_machine"]
             if len(result) > 1:
                 self.port = result[1].strip()
-
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
-    def get_uname(self):
-        # TODO: switch from uname to sys.implementation os the primary source of info
-        rc, result = self.run_command(
-            [
-                "exec",
-                "import sys;print(repr(sys.implementation) if 'implementation' in dir(sys) else 'no.implementation')",
-            ],
-            no_info=True,
-        )
-        s = result[0]
-        if "name=" in s:
-            implementation = eval(f"dict{s}")
-            version = ".".join([str(n) for n in implementation["version"]])
-            UName("implementation", implementation.name, version, version, "?")
-
-        rc, result = self.run_command(
-            ["exec", "import os;print(os.uname() if 'uname' in dir(os) else 'no.uname')"],
-            no_info=True,
-        )
-        s = result[0]
-        if "sysname=" in s:
-            self.uname = eval(f"UName{s}")
-        elif s.strip() == "no.uname":
-            self.uname = UName("no.uname", "?", "?", "?", "?")
-        else:
-            self.uname = UName(*s[1:-1].split(", "))
-        self.connected = True
-        return rc, self.uname
+            else:
+                self.port = "unknown"
 
     def disconnect(self) -> bool:
         """Disconnect from a board"""
@@ -381,12 +352,12 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
     board.run_command(cmd_path, timeout=5)
 
     if reset_before:
-        log.info(f"Resetting {board.serialport} {board.uname[4] if board.uname else ''}")
+        log.info(f"Resetting {board.serialport} {board.description}")
         board.run_command("reset", timeout=5)
         time.sleep(2)
 
     log.info(
-        f"Running createstubs {variant} on {board.serialport} {board.uname[4] if board.uname else ''} using temp path: {dest}"
+        f"Running createstubs {variant} on {board.serialport} {board.description} using temp path: {dest}"
     )
     cmd = build_cmd(dest, variant)
 
@@ -601,7 +572,7 @@ if __name__ == "__main__":
     # scan boards and generate stubs
 
     for board in connected_boards:
-        log.info(f"Connecting to {board.serialport} {board.uname[4] if board.uname else ''}")
+        log.info(f"Connecting to {board.serialport} {board.description} {board.version}")
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
         if rc == OK and my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
@@ -610,16 +581,25 @@ if __name__ == "__main__":
                 # Also merge the stubs with the docstubs
                 log.info(f"Merging stubs with docstubs : {board.firmware}")
 
-                _ = merge_all_docstubs(
+                merged = merge_all_docstubs(
                     versions=board.firmware["version"],
                     family=board.firmware["family"],
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
                     mpy_path=CONFIG.mpy_path,
                 )
-                log.success("Done")
-
+                if not merged:
+                    log.error(f"Failed to merge stubs for {board.serialport}")
+                    continue
                 # Then Build the package
+                log.info(f"Building package for {board.firmware}")
+                built = build_multiple(
+                    versions=board.firmware["version"],
+                    family=board.firmware["family"],
+                    boards=board.firmware["board"],
+                    ports=board.firmware["port"],
+                )
 
+                log.success("Done")
         else:
             log.error(f"Failed to generate stubs for {board.serialport}")
