@@ -203,7 +203,7 @@ def main():
         "v1.11",
         "v1.10",
     ]
-    versions.reverse()
+    # versions.reverse()
     board_list = get_board_list(versions, mpy_path)
 
     print(tabulate(board_list, headers="keys"))  # type: ignore
