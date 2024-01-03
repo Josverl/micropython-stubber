@@ -1,0 +1,18 @@
+# MicroPython v1.22.0 on 2023-12-27; Raspberry Pi Pico W with RP2040
+__main__          array             framebuf          random
+_asyncio          asyncio/__init__  gc                re
+_boot             asyncio/core      hashlib           requests/__init__
+_boot_fat         asyncio/event     heapq             rp2
+_onewire          asyncio/funcs     io                select
+_rp2              asyncio/lock      json              socket
+_thread           asyncio/stream    lwip              ssl
+_webrepl          binascii          machine           struct
+aioble/__init__   bluetooth         math              sys
+aioble/central    builtins          micropython       time
+aioble/client     cmath             mip/__init__      uasyncio
+aioble/core       collections       neopixel          uctypes
+aioble/device     cryptolib         network           urequests
+aioble/l2cap      deflate           ntptime           webrepl
+aioble/peripheral dht               onewire           webrepl_setup
+aioble/security   ds18x20           os                websocket
+aioble/server     errno             platform
