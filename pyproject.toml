@@ -102,6 +102,8 @@ ipykernel = "^6.23.1"
 fasteners = "^0.19"
 python-dotenv = "^1.0.0"
 pydocstyle = "^6.3.0"
+chime = "^0.7.0"
+bincopy = "^20.0.0"
 
 
 
