@@ -12,7 +12,10 @@ import logging
 import os
 import sys
 
-from ujson import dumps
+try:
+    from ujson import dumps
+except:
+    from json import dumps
 
 try:
     from machine import reset  # type: ignore
@@ -50,9 +53,9 @@ class Stubber:
             self._fwid = firmware_id.lower()
         else:
             if self.info["family"] == "micropython":
-                self._fwid = "{family}-{ver}-{port}-{board}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}-{board}".format(**self.info)
             else:
-                self._fwid = "{family}-{ver}-{port}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
 
         if path:
@@ -417,12 +420,15 @@ def ensure_folder(path: str):
 
 
 def _build(s):
-    # extract a build nr from a string
+    # extract build from sys.version or os.uname().version if available
+    # 'v1.13-103-gb137d064e'
+    # 'MicroPython v1.23.0-preview.6.g3d0b6276f'
     if not s:
         return ""
-    if " on " in s:
-        s = s.split(" on ", 1)[0]
-    return s.split("-")[1] if "-" in s else ""
+    s = s.split(" on ", 1)[0] if " on " in s else s
+    s = s.split("; ", 1)[1] if "; " in s else s
+    b = s.split("-")[1] if s.startswith("v") else s.split("-", 1)[-1].split(".")[1]
+    return b
 
 
 def _info():  # type:() -> dict[str, str]
@@ -447,7 +453,7 @@ def _info():  # type:() -> dict[str, str]
     elif info["port"] == "linux":
         info["port"] = "unix"
     try:
-        info["version"] = ".".join([str(n) for n in sys.implementation.version]).rstrip(".")
+        info["version"] = version_str(sys.implementation.version)  # type: ignore
     except AttributeError:
         pass
     try:
@@ -469,19 +475,20 @@ def _info():  # type:() -> dict[str, str]
     gc.collect()
 
     try:
-        # extract build from uname().version if available
-        info["build"] = _build(os.uname()[3])  # type: ignore
-        if not info["build"]:
-            # extract build from uname().release if available
-            info["build"] = _build(os.uname()[2])  # type: ignore
-        if not info["build"] and ";" in sys.version:
-            # extract build from uname().release if available
-            info["build"] = _build(sys.version.split(";")[1])
-    except (AttributeError, IndexError):
+        if "uname" in dir(os):  # old
+            # extract build from uname().version if available
+            info["build"] = _build(os.uname()[3])  # type: ignore
+            if not info["build"]:
+                # extract build from uname().release if available
+                info["build"] = _build(os.uname()[2])  # type: ignore
+        elif "version" in dir(sys):  # new
+            # extract build from sys.version if available
+            info["build"] = _build(sys.version)
+    except (AttributeError, IndexError, TypeError):
         pass
     # avoid  build hashes
-    if info["build"] and len(info["build"]) > 5:
-        info["build"] = ""
+    # if info["build"] and len(info["build"]) > 5:
+    #     info["build"] = ""
 
     if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
@@ -507,13 +514,14 @@ def _info():  # type:() -> dict[str, str]
         info["release"] = "2.0.0"
 
     if info["family"] == "micropython":
+        info["version"]
         if (
             info["version"]
             and info["version"].endswith(".0")
             and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # drop the .0 for newer releases
+            # versions from 1.10.0 to 1.20.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
@@ -537,10 +545,19 @@ def _info():  # type:() -> dict[str, str]
             info["arch"] = arch
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+    if info["build"] and not info["version"].endswith("-preview"):
+        info["version"] = info["version"] + "-preview"
     # simple to use version[-build] string
-    info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
+    info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
 
     return info
+
+
+def version_str(version: tuple):  #  -> str:
+    v_str = ".".join([str(n) for n in version[:3]])
+    if len(version) > 3 and version[3]:
+        v_str += "-" + version[3]
+    return v_str
 
 
 def read_boardname(info, desc: str = ""):
