@@ -262,7 +262,7 @@ markers = [
 [tool.coverage.run]
 parallel = false
 branch = true
-source = ["board", "src"]
+source = ["src"]
 omit = [
     # helper files in board
     "*/boot.py",
