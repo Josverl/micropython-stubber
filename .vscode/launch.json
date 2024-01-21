@@ -45,6 +45,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-v",
+                "-v",
                 "make-variants",
                 // "switch",
                 // "v1.20.0",
@@ -98,7 +99,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            // "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },
         {

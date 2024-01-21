@@ -140,5 +140,8 @@
     ],
     "python.analysis.enablePytestExtra": true,
     "testExplorer.addToEditorContextMenu": true,
-    "todo-tree.tree.scanMode": "open files"
+    "todo-tree.tree.scanMode": "open files",
+    "python.analysis.typeshedPaths": [
+        "typings"
+    ]
 }
