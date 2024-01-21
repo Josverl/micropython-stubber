@@ -177,6 +177,8 @@ class MPRemoteBoard:
         self.path: Optional[Path] = None
         self.description = ""
         self.version = ""
+        self.port = ""
+        self.board = ""
 
     @staticmethod
     def connected_boards():
@@ -188,22 +190,16 @@ class MPRemoteBoard:
     def get_mcu_info(self):
         # switched from uname to sys.implementation as the primary source of info
         rc, result = self.run_command(
-            [
-                "exec",
-                "import sys;print(repr(sys.implementation) if 'implementation' in dir(sys) else 'no.implementation');print(sys.platform)",
-            ],
+            ["run", "src/stubber/board/fw_info.py"],
             no_info=True,
         )
         if rc == OK:
-            s = result[0]
-            if "name=" in s:
-                implementation = eval(f"dict{s}")
-                self.version = ".".join([str(n) for n in implementation["version"]])
-                self.description = implementation["_machine"]
-            if len(result) > 1:
-                self.port = result[1].strip()
-            else:
-                self.port = "unknown"
+            s = result[0].strip()
+            if s.startswith("{") and s.endswith("}"):
+                info = eval(s)
+                self.version = info["version"]
+                self.port = info["port"]
+                self.description = info["board"]
 
     def disconnect(self) -> bool:
         """Disconnect from a board"""
@@ -356,9 +352,7 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
         board.run_command("reset", timeout=5)
         time.sleep(2)
 
-    log.info(
-        f"Running createstubs {variant} on {board.serialport} {board.description} using temp path: {dest}"
-    )
+    log.info(f"Running createstubs {variant} on {board.serialport} {board.description} using temp path: {dest}")
     cmd = build_cmd(dest, variant)
 
     board.run_command.retry.wait = wait_fixed(15)
@@ -368,12 +362,7 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
     timeout = 60 if board.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = board.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
-    if (
-        rc != OK
-        and ":" in out[-1]
-        and not out[-1].startswith("INFO")
-        and not out[-1].startswith("WARN")
-    ):
+    if rc != OK and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
         log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
@@ -478,11 +467,7 @@ def generate_board_stubs(
 
 
 def get_stubfolder(out: List[str]):
-    return (
-        lines[-1].split("/remote/")[-1].strip()
-        if (lines := [l for l in out if l.startswith("Path: ")])
-        else ""
-    )
+    return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("Path: ")]) else ""
 
 
 # def get_port_board(out: List[str]):
@@ -527,9 +512,7 @@ def set_loglevel(verbose: int) -> str:
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level: <8}</level>|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
-    log.add(
-        sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str
-    )
+    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
     # log.info(f"micropython-stubber {__version__}")
     return level
 
