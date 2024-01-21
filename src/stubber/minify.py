@@ -198,9 +198,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     elif isinstance(source_script, str):  # type: ignore
         source_content = source_script
     else:
-        raise TypeError(
-            f"source_script must be str, Path, or file-like object, not {type(source_script)}"
-        )
+        raise TypeError(f"source_script must be str, Path, or file-like object, not {type(source_script)}")
 
     if not source_content:
         raise ValueError("No source content")
@@ -256,30 +254,31 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
         with open("tmp_minified.py", "w+") as f:
             f.write(content)
 
-    source = python_minifier.minify(
-        content,
-        filename=getattr(source_script, "name", None),
-        combine_imports=True,
-        remove_literal_statements=True,  # no Docstrings
-        remove_annotations=True,  # not used runtime anyways
-        hoist_literals=True,  # remove redundant strings
-        rename_locals=True,  # short names save memory
-        preserve_locals=["stubber", "path"],  # names to keep
-        rename_globals=True,  # short names save memory
-        # keep these globals to allow testing/mocking to work against the minified not compiled version
-        preserve_globals=[
-            "main",
-            "Stubber",
-            "read_path",
-            "get_root",
-            "_info",
-            "os",
-            "sys",
-            "__version__",
-        ],
-        # remove_pass=True,  # no dead code
-        # convert_posargs_to_args=True, # Does not save any space
-    )
+    # source = python_minifier.minify(
+    #     content,
+    #     filename=getattr(source_script, "name", None),
+    #     combine_imports=True,
+    #     remove_literal_statements=True,  # no Docstrings
+    #     remove_annotations=True,  # not used runtime anyways
+    #     hoist_literals=True,  # remove redundant strings
+    #     rename_locals=True,  # short names save memory
+    #     preserve_locals=["stubber", "path"],  # names to keep
+    #     rename_globals=True,  # short names save memory
+    #     # keep these globals to allow testing/mocking to work against the minified not compiled version
+    #     preserve_globals=[
+    #         "main",
+    #         "Stubber",
+    #         "read_path",
+    #         "get_root",
+    #         "_info",
+    #         "os",
+    #         "sys",
+    #         "__version__",
+    #     ],
+    #     # remove_pass=True,  # no dead code
+    #     # convert_posargs_to_args=True, # Does not save any space
+    # )
+    source = content
     log.debug(f"Original length : {len(content)}")
     log.info(f"Minified length : {len(source)}")
     log.info(f"Reduced by      : {len(content)-len(source)} ")
@@ -347,7 +346,6 @@ def cross_compile(
     else:
         # target must be a Path object
         _target = get_temp_file(suffix=".mpy")
-
     result = pipx_mpy_cross(version, source_file, _target)
     if result.stderr and "No matching distribution found for mpy-cross==" in result.stderr:
         log.warning(f"mpy-cross=={version} not found, using latest")
@@ -378,7 +376,7 @@ def pipx_mpy_cross(version, source_file, _target):
     # Add params
     cmd += ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
     log.trace(" ".join(cmd))
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")  # Specify the encoding
     return result
 
 

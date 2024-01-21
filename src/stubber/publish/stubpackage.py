@@ -654,6 +654,7 @@ class PoetryBuilder(Builder):
                 # stdout=subprocess.PIPE,
                 stdout=subprocess.PIPE,  # interestingly: errors on stdout , output on stderr .....
                 universal_newlines=True,
+                encoding="utf-8"
             )
             log.trace(f"poetry {parameters} completed")
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover # InvalidVersion

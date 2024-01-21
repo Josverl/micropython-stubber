@@ -36,10 +36,10 @@ def _run_local_git(
             if isinstance(repo, str):
                 repo = Path(repo)
             result = subprocess.run(
-                cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix()
+                cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix(),encoding="utf-8"
             )
         else:
-            result = subprocess.run(cmd, capture_output=capture_output, check=True)
+            result = subprocess.run(cmd, capture_output=capture_output, check=True,encoding="utf-8")
     except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
