@@ -8,7 +8,10 @@ import logging
 import os
 import sys
 
-from ujson import dumps
+try:
+    from ujson import dumps
+except:
+    from json import dumps
 
 try:
     from machine import reset  # type: ignore
@@ -46,9 +49,9 @@ class Stubber:
             self._fwid = firmware_id.lower()
         else:
             if self.info["family"] == "micropython":
-                self._fwid = "{family}-{ver}-{port}-{board}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}-{board}".format(**self.info)
             else:
-                self._fwid = "{family}-{ver}-{port}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
 
         if path:
@@ -109,11 +112,7 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append(
-                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
-                        name, item_instance, e
-                    )
-                )
+                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -177,9 +176,7 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            self.log.info(
-                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
-            )
+            self.log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
 
         except ImportError:
             self.log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -197,9 +194,7 @@ class Stubber:
             fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append(
-            '{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/"))
-        )
+        self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
 
         if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
@@ -214,9 +209,7 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(
-        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
-    ):
+    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -276,11 +269,7 @@ class Stubber:
                 s += indent + "        ...\n\n"
                 fp.write(s)
             elif any(word in item_type_txt for word in ["method", "function", "closure"]):
-                self.log.debug(
-                    "# def {1} function/method/closure, type = '{0}'".format(
-                        item_type_txt, item_name
-                    )
-                )
+                self.log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
                 # will accept any number of params
                 # return type Any/Incomplete
@@ -291,13 +280,11 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(
-                        indent
-                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
-                else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
-                        indent, item_name, first, ret
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
+                        indent, item_name, ret
                     )
+                else:
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 self.log.debug("\n" + s)
@@ -324,9 +311,7 @@ class Stubber:
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         t = "Incomplete"
                     # Requires Python 3.6 syntax, which is OK for the stubs/pyi
-                    s = "{0}{1} : {2} ## {3} = {4}\n".format(
-                        indent, item_name, t, item_type_txt, item_repr
-                    )
+                    s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 self.log.debug("\n" + s)
             else:
@@ -378,9 +363,7 @@ class Stubber:
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
         self.log.info(
-            "Created stubs for {} modules on board {}\nPath: {}".format(
-                len(self._report), self._fwid, self.path
-            )
+            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
         )
         f_name = "{}/{}".format(self.path, filename)
         self.log.info("Report file: {}".format(f_name))
@@ -439,12 +422,15 @@ def ensure_folder(path: str):
 
 
 def _build(s):
-    # extract a build nr from a string
+    # extract build from sys.version or os.uname().version if available
+    # 'v1.13-103-gb137d064e'
+    # 'MicroPython v1.23.0-preview.6.g3d0b6276f'
     if not s:
         return ""
-    if " on " in s:
-        s = s.split(" on ", 1)[0]
-    return s.split("-")[1] if "-" in s else ""
+    s = s.split(" on ", 1)[0] if " on " in s else s
+    s = s.split("; ", 1)[1] if "; " in s else s
+    b = s.split("-")[1] if s.startswith("v") else s.split("-", 1)[-1].split(".")[1]
+    return b
 
 
 def _info():  # type:() -> dict[str, str]
@@ -469,14 +455,12 @@ def _info():  # type:() -> dict[str, str]
     elif info["port"] == "linux":
         info["port"] = "unix"
     try:
-        info["version"] = ".".join([str(n) for n in sys.implementation.version]).rstrip(".")
+        info["version"] = version_str(sys.implementation.version)  # type: ignore
     except AttributeError:
         pass
     try:
         _machine = (
-            sys.implementation._machine
-            if "_machine" in dir(sys.implementation)
-            else os.uname().machine  # type: ignore
+            sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
         )
         # info["board"] = "with".join(_machine.split("with")[:-1]).strip()
         info["board"] = _machine
@@ -495,19 +479,20 @@ def _info():  # type:() -> dict[str, str]
     gc.collect()
 
     try:
-        # extract build from uname().version if available
-        info["build"] = _build(os.uname()[3])  # type: ignore
-        if not info["build"]:
-            # extract build from uname().release if available
-            info["build"] = _build(os.uname()[2])  # type: ignore
-        if not info["build"] and ";" in sys.version:
-            # extract build from uname().release if available
-            info["build"] = _build(sys.version.split(";")[1])
-    except (AttributeError, IndexError):
+        if "uname" in dir(os):  # old
+            # extract build from uname().version if available
+            info["build"] = _build(os.uname()[3])  # type: ignore
+            if not info["build"]:
+                # extract build from uname().release if available
+                info["build"] = _build(os.uname()[2])  # type: ignore
+        elif "version" in dir(sys):  # new
+            # extract build from sys.version if available
+            info["build"] = _build(sys.version)
+    except (AttributeError, IndexError, TypeError):
         pass
     # avoid  build hashes
-    if info["build"] and len(info["build"]) > 5:
-        info["build"] = ""
+    # if info["build"] and len(info["build"]) > 5:
+    #     info["build"] = ""
 
     if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
@@ -533,14 +518,14 @@ def _info():  # type:() -> dict[str, str]
         info["release"] = "2.0.0"
 
     if info["family"] == "micropython":
+        info["version"]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"]
-            >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # drop the .0 for newer releases
+            # versions from 1.10.0 to 1.20.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
@@ -564,10 +549,19 @@ def _info():  # type:() -> dict[str, str]
             info["arch"] = arch
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+    if info["build"] and not info["version"].endswith("-preview"):
+        info["version"] = info["version"] + "-preview"
     # simple to use version[-build] string
-    info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
+    info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
 
     return info
+
+
+def version_str(version: tuple):  #  -> str:
+    v_str = ".".join([str(n) for n in version[:3]])
+    if len(version) > 3 and version[3]:
+        v_str += "-" + version[3]
+    return v_str
 
 
 def read_boardname(info, desc: str = ""):
