@@ -354,11 +354,17 @@ def test_unavailable_modules(
     "input, expected",
     [
         ("", ""),
+        ("v1.13 on 2020-10-09", ""),
         ("v1.13-103-gb137d064e on 2020-10-09", "103"),
         ("3.4.0; MicroPython v1.23.0-preview.6.g3d0b6276f on 2024-01-02", "6"),
+        ("3.4.0; MicroPython v1.22.0 on 2023-12-27", ""),
     ],
 )
 def test_build(input: str, expected: str):
+    """build function should be able to extract from
+    - sys.version
+    - sys.implementation.version
+    """
     variant = "createstubs"
     location = "board"
     createstubs = import_variant(location, variant)
