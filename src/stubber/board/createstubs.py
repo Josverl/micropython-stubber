@@ -210,7 +210,7 @@ class Stubber:
                 module_name, self._fwid, info_, __version__
             )
             fp.write(s)
-            fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
@@ -331,12 +331,14 @@ class Stubber:
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t not in ["object", "set", "frozenset"]:
-                        # Possibly default others to item_instance object ?
+                    if t in ["object", "set", "frozenset", "Pin", "FileIO"]:
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
+                        #  use these types for the attribute
+                        s = "{0}{1} : {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                    else:
+                        # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
-                    # Requires Python 3.6 syntax, which is OK for the stubs/pyi
-                    s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 self.log.debug("\n" + s)
             else:
