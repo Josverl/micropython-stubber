@@ -253,7 +253,7 @@ class Stubber:
                 if is_exception:
                     s += indent + "    ...\n"
                     fp.write(s)
-                    return
+                    continue
                 # write classdef
                 fp.write(s)
                 # first write the class literals and methods
