@@ -24,21 +24,6 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-try:
-    from nope_machine import WDT
-
-    wdt = WDT()
-
-except ImportError:
-
-    class _WDT:
-        def feed(self):
-            pass
-
-    wdt = _WDT()
-
-
-wdt.feed()
 
 __version__ = "v1.16.2"
 ENOENT = 2
@@ -61,7 +46,6 @@ class Stubber:
         self.log.info("Port: {}".format(self.info["port"]))
         self.log.info("Board: {}".format(self.info["board"]))
         gc.collect()
-        wdt.feed()
         if firmware_id:
             self._fwid = firmware_id.lower()
         else:
@@ -155,7 +139,6 @@ class Stubber:
         self.log.info("Finally done")
 
     def create_one_stub(self, module_name: str):
-        wdt.feed()
         if module_name in self.problematic:
             self.log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
@@ -367,7 +350,6 @@ class Stubber:
 
     def clean(self, path: str = None):  # type: ignore
         "Remove all files from the stub folder"
-        wdt.feed()
         if path is None:
             path = self.path
         self.log.info("Clean/remove files in folder: {}".format(path))
@@ -390,7 +372,6 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        wdt.feed()
         self.log.info(
             "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
         )
@@ -603,7 +584,6 @@ def read_boardname(info, desc: str = ""):
     info["board"] = info["board"].replace(" ", "_")
     found = False
     for filename in [d + "/board_name.txt" for d in LIBS]:
-        wdt.feed()
         # print("look up the board name in the file", filename)
         if file_exists(filename):
             with open(filename, "r") as file:
@@ -623,7 +603,6 @@ def read_boardname(info, desc: str = ""):
 
 
 # def read_boardname(info, desc: str = ""):
-#         wdt.feed()
 #         # print("look up the board name in the file", filename)
 #         if file_exists(filename):
 #             descr = desc or info["board"].strip()
