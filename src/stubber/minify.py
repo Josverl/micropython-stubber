@@ -365,8 +365,10 @@ def cross_compile(
     return result.returncode
 
 
-def pipx_mpy_cross(version:str, source_file, _target):
+def pipx_mpy_cross(version: str, source_file, _target):
     """Run mpy-cross using pipx"""
+
+    log.info(f"Compiling with mpy-cross version: {version}")
     if version == "latest":
         version = ""
     if version:

@@ -17,6 +17,7 @@ import gc
 import logging
 import os
 import sys
+from time import sleep
 
 try:
     from ujson import dumps
@@ -33,11 +34,11 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
+
 __version__ = "v1.16.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
-from time import sleep
 
 
 class Stubber:
@@ -59,7 +60,7 @@ class Stubber:
             self._fwid = firmware_id.lower()
         else:
             if self.info["family"] == "micropython":
-                self._fwid = "{family}-v{version}-{port}-{board}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}-{board}".format(**self.info).rstrip("-")
             else:
                 self._fwid = "{family}-v{version}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
@@ -108,6 +109,7 @@ class Stubber:
             try:
                 val = getattr(item_instance, name)
                 # name , item_repr(value) , type as text, item_instance, order
+                self.log.debug("attribute {}:{}".format(name, val))
                 try:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
@@ -199,7 +201,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
@@ -210,10 +212,11 @@ class Stubber:
                 del new_module
             except (OSError, KeyError):  # lgtm [py/unreachable-statement]
                 self.log.warning("could not del new_module")
-            try:
-                del sys.modules[module_name]
-            except KeyError:
-                self.log.debug("could not del sys.modules[{}]".format(module_name))
+            # lets not try - most times it does not work anyway
+            # try:
+            #     del sys.modules[module_name]
+            # except KeyError:
+            #     self.log.warning("could not del sys.modules[{}]".format(module_name))
         gc.collect()
         return True
 
@@ -239,8 +242,13 @@ class Stubber:
                 self.log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
-            if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
-                self.log.debug("{0}class {1}:".format(indent, item_name))
+            if (
+                item_type_txt == "<class 'type'>"
+                and len(indent) <= _MAX_CLASS_LEVEL * 4
+                # and not obj_name.endswith(".Pin")
+                # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
+            ):
+                self.log.info("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (
                     item_name.endswith("Exception")
@@ -312,12 +320,14 @@ class Stubber:
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t not in ["object", "set", "frozenset"]:
-                        # Possibly default others to item_instance object ?
+                    if t in ["object", "set", "frozenset", "Pin", "FileIO"]:
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
+                        #  use these types for the attribute
+                        s = "{0}{1} : {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                    else:
+                        # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
-                    # Requires Python 3.6 syntax, which is OK for the stubs/pyi
-                    s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 self.log.debug("\n" + s)
             else:
@@ -327,12 +337,12 @@ class Stubber:
 
                 fp.write(indent + item_name + " # type: Incomplete\n")
 
-        del items
-        del errors
-        try:
-            del item_name, item_repr, item_type_txt, item_instance  # type: ignore
-        except (OSError, KeyError, NameError):
-            pass
+        # del items
+        # del errors
+        # try:
+        #     del item_name, item_repr, item_type_txt, item_instance  # type: ignore
+        # except (OSError, KeyError, NameError):
+        #     pass
 
     @property
     def flat_fwid(self):
@@ -427,13 +437,19 @@ def ensure_folder(path: str):
 
 def _build(s):
     # extract build from sys.version or os.uname().version if available
-    # 'v1.13-103-gb137d064e'
-    # 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.version: 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
     s = s.split(" on ", 1)[0] if " on " in s else s
-    s = s.split("; ", 1)[1] if "; " in s else s
-    b = s.split("-")[1] if s.startswith("v") else s.split("-", 1)[-1].split(".")[1]
+    if s.startswith("v"):
+        if not "-" in s:
+            return ""
+        b = s.split("-")[1]
+        return b
+    if not "-preview" in s:
+        return ""
+    b = s.split("-preview")[1].split(".")[1]
     return b
 
 
@@ -476,9 +492,7 @@ def _info():  # type:() -> dict[str, str]
         )
     except (AttributeError, IndexError):
         pass
-    gc.collect()
-    read_boardname(info)
-    gc.collect()
+    info["board"] = get_boardname()
 
     try:
         if "uname" in dir(os):  # old
@@ -566,57 +580,16 @@ def version_str(version: tuple):  #  -> str:
     return v_str
 
 
-def read_boardname(info, desc: str = ""):
-    found = False
-    for filename in [d + "/board_info.csv" for d in LIBS]:
-        # print("look up the board name in the file", filename)
-        if file_exists(filename):
-            descr = desc or info["board"].strip()
-            pos = descr.rfind(" with")
-            if pos != -1:
-                short_descr = descr[:pos].strip()
-            else:
-                short_descr = ""
-            print("searching info file: {} for: '{}' or '{}'".format(filename, descr, short_descr))
-            if find_board(info, descr, filename, short_descr):
-                found = True
-                break
-    if not found:
-        print("Board not found, guessing board name")
-        descr = desc or info["board"].strip()
-        if "with " + info["cpu"].upper() in descr:
-            # remove the with cpu part
-            descr = descr.split("with " + info["cpu"].upper())[0].strip()
-        info["board"] = descr
-    info["board"] = info["board"].replace(" ", "_")
-    gc.collect()
+def get_boardname() -> str:
+    "Read the board name from the boardname.py file that may have been created upfront"
+    try:
+        from boardname import BOARDNAME  # type: ignore
 
-
-def find_board(info: dict, descr: str, filename: str, short_descr: str):
-    "Find the board in the provided board_info.csv file"
-    short_hit = ""
-    with open(filename, "r") as file:
-        # ugly code to make testable in python and micropython
-        # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
-        while 1:
-            line = file.readline()
-            if not line:
-                break
-            descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
-            if descr_ == descr:
-                info["board"] = board_
-                return True
-            elif short_descr and descr_ == short_descr:
-                if "with" in short_descr:
-                    # Good enough - no need to trawl the entire file
-                    info["board"] = board_
-                    return True
-                # good enough if not found in the rest of the file (but slow)
-                short_hit = board_
-    if short_hit:
-        info["board"] = short_hit
-        return True
-    return False
+        log.info("Found BOARDNAME: {}".format(BOARDNAME))
+    except ImportError:
+        log.info("BOARDNAME not found")
+        BOARDNAME = ""
+    return BOARDNAME
 
 
 def get_root() -> str:  # sourcery skip: use-assigned-variable

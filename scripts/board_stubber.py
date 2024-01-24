@@ -1,5 +1,5 @@
 """ 
-This script creates stubs for a connected micropython MCU board.
+This script creates stubs on and for a connected micropython MCU board.
 """
 
 import json
@@ -14,8 +14,11 @@ from tempfile import mkdtemp
 from threading import Timer
 from typing import List, NamedTuple, Optional, Tuple, Union
 
+import rich_click as click
 import serial.tools.list_ports
 from loguru import logger as log
+from rich.console import Console
+from rich.table import Table
 from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
@@ -188,18 +191,30 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_mcu_info(self):
-        # switched from uname to sys.implementation as the primary source of info
         rc, result = self.run_command(
             ["run", "src/stubber/board/fw_info.py"],
             no_info=True,
         )
-        if rc == OK:
-            s = result[0].strip()
-            if s.startswith("{") and s.endswith("}"):
-                info = eval(s)
-                self.version = info["version"]
-                self.port = info["port"]
-                self.description = info["board"]
+        if rc != OK:
+            raise RuntimeError(f"Failed to get mcu_info for {self.serialport}")
+        # Ok we have the info, now parse it
+        s = result[0].strip()
+        if s.startswith("{") and s.endswith("}"):
+            info = eval(s)
+            self.version = info["version"]
+            self.port = info["port"]
+            self.description = descr = info["board"]
+            pos = descr.rfind(" with")
+            if pos != -1:
+                short_descr = descr[:pos].strip()
+            else:
+                short_descr = ""
+            if board_name := find_board(
+                descr, short_descr, Path(__file__).parent.parent / "src/stubber/data/board_info.csv"
+            ):
+                self.board = board_name
+            else:
+                self.board = "UNKNOWN"
 
     def disconnect(self) -> bool:
         """Disconnect from a board"""
@@ -238,7 +253,7 @@ class MPRemoteBoard:
         """
         if isinstance(cmd, str):
             cmd = cmd.split(" ")
-        prefix = ["mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
+        prefix = [sys.executable, "-m" "mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
         # if connected add resume to keep state between commands
         if self.connected:
             prefix += ["resume"]
@@ -334,7 +349,7 @@ def hard_reset(board: MPRemoteBoard) -> bool:
 
 
 @retry(stop=stop_after_attempt(10), wait=wait_fixed(15))
-def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant.db):
+def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.db):
     """
     Run a createstubs[variant]  on the provided board.
     Retry running the command up to 10 times, with a 15 second timeout between retries.
@@ -345,22 +360,22 @@ def run_createstubs(dest: Path, board: MPRemoteBoard, variant: Variant = Variant
         "exec",
         'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"',
     ]
-    board.run_command(cmd_path, timeout=5)
+    mcu.run_command(cmd_path, timeout=5)
 
     if reset_before:
-        log.info(f"Resetting {board.serialport} {board.description}")
-        board.run_command("reset", timeout=5)
+        log.info(f"Resetting {mcu.serialport} {mcu.description}")
+        mcu.run_command("reset", timeout=5)
         time.sleep(2)
 
-    log.info(f"Running createstubs {variant} on {board.serialport} {board.description} using temp path: {dest}")
+    log.info(f"Running createstubs {variant} on {mcu.serialport} {mcu.description} using temp path: {dest}")
     cmd = build_cmd(dest, variant)
 
-    board.run_command.retry.wait = wait_fixed(15)
+    mcu.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     # esp32s3 > 240 seconds with mounted fs
     #  but slows down esp8266 restarts so keep that to 60 seconds
-    timeout = 60 if board.port == "esp8266" else 6 * 60  # type: ignore
-    rc, out = board.run_command(cmd, timeout=timeout)
+    timeout = 60 if mcu.port == "esp8266" else 6 * 60  # type: ignore
+    rc, out = mcu.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
     if rc != OK and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
         log.warning(f"createstubs: {out[-1]}")
@@ -419,16 +434,14 @@ def generate_board_stubs(
         log.warning("Error copying createstubs to board")
         return ERROR, None
 
-    if host_mounted:
-        # HOST: remove .done file
-        (dest / "modulelist.done").unlink(missing_ok=True)
-        # HOST: copy board_info.csv to destination
-        shutil.copyfile(board_info_path, dest / "board_info.csv")
+    if mcu.board:
+        cmd = ["exec", f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board}\"')"]
+        log.info(f"Writing BOARDNAME='{mcu.board}' to boardname.py")
     else:
-        cmd = f"cp {board_info_path} :board_info.csv"
-        rc, _ = board.run_command(cmd)
-        if rc != OK and "rm" not in cmd:
-            log.error(f"Error during copy createstubs running command: {cmd}")
+        cmd = ["rm", "boardname.py"]
+    rc, _ = mcu.run_command(cmd)
+    if rc != OK and not "rm" in cmd:
+        log.error(f"Error during copy createstubs running command: {cmd}")
 
     rc, out = run_createstubs(dest, mcu, variant)  # , host_mounted=host_mounted)
 
@@ -447,7 +460,7 @@ def generate_board_stubs(
 
     stubs_path = dest / folder
     mcu.path = stubs_path
-    # read the modles.json file into a dict
+    # read the modules.json file into a dict
     try:
         with open(stubs_path / "modules.json") as fp:
             modules_json = json.load(fp)
@@ -468,13 +481,6 @@ def generate_board_stubs(
 
 def get_stubfolder(out: List[str]):
     return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("Path: ")]) else ""
-
-
-# def get_port_board(out: List[str]):
-#     return (
-#         lines[-1].split("Port:")[-1].strip() if (lines := [l for l in out if l.startswith("Port: ")]) else "",
-#         lines[-1].split("Board:")[-1].strip() if (lines := [l for l in out if l.startswith("Board: ")]) else "",
-#     )
 
 
 def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
@@ -536,11 +542,57 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
         return None
 
 
-if __name__ == "__main__":
-    set_loglevel(0)
+def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
+    "Find the board in the provided board_info.csv file"
+    short_hit = ""
+    with open(filename, "r") as file:
+        # ugly code to make testable in python and micropython
+        # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
+        while 1:
+            line = file.readline()
+            if not line:
+                break
+            descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
+            if descr_ == descr:
+                return board_
+            elif short_descr and descr_ == short_descr:
+                if "with" in short_descr:
+                    # Good enough - no need to trawl the entire file
+                    # info["board"] = board_
+                    return board_
+                # good enough if not found in the rest of the file (but slow)
+                short_hit = board_
+    if short_hit:
+        return short_hit
+    return None
 
-    variant = Variant.full
-    form = Form.py  # BUG : Minified geeft problemen ?
+
+@click.command()
+@click.option(
+    "--variant",
+    "-v",
+    type=click.Choice(["Full", "Mem", "DB"], case_sensitive=False),
+    default="Full",
+    show_default=True,
+    help="Variant of createstubs to run",
+)
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["py", "mpy"], case_sensitive=False),
+    default="py",
+    show_default=True,
+    help="Python source or pre-compiled.",
+)
+@click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
+def run_stubber(variant: str, format: str, debug: bool):
+    if debug:
+        set_loglevel(1)
+    else:
+        set_loglevel(0)
+    variant = Variant(variant.lower())
+    form = Form(format.lower())
+
     tempdir = mkdtemp(prefix="board_stubber")
 
     dest = Path(tempdir)
@@ -551,11 +603,23 @@ if __name__ == "__main__":
         log.error("No micropython boards were found")
         sys.exit(1)
 
-    print(tabulate([[b.serialport, b.port, b.description, b.version] for b in connected_boards]))  # type: ignore
-    # scan boards and generate stubs
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Serial Port")
+    table.add_column("Port")
+    table.add_column("Description")
+    table.add_column("Version")
 
+    for b in connected_boards:
+        table.add_row(b.serialport, b.port, b.description, b.version)
+    console = Console()
+    console.print(table)
+
+    # scan boards and generate stubs
     for board in connected_boards:
-        log.info(f"Connecting to {board.serialport} {board.description} {board.version}")
+        log.info(
+            f"Connecting using {board.serialport} to {board.port} {board.board} {board.version}: {board.description}"
+        )
+
         rc, my_stubs = generate_board_stubs(dest, board, variant, form)
         if rc == OK and my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
@@ -582,7 +646,12 @@ if __name__ == "__main__":
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
                 )
-
+                # create a rich table of the results and print it'
+                console.print(table)
                 log.success("Done")
         else:
             log.error(f"Failed to generate stubs for {board.serialport}")
+
+
+if __name__ == "__main__":
+    run_stubber()
