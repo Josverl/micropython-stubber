@@ -28,6 +28,21 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
+try:
+    from nope_machine import WDT
+
+    wdt = WDT()
+
+except ImportError:
+
+    class _WDT:
+        def feed(self):
+            pass
+
+    wdt = _WDT()
+
+
+wdt.feed()
 
 __version__ = "v1.16.2"
 ENOENT = 2
@@ -50,6 +65,7 @@ class Stubber:
         self.log.info("Port: {}".format(self.info["port"]))
         self.log.info("Board: {}".format(self.info["board"]))
         gc.collect()
+        wdt.feed()
         if firmware_id:
             self._fwid = firmware_id.lower()
         else:
@@ -143,6 +159,7 @@ class Stubber:
         self.log.info("Finally done")
 
     def create_one_stub(self, module_name: str):
+        wdt.feed()
         if module_name in self.problematic:
             self.log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
@@ -193,7 +210,9 @@ class Stubber:
         with open(file_name, "w") as fp:
             # todo: improve header
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
+                module_name, self._fwid, info_, __version__
+            )
             fp.write(s)
             fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -290,7 +309,9 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
+                        indent, item_name, ret
+                    )
                 else:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
@@ -350,6 +371,7 @@ class Stubber:
 
     def clean(self, path: str = None):  # type: ignore
         "Remove all files from the stub folder"
+        wdt.feed()
         if path is None:
             path = self.path
         self.log.info("Clean/remove files in folder: {}".format(path))
@@ -372,7 +394,10 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self.log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
+        wdt.feed()
+        self.log.info(
+            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
+        )
         f_name = "{}/{}".format(self.path, filename)
         self.log.info("Report file: {}".format(f_name))
         gc.collect()
@@ -574,16 +599,79 @@ def version_str(version: tuple):  #  -> str:
     return v_str
 
 
-def get_boardname() -> str:
-    "Read the board name from the boardname.py file that may have been created upfront"
-    try:
-        from boardname import BOARDNAME  # type: ignore
+def read_boardname(info, desc: str = ""):
+    info["board"] = info["board"].replace(" ", "_")
+    found = False
+    for filename in [d + "/board_name.txt" for d in LIBS]:
+        wdt.feed()
+        # print("look up the board name in the file", filename)
+        if file_exists(filename):
+            with open(filename, "r") as file:
+                data = file.read()
+            if data:
+                info["board"] = data.strip()
+                found = True
+                break
+    if not found:
+        print("Board not found, guessing board name")
+        descr = ""
+        # descr = desc or info["board"].strip()
+        # if "with " + info["cpu"].upper() in descr:
+        #     # remove the with cpu part
+        #     descr = descr.split("with " + info["cpu"].upper())[0].strip()
+        info["board"] = descr
 
-        log.info("Found BOARDNAME: {}".format(BOARDNAME))
-    except ImportError:
-        log.info("BOARDNAME not found")
-        BOARDNAME = ""
-    return BOARDNAME
+
+# def read_boardname(info, desc: str = ""):
+#         wdt.feed()
+#         # print("look up the board name in the file", filename)
+#         if file_exists(filename):
+#             descr = desc or info["board"].strip()
+#             pos = descr.rfind(" with")
+#             if pos != -1:
+#                 short_descr = descr[:pos].strip()
+#             else:
+#                 short_descr = ""
+#             print("searching info file: {} for: '{}' or '{}'".format(filename, descr, short_descr))
+#             if find_board(info, descr, filename, short_descr):
+#                 found = True
+#                 break
+#     if not found:
+#         print("Board not found, guessing board name")
+#         descr = desc or info["board"].strip()
+#         if "with " + info["cpu"].upper() in descr:
+#             # remove the with cpu part
+#             descr = descr.split("with " + info["cpu"].upper())[0].strip()
+#         info["board"] = descr
+#     info["board"] = info["board"].replace(" ", "_")
+#     gc.collect()
+
+
+# def find_board(info: dict, descr: str, filename: str, short_descr: str):
+#     "Find the board in the provided board_info.csv file"
+#     short_hit = ""
+#     with open(filename, "r") as file:
+#         # ugly code to make testable in python and micropython
+#         # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
+#         while 1:
+#             line = file.readline()
+#             if not line:
+#                 break
+#             descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
+#             if descr_ == descr:
+#                 info["board"] = board_
+#                 return True
+#             elif short_descr and descr_ == short_descr:
+#                 if "with" in short_descr:
+#                     # Good enough - no need to trawl the entire file
+#                     info["board"] = board_
+#                     return True
+#                 # good enough if not found in the rest of the file (but slow)
+#                 short_hit = board_
+#     if short_hit:
+#         info["board"] = short_hit
+#         return True
+#     return False
 
 
 def get_root() -> str:  # sourcery skip: use-assigned-variable
