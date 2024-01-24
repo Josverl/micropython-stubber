@@ -60,6 +60,7 @@ snippets/*/typings
 **/typings_*
 typings_test
 typings
+.vscode/Pico-W-Stub
 empty
 **/*_lock.file
 

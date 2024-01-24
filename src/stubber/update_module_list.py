@@ -100,7 +100,7 @@ def update_module_list():
         "builtins",
         "re",
     }
-
+    log.info("Update the module list in createstubs.py")
     all_modules = read_modules()
     modules_to_stub = sorted(all_modules - set(mods_excluded | mods_problematic))
 
