@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.16.2
+This variant was generated from createstubs.py by micropython-stubber v1.16.3
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
@@ -50,7 +50,7 @@ except ImportError:
 
 wdt.feed()
 
-__version__ = "v1.16.2"
+__version__ = "v1.16.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]

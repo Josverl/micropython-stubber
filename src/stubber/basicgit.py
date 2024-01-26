@@ -42,7 +42,7 @@ def _run_local_git(
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
         # add some logging for github actions
-        log.error(f"{str(e)} : { e.stderr.decode('utf-8')}")
+        log.error(f"{str(e)} : { e.stderr}")
         return None
     if result.stderr and result.stderr != b"":
         stderr = result.stderr
@@ -150,7 +150,7 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     """
     checkout a specific git tag
     """
-    cmd = ["git", "checkout", "tags/" + tag, "--detach", "--quiet", "--force"]
+    cmd = ["git", "checkout", tag, "--quiet", "--force"]
     result = _run_local_git(cmd, repo=repo, expect_stderr=True, capture_output=True)
     if not result:
         return False
