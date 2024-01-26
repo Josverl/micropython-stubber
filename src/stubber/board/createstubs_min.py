@@ -40,7 +40,7 @@ except ImportError:
 
 wdt.feed()
 
-__version__ = "v1.16.2"
+__version__ = "v1.16.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]

@@ -88,8 +88,10 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
         # micropython-lib is now a submodule
         result = git.checkout_tag(version_tag, lib_path)
         if not result:
-            log.error("Could not checkout micropython-lib @master")
-            return False
+            log.warning(f"Could not checkout micropython-lib @{version_tag}")
+            if not git.checkout_tag("master", lib_path):
+                log.error("Could not checkout micropython-lib @master")
+                return False
         return git.sync_submodules(mpy_path)
     else:
         log.info(
