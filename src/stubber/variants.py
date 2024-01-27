@@ -50,7 +50,7 @@ def create_variants(
     ctx = codemod.CodemodContext()
     base_file = base_path / "createstubs.py"
     log.info(f"Reading : {base_file}")
-    base_txt = (base_path / "createstubs.py").read_text()
+    base_txt = (base_path / "createstubs.py")encoding="utf-8")
     base_module = cst.parse_module(base_txt)
 
     for var in make_variants:
@@ -89,7 +89,7 @@ def create_variants(
 
         # str -> path
         # read minified file
-        minified_txt = minified_path.read_text()
+        minified_txt = minified_path.read_text(encoding="utf-8")
         cross_compile(minified_txt, mpy_path, version=version)
 
 

@@ -74,7 +74,7 @@ def enrich_file(
 
     log.debug(f"Merge {target_path} from {docstub_file}")
     # read source file
-    old_code = target_path.read_text()
+    old_code = target_path.read_text(encoding="utf-8")
 
     codemod_instance = merge_docstub.MergeCommand(context, docstub_file=docstub_file)
     if not (
