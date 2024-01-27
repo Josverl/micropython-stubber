@@ -19,7 +19,6 @@ import serial.tools.list_ports
 from loguru import logger as log
 from rich.console import Console
 from rich.table import Table
-from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
