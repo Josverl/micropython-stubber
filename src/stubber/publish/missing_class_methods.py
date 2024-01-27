@@ -27,7 +27,7 @@ def add_machine_pin_call(merged_path: Path, version: str):
         log.error(f"no docstubs found for {version}")
         return False
     log.trace(f"Parsing {mod_path} for __call__ method")
-    source = mod_path.read_text()
+    source = mod_path.read_text(encoding="utf-8")
     module = cst.parse_module(source)
 
     call_finder = CallFinder()
@@ -40,7 +40,7 @@ def add_machine_pin_call(merged_path: Path, version: str):
     # then use the CallAdder to add the __call__ method to all machine and pyb stubs
     mod_paths = [f for f in merged_path.rglob("*.*") if f.stem in {"machine", "umachine", "pyb"}]
     for mod_path in mod_paths:
-        source = mod_path.read_text()
+        source = mod_path.read_text(encoding="utf-8")
         machine_module = cst.parse_module(source)
         new_module = machine_module.visit(CallAdder(call_finder.call_meth))
         mod_path.write_text(new_module.code)

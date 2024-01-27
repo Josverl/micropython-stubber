@@ -192,7 +192,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
 
     source_content = ""
     if isinstance(source_script, Path):
-        source_content = source_script.read_text()
+        source_content = source_script.read_text(encoding="utf-8")
     elif isinstance(source_script, (StringIO, TextIOWrapper)):
         source_content = "".join(source_script.readlines())
     elif isinstance(source_script, str):  # type: ignore
