@@ -50,7 +50,7 @@ def create_variants(
     ctx = codemod.CodemodContext()
     base_file = base_path / "createstubs.py"
     log.info(f"Reading : {base_file}")
-    base_txt = (base_path / "createstubs.py")encoding="utf-8")
+    base_txt = base_path / "createstubs.py"
     base_module = cst.parse_module(base_txt)
 
     for var in make_variants:
