@@ -20,6 +20,7 @@ __all__ = [
 
 # all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
+    "from __future__ import annotations",
     "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
     "from _typeshed import Incomplete",
 ]
@@ -483,17 +484,18 @@ PARAM_FIXES = [
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {
     # machine
-    # "SoftSPI": "SPI", # BUG: SoftSPI is defined before SPI, so baseclass is not yet available
+    # SoftSPI is defined before SPI, so baseclass is not yet available - but in a .pyi that is OK 
+    "SoftSPI": "SPI",  
     "SoftI2C": "I2C",
     "Switch": "Pin",
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
     # "IOBase": "IO",  # DOCME  not in documentation
-    "TextIOWrapper": "IO",
-    "FileIO": "IO",
-    "StringIO": "IO",
-    "BytesIO": "IO",
-    "BufferedWriter": "IOBase",  # DOCME: not in documentation
+    "TextIOWrapper": "IO", # "TextIOBase, TextIO",  # based on Stdlib
+    "FileIO": "IO", #  "RawIOBase, BinaryIO",  # based on Stdlib
+    "StringIO": "IO", #  "BufferedIOBase, BinaryIO",  # based on Stdlib
+    "BytesIO": "IO", # "BufferedIOBase, BinaryIO",  # based on Stdlib
+    "BufferedWriter": "IOBase",  # DOCME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
     # uzlib
     # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # -------------------------------------------------------------------------------------
@@ -512,7 +514,7 @@ CHILD_PARENT_CLASS = {
     "namedtuple": "tuple",
     "deque": "stdlib_deque",
     # ESPNow
-    "ESPNow": "ESPNowBase,Iterator", # causes issue with mypy 
+    "ESPNow": "ESPNowBase,Iterator",  # causes issue with mypy
     "AIOESPNow": "ESPNow",
     # array
     "array": "List",
