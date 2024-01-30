@@ -148,7 +148,7 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self.log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
+        self.log.info("Start micropython-stubber {} on {}".format(__version__, self._fwid))
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)

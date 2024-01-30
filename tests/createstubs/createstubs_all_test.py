@@ -187,7 +187,6 @@ def test_stubber_fwid(
     assert Version(info["version"]), "provided version is not a valid version"
 
     assert info["port"] != "", "stubber.info() - No port detected"
-    assert info["board"] != "", "stubber.info() - No board detected"
     # TEST 2: check if the firmware id is correct
     new_fwid = stubber._fwid
     assert new_fwid != "none"

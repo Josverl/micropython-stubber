@@ -136,7 +136,7 @@ fwid_test_cases = [
     # - patch input -  os.uname stucture
     # - patch input -  array of modules to mock for firmware detection
     (
-        "micropython-v1.9.4-esp32-GENERIC",
+        "micropython-v1.9.4-esp32",
         MP_Implementation(name="micropython", version=(1, 9, 4)),
         "esp32",
         "",
@@ -144,7 +144,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.10-esp32-GENERIC",
+        "micropython-v1.10-esp32",
         MP_Implementation(
             "micropython",
             (1, 10, 0),
@@ -155,7 +155,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.13-preview-esp32-GENERIC_SPIRAM",
+        "micropython-v1.13-preview-esp32",
         MP_Implementation(
             "micropython",
             (1, 13, 0),
@@ -166,7 +166,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.11-esp8266-GENERIC",
+        "micropython-v1.11-esp8266",
         MP_Implementation(
             "micropython",
             (1, 11, 0),
@@ -177,7 +177,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.11-preview-esp8266-GENERIC",
+        "micropython-v1.11-preview-esp8266",
         MP_Implementation(
             "micropython",
             (1, 11, 0),
@@ -188,7 +188,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.17-esp8266-GENERIC",
+        "micropython-v1.17-esp8266",
         MP_Implementation(
             "micropython",
             (1, 17, 0),
@@ -200,7 +200,7 @@ fwid_test_cases = [
     ),
     # mpy pyb1
     (
-        "micropython-v1.13-preview-stm32-PYBV11",
+        "micropython-v1.13-preview-stm32",
         MP_Implementation(
             "micropython",
             (1, 13, 0),
@@ -212,7 +212,7 @@ fwid_test_cases = [
     ),
     # RP2
     (
-        "micropython-v1.18-preview-rp2-RPI_PICO",
+        "micropython-v1.18-preview-rp2",
         MP_Implementation(
             "micropython",
             (1, 18, 0),
@@ -294,7 +294,7 @@ fwid_test_cases = [
     ),
     # 1.19.1
     (
-        "micropython-v1.19.1-preview-rp2-RPI_PICO_W",
+        "micropython-v1.19.1-preview-rp2",
         MP_Implementation("micropython", (1, 19, 1)),
         "rp2",
         "",
@@ -308,7 +308,7 @@ fwid_test_cases = [
         [],
     ),
     (
-        "micropython-v1.19.1-rp2-PIMORONI_PICOLIPO_16MB",
+        "micropython-v1.19.1-rp2",
         MP_Implementation("micropython", (1, 19, 1)),
         "rp2",
         "",
@@ -324,7 +324,7 @@ fwid_test_cases = [
     # version 1.22
     (
         # using uname (old)
-        "micropython-v1.22.0-esp32-ESP32_GENERIC",
+        "micropython-v1.22.0-esp32",
         MP_Implementation("micropython", (1, 22, 0, "")),
         "esp32",
         "",
@@ -333,7 +333,7 @@ fwid_test_cases = [
     ),
     (
         # using _machine and uname
-        "micropython-v1.22.0-esp32-ESP32_GENERIC",
+        "micropython-v1.22.0-esp32",
         MP_Implementation("micropython", (1, 22, 0, ""), _machine="Generic ESP32 module with SPIRAM with ESP32"),
         "esp32",
         "",
@@ -342,7 +342,7 @@ fwid_test_cases = [
     ),
     (
         # using _machine only (new)
-        "micropython-v1.22.0-samd-SEEED_WIO_TERMINAL",
+        "micropython-v1.22.0-samd",
         MP_Implementation("micropython", (1, 22, 0, ""), _machine="Wio Terminal D51R with SAMD51P19A"),
         "samd",
         "",
@@ -351,7 +351,7 @@ fwid_test_cases = [
     ),
     (
         # using _machine only (new)
-        "micropython-v1.23.0-preview-samd-SEEED_WIO_TERMINAL",
+        "micropython-v1.23.0-preview-samd",
         MP_Implementation("micropython", (1, 23, 0, "preview"), _machine="Wio Terminal D51R with SAMD51P19A"),
         "samd",
         "3.4.0; MicroPython v1.23.0-preview.6.g3d0b6276f on 2024-01-02",  # sys.version

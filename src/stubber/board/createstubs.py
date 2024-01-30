@@ -4,7 +4,6 @@ Create stubs for (all) modules on a MicroPython board
 # Copyright (c) 2019-2023 Jos Verlinde
 
 import gc
-import logging
 import os
 import sys
 from time import sleep
@@ -24,11 +23,61 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-
 __version__ = "v1.16.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
-LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
+LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
+
+
+# our own logging module to avoid dependency on and interfering with logging module
+class logging:
+    DEBUG = 10
+    TRACE = 15
+    INFO = 20
+    WARNING = 30
+    ERROR = 40
+    CRITICAL = 50
+    level = INFO
+    prnt = print
+
+    @staticmethod
+    def getLogger(name):
+        return logging()
+
+    @classmethod
+    def basicConfig(cls, level):
+        cls.level = level
+        pass
+
+    def trace(self, msg):
+        if self.level <= logging.TRACE:
+            self.prnt("TRACE :", msg)
+
+    def debug(self, msg):
+        if self.level <= logging.DEBUG:
+            self.prnt("DEBUG :", msg)
+
+    def info(self, msg):
+        if self.level <= logging.INFO:
+            self.prnt("INFO  :", msg)
+
+    def warning(self, msg):
+        if self.level <= logging.WARNING:
+            self.prnt("WARN  :", msg)
+
+    def error(self, msg):
+        if self.level <= logging.ERROR:
+            self.prnt("ERROR :", msg)
+
+    def critical(self, msg):
+        if self.level <= logging.CRITICAL:
+            self.prnt("CRIT  :", msg)
+
+
+log = logging.getLogger("stubber")
+logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.TRACE)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 class Stubber:
@@ -40,11 +89,10 @@ class Stubber:
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
-        self.log = logging.getLogger("stubber")
         self._report = []  # type: list[str]
         self.info = _info()
-        self.log.info("Port: {}".format(self.info["port"]))
-        self.log.info("Board: {}".format(self.info["board"]))
+        log.info("Port: {}".format(self.info["port"]))
+        log.info("Board: {}".format(self.info["board"]))
         gc.collect()
         if firmware_id:
             self._fwid = firmware_id.lower()
@@ -62,11 +110,11 @@ class Stubber:
             path = get_root()
 
         self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace("//", "/")
-        self.log.debug(self.path)
+        log.debug(self.path)
         try:
             ensure_folder(path + "/")
         except OSError:
-            self.log.error("error creating stub folder {}".format(path))
+            log.error("error creating stub folder {}".format(path))
         self.problematic = [
             "upip",
             "upysh",
@@ -91,15 +139,15 @@ class Stubber:
         # name_, repr_(value), type as text, item_instance
         _result = []
         _errors = []
-        self.log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
+        log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
             if name.startswith("_") and not name in self.modules:
                 continue
-            self.log.debug("get attribute {}".format(name))
+            log.debug("get attribute {}".format(name))
             try:
                 val = getattr(item_instance, name)
                 # name , item_repr(value) , type as text, item_instance, order
-                self.log.debug("attribute {}:{}".format(name, val))
+                log.debug("attribute {}:{}".format(name, val))
                 try:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
@@ -132,18 +180,18 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        self.log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
+        log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)
-        self.log.info("Finally done")
+        log.info("Finally done")
 
     def create_one_stub(self, module_name: str):
         if module_name in self.problematic:
-            self.log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
+            log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
         if module_name in self.excluded:
-            self.log.warning("Skip module: {:<25}        : Excluded".format(module_name))
+            log.warning("Skip module: {:<25}        : Excluded".format(module_name))
             return False
 
         file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
@@ -178,10 +226,10 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            self.log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
+            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
 
         except ImportError:
-            self.log.warning("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
+            log.trace("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
             return False
 
         # Start a new file
@@ -203,12 +251,12 @@ class Stubber:
             try:
                 del new_module
             except (OSError, KeyError):  # lgtm [py/unreachable-statement]
-                self.log.warning("could not del new_module")
+                log.warning("could not del new_module")
             # lets not try - most times it does not work anyway
             # try:
             #     del sys.modules[module_name]
             # except KeyError:
-            #     self.log.warning("could not del sys.modules[{}]".format(module_name))
+            #     log.warning("could not del sys.modules[{}]".format(module_name))
         gc.collect()
         return True
 
@@ -216,14 +264,14 @@ class Stubber:
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
-            self.log.warning("SKIPPING problematic module:{}".format(object_expr))
+            log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
 
-        # self.log.debug("DUMP    : {}".format(object_expr))
+        # log.debug("DUMP    : {}".format(object_expr))
         items, errors = self.get_obj_attributes(object_expr)
 
         if errors:
-            self.log.error(errors)
+            log.error(errors)
 
         for item_name, item_repr, item_type_txt, item_instance, _ in items:
             # name_, repr_(value), type as text, item_instance, order
@@ -231,7 +279,7 @@ class Stubber:
                 # do not create stubs for these primitives
                 continue
             if item_name[0].isdigit():
-                self.log.warning("NameError: invalid name {}".format(item_name))
+                log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
             if (
@@ -240,7 +288,7 @@ class Stubber:
                 # and not obj_name.endswith(".Pin")
                 # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
             ):
-                self.log.info("{0}class {1}:".format(indent, item_name))
+                log.trace("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (
                     item_name.endswith("Exception")
@@ -263,7 +311,7 @@ class Stubber:
                 # write classdef
                 fp.write(s)
                 # first write the class literals and methods
-                self.log.debug("# recursion over class {0}".format(item_name))
+                log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
                     fp,
                     item_instance,
@@ -277,7 +325,7 @@ class Stubber:
                 s += indent + "        ...\n\n"
                 fp.write(s)
             elif any(word in item_type_txt for word in ["method", "function", "closure"]):
-                self.log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
+                log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
                 # will accept any number of params
                 # return type Any/Incomplete
@@ -295,7 +343,7 @@ class Stubber:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
                 fp.write(s)
-                self.log.debug("\n" + s)
+                log.debug("\n" + s)
             elif item_type_txt == "<class 'module'>":
                 # Skip imported modules
                 # fp.write("# import {}\n".format(item_name))
@@ -323,10 +371,10 @@ class Stubber:
                         t = "Incomplete"
                         s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
-                self.log.debug("\n" + s)
+                log.debug("\n" + s)
             else:
                 # keep only the name
-                self.log.debug("# all other, type = '{0}'".format(item_type_txt))
+                log.debug("# all other, type = '{0}'".format(item_type_txt))
                 fp.write("# all other, type = '{0}'\n".format(item_type_txt))
 
                 fp.write(indent + item_name + " # type: Incomplete\n")
@@ -352,7 +400,7 @@ class Stubber:
         "Remove all files from the stub folder"
         if path is None:
             path = self.path
-        self.log.info("Clean/remove files in folder: {}".format(path))
+        log.info("Clean/remove files in folder: {}".format(path))
         try:
             os.stat(path)  # TEMP workaround mpremote listdir bug -
             items = os.listdir(path)
@@ -372,11 +420,9 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
-        self.log.info(
-            "Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path)
-        )
+        log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
-        self.log.info("Report file: {}".format(f_name))
+        log.info("Report file: {}".format(f_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
@@ -388,9 +434,9 @@ class Stubber:
                     first = False
                 self.write_json_end(f)
             used = self._start_free - gc.mem_free()  # type: ignore
-            self.log.info("Memory used: {0} Kb".format(used // 1024))
+            log.trace("Memory used: {0} Kb".format(used // 1024))
         except OSError:
-            self.log.error("Failed to create the report.")
+            log.error("Failed to create the report.")
 
     def write_json_header(self, f):
         f.write("{")
@@ -582,9 +628,10 @@ def get_boardname() -> str:
     "Read the board name from the boardname.py file that may have been created upfront"
     try:
         from boardname import BOARDNAME  # type: ignore
+
         log.info("Found BOARDNAME: {}".format(BOARDNAME))
     except ImportError:
-        log.info("BOARDNAME not found")
+        log.warning("BOARDNAME not found")
         BOARDNAME = ""
     return BOARDNAME
 
@@ -911,12 +958,6 @@ def main():
 
 
 if __name__ == "__main__" or is_micropython():
-    try:
-        log = logging.getLogger("stubber")
-        logging.basicConfig(level=logging.INFO)
-        # logging.basicConfig(level=logging.DEBUG)
-    except NameError:
-        pass
     if not file_exists("no_auto_stubber.txt"):
         try:
             gc.threshold(4 * 1024)  # type: ignore
