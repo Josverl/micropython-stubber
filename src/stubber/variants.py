@@ -26,7 +26,7 @@ def create_variants(
     *,
     target_path: Optional[Path] = None,
     version: str = "",
-    make_variants: List[CreateStubsVariant] = ALL_VARIANTS,
+    make_variants: List[CreateStubsVariant] = ALL_VARIANTS[:3],
     update_modules: bool = True,
 ):
     """
@@ -50,7 +50,7 @@ def create_variants(
     ctx = codemod.CodemodContext()
     base_file = base_path / "createstubs.py"
     log.info(f"Reading : {base_file}")
-    base_txt = base_path / "createstubs.py"
+    base_txt = (base_path / "createstubs.py").read_text(encoding="utf-8")
     base_module = cst.parse_module(base_txt)
 
     for var in make_variants:

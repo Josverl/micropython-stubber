@@ -33,7 +33,7 @@ TESTING = False
 LOCAL_FILES = True
 
 ###############################################################################################
-reset_before = False
+reset_before = True
 ###############################################################################################
 
 
@@ -85,7 +85,7 @@ def run(
     if not error_tags:
         error_tags = ["Traceback ", "Error: ", "Exception: ", "ERROR :", "CRIT  :"]
     if not warning_tags:
-        warning_tags = ["WARN  :"]  # , "Module not found."
+        warning_tags = ["WARN  :", "TRACE :"]  # , "Module not found."
     if not success_tags:
         success_tags = ["Created stubs for", "Path: /remote"]
     if not ignore_tags:
@@ -252,14 +252,14 @@ class MPRemoteBoard:
         """
         if isinstance(cmd, str):
             cmd = cmd.split(" ")
-        prefix = [sys.executable, "-m" "mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
+        prefix = [sys.executable, "-m", "mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
         # if connected add resume to keep state between commands
         if self.connected:
             prefix += ["resume"]
         cmd = prefix + cmd
         log.debug(" ".join(cmd))
         result = run(cmd, timeout, log_errors, no_info, **kwargs)
-        self.connected = True
+        self.connected = result[0] == OK
         return result
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
@@ -272,7 +272,7 @@ class MPRemoteBoard:
         return result
 
 
-def copy_createstubs(board: MPRemoteBoard, variant: Variant, form: Form) -> bool:
+def copy_createstubs_to_board(board: MPRemoteBoard, variant: Variant, form: Form) -> bool:
     # sourcery skip: assign-if-exp, boolean-if-exp-identity, remove-unnecessary-cast
     """Copy createstubs to the board"""
     # copy createstubs.py to the destination folder
@@ -366,9 +366,9 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
         mcu.run_command("reset", timeout=5)
         time.sleep(2)
 
-    log.info(f"Running createstubs {variant} on {mcu.serialport} {mcu.description} using temp path: {dest}")
+    log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
     cmd = build_cmd(dest, variant)
-
+    log.info(f"Running : mpremote {' '.join(cmd)}")
     mcu.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     # esp32s3 > 240 seconds with mounted fs
@@ -406,7 +406,7 @@ def generate_board_stubs(
     host_mounted=True,
 ) -> Tuple[int, Optional[Path]]:
     """
-    Generate the board stubs.
+    Generate the board stubs for this MCU board.
     Parameters
     ----------
     dest : Path
@@ -415,32 +415,13 @@ def generate_board_stubs(
         The port the board is connected to
     """
 
-    board_info_path = Path(__file__).parent.parent / "src/stubber/data/board_info.csv"
     # HOST -> MCU : copy createstubs to board
-    if LOCAL_FILES:
-        ok = copy_createstubs(mcu, variant, form)
-    else:
-        if form == Form.min:
-            location = "github:josverl/micropython-stubber/mip/minified.json"
-        elif form == Form.mpy:
-            location = "github:josverl/micropython-stubber/mip/mpy_v6.json"
-        else:
-            location = "github:josverl/micropython-stubber/mip/full.json"
-
-        ok = mcu.mip_install(location)
-
+    ok = copy_scripts_to_board(mcu, variant, form)
     if not ok and not TESTING:
         log.warning("Error copying createstubs to board")
         return ERROR, None
 
-    if mcu.board:
-        cmd = ["exec", f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board}\"')"]
-        log.info(f"Writing BOARDNAME='{mcu.board}' to boardname.py")
-    else:
-        cmd = ["rm", "boardname.py"]
-    rc, _ = mcu.run_command(cmd)
-    if rc != OK and not "rm" in cmd:
-        log.error(f"Error during copy createstubs running command: {cmd}")
+    copy_boardname_to_board(mcu)
 
     rc, out = run_createstubs(dest, mcu, variant)  # , host_mounted=host_mounted)
 
@@ -476,6 +457,50 @@ def generate_board_stubs(
     utils.do_post_processing([stubs_path], stubgen=True, black=True, autoflake=True)
 
     return OK, stubs_path
+
+
+def copy_boardname_to_board(mcu: MPRemoteBoard):
+    """
+    Copies the board name to the board by writing it to the 'boardname.py' file.
+
+    Args:
+        mcu: The MCU object representing the microcontroller.
+
+    Returns:
+        None
+    """
+    if mcu.board:
+        cmd = ["exec", f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board}\"')"]
+        log.info(f"Writing BOARDNAME='{mcu.board}' to boardname.py")
+    else:
+        cmd = ["rm", "boardname.py"]
+    rc, _ = mcu.run_command(cmd)
+    if rc != OK and "rm" not in cmd:
+        log.error(f"Error during copy createstubs running command: {cmd}")
+
+
+def copy_scripts_to_board(mcu: MPRemoteBoard, variant: Variant, form: Form):
+    """
+    Copy scripts to the board.
+
+    Args:
+        mcu (str): The microcontroller unit.
+        variant (str): The variant of the board.
+        form (Form): The form of the scripts to be copied.
+
+    Returns:
+        bool: True if the scripts are successfully copied, False otherwise.
+    """
+    if LOCAL_FILES:
+        return copy_createstubs_to_board(mcu, variant, form)
+    if form == Form.min:
+        location = "github:josverl/micropython-stubber/mip/minified.json"
+    elif form == Form.mpy:
+        location = "github:josverl/micropython-stubber/mip/mpy_v6.json"
+    else:
+        location = "github:josverl/micropython-stubber/mip/full.json"
+
+    return mcu.mip_install(location)
 
 
 def get_stubfolder(out: List[str]):
@@ -584,7 +609,19 @@ def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
     help="Python source or pre-compiled.",
 )
 @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
-def run_stubber(variant: str, format: str, debug: bool):
+def run_stubber_connected_boards(variant: str, format: str, debug: bool):
+    """
+    Runs the stubber to generate stubs for connected MicroPython boards.
+
+    Args:
+        variant (str): The variant of the MicroPython board.
+        format (str): The format of the generated stubs.
+        debug (bool): Flag indicating whether to enable debug mode.
+
+    Returns:
+        None
+    """
+
     if debug:
         set_loglevel(1)
     else:
@@ -653,4 +690,4 @@ def run_stubber(variant: str, format: str, debug: bool):
 
 
 if __name__ == "__main__":
-    run_stubber()
+    run_stubber_connected_boards()
