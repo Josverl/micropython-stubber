@@ -25,8 +25,7 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 try:
-    from nope_machine import WDT
-
+    from machine import WDT
     wdt = WDT()
 
 except ImportError:

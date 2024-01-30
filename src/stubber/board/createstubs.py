@@ -31,12 +31,10 @@ LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
 # our own logging module to avoid dependency on and interfering with logging module
 class logging:
-    DEBUG = 10
-    TRACE = 15
+    # DEBUG = 10
     INFO = 20
     WARNING = 30
     ERROR = 40
-    CRITICAL = 50
     level = INFO
     prnt = print
 
@@ -47,15 +45,10 @@ class logging:
     @classmethod
     def basicConfig(cls, level):
         cls.level = level
-        pass
 
-    def trace(self, msg):
-        if self.level <= logging.TRACE:
-            self.prnt("TRACE :", msg)
-
-    def debug(self, msg):
-        if self.level <= logging.DEBUG:
-            self.prnt("DEBUG :", msg)
+    # def debug(self, msg):
+    #     if self.level <= logging.DEBUG:
+    #         self.prnt("DEBUG :", msg)
 
     def info(self, msg):
         if self.level <= logging.INFO:
@@ -69,14 +62,9 @@ class logging:
         if self.level <= logging.ERROR:
             self.prnt("ERROR :", msg)
 
-    def critical(self, msg):
-        if self.level <= logging.CRITICAL:
-            self.prnt("CRIT  :", msg)
-
 
 log = logging.getLogger("stubber")
 logging.basicConfig(level=logging.INFO)
-# logging.basicConfig(level=logging.TRACE)
 # logging.basicConfig(level=logging.DEBUG)
 
 
@@ -110,7 +98,7 @@ class Stubber:
             path = get_root()
 
         self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace("//", "/")
-        log.debug(self.path)
+        # log.debug(self.path)
         try:
             ensure_folder(path + "/")
         except OSError:
@@ -139,15 +127,15 @@ class Stubber:
         # name_, repr_(value), type as text, item_instance
         _result = []
         _errors = []
-        log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
+        # log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
             if name.startswith("_") and not name in self.modules:
                 continue
-            log.debug("get attribute {}".format(name))
+            # log.debug("get attribute {}".format(name))
             try:
                 val = getattr(item_instance, name)
                 # name , item_repr(value) , type as text, item_instance, order
-                log.debug("attribute {}:{}".format(name, val))
+                # log.debug("attribute {}:{}".format(name, val))
                 try:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
@@ -229,7 +217,7 @@ class Stubber:
             log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
 
         except ImportError:
-            log.trace("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
+            # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
             return False
 
         # Start a new file
@@ -267,7 +255,7 @@ class Stubber:
             log.warning("SKIPPING problematic module:{}".format(object_expr))
             return
 
-        # log.debug("DUMP    : {}".format(object_expr))
+        # # log.debug("DUMP    : {}".format(object_expr))
         items, errors = self.get_obj_attributes(object_expr)
 
         if errors:
@@ -288,7 +276,7 @@ class Stubber:
                 # and not obj_name.endswith(".Pin")
                 # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
             ):
-                log.trace("{0}class {1}:".format(indent, item_name))
+                # log.debug("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (
                     item_name.endswith("Exception")
@@ -311,7 +299,7 @@ class Stubber:
                 # write classdef
                 fp.write(s)
                 # first write the class literals and methods
-                log.debug("# recursion over class {0}".format(item_name))
+                # log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
                     fp,
                     item_instance,
@@ -325,7 +313,7 @@ class Stubber:
                 s += indent + "        ...\n\n"
                 fp.write(s)
             elif any(word in item_type_txt for word in ["method", "function", "closure"]):
-                log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
+                # log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
                 # module Function or class method
                 # will accept any number of params
                 # return type Any/Incomplete
@@ -343,7 +331,7 @@ class Stubber:
                     s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
                 fp.write(s)
-                log.debug("\n" + s)
+                # log.debug("\n" + s)
             elif item_type_txt == "<class 'module'>":
                 # Skip imported modules
                 # fp.write("# import {}\n".format(item_name))
@@ -371,10 +359,10 @@ class Stubber:
                         t = "Incomplete"
                         s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
-                log.debug("\n" + s)
+                # log.debug("\n" + s)
             else:
                 # keep only the name
-                log.debug("# all other, type = '{0}'".format(item_type_txt))
+                # log.debug("# all other, type = '{0}'".format(item_type_txt))
                 fp.write("# all other, type = '{0}'\n".format(item_type_txt))
 
                 fp.write(indent + item_name + " # type: Incomplete\n")
@@ -434,7 +422,7 @@ class Stubber:
                     first = False
                 self.write_json_end(f)
             used = self._start_free - gc.mem_free()  # type: ignore
-            log.trace("Memory used: {0} Kb".format(used // 1024))
+            # log.debug("Memory used: {0} Kb".format(used // 1024))
         except OSError:
             log.error("Failed to create the report.")
 
