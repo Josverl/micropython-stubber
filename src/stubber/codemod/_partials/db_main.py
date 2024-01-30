@@ -74,17 +74,16 @@ def main():
         # Only clean folder if this is a first run
         stubber.clean()
     # get list of modules to process
-    get_modulelist(stubber)
-    # remove the ones that are already done
     modules_done = read_done()
     # see if we can continue from where we left off
-    modules = [m for m in stubber.modules if not m in modules_done.keys()]
-    if not modules:
+    get_modulelist(stubber, modules_done)
+
+    if not stubber.modules:
         print("All modules have been processed, exiting")
     else:
         del modules_done
         gc.collect()
-        for modulename in modules:
+        for modulename in stubber.modules:
             # ------------------------------------
             # do epic shit
             # but sometimes things fail / run out of memory and reboot
@@ -129,7 +128,7 @@ def read_done():
         return modules_done
 
 
-def get_modulelist(stubber):
+def get_modulelist(stubber, modules_done):
     # new
     gc.collect()
     stubber.modules = []  # avoid duplicates
@@ -143,7 +142,7 @@ def get_modulelist(stubber):
                 line = f.readline().strip()
                 if not line:
                     break
-                if len(line) > 0 and line[0] != "#":
+                if line and line not in modules_done.keys():
                     stubber.modules.append(line)
             gc.collect()
             print("BREAK")

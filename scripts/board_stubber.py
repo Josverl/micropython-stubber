@@ -372,8 +372,8 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
     mcu.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     # esp32s3 > 240 seconds with mounted fs
-    #  but slows down esp8266 restarts so keep that to 60 seconds
-    timeout = 60 if mcu.port == "esp8266" else 6 * 60  # type: ignore
+    #  but slows down esp8266 restarts so keep that to 90 seconds
+    timeout = 90 if mcu.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = mcu.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
     if rc != OK and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
