@@ -94,7 +94,7 @@ def test_literal_init_order(
     # check literals defined before first method
 
     class_line = lines.index("class SoftSPI():")
-    LSB_line = lines.index("    LSB = 1 # type: int", class_line + 1)
+    LSB_line = lines.index("    LSB: int = 1", class_line + 1)
     init_line = lines.index("    def __init__(self, *argv, **kwargs) -> None:", class_line + 1)
 
     assert class_line < LSB_line < init_line, "Literals MUST be listed before class methods"

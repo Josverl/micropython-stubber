@@ -65,9 +65,7 @@ elif sys.platform == "win32":
     "firmware",
     fw_list,
 )
-def test_createstubs(
-    firmware: str, variant: str, suffix: str, tmp_path: Path, pytestconfig: Config
-):
+def test_createstubs(firmware: str, variant: str, suffix: str, tmp_path: Path, pytestconfig: Config):
     "run createstubs in the native (linux/windows) version of micropython"
     # all createstub variants are in the same folder
     script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
@@ -106,7 +104,7 @@ def test_createstubs(
     # did it run without error ?
 
     stub_path = tmp_path / "stubs"
-    stubfiles = list(stub_path.rglob("*.py"))
+    stubfiles = list(stub_path.rglob("*.pyi"))
 
     # manifest exists
     jsons = list(stub_path.rglob("modules.json"))
@@ -121,9 +119,7 @@ def test_createstubs(
     for x in ["firmware", "stubber", "modules"]:
         assert x in manifest.keys(), "module manifest should contain firmware, stubber , modules"
 
-    assert (
-        len(manifest["modules"]) - len(stubfiles) == 0
-    ), "number of modules must match count of stubfiles."
+    assert len(manifest["modules"]) - len(stubfiles) == 0, "number of modules must match count of stubfiles."
     # Delete databaseafter the test
     if variant == "createstubs_db":
         (script_path / "modulelist.done").unlink(missing_ok=False)  # MUST exist

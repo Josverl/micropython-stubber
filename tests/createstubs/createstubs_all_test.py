@@ -44,24 +44,6 @@ def test_firmwarestubber_all_versions_same(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-@pytest.mark.skip(reason="not sure if this is needed")
-def test_firmwarestubber_base_version_match_package(
-    location: Any,
-    variant: str,
-    mock_micropython_path: Generator[str, None, None],
-):
-    # Q&D Location
-    path = Path(__file__).resolve().parents[2] / "pyproject.toml"
-    pyproject = tomllib.loads(open(str(path)).read())
-    pyproject_version = pyproject["tool"]["poetry"]["version"]
-
-    createstubs = import_variant(location, variant)
-    # base version should match the package
-    assert parse(createstubs.__version__).base_version == parse(pyproject_version).base_version
-
-
-@pytest.mark.parametrize("variant", VARIANTS)
-@pytest.mark.parametrize("location", LOCATIONS)
 def test_stubber_Class_available(
     location: Any,
     variant: str,
@@ -223,9 +205,8 @@ def test_create_all_stubs(
     stubber.add_modules(["http_client", "webrepl", "_internal"])
     stubber.create_all_stubs()
 
-    stublist = list(tmp_path.glob("**/*.py"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 3
-    stubber.report()
     stublist = list(tmp_path.glob("**/modules.json"))
     assert len(stublist) == 1
 
@@ -261,11 +242,12 @@ def test_create_module_stub(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
+    stubber.report_start()
     # just in the test folder , no structure
-    stubber.create_module_stub("json", str(tmp_path / "json.py"))
-    stubber.create_module_stub("_thread", str(tmp_path / "_thread.py"))
+    stubber.create_module_stub("json", str(tmp_path / "json.pyi"))
+    stubber.create_module_stub("_thread", str(tmp_path / "_thread.pyi"))
 
-    stublist = list(tmp_path.glob("**/*.py"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 2
 
 
@@ -282,9 +264,9 @@ def test_create_module_stub_folder(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
-
+    stubber.report_start()
     stubber.create_module_stub("json")
-    stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.py"))
+    stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.pyi"))
     assert len(stublist) == 1, "should create stub in stub folder if no folder specified"
 
 
@@ -323,9 +305,10 @@ def test_nested_modules(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
+    stubber.report_start()
     # just in the test folder , no structure
-    stubber.create_module_stub("urllib/request", str(tmp_path / "request.py"))
-    stublist = list(tmp_path.glob("**/*.py"))
+    stubber.create_module_stub("urllib/request", str(tmp_path / "request.pyi"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 1
 
 
@@ -342,10 +325,11 @@ def test_unavailable_modules(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
+    stubber.report_start()
     # this should not generate a module , but also should not th
-    stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.py"))
-    stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.py"))
-    stublist = list(tmp_path.glob("**/*.py"))
+    stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.pyi"))
+    stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.pyi"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 0
 
 

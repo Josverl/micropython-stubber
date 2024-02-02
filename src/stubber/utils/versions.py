@@ -15,9 +15,9 @@ def clean_version(
 ):
     "Clean up and transform the many flavours of versions"
     # 'v1.13.0-103-gb137d064e' --> 'v1.13-103'
-
     if version in {"", "-"}:
         return version
+    is_preview = "-preview" in version
     nibbles = version.split("-")
     ver_ = nibbles[0].lower().lstrip("v")
     if not patch and ver_ >= "1.10.0" and ver_ < "1.20.0" and ver_.endswith(".0"):
@@ -25,12 +25,15 @@ def clean_version(
         nibbles[0] = nibbles[0][:-2]
     if len(nibbles) == 1:
         version = nibbles[0]
-    elif build:
+    elif build and not is_preview:
         version = "-".join(nibbles) if commit else "-".join(nibbles[:-1])
     else:
         # version = "-".join((nibbles[0], LATEST))
         # HACK: this is not always right, but good enough most of the time
-        version = "latest"
+        if is_preview:
+            version = "-".join((nibbles[0], "preview"))
+        else:
+            version = "latest"
     if flat:
         version = version.strip().replace(".", "_")
     else:
@@ -40,6 +43,7 @@ def clean_version(
         version = version.lstrip("v")
     elif not version.startswith("v") and version.lower() != "latest":
         version = "v" + version
+
     return version
 
 
@@ -50,4 +54,18 @@ def micropython_versions(start: str = "v1.9.2"):
         repo = g.get_repo("micropython/micropython")
         return [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(start)]
     except Exception:
-        return ["v1.19.1", "v1.19", "v1.18", "v1.17", "v1.16", "v1.15", "v1.14", "v1.13", "v1.12", "v1.11", "v1.10", "v1.9.4", "v1.9.3"]
+        return [
+            "v1.19.1",
+            "v1.19",
+            "v1.18",
+            "v1.17",
+            "v1.16",
+            "v1.15",
+            "v1.14",
+            "v1.13",
+            "v1.12",
+            "v1.11",
+            "v1.10",
+            "v1.9.4",
+            "v1.9.3",
+        ]

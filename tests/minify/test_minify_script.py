@@ -64,9 +64,7 @@ def test_get_whitespace_context(content, index, expected):
         # Happy path tests
         (
             ["#0", "__version__ = 1", "print('Hello, World!')", ""],
-            # ["#0", "__version__ = 1", "# print('Hello, World!')", ""],
-            ["__version__=1"],
-            # "\n".join(["__version__=1"]),
+            ["__version__=1", "print('Hello, World!')"],
             True,
         ),
         (
@@ -100,5 +98,6 @@ def test_minify_script(source_script, expected, keep_report):
         result = minify_script(source, keep_report, diff=True)
 
         result = result.split("\n")
+        assert len(result) == len(expected), "Lengths do not match"
         for i, line in enumerate(result):
             assert expected[i] == line

@@ -49,9 +49,7 @@ def merge_all_docstubs(
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
-            candidate["board"] = default_board(
-                port=candidate["port"], version=candidate["version"]
-            )
+            candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
         # check if we have board stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths
@@ -120,13 +118,13 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
         "pycopy_imphook",  # is not intended to be used directly, and has an unresolved subclass
     ]:
         for suffix in [".py", ".pyi"]:
-            if (dest_path / name).with_suffix(suffix).exists(): # type: ignore
-                (dest_path / name).with_suffix(suffix).unlink() # type: ignore
+            if (dest_path / name).with_suffix(suffix).exists():  # type: ignore
+                (dest_path / name).with_suffix(suffix).unlink()  # type: ignore
 
     # 2 - Enrich the firmware stubs with the document stubs
     result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
 
     # copy the docstubs manifest.json file to the package folder
-    # if (docstub_path / "modules.json").exists():
-    shutil.copy(docstub_path / "modules.json", dest_path / "doc_stubs.json")
+    if (docstub_path / "modules.json").exists():
+        shutil.copy(docstub_path / "modules.json", dest_path / "doc_stubs.json")
     return result
