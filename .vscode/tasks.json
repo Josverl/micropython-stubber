@@ -8,36 +8,22 @@
             "detail": "run createstubs in linux port",
             "type": "shell",
             "windows": {
-                "command": "ubuntu run MICROPYPATH=./board ./tools/micropython board/createstubs.py"
+                "command": "ubuntu run MICROPYPATH=./src/stubber/board ./tests/tools/ubuntu_20_04/micropython_v1_21_0 src/stubber/board/createstubs.py"
             },
             "linux": {
-                "command": "MICROPYPATH=./board ./tools/micropython board/createstubs.py"
+                "command": "MICROPYPATH=./src/stubber/board ./tests/tools/ubuntu_20_04/micropython_v1_21_0 src/stubber/board/createstubs.py"
             },
             "problemMatcher": []
         },
         {
-            "label": "minify",
-            "detail": "minify for esp8622",
-            "type": "shell",
-            "command": "poetry run stubber minify --all --compile",
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "run minified",
-            "detail": "run minified createstubs in linux port",
-            "dependsOn": [
-                "minify"
-            ],
+            "label": "run createstubs_db",
+            "detail": "run createstubs_db in linux port",
             "type": "shell",
             "windows": {
-                "command": "ubuntu run ./tools/micropython minified/createstubs.py"
+                "command": "ubuntu run MICROPYPATH=./src/stubber/board ./tests/tools/ubuntu_20_04/micropython_v1_21_0 src/stubber/board/createstubs_db.py"
             },
             "linux": {
-                "command": "./tools/micropython minified/createstubs.py"
+                "command": "MICROPYPATH=./src/stubber/board ./tests/tools/ubuntu_20_04/micropython_v1_21_0 src/stubber/board/createstubs_db.py"
             },
             "problemMatcher": []
         },

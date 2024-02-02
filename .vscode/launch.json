@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "dgb pytest --collect-only",
+            "name": "Pytest --collect-only (debug)",
             "type": "python",
             "request": "launch",
             "module": "pytest",
@@ -86,13 +86,17 @@
             ]
         },
         {
-            "name": "Python: stubber get-docstubs",
+            "name": "Python: board_stubber",
             "type": "python",
             "request": "launch",
-            "module": "stubber.stubber",
+            "program": "scripts/board_stubber.py",
+            "cwd": "${workspaceFolder}",
             "args": [
-                "get-docstubs"
-            ]
+                "--format",
+                "mpy",
+                "--debug"
+            ],
+            "console": "integratedTerminal"
         },
         {
             "name": "Python: Current File",
