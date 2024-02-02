@@ -376,7 +376,7 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
     timeout = 90 if mcu.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = mcu.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
-    if rc != OK and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
+    if rc != OK and out and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
         log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
