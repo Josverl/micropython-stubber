@@ -454,7 +454,8 @@ def generate_board_stubs(
         log.warning("Error generating stubs, too few (<10)stubs were generated")
         return ERROR, None
 
-    utils.do_post_processing([stubs_path], stubgen=True, black=True, autoflake=True)
+    stubgen_needed = any(stubs_path.glob("*.py"))
+    utils.do_post_processing([stubs_path], stubgen=stubgen_needed, black=True, autoflake=True)
 
     return OK, stubs_path
 
@@ -517,7 +518,7 @@ def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
     boards = []
     for mpr_port in MPRemoteBoard.connected_boards():
         board = MPRemoteBoard(mpr_port)
-        log.info(f"Attempt to connect to: {board.serialport}")
+        log.debug(f"Attempt to connect to: {board.serialport}")
         try:
             board.get_mcu_info()
             log.success(f"Detected board {board.description} {board.version}")
@@ -633,7 +634,7 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool):
 
     tempdir = mkdtemp(prefix="board_stubber")
 
-    dest = Path(tempdir)
+    temp_path = Path(tempdir)
 
     # scan boards and just work with the ones that reponded with understandable data
     connected_boards = scan_boards(True)
@@ -657,8 +658,10 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool):
         log.info(
             f"Connecting using {board.serialport} to {board.port} {board.board} {board.version}: {board.description}"
         )
+        # remove the modulelist.done file before starting createstubs on each board
+        (temp_path / "modulelist.done").unlink(missing_ok=True)
 
-        rc, my_stubs = generate_board_stubs(dest, board, variant, form)
+        rc, my_stubs = generate_board_stubs(temp_path, board, variant, form)
         if rc == OK and my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
             if destination := copy_to_repo(my_stubs, board.firmware):
