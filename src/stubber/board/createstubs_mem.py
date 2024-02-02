@@ -140,7 +140,7 @@ class Stubber:
         _errors = []
         # log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
-            if name.startswith("_") and not name in self.modules:
+            if name.startswith("__") and not name in self.modules:
                 continue
             # log.debug("get attribute {}".format(name))
             try:
@@ -195,7 +195,7 @@ class Stubber:
             log.warning("Skip module: {:<25}        : Excluded".format(module_name))
             return False
 
-        file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
+        file_name = "{}/{}.pyi".format(self.path, module_name.replace(".", "/"))
         gc.collect()
         result = False
         try:
@@ -210,10 +210,10 @@ class Stubber:
 
         Args:
         - module_name (str): name of the module to document. This module will be imported.
-        - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
+        - file_name (Optional[str]): the 'path/filename.pyi' to write to. If omitted will be created based on the module name.
         """
         if file_name is None:
-            fname = module_name.replace(".", "_") + ".py"
+            fname = module_name.replace(".", "_") + ".pyi"
             file_name = self.path + "/" + fname
         else:
             fname = file_name.split("/")[-1]
@@ -240,7 +240,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -346,23 +346,27 @@ class Stubber:
                 t = item_type_txt[8:-2]
                 s = ""
 
-                if t in ["str", "int", "float", "bool", "bytearray", "bytes"]:
+                if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                elif t in ["dict", "list", "tuple"]:
+                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
+                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
+                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
+                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t in ["object", "set", "frozenset", "Pin", "FileIO"]:
+                    if t in ("object", "set", "frozenset", "Pin", "generator"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
-                        #  use these types for the attribute
-                        s = "{0}{1} : {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        # use these types for the attribute
+                        if t == "generator":
+                            t = "Generator"
+                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
-                        s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
