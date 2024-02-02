@@ -288,8 +288,8 @@ def copy_createstubs_to_board(board: MPRemoteBoard, variant: Variant, form: Form
         f"cp {origin}/createstubs.py :lib/createstubs.py",
         f"cp {origin}/createstubs_mem.py :lib/createstubs_mem.py",
         f"cp {origin}/createstubs_db.py :lib/createstubs_db.py",
-        f"cp {origin}/logging.py :lib/logging.py",
     ]
+
     # copy createstubs*_min.py to the destination folder
     _min = [
         f"cp {origin}/createstubs_min.py :lib/createstubs.py",
@@ -446,7 +446,7 @@ def generate_board_stubs(
             modules_json = json.load(fp)
             mcu.firmware = modules_json["firmware"]
     except FileNotFoundError:
-        log.warning("Error generating stubs, modules.json not found")
+        log.warning("Could not load modules.json, Assuming error in createstubs")
         return ERROR, None
 
     # check the number of stubs generated
@@ -504,7 +504,9 @@ def copy_scripts_to_board(mcu: MPRemoteBoard, variant: Variant, form: Form):
 
 
 def get_stubfolder(out: List[str]):
-    return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("Path: ")]) else ""
+    return (
+        lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("INFO  : Path: ")]) else ""
+    )
 
 
 def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
