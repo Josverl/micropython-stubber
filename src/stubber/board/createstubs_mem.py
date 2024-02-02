@@ -87,7 +87,6 @@ class Stubber:
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
-        self._report = []  # type: list[str]
         self.info = _info()
         log.info("Port: {}".format(self.info["port"]))
         log.info("Board: {}".format(self.info["board"]))
@@ -131,6 +130,8 @@ class Stubber:
         ]
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []  # type: list[str]
+        self._json_name = None
+        self._json_first = False
 
     def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
@@ -178,10 +179,12 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
+        log.info("Start micropython-stubber {} on {}".format(__version__, self._fwid))
+        self.report_start()
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)
+        self.report_end()
         log.info("Finally done")
 
     def create_one_stub(self, module_name: str):
@@ -240,7 +243,7 @@ class Stubber:
             fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
+        self.report_add(module_name, file_name)
 
         if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
@@ -248,11 +251,7 @@ class Stubber:
                 del new_module
             except (OSError, KeyError):  # lgtm [py/unreachable-statement]
                 log.warning("could not del new_module")
-            # lets not try - most times it does not work anyway
-            # try:
-            #     del sys.modules[module_name]
-            # except KeyError:
-            #     log.warning("could not del sys.modules[{}]".format(module_name))
+            # do not try to delete from sys.modules - most times it does not work anyway
         gc.collect()
         return True
 
@@ -412,41 +411,53 @@ class Stubber:
                 except OSError:
                     pass
 
-    def report(self, filename: str = "modules.json"):
-        "create json with list of exported modules"
-        log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
-        f_name = "{}/{}".format(self.path, filename)
-        log.info("Report file: {}".format(f_name))
+    def report_start(self, filename: str = "modules.json"):
+        """Start a report of the modules that have been stubbed
+        "create json with list of exported modules"""
+        self._json_name = "{}/{}".format(self.path, filename)
+        self._json_first = True
+        ensure_folder(self._json_name)
+        log.info("Report file: {}".format(self._json_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
-            with open(f_name, "w") as f:
-                self.write_json_header(f)
-                first = True
-                for n in self._report:
-                    self.write_json_node(f, n, first)
-                    first = False
-                self.write_json_end(f)
-            used = self._start_free - gc.mem_free()  # type: ignore
-            # log.debug("Memory used: {0} Kb".format(used // 1024))
+            with open(self._json_name, "w") as f:
+                f.write("{")
+                f.write(dumps({"firmware": self.info})[1:-1])
+                f.write(",\n")
+                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
+                f.write(",\n")
+                f.write('"modules" :[\n')
+
+        except OSError as e:
+            log.error("Failed to create the report.")
+            self._json_name = None
+            raise e
+
+    def report_add(self, module_name: str, stub_file: str):
+        "Add a module to the report"
+        # write json by node to reduce memory requirements
+        if not self._json_name:
+            raise Exception("No report file")
+        try:
+            with open(self._json_name, "a") as f:
+                if not self._json_first:
+                    f.write(",\n")
+                else:
+                    self._json_first = False
+                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
+                f.write(line)
+
         except OSError:
             log.error("Failed to create the report.")
 
-    def write_json_header(self, f):
-        f.write("{")
-        f.write(dumps({"firmware": self.info})[1:-1])
-        f.write(",\n")
-        f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
-        f.write(",\n")
-        f.write('"modules" :[\n')
-
-    def write_json_node(self, f, n, first):
-        if not first:
-            f.write(",\n")
-        f.write(n)
-
-    def write_json_end(self, f):
-        f.write("\n]}")
+    def report_end(self):
+        if not self._json_name:
+            raise Exception("No report file")
+        with open(self._json_name, "a") as f:
+            f.write("\n]}")
+        # is used as sucess indicator
+        log.info("Path: {}".format(self.path))
 
 
 def ensure_folder(path: str):
@@ -492,7 +503,7 @@ def _build(s):
 def _info():  # type:() -> dict[str, str]
     info = OrderedDict(
         {
-            "family": sys.implementation.name,
+            "family": sys.implementation.name,  # type: ignore
             "version": "",
             "build": "",
             "ver": "",
@@ -520,9 +531,9 @@ def _info():  # type:() -> dict[str, str]
         info["board"] = _machine
         info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
-            sys.implementation._mpy
+            sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
+            else sys.implementation.mpy  # type: ignore
             if "mpy" in dir(sys.implementation)
             else ""
         )
@@ -678,10 +689,6 @@ def is_micropython() -> bool:
     # pylint: disable=unused-variable,eval-used
     try:
         # either test should fail on micropython
-        # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
-        # Micropython : SyntaxError
-        # a = eval("1and 0")  # lgtm [py/unused-local-variable]
-        # Eval blocks some minification aspects
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
@@ -734,7 +741,6 @@ def main():
     gc.collect()
 
     stubber.create_all_stubs()
-    stubber.report()
 
 
 if __name__ == "__main__" or is_micropython():
