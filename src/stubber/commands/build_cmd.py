@@ -22,7 +22,7 @@ from stubber.utils.config import CONFIG
     multiple=True,
     default=[CONFIG.stable_version],
     show_default=True,
-    help="multiple: ",
+    help="MicroPython version to build, or 'preview' for the latest preview version",
 )
 @click.option(
     "--port",
@@ -72,9 +72,11 @@ def cli_build(
     ports = list(ports)
     boards = list(boards)
 
-    if len(versions) > 1 :
-        raise NotImplementedError("Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487")
-    
+    if len(versions) > 1:
+        raise NotImplementedError(
+            "Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487"
+        )
+
     # db = get_database(publish_path=CONFIG.publish_path, production=production)
     log.info(f"Build {family} {versions} {ports} {boards}")
 

@@ -57,7 +57,8 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
     # so we need to get the port and board from the path
     log.info(f"input_manifest: {manifest}")
     port, board = get_portboard(manifest)
-    log.info(f"port-board: '{port}-{board}'")
+
+    log.info("port-board: {}".format((port + "-" +board).rstrip("-")))
 
     path_vars = make_path_vars(port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)

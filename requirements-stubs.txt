@@ -1,0 +1,4 @@
+# install the stusbs using 
+# pip install -r requirements-stubs.txt -t typings --no-user
+
+micropython-esp32-stubs

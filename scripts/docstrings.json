@@ -27,8 +27,8 @@
         "class": 0.96,
         "def": 0.97,
         "counts": {
-            "def": 911,
-            "class": 116,
+            "def": 919,
+            "class": 120,
             "module": 55
         },
         "missing": {
@@ -38,22 +38,22 @@
         }
     },
     {
-        "folder": "micropython-latest-esp32--OLD",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-esp32--OLD",
+        "folder": "micropython-latest-esp32-ESP32_GENERIC-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-esp32-ESP32_GENERIC-merged",
         "version": "99.99.99",
         "port": "esp32",
-        "module": 0.52,
-        "class": 0.29,
-        "def": 0.11,
+        "module": 0.84,
+        "class": 0.71,
+        "def": 0.59,
         "counts": {
-            "def": 2100,
-            "class": 331,
-            "module": 170
+            "def": 2248,
+            "class": 385,
+            "module": 174
         },
         "missing": {
-            "module": 81,
-            "class": 234,
-            "def": 1874
+            "module": 28,
+            "class": 110,
+            "def": 918
         }
     },
     {
@@ -99,18 +99,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-frozen",
         "version": "99.99.99",
         "port": "frozen",
-        "module": 0.14,
-        "class": 0.12,
-        "def": 0.33,
+        "module": 0.26,
+        "class": 0.17,
+        "def": 0.37,
         "counts": {
-            "def": 19581,
-            "class": 2971,
-            "module": 2327
+            "def": 20461,
+            "class": 3084,
+            "module": 2394
         },
         "missing": {
-            "module": 2004,
-            "class": 2626,
-            "def": 13158
+            "module": 1778,
+            "class": 2555,
+            "def": 12977
         }
     },
     {
@@ -149,6 +149,44 @@
             "module": 11,
             "class": 73,
             "def": 660
+        }
+    },
+    {
+        "folder": "micropython-latest-rp2-RPI_PICO-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-rp2-RPI_PICO-merged",
+        "version": "99.99.99",
+        "port": "rp2",
+        "module": 0.89,
+        "class": 0.82,
+        "def": 0.62,
+        "counts": {
+            "def": 1688,
+            "class": 432,
+            "module": 128
+        },
+        "missing": {
+            "module": 14,
+            "class": 79,
+            "def": 644
+        }
+    },
+    {
+        "folder": "micropython-latest-rp2-RPI_PICO_W-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-rp2-RPI_PICO_W-merged",
+        "version": "99.99.99",
+        "port": "rp2",
+        "module": 0.83,
+        "class": 0.75,
+        "def": 0.57,
+        "counts": {
+            "def": 2288,
+            "class": 636,
+            "module": 174
+        },
+        "missing": {
+            "module": 30,
+            "class": 159,
+            "def": 978
         }
     },
     {
@@ -213,18 +251,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-samd-SEEED_WIO_TERMINAL-merged",
         "version": "99.99.99",
         "port": "samd",
-        "module": 0.88,
+        "module": 0.87,
         "class": 0.88,
-        "def": 0.56,
+        "def": 0.61,
         "counts": {
-            "def": 1454,
-            "class": 539,
-            "module": 102
+            "def": 1546,
+            "class": 624,
+            "module": 114
         },
         "missing": {
-            "module": 12,
-            "class": 64,
-            "def": 646
+            "module": 15,
+            "class": 76,
+            "def": 608
         }
     },
     {
@@ -251,18 +289,37 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-stm32-PYBV11-merged",
         "version": "99.99.99",
         "port": "stm32",
-        "module": 0.92,
+        "module": 0.9,
         "class": 0.89,
-        "def": 0.66,
+        "def": 0.67,
         "counts": {
-            "def": 2066,
-            "class": 559,
-            "module": 118
+            "def": 2190,
+            "class": 630,
+            "module": 124
         },
         "missing": {
-            "module": 10,
-            "class": 62,
-            "def": 708
+            "module": 13,
+            "class": 72,
+            "def": 726
+        }
+    },
+    {
+        "folder": "micropython-latest-webassembly-GENERIC-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-latest-webassembly-GENERIC-merged",
+        "version": "99.99.99",
+        "port": "webassembly",
+        "module": 0.97,
+        "class": 0.77,
+        "def": 0.64,
+        "counts": {
+            "def": 688,
+            "class": 70,
+            "module": 80
+        },
+        "missing": {
+            "module": 2,
+            "class": 16,
+            "def": 246
         }
     },
     {
@@ -700,25 +757,6 @@
             "module": 56,
             "class": 155,
             "def": 2184
-        }
-    },
-    {
-        "folder": "micropython-v1_16-docstubs",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_16-docstubs",
-        "version": "1.16",
-        "port": "docstubs",
-        "module": 1.0,
-        "class": 1.0,
-        "def": 1.0,
-        "counts": {
-            "def": 0,
-            "class": 0,
-            "module": 0
-        },
-        "missing": {
-            "module": 0,
-            "class": 0,
-            "def": 0
         }
     },
     {
@@ -1221,11 +1259,11 @@
         "version": "1.19.1",
         "port": "docstubs",
         "module": 1.0,
-        "class": 0.95,
+        "class": 0.96,
         "def": 0.97,
         "counts": {
             "def": 813,
-            "class": 109,
+            "class": 113,
             "module": 50
         },
         "missing": {
@@ -1235,8 +1273,8 @@
         }
     },
     {
-        "folder": "micropython-v1_19_1-esp32",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32",
+        "folder": "micropython-v1_19_1-esp32-GENERIC",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-GENERIC",
         "version": "1.19.1",
         "port": "esp32",
         "module": 0.51,
@@ -1254,16 +1292,16 @@
         }
     },
     {
-        "folder": "micropython-v1_19_1-esp32-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-merged",
+        "folder": "micropython-v1_19_1-esp32-GENERIC-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-GENERIC-merged",
         "version": "1.19.1",
         "port": "esp32",
         "module": 0.84,
-        "class": 0.73,
+        "class": 0.74,
         "def": 0.58,
         "counts": {
             "def": 1934,
-            "class": 305,
+            "class": 313,
             "module": 150
         },
         "missing": {
@@ -1273,41 +1311,79 @@
         }
     },
     {
-        "folder": "micropython-v1_19_1-esp32-s3",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-s3",
+        "folder": "micropython-v1_19_1-esp32-GENERIC_S3",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-GENERIC_S3",
         "version": "1.19.1",
         "port": "esp32",
-        "module": 1.0,
-        "class": 0.33,
-        "def": 0.11,
+        "module": 0.52,
+        "class": 0.21,
+        "def": 0.1,
         "counts": {
-            "def": 1027,
-            "class": 167,
-            "module": 75
+            "def": 1977,
+            "class": 268,
+            "module": 149
         },
         "missing": {
-            "module": 0,
-            "class": 112,
-            "def": 919
+            "module": 71,
+            "class": 213,
+            "def": 1771
         }
     },
     {
-        "folder": "micropython-v1_19_1-esp32-S3-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-S3-merged",
+        "folder": "micropython-v1_19_1-esp32-GENERIC_S3-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-GENERIC_S3-merged",
         "version": "1.19.1",
         "port": "esp32",
-        "module": 1.0,
-        "class": 0.79,
+        "module": 0.86,
+        "class": 0.76,
         "def": 0.59,
         "counts": {
-            "def": 974,
-            "class": 178,
-            "module": 74
+            "def": 1948,
+            "class": 311,
+            "module": 148
         },
         "missing": {
-            "module": 0,
-            "class": 37,
-            "def": 396
+            "module": 20,
+            "class": 74,
+            "def": 792
+        }
+    },
+    {
+        "folder": "micropython-v1_19_1-esp32-GENERIC_SPIRAM",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-GENERIC_SPIRAM",
+        "version": "1.19.1",
+        "port": "esp32",
+        "module": 0.51,
+        "class": 0.21,
+        "def": 0.1,
+        "counts": {
+            "def": 1890,
+            "class": 260,
+            "module": 152
+        },
+        "missing": {
+            "module": 74,
+            "class": 205,
+            "def": 1694
+        }
+    },
+    {
+        "folder": "micropython-v1_19_1-esp32-GENERIC_SPIRAM-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-GENERIC_SPIRAM-merged",
+        "version": "1.19.1",
+        "port": "esp32",
+        "module": 0.84,
+        "class": 0.74,
+        "def": 0.58,
+        "counts": {
+            "def": 1934,
+            "class": 313,
+            "module": 150
+        },
+        "missing": {
+            "module": 24,
+            "class": 82,
+            "def": 806
         }
     },
     {
@@ -1315,18 +1391,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-UM_TINYPICO",
         "version": "1.19.1",
         "port": "esp32",
-        "module": 0.91,
-        "class": 0.87,
-        "def": 0.12,
+        "module": 0.52,
+        "class": 0.61,
+        "def": 0.11,
         "counts": {
-            "def": 1021,
-            "class": 213,
-            "module": 79
+            "def": 1862,
+            "class": 302,
+            "module": 147
         },
         "missing": {
-            "module": 7,
-            "class": 28,
-            "def": 898
+            "module": 71,
+            "class": 117,
+            "def": 1654
         }
     },
     {
@@ -1334,18 +1410,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-esp32-UM_TINYPICO-merged",
         "version": "1.19.1",
         "port": "esp32",
-        "module": 0.91,
-        "class": 0.88,
-        "def": 0.56,
+        "module": 0.84,
+        "class": 0.85,
+        "def": 0.6,
         "counts": {
-            "def": 1049,
-            "class": 232,
-            "module": 79
+            "def": 1866,
+            "class": 328,
+            "module": 146
         },
         "missing": {
-            "module": 7,
-            "class": 28,
-            "def": 464
+            "module": 24,
+            "class": 50,
+            "def": 744
         }
     },
     {
@@ -1377,7 +1453,7 @@
         "def": 0.59,
         "counts": {
             "def": 1412,
-            "class": 178,
+            "class": 186,
             "module": 118
         },
         "missing": {
@@ -1391,18 +1467,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_19_1-frozen",
         "version": "1.19.1",
         "port": "frozen",
-        "module": 0.31,
-        "class": 0.35,
-        "def": 0.45,
+        "module": 0.23,
+        "class": 0.25,
+        "def": 0.41,
         "counts": {
-            "def": 4146,
-            "class": 721,
-            "module": 473
+            "def": 8120,
+            "class": 1319,
+            "module": 935
         },
         "missing": {
-            "module": 325,
-            "class": 468,
-            "def": 2299
+            "module": 720,
+            "class": 991,
+            "def": 4753
         }
     },
     {
@@ -1430,17 +1506,17 @@
         "version": "1.19.1",
         "port": "rp2",
         "module": 0.84,
-        "class": 0.65,
-        "def": 0.54,
+        "class": 0.67,
+        "def": 0.56,
         "counts": {
             "def": 1974,
-            "class": 395,
+            "class": 403,
             "module": 140
         },
         "missing": {
             "module": 22,
-            "class": 137,
-            "def": 902
+            "class": 131,
+            "def": 874
         }
     },
     {
@@ -1491,7 +1567,7 @@
         "def": 0.64,
         "counts": {
             "def": 2088,
-            "class": 573,
+            "class": 581,
             "module": 114
         },
         "missing": {
@@ -1506,11 +1582,11 @@
         "version": "1.20.0",
         "port": "docstubs",
         "module": 1.0,
-        "class": 0.95,
+        "class": 0.96,
         "def": 0.97,
         "counts": {
             "def": 823,
-            "class": 108,
+            "class": 112,
             "module": 50
         },
         "missing": {
@@ -1524,42 +1600,23 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32",
         "version": "1.20.0",
         "port": "esp32",
-        "module": 0.52,
-        "class": 0.21,
-        "def": 0.1,
+        "module": 0.68,
+        "class": 0.49,
+        "def": 0.36,
         "counts": {
-            "def": 1908,
-            "class": 262,
-            "module": 158
+            "def": 3874,
+            "class": 568,
+            "module": 316
         },
         "missing": {
-            "module": 76,
-            "class": 206,
-            "def": 1710
+            "module": 101,
+            "class": 290,
+            "def": 2474
         }
     },
     {
-        "folder": "micropython-v1_20_0-esp32-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-merged",
-        "version": "1.20.0",
-        "port": "esp32",
-        "module": 0.84,
-        "class": 0.73,
-        "def": 0.61,
-        "counts": {
-            "def": 1966,
-            "class": 306,
-            "module": 158
-        },
-        "missing": {
-            "module": 25,
-            "class": 84,
-            "def": 764
-        }
-    },
-    {
-        "folder": "micropython-v1_20_0-esp32-OTA",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-OTA",
+        "folder": "micropython-v1_20_0-esp32-GENERIC",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-GENERIC",
         "version": "1.20.0",
         "port": "esp32",
         "module": 0.52,
@@ -1577,8 +1634,8 @@
         }
     },
     {
-        "folder": "micropython-v1_20_0-esp32-OTA-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-OTA-merged",
+        "folder": "micropython-v1_20_0-esp32-GENERIC-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-GENERIC-merged",
         "version": "1.20.0",
         "port": "esp32",
         "module": 0.84,
@@ -1586,7 +1643,7 @@
         "def": 0.61,
         "counts": {
             "def": 1966,
-            "class": 306,
+            "class": 314,
             "module": 158
         },
         "missing": {
@@ -1596,8 +1653,46 @@
         }
     },
     {
-        "folder": "micropython-v1_20_0-esp32-S3",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-S3",
+        "folder": "micropython-v1_20_0-esp32-GENERIC_OTA",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-GENERIC_OTA",
+        "version": "1.20.0",
+        "port": "esp32",
+        "module": 0.52,
+        "class": 0.21,
+        "def": 0.1,
+        "counts": {
+            "def": 1908,
+            "class": 262,
+            "module": 158
+        },
+        "missing": {
+            "module": 76,
+            "class": 206,
+            "def": 1710
+        }
+    },
+    {
+        "folder": "micropython-v1_20_0-esp32-GENERIC_OTA-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-GENERIC_OTA-merged",
+        "version": "1.20.0",
+        "port": "esp32",
+        "module": 0.84,
+        "class": 0.73,
+        "def": 0.61,
+        "counts": {
+            "def": 1966,
+            "class": 314,
+            "module": 158
+        },
+        "missing": {
+            "module": 25,
+            "class": 84,
+            "def": 764
+        }
+    },
+    {
+        "folder": "micropython-v1_20_0-esp32-GENERIC_S3",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-GENERIC_S3",
         "version": "1.20.0",
         "port": "esp32",
         "module": 0.52,
@@ -1615,16 +1710,16 @@
         }
     },
     {
-        "folder": "micropython-v1_20_0-esp32-S3-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-S3-merged",
+        "folder": "micropython-v1_20_0-esp32-GENERIC_S3-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-esp32-GENERIC_S3-merged",
         "version": "1.20.0",
         "port": "esp32",
         "module": 0.85,
-        "class": 0.72,
+        "class": 0.73,
         "def": 0.61,
         "counts": {
             "def": 1944,
-            "class": 303,
+            "class": 311,
             "module": 156
         },
         "missing": {
@@ -1639,55 +1734,17 @@
         "version": "1.20.0",
         "port": "frozen",
         "module": 0.15,
-        "class": 0.15,
+        "class": 0.16,
         "def": 0.32,
         "counts": {
             "def": 18676,
-            "class": 2959,
+            "class": 2964,
             "module": 2019
         },
         "missing": {
             "module": 1711,
-            "class": 2517,
-            "def": 12774
-        }
-    },
-    {
-        "folder": "micropython-v1_20_0-rp2",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-rp2",
-        "version": "1.20.0",
-        "port": "rp2",
-        "module": 0.54,
-        "class": 0.52,
-        "def": 0.11,
-        "counts": {
-            "def": 1518,
-            "class": 339,
-            "module": 116
-        },
-        "missing": {
-            "module": 53,
-            "class": 164,
-            "def": 1354
-        }
-    },
-    {
-        "folder": "micropython-v1_20_0-rp2-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-rp2-merged",
-        "version": "1.20.0",
-        "port": "rp2",
-        "module": 0.91,
-        "class": 0.81,
-        "def": 0.57,
-        "counts": {
-            "def": 1546,
-            "class": 363,
-            "module": 116
-        },
-        "missing": {
-            "module": 11,
-            "class": 69,
-            "def": 660
+            "class": 2475,
+            "def": 12639
         }
     },
     {
@@ -1715,17 +1772,17 @@
         "version": "1.20.0",
         "port": "rp2",
         "module": 0.91,
-        "class": 0.81,
-        "def": 0.57,
+        "class": 0.83,
+        "def": 0.59,
         "counts": {
             "def": 1546,
-            "class": 363,
+            "class": 371,
             "module": 116
         },
         "missing": {
             "module": 11,
-            "class": 69,
-            "def": 660
+            "class": 63,
+            "def": 630
         }
     },
     {
@@ -1753,17 +1810,17 @@
         "version": "1.20.0",
         "port": "rp2",
         "module": 0.88,
-        "class": 0.8,
-        "def": 0.56,
+        "class": 0.82,
+        "def": 0.58,
         "counts": {
             "def": 1776,
-            "class": 389,
+            "class": 397,
             "module": 138
         },
         "missing": {
             "module": 17,
-            "class": 77,
-            "def": 780
+            "class": 71,
+            "def": 750
         }
     },
     {
@@ -1791,17 +1848,17 @@
         "version": "1.20.0",
         "port": "rp2",
         "module": 0.91,
-        "class": 0.78,
-        "def": 0.57,
+        "class": 0.8,
+        "def": 0.59,
         "counts": {
             "def": 1546,
-            "class": 309,
+            "class": 317,
             "module": 116
         },
         "missing": {
             "module": 11,
-            "class": 69,
-            "def": 660
+            "class": 63,
+            "def": 630
         }
     },
     {
@@ -1833,7 +1890,7 @@
         "def": 0.56,
         "counts": {
             "def": 1454,
-            "class": 401,
+            "class": 409,
             "module": 102
         },
         "missing": {
@@ -1871,7 +1928,7 @@
         "def": 0.56,
         "counts": {
             "def": 1454,
-            "class": 375,
+            "class": 383,
             "module": 102
         },
         "missing": {
@@ -1905,11 +1962,11 @@
         "version": "1.20.0",
         "port": "samd",
         "module": 0.88,
-        "class": 0.83,
+        "class": 0.84,
         "def": 0.56,
         "counts": {
             "def": 1454,
-            "class": 357,
+            "class": 365,
             "module": 102
         },
         "missing": {
@@ -1947,7 +2004,7 @@
         "def": 0.56,
         "counts": {
             "def": 1454,
-            "class": 543,
+            "class": 551,
             "module": 102
         },
         "missing": {
@@ -1973,25 +2030,6 @@
             "module": 56,
             "class": 184,
             "def": 1844
-        }
-    },
-    {
-        "folder": "micropython-v1_20_0-stm32-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_20_0-stm32-merged",
-        "version": "1.20.0",
-        "port": "stm32",
-        "module": 0.9,
-        "class": 0.9,
-        "def": 0.65,
-        "counts": {
-            "def": 2066,
-            "class": 563,
-            "module": 118
-        },
-        "missing": {
-            "module": 12,
-            "class": 58,
-            "def": 720
         }
     },
     {
@@ -2023,7 +2061,7 @@
         "def": 0.65,
         "counts": {
             "def": 2066,
-            "class": 563,
+            "class": 571,
             "module": 118
         },
         "missing": {
@@ -2042,32 +2080,13 @@
         "def": 0.97,
         "counts": {
             "def": 915,
-            "class": 124,
+            "class": 128,
             "module": 55
         },
         "missing": {
             "module": 0,
             "class": 5,
             "def": 24
-        }
-    },
-    {
-        "folder": "micropython-v1_21_0-esp32",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-esp32",
-        "version": "1.21.0",
-        "port": "esp32",
-        "module": 0.51,
-        "class": 0.29,
-        "def": 0.1,
-        "counts": {
-            "def": 2220,
-            "class": 339,
-            "module": 179
-        },
-        "missing": {
-            "module": 87,
-            "class": 242,
-            "def": 1988
         }
     },
     {
@@ -2094,37 +2113,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-esp32-ESP32_GENERIC-merged",
         "version": "1.21.0",
         "port": "esp32",
-        "module": 0.83,
-        "class": 0.7,
-        "def": 0.58,
+        "module": 0.84,
+        "class": 0.71,
+        "def": 0.59,
         "counts": {
-            "def": 2236,
-            "class": 377,
+            "def": 2248,
+            "class": 385,
             "module": 174
         },
         "missing": {
-            "module": 30,
-            "class": 112,
-            "def": 950
-        }
-    },
-    {
-        "folder": "micropython-v1_21_0-esp32-merged",
-        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-esp32-merged",
-        "version": "1.21.0",
-        "port": "esp32",
-        "module": 0.83,
-        "class": 0.7,
-        "def": 0.58,
-        "counts": {
-            "def": 2236,
-            "class": 377,
-            "module": 174
-        },
-        "missing": {
-            "module": 30,
-            "class": 112,
-            "def": 950
+            "module": 28,
+            "class": 110,
+            "def": 918
         }
     },
     {
@@ -2133,17 +2133,17 @@
         "version": "1.21.0",
         "port": "frozen",
         "module": 0.23,
-        "class": 0.15,
+        "class": 0.17,
         "def": 0.36,
         "counts": {
             "def": 19937,
-            "class": 2989,
+            "class": 2996,
             "module": 2338
         },
         "missing": {
             "module": 1795,
-            "class": 2554,
-            "def": 12856
+            "class": 2494,
+            "def": 12679
         }
     },
     {
@@ -2170,18 +2170,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-rp2-RPI_PICO-merged",
         "version": "1.21.0",
         "port": "rp2",
-        "module": 0.88,
-        "class": 0.78,
-        "def": 0.55,
+        "module": 0.89,
+        "class": 0.82,
+        "def": 0.62,
         "counts": {
-            "def": 1676,
-            "class": 424,
+            "def": 1688,
+            "class": 432,
             "module": 128
         },
         "missing": {
-            "module": 16,
-            "class": 95,
-            "def": 754
+            "module": 14,
+            "class": 79,
+            "def": 644
         }
     },
     {
@@ -2208,18 +2208,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-rp2-RPI_PICO_W-merged",
         "version": "1.21.0",
         "port": "rp2",
-        "module": 0.82,
-        "class": 0.72,
-        "def": 0.52,
+        "module": 0.83,
+        "class": 0.75,
+        "def": 0.57,
         "counts": {
-            "def": 2276,
-            "class": 628,
+            "def": 2288,
+            "class": 636,
             "module": 174
         },
         "missing": {
-            "module": 32,
-            "class": 175,
-            "def": 1088
+            "module": 30,
+            "class": 159,
+            "def": 978
         }
     },
     {
@@ -2228,17 +2228,17 @@
         "version": "1.21.0",
         "port": "samd",
         "module": 0.52,
-        "class": 0.72,
+        "class": 0.71,
         "def": 0.11,
         "counts": {
-            "def": 1506,
-            "class": 594,
-            "module": 114
+            "def": 1534,
+            "class": 596,
+            "module": 116
         },
         "missing": {
-            "module": 55,
-            "class": 168,
-            "def": 1340
+            "module": 56,
+            "class": 170,
+            "def": 1366
         }
     },
     {
@@ -2246,18 +2246,18 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-samd-SEEED_WIO_TERMINAL-merged",
         "version": "1.21.0",
         "port": "samd",
-        "module": 0.85,
-        "class": 0.86,
-        "def": 0.55,
+        "module": 0.86,
+        "class": 0.88,
+        "def": 0.6,
         "counts": {
-            "def": 1534,
-            "class": 616,
-            "module": 114
+            "def": 1574,
+            "class": 626,
+            "module": 116
         },
         "missing": {
-            "module": 17,
-            "class": 86,
-            "def": 688
+            "module": 16,
+            "class": 78,
+            "def": 634
         }
     },
     {
@@ -2284,18 +2284,322 @@
         "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-stm32-PYBV11-merged",
         "version": "1.21.0",
         "port": "stm32",
-        "module": 0.88,
-        "class": 0.87,
-        "def": 0.63,
+        "module": 0.9,
+        "class": 0.89,
+        "def": 0.67,
         "counts": {
-            "def": 2178,
-            "class": 622,
+            "def": 2190,
+            "class": 630,
             "module": 124
         },
         "missing": {
+            "module": 13,
+            "class": 72,
+            "def": 726
+        }
+    },
+    {
+        "folder": "micropython-v1_21_0-webassembly-GENERIC",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-webassembly-GENERIC",
+        "version": "1.21.0",
+        "port": "webassembly",
+        "module": 0.51,
+        "class": 0.0,
+        "def": 0.07,
+        "counts": {
+            "def": 664,
+            "class": 44,
+            "module": 80
+        },
+        "missing": {
+            "module": 39,
+            "class": 44,
+            "def": 620
+        }
+    },
+    {
+        "folder": "micropython-v1_21_0-webassembly-GENERIC-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_21_0-webassembly-GENERIC-merged",
+        "version": "1.21.0",
+        "port": "webassembly",
+        "module": 0.97,
+        "class": 0.77,
+        "def": 0.64,
+        "counts": {
+            "def": 688,
+            "class": 70,
+            "module": 80
+        },
+        "missing": {
+            "module": 2,
+            "class": 16,
+            "def": 246
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-docstubs",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-docstubs",
+        "version": "1.22.0",
+        "port": "docstubs",
+        "module": 1.0,
+        "class": 0.96,
+        "def": 0.97,
+        "counts": {
+            "def": 919,
+            "class": 120,
+            "module": 55
+        },
+        "missing": {
+            "module": 0,
+            "class": 5,
+            "def": 24
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-esp32-ESP32_GENERIC",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-esp32-ESP32_GENERIC",
+        "version": "1.22.0",
+        "port": "esp32",
+        "module": 0.52,
+        "class": 0.3,
+        "def": 0.11,
+        "counts": {
+            "def": 2242,
+            "class": 353,
+            "module": 178
+        },
+        "missing": {
+            "module": 85,
+            "class": 248,
+            "def": 2002
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-esp32-ESP32_GENERIC-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-esp32-ESP32_GENERIC-merged",
+        "version": "1.22.0",
+        "port": "esp32",
+        "module": 0.84,
+        "class": 0.72,
+        "def": 0.59,
+        "counts": {
+            "def": 2274,
+            "class": 397,
+            "module": 174
+        },
+        "missing": {
+            "module": 28,
+            "class": 112,
+            "def": 922
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-esp32-ESP32_GENERIC_S3",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-esp32-ESP32_GENERIC_S3",
+        "version": "1.22.0",
+        "port": "esp32",
+        "module": 0.52,
+        "class": 0.3,
+        "def": 0.11,
+        "counts": {
+            "def": 2232,
+            "class": 349,
+            "module": 178
+        },
+        "missing": {
+            "module": 85,
+            "class": 244,
+            "def": 1996
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-esp32-ESP32_GENERIC_S3-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-esp32-ESP32_GENERIC_S3-merged",
+        "version": "1.22.0",
+        "port": "esp32",
+        "module": 0.84,
+        "class": 0.73,
+        "def": 0.59,
+        "counts": {
+            "def": 2264,
+            "class": 393,
+            "module": 174
+        },
+        "missing": {
+            "module": 28,
+            "class": 108,
+            "def": 918
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-esp32-Generic_ESP32S3_module",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-esp32-Generic_ESP32S3_module",
+        "version": "1.22.0",
+        "port": "esp32",
+        "module": 0.52,
+        "class": 0.3,
+        "def": 0.11,
+        "counts": {
+            "def": 2232,
+            "class": 349,
+            "module": 178
+        },
+        "missing": {
+            "module": 85,
+            "class": 244,
+            "def": 1996
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-rp2-ARDUINO_NANO_RP2040_CONNECT",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-rp2-ARDUINO_NANO_RP2040_CONNECT",
+        "version": "1.22.0",
+        "port": "rp2",
+        "module": 0.53,
+        "class": 0.52,
+        "def": 0.12,
+        "counts": {
+            "def": 2292,
+            "class": 616,
+            "module": 180
+        },
+        "missing": {
+            "module": 85,
+            "class": 298,
+            "def": 2010
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-rp2-ARDUINO_NANO_RP2040_CONNECT-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-rp2-ARDUINO_NANO_RP2040_CONNECT-merged",
+        "version": "1.22.0",
+        "port": "rp2",
+        "module": 0.82,
+        "class": 0.75,
+        "def": 0.58,
+        "counts": {
+            "def": 2312,
+            "class": 646,
+            "module": 176
+        },
+        "missing": {
+            "module": 31,
+            "class": 161,
+            "def": 976
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-rp2-RPI_PICO",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-rp2-RPI_PICO",
+        "version": "1.22.0",
+        "port": "rp2",
+        "module": 0.54,
+        "class": 0.53,
+        "def": 0.12,
+        "counts": {
+            "def": 1612,
+            "class": 408,
+            "module": 130
+        },
+        "missing": {
+            "module": 60,
+            "class": 192,
+            "def": 1424
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-rp2-RPI_PICO-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-rp2-RPI_PICO-merged",
+        "version": "1.22.0",
+        "port": "rp2",
+        "module": 0.88,
+        "class": 0.82,
+        "def": 0.62,
+        "counts": {
+            "def": 1652,
+            "class": 438,
+            "module": 130
+        },
+        "missing": {
             "module": 15,
-            "class": 82,
-            "def": 806
+            "class": 79,
+            "def": 632
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-rp2-RPI_PICO_W",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-rp2-RPI_PICO_W",
+        "version": "1.22.0",
+        "port": "rp2",
+        "module": 0.53,
+        "class": 0.52,
+        "def": 0.12,
+        "counts": {
+            "def": 2228,
+            "class": 590,
+            "module": 180
+        },
+        "missing": {
+            "module": 85,
+            "class": 284,
+            "def": 1960
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-rp2-RPI_PICO_W-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-rp2-RPI_PICO_W-merged",
+        "version": "1.22.0",
+        "port": "rp2",
+        "module": 0.82,
+        "class": 0.76,
+        "def": 0.58,
+        "counts": {
+            "def": 2248,
+            "class": 620,
+            "module": 176
+        },
+        "missing": {
+            "module": 31,
+            "class": 151,
+            "def": 954
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-samd-SEEED_WIO_TERMINAL",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-samd-SEEED_WIO_TERMINAL",
+        "version": "1.22.0",
+        "port": "samd",
+        "module": 0.52,
+        "class": 0.72,
+        "def": 0.11,
+        "counts": {
+            "def": 1488,
+            "class": 604,
+            "module": 116
+        },
+        "missing": {
+            "module": 56,
+            "class": 172,
+            "def": 1318
+        }
+    },
+    {
+        "folder": "micropython-v1_22_0-samd-SEEED_WIO_TERMINAL-merged",
+        "path": "..\\repos\\micropython-stubs\\stubs\\micropython-v1_22_0-samd-SEEED_WIO_TERMINAL-merged",
+        "version": "1.22.0",
+        "port": "samd",
+        "module": 0.86,
+        "class": 0.88,
+        "def": 0.6,
+        "counts": {
+            "def": 1528,
+            "class": 634,
+            "module": 116
+        },
+        "missing": {
+            "module": 16,
+            "class": 76,
+            "def": 614
         }
     },
     {
@@ -2375,22 +2679,41 @@
         }
     },
     {
+        "folder": "micropython-latest-esp32-esp32_generic-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-esp32-esp32_generic-stubs",
+        "version": "99.99.99",
+        "port": "esp32",
+        "module": 0.68,
+        "class": 0.6,
+        "def": 0.6,
+        "counts": {
+            "def": 1096,
+            "class": 138,
+            "module": 87
+        },
+        "missing": {
+            "module": 28,
+            "class": 55,
+            "def": 435
+        }
+    },
+    {
         "folder": "micropython-latest-esp32-stubs",
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-esp32-stubs",
         "version": "99.99.99",
         "port": "esp32",
-        "module": 0.61,
-        "class": 0.59,
-        "def": 0.59,
+        "module": 0.68,
+        "class": 0.6,
+        "def": 0.6,
         "counts": {
-            "def": 1148,
-            "class": 145,
-            "module": 94
+            "def": 1096,
+            "class": 138,
+            "module": 87
         },
         "missing": {
-            "module": 37,
-            "class": 59,
-            "def": 475
+            "module": 28,
+            "class": 55,
+            "def": 435
         }
     },
     {
@@ -2398,18 +2721,56 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-rp2-pimoroni_picolipo_16mb-stubs",
         "version": "99.99.99",
         "port": "rp2",
-        "module": 0.7,
-        "class": 0.55,
-        "def": 0.55,
+        "module": 0.81,
+        "class": 0.58,
+        "def": 0.59,
         "counts": {
-            "def": 844,
-            "class": 107,
-            "module": 66
+            "def": 745,
+            "class": 88,
+            "module": 58
         },
         "missing": {
-            "module": 20,
-            "class": 48,
-            "def": 377
+            "module": 11,
+            "class": 37,
+            "def": 306
+        }
+    },
+    {
+        "folder": "micropython-latest-rp2-rpi_pico-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-rp2-rpi_pico-stubs",
+        "version": "99.99.99",
+        "port": "rp2",
+        "module": 0.78,
+        "class": 0.62,
+        "def": 0.63,
+        "counts": {
+            "def": 816,
+            "class": 105,
+            "module": 64
+        },
+        "missing": {
+            "module": 14,
+            "class": 40,
+            "def": 298
+        }
+    },
+    {
+        "folder": "micropython-latest-rp2-rpi_pico_w-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-rp2-rpi_pico_w-stubs",
+        "version": "99.99.99",
+        "port": "rp2",
+        "module": 0.64,
+        "class": 0.54,
+        "def": 0.62,
+        "counts": {
+            "def": 1142,
+            "class": 138,
+            "module": 92
+        },
+        "missing": {
+            "module": 33,
+            "class": 63,
+            "def": 435
         }
     },
     {
@@ -2417,18 +2778,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-rp2-stubs",
         "version": "99.99.99",
         "port": "rp2",
-        "module": 0.7,
-        "class": 0.55,
-        "def": 0.55,
+        "module": 0.78,
+        "class": 0.62,
+        "def": 0.63,
         "counts": {
-            "def": 844,
-            "class": 107,
-            "module": 66
+            "def": 816,
+            "class": 105,
+            "module": 64
         },
         "missing": {
-            "module": 20,
-            "class": 48,
-            "def": 377
+            "module": 14,
+            "class": 40,
+            "def": 298
         }
     },
     {
@@ -2436,18 +2797,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-samd-adafruit_feather_m4_express-stubs",
         "version": "99.99.99",
         "port": "samd",
-        "module": 0.68,
-        "class": 0.58,
-        "def": 0.54,
+        "module": 0.76,
+        "class": 0.6,
+        "def": 0.57,
         "counts": {
-            "def": 798,
-            "class": 99,
-            "module": 59
+            "def": 700,
+            "class": 80,
+            "module": 51
         },
         "missing": {
-            "module": 19,
-            "class": 42,
-            "def": 368
+            "module": 12,
+            "class": 32,
+            "def": 299
         }
     },
     {
@@ -2455,18 +2816,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-samd-adafruit_itsybitsy_m4_express-stubs",
         "version": "99.99.99",
         "port": "samd",
-        "module": 0.68,
-        "class": 0.58,
-        "def": 0.54,
+        "module": 0.76,
+        "class": 0.6,
+        "def": 0.57,
         "counts": {
-            "def": 798,
-            "class": 99,
-            "module": 59
+            "def": 700,
+            "class": 80,
+            "module": 51
         },
         "missing": {
-            "module": 19,
-            "class": 42,
-            "def": 368
+            "module": 12,
+            "class": 32,
+            "def": 299
         }
     },
     {
@@ -2474,18 +2835,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-samd-minisam_m4-stubs",
         "version": "99.99.99",
         "port": "samd",
-        "module": 0.68,
-        "class": 0.58,
-        "def": 0.54,
+        "module": 0.76,
+        "class": 0.6,
+        "def": 0.57,
         "counts": {
-            "def": 798,
-            "class": 99,
-            "module": 59
+            "def": 700,
+            "class": 80,
+            "module": 51
         },
         "missing": {
-            "module": 19,
-            "class": 42,
-            "def": 368
+            "module": 12,
+            "class": 32,
+            "def": 299
         }
     },
     {
@@ -2493,18 +2854,37 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-samd-seeed_wio_terminal-stubs",
         "version": "99.99.99",
         "port": "samd",
-        "module": 0.68,
-        "class": 0.58,
-        "def": 0.54,
+        "module": 0.74,
+        "class": 0.6,
+        "def": 0.62,
         "counts": {
-            "def": 798,
-            "class": 99,
-            "module": 59
+            "def": 745,
+            "class": 95,
+            "module": 57
         },
         "missing": {
-            "module": 19,
-            "class": 42,
-            "def": 368
+            "module": 15,
+            "class": 38,
+            "def": 280
+        }
+    },
+    {
+        "folder": "micropython-latest-samd-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-samd-stubs",
+        "version": "99.99.99",
+        "port": "samd",
+        "module": 0.74,
+        "class": 0.6,
+        "def": 0.62,
+        "counts": {
+            "def": 745,
+            "class": 95,
+            "module": 57
+        },
+        "missing": {
+            "module": 15,
+            "class": 38,
+            "def": 280
         }
     },
     {
@@ -2512,18 +2892,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-stm32-pybv11-stubs",
         "version": "99.99.99",
         "port": "stm32",
-        "module": 0.74,
-        "class": 0.66,
-        "def": 0.64,
+        "module": 0.79,
+        "class": 0.69,
+        "def": 0.68,
         "counts": {
-            "def": 1104,
-            "class": 119,
-            "module": 66
+            "def": 1067,
+            "class": 116,
+            "module": 62
         },
         "missing": {
-            "module": 17,
-            "class": 41,
-            "def": 400
+            "module": 13,
+            "class": 36,
+            "def": 339
         }
     },
     {
@@ -2531,18 +2911,37 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-stm32-stubs",
         "version": "99.99.99",
         "port": "stm32",
-        "module": 0.74,
-        "class": 0.66,
-        "def": 0.64,
+        "module": 0.79,
+        "class": 0.69,
+        "def": 0.68,
         "counts": {
-            "def": 1104,
-            "class": 119,
-            "module": 66
+            "def": 1067,
+            "class": 116,
+            "module": 62
         },
         "missing": {
-            "module": 17,
-            "class": 41,
-            "def": 400
+            "module": 13,
+            "class": 36,
+            "def": 339
+        }
+    },
+    {
+        "folder": "micropython-latest-webassembly-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-latest-webassembly-stubs",
+        "version": "99.99.99",
+        "port": "webassembly",
+        "module": 0.95,
+        "class": 0.7,
+        "def": 0.69,
+        "counts": {
+            "def": 316,
+            "class": 27,
+            "module": 40
+        },
+        "missing": {
+            "module": 2,
+            "class": 8,
+            "def": 98
         }
     },
     {
@@ -2554,9 +2953,9 @@
         "class": 1.0,
         "def": 1.0,
         "counts": {
-            "def": 3625,
-            "class": 658,
-            "module": 63
+            "def": 3566,
+            "class": 649,
+            "module": 57
         },
         "missing": {
             "module": 0,
@@ -2717,6 +3116,44 @@
         }
     },
     {
+        "folder": "micropython-v1_19_1-esp32-generic_s3-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-esp32-generic_s3-stubs",
+        "version": "1.19.1",
+        "port": "esp32",
+        "module": 0.64,
+        "class": 0.62,
+        "def": 0.58,
+        "counts": {
+            "def": 1048,
+            "class": 136,
+            "module": 86
+        },
+        "missing": {
+            "module": 31,
+            "class": 51,
+            "def": 443
+        }
+    },
+    {
+        "folder": "micropython-v1_19_1-esp32-generic_spiram-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-esp32-generic_spiram-stubs",
+        "version": "1.19.1",
+        "port": "esp32",
+        "module": 0.65,
+        "class": 0.66,
+        "def": 0.59,
+        "counts": {
+            "def": 1003,
+            "class": 129,
+            "module": 82
+        },
+        "missing": {
+            "module": 29,
+            "class": 44,
+            "def": 416
+        }
+    },
+    {
         "folder": "micropython-v1_19_1-esp32-s3-stubs",
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-esp32-s3-stubs",
         "version": "1.19.1",
@@ -2740,18 +3177,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-esp32-stubs",
         "version": "1.19.1",
         "port": "esp32",
-        "module": 0.64,
-        "class": 0.65,
-        "def": 0.57,
+        "module": 0.65,
+        "class": 0.66,
+        "def": 0.59,
         "counts": {
-            "def": 1020,
-            "class": 133,
-            "module": 81
+            "def": 1003,
+            "class": 129,
+            "module": 82
         },
         "missing": {
             "module": 29,
-            "class": 47,
-            "def": 443
+            "class": 44,
+            "def": 416
         }
     },
     {
@@ -2759,18 +3196,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-esp32-um_tinypico-stubs",
         "version": "1.19.1",
         "port": "esp32",
-        "module": 0.63,
+        "module": 0.62,
         "class": 0.65,
-        "def": 0.57,
+        "def": 0.63,
         "counts": {
-            "def": 1038,
-            "class": 134,
-            "module": 83
+            "def": 931,
+            "class": 110,
+            "module": 82
         },
         "missing": {
             "module": 31,
-            "class": 47,
-            "def": 443
+            "class": 38,
+            "def": 342
         }
     },
     {
@@ -2778,18 +3215,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-esp8266-stubs",
         "version": "1.19.1",
         "port": "esp8266",
-        "module": 0.71,
-        "class": 0.72,
-        "def": 0.58,
+        "module": 0.73,
+        "class": 0.73,
+        "def": 0.59,
         "counts": {
-            "def": 739,
+            "def": 724,
             "class": 85,
-            "module": 65
+            "module": 66
         },
         "missing": {
-            "module": 19,
-            "class": 24,
-            "def": 311
+            "module": 18,
+            "class": 23,
+            "def": 296
         }
     },
     {
@@ -2797,18 +3234,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-rp2-stubs",
         "version": "1.19.1",
         "port": "rp2",
-        "module": 0.68,
-        "class": 0.5,
-        "def": 0.54,
+        "module": 0.69,
+        "class": 0.53,
+        "def": 0.58,
         "counts": {
-            "def": 1003,
-            "class": 142,
-            "module": 73
+            "def": 981,
+            "class": 137,
+            "module": 74
         },
         "missing": {
             "module": 23,
-            "class": 71,
-            "def": 460
+            "class": 64,
+            "def": 413
         }
     },
     {
@@ -2816,18 +3253,56 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_19_1-stm32-stubs",
         "version": "1.19.1",
         "port": "stm32",
-        "module": 0.76,
-        "class": 0.73,
-        "def": 0.63,
+        "module": 0.77,
+        "class": 0.75,
+        "def": 0.66,
         "counts": {
-            "def": 1066,
-            "class": 119,
-            "module": 59
+            "def": 1043,
+            "class": 114,
+            "module": 60
         },
         "missing": {
             "module": 14,
-            "class": 32,
-            "def": 391
+            "class": 28,
+            "def": 358
+        }
+    },
+    {
+        "folder": "micropython-v1_20_0-esp32-generic_ota-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-esp32-generic_ota-stubs",
+        "version": "1.20.0",
+        "port": "esp32",
+        "module": 0.65,
+        "class": 0.63,
+        "def": 0.62,
+        "counts": {
+            "def": 1010,
+            "class": 126,
+            "module": 85
+        },
+        "missing": {
+            "module": 30,
+            "class": 46,
+            "def": 384
+        }
+    },
+    {
+        "folder": "micropython-v1_20_0-esp32-generic_s3-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-esp32-generic_s3-stubs",
+        "version": "1.20.0",
+        "port": "esp32",
+        "module": 0.65,
+        "class": 0.64,
+        "def": 0.62,
+        "counts": {
+            "def": 980,
+            "class": 120,
+            "module": 84
+        },
+        "missing": {
+            "module": 29,
+            "class": 43,
+            "def": 369
         }
     },
     {
@@ -2873,18 +3348,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-esp32-stubs",
         "version": "1.20.0",
         "port": "esp32",
-        "module": 0.64,
-        "class": 0.64,
-        "def": 0.61,
+        "module": 0.65,
+        "class": 0.63,
+        "def": 0.62,
         "counts": {
-            "def": 1041,
-            "class": 130,
+            "def": 1010,
+            "class": 126,
             "module": 85
         },
         "missing": {
-            "module": 31,
-            "class": 47,
-            "def": 410
+            "module": 30,
+            "class": 46,
+            "def": 384
         }
     },
     {
@@ -2892,18 +3367,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-rp2-pico-stubs",
         "version": "1.20.0",
         "port": "rp2",
-        "module": 0.77,
-        "class": 0.65,
-        "def": 0.59,
+        "module": 0.8,
+        "class": 0.68,
+        "def": 0.63,
         "counts": {
-            "def": 782,
-            "class": 97,
+            "def": 751,
+            "class": 93,
             "module": 60
         },
         "missing": {
-            "module": 14,
-            "class": 34,
-            "def": 324
+            "module": 12,
+            "class": 30,
+            "def": 281
         }
     },
     {
@@ -2911,37 +3386,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-rp2-pico_w-stubs",
         "version": "1.20.0",
         "port": "rp2",
-        "module": 0.72,
-        "class": 0.63,
-        "def": 0.57,
+        "module": 0.75,
+        "class": 0.66,
+        "def": 0.61,
         "counts": {
-            "def": 896,
-            "class": 104,
+            "def": 865,
+            "class": 100,
             "module": 71
         },
         "missing": {
-            "module": 20,
-            "class": 38,
-            "def": 383
-        }
-    },
-    {
-        "folder": "micropython-v1_20_0-rp2-pimoroni_picolipo_16mb-stubs",
-        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-rp2-pimoroni_picolipo_16mb-stubs",
-        "version": "1.20.0",
-        "port": "rp2",
-        "module": 0.77,
-        "class": 0.65,
-        "def": 0.59,
-        "counts": {
-            "def": 782,
-            "class": 97,
-            "module": 60
-        },
-        "missing": {
-            "module": 14,
+            "module": 18,
             "class": 34,
-            "def": 324
+            "def": 340
         }
     },
     {
@@ -2949,18 +3405,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-rp2-stubs",
         "version": "1.20.0",
         "port": "rp2",
-        "module": 0.77,
-        "class": 0.65,
-        "def": 0.59,
+        "module": 0.8,
+        "class": 0.68,
+        "def": 0.63,
         "counts": {
-            "def": 782,
-            "class": 97,
+            "def": 751,
+            "class": 93,
             "module": 60
         },
         "missing": {
-            "module": 14,
-            "class": 34,
-            "def": 324
+            "module": 12,
+            "class": 30,
+            "def": 281
         }
     },
     {
@@ -2969,17 +3425,17 @@
         "version": "1.20.0",
         "port": "samd",
         "module": 0.75,
-        "class": 0.69,
-        "def": 0.57,
+        "class": 0.67,
+        "def": 0.59,
         "counts": {
-            "def": 736,
-            "class": 89,
+            "def": 705,
+            "class": 85,
             "module": 53
         },
         "missing": {
             "module": 13,
             "class": 28,
-            "def": 315
+            "def": 291
         }
     },
     {
@@ -2988,17 +3444,17 @@
         "version": "1.20.0",
         "port": "samd",
         "module": 0.75,
-        "class": 0.69,
-        "def": 0.57,
+        "class": 0.67,
+        "def": 0.59,
         "counts": {
-            "def": 736,
-            "class": 89,
+            "def": 705,
+            "class": 85,
             "module": 53
         },
         "missing": {
             "module": 13,
             "class": 28,
-            "def": 315
+            "def": 291
         }
     },
     {
@@ -3007,17 +3463,17 @@
         "version": "1.20.0",
         "port": "samd",
         "module": 0.75,
-        "class": 0.69,
-        "def": 0.57,
+        "class": 0.67,
+        "def": 0.59,
         "counts": {
-            "def": 736,
-            "class": 89,
+            "def": 705,
+            "class": 85,
             "module": 53
         },
         "missing": {
             "module": 13,
             "class": 28,
-            "def": 315
+            "def": 291
         }
     },
     {
@@ -3026,17 +3482,36 @@
         "version": "1.20.0",
         "port": "samd",
         "module": 0.75,
-        "class": 0.69,
-        "def": 0.57,
+        "class": 0.67,
+        "def": 0.59,
         "counts": {
-            "def": 736,
-            "class": 89,
+            "def": 705,
+            "class": 85,
             "module": 53
         },
         "missing": {
             "module": 13,
             "class": 28,
-            "def": 315
+            "def": 291
+        }
+    },
+    {
+        "folder": "micropython-v1_20_0-samd-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-samd-stubs",
+        "version": "1.20.0",
+        "port": "samd",
+        "module": 0.75,
+        "class": 0.67,
+        "def": 0.59,
+        "counts": {
+            "def": 705,
+            "class": 85,
+            "module": 53
+        },
+        "missing": {
+            "module": 13,
+            "class": 28,
+            "def": 291
         }
     },
     {
@@ -3044,18 +3519,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-stm32-pybv11-stubs",
         "version": "1.20.0",
         "port": "stm32",
-        "module": 0.77,
-        "class": 0.75,
-        "def": 0.66,
+        "module": 0.78,
+        "class": 0.74,
+        "def": 0.67,
         "counts": {
-            "def": 1043,
-            "class": 109,
-            "module": 61
+            "def": 1011,
+            "class": 105,
+            "module": 60
         },
         "missing": {
-            "module": 14,
+            "module": 13,
             "class": 27,
-            "def": 353
+            "def": 329
         }
     },
     {
@@ -3063,18 +3538,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_20_0-stm32-stubs",
         "version": "1.20.0",
         "port": "stm32",
-        "module": 0.77,
-        "class": 0.75,
-        "def": 0.66,
+        "module": 0.78,
+        "class": 0.74,
+        "def": 0.67,
         "counts": {
-            "def": 1043,
-            "class": 109,
-            "module": 61
+            "def": 1011,
+            "class": 105,
+            "module": 60
         },
         "missing": {
-            "module": 14,
+            "module": 13,
             "class": 27,
-            "def": 353
+            "def": 329
         }
     },
     {
@@ -3082,18 +3557,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-esp32-esp32_generic-stubs",
         "version": "1.21.0",
         "port": "esp32",
-        "module": 0.64,
+        "module": 0.65,
         "class": 0.6,
-        "def": 0.59,
+        "def": 0.61,
         "counts": {
-            "def": 1150,
-            "class": 145,
-            "module": 94
+            "def": 1122,
+            "class": 141,
+            "module": 93
         },
         "missing": {
-            "module": 34,
-            "class": 58,
-            "def": 471
+            "module": 33,
+            "class": 57,
+            "def": 441
         }
     },
     {
@@ -3101,18 +3576,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-esp32-stubs",
         "version": "1.21.0",
         "port": "esp32",
-        "module": 0.64,
+        "module": 0.65,
         "class": 0.6,
-        "def": 0.59,
+        "def": 0.61,
         "counts": {
-            "def": 1150,
-            "class": 145,
-            "module": 94
+            "def": 1122,
+            "class": 141,
+            "module": 93
         },
         "missing": {
-            "module": 34,
-            "class": 58,
-            "def": 471
+            "module": 33,
+            "class": 57,
+            "def": 441
         }
     },
     {
@@ -3120,18 +3595,18 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-rp2-rpi_pico-stubs",
         "version": "1.21.0",
         "port": "rp2",
-        "module": 0.76,
-        "class": 0.58,
-        "def": 0.58,
+        "module": 0.77,
+        "class": 0.63,
+        "def": 0.63,
         "counts": {
-            "def": 838,
-            "class": 106,
-            "module": 67
+            "def": 810,
+            "class": 102,
+            "module": 66
         },
         "missing": {
-            "module": 16,
-            "class": 44,
-            "def": 356
+            "module": 15,
+            "class": 38,
+            "def": 299
         }
     },
     {
@@ -3139,18 +3614,37 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-rp2-rpi_pico_w-stubs",
         "version": "1.21.0",
         "port": "rp2",
-        "module": 0.62,
-        "class": 0.51,
-        "def": 0.58,
+        "module": 0.63,
+        "class": 0.54,
+        "def": 0.62,
         "counts": {
-            "def": 1170,
-            "class": 142,
-            "module": 93
+            "def": 1142,
+            "class": 138,
+            "module": 92
         },
         "missing": {
-            "module": 35,
-            "class": 69,
-            "def": 492
+            "module": 34,
+            "class": 63,
+            "def": 435
+        }
+    },
+    {
+        "folder": "micropython-v1_21_0-rp2-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-rp2-stubs",
+        "version": "1.21.0",
+        "port": "rp2",
+        "module": 0.77,
+        "class": 0.63,
+        "def": 0.63,
+        "counts": {
+            "def": 810,
+            "class": 102,
+            "module": 66
+        },
+        "missing": {
+            "module": 15,
+            "class": 38,
+            "def": 299
         }
     },
     {
@@ -3158,18 +3652,37 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-samd-seeed_wio_terminal-stubs",
         "version": "1.21.0",
         "port": "samd",
-        "module": 0.72,
-        "class": 0.59,
-        "def": 0.58,
+        "module": 0.73,
+        "class": 0.61,
+        "def": 0.62,
         "counts": {
-            "def": 766,
-            "class": 96,
-            "module": 60
+            "def": 738,
+            "class": 92,
+            "module": 59
         },
         "missing": {
-            "module": 17,
-            "class": 39,
-            "def": 325
+            "module": 16,
+            "class": 36,
+            "def": 283
+        }
+    },
+    {
+        "folder": "micropython-v1_21_0-samd-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-samd-stubs",
+        "version": "1.21.0",
+        "port": "samd",
+        "module": 0.73,
+        "class": 0.61,
+        "def": 0.62,
+        "counts": {
+            "def": 738,
+            "class": 92,
+            "module": 59
+        },
+        "missing": {
+            "module": 16,
+            "class": 36,
+            "def": 283
         }
     },
     {
@@ -3177,18 +3690,56 @@
         "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-stm32-pybv11-stubs",
         "version": "1.21.0",
         "port": "stm32",
-        "module": 0.77,
-        "class": 0.68,
-        "def": 0.65,
+        "module": 0.78,
+        "class": 0.7,
+        "def": 0.68,
         "counts": {
-            "def": 1089,
-            "class": 117,
-            "module": 64
+            "def": 1061,
+            "class": 113,
+            "module": 63
         },
         "missing": {
-            "module": 15,
-            "class": 37,
-            "def": 385
+            "module": 14,
+            "class": 34,
+            "def": 343
+        }
+    },
+    {
+        "folder": "micropython-v1_21_0-stm32-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-stm32-stubs",
+        "version": "1.21.0",
+        "port": "stm32",
+        "module": 0.78,
+        "class": 0.7,
+        "def": 0.68,
+        "counts": {
+            "def": 1061,
+            "class": 113,
+            "module": 63
+        },
+        "missing": {
+            "module": 14,
+            "class": 34,
+            "def": 343
+        }
+    },
+    {
+        "folder": "micropython-v1_21_0-webassembly-stubs",
+        "path": "..\\repos\\micropython-stubs\\publish\\micropython-v1_21_0-webassembly-stubs",
+        "version": "1.21.0",
+        "port": "webassembly",
+        "module": 0.95,
+        "class": 0.7,
+        "def": 0.69,
+        "counts": {
+            "def": 316,
+            "class": 27,
+            "module": 40
+        },
+        "missing": {
+            "module": 2,
+            "class": 8,
+            "def": 98
         }
     }
 ]

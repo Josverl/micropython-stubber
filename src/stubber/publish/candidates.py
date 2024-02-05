@@ -10,7 +10,6 @@ what versions are available. This module provides functions to :
     - get a list of the firmware/board stubs (firmware candidates)
 """
 
-
 import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Union
@@ -18,15 +17,11 @@ from typing import Any, Dict, Generator, List, Optional, Union
 from packaging.version import parse
 
 import stubber.basicgit as git
-from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
+from stubber import utils
 from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
+from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version, micropython_versions
-
-OLDEST_VERSION = "1.16"
-"This is the oldest MicroPython version to build the stubs on"
-
-V_LATEST = "latest"
+from stubber.utils.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean_version, micropython_versions
 
 
 def subfolder_names(path: Path):
@@ -50,13 +45,13 @@ def version_candidates(
         for name in subfolder_names(path):
             if match := re.match(folder_re, name):
                 folder_ver = clean_version(match[1])
-                if folder_ver == V_LATEST or parse(folder_ver) >= parse(oldest):
+                if folder_ver == V_PREVIEW or parse(folder_ver) >= parse(oldest):
                     yield folder_ver
 
 
 def list_frozen_ports(
     family: str = "micropython",
-    version: str = V_LATEST,
+    version: str = V_PREVIEW,
     path: Path = CONFIG.stub_path,
 ):
     "get list of ports with frozen stubs for a given family and version"
@@ -94,7 +89,7 @@ def list_micropython_port_boards(
 
 def frozen_candidates(
     family: str = "micropython",
-    versions: Union[str, List[str]] = V_LATEST,
+    versions: Union[str, List[str]] = V_PREVIEW,
     ports: Union[str, List[str]] = "all",
     boards: Union[str, List[str]] = "all",
     *,
@@ -111,7 +106,7 @@ def frozen_candidates(
     auto_port = is_auto(ports)
     auto_board = is_auto(boards)
     if is_auto(versions):
-        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_LATEST]
+        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_PREVIEW]
     else:
         versions = [versions] if isinstance(versions, str) else versions
 
@@ -129,9 +124,7 @@ def frozen_candidates(
                 # lookup the (frozen) micropython ports
                 ports = list_frozen_ports(family, version, path=path)
             else:
-                raise NotImplementedError(
-                    f"auto ports not implemented for family {family}"
-                )  # pragma: no cover
+                raise NotImplementedError(f"auto ports not implemented for family {family}")  # pragma: no cover
             # elif family == "pycom":
             #     ports = ["esp32"]
             # elif family == "lobo":
@@ -164,9 +157,7 @@ def frozen_candidates(
 
                 else:
                     # raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
-                    raise NotImplementedError(
-                        f"auto boards not implemented for family {family}"
-                    )  # pragma: no cover
+                    raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
                 # elif family == "pycom":
                 #     boards = ["wipy", "lopy", "gpy", "fipy"]
             # ---------------------------------------------------------------------------
@@ -199,7 +190,7 @@ def is_auto(thing: Union[None, str, List[str]]):
 
 def docstub_candidates(
     family: str = "micropython",
-    versions: Union[str, List[str]] = V_LATEST,
+    versions: Union[str, List[str]] = V_PREVIEW,
     path: Path = CONFIG.stub_path,
 ):
     """
@@ -220,7 +211,7 @@ def docstub_candidates(
 
 def board_candidates(
     family: str = "micropython",
-    versions: Union[str, List[str]] = V_LATEST,
+    versions: Union[str, List[str]] = V_PREVIEW,
     *,
     mpy_path: Path = CONFIG.mpy_path,
     pt: str = FIRMWARE_STUBS,
@@ -237,8 +228,10 @@ def board_candidates(
 
     for version in versions:
         # check out the micropython repo for this version
-        if version in ["latest", "master"]:
+        if version in SET_PREVIEW:
             r = git.switch_branch(repo=mpy_path, branch="master")
+            # get the current checked out version
+            version = utils.checkedout_version(mpy_path)
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
@@ -283,7 +276,6 @@ def filter_list(
         worklist = [
             i
             for i in worklist
-            if i["board"].lower() in boards_
-            or i["board"].lower().replace("generic_", "") in boards_
+            if i["board"].lower() in boards_ or i["board"].lower().replace("generic_", "") in boards_
         ]
     return worklist

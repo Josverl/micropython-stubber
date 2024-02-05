@@ -39,9 +39,7 @@ from .cli import stubber_cli
     show_default=True,
 )
 #  @click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
-@click.option(
-    "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
-)
+@click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.pass_context
 def cli_docstubs(
@@ -72,16 +70,13 @@ def cli_docstubs(
         result = fetch_repos(version, CONFIG.mpy_path, CONFIG.mpy_lib_path)
         if not result:
             return -1
+    # get the current checked out version
+    version = utils.checkedout_version(CONFIG.mpy_path)
 
-    v_tag = git.get_local_tag(rst_path.as_posix())
-    if not v_tag:
-        # if we can't find a tag , bail
-        raise ValueError("No valid Tag found")
-    v_tag = utils.clean_version(v_tag, flat=True, drop_v=False)
     release = git.get_local_tag(rst_path.as_posix(), abbreviate=False) or ""
 
-    dst_path = Path(target) / f"{basename}-{v_tag}-docstubs"
+    dst_path = Path(target) / f"{basename}-{version}-docstubs"
 
-    log.info(f"Get docstubs for MicroPython {utils.clean_version(v_tag, drop_v=False)}")
-    generate_from_rst(rst_path, dst_path, v_tag, release=release, suffix=".pyi",black=black)
+    log.info(f"Get docstubs for MicroPython {utils.clean_version(version, drop_v=False)}")
+    generate_from_rst(rst_path, dst_path, version, release=release, suffix=".pyi", black=black)
     log.info("::group:: Done")

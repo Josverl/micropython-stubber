@@ -9,6 +9,8 @@ from typing import List, Optional, Tuple
 
 from loguru import logger as log
 
+from stubber.utils.versions import V_PREVIEW
+
 # log = logging.getLogger()
 
 RELEASED = "v1_18"
@@ -24,7 +26,7 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
     """
     if not fw_version:
         fw_version = version
-    if fw_version == "latest":
+    if fw_version == V_PREVIEW:
         fw_version = RELEASED
     SOURCES = [
         ("uasyncio", f"micropython-{fw_version}-esp32"),

@@ -15,7 +15,7 @@ def _read_partial(path: Path) -> Iterator[str]:
     Read a partial from the file at `path`
     and yield only the lines between the ###PARTIAL### and ###PARTIALEND### markers
     """
-    lines = deque(path.read_text().splitlines(keepends=True))
+    lines = deque(path.read_text(encoding="utf-8").splitlines(keepends=True))
     _start = False
     _end = False
     # todo: allow processing of files that do not have the markers

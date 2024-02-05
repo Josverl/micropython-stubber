@@ -4,7 +4,7 @@ import sys
 from collections import namedtuple
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator, List, NamedTuple, Optional
 
 import pytest
 from mock import MagicMock
@@ -44,24 +44,6 @@ def test_firmwarestubber_all_versions_same(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-@pytest.mark.skip(reason="not sure if this is needed")
-def test_firmwarestubber_base_version_match_package(
-    location: Any,
-    variant: str,
-    mock_micropython_path: Generator[str, None, None],
-):
-    # Q&D Location
-    path = Path(__file__).resolve().parents[2] / "pyproject.toml"
-    pyproject = tomllib.loads(open(str(path)).read())
-    pyproject_version = pyproject["tool"]["poetry"]["version"]
-
-    createstubs = import_variant(location, variant)
-    # base version should match the package
-    assert parse(createstubs.__version__).base_version == parse(pyproject_version).base_version
-
-
-@pytest.mark.parametrize("variant", VARIANTS)
-@pytest.mark.parametrize("location", LOCATIONS)
 def test_stubber_Class_available(
     location: Any,
     variant: str,
@@ -74,9 +56,7 @@ def test_stubber_Class_available(
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("location", LOCATIONS)
-def test_stubber_info_basic(
-    location: Any, variant: str, mock_micropython_path: Generator[str, None, None]
-):
+def test_stubber_info_basic(location: Any, variant: str, mock_micropython_path: Generator[str, None, None]):
     createstubs = import_variant(location, variant)
     stubber = createstubs.Stubber()
     assert stubber is not None, "Can't create Stubber instance"
@@ -114,26 +94,24 @@ def test_stubber_info_custom(
 #################################################
 # test the fwid naming on the different platforms
 #################################################
-from testcases import fwid_test_cases
+from testcases import MP_Implementation, fwid_test_cases
 
 
 # @pytest.mark.parametrize("variant", VARIANTS)
 # @pytest.mark.parametrize("location", LOCATIONS)
 @pytest.mark.parametrize(
-    "fwid,  sys_imp_name, sys_imp_version, sys_platform, os_uname, mock_modules",
+    "fwid,  sys_implementation, sys_platform, sys_version, os_uname, mock_modules",
     fwid_test_cases,
     ids=[e[0] for e in fwid_test_cases],
 )
 @pytest.mark.mocked
 def test_stubber_fwid(
     mock_micropython_path: Generator[str, None, None],
-    # location: str,
-    # variant: str,
     mocker: MockerFixture,
     fwid: str,
-    sys_imp_name: str,
-    sys_imp_version: tuple,
+    sys_implementation: MP_Implementation,
     sys_platform: str,
+    sys_version: str,
     os_uname: Dict,
     mock_modules: List[str],
 ):
@@ -141,19 +119,28 @@ def test_stubber_fwid(
     location = "board"
     createstubs = import_variant(location, variant)
 
-    # FIX-ME : This does not yet cover minified
     mod_name = f"stubber.board.{variant}"
     # class.property : just pass a value
     mocker.patch(f"{mod_name}.sys.platform", sys_platform)
-    mocker.patch(f"{mod_name}.sys.implementation.name", sys_imp_name)
-    mocker.patch(f"{mod_name}.sys.implementation.version", sys_imp_version)
+    # fatch sys.implementation
+    mocker.patch(f"{mod_name}.sys.implementation.name", sys_implementation.name)
+    mocker.patch(f"{mod_name}.sys.implementation.version", sys_implementation.version)
+    mocker.patch(f"{mod_name}.sys.version", sys_version)
+    if sys_implementation._machine:
+        mocker.patch(f"{mod_name}.sys.implementation._machine", sys_implementation._machine, create=True)
+    if sys_implementation._mpy:
+        mocker.patch(f"{mod_name}.sys.implementation._mpy", sys_implementation._mpy, create=True)
     # class.method--> mock using function
-    fake_uname = os_uname
 
-    def mock_uname():
-        return fake_uname
+    if os_uname:
+        # only mock uname if there is something to mock
+        fake_uname = os_uname
 
-    mocker.patch(f"{mod_name}.os.uname", mock_uname, create=True)
+        def mock_uname():
+            return fake_uname
+
+        mocker.patch(f"{mod_name}.os.uname", mock_uname, create=True)
+
     for mod in mock_modules:
         # mock that these modules can be imported without errors
         sys.modules[mod] = MagicMock()
@@ -182,8 +169,7 @@ def test_stubber_fwid(
     assert Version(info["version"]), "provided version is not a valid version"
 
     assert info["port"] != "", "stubber.info() - No port detected"
-    assert info["board"] != "", "stubber.info() - No board detected"
-
+    # TEST 2: check if the firmware id is correct
     new_fwid = stubber._fwid
     assert new_fwid != "none"
 
@@ -192,28 +178,13 @@ def test_stubber_fwid(
         assert c not in stubber.flat_fwid, "flat_fwid must not contain '{}'".format(c)
 
     # Does the firmware id match (at least the part before the last -)
-    assert new_fwid.startswith(
-        fwid.rsplit("-", 1)[0]
-    ), f"fwid: {new_fwid} does not start with {fwid.rsplit('-', 1)[0]}"
+
+    short_fwid = "-".join(fwid.split("-", 2)[:2])
+    assert new_fwid.startswith(short_fwid), f"fwid: {new_fwid} does not start with {short_fwid}"
 
     if not "esp8266" in fwid:
         # TODO: Fix FWID logic with esp8266
         assert new_fwid == fwid, f"fwid: {new_fwid} does not match"
-
-
-# # throws an error on the commandline
-# @pytest.mark.skip(reason="test not working")
-# @pytest.mark.parametrize("variant", VARIANTS)
-# @pytest.mark.parametrize("location", LOCATIONS)
-# def test_read_path(
-#     location,
-#     variant,
-#     mock_micropython_path,
-# ):
-#     # import createstubs  # type: ignore
-#     createstubs = import_module(f"{location}.{variant}")  # type: ignore
-
-#     assert createstubs.read_path() == ""
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -234,9 +205,8 @@ def test_create_all_stubs(
     stubber.add_modules(["http_client", "webrepl", "_internal"])
     stubber.create_all_stubs()
 
-    stublist = list(tmp_path.glob("**/*.py"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 3
-    stubber.report()
     stublist = list(tmp_path.glob("**/modules.json"))
     assert len(stublist) == 1
 
@@ -272,11 +242,12 @@ def test_create_module_stub(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
+    stubber.report_start()
     # just in the test folder , no structure
-    stubber.create_module_stub("json", str(tmp_path / "json.py"))
-    stubber.create_module_stub("_thread", str(tmp_path / "_thread.py"))
+    stubber.create_module_stub("json", str(tmp_path / "json.pyi"))
+    stubber.create_module_stub("_thread", str(tmp_path / "_thread.pyi"))
 
-    stublist = list(tmp_path.glob("**/*.py"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 2
 
 
@@ -293,9 +264,9 @@ def test_create_module_stub_folder(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
-
+    stubber.report_start()
     stubber.create_module_stub("json")
-    stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.py"))
+    stublist = list((tmp_path / "stubs" / myid.lower()).glob("**/*.pyi"))
     assert len(stublist) == 1, "should create stub in stub folder if no folder specified"
 
 
@@ -334,9 +305,10 @@ def test_nested_modules(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
+    stubber.report_start()
     # just in the test folder , no structure
-    stubber.create_module_stub("urllib/request", str(tmp_path / "request.py"))
-    stublist = list(tmp_path.glob("**/*.py"))
+    stubber.create_module_stub("urllib/request", str(tmp_path / "request.pyi"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 1
 
 
@@ -353,24 +325,32 @@ def test_unavailable_modules(
     myid = "MyCustomID"
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id=myid)  # type: ignore
     assert stubber is not None, "Can't create Stubber instance"
+    stubber.report_start()
     # this should not generate a module , but also should not th
-    stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.py"))
-    stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.py"))
-    stublist = list(tmp_path.glob("**/*.py"))
+    stubber.create_module_stub("notamodule1", str(tmp_path / "notamodule1.pyi"))
+    stubber.create_module_stub("not/amodule2", str(tmp_path / "notamodule2.pyi"))
+    stublist = list(tmp_path.glob("**/*.pyi"))
     assert len(stublist) == 0
 
 
-# def test_clean(tmp_path):
-# import createstubs  # type: ignore
-#    createstubs = import_module(f"{location}.{variant}")  # type: ignore
-#     myid = "MyCustomID"
-#     test_path = str(tmp_path)
-#     stub_path =  Path(test_path) /"stubs"/ myid.lower()
-#     stubber = Stubber(path = test_path, firmware_id=myid)
-#     stubber.clean()
+@pytest.mark.parametrize(
+    "input, expected",
+    [
+        ("", ""),
+        ("v1.13 on 2020-10-09", ""),
+        ("v1.13-103-gb137d064e on 2020-10-09", "103"),
+        ("3.4.0; MicroPython v1.23.0-preview.6.g3d0b6276f on 2024-01-02", "6"),
+        ("3.4.0; MicroPython v1.22.0 on 2023-12-27", ""),
+    ],
+)
+def test_build(input: str, expected: str):
+    """build function should be able to extract from
+    - sys.version
+    - sys.implementation.version
+    """
+    variant = "createstubs"
+    location = "board"
+    createstubs = import_variant(location, variant)
 
-#     #Create a file
-#     stubber.create_module_stub("json", PurePosixPath( stub_path / "json.py") )
-#     stublist = list(Path(test_path).glob('**/*.py'))
-#     assert len(stublist) == 1
-#     stubber.clean()
+    outcome = createstubs._build(input)
+    assert outcome == expected

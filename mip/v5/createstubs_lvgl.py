@@ -3,7 +3,7 @@ Create stubs for the lvgl modules on a MicroPython board.
 
 Note that the stubs can be very large, and it may be best to directly store them on an SD card if your device supports this.
 
-This variant was generated from createstubs.py by micropython-stubber v1.16.0
+This variant was generated from createstubs.py by micropython-stubber v1.16.2
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
@@ -11,8 +11,12 @@ import gc
 import logging
 import os
 import sys
+from time import sleep
 
-from ujson import dumps
+try:
+    from ujson import dumps
+except:
+    from json import dumps
 
 try:
     from machine import reset  # type: ignore
@@ -24,11 +28,26 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.16.0"
+try:
+    from nope_machine import WDT
+
+    wdt = WDT()
+
+except ImportError:
+
+    class _WDT:
+        def feed(self):
+            pass
+
+    wdt = _WDT()
+
+
+wdt.feed()
+
+__version__ = "v1.16.2"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = [".", "/lib", "/sd/lib", "/flash/lib", "lib"]
-from time import sleep
 
 
 class Stubber:
@@ -36,24 +55,24 @@ class Stubber:
 
     def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
         try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":
+            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
-        self.log = None
         self.log = logging.getLogger("stubber")
         self._report = []  # type: list[str]
         self.info = _info()
         self.log.info("Port: {}".format(self.info["port"]))
         self.log.info("Board: {}".format(self.info["board"]))
         gc.collect()
+        wdt.feed()
         if firmware_id:
             self._fwid = firmware_id.lower()
         else:
             if self.info["family"] == "micropython":
-                self._fwid = "{family}-{ver}-{port}-{board}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}-{board}".format(**self.info).rstrip("-")
             else:
-                self._fwid = "{family}-{ver}-{port}".format(**self.info)
+                self._fwid = "{family}-v{version}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
 
         if path:
@@ -100,6 +119,7 @@ class Stubber:
             try:
                 val = getattr(item_instance, name)
                 # name , item_repr(value) , type as text, item_instance, order
+                self.log.debug("attribute {}:{}".format(name, val))
                 try:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
@@ -139,6 +159,7 @@ class Stubber:
         self.log.info("Finally done")
 
     def create_one_stub(self, module_name: str):
+        wdt.feed()
         if module_name in self.problematic:
             self.log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
             return False
@@ -191,7 +212,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from typing import Any\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
@@ -202,10 +223,11 @@ class Stubber:
                 del new_module
             except (OSError, KeyError):  # lgtm [py/unreachable-statement]
                 self.log.warning("could not del new_module")
-            try:
-                del sys.modules[module_name]
-            except KeyError:
-                self.log.debug("could not del sys.modules[{}]".format(module_name))
+            # lets not try - most times it does not work anyway
+            # try:
+            #     del sys.modules[module_name]
+            # except KeyError:
+            #     self.log.warning("could not del sys.modules[{}]".format(module_name))
         gc.collect()
         return True
 
@@ -231,8 +253,13 @@ class Stubber:
                 self.log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
-            if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
-                self.log.debug("{0}class {1}:".format(indent, item_name))
+            if (
+                item_type_txt == "<class 'type'>"
+                and len(indent) <= _MAX_CLASS_LEVEL * 4
+                # and not obj_name.endswith(".Pin")
+                # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
+            ):
+                self.log.info("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (
                     item_name.endswith("Exception")
@@ -251,7 +278,7 @@ class Stubber:
                 if is_exception:
                     s += indent + "    ...\n"
                     fp.write(s)
-                    return
+                    continue
                 # write classdef
                 fp.write(s)
                 # first write the class literals and methods
@@ -304,12 +331,14 @@ class Stubber:
                     s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t not in ["object", "set", "frozenset"]:
-                        # Possibly default others to item_instance object ?
+                    if t in ["object", "set", "frozenset", "Pin", "FileIO"]:
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
+                        #  use these types for the attribute
+                        s = "{0}{1} : {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                    else:
+                        # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
-                    # Requires Python 3.6 syntax, which is OK for the stubs/pyi
-                    s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 self.log.debug("\n" + s)
             else:
@@ -319,12 +348,12 @@ class Stubber:
 
                 fp.write(indent + item_name + " # type: Incomplete\n")
 
-        del items
-        del errors
-        try:
-            del item_name, item_repr, item_type_txt, item_instance  # type: ignore
-        except (OSError, KeyError, NameError):
-            pass
+        # del items
+        # del errors
+        # try:
+        #     del item_name, item_repr, item_type_txt, item_instance  # type: ignore
+        # except (OSError, KeyError, NameError):
+        #     pass
 
     @property
     def flat_fwid(self):
@@ -338,6 +367,7 @@ class Stubber:
 
     def clean(self, path: str = None):  # type: ignore
         "Remove all files from the stub folder"
+        wdt.feed()
         if path is None:
             path = self.path
         self.log.info("Clean/remove files in folder: {}".format(path))
@@ -360,6 +390,7 @@ class Stubber:
 
     def report(self, filename: str = "modules.json"):
         "create json with list of exported modules"
+        wdt.feed()
         self.log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
         f_name = "{}/{}".format(self.path, filename)
         self.log.info("Report file: {}".format(f_name))
@@ -418,12 +449,21 @@ def ensure_folder(path: str):
 
 
 def _build(s):
-    # extract a build nr from a string
+    # extract build from sys.version or os.uname().version if available
+    # sys.version: 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
-    if " on " in s:
-        s = s.split(" on ", 1)[0]
-    return s.split("-")[1] if "-" in s else ""
+    s = s.split(" on ", 1)[0] if " on " in s else s
+    if s.startswith("v"):
+        if not "-" in s:
+            return ""
+        b = s.split("-")[1]
+        return b
+    if not "-preview" in s:
+        return ""
+    b = s.split("-preview")[1].split(".")[1]
+    return b
 
 
 def _info():  # type:() -> dict[str, str]
@@ -433,21 +473,29 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
-            "board": "GENERIC",
+            "port": sys.platform,  # port: esp32 / win32 / linux / stm32
+            "board": "UNKNOWN",
             "cpu": "",
             "mpy": "",
             "arch": "",
         }
     )
+    # change port names to be consistent with the repo
+    if info["port"].startswith("pyb"):
+        info["port"] = "stm32"
+    elif info["port"] == "win32":
+        info["port"] = "windows"
+    elif info["port"] == "linux":
+        info["port"] = "unix"
     try:
-        info["version"] = ".".join([str(n) for n in sys.implementation.version])
+        info["version"] = version_str(sys.implementation.version)  # type: ignore
     except AttributeError:
         pass
     try:
-        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine
-        info["board"] = machine.strip()
-        info["cpu"] = machine.split("with")[1].strip()
+        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
+        # info["board"] = "with".join(_machine.split("with")[:-1]).strip()
+        info["board"] = _machine
+        info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
             sys.implementation._mpy
             if "_mpy" in dir(sys.implementation)
@@ -458,39 +506,28 @@ def _info():  # type:() -> dict[str, str]
     except (AttributeError, IndexError):
         pass
     gc.collect()
-    for filename in [d + "/board_info.csv" for d in LIBS]:
-        # print("look up the board name in the file", filename)
-        if file_exists(filename):
-            # print("Found board info file: {}".format(filename))
-            b = info["board"].strip()
-            if find_board(info, b, filename):
-                break
-            if "with" in b:
-                b = b.split("with")[0].strip()
-                if find_board(info, b, filename):
-                    break
-            info["board"] = "GENERIC"
-    info["board"] = info["board"].replace(" ", "_")
+    read_boardname(info)
     gc.collect()
 
     try:
-        # extract build from uname().version if available
-        info["build"] = _build(os.uname()[3])
-        if not info["build"]:
-            # extract build from uname().release if available
-            info["build"] = _build(os.uname()[2])
-        if not info["build"] and ";" in sys.version:
-            # extract build from uname().release if available
-            info["build"] = _build(sys.version.split(";")[1])
-    except (AttributeError, IndexError):
+        if "uname" in dir(os):  # old
+            # extract build from uname().version if available
+            info["build"] = _build(os.uname()[3])  # type: ignore
+            if not info["build"]:
+                # extract build from uname().release if available
+                info["build"] = _build(os.uname()[2])  # type: ignore
+        elif "version" in dir(sys):  # new
+            # extract build from sys.version if available
+            info["build"] = _build(sys.version)
+    except (AttributeError, IndexError, TypeError):
         pass
     # avoid  build hashes
-    if info["build"] and len(info["build"]) > 5:
-        info["build"] = ""
+    # if info["build"] and len(info["build"]) > 5:
+    #     info["build"] = ""
 
     if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
-            u = os.uname()
+            u = os.uname()  # type: ignore
             info["version"] = u.release
         except (IndexError, AttributeError, TypeError):
             pass
@@ -512,13 +549,14 @@ def _info():  # type:() -> dict[str, str]
         info["release"] = "2.0.0"
 
     if info["family"] == "micropython":
+        info["version"]
         if (
             info["version"]
             and info["version"].endswith(".0")
             and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # drop the .0 for newer releases
+            # versions from 1.10.0 to 1.20.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
@@ -542,25 +580,94 @@ def _info():  # type:() -> dict[str, str]
             info["arch"] = arch
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+    if info["build"] and not info["version"].endswith("-preview"):
+        info["version"] = info["version"] + "-preview"
     # simple to use version[-build] string
-    info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
+    info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
 
     return info
 
 
-def find_board(info: dict, board_descr: str, filename: str):
-    "Find the board in the provided board_info.csv file"
-    with open(filename, "r") as file:
-        # ugly code to make testable in python and micropython
-        while 1:
-            line = file.readline()
-            if not line:
+def version_str(version: tuple):  #  -> str:
+    v_str = ".".join([str(n) for n in version[:3]])
+    if len(version) > 3 and version[3]:
+        v_str += "-" + version[3]
+    return v_str
+
+
+def read_boardname(info, desc: str = ""):
+    info["board"] = info["board"].replace(" ", "_")
+    found = False
+    for filename in [d + "/board_name.txt" for d in LIBS]:
+        wdt.feed()
+        # print("look up the board name in the file", filename)
+        if file_exists(filename):
+            with open(filename, "r") as file:
+                data = file.read()
+            if data:
+                info["board"] = data.strip()
+                found = True
                 break
-            descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
-            if descr_ == board_descr:
-                info["board"] = board_
-                return True
-    return False
+    if not found:
+        print("Board not found, guessing board name")
+        descr = ""
+        # descr = desc or info["board"].strip()
+        # if "with " + info["cpu"].upper() in descr:
+        #     # remove the with cpu part
+        #     descr = descr.split("with " + info["cpu"].upper())[0].strip()
+        info["board"] = descr
+
+
+# def read_boardname(info, desc: str = ""):
+#         wdt.feed()
+#         # print("look up the board name in the file", filename)
+#         if file_exists(filename):
+#             descr = desc or info["board"].strip()
+#             pos = descr.rfind(" with")
+#             if pos != -1:
+#                 short_descr = descr[:pos].strip()
+#             else:
+#                 short_descr = ""
+#             print("searching info file: {} for: '{}' or '{}'".format(filename, descr, short_descr))
+#             if find_board(info, descr, filename, short_descr):
+#                 found = True
+#                 break
+#     if not found:
+#         print("Board not found, guessing board name")
+#         descr = desc or info["board"].strip()
+#         if "with " + info["cpu"].upper() in descr:
+#             # remove the with cpu part
+#             descr = descr.split("with " + info["cpu"].upper())[0].strip()
+#         info["board"] = descr
+#     info["board"] = info["board"].replace(" ", "_")
+#     gc.collect()
+
+
+# def find_board(info: dict, descr: str, filename: str, short_descr: str):
+#     "Find the board in the provided board_info.csv file"
+#     short_hit = ""
+#     with open(filename, "r") as file:
+#         # ugly code to make testable in python and micropython
+#         # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
+#         while 1:
+#             line = file.readline()
+#             if not line:
+#                 break
+#             descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
+#             if descr_ == descr:
+#                 info["board"] = board_
+#                 return True
+#             elif short_descr and descr_ == short_descr:
+#                 if "with" in short_descr:
+#                     # Good enough - no need to trawl the entire file
+#                     info["board"] = board_
+#                     return True
+#                 # good enough if not found in the rest of the file (but slow)
+#                 short_hit = board_
+#     if short_hit:
+#         info["board"] = short_hit
+#         return True
+#     return False
 
 
 def get_root() -> str:  # sourcery skip: use-assigned-variable

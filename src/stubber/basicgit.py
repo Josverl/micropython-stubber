@@ -13,11 +13,12 @@ from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse
 
-# Token with no permissions
+# from stubber.utils.versions import SET_PREVIEW
+
+# Token with no permissions to avoid throttling
+# https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
 PAT_NO_ACCESS = (
-    "github_pat"
-    + "_11AAHPVFQ0IwtAmfc3cD5Z"
-    + "_xOVII22ErRzzZ7xwwxRcNotUu4krMMbjinQcsMxjnWkYFBIDRWFlZMaHSqq"
+    "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
 )
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
@@ -36,18 +37,18 @@ def _run_local_git(
             if isinstance(repo, str):
                 repo = Path(repo)
             result = subprocess.run(
-                cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix()
+                cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix(), encoding="utf-8"
             )
         else:
-            result = subprocess.run(cmd, capture_output=capture_output, check=True)
+            result = subprocess.run(cmd, capture_output=capture_output, check=True, encoding="utf-8")
     except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
         # add some logging for github actions
-        log.error(f"{str(e)} : { e.stderr.decode('utf-8')}")
+        log.error(f"{str(e)} : { e.stderr}")
         return None
     if result.stderr and result.stderr != b"":
-        stderr = result.stderr.decode("utf-8")
+        stderr = result.stderr
         if "cloning into" in stderr.lower():
             # log.info(stderr)
             expect_stderr = True
@@ -59,8 +60,8 @@ def _run_local_git(
         if not expect_stderr:
             raise ChildProcessError(stderr)
 
-    if result.returncode < 0:
-        raise ChildProcessError(result.stderr.decode("utf-8"))
+    if result.returncode and result.returncode < 0:
+        raise ChildProcessError(result.stderr)
     return result
 
 
@@ -69,7 +70,7 @@ def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str
     cmd = ["git", "clone"]
     if shallow:
         cmd += ["--depth", "1"]
-    if tag in ("latest", "master"):
+    if tag in {"preview", "latest", "master"}:
         tag = None
     cmd += [remote_repo, "--branch", tag, str(path)] if tag else [remote_repo, str(path)]
     if result := _run_local_git(cmd, expect_stderr=True, capture_output=False):
@@ -78,9 +79,7 @@ def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str
         return False
 
 
-def get_local_tag(
-    repo: Optional[Union[str, Path]] = None, abbreviate: bool = True
-) -> Union[str, None]:
+def get_local_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo
     repo Path should be in the form of : repo = "./repo/micropython"
@@ -100,23 +99,18 @@ def get_local_tag(
     )
     if not result:
         return None
-    tag: str = result.stdout.decode("utf-8")
+    tag: str = result.stdout
     tag = tag.replace("\r", "").replace("\n", "")
-    if abbreviate and "-" in tag:
-        if result := _run_local_git(
-            ["git", "status", "--branch"],
-            repo=repo.as_posix(),
-            expect_stderr=True,
-        ):
-            lines = result.stdout.decode("utf-8").replace("\r", "").split("\n")
-            if lines[0].startswith("On branch") and lines[0].endswith("master"):
-                tag = "latest"
+    if not abbreviate or "-" not in tag:
+        return tag
+    if "-preview" in tag:
+        tag = tag.split("-preview")[0] + "-preview"
     return tag
 
 
 def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) -> List[str]:
     """
-    get list of tag of a local repo
+    get list of all tags of a local repo
     """
     if not repo:
         repo = Path(".")
@@ -124,7 +118,7 @@ def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) ->
     result = _run_local_git(["git", "tag", "-l"], repo=repo.as_posix(), expect_stderr=True)
     if not result or result.returncode != 0:
         return []
-    tags = result.stdout.decode("utf-8").replace("\r", "").split("\n")
+    tags = result.stdout.replace("\r", "").split("\n")
     tags = [tag for tag in tags if tag.startswith("v")]
     if minver:
         tags = [tag for tag in tags if parse(tag) >= parse(minver)]
@@ -154,12 +148,12 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     """
     checkout a specific git tag
     """
-    cmd = ["git", "checkout", "tags/" + tag, "--detach", "--quiet", "--force"]
+    cmd = ["git", "checkout", tag, "--quiet", "--force"]
     result = _run_local_git(cmd, repo=repo, expect_stderr=True, capture_output=True)
     if not result:
         return False
     # actually a good result
-    msg = {result.stdout.decode("utf-8")}
+    msg = {result.stdout}
     if msg != {""}:
         log.warning(f"git message: {msg}")
     return True
@@ -177,7 +171,7 @@ def sync_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
     for cmd in cmds:
         if result := _run_local_git(cmd, repo=repo, expect_stderr=True):
             # actually a good result
-            log.debug(result.stderr.decode("utf-8"))
+            log.debug(result.stderr)
         else:
             return False
     return True
@@ -192,11 +186,11 @@ def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -
     if not result:
         return False
     # actually a good result
-    log.debug(result.stderr.decode("utf-8"))
+    log.debug(result.stderr)
     return True
 
 
-def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
+def switch_tag(tag: Union[str, Path], repo: Optional[Union[Path, str]] = None) -> bool:
     """
     switch to the specified version tag of a local repo
     repo should be in the form of : path/.git
@@ -209,7 +203,7 @@ def switch_tag(tag: str, repo: Optional[Union[Path, str]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.debug(result.stderr.decode("utf-8"))
+    log.debug(result.stderr)
     return True
 
 
@@ -225,7 +219,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
     if not result:
         return False
     # actually a good result
-    log.debug(result.stderr.decode("utf-8"))
+    log.debug(result.stderr)
     return True
 
 
