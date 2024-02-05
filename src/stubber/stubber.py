@@ -4,8 +4,8 @@
 """Create, Process, and Maintain stubs ✏️  for MicroPython"""
 
 
-from stubber.commands.cli import stubber_cli
 from stubber.commands.build_cmd import cli_build
+from stubber.commands.cli import stubber_cli
 from stubber.commands.clone_cmd import cli_clone
 from stubber.commands.config_cmd import cli_config
 from stubber.commands.enrich_folder_cmd import cli_enrich_folder
@@ -22,7 +22,6 @@ from stubber.commands.upd_fallback_cmd import cli_update_fallback
 from stubber.commands.upd_module_list_cmd import cli_update_module_list
 from stubber.commands.variants_cmd import cli_variants
 
-
 ##########################################################################################
 if __name__ == "__main__":
     # add all commands to the CLI
@@ -33,13 +32,13 @@ if __name__ == "__main__":
     stubber_cli.add_command(cli_docstubs)
     stubber_cli.add_command(cli_get_core)
     stubber_cli.add_command(cli_get_frozen)
-    stubber_cli.add_command(cli_get_lobo)
+    # stubber_cli.add_command(cli_get_lobo)
     stubber_cli.add_command(cli_stub)
     stubber_cli.add_command(cli_enrich_folder)
-    stubber_cli.add_command(cli_minify)
+    # stubber_cli.add_command(cli_minify)
     stubber_cli.add_command(cli_publish)
     stubber_cli.add_command(cli_merge_docstubs)
-    stubber_cli.add_command(cli_update_module_list)
-    stubber_cli.add_command(cli_update_fallback)
+    # stubber_cli.add_command(cli_update_module_list)
+    # stubber_cli.add_command(cli_update_fallback)
     stubber_cli.add_command(cli_variants)
     stubber_cli()

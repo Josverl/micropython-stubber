@@ -15,29 +15,43 @@ import stubber.utils as utils
     "commit, build, expected",
     [
         ("v1.13-103-gb137d064e", True, "v1.13-103"),
-        ("v1.13-103-gb137d064e", False, "latest"),
+        ("v1.13-103-gb137d064e", False, "preview"),  # used to be 'latest'
         ("v1.13", True, "v1.13"),
         ("v1.13", False, "v1.13"),
         ("v1.13-dirty", True, "v1.13"),
-        ("v1.13-dirty", False, "latest"),
+        ("v1.13-dirty", False, "preview"),  # used to be 'latest'
         # lets keep all the preview tags simple based on the provided version
         ("v1.23.0-preview", False, "v1.23.0-preview"),
         ("v1.23.0-preview", True, "v1.23.0-preview"),
         ("1.20.0-preview-487", False, "v1.20.0-preview"),
         ("1.20.0-preview-487", True, "v1.20.0-preview"),
+        ("v1.23.0-preview-87-g0285cb2bf", False, "v1.23.0-preview"),
     ],
 )
 def test_clean_version_build(commit, build, expected):
     assert utils.clean_version(commit, build=build) == expected
 
 
+@pytest.mark.parametrize(
+    "input, expected",
+    [
+        ("", ""),
+        ("latest", "preview"),
+        ("preview", "preview"),
+        ("v1.23.0-preview-87-g0285cb2bf", "v1_23_0_preview"),
+    ],
+)
+def test_clean_version_flat_preview(input: str, expected: str):
+    assert utils.clean_version(input, drop_v=False, flat=True) == expected
+
+
 def test_clean_version_special():
-    assert utils.clean_version("v1.13.0-103-gb137d064e") == "latest"
+    assert utils.clean_version("v1.13.0-103-gb137d064e") == "preview"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True) == "v1.13-103"
     assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True) == "v1.13-103-gb137d064e"
     # with path
     #    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "v1.13.0-Latest"
-    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "latest"
+    assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True) == "preview"
     assert utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True) == "v1.13.0-103"
     # with commit
     assert (
@@ -45,13 +59,13 @@ def test_clean_version_special():
     )
     # FLats
     #    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "v1_13-Latest"
-    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "latest"
-    assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True, flat=True) == "v1_13-103-gb137d064e"
+    assert utils.clean_version("v1.13.0-103-gb137d064e", flat=True) == "preview"
+    assert utils.clean_version("v1.13.0-103-gb137d064e", build=True, commit=True, flat=True) == "v1_13_103_gb137d064e"
 
     # all options , no V for version
     assert (
         utils.clean_version("v1.13.0-103-gb137d064e", patch=True, build=True, commit=True, flat=True, drop_v=True)
-        == "1_13_0-103-gb137d064e"
+        == "1_13_0_103_gb137d064e"
     )
 
 
@@ -105,10 +119,10 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     dest = tmp_path / "stubs"
     # shutil.copytree(source, dest)
 
-    m_generate_pyi_files: MagicMock = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
+    m_generate_pyi_files = mocker.patch("stubber.utils.post.generate_pyi_files", autospec=True)
     return_val = SimpleNamespace()
     return_val.returncode = 0
-    m_spr: MagicMock = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value=return_val)
+    m_spr = mocker.patch("stubber.utils.post.subprocess.run", autospec=True, return_value=return_val)
 
     utils.do_post_processing([dest], stubgen=True, black=True, autoflake=False)
 

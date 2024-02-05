@@ -66,9 +66,7 @@ def test_get_portboard(path: str, port: str, board: str):
     assert _port == port
 
 
-def test_manifest_uasync(
-    tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path
-):
+def test_manifest_uasync(tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path):
     "test if task.py is included with the uasyncio frozen module"
     mpy_version = "v1.18"
     mpy_folder = testrepo_micropython.absolute()
@@ -80,9 +78,7 @@ def test_manifest_uasync(
     manifest = mpy_folder / "ports/esp32/boards/manifest.py"
     freeze_one_manifest_2(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
 
-    assert (
-        tmp_path / "esp32" / GENERIC_U / "uasyncio/task.py"
-    ).exists(), "task.py must be included in uasyncio"
+    assert (tmp_path / "esp32" / GENERIC_U / "uasyncio/task.py").exists(), "task.py must be included in uasyncio"
 
 
 #######################################################################################################################
@@ -264,11 +260,9 @@ def test_freeze_any_mocked(
 ):
     "mocked test if we can freeze source using manifest.py files"
 
-    m_freeze_folders: MagicMock = mocker.patch(
-        "stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1]
-    )
-    # m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
-    m_freeze_one_manifest_2: MagicMock = mocker.patch(
+    m_freeze_folders = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
+    # m_freeze_one_manifest_1= mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
+    m_freeze_one_manifest_2 = mocker.patch(
         "stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1
     )
     x = freeze_any(
@@ -297,25 +291,22 @@ def test_freeze_manifest2_error_mocked(
 ):
     "mocked test if we can freeze source using manifest.py files"
 
-    m_freeze_folders: MagicMock = mocker.patch(
-        "stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1]
-    )
-    # m_freeze_one_manifest_1: MagicMock = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
-    m_freeze_one_manifest_2: MagicMock = mocker.patch(
+    m_freeze_folders = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
+    m_freeze_one_manifest_2 = mocker.patch(
         "stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1
     )
     # get the correct version to test
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-    x = freeze_any(
+    test_path = freeze_any(
         tmp_path,
         version=mpy_version,
         mpy_path=testrepo_micropython,
         mpy_lib_path=testrepo_micropython_lib,
     )
-    assert x >= 1, "expect >= 1 stubs"
+    assert test_path is not None, "expect a path"
+    # no further asserts of path as this is mocked
     assert m_freeze_folders.call_count == 0, "expect no calls to freeze_folders"
     assert m_freeze_one_manifest_2.call_count == 34, "34 calls to freeze_one_manifest_2"
-    # assert m_freeze_one_manifest_1.call_count == 0
 
 
 ##########################################################################

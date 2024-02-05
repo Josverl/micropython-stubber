@@ -1,7 +1,20 @@
 """Handle versions of micropython based on the git tags in the repo """
 
+from pathlib import Path
+
 from github import Github
 from packaging.version import parse
+
+import stubber.basicgit as git
+import stubber.utils as utils
+
+OLDEST_VERSION = "1.16"
+"This is the oldest MicroPython version to build the stubs on"
+
+V_PREVIEW = "preview"
+"Latest preview version"
+
+SET_PREVIEW = {"preview", "latest", "master"}
 
 
 def clean_version(
@@ -31,19 +44,29 @@ def clean_version(
         # version = "-".join((nibbles[0], LATEST))
         # HACK: this is not always right, but good enough most of the time
         if is_preview:
-            version = "-".join((nibbles[0], "preview"))
+            version = "-".join((nibbles[0], V_PREVIEW))
         else:
-            version = "latest"
+            version = V_PREVIEW
     if flat:
-        version = version.strip().replace(".", "_")
+        version = version.strip().replace(".", "_").replace("-", "_")
     else:
-        version = version.strip().replace("_", ".")
+        version = version.strip().replace("_preview", "-preview").replace("_", ".")
 
     if drop_v:
         version = version.lstrip("v")
-    elif not version.startswith("v") and version.lower() != "latest":
+    elif not version.startswith("v") and version.lower() not in SET_PREVIEW:
         version = "v" + version
+    if version == "latest":
+        version = V_PREVIEW
+    return version
 
+
+def checkedout_version(path: Path, flat: bool = False) -> str:
+    """Get the checked-out version of the repo"""
+    version = git.get_local_tag(path.as_posix())
+    if not version:
+        raise ValueError("No valid Tag found")
+    version = utils.clean_version(version, flat=flat, drop_v=False)
     return version
 
 
