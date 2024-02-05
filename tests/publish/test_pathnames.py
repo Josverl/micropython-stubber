@@ -9,7 +9,7 @@ from stubber.publish.pathnames import board_folder_name, get_base
         ("micropython-v1_22", {"family": "MicroPython", "version": "1.22"}, None),
         ("micropython-v1_22_1", {"family": "MicroPython", "version": "1.22"}, "1.22.1"),
         ("micropython-v1_22_2", {"family": "MicroPython"}, "1.22.2"),
-        ("micropython-v1_23_0-preview", {"family": "MicroPython", "version": "1.23.0-preview"}, None),
+        ("micropython-v1_23_0_preview", {"family": "MicroPython", "version": "1.23.0-preview"}, None),
     ],
 )
 def test_get_base_with_version(expected_base, candidate, version):
@@ -31,7 +31,7 @@ def test_get_base_with_version(expected_base, candidate, version):
             "1.23.4",
         ),
         (
-            "micropython-v1_23_5-preview-esp8266-ESP8266_GENERIC",
+            "micropython-v1_23_5_preview-esp8266-ESP8266_GENERIC",
             {"family": "MicroPython", "port": "esp8266", "board": "ESP8266_GENERIC", "version": "1.23.5-preview"},
             "1.23.5-preview",
         ),

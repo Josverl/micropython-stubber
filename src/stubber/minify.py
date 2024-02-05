@@ -13,6 +13,8 @@ from typing import List, Tuple, Union
 import python_minifier
 from loguru import logger as log
 
+from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
+
 # Type Aliases for minify
 StubSource = Union[Path, str, StringIO, TextIOWrapper]
 XCompileDest = Union[Path, BytesIO]
@@ -360,7 +362,7 @@ def cross_compile(
     result = pipx_mpy_cross(version, source_file, _target)
     if result.stderr and "No matching distribution found for mpy-cross==" in result.stderr:
         log.warning(f"mpy-cross=={version} not found, using latest")
-        result = pipx_mpy_cross("latest", source_file, _target)
+        result = pipx_mpy_cross(V_PREVIEW, source_file, _target)
 
     if result.returncode == 0:
         log.debug(f"mpy-cross compiled to    : {_target.name}")
@@ -380,7 +382,7 @@ def pipx_mpy_cross(version: str, source_file, _target):
     """Run mpy-cross using pipx"""
 
     log.info(f"Compiling with mpy-cross version: {version}")
-    if version == "latest":
+    if version in SET_PREVIEW:
         version = ""
     if version:
         version = "==" + version

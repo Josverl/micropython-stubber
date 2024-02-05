@@ -13,6 +13,8 @@ from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse
 
+# from stubber.utils.versions import SET_PREVIEW
+
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
 PAT_NO_ACCESS = (
@@ -68,7 +70,7 @@ def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str
     cmd = ["git", "clone"]
     if shallow:
         cmd += ["--depth", "1"]
-    if tag in ("latest", "master"):
+    if tag in {"preview", "latest", "master"}:
         tag = None
     cmd += [remote_repo, "--branch", tag, str(path)] if tag else [remote_repo, str(path)]
     if result := _run_local_git(cmd, expect_stderr=True, capture_output=False):
@@ -99,21 +101,16 @@ def get_local_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = Tr
         return None
     tag: str = result.stdout
     tag = tag.replace("\r", "").replace("\n", "")
-    if abbreviate and "-" in tag:
-        if result := _run_local_git(
-            ["git", "status", "--branch"],
-            repo=repo.as_posix(),
-            expect_stderr=True,
-        ):
-            lines = result.stdout.replace("\r", "").split("\n")
-            if lines[0].startswith("On branch") and lines[0].endswith("master"):
-                tag = "latest"
+    if not abbreviate or "-" not in tag:
+        return tag
+    if "-preview" in tag:
+        tag = tag.split("-preview")[0] + "-preview"
     return tag
 
 
 def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) -> List[str]:
     """
-    get list of tag of a local repo
+    get list of all tags of a local repo
     """
     if not repo:
         repo = Path(".")

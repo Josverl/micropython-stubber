@@ -36,6 +36,7 @@ from .cli import stubber_cli
     default="",
     # default=[CONFIG.stable_version],
     show_default=True,
+    help="The version of MicroPython to get the frozen modules for. Use 'preview' to get the latest version from the micropython repo",
 )
 @click.option(
     "--stubgen/--no-stubgen",
@@ -78,27 +79,21 @@ def cli_get_frozen(
     else:
         version = utils.clean_version(git.get_local_tag(CONFIG.mpy_path.as_posix()) or "0.0")
     if not version:
-        log.warning(
-            "Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix())
-        )
+        log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
 
     log.info("MicroPython version : {}".format(version))
     # folder/{family}-{version}-frozen
     family = "micropython"
-    stub_path = Path(stub_folder) / f"{family}-{utils.clean_version(version, flat=True)}-frozen"
+
+    stub_path = freeze_any(version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     stub_paths.append(stub_path)
-    freeze_any(
-        stub_path, version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path
-    )
     # Also enrich the frozen modules from the doc stubs if available
 
     # first create .pyi files so they can be enriched
     utils.do_post_processing(stub_paths, stubgen=stubgen, black=False, autoflake=False)
     family = "micropython"
-    docstubs_path = (
-        Path(CONFIG.stub_path)
-        / f"{family}-{utils.clean_version(version, drop_v=False, flat=True)}-docstubs"
-    )
+    _version = utils.clean_version(version, drop_v=False, flat=True)
+    docstubs_path = Path(CONFIG.stub_path) / f"{family}-{_version}-docstubs"
     if docstubs_path.exists():
         log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
         if merged := enrich_folder(

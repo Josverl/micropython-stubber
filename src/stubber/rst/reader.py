@@ -83,6 +83,7 @@ from stubber.rst import (
 )
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
+from stubber.utils.versions import V_PREVIEW
 
 SEPERATOR = "::"
 
@@ -506,7 +507,7 @@ class RSTParser(RSTReader):
             # Add link to online documentation
             # https://docs.micropython.org/en/v1.17/library/array.html
             if "nightly" in self.source_tag:
-                version = "latest"
+                version = V_PREVIEW
             else:
                 version = self.source_tag.replace(
                     "_", "."

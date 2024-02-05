@@ -2,7 +2,7 @@
 from typing import Dict, List
 
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version
+from stubber.utils.versions import V_PREVIEW, clean_version
 
 # The default board for the ports modules documented with base name only
 # as the MicroPython BOARD naming convention has changed over time there are different options to try
@@ -24,7 +24,7 @@ GENERIC = {GENERIC_L, GENERIC_U}
 "GENERIC eithercase"
 
 
-def default_board(port: str, version="latest") -> str:  # sourcery skip: assign-if-exp
+def default_board(port: str, version=V_PREVIEW) -> str:  # sourcery skip: assign-if-exp
     """Return the default board for the given version and port"""
     ver_flat = clean_version(version, flat=True)
     if port in DEFAULT_BOARDS:
