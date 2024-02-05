@@ -24,14 +24,15 @@ from typing import List, Optional
 
 from loguru import logger as log
 from packaging.version import Version
+
+import stubber.basicgit as git
 from stubber import utils
+from stubber.codemod.add_comment import AddComment
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 from stubber.utils.config import CONFIG
-from stubber.codemod.add_comment import AddComment
+from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
 
-
-# globals
 FAMILY = "micropython"
 
 
@@ -54,13 +55,18 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     Add a comment to the top of each file in the path
     using a codemod
     """
-    #TODO: #305 add comment line to each file with the micropython version it was generated from
+    # TODO: #305 add comment line to each file with the micropython version it was generated from
     # frozen_stub_path
     # python -m libcst.tool codemod --include-stubs --no-format  add_comment.AddComment .\repos\micropython-stubs\stubs\micropython-v1_19_1-frozen\ --comment "# Micropython 1.19.1 frozen stubs"
     pass
 
 
-def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None, mpy_lib_path: Optional[Path] = None) -> int:
+def freeze_any(
+    stub_folder: Optional[Path] = None,
+    version: str = V_PREVIEW,
+    mpy_path: Optional[Path] = None,
+    mpy_lib_path: Optional[Path] = None,
+) -> Path:
     """
     Get and parse the to-be-frozen .py modules for micropython to extract the static type information
      - requires that the MicroPython and Micropython-lib repos are checked out and available on a local path
@@ -73,24 +79,24 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
     current_dir = os.getcwd()
     mpy_path = Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
     mpy_lib_path = Path(mpy_lib_path).absolute() if mpy_lib_path else CONFIG.mpy_path.absolute()
-    if not stub_folder:
-        frozen_stub_path = Path("{}/{}_{}_frozen".format(CONFIG.stub_path, FAMILY, utils.clean_version(version, flat=True))).absolute()
-    else:
-        frozen_stub_path: Path = Path(stub_folder).absolute()
 
     # if old version of micropython, use the old freeze method
-    if version not in ["master", "latest"] and Version(version) <= Version("1.11"):
+    if version not in SET_PREVIEW and Version(version) <= Version("1.11"):
+        frozen_stub_path = get_fsp(version, stub_folder)
         log.debug("MicroPython v1.11, older or other")
         # others
         modules = freeze_folders(frozen_stub_path.as_posix(), mpy_path.as_posix(), mpy_lib_path.as_posix(), version)
         count = len(modules)
     else:
+        # get the current checked out version
+        version = utils.checkedout_version(CONFIG.mpy_path)
+
+        frozen_stub_path = get_fsp(version, stub_folder)
         # get the manifests of the different ports and boards
         all_manifests = get_manifests(mpy_path)
 
         # process all_manifests under the ports folder and update the frozen files in the stubs folder
-        # we are goning to jump around, avoid relative paths
-        frozen_stub_path = frozen_stub_path.absolute()
+        # we are going to jump around, avoid relative paths
         mpy_path = mpy_path.absolute()
         mpy_lib_path = mpy_lib_path.absolute()
 
@@ -111,4 +117,13 @@ def freeze_any(stub_folder: Path, version: str, mpy_path: Optional[Path] = None,
 
     # restore cwd
     os.chdir(current_dir)
-    return count
+    return frozen_stub_path
+
+
+def get_fsp(version: str, stub_folder: Optional[Path] = None) -> Path:
+    if not stub_folder:
+        frozen_stub_path = CONFIG.stub_path / f"{FAMILY}-{utils.clean_version(version, flat=True)}-frozen"
+        frozen_stub_path = frozen_stub_path.absolute()
+    else:
+        frozen_stub_path: Path = Path(stub_folder).absolute()
+    return frozen_stub_path

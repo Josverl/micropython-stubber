@@ -11,7 +11,7 @@ from loguru import logger as log
 from stubber.publish.defaults import default_board
 from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version
+from stubber.utils.versions import V_PREVIEW, clean_version
 
 
 ## Helper functions
@@ -40,7 +40,7 @@ def board_folder_name(fw: Dict, *, version: Optional[str] = None) -> str:
 
 def get_board_path(candidate: Dict) -> Path:
     board_path = CONFIG.stub_path / board_folder_name(candidate)
-    if candidate["version"] == "latest" and not board_path.exists():
+    if V_PREVIEW in candidate["version"] and not board_path.exists():
         log.debug(f"no board stubs found for {candidate['version']}, trying stable")
         board_path = CONFIG.stub_path / board_folder_name(candidate, version=CONFIG.stable_version)
 

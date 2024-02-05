@@ -13,6 +13,7 @@ from packaging.version import Version
 
 import stubber.basicgit as git
 from stubber.utils.config import CONFIG
+from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
 
 # # log = logging.getLogger(__name__)
 
@@ -34,8 +35,8 @@ def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
     git.fetch(mpy_lib_path)
 
     if not tag or tag in {"master", ""}:
-        tag = "latest"
-    if tag == "latest":
+        tag = V_PREVIEW
+    if tag in SET_PREVIEW:
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)
@@ -76,7 +77,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     #  check if micropython-lib has matching tags
-    if version_tag == "latest":
+    if version_tag in SET_PREVIEW:
         # micropython-lib is now a submodule
         result = git.checkout_commit("master", lib_path)
         if not result:
@@ -88,8 +89,10 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
         # micropython-lib is now a submodule
         result = git.checkout_tag(version_tag, lib_path)
         if not result:
-            log.error("Could not checkout micropython-lib @master")
-            return False
+            log.warning(f"Could not checkout micropython-lib @{version_tag}")
+            if not git.checkout_tag("master", lib_path):
+                log.error("Could not checkout micropython-lib @master")
+                return False
         return git.sync_submodules(mpy_path)
     else:
         log.info(
@@ -109,10 +112,10 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         log.trace("no stubs repo found : {CONFIG.stub_path.parent}")
 
     if not tag:
-        tag = "latest"
+        tag = V_PREVIEW
 
     log.info(f"Switching to {tag}")
-    if tag == "latest":
+    if tag == V_PREVIEW:
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         git.checkout_tag(repo=mpy_path, tag=tag)

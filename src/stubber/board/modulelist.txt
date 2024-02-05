@@ -1,5 +1,4 @@
-# list of modules to stub.
-# used by the memory optimised createstubs_mem.py
+# list of modules to stub used by the memory optimised createstubs_mem.py
 WM8960
 _OTA
 _asyncio

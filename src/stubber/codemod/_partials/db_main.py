@@ -3,20 +3,30 @@ This file contains the `def main()` funcion for the db variant of createstubs.py
 - type_check_only is used to avoid circular imports
 The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
 """
+# sourcery skip: require-parameter-annotation, for-append-to-extend, use-named-expression
 
 from io import TextIOWrapper
 from typing import TYPE_CHECKING, List, type_check_only
 
-# sourcery skip: require-parameter-annotation
 if TYPE_CHECKING:
+    import gc
     import logging
     import sys
 
-    @type_check_only
+    class logging:
+        def getLogger(self, name: str) -> "logging":
+            ...
+
+        def info(self, msg: str) -> None:
+            ...
+
+    log = logging()
+
     class Stubber:
         path: str
         _report: List[str]
         modules = []
+        _json_name: str
 
         def __init__(self, path: str = "", firmware_id: str = "") -> None:
             ...
@@ -27,114 +37,122 @@ if TYPE_CHECKING:
         def create_one_stub(self, modulename: str) -> bool:
             ...
 
-        def report(self, filename: str = "modules.json"):
+        def report_start(self, filename: str = "modules.json"):
             ...
 
-        def write_json_header(self, f: TextIOWrapper):
-            ...
-
-        def write_json_node(self, f: TextIOWrapper, n, first=False):
-            ...
-
-        def write_json_end(self, f):
+        def report_end(self):
             ...
 
         def create_all_stubs(self):
             ...
 
-    @type_check_only
     def read_path() -> str:
         ...
 
-    @type_check_only
     class _gc:
         def collect(self) -> None:
             ...
 
     gc: _gc
-    _log = logging.getLogger("stubber")
+    log = logging.getLogger("stubber")
+
+    def file_exists(filename: str) -> bool:
+        ...
 
     LIBS = [".", "lib"]
 
 
 ###PARTIAL###
+SKIP_FILE = "modulelist.done"
+
+
+def get_modules(skip=0):
+    # new
+    for p in LIBS:
+        fname = p + "/modulelist.txt"
+        if not file_exists(fname):
+            continue
+        try:
+            with open(fname) as f:
+                i = 0
+                while True:
+                    line = f.readline().strip()
+                    if not line:
+                        break
+                    if len(line) > 0 and line[0] == "#":
+                        continue
+                    i += 1
+                    if i < skip:
+                        continue
+                    yield line
+                break
+        except OSError:
+            pass
+
+
+def write_skip(done):
+    # write count of modules already processed to file
+    with open(SKIP_FILE, "w") as f:
+        f.write(str(done) + "\n")
+
+
+def read_skip():
+    # read count of modules already processed from file
+    done = 0
+    try:
+        with open(SKIP_FILE) as f:
+            done = int(f.readline().strip())
+    except OSError:
+        pass
+    return done
+
+
 def main():
     import machine  # type: ignore
 
-    try:
-        f = open("modulelist.done", "r+b")
-        was_running = True
-        print("Opened existing db")
-    except OSError:
-        f = open("modulelist.done", "w+b")
-        print("created new db")
-        was_running = False
+    was_running = file_exists(SKIP_FILE)
+    if was_running:
+        log.info("Continue from last run")
+    else:
+        log.info("Starting new run")
+    # try:
+    #     f = open("modulelist.done", "r+b")
+    #     was_running = True
+    #     print("Continue from last run")
+    # except OSError:
+    #     f = open("modulelist.done", "w+b")
+    #     was_running = False
     stubber = Stubber(path=read_path())
 
     # f_name = "{}/{}".format(stubber.path, "modules.json")
+    skip = 0
     if not was_running:
         # Only clean folder if this is a first run
         stubber.clean()
-    # get list of modules to process
-    get_modulelist(stubber)
-    # remove the ones that are already done
-    modules_done = {}  # type: dict[str, str]
-    try:
-        with open("modulelist.done") as f:
-            # not optimal , but works on mpremote and esp8266
-            for line in f.read().split("\n"):
-                line = line.strip()
-                gc.collect()
-                if len(line) > 0:
-                    key, value = line.split("=", 1)
-                    modules_done[key] = value
-    except (OSError, SyntaxError):
-        pass
-    gc.collect()
-    # see if we can continue from where we left off
-    modules = [m for m in stubber.modules if m not in modules_done.keys()]
-    gc.collect()
-    for modulename in modules:
+        stubber.report_start("modules.json")
+    else:
+        skip = read_skip()
+        stubber._json_name = "{}/{}".format(stubber.path, "modules.json")
+
+    for modulename in get_modules(skip):
         # ------------------------------------
         # do epic shit
         # but sometimes things fail / run out of memory and reboot
-        ok = False
         try:
-            ok = stubber.create_one_stub(modulename)
+            stubber.create_one_stub(modulename)
         except MemoryError:
             # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
             machine.reset()
         # -------------------------------------
         gc.collect()
-        modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
-        with open("modulelist.done", "a") as f:
-            f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
+        # modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
+        # with open("modulelist.done", "a") as f:
+        #     f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
+        skip += 1
+        write_skip(skip)
 
-    # Finished processing - load all the results , and remove the failed ones
-    if modules_done:
-        # stubber.write_json_end(mod_fp)
-        stubber._report = [v for _, v in modules_done.items() if v != "failed"]
-        stubber.report()
-
-
-def get_modulelist(stubber):
-    stubber.modules = []  # avoid duplicates
-    for p in LIBS:
-        try:
-            with open(p + "/modulelist.txt") as f:
-                print("DEBUG: list of modules: " + p + "/modulelist.txt")
-                for line in f.read().split("\n"):
-                    line = line.strip()
-                    if len(line) > 0 and line[0] != "#":
-                        stubber.modules.append(line)
-                gc.collect()
-                break
-        except OSError:
-            pass
-    if not stubber.modules:
-        stubber.modules = ["micropython"]
-        _log.warn("Could not find modulelist.txt, using default modules")
-    gc.collect()
+    print("All modules have been processed, Finalizing report")
+    stubber.report_end()
 
 
 ###PARTIALEND###

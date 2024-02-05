@@ -13,11 +13,12 @@ from stubber.publish.defaults import GENERIC_U
 from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
+from stubber.utils.versions import V_PREVIEW
 
 
 def build_multiple(
     family: str = "micropython",
-    versions: List[str] = ["v1.19.1"],
+    versions: List[str] = [V_PREVIEW],
     ports: List[str] = ["all"],
     boards: List[str] = [GENERIC_U],
     production: bool = False,

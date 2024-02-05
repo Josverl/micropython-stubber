@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import pytest
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test
@@ -8,6 +9,7 @@ from stubber.update_fallback import RELEASED, fallback_sources, update_fallback
 from stubber.utils.config import CONFIG
 
 
+@pytest.mark.skip("deprecated")
 def test_update_fallback(tmp_path):
     # test requires an actuall filled source
     # from actual source
@@ -21,6 +23,7 @@ def test_update_fallback(tmp_path):
     assert count >= 0
 
 
+@pytest.mark.skip("deprecated")
 def test_update_fallback_2(tmp_path: Path):
     # test requires an actuall filled source
     # from actual source

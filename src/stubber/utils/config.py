@@ -2,12 +2,14 @@
 
 from pathlib import Path
 
+from loguru import logger as log
 from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
-from .typed_config_toml import TomlConfigSource
 
-from loguru import logger as log
 import stubber.basicgit as git
+from stubber.utils.versions import V_PREVIEW
+
+from .typed_config_toml import TomlConfigSource
 
 
 @section("micropython-stubber")
@@ -16,9 +18,7 @@ class StubberConfig(Config):
     stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
     "a Path to the stubs directory"
     # relative to stubs folder
-    fallback_path = key(
-        key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback")
-    )
+    fallback_path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
     "a Path to the fallback stubs directory"
 
     # ------------------------------------------------------------------------------------------
@@ -29,9 +29,7 @@ class StubberConfig(Config):
     mpy_path = key(key_name="mpy-path", cast=Path, required=False, default=Path("micropython"))
     "a Path to the micropython folder in the repos directory"
 
-    mpy_lib_path = key(
-        key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib")
-    )
+    mpy_lib_path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
     "a Path to the micropython-lib folder in the repos directory"
 
     # mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("./micropython-stubs"))
@@ -96,7 +94,7 @@ class StubberConfig(Config):
             all_versions = ["1.19", "1.19.1", "1.20.0", "1.21.0"]
         config_updates.update(all_versions=all_versions)
         config_updates.update(
-            stable_version=[v for v in all_versions if not v.endswith("preview")][-1]
+            stable_version=[v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
         )  # second last version - last version is the preview version
         return config_updates
 
