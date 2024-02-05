@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Pytest --collect-only (debug)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
@@ -19,14 +19,14 @@
         },
         {
             "name": "Python: file as Module",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "stubber.${fileBasenameNoExtension}",
             "justMyCode": false
         },
         {
             "name": "mpremote",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "mpremote",
             "justMyCode": false,
@@ -39,19 +39,18 @@
         },
         {
             "name": "Python: stubber - cmdline",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
-                "-v",
-                "-v",
-                "make-variants",
+                // "-v",
+                "get-frozen",
+                "--version",
+                "preview",
                 // "switch",
                 // "v1.20.0",
                 // "build",
-                // "--version",
-                // "latest",
                 // "--port",
                 // "esp32",
                 // "--board",
@@ -87,7 +86,7 @@
         },
         {
             "name": "Python: board_stubber",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "scripts/board_stubber.py",
             "cwd": "${workspaceFolder}",
@@ -100,7 +99,7 @@
         },
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
@@ -108,7 +107,7 @@
         },
         {
             "name": "Python: this File - Args ",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
@@ -118,7 +117,7 @@
         },
         {
             "name": "Micro-CPython: Current File",
-            "type": "python",
+            "type": "debugpy",
             "subProcess": false,
             "justMyCode": true,
             "request": "launch",
@@ -134,7 +133,7 @@
         },
         {
             "name": "Python: Debug process --path",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "console": "integratedTerminal",
             "program": "${file}",
@@ -148,7 +147,7 @@
             "purpose": [
                 "debug-test"
             ],
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "console": "integratedTerminal",
             "justMyCode": false,
