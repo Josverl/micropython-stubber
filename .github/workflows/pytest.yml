@@ -104,7 +104,7 @@ jobs:
 
       - name: Upload coverage
         if: always() # ignore previous error
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           fail_ci_if_error: false
