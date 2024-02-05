@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from loguru import logger as log
+
 from stubber import utils
 from stubber.tools.manifestfile import MODE_FREEZE, ManifestFile, ManifestFileError, ManifestOutput
 from stubber.utils.config import CONFIG
@@ -55,10 +56,10 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
     # save cwd for 'misbehaving' older esp8266 manifest files
     cwd = Path.cwd()
     # so we need to get the port and board from the path
-    log.info(f"input_manifest: {manifest}")
+    log.debug(f"input_manifest: {manifest}")
     port, board = get_portboard(manifest)
 
-    log.info("port-board: {}".format((port + "-" +board).rstrip("-")))
+    log.info("port-board: {}".format((port + "-" + board).rstrip("-")))
 
     path_vars = make_path_vars(port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
@@ -69,7 +70,7 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
     except ManifestFileError as er:
         log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
         raise er
-    log.info(f"total {len(upy_manifest.files())} files")
+    log.debug(f"total {len(upy_manifest.files())} files")
 
     # restore working directory
     os.chdir(cwd)
@@ -77,7 +78,9 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
     copy_frozen_to_stubs(frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path)
 
 
-def copy_frozen_to_stubs(stub_path: Path, port: str, board: str, files: List[ManifestOutput], version: str, mpy_path: Path):
+def copy_frozen_to_stubs(
+    stub_path: Path, port: str, board: str, files: List[ManifestOutput], version: str, mpy_path: Path
+):
     """
     copy the frozen files from the manifest to the stubs folder
 
@@ -85,7 +88,7 @@ def copy_frozen_to_stubs(stub_path: Path, port: str, board: str, files: List[Man
     """
     freeze_path, board = get_freeze_path(stub_path, port, board)
 
-    log.info(f"copy frozen: {port}-{board} to {freeze_path}")
+    log.debug(f"copy frozen: {port}-{board} to {freeze_path}")
     freeze_path.mkdir(parents=True, exist_ok=True)
     # clean target folder
     shutil.rmtree(freeze_path, ignore_errors=True)

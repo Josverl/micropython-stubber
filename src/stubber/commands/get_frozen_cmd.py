@@ -1,4 +1,5 @@
 """Get the frozen stubs for MicroPython."""
+
 ##########################################################################################
 # get-frozen
 ##########################################################################################
@@ -8,7 +9,6 @@ from typing import List
 import click
 from loguru import logger as log
 
-import stubber.basicgit as git
 import stubber.utils as utils
 from stubber.codemod.enrich import enrich_folder
 from stubber.freeze.get_frozen import freeze_any
@@ -76,14 +76,11 @@ def cli_get_frozen(
                 )
             )
             return -1
-    else:
-        version = utils.clean_version(git.get_local_tag(CONFIG.mpy_path.as_posix()) or "0.0")
-    if not version:
-        log.warning("Unable to find the micropython repo in folder : {}".format(CONFIG.mpy_path.as_posix()))
-
-    log.info("MicroPython version : {}".format(version))
-    # folder/{family}-{version}-frozen
+    # folder/{family}-{version[_preview]}-frozen
     family = "micropython"
+    # get the current checked out version
+    version = utils.checkedout_version(CONFIG.mpy_path)
+    log.info("MicroPython version : {}".format(version))
 
     stub_path = freeze_any(version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     stub_paths.append(stub_path)
