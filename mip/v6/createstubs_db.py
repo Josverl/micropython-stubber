@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.16.3
+This variant was generated from createstubs.py by micropython-stubber v1.17.0
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
@@ -42,7 +42,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.16.3"
+__version__ = "v1.17.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -96,7 +96,6 @@ class Stubber:
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
             pass
-        self._report = []  # type: list[str]
         self.info = _info()
         log.info("Port: {}".format(self.info["port"]))
         log.info("Board: {}".format(self.info["board"]))
@@ -140,6 +139,8 @@ class Stubber:
         ]
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []  # type: list[str]
+        self._json_name = None
+        self._json_first = False
 
     def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"
@@ -148,7 +149,7 @@ class Stubber:
         _errors = []
         # log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
         for name in dir(item_instance):
-            if name.startswith("_") and not name in self.modules:
+            if name.startswith("__") and not name in self.modules:
                 continue
             # log.debug("get attribute {}".format(name))
             try:
@@ -187,10 +188,12 @@ class Stubber:
 
     def create_all_stubs(self):
         "Create stubs for all configured modules"
-        log.info("Start micropython-stubber v{} on {}".format(__version__, self._fwid))
+        log.info("Start micropython-stubber {} on {}".format(__version__, self._fwid))
+        self.report_start()
         gc.collect()
         for module_name in self.modules:
             self.create_one_stub(module_name)
+        self.report_end()
         log.info("Finally done")
 
     def create_one_stub(self, module_name: str):
@@ -201,7 +204,7 @@ class Stubber:
             log.warning("Skip module: {:<25}        : Excluded".format(module_name))
             return False
 
-        file_name = "{}/{}.py".format(self.path, module_name.replace(".", "/"))
+        file_name = "{}/{}.pyi".format(self.path, module_name.replace(".", "/"))
         gc.collect()
         result = False
         try:
@@ -216,10 +219,10 @@ class Stubber:
 
         Args:
         - module_name (str): name of the module to document. This module will be imported.
-        - file_name (Optional[str]): the 'path/filename.py' to write to. If omitted will be created based on the module name.
+        - file_name (Optional[str]): the 'path/filename.pyi' to write to. If omitted will be created based on the module name.
         """
         if file_name is None:
-            fname = module_name.replace(".", "_") + ".py"
+            fname = module_name.replace(".", "_") + ".pyi"
             file_name = self.path + "/" + fname
         else:
             fname = file_name.split("/")[-1]
@@ -246,10 +249,10 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
-        self._report.append('{{"module": "{}", "file": "{}"}}'.format(module_name, file_name.replace("\\", "/")))
+        self.report_add(module_name, file_name)
 
         if module_name not in {"os", "sys", "logging", "gc"}:
             # try to unload the module unless we use it
@@ -257,11 +260,7 @@ class Stubber:
                 del new_module
             except (OSError, KeyError):  # lgtm [py/unreachable-statement]
                 log.warning("could not del new_module")
-            # lets not try - most times it does not work anyway
-            # try:
-            #     del sys.modules[module_name]
-            # except KeyError:
-            #     log.warning("could not del sys.modules[{}]".format(module_name))
+            # do not try to delete from sys.modules - most times it does not work anyway
         gc.collect()
         return True
 
@@ -356,23 +355,27 @@ class Stubber:
                 t = item_type_txt[8:-2]
                 s = ""
 
-                if t in ["str", "int", "float", "bool", "bytearray", "bytes"]:
+                if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                elif t in ["dict", "list", "tuple"]:
+                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
+                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
-                    s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
+                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
+                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t in ["object", "set", "frozenset", "Pin", "FileIO"]:
+                    if t in ("object", "set", "frozenset", "Pin", "generator"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
-                        #  use these types for the attribute
-                        s = "{0}{1} : {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        # use these types for the attribute
+                        if t == "generator":
+                            t = "Generator"
+                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
-                        s = "{0}{1} : {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
@@ -421,41 +424,53 @@ class Stubber:
                 except OSError:
                     pass
 
-    def report(self, filename: str = "modules.json"):
-        "create json with list of exported modules"
-        log.info("Created stubs for {} modules on board {}\nPath: {}".format(len(self._report), self._fwid, self.path))
-        f_name = "{}/{}".format(self.path, filename)
-        log.info("Report file: {}".format(f_name))
+    def report_start(self, filename: str = "modules.json"):
+        """Start a report of the modules that have been stubbed
+        "create json with list of exported modules"""
+        self._json_name = "{}/{}".format(self.path, filename)
+        self._json_first = True
+        ensure_folder(self._json_name)
+        log.info("Report file: {}".format(self._json_name))
         gc.collect()
         try:
             # write json by node to reduce memory requirements
-            with open(f_name, "w") as f:
-                self.write_json_header(f)
-                first = True
-                for n in self._report:
-                    self.write_json_node(f, n, first)
-                    first = False
-                self.write_json_end(f)
-            used = self._start_free - gc.mem_free()  # type: ignore
-            # log.debug("Memory used: {0} Kb".format(used // 1024))
+            with open(self._json_name, "w") as f:
+                f.write("{")
+                f.write(dumps({"firmware": self.info})[1:-1])
+                f.write(",\n")
+                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
+                f.write(",\n")
+                f.write('"modules" :[\n')
+
+        except OSError as e:
+            log.error("Failed to create the report.")
+            self._json_name = None
+            raise e
+
+    def report_add(self, module_name: str, stub_file: str):
+        "Add a module to the report"
+        # write json by node to reduce memory requirements
+        if not self._json_name:
+            raise Exception("No report file")
+        try:
+            with open(self._json_name, "a") as f:
+                if not self._json_first:
+                    f.write(",\n")
+                else:
+                    self._json_first = False
+                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
+                f.write(line)
+
         except OSError:
             log.error("Failed to create the report.")
 
-    def write_json_header(self, f):
-        f.write("{")
-        f.write(dumps({"firmware": self.info})[1:-1])
-        f.write(",\n")
-        f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
-        f.write(",\n")
-        f.write('"modules" :[\n')
-
-    def write_json_node(self, f, n, first):
-        if not first:
-            f.write(",\n")
-        f.write(n)
-
-    def write_json_end(self, f):
-        f.write("\n]}")
+    def report_end(self):
+        if not self._json_name:
+            raise Exception("No report file")
+        with open(self._json_name, "a") as f:
+            f.write("\n]}")
+        # is used as sucess indicator
+        log.info("Path: {}".format(self.path))
 
 
 def ensure_folder(path: str):
@@ -501,7 +516,7 @@ def _build(s):
 def _info():  # type:() -> dict[str, str]
     info = OrderedDict(
         {
-            "family": sys.implementation.name,
+            "family": sys.implementation.name,  # type: ignore
             "version": "",
             "build": "",
             "ver": "",
@@ -529,9 +544,9 @@ def _info():  # type:() -> dict[str, str]
         info["board"] = _machine
         info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
-            sys.implementation._mpy
+            sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
+            else sys.implementation.mpy  # type: ignore
             if "mpy" in dir(sys.implementation)
             else ""
         )
@@ -687,10 +702,6 @@ def is_micropython() -> bool:
     # pylint: disable=unused-variable,eval-used
     try:
         # either test should fail on micropython
-        # a) https://docs.micropython.org/en/latest/genrst/syntax.html#spaces
-        # Micropython : SyntaxError
-        # a = eval("1and 0")  # lgtm [py/unused-local-variable]
-        # Eval blocks some minification aspects
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
@@ -704,102 +715,96 @@ def is_micropython() -> bool:
         return True
 
 
-def main():
-    import machine  # type: ignore
-
-    try:
-        f = open("modulelist.done", "r+b")
-        was_running = True
-        print("Opened existing db")
-    except OSError:
-        f = open("modulelist.done", "w+b")
-        print("created new db")
-        was_running = False
-    stubber = Stubber(path=read_path())
-
-    # f_name = "{}/{}".format(stubber.path, "modules.json")
-    if not was_running:
-        # Only clean folder if this is a first run
-        stubber.clean()
-    # get list of modules to process
-    modules_done = read_done()
-    # see if we can continue from where we left off
-    get_modulelist(stubber, modules_done)
-
-    if not stubber.modules:
-        print("All modules have been processed, exiting")
-    else:
-        del modules_done
-        gc.collect()
-        for modulename in stubber.modules:
-            # ------------------------------------
-            # do epic shit
-            # but sometimes things fail / run out of memory and reboot
-            ok = False
-            try:
-                ok = stubber.create_one_stub(modulename)
-            except MemoryError:
-                # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
-                machine.reset()
-            # -------------------------------------
-            gc.collect()
-            # modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
-            with open("modulelist.done", "a") as f:
-                f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
-
-    # Finished processing - load all the results , and remove the failed ones
-    modules_done = read_done()
-    if modules_done:
-        # stubber.write_json_end(mod_fp)
-        stubber._report = []
-        for k, v in modules_done.items():
-            if v != "failed":
-                stubber._report.append('{{"module": "{0}", "file": "{0}.py"}}'.format(k))
-        stubber.report()
+SKIP_FILE = "modulelist.done"
 
 
-def read_done():
-    modules_done = {}  # type: dict[str, str]
-    try:
-        with open("modulelist.done") as f:
-            while True:
-                line = f.readline().strip()
-                if not line:
-                    break
-                if len(line) > 0 and line[0] != "#":
-                    key, value = line.split("=", 1)
-                    modules_done[key] = value
-    except (OSError, SyntaxError):
-        print("could not read modulelist.done")
-    finally:
-        gc.collect()
-        return modules_done
-
-
-def get_modulelist(stubber, modules_done):
+def get_modules(skip=0):
     # new
-    gc.collect()
-    stubber.modules = []  # avoid duplicates
     for p in LIBS:
         fname = p + "/modulelist.txt"
         if not file_exists(fname):
             continue
-        with open(fname) as f:
-            # print("DEBUG: list of modules: " + p + "/modulelist.txt")
-            while True:
-                line = f.readline().strip()
-                if not line:
-                    break
-                if line and line not in modules_done.keys():
-                    stubber.modules.append(line)
-            gc.collect()
-            print("BREAK")
-            break
+        try:
+            with open(fname) as f:
+                i = 0
+                while True:
+                    line = f.readline().strip()
+                    if not line:
+                        break
+                    if len(line) > 0 and line[0] == "#":
+                        continue
+                    i += 1
+                    if i < skip:
+                        continue
+                    yield line
+                break
+        except OSError:
+            pass
 
-    if not stubber.modules:
-        stubber.modules = ["micropython"]
-        # _log.warn("Could not find modulelist.txt, using default modules")
-    gc.collect()
+
+def write_skip(done):
+    # write count of modules already processed to file
+    with open(SKIP_FILE, "w") as f:
+        f.write(str(done) + "\n")
+
+
+def read_skip():
+    # read count of modules already processed from file
+    done = 0
+    try:
+        with open(SKIP_FILE) as f:
+            done = int(f.readline().strip())
+    except OSError:
+        pass
+    return done
+
+
+def main():
+    import machine  # type: ignore
+
+    was_running = file_exists(SKIP_FILE)
+    if was_running:
+        log.info("Continue from last run")
+    else:
+        log.info("Starting new run")
+    # try:
+    #     f = open("modulelist.done", "r+b")
+    #     was_running = True
+    #     print("Continue from last run")
+    # except OSError:
+    #     f = open("modulelist.done", "w+b")
+    #     was_running = False
+    stubber = Stubber(path=read_path())
+
+    # f_name = "{}/{}".format(stubber.path, "modules.json")
+    skip = 0
+    if not was_running:
+        # Only clean folder if this is a first run
+        stubber.clean()
+        stubber.report_start("modules.json")
+    else:
+        skip = read_skip()
+        stubber._json_name = "{}/{}".format(stubber.path, "modules.json")
+
+    for modulename in get_modules(skip):
+        # ------------------------------------
+        # do epic shit
+        # but sometimes things fail / run out of memory and reboot
+        try:
+            stubber.create_one_stub(modulename)
+        except MemoryError:
+            # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
+            machine.reset()
+        # -------------------------------------
+        gc.collect()
+        # modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
+        # with open("modulelist.done", "a") as f:
+        #     f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
+        skip += 1
+        write_skip(skip)
+
+    print("All modules have been processed, Finalizing report")
+    stubber.report_end()
 
 
 if __name__ == "__main__" or is_micropython():
