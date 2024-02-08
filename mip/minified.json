@@ -1,26 +1,22 @@
 {
-  "urls": [
-    [
-      "createstubs.py",
-      "github:josverl/micropython-stubber/src/stubber/board/createstubs_min.py"
+    "urls": [
+        [
+            "createstubs.py",
+            "github:josverl/micropython-stubber/src/stubber/board/createstubs_min.py"
+        ],
+        [
+            "createstubs_db.py",
+            "github:Josverl/micropython-stubber/src/stubber/board/createstubs_db_min.py"
+        ],
+        [
+            "createstubs_mem.py",
+            "github:Josverl/micropython-stubber/src/stubber/board/createstubs_mem_min.py"
+        ],
+        [
+            "modulelist.txt",
+            "github:Josverl/micropython-stubber/src/stubber/board/modulelist.txt"
+        ]
     ],
-    [
-      "createstubs_db.py",
-      "github:Josverl/micropython-stubber/src/stubber/board/createstubs_db_min.py"
-    ],
-    [
-      "createstubs_mem.py",
-      "github:Josverl/micropython-stubber/src/stubber/board/createstubs_mem_min.py"
-    ],
-    [
-      "modulelist.txt",
-      "github:Josverl/micropython-stubber/src/stubber/board/modulelist.txt"
-    ],
-    [
-      "board_info.csv",
-      "github:Josverl/micropython-stubber/src/stubber/board/board_info.csv"
-    ]
-  ],
-  "deps": [],
-  "version": "1.17.0"
+    "deps": [],
+    "version": "1.17.0"
 }
