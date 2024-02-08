@@ -30,9 +30,12 @@ OK = 0
 ERROR = -1
 RETRIES = 3
 TESTING = False
-LOCAL_FILES = False
 
+# TODO : make this a bit nicer 
+REPO_ROOT = Path(__file__).parent.parent 
 ###############################################################################################
+# TODO: promote to cmdline params
+LOCAL_FILES = False
 reset_before = True
 ###############################################################################################
 
@@ -190,8 +193,9 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_mcu_info(self):
+
         rc, result = self.run_command(
-            ["run", "src/stubber/board/fw_info.py"],
+            ["run", str(REPO_ROOT / "src/stubber/board/fw_info.py")],
             no_info=True,
         )
         if rc != OK:
@@ -209,7 +213,7 @@ class MPRemoteBoard:
             else:
                 short_descr = ""
             if board_name := find_board(
-                descr, short_descr, Path(__file__).parent.parent / "src/stubber/data/board_info.csv"
+                descr, short_descr, REPO_ROOT / "src/stubber/data/board_info.csv"
             ):
                 self.board = board_name
             else:
@@ -612,7 +616,7 @@ def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
     help="Python source or pre-compiled.",
 )
 @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
-def run_stubber_connected_boards(variant: str, format: str, debug: bool):
+def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
 
@@ -690,9 +694,11 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool):
                 # create a rich table of the results and print it'
                 console.print(table)
                 log.success("Done")
+                return OK
         else:
             log.error(f"Failed to generate stubs for {board.serialport}")
+            return ERROR
 
 
 if __name__ == "__main__":
-    run_stubber_connected_boards()
+    exit(run_stubber_connected_boards())
