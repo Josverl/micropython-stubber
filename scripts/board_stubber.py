@@ -30,7 +30,7 @@ OK = 0
 ERROR = -1
 RETRIES = 3
 TESTING = False
-LOCAL_FILES = True
+LOCAL_FILES = False
 
 ###############################################################################################
 reset_before = True
