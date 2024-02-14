@@ -1,5 +1,6 @@
 """Generate stub files for micropython modules using mypy/stubgen"""
 
+import re
 import sys
 from pathlib import Path
 
@@ -63,12 +64,24 @@ def generate_pyi_files(modules_folder: Path) -> bool:
     """
     # stubgen cannot process folders with duplicate modules ( ie v1.14 and v1.15 )
     # NOTE: FIX 1 add __init__.py to umqtt
-    if (
-        modules_folder / "umqtt/robust.py"
-    ).exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
+    if (modules_folder / "umqtt/robust.py").exists():
         log.debug("add missing : umqtt/__init__.py")
         with open(modules_folder / "umqtt" / "__init__.py", "a") as f:
             f.write("")
+
+    # rx_const = re.compile(r"const\(([\w_\"']+)\)")
+    rx_const = re.compile(r"const\(([-*<.,:/\(\) \w_\"']+)\)")
+    # FIX 2 - replace `const(foo)` with `foo`
+    for f in modules_folder.rglob("*.py"):
+        if f.is_file():
+            with open(f, "r") as file:
+                data = file.read()
+            # regex Search for const\(([\w_"']+)\) and replace with (\1)
+            if rx_const.search(data):
+                log.debug(f"replace const() in {f}")
+                data = rx_const.sub(r"\1", data)
+                with open(f, "w") as file:
+                    file.write(data)
 
     module_list = list(modules_folder.glob("**/modules.json"))
     r = True
