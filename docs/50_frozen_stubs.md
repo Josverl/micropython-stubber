@@ -25,9 +25,19 @@ Most OSS firmwares store these frozen modules as part of their repository, which
        * /GENERIC
        * /PYBD_SF2
 
-       
 
-3. generate typeshed stubs of these files. (the .pyi files will be stored alongside the .py files)
+3. Generate typeshed stubs of these files.
+   _const pre-processing:_
+   As the mypy.stubgen tool is not able to incur the correct types from the MicroPython `foo = const(1)` syntax, 
+   the 'to be frozen' modules are pre-processed usig a regular expression to replace the `foo = const(1)` with `foo = 1`.
+   If the `.py` files contain any docstrings, they are preserved. Howecer this is uncommon as most micropython-lib modules have not docstrings to save space.
+
+    _Addition of docstrings:_
+    Then the docstring to modules, classes and methods are added by merging the docstrings based on the docstubs generated from the MicroPython documentation.
+   
+   Finally  the stubs are generated using the `stubgen` tool. 
+   The resulting .pyi files are stored alongside the .py files
+
 
 4. Include/use them in the configuration 
 
