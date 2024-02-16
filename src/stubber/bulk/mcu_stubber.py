@@ -12,9 +12,8 @@ from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
 from threading import Timer
-from typing import List, NamedTuple, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
-import rich_click as click
 import serial.tools.list_ports
 from loguru import logger as log
 from rich.console import Console
@@ -155,7 +154,7 @@ def run(
 
 
 class Variant(str, Enum):
-    """Variants of generatings stubs on a MCU"""
+    """Variants to generate stubs on a MCU"""
 
     full = "full"
     mem = "mem"
@@ -163,7 +162,7 @@ class Variant(str, Enum):
 
 
 class Form(str, Enum):
-    """Optimisation forms of scripts"""
+    """Optimization forms of scripts"""
 
     py = "py"
     min = "min"
@@ -409,7 +408,7 @@ def generate_board_stubs(
     host_mounted=True,
 ) -> Tuple[int, Optional[Path]]:
     """
-    Generate the board stubs for this MCU board.
+    Generate the MCU stubs for this MCU board.
     Parameters
     ----------
     dest : Path
@@ -556,7 +555,7 @@ def set_loglevel(verbose: int) -> str:
 def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
     """Copy the generated stubs to the stubs repo.
     If the destination folder exists, it is first emptied
-    when succesfull: returns the destination path - None otherwise
+    when successful: returns the destination path - None otherwise
     """
     # destination = CONFIG.stub_path / source.name
     destination = get_board_path(fw)
@@ -577,7 +576,7 @@ def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
     short_hit = ""
     with open(filename, "r") as file:
         # ugly code to make testable in python and micropython
-        # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
+        # TODO: This is VERY slow on micropython with MPREMOTE mount on esp32 (2-3 minutes to read file)
         while 1:
             line = file.readline()
             if not line:
@@ -615,13 +614,13 @@ def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
 #     help="Python source or pre-compiled.",
 # )
 # @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
-def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
+def stub_connected_mcus(variant: str, format: str, debug: bool) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
 
     Args:
-        variant (str): The variant of the MicroPython board.
-        format (str): The format of the generated stubs.
+        variant (str): The variant of the createstubs script.
+        format (str): The format of the createstubs script.
         debug (bool): Flag indicating whether to enable debug mode.
 
     Returns:
@@ -634,12 +633,12 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
         set_loglevel(0)
     variant = Variant(variant.lower())
     form = Form(format.lower())
-
     tempdir = mkdtemp(prefix="board_stubber")
-
     temp_path = Path(tempdir)
 
-    # scan boards and just work with the ones that reponded with understandable data
+    all_built = []
+
+    # scan boards and just work with the ones that respond with understandable data
     connected_boards = scan_boards(True)
     if not connected_boards:
         log.error("No micropython boards were found")
@@ -665,6 +664,9 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
         (temp_path / "modulelist.done").unlink(missing_ok=True)
 
         rc, my_stubs = generate_board_stubs(temp_path, board, variant, form)
+        if not rc == OK:
+            log.error(f"Failed to generate stubs for {board.serialport}")
+            continue
         if rc == OK and my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
             if destination := copy_to_repo(my_stubs, board.firmware):
@@ -690,14 +692,23 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
                 )
-                # create a rich table of the results and print it'
-                console.print(table)
-                log.success("Done")
-                return OK
-        else:
-            log.error(f"Failed to generate stubs for {board.serialport}")
-            return ERROR
+                all_built.extend(built)
 
+    if all_built:
+        # create a rich table of the results and print it'
+        table = Table(title="Results")
 
-if __name__ == "__main__":
-    exit(run_stubber_connected_boards())
+        table.add_column("Result",style="cyan")
+        table.add_column("Name",style="cyan")
+        table.add_column("Version",style="green")
+        table.add_column("Error",style="red")
+
+        for result in all_built:
+            table.add_row(result['result'], result['name'], result['version'], result['error'])                    
+        console.print(table)
+        log.success("Done")
+        return OK
+    else: 
+        log.error(f"Failed to generate stubs for {board.serialport}")
+        return ERROR
+

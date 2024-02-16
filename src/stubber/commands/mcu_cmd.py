@@ -6,7 +6,7 @@
 
 import click
 
-from stubber.mcu.board_stubber import run_stubber_connected_boards
+from stubber.bulk.mcu_stubber import stub_connected_mcus
 from .cli import stubber_cli
 
 ##########################################################################################
@@ -32,7 +32,8 @@ from .cli import stubber_cli
     help="Python source or pre-compiled.",
 )
 @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
-def cli_create_mcu_stubs(variant: str, format: str, debug: bool) -> int:
+@click.option("--reset/--no-reset", default=False, show_default=True, help="Reset the board before running createstubs.")
+@click.option("--github/--local", default=True, show_default=True, help="where to install the board files from. local is intended for development.")
+def cli_create_mcu_stubs(variant: str, format: str, debug: bool, reset:bool, github:bool) -> int:
     """Run createstubs on one or more MCUs, and add the stubs to the micropython-stub repo."""
-    OK = run_stubber_connected_boards(variant=variant, format=format, debug=debug)
-    return 0 if OK else 1
+    exit(stub_connected_mcus(variant=variant, format=format, debug=debug))

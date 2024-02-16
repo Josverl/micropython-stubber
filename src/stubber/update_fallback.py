@@ -21,7 +21,7 @@ def fallback_sources(version: str, fw_version: Optional[str] = None) -> List[Tup
     """
     list of sources to build/update the fallback 'catch-all' stubfolder
     version : the version to use
-    fw_version : version to source the Firmware stubs from.  defaults to the version used , but can be lower
+    fw_version : version to source the MCU stubs from. Defaults to the version used , but can be lower
 
     """
     if not fw_version:
