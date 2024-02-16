@@ -7,7 +7,7 @@ what versions are available. This module provides functions to :
         - get a list of versions for micropython ( version candidates)
     - get the frozen stubs for a given version of micropython ( frozen candidates)
     - get a list of all the docstubs (docstub candidates)
-    - get a list of the firmware/board stubs (firmware candidates)
+    - get a list of the firmware/MCU stubs (firmware candidates)
 """
 
 import re
@@ -96,7 +96,7 @@ def frozen_candidates(
     path: Path = CONFIG.stub_path,
 ) -> Generator[Dict[str, Any], None, None]:
     """
-    generate a list of possible firmware stubs for the given family (, version port and board) ?
+    generate a list of possible MCU stubs for the given family (, version port and board) ?
     - family = micropython
         board and port are ignored, they are looked up from the available frozen stubs
     - versions = 'latest' , 'auto' or a list of versions

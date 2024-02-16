@@ -38,7 +38,7 @@ def cli_minify(
     Minify createstubs*.py.
 
     Creates a minified version of the SOURCE micropython file in TARGET (file or folder).
-    The goal is to use less memory / not to run out of memory, while generating Firmware stubs.
+    The goal is to use less memory / not to run out of memory, while generating MCU stubs.
     """
     if all:
         sources = ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"]

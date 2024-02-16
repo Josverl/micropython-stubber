@@ -1,5 +1,5 @@
 """ 
-Merge firmware stubs and docstubs into a single folder
+Merge MCU stubs and docstubs into a single folder
 """
 
 import shutil
@@ -24,7 +24,7 @@ def merge_all_docstubs(
     *,
     mpy_path: Path = CONFIG.mpy_path,
 ):
-    """merge docstubs and board stubs to merged stubs"""
+    """merge docstubs and MCU stubs to merged stubs"""
     if versions is None:
         versions = [CONFIG.stable_version]
     if ports is None:
@@ -50,7 +50,7 @@ def merge_all_docstubs(
         # use the default board for the port
         if candidate["board"] in GENERIC:
             candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
-        # check if we have board stubs of this version and port
+        # check if we have MCU stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths
         board_path = get_board_path(candidate)
@@ -61,11 +61,11 @@ def merge_all_docstubs(
             log.warning(f"No docstubs found for {candidate['version']}")
             continue
         if not board_path.exists():
-            log.info(f"skipping {merged_path.name}, no firmware stubs found in {board_path}")
+            log.info(f"skipping {merged_path.name}, no MCU stubs found in {board_path}")
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
-        # Add methods from docstubs to the firmware stubs that do not exist in the firmware stubs
+        # Add methods from docstubs to the MCU stubs that do not exist in the MCU stubs
         # Add the __call__ method to the machine.Pin and pyb.Pin class
         add_machine_pin_call(merged_path, candidate["version"])
         if result:
@@ -77,14 +77,14 @@ def merge_all_docstubs(
 def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     """
     Parameters:
-        fw_path: Path to firmware stubs (absolute path)
+        fw_path: Path to MCU stubs (absolute path)
         dest_path: Path to destination (absolute path)
         mpy_version: micropython version ('1.18')
 
     Copy files from the firmware stub folders to the merged
-    - 1 - Copy all firmware stubs to the package folder
+    - 1 - Copy all MCU stubs to the package folder
     - 1.B - clean up a little bit
-    - 2 - Enrich the firmware stubs with the document stubs
+    - 2 - Enrich the MCU stubs with the document stubs
 
     """
     if dest_path.exists():
@@ -94,7 +94,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
 
     # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
     try:
-        log.debug(f"Copying firmware stubs from {fw_path}")
+        log.debug(f"Copying MCU stubs from {fw_path}")
         shutil.copytree(fw_path, dest_path, symlinks=True, dirs_exist_ok=True)
     except OSError as e:
         log.error(f"Error copying stubs from : { fw_path}, {e}")
@@ -104,7 +104,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
         (dest_path / "modules.json").rename(dest_path / "firmware_stubs.json")
 
     # avoid duplicate modules : folder - file combinations
-    # prefer folder from frozen stubs, over file from firmware stubs
+    # prefer folder from frozen stubs, over file from MCU stubs
     # No frozen here - OLD code ?
     for f in dest_path.glob("*"):
         if f.is_dir():
@@ -121,7 +121,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
             if (dest_path / name).with_suffix(suffix).exists():  # type: ignore
                 (dest_path / name).with_suffix(suffix).unlink()  # type: ignore
 
-    # 2 - Enrich the firmware stubs with the document stubs
+    # 2 - Enrich the MCU stubs with the document stubs
     result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
 
     # copy the docstubs manifest.json file to the package folder

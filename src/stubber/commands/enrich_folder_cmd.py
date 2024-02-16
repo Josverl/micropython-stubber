@@ -20,7 +20,7 @@ from .cli import stubber_cli
     "stubs_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the firmware stubs to be updated",
+    help="File or folder containing the MCU stubs to be updated",
     show_default=True,
 )
 @click.option(

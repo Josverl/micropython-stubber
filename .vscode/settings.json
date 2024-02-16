@@ -143,5 +143,7 @@
     "todo-tree.tree.scanMode": "open files",
     "python.analysis.typeshedPaths": [
         "typings"
-    ]
+    ],
+    "austin.mode": "Wall time",
+    "austin.binaryMode": true
 }

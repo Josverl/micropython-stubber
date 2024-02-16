@@ -1,15 +1,14 @@
-# Create Firmware Stubs
+# Create MCU Stubs
 
-It is possible to create MicroPython stubs using the `createstubs.py` MicroPython script.  
+It is possible to create MicroPython stubs using the `stubber get-mcu-stubs`command.  
 
-the script goes though the following stages
+This command will do the following
 
-1. it determines the firmware family, the version and the port of the device, 
-   and based on that information it creates a firmware identifier (fwid) in the format : {family}-{port}-{version}
-   the fwid is used to name the folder that stores the stubs for that device.
-   - stubs/micropython-v1_10-stm32
-   - stubs/micropython-v1_12-esp32
-   - stubs/loboris-v3_2_4-esp32
+1. It determines the serialports that are available on your system.
+2. It runs a small script to determine the firmware family, the version and the port of the device, and looks up the boards description in a list of known boards.
+3. it uses `mpremote mip` to install the files needed to generate the stubs on the device
+4. it runs the selected variant of  `createstubs.py` script on the device to generate the stubs
+
 
 2. it cleans the stub folder 
 3. it generates stubs, using a predetermined list of module names.
@@ -109,4 +108,4 @@ The excluded category provides no relevant stub information
 `createstubs.py` will not process a module in either category.
 
 Note: that some of these modules are also included in the frozen modules that are gathered for those ports or boards. 
-For those modules it makes sense to use/prioritize the .pyi stubs for the forzen modules over the firmware stubs.
+For those modules it makes sense to use/prioritize the .pyi stubs for the frozen modules over the MCU stubs.
