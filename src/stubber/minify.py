@@ -10,7 +10,11 @@ from io import BytesIO, IOBase, StringIO, TextIOWrapper
 from pathlib import Path
 from typing import List, Tuple, Union
 
-import python_minifier
+try: 
+    import python_minifier
+except ImportError:
+    python_minifier = None
+
 from loguru import logger as log
 
 from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
@@ -212,29 +216,33 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
         min_source = source_content
     len_2 = len(min_source)
 
-    min_source = python_minifier.minify(
-        min_source,
-        filename=getattr(source_script, "name", None),
-        combine_imports=True,
-        remove_literal_statements=True,  # no Docstrings
-        remove_annotations=True,  # not used runtime anyways
-        hoist_literals=True,  # remove redundant strings
-        rename_locals=True,  # short names save memory
-        preserve_locals=["stubber", "path"],  # names to keep
-        rename_globals=True,  # short names save memory
-        # keep these globals to allow testing/mocking to work against the minified not compiled version
-        preserve_globals=[
-            "main",
-            "Stubber",
-            "read_path",
-            "get_root",
-            "_info",
-            "os",
-            "sys",
-            "__version__",
-        ],
-        # remove_pass=True,  # no dead code
-        # convert_posargs_to_args=True, # Does not save any space
+    if not python_minifier:
+        log.warning("python_minifier not found, skipping minification")
+    else:
+        # use python_minifier to minify the source if it is successfully imported
+        min_source = python_minifier.minify(
+            min_source,
+            filename=getattr(source_script, "name", None),
+            combine_imports=True,
+            remove_literal_statements=True,  # no Docstrings
+            remove_annotations=True,  # not used runtime anyways
+            hoist_literals=True,  # remove redundant strings
+            rename_locals=True,  # short names save memory
+            preserve_locals=["stubber", "path"],  # names to keep
+            rename_globals=True,  # short names save memory
+            # keep these globals to allow testing/mocking to work against the minified not compiled version
+            preserve_globals=[
+                "main",
+                "Stubber",
+                "read_path",
+                "get_root",
+                "_info",
+                "os",
+                "sys",
+                "__version__",
+            ],
+            # remove_pass=True,  # no dead code
+            # convert_posargs_to_args=True, # Does not save any space
     )
     len_3 = len(min_source)
     if 1:
