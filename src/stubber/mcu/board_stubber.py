@@ -32,7 +32,7 @@ RETRIES = 3
 TESTING = False
 
 # TODO : make this a bit nicer 
-REPO_ROOT = Path(__file__).parent.parent 
+HERE = Path(__file__).parent 
 ###############################################################################################
 # TODO: promote to cmdline params
 LOCAL_FILES = False
@@ -193,9 +193,8 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def get_mcu_info(self):
-
         rc, result = self.run_command(
-            ["run", str(REPO_ROOT / "src/stubber/board/fw_info.py")],
+            ["run", str(HERE / "../board/fw_info.py")],
             no_info=True,
         )
         if rc != OK:
@@ -213,7 +212,7 @@ class MPRemoteBoard:
             else:
                 short_descr = ""
             if board_name := find_board(
-                descr, short_descr, REPO_ROOT / "src/stubber/data/board_info.csv"
+                descr, short_descr, HERE / "../data/board_info.csv"
             ):
                 self.board = board_name
             else:
@@ -598,24 +597,24 @@ def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
     return None
 
 
-@click.command()
-@click.option(
-    "--variant",
-    "-v",
-    type=click.Choice(["Full", "Mem", "DB"], case_sensitive=False),
-    default="Full",
-    show_default=True,
-    help="Variant of createstubs to run",
-)
-@click.option(
-    "--format",
-    "-f",
-    type=click.Choice(["py", "mpy"], case_sensitive=False),
-    default="py",
-    show_default=True,
-    help="Python source or pre-compiled.",
-)
-@click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
+# @click.command()
+# @click.option(
+#     "--variant",
+#     "-v",
+#     type=click.Choice(["Full", "Mem", "DB"], case_sensitive=False),
+#     default="Full",
+#     show_default=True,
+#     help="Variant of createstubs to run",
+# )
+# @click.option(
+#     "--format",
+#     "-f",
+#     type=click.Choice(["py", "mpy"], case_sensitive=False),
+#     default="py",
+#     show_default=True,
+#     help="Python source or pre-compiled.",
+# )
+# @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
 def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
@@ -644,7 +643,7 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
     connected_boards = scan_boards(True)
     if not connected_boards:
         log.error("No micropython boards were found")
-        sys.exit(1)
+        return ERROR
 
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Serial Port")
