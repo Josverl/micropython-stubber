@@ -1,5 +1,5 @@
 """
-Download or update the micropyton compatibility modules from pycopy and stores them in the all_stubs folder
+Download or update the MicroPython compatibility modules from pycopy and stores them in the all_stubs folder
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
 # pragma: no cover
@@ -28,7 +28,7 @@ def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, fa
         stub_path = CONFIG.stub_path / "cpython-core"  # pragma: no cover
     stub_path = Path(stub_path)
 
-    # use pip to dowload requirements file to build folder in one go
+    # use pip to download requirements file to build folder in one go
     #   pip install --no-compile --no-cache-dir --target ./scratch/test --upgrade -r ./src/micropython.txt
 
     os.makedirs(stub_path, exist_ok=True)
