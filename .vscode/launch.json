@@ -45,7 +45,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "-v",
-                "mcu",
+                "get-mcu-stubs",
                 // "get-frozen",
                 // "--version",
                 // "preview",
