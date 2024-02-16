@@ -41,7 +41,7 @@ class StubberConfig(Config):
         required=False,
         default=Path("./repos/micropython-stubs/publish"),
     )
-    "a Path to the folder where all stub publication artefacts are stored"
+    "A Path to the folder where all stub publication artifacts are stored"
 
     template_path = key(
         key_name="template-path",

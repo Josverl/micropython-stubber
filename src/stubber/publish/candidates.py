@@ -22,10 +22,10 @@ from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
 from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean_version, micropython_versions
-
+from loguru import logger as log
 
 def subfolder_names(path: Path):
-    "returns a list of names of the subfolders of the given path"
+    "returns a list of names of the sub folders of the given path"
     if path.exists():
         for child in path.iterdir():
             if child.is_dir():
@@ -235,6 +235,7 @@ def board_candidates(
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
+            log.warning(f"Did you run `stubber clone` to get the micropython repo?")
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:

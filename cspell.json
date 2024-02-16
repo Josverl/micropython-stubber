@@ -68,6 +68,7 @@
         "typeshed",
         "updent",
         "Verlinde",
+        "worklist",
         "writeln"
     ],
     "enableFiletypes": [
