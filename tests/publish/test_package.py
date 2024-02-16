@@ -110,7 +110,7 @@ read_db_data = [
         "pkg_version": "1.18.post6",
         "path": "foo-v1_18-bar-stubs",
         "stub_sources": [
-            ["MCU-stubs", "micropython-v1_17-stm32"],
+            ["MCU stubs", "micropython-v1_17-stm32"],
             ["Frozen stubs", "micropython-v1_17-frozen/stm32/GENERIC"],
             ["Core Stubs", "cpython_core-pycopy"],
         ],
@@ -125,7 +125,7 @@ read_db_data = [
         "pkg_version": "1.18.post6",
         "path": "foo-v1_18-bar-stubs",
         "stub_sources": [
-            ["MCU-stubs", "stubs/micropython-v1_17-stm32"],
+            ["MCU stubs", "stubs/micropython-v1_17-stm32"],
             ["Frozen stubs", "stubs/micropython-v1_17-frozen/stm32/GENERIC"],
             ["Core Stubs", "stubs/cpython_core-pycopy"],
         ],
@@ -140,7 +140,7 @@ read_db_data = [
         "pkg_version": "1.18.post6",
         "path": "publish/foo-v1_18-bar-stubs",
         "stub_sources": [
-            ["MCU-stubs", "micropython-v1_17-stm32"],
+            ["MCU stubs", "micropython-v1_17-stm32"],
         ],
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
