@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "mp-downloader"
+version = "0.1.2"
+description = "Download specified micropython firmwares"
+authors = ["Jos Verlinde <jos.verlinde@microsoft.com>"]
+license = "MIT"
+readme = "README.md"
+# packages = [{ include = "**/*.*", from = "src" }]
+
+[tool.poetry.scripts]
+mp_downloader = "mp_downloader.__main__:cli"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.3"
+
+[tool.poetry.group.dev.dependencies]
+types-beautifulsoup4 = "^4.12.0.20240106"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
