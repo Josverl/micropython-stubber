@@ -84,7 +84,7 @@ FirmwareInfo = Dict[str, str]
 # boards we are interested in ( this avoids getting a lot of boards we don't care about)
 # The first run takes ~60 seconds to run for 4 ports , all boards
 # so it makes sense to cache the results and skip boards as soon as possible
-def get_boards(fw_types: Dict[str, str], board_list: List[str]) -> List[FirmwareInfo]:
+def get_boards(fw_types: Dict[str, str], board_list: List[str], clean: bool) -> List[FirmwareInfo]:
     board_urls: List[FirmwareInfo] = []
     for port in fw_types:
         download_page_url = f"{MICROPYTHON_ORG_URL}download/?port={port}"
@@ -109,10 +109,12 @@ def get_boards(fw_types: Dict[str, str], board_list: List[str]) -> List[Firmware
                     board["build"] = board["version"].split("preview.")[-1]
                 else:
                     board["build"] = "0"
-                # remove date from firmware name
-                fname = re.sub(RE_DATE, "-", Path(board["firmware"]).name)
-                # remove hash from firmware name
-                fname = re.sub(RE_HASH, ".", fname)
+                fname = Path(board["firmware"]).name
+                if clean:
+                    # remove date from firmware name
+                    fname = re.sub(RE_DATE, "-", fname)
+                    # remove hash from firmware name
+                    fname = re.sub(RE_HASH, ".", fname)
                 board["filename"] = fname
                 board["variant"] = board["filename"].split("-v")[0] if "-v" in board["filename"] else ""
                 board_urls.append(board.copy())
@@ -136,10 +138,11 @@ def download_firmwares(
     *,
     preview: bool = False,
     force: bool = False,
+    clean: bool = True,
 ):
     if version_list is None:
         version_list = []
-    unique_boards = get_firmware_list(board_list, version_list, preview)
+    unique_boards = get_firmware_list(board_list, version_list, preview, clean)
 
     for b in unique_boards:
         log.debug(b["filename"])
@@ -169,10 +172,10 @@ def download_firmwares(
             f_jsonl.write(json_str)
 
 
-def get_firmware_list(board_list: List[str], version_list: List[str], preview: bool):
+def get_firmware_list(board_list: List[str], version_list: List[str], preview: bool, clean: bool):
     log.info("Checking MicroPython download pages")
 
-    board_urls = sorted(get_boards(PORT_FWTYPES, board_list), key=key_fw_variant_ver)
+    board_urls = sorted(get_boards(PORT_FWTYPES, board_list, clean), key=key_fw_variant_ver)
 
     log.info(f"Total {len(board_urls)} firmwares")
     relevant = [
@@ -210,14 +213,15 @@ DEFAULT_BOARDS = [
     "-d",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
     default="./firmware",
+    show_default=True,
     help="The folder to download the firmware to.",
 )
 @click.option(
     "--version",
-    "-V",
+    "-v",
     "versions",
     multiple=True,
-    help="The version of MicroPython to to download. Use '--preview'",
+    help="The version of MicroPython to to download. Use '--preview' to include preview versions.",
 )
 @click.option(
     "--board",
@@ -230,8 +234,14 @@ DEFAULT_BOARDS = [
 @click.option(
     "--preview/--no-preview",
     default=False,
-    help="""Include preview versions in the download list.""",
     show_default=True,
+    help="""Include preview versions in the download list.""",
+)
+@click.option(
+    "--clean/--no-clean",
+    default=True,
+    show_default=True,
+    help="""Remove dates and hashes from the downloaded firmware filenames.""",
 )
 @click.option(
     "--force",
@@ -240,11 +250,11 @@ DEFAULT_BOARDS = [
     help="""Force download of firmware even if it already exists.""",
     show_default=True,
 )
-def cli(destination: Path, boards: List[str], versions: List[str], preview: bool, force: bool):
+def cli(destination: Path, boards: List[str], versions: List[str], preview: bool, force: bool, clean: bool):
     versions = list(versions)
     boards = list(boards) or DEFAULT_BOARDS
     versions = [v.lstrip("v") for v in versions]  # remove leading v from version
-    download_firmwares(destination, boards, versions, preview=preview, force=force)
+    download_firmwares(destination, boards, versions, preview=preview, force=force, clean=clean)
 
 
 if __name__ == "__main__":
