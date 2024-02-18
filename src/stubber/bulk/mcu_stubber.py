@@ -21,8 +21,7 @@ from stubber.publish.merge_docstubs import get_board_path, merge_all_docstubs
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
-from .mpremoteboard import MPRemoteBoard
-
+from .mpremoteboard import ERROR, OK, MPRemoteBoard
 
 # TODO : make this a bit nicer
 HERE = Path(__file__).parent
