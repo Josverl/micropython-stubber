@@ -1,20 +1,18 @@
 """
-Module to run mpremote commands
+Module to run mpremote commands, and retry on failure or timeout
 """
-
-
 
 import sys
 from pathlib import Path
-from typing import List, Optional,  Union
+from typing import List, Optional, Union
 
 import serial.tools.list_ports
 from loguru import logger as log
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-
 from .board_id import find_board_designator
 from .runner import run
+
 ###############################################################################################
 # TODO : make this a bit nicer
 HERE = Path(__file__).parent
@@ -23,6 +21,7 @@ OK = 0
 ERROR = -1
 RETRIES = 3
 ###############################################################################################
+
 
 class MPRemoteBoard:
     """Class to run mpremote commands"""
