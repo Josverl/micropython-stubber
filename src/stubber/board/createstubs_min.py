@@ -131,11 +131,11 @@ class Stubber:
 			except(E,l):A.warning('could not del new_module')
 		F.collect();return U
 	def write_object_stub(K,fp,object_expr,obj_name,indent,in_class=0):
-		X='generator';W='{0}{1}: {3} = {2}\n';V='bound_method';U='Incomplete';N=in_class;M='Exception';L=object_expr;I=fp;D=indent;F.collect()
+		Y=' at ';X='generator';W='{0}{1}: {3} = {2}\n';V='bound_method';U='Incomplete';N=in_class;M='Exception';L=object_expr;I=fp;D=indent;F.collect()
 		if L in K.problematic:A.warning('SKIPPING problematic module:{}'.format(L));return
-		Y,O=K.get_obj_attributes(L)
+		Z,O=K.get_obj_attributes(L)
 		if O:A.error(O)
-		for(E,J,H,Z,e)in Y:
+		for(E,J,H,a,f)in Z:
 			if E in['classmethod','staticmethod','BaseException',M]:continue
 			if E[0].isdigit():A.warning('NameError: invalid name {}'.format(E));continue
 			if H=="<class 'type'>"and R(D)<=A1*4:
@@ -143,7 +143,7 @@ class Stubber:
 				if Q:P=M
 				C='\n{}class {}({}):\n'.format(D,E,P)
 				if Q:C+=D+'    ...\n';I.write(C);continue
-				I.write(C);K.write_object_stub(I,Z,'{0}.{1}'.format(obj_name,E),D+'    ',N+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';I.write(C)
+				I.write(C);K.write_object_stub(I,a,'{0}.{1}'.format(obj_name,E),D+'    ',N+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';I.write(C)
 			elif any(A in H for A in[u,t,'closure']):
 				S=U;T=B
 				if N>0:T='self, '
@@ -154,11 +154,14 @@ class Stubber:
 			elif H.startswith("<class '"):
 				G=H[8:-2];C=B
 				if G in(r,p,q,s,'bytearray','bytes'):C=W.format(D,E,J,G)
-				elif G in(d,c,b):a={d:'{}',c:'[]',b:'()'};C=W.format(D,E,a[G],G)
+				elif G in(d,c,b):e={d:'{}',c:'[]',b:'()'};C=W.format(D,E,e[G],G)
 				elif G in('object','set','frozenset','Pin',X):
 					if G==X:G='Generator'
 					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,H,J)
-				else:G=U;C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,H,J)
+				else:
+					G=U
+					if Y in J:J=J.split(Y)[0]+' at ...>'
+					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,H,J)
 				I.write(C)
 			else:I.write("# all other, type = '{0}'\n".format(H));I.write(D+E+' # type: Incomplete\n')
 	@property
