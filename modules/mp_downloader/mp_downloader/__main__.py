@@ -1,11 +1,18 @@
+"""
+Module to download MicroPython firmware for specific boards and versions.
+Uses the micropython.org website to get the available versions and locations to download firmware files.
+"""
+
 import functools
 import itertools
+import json
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
 import requests
+import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
 
@@ -17,6 +24,9 @@ PORT_FWTYPES = {
     "esp8266": ".bin",
     "rp2": ".uf2",
     "samd": ".uf2",
+    "mimxrt": ".hex",
+    "nrf": ".hex",
+    "renesas-ra": ".hex",
 }
 
 
@@ -62,7 +72,7 @@ def firmware_list(board_url: str, base_url: str, ext: str) -> List[str]:
     return links
 
 
-# Regexes to remove datses and hashes in the filename that just get in the way
+# Regexes to remove dates and hashes in the filename that just get in the way
 RE_DATE = r"(-\d{8}-)"
 RE_HASH = r"(.g[0-9a-f]+\.)"
 # regex to extract the version from the firmware filename
@@ -74,9 +84,9 @@ FirmwareInfo = Dict[str, str]
 # boards we are interested in ( this avoids getting a lot of boards we don't care about)
 # The first run takes ~60 seconds to run for 4 ports , all boards
 # so it makes sense to cache the results and skip boards as soon as possible
-def get_boards(fw_types, board_list: List[str]) -> List[FirmwareInfo]:
+def get_boards(fw_types: Dict[str, str], board_list: List[str]) -> List[FirmwareInfo]:
     board_urls: List[FirmwareInfo] = []
-    for port in fw_types.keys():
+    for port in fw_types:
         download_page_url = f"{MICROPYTHON_ORG_URL}download/?port={port}"
         _urls = get_board_urls(download_page_url)
         # filter out boards we don't care about
@@ -132,14 +142,12 @@ def download_firmwares(
     unique_boards = get_firmware_list(board_list, version_list, preview)
 
     for b in unique_boards:
-        print(b["filename"])
+        log.debug(b["filename"])
     # relevant
 
-    print(f"Found {len(unique_boards)} relevant unique firmwares")
+    log.info(f"Found {len(unique_boards)} relevant unique firmwares")
 
     firmware_folder.mkdir(exist_ok=True)
-
-    import json
 
     with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
         for board in unique_boards:
@@ -148,7 +156,7 @@ def download_firmwares(
             if filename.exists() and not force:
                 log.info(f" {filename} already exists, skip download")
                 continue
-            print(f"Downloading {board['firmware']} to {filename}")
+            log.info(f"Downloading {board['firmware']} to {filename}")
             try:
                 r = requests.get(board["firmware"], allow_redirects=True)
                 with open(filename, "wb") as fw:
@@ -184,7 +192,7 @@ def get_firmware_list(board_list: List[str], version_list: List[str], preview: b
     return unique_boards
 
 
-RELEVANT_BOARDS = [
+DEFAULT_BOARDS = [
     "PYBV11",
     "ESP32_GENERIC",
     "ESP32_GENERIC_S3",
@@ -196,10 +204,47 @@ RELEVANT_BOARDS = [
 ]
 
 
-def cli():
-    firmware_folder = Path("firmware")
-    versions = []
-    download_firmwares(firmware_folder, RELEVANT_BOARDS, versions, preview=True)
+@click.command()
+@click.option(
+    "--destination",
+    "-d",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default="./firmware",
+    help="The folder to download the firmware to.",
+)
+@click.option(
+    "--version",
+    "-V",
+    "versions",
+    multiple=True,
+    help="The version of MicroPython to to download. Use '--preview'",
+)
+@click.option(
+    "--board",
+    "-b",
+    "boards",
+    multiple=True,
+    show_default=True,
+    help="The board(s) to download the firmware for.",  # Use '--board all' to download all boards.",
+)
+@click.option(
+    "--preview/--no-preview",
+    default=False,
+    help="""Include preview versions in the download list.""",
+    show_default=True,
+)
+@click.option(
+    "--force",
+    default=False,
+    is_flag=True,
+    help="""Force download of firmware even if it already exists.""",
+    show_default=True,
+)
+def cli(destination: Path, boards: List[str], versions: List[str], preview: bool, force: bool):
+    versions = list(versions)
+    boards = list(boards) or DEFAULT_BOARDS
+    versions = [v.lstrip("v") for v in versions]  # remove leading v from version
+    download_firmwares(destination, boards, versions, preview=preview, force=force)
 
 
 if __name__ == "__main__":
