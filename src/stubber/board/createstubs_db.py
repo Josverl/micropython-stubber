@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.17.2
+This variant was generated from createstubs.py by micropython-stubber v1.17.3
 """
 # Copyright (c) 2019-2023 Jos Verlinde
 
@@ -42,7 +42,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.17.2"
+__version__ = "v1.17.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -375,6 +375,8 @@ class Stubber:
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
+                        if " at " in item_repr:
+                            item_repr = item_repr.split(" at ")[0] + " at ...>"
                         s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 # log.debug("\n" + s)
