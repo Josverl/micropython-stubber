@@ -33,10 +33,18 @@ class MPRemoteBoard:
 
         self.connected = False
         self.path: Optional[Path] = None
+        self.family = "micropython"
         self.description = ""
         self.version = ""
         self.port = ""
         self.board = ""
+        self.cpu = ""
+        self.arch = ""
+        self.mpy = ""
+        self.build = ""
+
+    def __str__(self):
+        return f"MPRemoteBoard({self.serialport}, {self.family} {self.port}, {self.board}, {self.version})"
 
     @staticmethod
     def connected_boards():
@@ -56,8 +64,13 @@ class MPRemoteBoard:
         s = result[0].strip()
         if s.startswith("{") and s.endswith("}"):
             info = eval(s)
+            self.family = info["family"]
             self.version = info["version"]
+            self.build = info["build"]
             self.port = info["port"]
+            self.cpu = info["cpu"]
+            self.arch = info["arch"]
+            self.mpy = info["mpy"]
             self.description = descr = info["board"]
             pos = descr.rfind(" with")
             if pos != -1:
