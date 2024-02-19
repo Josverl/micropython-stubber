@@ -8,7 +8,8 @@ readme = "README.md"
 # packages = [{ include = "**/*.*", from = "src" }]
 
 [tool.poetry.scripts]
-mp_downloader = "mp_downloader.__main__:cli"
+mp_downloader = "mp_downloader.downloader:cli"
+mp_flasher = "mp_downloader.flasher:cli"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
