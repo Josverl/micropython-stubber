@@ -16,18 +16,12 @@ import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
 
+# from .common import PORT_FWTYPES
+PORT_FWTYPES = {
+    "esp8266": ".bin",
+}
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 # ports and firmware extensions we are interested in
-PORT_FWTYPES = {
-    "stm32": ".hex",
-    "esp32": ".bin",
-    "esp8266": ".bin",
-    "rp2": ".uf2",
-    "samd": ".uf2",
-    "mimxrt": ".hex",
-    "nrf": ".hex",
-    "renesas-ra": ".hex",
-}
 
 
 # use functools.lru_cache to avoid needing to download pages multiple times
@@ -164,7 +158,7 @@ def download_firmwares(
                 r = requests.get(board["firmware"], allow_redirects=True)
                 with open(filename, "wb") as fw:
                     fw.write(r.content)
-                board["filename"] = str(filename)
+                board["filename"] = str(filename.relative_to(firmware_folder))
             except requests.RequestException as e:
                 log.exception(e)
                 continue
@@ -197,6 +191,7 @@ def get_firmware_list(board_list: List[str], version_list: List[str], preview: b
 
 DEFAULT_BOARDS = [
     "PYBV11",
+    "ESP8266_GENERIC",
     "ESP32_GENERIC",
     "ESP32_GENERIC_S3",
     "RPI_PICO",
