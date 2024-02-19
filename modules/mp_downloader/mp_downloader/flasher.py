@@ -1,8 +1,10 @@
 import shutil
+import subprocess
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
+import bincopy
 import esptool
 import jsonlines
 import psutil
@@ -10,15 +12,19 @@ import rich_click as click
 from loguru import logger as log
 from rich import print
 from rich.table import Table
+from tenacity import RetryError
 
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .common import DEFAULT_FW_PATH, PORT_FWTYPES
 
+# #########################################################################################################
+FWInfo = Dict[str, Union[str, bool]]
 
-def load_firmwares(fw_folder: Path):
+
+def load_firmwares(fw_folder: Path) -> List[FWInfo]:
     """Load a list of available  firmwares from the jsonl file"""
-    firmwares = []
+    firmwares: List[FWInfo] = []
     with jsonlines.open(fw_folder / "firmware.jsonl") as reader:
         firmwares.extend(iter(reader))
     return firmwares
@@ -32,6 +38,7 @@ def find_firmware(
     preview: bool = False,
     variants: bool = False,
     fw_folder: Optional[Path] = None,
+    trie: int = 1,
 ):
     # TODO : better path handling
     fw_folder = fw_folder or DEFAULT_FW_PATH
@@ -58,11 +65,28 @@ def find_firmware(
             # the variant should match exactly the board name
             fw_list = [fw for fw in fw_list if fw["variant"] == board]
 
-    if not fw_list:
-        print(f"No firmware files found for {version}")
-        return []
+    if not fw_list and trie < 2:
+        board_id = board.replace("_", "-")
+        # ESP board naming conventions have changed by addin a prefix ( port / CPU)
+        if port.startswith("esp") and not board_id.startswith(port.upper()):
+            board_id = f"{port.upper()}_{board_id}"
 
+        log.warning(f"Trying to find a firmware for the board {board_id}")
+        fw_list = find_firmware(
+            fw_folder=fw_folder,
+            board=board_id,
+            version=version,
+            port=port,
+            preview=preview,
+            trie=trie + 1,
+        )
+        # hope we have a match now for the board
     return fw_list
+
+
+# #########################################################################################################
+# Flash SAMD and RP2 via UF2
+# #########################################################################################################
 
 
 def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
@@ -74,16 +98,16 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     - wait for the device to restart (5s)
     """
     if PORT_FWTYPES[mcu.port] not in [".uf2"]:
-        print(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
+        log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
 
-    print(f"Entering UF2 bootloader on {mcu.board} on {mcu.serialport}")
+    log.info(f"Entering UF2 bootloader on {mcu.board} on {mcu.serialport}")
     mcu.run_command("bootloader")
 
     destination = ""
     wait = 5
     while not destination and wait > 0:
-        print(f"Waiting for mcu to mount as a drive : {wait} seconds left")
+        log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
         drives = [drive.device for drive in psutil.disk_partitions()]
         for drive in drives:
             if Path(drive, "INFO_UF2.TXT").exists():
@@ -94,32 +118,37 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
                 for line in data:
                     if line.startswith("Board-ID="):
                         board_id = line.split("=")[1].strip()
-                print(f"Found Board-ID={board_id}")
+                log.trace(f"Found Board-ID={board_id}")
                 destination = drive
                 break
         time.sleep(1)
         wait -= 1
     if not destination or not Path(destination).exists() or not Path(destination, "INFO_UF2.TXT").exists():
-        print("Board is not in bootloader mode")
+        log.error("Board is not in bootloader mode")
         return None
 
-    print("Board is in bootloader mode")
-    print(f"Copying {fw_file} to {destination}")
+    log.info("Board is in bootloader mode")
+    log.info(f"Copying {fw_file} to {destination}")
     shutil.copy(fw_file, destination)
-    print("Done copying, resetting the board and wait for it to restart")
+    log.success("Done copying, resetting the board and wait for it to restart")
     time.sleep(5)
     # refresh bord info
-    mcu.get_mcu_info()
+    # try:
+    #     # sometimes a board might not re-appear as the same com port
+    #     mcu.get_mcu_info()
+    # except (Exception, RetryError, RuntimeError) as e:
+    #     log.error(f"Failed to get mcu info {e}")
     return mcu
 
 
+# #########################################################################################################
 # Flash ESP32 and ESP8266 via esptool
-# TODO : use sys.executable to run esptool to avoid getting a wrong version
+# #########################################################################################################
 
 
 def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) -> Optional[MPRemoteBoard]:
     if mcu.port not in ["esp32", "esp8266"] or mcu.board in ["ARDUINO_NANO_ESP32"]:
-        print(f"esptool not supported for {mcu.port} {mcu.board} on {mcu.serialport}")
+        log.error(f"esptool not supported for {mcu.port} {mcu.board} on {mcu.serialport}")
         return None
 
     log.info(f"Flashing {fw_file} on {mcu.board} on {mcu.serialport}")
@@ -151,17 +180,17 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         log.info(f"Running {' '.join(cmd)} ")
         esptool.main(cmd[1:])
 
-    print("Done flashing, resetting the board and wait for it to restart")
+    log.info("Done flashing, resetting the board and wait for it to restart")
     time.sleep(5)
     mcu.get_mcu_info()
     log.success(f"Flashed {mcu.version} to {mcu.board} on {mcu.serialport} done")
     return mcu
 
 
-# # flash STM32 using STM32CubeProgrammer
-import subprocess
-
-import bincopy
+# #########################################################################################################
+# flash STM32 using STM32CubeProgrammer
+# needs to be installed independenty from https://www.st.com/en/development-tools/stm32cubeprog.html
+# #########################################################################################################
 
 
 def get_stm32_start_address(fw_file: Path):
@@ -172,6 +201,7 @@ def get_stm32_start_address(fw_file: Path):
         fw_hex = bincopy.BinFile(str(fw_file))
         return f"0x{fw_hex.execution_start_address:08X}"
     except Exception:
+
         return ""
 
 
@@ -190,7 +220,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
         )
         return None
 
-    print(f"Entering STM bootloader on {mcu.board} on {mcu.serialport}")
+    log.info(f"Entering STM bootloader on {mcu.board} on {mcu.serialport}")
     mcu.run_command("bootloader")
     time.sleep(2)
     # run STM32_Programmer_CLI.exe --list
@@ -200,7 +230,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
     if "Product ID             : STM32  BOOTLOADER" in results:
-        print("No STM32 BOOTLOADER detected")
+        log.error("No STM32 BOOTLOADER detected")
         return None
     echo = False
     for line in results:
@@ -218,8 +248,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
     if erase_flash:
-        print("Erasing flash")
-        # !"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" --connect port=USB1 --erase all
+        log.info("Erasing flash")
         cmd = [
             STM32_CLI,
             "--connect",
@@ -229,10 +258,10 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
         ]
         results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
 
-    print("Flashing")
+    log.info("Flashing")
     start_address = get_stm32_start_address(fw_file)
 
-    print(f"STM32_Programmer_CLI.exe --connect port=USB1 --write {str(fw_file)} --go {start_address}")
+    log.trace(f"STM32_Programmer_CLI.exe --connect port=USB1 --write {str(fw_file)} --go {start_address}")
     # !"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" --connect port=USB1 --write "{str(fw_file)}" --go {start_address}
     cmd = [
         STM32_CLI,
@@ -244,13 +273,60 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
         start_address,
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
-    print("Done flashing, resetting the board and wait for it to restart")
+    log.success("Done flashing, resetting the board and wait for it to restart")
     time.sleep(5)
     mcu.get_mcu_info()
     return mcu
 
 
-@click.command()
+# #########################################################################################################
+#
+# #########################################################################################################
+WorkList = List[Tuple[MPRemoteBoard, FWInfo]]
+
+
+def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder: Path):
+    """Builds a list of boards to update based on the connected boards and the firmware available"""
+    wl: WorkList = []
+    for mcu in conn_boards:
+        if mcu.family != "micropython":
+            log.warning(f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board")
+            continue
+        board_firmwares = find_firmware(
+            fw_folder=fw_folder,
+            board=mcu.board,
+            version=target_version,
+            port=mcu.port,
+            preview="preview" in target_version,
+        )
+
+        if not board_firmwares:
+            log.error(f"No firmware found for {mcu.board}? on {mcu.serialport} with version {target_version}")
+            continue
+        if len(board_firmwares) > 1:
+            log.warning(f"Multiple firmwares found for {mcu.board} on {mcu.serialport} with version {target_version}")
+
+        # just use the first firmware
+        fw_info = board_firmwares[0]
+        wl.append((mcu, fw_info))
+    return wl
+
+
+# #########################################################################################################
+# CLI
+# #########################################################################################################
+@click.group()
+def cli():
+    pass
+
+
+@cli.command("list")
+def show_list():
+    conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
+    show_boards(conn_boards)
+
+
+@cli.command()
 @click.option(
     "--firmware",
     "-f",
@@ -270,7 +346,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     metavar="SEMVER or preview",
 )
 @click.option(
-    "--serial_port",
+    "--serial-port",
     "-s",
     "serial_port",
     default="auto",
@@ -300,7 +376,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     show_default=True,
     help="""Erase flash before writing new firmware.""",
 )
-def cli(
+def update(
     target_version: str,
     fw_folder: Path,
     serial_port: Optional[str] = None,
@@ -309,49 +385,36 @@ def cli(
     variant: Optional[str] = None,
     erase: bool = False,
 ):
-    conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
-    show_connected(conn_boards)
-
+    todo: WorkList = []
     # Update all micropython boards to the latest version
-    flashed = []
-    # fw_folder = Path("D:\\MyPython\\micropython-stubber") / "firmware"
-    for mcu in conn_boards:
-        if mcu.family != "micropython":
-            log.warning(f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board")
-            continue
-        board_firmwares = find_firmware(
+    if target_version and port and board and serial_port:
+        mcu = MPRemoteBoard(serial_port)
+        mcu.port = port
+        mcu.board = board
+        firmwares = find_firmware(
             fw_folder=fw_folder,
-            board=mcu.board,
+            board=board,
             version=target_version,
-            port=mcu.port,
+            port=port,
             preview="preview" in target_version,
         )
-        if not board_firmwares:
-            log.warning(f"No firmware found for {mcu.board} on {mcu.serialport} with version {target_version}")
-            board_id = mcu.board.replace("_", "-")
-            # ESP board naming conventions have changed by addin a prefix ( port / CPU)
-            if mcu.port.startswith("esp") and not board_id.startswith(mcu.port.upper()):
-                board_id = f"{mcu.port.upper()}_{board_id}"
+        if not firmwares:
+            log.error(f"No firmware found for {port} {board} version {target_version}")
+            return
+        todo = [(mcu, firmwares[0])]
+    elif serial_port:
+        if serial_port == "auto":
+            # update all connected boards
+            conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
+        else:
+            # just this serial port
+            conn_boards = [MPRemoteBoard(serial_port)]
+        show_boards(conn_boards)
+        todo = auto_update(conn_boards, target_version, fw_folder)
 
-            log.warning(f"Trying to find a firmware for the board {board_id}")
-            board_firmwares = find_firmware(
-                fw_folder=fw_folder,
-                board=board_id,
-                version=target_version,
-                port=mcu.port,
-                preview="preview" in target_version,
-            )
-            # we have a match now for the board
-        if not board_firmwares:
-            log.warning(f"No firmware found for {board_id}? on {mcu.serialport} with version {target_version}")
-            continue
-        if len(board_firmwares) > 1:
-            log.warning(f"Multiple firmwares found for {mcu.board} on {mcu.serialport} with version {target_version}")
-
-        # just use the first firmware
-        fw_info = board_firmwares[0]
-        # the filename is relative to the firmware folder
-        fw_file = fw_folder / fw_info["filename"]
+    flashed = []
+    for mcu, fw_info in todo:
+        fw_file = fw_folder / fw_info["filename"]  # type: ignore
         if not fw_file.exists():
             log.error(f"File {fw_file} does not exist, skipping {mcu.board} on {mcu.serialport}")
             continue
@@ -363,7 +426,6 @@ def cli(
             updated = flash_uf2(mcu, fw_file=fw_file)
         elif mcu.port in ["esp32", "esp8266"]:
             updated = flash_esp(mcu, erase_flash=True, fw_file=fw_file)
-
         elif mcu.port in ["stm32"]:
             updated = flash_stm32(mcu, erase_flash=False, fw_file=fw_file)
 
@@ -371,12 +433,13 @@ def cli(
             flashed.append(updated)
         else:
             log.error(f"Failed to flash {mcu.board} on {mcu.serialport}")
-    if flashed:
-        show_connected(flashed)
+
+    conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
+    show_boards(conn_boards, title="Connected boards after flashing")
 
 
-def show_connected(conn_boards: List[MPRemoteBoard]):
-    table = Table(title="Connected boards")
+def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards"):
+    table = Table(title=title)
     table.add_column("Serial")
     table.add_column("Family")
     table.add_column("Port")
@@ -399,6 +462,7 @@ def show_connected(conn_boards: List[MPRemoteBoard]):
 #  - stub variant 1
 #  - flash variant 2
 #  - stub variant 2
+#
 # JIT download / download any missing firmwares based on the detected boards
 
 
