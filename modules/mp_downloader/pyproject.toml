@@ -17,6 +17,8 @@ requests = "^2.31.0"
 beautifulsoup4 = "^4.12.3"
 loguru = "^0.7.2"
 esptool = "^4.7.0"
+jsonlines = "^4.0.0"
+bincopy = "^20.0.0"
 
 [tool.poetry.group.dev.dependencies]
 types-beautifulsoup4 = "^4.12.0.20240106"
