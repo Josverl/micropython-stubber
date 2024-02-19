@@ -1,4 +1,5 @@
 import shutil
+import sys
 import time
 from pathlib import Path
 from typing import List, Optional
@@ -125,9 +126,9 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         baud_rate = str(460_800)
     else:
         baud_rate = str(512_000)
-    cmds: List[str] = []
+    cmds: List[List[str]] = []
     if erase_flash:
-        cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash")
+        cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split())
 
     if mcu.cpu.upper() == ("ESP32", "ESP32S2"):
         start_addr = "0x1000"
@@ -135,17 +136,22 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         start_addr = "0x0"
     if mcu.cpu.startswith("esp32"):
         cmds.append(
-            f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash -z {start_addr} {fw_file}"
+            f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash -z {start_addr}".split()
+            + [str(fw_file)]
         )
     elif mcu.cpu.upper() == "ESP8266":
         start_addr = "0x0"
         cmds.append(
-            f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash --flash_size=detect {start_addr} {fw_file}"
+            f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash --flash_size=detect {start_addr}".split()
+            + [str(fw_file)]
         )
 
     for cmd in cmds:
         log.info(f"Running {cmd}")
         # TODO : check for errors
+        # cmd = cmd.split()
+        cmd = [sys.executable, "-m"] + cmd
+
         subprocess.run(cmd, capture_output=False, text=True)
 
     print("Done flashing, resetting the board and wait for it to restart")
@@ -173,14 +179,26 @@ def get_stm32_start_address(fw_file: Path):
 
 
 def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) -> Optional[MPRemoteBoard]:
-    print(f"Entering STM bootloader on {mcu.board} on {mcu.serialport}")
-    # %mpy --select {mcu.serialport}
-    # %mpy --bootloader # TODO: add this to micropython-magic
+    """
+    Flash STM32 devices using STM32CubeProgrammer CLI
+    - Enter bootloader mode
+    - wait 2s for the device to be detected
+    - list the connected DFU devices
+    """
+    STM32_CLI = "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe"
 
+    if not Path(STM32_CLI).exists():
+        log.error(
+            f"STM32CubeProgrammer not found at {STM32_CLI}\nPlease install it from https://www.st.com/en/development-tools/stm32cubeprog.html"
+        )
+        return None
+
+    print(f"Entering STM bootloader on {mcu.board} on {mcu.serialport}")
+    mcu.run_command("bootloader")
     time.sleep(2)
     # run STM32_Programmer_CLI.exe --list
     cmd = [
-        "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe",
+        STM32_CLI,
         "--list",
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
@@ -195,10 +213,9 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
             echo = False
         if echo:
             print(line)
-
-    #  !"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" --connect port=USB1
+    # Try to connect - no action
     cmd = [
-        "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe",
+        STM32_CLI,
         "--connect",
         "port=USB1",
     ]
@@ -207,7 +224,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
         print("Erasing flash")
         # !"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" --connect port=USB1 --erase all
         cmd = [
-            "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe",
+            STM32_CLI,
             "--connect",
             "port=USB1",
             "--erase",
@@ -221,7 +238,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     print(f"STM32_Programmer_CLI.exe --connect port=USB1 --write {str(fw_file)} --go {start_address}")
     # !"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" --connect port=USB1 --write "{str(fw_file)}" --go {start_address}
     cmd = [
-        "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe",
+        STM32_CLI,
         "--connect",
         "port=USB1",
         "--write",
@@ -323,12 +340,12 @@ def show_connected(conn_boards: List[MPRemoteBoard]):
 
 # TODO:
 # add option to skip autodetect
-# specify port / bord / version to flash
-# flsh from some sort of queue to allow different images to be flashed to the same board
-# flash variant 1
-# stub variant 1
-# flash variant 2
-# stub variant 2
+#   -specify port / bord / version to flash
+# flash from some sort of queue to allow different images to be flashed to the same board
+#  - flash variant 1
+#  - stub variant 1
+#  - flash variant 2
+#  - stub variant 2
 
 
 if __name__ == "__main__":
