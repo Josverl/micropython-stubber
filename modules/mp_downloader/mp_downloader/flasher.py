@@ -12,7 +12,6 @@ import rich_click as click
 from loguru import logger as log
 from rich import print
 from rich.table import Table
-from tenacity import RetryError
 
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
@@ -67,9 +66,12 @@ def find_firmware(
 
     if not fw_list and trie < 2:
         board_id = board.replace("_", "-")
-        # ESP board naming conventions have changed by addin a prefix ( port / CPU)
+        # ESP board naming conventions have changed by adding a PORT refix 
         if port.startswith("esp") and not board_id.startswith(port.upper()):
             board_id = f"{port.upper()}_{board_id}"
+        # RP2 board naming conventions have changed by adding a _RPIprefix 
+        if port == "rp2" and not board_id.startswith("RPI_"):
+            board_id = f"RPI_{board_id}"
 
         log.warning(f"Trying to find a firmware for the board {board_id}")
         fw_list = find_firmware(
@@ -132,12 +134,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     shutil.copy(fw_file, destination)
     log.success("Done copying, resetting the board and wait for it to restart")
     time.sleep(5)
-    # refresh bord info
-    # try:
-    #     # sometimes a board might not re-appear as the same com port
-    #     mcu.get_mcu_info()
-    # except (Exception, RetryError, RuntimeError) as e:
-    #     log.error(f"Failed to get mcu info {e}")
+
     return mcu
 
 
@@ -160,7 +157,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
     if erase_flash:
         cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split())
 
-    if mcu.cpu.upper() == ("ESP32", "ESP32S2"):
+    if mcu.cpu.upper() in ("ESP32", "ESP32S2"):
         start_addr = "0x1000"
     elif mcu.cpu.upper() in ("ESP32S3", "ESP32C3"):
         start_addr = "0x0"
@@ -390,6 +387,7 @@ def update(
     if target_version and port and board and serial_port:
         mcu = MPRemoteBoard(serial_port)
         mcu.port = port
+        mcu.cpu = port if port.startswith("esp") else ""
         mcu.board = board
         firmwares = find_firmware(
             fw_folder=fw_folder,
