@@ -20,6 +20,7 @@ Create stubs for (all) modules on a MicroPython board.
 
 This variant was generated from createstubs.py by micropython-stubber v1.17.3
 """
+
 # Copyright (c) 2019-2023 Jos Verlinde
 
 import gc
@@ -518,7 +519,7 @@ def _build(s):
 def _info():  # type:() -> dict[str, str]
     info = OrderedDict(
         {
-            "family": sys.implementation.name,  # type: ignore
+            "family": sys.implementation[0],  # type: ignore
             "version": "",
             "build": "",
             "ver": "",
@@ -548,9 +549,9 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy  # type: ignore
+            else sys.implementation.mpy
             if "mpy" in dir(sys.implementation)
-            else ""
+            else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass

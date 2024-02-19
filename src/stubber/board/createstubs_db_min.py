@@ -220,7 +220,7 @@ def Y(s):
 	if not W in s:return B
 	A=s.split(W)[1].split(J)[1];return A
 def _info():
-	Z='ev3-pybricks';X='pycom';V='pycopy';S='unix';R='win32';P='arch';M='cpu';L='ver';F='mpy';D='build';A=k({Q:sys.implementation.name,C:B,D:B,L:B,K:sys.platform,U:'UNKNOWN',M:B,F:B,P:B})
+	Z='ev3-pybricks';X='pycom';V='pycopy';S='unix';R='win32';P='arch';M='cpu';L='ver';F='mpy';D='build';A=k({Q:sys.implementation[0],C:B,D:B,L:B,K:sys.platform,U:'UNKNOWN',M:B,F:B,P:B})
 	if A[K].startswith('pyb'):A[K]='stm32'
 	elif A[K]==R:A[K]='windows'
 	elif A[K]=='linux':A[K]=S
