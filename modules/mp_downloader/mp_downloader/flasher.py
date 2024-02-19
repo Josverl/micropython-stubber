@@ -6,6 +6,7 @@ from typing import List, Optional
 import esptool
 import jsonlines
 import psutil
+import rich_click as click
 from loguru import logger as log
 from rich import print
 from rich.table import Table
@@ -249,16 +250,71 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     return mcu
 
 
-def cli(target_version: str = "preview"):
+@click.command()
+@click.option(
+    "--firmware",
+    "-f",
+    "fw_folder",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default="./firmware",
+    show_default=True,
+    help="The folder to retrieve the firmware from.",
+)
+@click.option(
+    "--version",
+    "-v",
+    "target_version",
+    default="preview",
+    show_default=True,
+    help="The version of MicroPython to flash.",
+    metavar="SEMVER or preview",
+)
+@click.option(
+    "--serial_port",
+    "-s",
+    "serial_port",
+    default="auto",
+    show_default=True,
+    help="Which serial port(s) to flash",
+    metavar="SERIAL_PORT",
+)
+@click.option(
+    "--port",
+    "-p",
+    "port",
+    help="The MicroPython port to flash",
+    metavar="PORT",
+    default="",
+)
+@click.option(
+    "--board",
+    "-b",
+    "board",
+    help="The MicroPython board ID to flash",
+    metavar="BOARD_ID",
+    default="",
+)
+@click.option(
+    "--erase/--no-erase",
+    default=True,
+    show_default=True,
+    help="""Erase flash before writing new firmware.""",
+)
+def cli(
+    target_version: str,
+    fw_folder: Path,
+    serial_port: Optional[str] = None,
+    board: Optional[str] = None,
+    port: Optional[str] = None,
+    variant: Optional[str] = None,
+    erase: bool = False,
+):
     conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
     show_connected(conn_boards)
 
     # Update all micropython boards to the latest version
-
-    target_version = "1.22.1"
-    target_version = "preview"
-    updated = []
-    fw_folder = Path("D:\\MyPython\\micropython-stubber") / "firmware"
+    flashed = []
+    # fw_folder = Path("D:\\MyPython\\micropython-stubber") / "firmware"
     for mcu in conn_boards:
         if mcu.family != "micropython":
             log.warning(f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board")
@@ -301,7 +357,6 @@ def cli(target_version: str = "preview"):
             continue
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info['version']}")
 
-        flashed = []
         updated = None
         # try:
         if mcu.port in ["samd", "rp2"]:
@@ -316,6 +371,8 @@ def cli(target_version: str = "preview"):
             flashed.append(updated)
         else:
             log.error(f"Failed to flash {mcu.board} on {mcu.serialport}")
+    if flashed:
+        show_connected(flashed)
 
 
 def show_connected(conn_boards: List[MPRemoteBoard]):
@@ -342,6 +399,7 @@ def show_connected(conn_boards: List[MPRemoteBoard]):
 #  - stub variant 1
 #  - flash variant 2
 #  - stub variant 2
+# JIT download / download any missing firmwares based on the detected boards
 
 
 if __name__ == "__main__":
