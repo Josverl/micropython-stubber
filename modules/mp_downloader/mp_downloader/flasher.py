@@ -1,9 +1,9 @@
 import shutil
-import sys
 import time
 from pathlib import Path
 from typing import List, Optional
 
+import esptool
 import jsonlines
 import psutil
 from loguru import logger as log
@@ -134,7 +134,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         start_addr = "0x1000"
     elif mcu.cpu.upper() in ("ESP32S3", "ESP32C3"):
         start_addr = "0x0"
-    if mcu.cpu.startswith("esp32"):
+    if mcu.cpu.upper().startswith("ESP32"):
         cmds.append(
             f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash -z {start_addr}".split()
             + [str(fw_file)]
@@ -147,12 +147,8 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         )
 
     for cmd in cmds:
-        log.info(f"Running {cmd}")
-        # TODO : check for errors
-        # cmd = cmd.split()
-        cmd = [sys.executable, "-m"] + cmd
-
-        subprocess.run(cmd, capture_output=False, text=True)
+        log.info(f"Running {' '.join(cmd)} ")
+        esptool.main(cmd[1:])
 
     print("Done flashing, resetting the board and wait for it to restart")
     time.sleep(5)
