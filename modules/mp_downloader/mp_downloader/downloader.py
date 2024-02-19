@@ -16,10 +16,8 @@ import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
 
-# from .common import PORT_FWTYPES
-PORT_FWTYPES = {
-    "esp8266": ".bin",
-}
+from .common import PORT_FWTYPES
+
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 # ports and firmware extensions we are interested in
 
