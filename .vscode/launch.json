@@ -25,6 +25,25 @@
             "justMyCode": false
         },
         {
+            "name": "mp_downloader: Module",
+            "type": "python",
+            "request": "launch",
+            "module": "mp_downloader.${fileBasenameNoExtension}",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "update",
+                "--serial",
+                "/dev/ttyACM0",
+                "--port",
+                "samd",
+                "--board",
+                "SEEED_WIO_TERMINAL",
+                "--version",
+                "preview",
+            ]
+        },
+        {
             "name": "mpremote",
             "type": "python",
             "request": "launch",

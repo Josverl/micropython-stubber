@@ -1,6 +1,9 @@
+import os
 import shutil
 import subprocess
 import time
+import sys
+
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -89,43 +92,115 @@ def find_firmware(
 # #########################################################################################################
 # Flash SAMD and RP2 via UF2
 # #########################################################################################################
+class UF2Disk:
+    """Info to support mounting and unmounting of UF2 drives on linux"""
+    diskpath: str
+    label: str
+    mountpoint: str
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
+def get_uf2_drives():
+    """
+    Get a list of all the (un)mounted UF2 drives
+    """
+    if sys.platform != "linux":
+        log.error("pumount only works on Linux")
+        return
+    # import blkinfo only on linux
+    from blkinfo import BlkDiskInfo
+
+    myblkd = BlkDiskInfo()
+    filters = {
+    'tran': 'usb',
+    }
+    usb_disks = myblkd.get_disks(filters)
+    for disk in usb_disks:
+        if disk["fstype"] == "vfat":
+            uf2_part = disk
+            # unpartioned usb disk or partition (e.g. /dev/sdb )
+            # SEEED WIO Terminal is unpartioned
+            # print( json.dumps(uf2_part, indent=4))
+            uf2 = UF2Disk()
+            uf2.diskpath = "/dev/" + uf2_part["name"]
+            uf2.label = uf2_part["label"]
+            uf2.mountpoint = uf2_part["mountpoint"]
+            yield uf2 
+        elif disk["type"] == "disk" and disk.get("children") and len(disk.get("children")) > 0:
+            if disk.get("children")[0]["type"] == "part" and disk.get("children")[0]["fstype"] == "vfat":
+                uf2_part = disk.get("children")[0]
+                # print( json.dumps(uf2_part, indent=4))
+                uf2 = UF2Disk()
+                uf2.diskpath = "/dev/" + uf2_part["name"]
+                uf2.label = uf2_part["label"]
+                uf2.mountpoint = uf2_part["mountpoint"]
+                yield uf2
+
+dismount_me : List[UF2Disk] = []
+
+def pmount(disk: UF2Disk):
+    """
+    Mount a UF2 drive if there is no mountpoint yet.
+    """
+    global dismount_me
+    if not disk.mountpoint:
+        subprocess.run(["pmount", disk.diskpath, f"/media/{disk.label}"])
+        disk.mountpoint = f"/media/{disk.label}"
+        print(f"Mounted {disk.label} at {disk.mountpoint}")
+        dismount_me.append(disk)
+    else:
+        print(f"{disk.label} already mounted at {disk.mountpoint}")
+
+def pumount(disk: UF2Disk):
+    """
+    Unmount a UF2 drive
+    """
+    if sys.platform != "linux":
+        log.error("pumount only works on Linux")
+        return
+    if disk.mountpoint:
+        subprocess.run(["pumount", disk.mountpoint]) # ), f"/media/{disk.label}"])
+        print(f"Unmounted {disk.label} from {disk.mountpoint}")
+        disk.mountpoint = f""
+    else:
+        print(f"{disk.label} already dismounted")
+
+def dismount_uf2():
+    global dismount_me
+    for disk in dismount_me:
+        pumount(disk)
+    dismount_me = []
 
 def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     """
     Flash .UF2 devices via bootloader and filecopy
-    - Enter bootloader mode
+    - mpremote bootloader
     - Wait for the device to mount as a drive (up to 5s)
+    - detect new drive with INFO_UF2.TXT
     - copy the firmware file to the drive
     - wait for the device to restart (5s)
+
+    for Lunix : 
+    pmount and pumount are used to mount and unmount the drive
+    as this is not done automatically by the OS in headless mode.
     """
     if PORT_FWTYPES[mcu.port] not in [".uf2"]:
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
 
     log.info(f"Entering UF2 bootloader on {mcu.board} on {mcu.serialport}")
-    mcu.run_command("bootloader")
+    mcu.run_command("bootloader", timeout=10)
 
-    destination = ""
-    wait = 5
-    while not destination and wait > 0:
-        log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
-        drives = [drive.device for drive in psutil.disk_partitions()]
-        for drive in drives:
-            if Path(drive, "INFO_UF2.TXT").exists():
-                # Option : read Board-ID from INFO_UF2.TXT
-                board_id = "Unknown"
-                with open(Path(drive, "INFO_UF2.TXT")) as f:
-                    data = f.readlines()
-                for line in data:
-                    if line.startswith("Board-ID="):
-                        board_id = line.split("=")[1].strip()
-                log.trace(f"Found Board-ID={board_id}")
-                destination = drive
-                break
-        time.sleep(1)
-        wait -= 1
-    if not destination or not Path(destination).exists() or not Path(destination, "INFO_UF2.TXT").exists():
+    if sys.platform == "linux":
+        destination = await_UF2_linux()
+    elif sys.platform == "win32":
+        destination = await_UF2_windows()
+    else:
+        log.error(f"OS {sys.platform} not supported")
+        return None
+
+    if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
         log.error("Board is not in bootloader mode")
         return None
 
@@ -133,9 +208,54 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     log.info(f"Copying {fw_file} to {destination}")
     shutil.copy(fw_file, destination)
     log.success("Done copying, resetting the board and wait for it to restart")
-    time.sleep(5)
-
+    if sys.platform == "linux":
+        dismount_uf2()
+    time.sleep(5 * 2) # 5 secs to short on linux
     return mcu
+
+def await_UF2_linux():
+    destination = ""
+    wait = 5
+    uf2_drives = []
+    while not destination and wait > 0:
+        log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
+        uf2_drives += list(get_uf2_drives())
+        for drive in get_uf2_drives():
+            pmount(drive)
+            time.sleep(1)
+            if Path(drive.mountpoint, "INFO_UF2.TXT").exists():
+                board_id = get_board_id(Path(drive.mountpoint))
+                destination = Path(drive.mountpoint)
+                break
+        time.sleep(1)
+        wait -= 1
+    return destination
+
+def await_UF2_windows():
+    destination = ""
+    wait = 5
+    while not destination and wait > 0:
+        log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
+        drives = [drive.device for drive in psutil.disk_partitions()]
+        for drive in drives:
+            if Path(drive, "INFO_UF2.TXT").exists():
+                board_id = get_board_id(Path(drive))
+                destination = Path(drive)
+                break
+        time.sleep(1)
+        wait -= 1
+    return destination
+
+def get_board_id(path:Path):
+    # Option : read Board-ID from INFO_UF2.TXT
+    board_id = "Unknown"
+    with open(path /  "INFO_UF2.TXT") as f:
+        data = f.readlines()
+    for line in data:
+        if line.startswith("Board-ID"):
+            board_id = line[9:].strip()
+    log.trace(f"Found Board-ID={board_id}")
+    return board_id
 
 
 # #########################################################################################################
@@ -343,6 +463,7 @@ def show_list():
     metavar="SEMVER or preview",
 )
 @click.option(
+    "--serial",
     "--serial-port",
     "-s",
     "serial_port",
