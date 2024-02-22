@@ -29,6 +29,8 @@ def load_firmwares(fw_folder: Path) -> List[FWInfo]:
     firmwares: List[FWInfo] = []
     with jsonlines.open(fw_folder / "firmware.jsonl") as reader:
         firmwares.extend(iter(reader))
+    # sort by filename
+    firmwares.sort(key=lambda x: x["filename"])
     return firmwares
 
 
@@ -86,6 +88,8 @@ def find_firmware(
             trie=trie + 1,
         )
         # hope we have a match now for the board
+    # sort by filename
+    fw_list.sort(key=lambda x: x["filename"])
     return fw_list
 
 
@@ -94,7 +98,7 @@ def find_firmware(
 # #########################################################################################################
 class UF2Disk:
     """Info to support mounting and unmounting of UF2 drives on linux"""
-    diskpath: str
+    device_path: str
     label: str
     mountpoint: str
 
@@ -123,7 +127,7 @@ def get_uf2_drives():
             # SEEED WIO Terminal is unpartioned
             # print( json.dumps(uf2_part, indent=4))
             uf2 = UF2Disk()
-            uf2.diskpath = "/dev/" + uf2_part["name"]
+            uf2.device_path = "/dev/" + uf2_part["name"]
             uf2.label = uf2_part["label"]
             uf2.mountpoint = uf2_part["mountpoint"]
             yield uf2 
@@ -132,7 +136,7 @@ def get_uf2_drives():
                 uf2_part = disk.get("children")[0]
                 # print( json.dumps(uf2_part, indent=4))
                 uf2 = UF2Disk()
-                uf2.diskpath = "/dev/" + uf2_part["name"]
+                uf2.device_path = "/dev/" + uf2_part["name"]
                 uf2.label = uf2_part["label"]
                 uf2.mountpoint = uf2_part["mountpoint"]
                 yield uf2
@@ -145,12 +149,14 @@ def pmount(disk: UF2Disk):
     """
     global dismount_me
     if not disk.mountpoint:
-        subprocess.run(["pmount", disk.diskpath, f"/media/{disk.label}"])
+        if not disk.label:
+            disk.label = "UF2BOOT"
         disk.mountpoint = f"/media/{disk.label}"
-        print(f"Mounted {disk.label} at {disk.mountpoint}")
+        subprocess.run(["pmount",disk.device_path,  disk.mountpoint ])
+        log.info(f"Mounted {disk.label} at {disk.mountpoint}")
         dismount_me.append(disk)
     else:
-        print(f"{disk.label} already mounted at {disk.mountpoint}")
+        log.warning(f"{disk.label} already mounted at {disk.mountpoint}")
 
 def pumount(disk: UF2Disk):
     """
@@ -161,10 +167,10 @@ def pumount(disk: UF2Disk):
         return
     if disk.mountpoint:
         subprocess.run(["pumount", disk.mountpoint]) # ), f"/media/{disk.label}"])
-        print(f"Unmounted {disk.label} from {disk.mountpoint}")
+        log.info(f"Unmounted {disk.label} from {disk.mountpoint}")
         disk.mountpoint = f""
     else:
-        print(f"{disk.label} already dismounted")
+        log.warning(f"{disk.label} already dismounted")
 
 def dismount_uf2():
     global dismount_me
@@ -193,9 +199,9 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     mcu.run_command("bootloader", timeout=10)
 
     if sys.platform == "linux":
-        destination = await_UF2_linux()
+        destination = wait_for_UF2_linux()
     elif sys.platform == "win32":
-        destination = await_UF2_windows()
+        destination = wait_for_UF2_windows()
     else:
         log.error(f"OS {sys.platform} not supported")
         return None
@@ -213,9 +219,9 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     time.sleep(5 * 2) # 5 secs to short on linux
     return mcu
 
-def await_UF2_linux():
+def wait_for_UF2_linux():
     destination = ""
-    wait = 5
+    wait = 10
     uf2_drives = []
     while not destination and wait > 0:
         log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
@@ -224,16 +230,16 @@ def await_UF2_linux():
             pmount(drive)
             time.sleep(1)
             if Path(drive.mountpoint, "INFO_UF2.TXT").exists():
-                board_id = get_board_id(Path(drive.mountpoint))
+                # board_id = get_board_id(Path(drive.mountpoint))
                 destination = Path(drive.mountpoint)
                 break
         time.sleep(1)
         wait -= 1
     return destination
 
-def await_UF2_windows():
+def wait_for_UF2_windows():
     destination = ""
-    wait = 5
+    wait = 10
     while not destination and wait > 0:
         log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
         drives = [drive.device for drive in psutil.disk_partitions()]
@@ -273,6 +279,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         baud_rate = str(460_800)
     else:
         baud_rate = str(512_000)
+        # baud_rate = str(115_200)
     cmds: List[List[str]] = []
     if erase_flash:
         cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split())
@@ -283,7 +290,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         start_addr = "0x0"
     if mcu.cpu.upper().startswith("ESP32"):
         cmds.append(
-            f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash -z {start_addr}".split()
+            f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash --compress {start_addr}".split()
             + [str(fw_file)]
         )
     elif mcu.cpu.upper() == "ESP8266":
@@ -292,10 +299,13 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
             f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash --flash_size=detect {start_addr}".split()
             + [str(fw_file)]
         )
-
-    for cmd in cmds:
-        log.info(f"Running {' '.join(cmd)} ")
-        esptool.main(cmd[1:])
+    try:
+        for cmd in cmds:
+            log.info(f"Running {' '.join(cmd)} ")
+            esptool.main(cmd[1:])
+    except Exception as e:
+        log.error(f"Failed to flash {mcu.board} on {mcu.serialport} : {e}")
+        return None
 
     log.info("Done flashing, resetting the board and wait for it to restart")
     time.sleep(5)
@@ -421,10 +431,10 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
             log.error(f"No firmware found for {mcu.board}? on {mcu.serialport} with version {target_version}")
             continue
         if len(board_firmwares) > 1:
-            log.warning(f"Multiple firmwares found for {mcu.board} on {mcu.serialport} with version {target_version}")
-
-        # just use the first firmware
-        fw_info = board_firmwares[0]
+            log.debug(f"Multiple firmwares found for {mcu.board} on {mcu.serialport} with version {target_version}")
+        # just use the last firmware
+        fw_info = board_firmwares[-1]
+        log.info(f"Found firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport} with version {target_version}")
         wl.append((mcu, fw_info))
     return wl
 
@@ -520,7 +530,8 @@ def update(
         if not firmwares:
             log.error(f"No firmware found for {port} {board} version {target_version}")
             return
-        todo = [(mcu, firmwares[0])]
+        # use the most recent matching firmware  
+        todo = [(mcu, firmwares[-1])]
     elif serial_port:
         if serial_port == "auto":
             # update all connected boards
