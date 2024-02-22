@@ -211,7 +211,7 @@ exclude = '''
 minversion = "7.0"
 python_functions = ["test_", "*_test"]
 python_files = ["test_*.py", "*_test.py"]
-testpaths = ["tests", "src", "repos/micropython-stubs/tests"]
+testpaths = ["tests", "src", "repos/micropython-stubs/tests", "modules/**/tests"]
 norecursedirs = [
     "repos",
     "typings*",
