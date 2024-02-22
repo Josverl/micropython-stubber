@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Dict, Union
 
 PORT_FWTYPES = {
     "stm32": ".hex",
@@ -13,3 +14,5 @@ PORT_FWTYPES = {
 
 DEFAULT_FW_PATH = Path.cwd() / "firmware"
 # DEFAULT_FW_PATH = Path.home() / "mp_firmware"
+
+FWInfo = Dict[str, Union[str, bool]]
