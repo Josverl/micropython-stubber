@@ -18,6 +18,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
 from stubber.publish.merge_docstubs import get_board_path, merge_all_docstubs
+from stubber.publish.pathnames import board_folder_name
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
@@ -335,8 +336,7 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
     If the destination folder exists, it is first emptied
     when successful: returns the destination path - None otherwise
     """
-    # destination = CONFIG.stub_path / source.name
-    destination = get_board_path(fw)
+    destination = CONFIG.stub_path / board_folder_name(fw)
     try:
         if destination.exists() and destination.is_dir():
             # first clean the destination folder
