@@ -288,6 +288,16 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
+name = "blkinfo"
+version = "0.2.0"
+description = "blkinfo is a python package to list information about all available or the specified block devices."
+optional = false
+python-versions = "*"
+files = [
+    {file = "blkinfo-0.2.0.tar.gz", hash = "sha256:322a906595f78832d6725ac74a0b9fd2794df3388584d9f05c1a2f8e19324851"},
+]
+
+[[package]]
 name = "cachetools"
 version = "5.3.2"
 description = "Extensible memoizing collections and decorators"
@@ -1771,4 +1781,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "fff065f88cb5237f0191749633d86eb4eb8693e9c7847662ecb3f1b440d33e9a"
+content-hash = "ff795e1e814c14b9f1c3105b8889416ecf116b49602cad0e9b00651415d60fbf"
