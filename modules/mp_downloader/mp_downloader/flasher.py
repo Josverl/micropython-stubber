@@ -137,7 +137,7 @@ def show_list():
     show_boards(conn_boards)
 
 
-@cli.command()
+@cli.command("flash")
 @click.option(
     "--firmware",
     "-f",
@@ -269,8 +269,6 @@ def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards
 
 
 # TODO:
-# add option to skip autodetect
-#   -specify port / bord / version to flash
 # flash from some sort of queue to allow different images to be flashed to the same board
 #  - flash variant 1
 #  - stub variant 1

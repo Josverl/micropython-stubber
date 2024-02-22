@@ -722,6 +722,17 @@ files = [
 ]
 
 [[package]]
+name = "strip-ansi"
+version = "0.1.1"
+description = "Strip ANSI escape sequences from a string"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "strip-ansi-0.1.1.tar.gz", hash = "sha256:5d60f239cc8a37fdd52b43c3e66e893d45ba0423115db59eca0d2eef83b07729"},
+    {file = "strip_ansi-0.1.1-py3-none-any.whl", hash = "sha256:9f55280e1b0ba84dac49d4f18aa6b51b90ff766b22e4918ffc01cc87b394ecd1"},
+]
+
+[[package]]
 name = "types-beautifulsoup4"
 version = "4.12.0.20240106"
 description = "Typing stubs for beautifulsoup4"
@@ -780,4 +791,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "14c44dc6acb23a2c78b2bbf339547e83539d63ff22915f81d179a9ea0eb32fda"
+content-hash = "f5d281693886299cdcd59678c1326e43fead73bbbec49520b9623e3e8b65ad19"

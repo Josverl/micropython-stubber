@@ -1,13 +1,14 @@
 """
-# #########################################################################################################
-# flash STM32 using STM32CubeProgrammer
-# needs to be installed independenty from https://www.st.com/en/development-tools/stm32cubeprog.html
-# #########################################################################################################
+Flash STM32 using STM32CubeProgrammer
+needs to be installed independenty from https://www.st.com/en/development-tools/stm32cubeprog.html
+
+On Linux needs to be run with sudo - because ?
 """
 
 import sys
 import time
 import subprocess
+from strip_ansi import strip_ansi
 
 from pathlib import Path
 from typing import  Optional
@@ -16,7 +17,7 @@ from stubber.bulk.mpremoteboard import MPRemoteBoard
 import bincopy
 
 STM32_CLI_WIN = "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe"
-STM32_CLI_LINUX = ""
+STM32_CLI_LINUX = "/home/jos/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI"
 
 def get_stm32_start_address(fw_file: Path):
     """
@@ -62,7 +63,8 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
         "--list",
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
-    if "Product ID             : STM32  BOOTLOADER" in results:
+    results = [strip_ansi(line) for line in results]
+    if not any(["Product ID             : STM32  BOOTLOADER" in l for l in   results]):
         log.error("No STM32 BOOTLOADER detected")
         return None
     echo = False
@@ -90,12 +92,11 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
             "all",
         ]
         results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
-
+        results = [strip_ansi(line) for line in results]
     log.info("Flashing")
     start_address = get_stm32_start_address(fw_file)
 
-    log.trace(f"STM32_Programmer_CLI.exe --connect port=USB1 --write {str(fw_file)} --go {start_address}")
-    # !"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" --connect port=USB1 --write "{str(fw_file)}" --go {start_address}
+    log.trace(f"STM32_Programmer_CLI --connect port=USB1 --write {str(fw_file)} --go {start_address}")
     cmd = [
         STM32_CLI,
         "--connect",
