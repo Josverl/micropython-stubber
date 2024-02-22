@@ -23,6 +23,7 @@ strip-ansi = "^0.1.1"
 rich-click = "^1.7.3"
 micropython-stubber = {git = "https://github.com/josverl/micropython-stubber.git", rev = "action_board_stubber"}
 psutil = "^5.9.8"
+blkinfo = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 types-beautifulsoup4 = "^4.12.0.20240106"
