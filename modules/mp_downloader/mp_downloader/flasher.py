@@ -188,6 +188,12 @@ def show_list():
     show_default=True,
     help="""Erase flash before writing new firmware.""",
 )
+@click.option(
+    "--preview/--no-preview",
+    default=False,
+    show_default=True,
+    help="""Include preview versions in the download list.""",
+)
 def update(
     target_version: str,
     fw_folder: Path,
@@ -196,6 +202,7 @@ def update(
     port: Optional[str] = None,
     variant: Optional[str] = None,
     erase: bool = False,
+    preview: bool = False,
 ):
     todo: WorkList = []
     # Update all micropython boards to the latest version
@@ -209,7 +216,7 @@ def update(
             board=board,
             version=target_version,
             port=port,
-            preview="preview" in target_version,
+            preview=preview or "preview" in target_version,
         )
         if not firmwares:
             log.error(f"No firmware found for {port} {board} version {target_version}")
