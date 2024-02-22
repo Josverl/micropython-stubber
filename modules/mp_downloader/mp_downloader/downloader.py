@@ -205,7 +205,7 @@ DEFAULT_BOARDS = [
 @click.option(
     "--destination",
     "-d",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default="./firmware",
     show_default=True,
     help="The folder to download the firmware to.",
@@ -248,6 +248,7 @@ def cli(destination: Path, boards: List[str], versions: List[str], preview: bool
     versions = list(versions)
     boards = list(boards) or DEFAULT_BOARDS
     versions = [v.lstrip("v") for v in versions]  # remove leading v from version
+    destination.mkdir(exist_ok=True)
     download_firmwares(destination, boards, versions, preview=preview, force=force, clean=clean)
 
 
