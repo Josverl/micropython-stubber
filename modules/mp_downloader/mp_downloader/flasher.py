@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import  List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import jsonlines
 import rich_click as click
@@ -9,13 +9,13 @@ from rich.table import Table
 
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
-from .common import DEFAULT_FW_PATH, FWInfo
-
-from .flash_uf2 import flash_uf2
+from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
+from .flash_uf2 import flash_uf2
 
 # #########################################################################################################
+
 
 def load_firmwares(fw_folder: Path) -> List[FWInfo]:
     """Load a list of available  firmwares from the jsonl file"""
@@ -45,6 +45,7 @@ def find_firmware(
     if not fw_list:
         raise FileNotFoundError(f"No firmware files found in {fw_folder}")
     # filter by version
+    version = clean_version(version, drop_v=True)
     if preview or "preview" in version:
         # never get a preview for an older version
         fw_list = [fw for fw in fw_list if fw["preview"]]
@@ -64,10 +65,10 @@ def find_firmware(
 
     if not fw_list and trie < 2:
         board_id = board.replace("_", "-")
-        # ESP board naming conventions have changed by adding a PORT refix 
+        # ESP board naming conventions have changed by adding a PORT refix
         if port.startswith("esp") and not board_id.startswith(port.upper()):
             board_id = f"{port.upper()}_{board_id}"
-        # RP2 board naming conventions have changed by adding a _RPIprefix 
+        # RP2 board naming conventions have changed by adding a _RPIprefix
         if port == "rp2" and not board_id.startswith("RPI_"):
             board_id = f"RPI_{board_id}"
 
@@ -84,10 +85,6 @@ def find_firmware(
     # sort by filename
     fw_list.sort(key=lambda x: x["filename"])
     return fw_list
-
-
-
-
 
 
 # #########################################################################################################
@@ -118,7 +115,9 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
             log.debug(f"Multiple firmwares found for {mcu.board} on {mcu.serialport} with version {target_version}")
         # just use the last firmware
         fw_info = board_firmwares[-1]
-        log.info(f"Found firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport} with version {target_version}")
+        log.info(
+            f"Found firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport} with version {target_version}"
+        )
         wl.append((mcu, fw_info))
     return wl
 
@@ -194,7 +193,7 @@ def show_list():
     show_default=True,
     help="""Include preview versions in the download list.""",
 )
-def update(
+def flash_board(
     target_version: str,
     fw_folder: Path,
     serial_port: Optional[str] = None,
@@ -205,6 +204,7 @@ def update(
     preview: bool = False,
 ):
     todo: WorkList = []
+    version = clean_version(target_version)
     # Update all micropython boards to the latest version
     if target_version and port and board and serial_port:
         mcu = MPRemoteBoard(serial_port)
@@ -221,7 +221,7 @@ def update(
         if not firmwares:
             log.error(f"No firmware found for {port} {board} version {target_version}")
             return
-        # use the most recent matching firmware  
+        # use the most recent matching firmware
         todo = [(mcu, firmwares[-1])]
     elif serial_port:
         if serial_port == "auto":
