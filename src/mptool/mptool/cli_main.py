@@ -4,7 +4,8 @@ import rich_click as click
 
 from .cli_group import cli
 from .downloader import download
-from .flasher import flash_board, list_boards
+from .flasher import flash_board
+from .list import list_boards
 
 # from loguru import logger as log
 
