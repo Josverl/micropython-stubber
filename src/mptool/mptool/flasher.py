@@ -4,9 +4,8 @@ from typing import List, Optional, Tuple
 import jsonlines
 import rich_click as click
 from loguru import logger as log
-from rich import print
-from rich.table import Table
 
+# TODO: - refactor so that we do not need the entire stubber package
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
@@ -14,6 +13,7 @@ from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
+from .list import show_boards
 
 # #########################################################################################################
 
@@ -126,12 +126,6 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
 # #########################################################################################################
 # CLI
 # #########################################################################################################
-
-
-@cli.command("list")
-def list_boards():
-    conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
-    show_boards(conn_boards)
 
 
 @cli.command("flash")
@@ -255,22 +249,6 @@ def flash_board(
 
     conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
     show_boards(conn_boards, title="Connected boards after flashing")
-
-
-def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards"):
-    table = Table(title=title)
-    table.add_column("Serial")
-    table.add_column("Family")
-    table.add_column("Port")
-    table.add_column("Board")
-    table.add_column("CPU")
-    table.add_column("Version")
-    table.add_column("build")
-
-    for mcu in conn_boards:
-        mcu.get_mcu_info()
-        table.add_row(mcu.serialport, mcu.family, mcu.port, mcu.board, mcu.cpu, mcu.version, mcu.build)
-    print(table)
 
 
 # TODO:
