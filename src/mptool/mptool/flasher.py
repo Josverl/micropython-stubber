@@ -9,6 +9,7 @@ from rich.table import Table
 
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
+from .cli_group import cli
 from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
@@ -125,13 +126,10 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
 # #########################################################################################################
 # CLI
 # #########################################################################################################
-@click.group()
-def cli():
-    pass
 
 
 @cli.command("list")
-def show_list():
+def list_boards():
     conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
     show_boards(conn_boards)
 
@@ -204,7 +202,7 @@ def flash_board(
     preview: bool = False,
 ):
     todo: WorkList = []
-    version = clean_version(target_version)
+    target_version = clean_version(target_version)
     # Update all micropython boards to the latest version
     if target_version and port and board and serial_port:
         mcu = MPRemoteBoard(serial_port)
@@ -283,7 +281,3 @@ def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards
 #  - stub variant 2
 #
 # JIT download / download any missing firmwares based on the detected boards
-
-
-if __name__ == "__main__":
-    cli()

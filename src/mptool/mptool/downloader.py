@@ -16,6 +16,7 @@ import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
 
+from .cli_group import cli
 from .common import PORT_FWTYPES
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
@@ -201,7 +202,7 @@ DEFAULT_BOARDS = [
 ]
 
 
-@click.command()
+@cli.command("download", help="Download MicroPython firmware for specific ports, boards and versions.")
 @click.option(
     "--destination",
     "-d",
@@ -244,13 +245,9 @@ DEFAULT_BOARDS = [
     help="""Force download of firmware even if it already exists.""",
     show_default=True,
 )
-def cli(destination: Path, boards: List[str], versions: List[str], preview: bool, force: bool, clean: bool):
+def download(destination: Path, boards: List[str], versions: List[str], preview: bool, force: bool, clean: bool):
     versions = list(versions)
     boards = list(boards) or DEFAULT_BOARDS
     versions = [v.lstrip("v") for v in versions]  # remove leading v from version
     destination.mkdir(exist_ok=True)
     download_firmwares(destination, boards, versions, preview=preview, force=force, clean=clean)
-
-
-if __name__ == "__main__":
-    exit(cli())

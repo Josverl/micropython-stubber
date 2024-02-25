@@ -1,15 +1,15 @@
 [tool.poetry]
-name = "mp-downloader"
-version = "0.1.2"
-description = "Download specified micropython firmwares"
+name = "mptool"
+version = "0.1.3"
+description = "Download and flashing tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos.verlinde@microsoft.com>"]
 license = "MIT"
 readme = "README.md"
 # packages = [{ include = "**/*.*", from = "src" }]
 
 [tool.poetry.scripts]
-mp_flasher = "mp_downloader.flasher:cli"
-mp_downloader = "mp_downloader.downloader:cli"
+mptool = "mptool.cli_main:mptool"
+
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
