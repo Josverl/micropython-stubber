@@ -5,19 +5,21 @@ needs to be installed independenty from https://www.st.com/en/development-tools/
 On Linux needs to be run with sudo - because ?
 """
 
+import subprocess
 import sys
 import time
-import subprocess
+from pathlib import Path
+from typing import Optional
+
+import bincopy
+from loguru import logger as log
 from strip_ansi import strip_ansi
 
-from pathlib import Path
-from typing import  Optional
-from loguru import logger as log
 from stubber.bulk.mpremoteboard import MPRemoteBoard
-import bincopy
 
 STM32_CLI_WIN = "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe"
 STM32_CLI_LINUX = "/home/jos/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI"
+
 
 def get_stm32_start_address(fw_file: Path):
     """
@@ -31,7 +33,7 @@ def get_stm32_start_address(fw_file: Path):
         return ""
 
 
-def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) -> Optional[MPRemoteBoard]:
+def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
     """
     Flash STM32 devices using STM32CubeProgrammer CLI
     - Enter bootloader mode
@@ -64,7 +66,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
     results = [strip_ansi(line) for line in results]
-    if not any(["Product ID             : STM32  BOOTLOADER" in l for l in   results]):
+    if not any(["Product ID             : STM32  BOOTLOADER" in l for l in results]):
         log.error("No STM32 BOOTLOADER detected")
         return None
     echo = False
@@ -82,7 +84,7 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
         "port=USB1",
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
-    if erase_flash:
+    if erase:
         log.info("Erasing flash")
         cmd = [
             STM32_CLI,
@@ -111,4 +113,3 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) 
     time.sleep(5)
     mcu.get_mcu_info()
     return mcu
-

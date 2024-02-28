@@ -12,7 +12,7 @@ from .cli_group import cli
 from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 
 
-@cli.command("list")
+@cli.command("list", help="List the connected boards.")
 @click.option(
     "--json",
     "-j",
@@ -20,7 +20,7 @@ from .common import DEFAULT_FW_PATH, FWInfo, clean_version
     is_flag=True,
     default=False,
     show_default=True,
-    help="""output in json format""",
+    help="""Output in json format""",
 )
 def list_boards(as_json: bool):
     conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]

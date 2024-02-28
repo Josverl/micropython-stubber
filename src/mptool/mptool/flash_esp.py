@@ -3,18 +3,18 @@
 # Flash ESP32 and ESP8266 via esptool
 # #########################################################################################################
 """
+
 import time
-import esptool
-
-from typing import List
-
 from pathlib import Path
-from typing import  Optional
+from typing import List, Optional
+
+import esptool
 from loguru import logger as log
+
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 
-def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) -> Optional[MPRemoteBoard]:
+def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
     if mcu.port not in ["esp32", "esp8266"] or mcu.board in ["ARDUINO_NANO_ESP32"]:
         log.error(f"esptool not supported for {mcu.port} {mcu.board} on {mcu.serialport}")
         return None
@@ -26,7 +26,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase_flash: bool = True) ->
         baud_rate = str(512_000)
         # baud_rate = str(115_200)
     cmds: List[List[str]] = []
-    if erase_flash:
+    if erase:
         cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split())
 
     if mcu.cpu.upper() in ("ESP32", "ESP32S2"):

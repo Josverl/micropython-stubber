@@ -1,5 +1,8 @@
+import sys
 from pathlib import Path
 from typing import Dict, Union
+
+from loguru import logger as log
 
 PORT_FWTYPES = {
     "stm32": ".hex",
@@ -68,3 +71,12 @@ def clean_version(
     if version == "latest":
         version = V_PREVIEW
     return version
+
+
+def set_loglevel(loglevel: str):
+    """Set the log level for the logger"""
+    try:
+        log.remove()
+    except ValueError:
+        pass
+    log.add(sys.stderr, level=loglevel.upper())

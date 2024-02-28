@@ -3,19 +3,21 @@ Flash SAMD and RP2 via UF2
 """
 
 import shutil
-import time
 import sys
-
+import time
 from pathlib import Path
-from typing import  Optional
+from typing import Optional
+
 from loguru import logger as log
+
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .common import PORT_FWTYPES
-from .flash_uf2_windows import wait_for_UF2_windows
 from .flash_uf2_linux import dismount_uf2, wait_for_UF2_linux
+from .flash_uf2_windows import wait_for_UF2_windows
 
-def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
+
+def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemoteBoard]:
     """
     Flash .UF2 devices via bootloader and filecopy
     - mpremote bootloader
@@ -24,13 +26,15 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     - copy the firmware file to the drive
     - wait for the device to restart (5s)
 
-    for Lunix : 
+    for Lunix :
     pmount and pumount are used to mount and unmount the drive
     as this is not done automatically by the OS in headless mode.
     """
     if PORT_FWTYPES[mcu.port] not in [".uf2"]:
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
+    if erase:
+        log.info("Erasing not yet implemented for UF2 flashing.")
 
     log.info(f"Entering UF2 bootloader on {mcu.board} on {mcu.serialport}")
     mcu.run_command("bootloader", timeout=10)
@@ -53,5 +57,5 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path) -> Optional[MPRemoteBoard]:
     log.success("Done copying, resetting the board and wait for it to restart")
     if sys.platform == "linux":
         dismount_uf2()
-    time.sleep(5 * 2) # 5 secs to short on linux
+    time.sleep(5 * 2)  # 5 secs to short on linux
     return mcu
