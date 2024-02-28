@@ -20,7 +20,26 @@ from .cli_group import cli
 from .common import PORT_FWTYPES
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
-# ports and firmware extensions we are interested in
+
+# Regexes to remove dates and hashes in the filename that just get in the way
+RE_DATE = r"(-\d{8}-)"
+RE_HASH = r"(.g[0-9a-f]+\.)"
+# regex to extract the version from the firmware filename
+RE_VERSION_PREVIEW = r"(\d+\.\d+(\.\d+)?(-\w+.\d+)?)"
+
+# boards we are interested in ( this avoids getting a lot of boards that are not relevant)
+DEFAULT_BOARDS = [
+    "PYBV11",
+    "ESP8266_GENERIC",
+    "ESP32_GENERIC",
+    "ESP32_GENERIC_S3",
+    "RPI_PICO",
+    "RPI_PICO_W",
+    "ADAFRUIT_QTPY_RP2040",
+    "ARDUINO_NANO_RP2040_CONNECT",
+    "PIMORONI_PICOLIPO_16MB",
+    "SEEED_WIO_TERMINAL",
+]
 
 
 # use functools.lru_cache to avoid needing to download pages multiple times
@@ -65,12 +84,7 @@ def firmware_list(board_url: str, base_url: str, ext: str) -> List[str]:
     return links
 
 
-# Regexes to remove dates and hashes in the filename that just get in the way
-RE_DATE = r"(-\d{8}-)"
-RE_HASH = r"(.g[0-9a-f]+\.)"
-# regex to extract the version from the firmware filename
-RE_VERSION_PREVIEW = r"(\d+\.\d+(\.\d+)?(-\w+.\d+)?)"
-
+# type alias for the firmware info
 FirmwareInfo = Dict[str, str]
 
 
@@ -188,20 +202,6 @@ def get_firmware_list(board_list: List[str], version_list: List[str], preview: b
     return unique_boards
 
 
-DEFAULT_BOARDS = [
-    "PYBV11",
-    "ESP8266_GENERIC",
-    "ESP32_GENERIC",
-    "ESP32_GENERIC_S3",
-    "RPI_PICO",
-    "RPI_PICO_W",
-    "ADAFRUIT_QTPY_RP2040",
-    "ARDUINO_NANO_RP2040_CONNECT",
-    "PIMORONI_PICOLIPO_16MB",
-    "SEEED_WIO_TERMINAL",
-]
-
-
 @cli.command("download", help="Download MicroPython firmware for specific ports, boards and versions.")
 @click.option(
     "--destination",
@@ -216,7 +216,9 @@ DEFAULT_BOARDS = [
     "-v",
     "versions",
     multiple=True,
-    help="The version of MicroPython to to download. Use '--preview' to include preview versions.",
+    help="The version of MicroPython to to download. Use 'preview' to include preview versions.",
+    show_default=True,
+    default=["preview"],
 )
 @click.option(
     "--board",
@@ -225,12 +227,6 @@ DEFAULT_BOARDS = [
     multiple=True,
     show_default=True,
     help="The board(s) to download the firmware for.",  # Use '--board all' to download all boards.",
-)
-@click.option(
-    "--preview/--no-preview",
-    default=False,
-    show_default=True,
-    help="""Include preview versions in the download list.""",
 )
 @click.option(
     "--clean/--no-clean",
@@ -245,8 +241,12 @@ DEFAULT_BOARDS = [
     help="""Force download of firmware even if it already exists.""",
     show_default=True,
 )
-def download(destination: Path, boards: List[str], versions: List[str], preview: bool, force: bool, clean: bool):
+def download(destination: Path, boards: List[str], versions: List[str], force: bool, clean: bool):
     versions = list(versions)
+    # preview is not a version, it is an option to include preview versions
+    preview = "preview" in versions
+    versions = [v for v in versions if v != "preview"]
+
     boards = list(boards) or DEFAULT_BOARDS
     versions = [v.lstrip("v") for v in versions]  # remove leading v from version
     destination.mkdir(exist_ok=True)

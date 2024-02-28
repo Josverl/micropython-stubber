@@ -128,7 +128,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
 # #########################################################################################################
 
 
-@cli.command("flash")
+@cli.command("flash", short_help="Flash one or all connected MicroPython boards with a specific firmware and version.")
 @click.option(
     "--firmware",
     "-f",
@@ -169,7 +169,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     "--board",
     "-b",
     "board",
-    help="The MicroPython board ID to flash",
+    help="The MicroPython board ID to flash. if not specified will try to read the BOARD_ID from the connected MCU.",
     metavar="BOARD_ID",
     default="",
 )
@@ -236,11 +236,11 @@ def flash_board(
         updated = None
         # try:
         if mcu.port in ["samd", "rp2"]:
-            updated = flash_uf2(mcu, fw_file=fw_file)
+            updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["esp32", "esp8266"]:
-            updated = flash_esp(mcu, erase_flash=True, fw_file=fw_file)
+            updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
-            updated = flash_stm32(mcu, erase_flash=False, fw_file=fw_file)
+            updated = flash_stm32(mcu, fw_file=fw_file, erase=erase)
 
         if updated:
             flashed.append(updated)
