@@ -18,7 +18,7 @@ from loguru import logger as log
 from rich.progress import track
 
 from .cli_group import cli
-from .common import PORT_FWTYPES
+from .common import PORT_FWTYPES, clean_version
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -224,7 +224,7 @@ def get_firmware_list(board_list: List[str], version_list: List[str], preview: b
     multiple=True,
     help="The version of MicroPython to to download. Use 'preview' to include preview versions.",
     show_default=True,
-    default=["preview"],
+    default=["stable"],
 )
 @click.option(
     "--board",
@@ -254,6 +254,6 @@ def download(destination: Path, boards: List[str], versions: List[str], force: b
     versions = [v for v in versions if v != "preview"]
 
     boards = list(boards) or DEFAULT_BOARDS
-    versions = [v.lstrip("v") for v in versions]  # remove leading v from version
+    versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     destination.mkdir(exist_ok=True)
     download_firmwares(destination, boards, versions, preview=preview, force=force, clean=clean)

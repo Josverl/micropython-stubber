@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Union
 
+from loguru import logger as log
 from packaging.version import parse
 
 import stubber.basicgit as git
@@ -22,7 +23,7 @@ from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
 from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean_version, micropython_versions
-from loguru import logger as log
+
 
 def subfolder_names(path: Path):
     "returns a list of names of the sub folders of the given path"
@@ -221,7 +222,7 @@ def board_candidates(
     list is based on the micropython repo:  /ports/<list of ports>/boards/<list of boards>
     """
     if is_auto(versions):
-        versions = list(micropython_versions(start=OLDEST_VERSION))
+        versions = list(micropython_versions(minver=OLDEST_VERSION))
     elif isinstance(versions, str):
         versions = [versions]
     versions = [clean_version(v, flat=False) for v in versions]
