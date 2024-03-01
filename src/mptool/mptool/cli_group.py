@@ -5,7 +5,7 @@ Additional comands are added in the submodules.
 
 import rich_click as click
 
-from .common import set_loglevel
+from .logger import set_loglevel
 
 
 def cb_verbose(ctx, param, value):
@@ -24,6 +24,4 @@ def cli(verbose: bool):
 
     This module provides a CLI to download and flash MicroPython firmware to various boards.
     """
-    # log_level = "DEBUG" if verbose else "INFO"
-    # set_loglevel(log_level)
     pass

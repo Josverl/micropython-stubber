@@ -110,15 +110,13 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
         )
 
         if not board_firmwares:
-            log.error(f"No firmware found for {mcu.board}? on {mcu.serialport} with version {target_version}")
+            log.error(f"No {target_version} firmware found for {mcu.board} on {mcu.serialport}.")
             continue
         if len(board_firmwares) > 1:
-            log.debug(f"Multiple firmwares found for {mcu.board} on {mcu.serialport} with version {target_version}")
+            log.debug(f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}.")
         # just use the last firmware
         fw_info = board_firmwares[-1]
-        log.info(
-            f"Found firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport} with version {target_version}"
-        )
+        log.info(f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}.")
         wl.append((mcu, fw_info))
     return wl
 
