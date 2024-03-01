@@ -140,10 +140,10 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     "--version",
     "-v",
     "target_version",
-    default="preview",
+    default="stable",
     show_default=True,
     help="The version of MicroPython to flash.",
-    metavar="SEMVER or preview",
+    metavar="SEMVER, stable or preview",
 )
 @click.option(
     "--serial",
