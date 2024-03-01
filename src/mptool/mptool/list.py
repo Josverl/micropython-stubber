@@ -3,13 +3,13 @@ from typing import List
 
 import rich_click as click
 from rich import print
+from rich.progress import track
 from rich.table import Table
 
 # TODO: - refactor so that we do not need the entire stubber package
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
-from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 
 
 @cli.command("list", help="List the connected boards.")
@@ -24,8 +24,12 @@ from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 )
 def list_boards(as_json: bool):
     conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
-    for mcu in conn_boards:
-        mcu.get_mcu_info()
+    for mcu in track(conn_boards, description="Getting board info"):
+        try: 
+            mcu.get_mcu_info()
+        except ConnectionError as e:
+            print(f"Error: {e}")
+            continue
     if as_json:
         print(json.dumps([mcu.__dict__ for mcu in conn_boards], indent=4))
     else:
@@ -43,8 +47,11 @@ def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards
     table.add_column("Version")
     table.add_column("build")
 
-    for mcu in conn_boards:
+    for mcu in track(conn_boards, transient=True, description="Updating board info"):
         if refresh:
-            mcu.get_mcu_info()
+            try:
+                mcu.get_mcu_info()
+            except ConnectionError:
+                continue
         table.add_row(mcu.serialport, mcu.family, mcu.port, mcu.board, mcu.cpu, mcu.version, mcu.build)
     print(table)

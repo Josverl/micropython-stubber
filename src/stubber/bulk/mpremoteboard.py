@@ -12,6 +12,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .board_id import find_board_designator
 from .runner import run
+from rich.progress import Progress
 
 ###############################################################################################
 # TODO : make this a bit nicer
@@ -52,14 +53,15 @@ class MPRemoteBoard:
         devices = [p.device for p in serial.tools.list_ports.comports()]
         return sorted(devices)
 
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
-    def get_mcu_info(self):
+    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1), retry_error_cls=ConnectionError) # type: ignore
+    def get_mcu_info(self, timeout:int=6):
         rc, result = self.run_command(
             ["run", str(HERE / "../board/fw_info.py")],
             no_info=True,
+            timeout=timeout,
         )
         if rc != OK:
-            raise RuntimeError(f"Failed to get mcu_info for {self.serialport}")
+            raise ConnectionError(f"Failed to get mcu_info for {self.serialport}")
         # Ok we have the info, now parse it
         s = result[0].strip()
         if s.startswith("{") and s.endswith("}"):
