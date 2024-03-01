@@ -15,6 +15,7 @@ import requests
 import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
+from rich.progress import track
 
 from .cli_group import cli
 from .common import PORT_FWTYPES
@@ -102,7 +103,7 @@ def get_boards(fw_types: Dict[str, str], board_list: List[str], clean: bool) -> 
         for board in _urls:
             board["port"] = port
 
-        for board in _urls:
+        for board in track(_urls, description="Checking download pages", transient=True):
             # add a board to the list for each firmware found
             firmwares = firmware_list(board["url"], MICROPYTHON_ORG_URL, fw_types[port])
             for _url in firmwares:
@@ -147,6 +148,7 @@ def download_firmwares(
     force: bool = False,
     clean: bool = True,
 ):
+    skipped = downloaded = 0
     if version_list is None:
         version_list = []
     unique_boards = get_firmware_list(board_list, version_list, preview, clean)
@@ -164,7 +166,8 @@ def download_firmwares(
             filename = firmware_folder / board["port"] / board["filename"]
             filename.parent.mkdir(exist_ok=True)
             if filename.exists() and not force:
-                log.info(f" {filename} already exists, skip download")
+                skipped += 1
+                log.debug(f" {filename} already exists, skip download")
                 continue
             log.info(f"Downloading {board['firmware']} to {filename}")
             try:
@@ -175,16 +178,19 @@ def download_firmwares(
             except requests.RequestException as e:
                 log.exception(e)
                 continue
+            # add the firmware to the jsonl file
             json_str = json.dumps(board) + "\n"
             f_jsonl.write(json_str)
+            downloaded += 1
+    log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
 
 
 def get_firmware_list(board_list: List[str], version_list: List[str], preview: bool, clean: bool):
-    log.info("Checking MicroPython download pages")
+    log.trace("Checking MicroPython download pages")
 
     board_urls = sorted(get_boards(PORT_FWTYPES, board_list, clean), key=key_fw_variant_ver)
 
-    log.info(f"Total {len(board_urls)} firmwares")
+    log.debug(f"Total {len(board_urls)} firmwares")
     relevant = [
         board
         for board in board_urls
@@ -198,7 +204,7 @@ def get_firmware_list(board_list: List[str], version_list: List[str], preview: b
         # list is aleady sorted by build so we can just get the last item
         sub_list = list(g)
         unique_boards.append(sub_list[-1])
-    log.info(f"Last preview only: {len(unique_boards)}")
+    log.debug(f"Last preview only: {len(unique_boards)}")
     return unique_boards
 
 
