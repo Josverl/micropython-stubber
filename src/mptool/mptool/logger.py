@@ -30,7 +30,9 @@ def set_loglevel(loglevel: str):
         log.remove()
     except ValueError:
         pass
-    log.add(console.print, level=loglevel.upper(), colorize=False, format=_log_formatter)
+    log.add(
+        console.print, level=loglevel.upper(), colorize=False, format=_log_formatter
+    )
 
     # log.add(
     #     console.print,

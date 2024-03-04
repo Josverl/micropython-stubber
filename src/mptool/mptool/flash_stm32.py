@@ -33,7 +33,9 @@ def get_stm32_start_address(fw_file: Path):
         return ""
 
 
-def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
+def flash_stm32(
+    mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
+) -> Optional[MPRemoteBoard]:
     """
     Flash STM32 devices using STM32CubeProgrammer CLI
     - Enter bootloader mode
@@ -93,12 +95,16 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Opt
             "--erase",
             "all",
         ]
-        results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
+        results = subprocess.run(
+            cmd, capture_output=True, text=True
+        ).stdout.splitlines()
         results = [strip_ansi(line) for line in results]
     log.info("Flashing")
     start_address = get_stm32_start_address(fw_file)
 
-    log.trace(f"STM32_Programmer_CLI --connect port=USB1 --write {str(fw_file)} --go {start_address}")
+    log.trace(
+        f"STM32_Programmer_CLI --connect port=USB1 --write {str(fw_file)} --go {start_address}"
+    )
     cmd = [
         STM32_CLI,
         "--connect",

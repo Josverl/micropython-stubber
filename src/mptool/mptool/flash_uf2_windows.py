@@ -5,6 +5,7 @@ import psutil
 from loguru import logger as log
 from .uf2_boardid import get_board_id
 
+
 def wait_for_UF2_windows():
     destination = ""
     wait = 10
@@ -13,7 +14,7 @@ def wait_for_UF2_windows():
         drives = [drive.device for drive in psutil.disk_partitions()]
         for drive in drives:
             if Path(drive, "INFO_UF2.TXT").exists():
-                board_id = get_board_id(Path(drive)) # type: ignore
+                board_id = get_board_id(Path(drive))  # type: ignore
                 destination = Path(drive)
                 break
         time.sleep(1)

@@ -17,7 +17,9 @@ from .flash_uf2_linux import dismount_uf2, wait_for_UF2_linux
 from .flash_uf2_windows import wait_for_UF2_windows
 
 
-def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemoteBoard]:
+def flash_uf2(
+    mcu: MPRemoteBoard, fw_file: Path, erase: bool
+) -> Optional[MPRemoteBoard]:
     """
     Flash .UF2 devices via bootloader and filecopy
     - mpremote bootloader
@@ -47,7 +49,11 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         log.error(f"OS {sys.platform} not supported")
         return None
 
-    if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
+    if (
+        not destination
+        or not destination.exists()
+        or not (destination / "INFO_UF2.TXT").exists()
+    ):
         log.error("Board is not in bootloader mode")
         return None
 
