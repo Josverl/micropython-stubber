@@ -33,7 +33,9 @@
             // "sudo": true,
             "cwd": "${workspaceFolder}",
             "args": [
-                "-v",
+                // "-V",
+                "--ignore",
+                "/dev/ttyAMA0",
                 "list",
                 // "--version",
                 // "v1.22.2",

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mptool"
-version = "0.1.3"
+version = "0.2.0"
 description = "Download and flashing tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos.verlinde@microsoft.com>"]
 license = "MIT"
