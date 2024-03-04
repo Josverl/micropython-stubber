@@ -10,6 +10,7 @@ from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
 from .common import DEFAULT_FW_PATH, FWInfo, clean_version
+from .config import config
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
@@ -21,8 +22,11 @@ from .list import show_boards
 def load_firmwares(fw_folder: Path) -> List[FWInfo]:
     """Load a list of available  firmwares from the jsonl file"""
     firmwares: List[FWInfo] = []
-    with jsonlines.open(fw_folder / "firmware.jsonl") as reader:
-        firmwares.extend(iter(reader))
+    try:
+        with jsonlines.open(fw_folder / "firmware.jsonl") as reader:
+            firmwares.extend(iter(reader))
+    except FileNotFoundError:
+        log.error(f"No firmware.jsonl found in {fw_folder}")
     # sort by filename
     firmwares.sort(key=lambda x: x["filename"])
     return firmwares
@@ -44,7 +48,8 @@ def find_firmware(
     fw_list = load_firmwares(fw_folder)
 
     if not fw_list:
-        raise FileNotFoundError(f"No firmware files found in {fw_folder}")
+        log.error(f"No firmware files found. Please download the firmware first.")
+        return []
     # filter by version
     version = clean_version(version, drop_v=True)
     if preview or "preview" in version:
@@ -99,7 +104,9 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     wl: WorkList = []
     for mcu in conn_boards:
         if mcu.family != "micropython":
-            log.warning(f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board")
+            log.warning(
+                f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board"
+            )
             continue
         board_firmwares = find_firmware(
             fw_folder=fw_folder,
@@ -110,13 +117,19 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
         )
 
         if not board_firmwares:
-            log.error(f"No {target_version} firmware found for {mcu.board} on {mcu.serialport}.")
+            log.error(
+                f"No {target_version} firmware found for {mcu.board} on {mcu.serialport}."
+            )
             continue
         if len(board_firmwares) > 1:
-            log.debug(f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}.")
+            log.debug(
+                f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}."
+            )
         # just use the last firmware
         fw_info = board_firmwares[-1]
-        log.info(f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}.")
+        log.info(
+            f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}."
+        )
         wl.append((mcu, fw_info))
     return wl
 
@@ -126,7 +139,10 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
 # #########################################################################################################
 
 
-@cli.command("flash", short_help="Flash one or all connected MicroPython boards with a specific firmware and version.")
+@cli.command(
+    "flash",
+    short_help="Flash one or all connected MicroPython boards with a specific firmware and version.",
+)
 @click.option(
     "--firmware",
     "-f",
@@ -216,7 +232,11 @@ def flash_board(
     elif serial_port:
         if serial_port == "auto":
             # update all connected boards
-            conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
+            conn_boards = [
+                MPRemoteBoard(sp)
+                for sp in MPRemoteBoard.connected_boards()
+                if sp not in config.ignore_ports
+            ]
         else:
             # just this serial port
             conn_boards = [MPRemoteBoard(serial_port)]
@@ -227,7 +247,9 @@ def flash_board(
     for mcu, fw_info in todo:
         fw_file = fw_folder / fw_info["filename"]  # type: ignore
         if not fw_file.exists():
-            log.error(f"File {fw_file} does not exist, skipping {mcu.board} on {mcu.serialport}")
+            log.error(
+                f"File {fw_file} does not exist, skipping {mcu.board} on {mcu.serialport}"
+            )
             continue
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info['version']}")
 
@@ -245,8 +267,14 @@ def flash_board(
         else:
             log.error(f"Failed to flash {mcu.board} on {mcu.serialport}")
 
-    conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
-    show_boards(conn_boards, title="Connected boards after flashing")
+    if flashed:
+        log.info(f"Flashed {len(flashed)} boards")
+        conn_boards = [
+            MPRemoteBoard(sp)
+            for sp in MPRemoteBoard.connected_boards()
+            if sp not in config.ignore_ports
+        ]
+        show_boards(conn_boards, title="Connected boards after flashing")
 
 
 # TODO:

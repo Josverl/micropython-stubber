@@ -10,6 +10,7 @@ from rich.table import Table
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
+from .config import config
 
 
 @cli.command("list", help="List the connected boards.")
@@ -23,9 +24,14 @@ from .cli_group import cli
     help="""Output in json format""",
 )
 def list_boards(as_json: bool):
-    conn_boards = [MPRemoteBoard(p) for p in MPRemoteBoard.connected_boards()]
+    conn_boards = [
+        MPRemoteBoard(sp)
+        for sp in MPRemoteBoard.connected_boards()
+        if sp not in config.ignore_ports
+    ]
+
     for mcu in track(conn_boards, description="Getting board info"):
-        try: 
+        try:
             mcu.get_mcu_info()
         except ConnectionError as e:
             print(f"Error: {e}")
@@ -36,7 +42,11 @@ def list_boards(as_json: bool):
         show_boards(conn_boards, refresh=False)
 
 
-def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards", refresh: bool = True):
+def show_boards(
+    conn_boards: List[MPRemoteBoard],
+    title: str = "Connected boards",
+    refresh: bool = True,
+):
     """Show the list of connected boards in a nice table"""
     table = Table(title=title)
     table.add_column("Serial")
@@ -53,5 +63,13 @@ def show_boards(conn_boards: List[MPRemoteBoard], title: str = "Connected boards
                 mcu.get_mcu_info()
             except ConnectionError:
                 continue
-        table.add_row(mcu.serialport, mcu.family, mcu.port, mcu.board, mcu.cpu, mcu.version, mcu.build)
+        table.add_row(
+            mcu.serialport,
+            mcu.family,
+            mcu.port,
+            mcu.board,
+            mcu.cpu,
+            mcu.version,
+            mcu.build,
+        )
     print(table)
