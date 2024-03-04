@@ -1,4 +1,4 @@
-"""Main CLI module for mp_tool."""
+"""mptool is a CLI to download and flash MicroPython firmware to various boards."""
 
 import rich_click as click
 
@@ -11,12 +11,11 @@ from .list import list_boards
 
 
 def mptool():
-    """This module provides a CLI to download and flash MicroPython firmware to various boards."""
-    cli()
-
-
-if __name__ == "__main__":
     # cli.add_command(flash_board)
     # cli.add_command(list_boards)
     # cli.add_command(download)
+    cli()  # auto_envvar_prefix='MPTOOL')
+
+
+if __name__ == "__main__":
     mptool()
