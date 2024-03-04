@@ -48,15 +48,8 @@ def get_uf2_drives():
             uf2.label = uf2_part["label"]
             uf2.mountpoint = uf2_part["mountpoint"]
             yield uf2
-        elif (
-            disk["type"] == "disk"
-            and disk.get("children")
-            and len(disk.get("children")) > 0
-        ):
-            if (
-                disk.get("children")[0]["type"] == "part"
-                and disk.get("children")[0]["fstype"] == "vfat"
-            ):
+        elif disk["type"] == "disk" and disk.get("children") and len(disk.get("children")) > 0:
+            if disk.get("children")[0]["type"] == "part" and disk.get("children")[0]["fstype"] == "vfat":
                 uf2_part = disk.get("children")[0]
                 # print( json.dumps(uf2_part, indent=4))
                 uf2 = UF2Disk()
@@ -75,7 +68,12 @@ def pmount(disk: UF2Disk):
         if not disk.label:
             disk.label = "UF2BOOT"
         disk.mountpoint = f"/media/{disk.label}"
-        subprocess.run(["pmount", disk.device_path, disk.mountpoint])
+        # capture error if pmount is not installed
+        try:
+            subprocess.run(["pmount", disk.device_path, disk.mountpoint])
+        except FileNotFoundError:
+            log.error("pmount not found, please install it using 'sudo apt install pmount'")
+            return
         log.info(f"Mounted {disk.label} at {disk.mountpoint}")
         glb_dismount_me.append(disk)
     else:
