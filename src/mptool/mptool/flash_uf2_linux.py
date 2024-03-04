@@ -8,16 +8,19 @@ from loguru import logger as log
 from typing import List
 from .uf2_boardid import get_board_id
 
-glb_dismount_me : List[UF2Disk] = []
+glb_dismount_me: List[UF2Disk] = []
+
 
 class UF2Disk:
     """Info to support mounting and unmounting of UF2 drives on linux"""
+
     device_path: str
     label: str
     mountpoint: str
 
     def __repr__(self):
         return repr(self.__dict__)
+
 
 def get_uf2_drives():
     """
@@ -31,7 +34,7 @@ def get_uf2_drives():
 
     myblkd = BlkDiskInfo()
     filters = {
-    'tran': 'usb',
+        "tran": "usb",
     }
     usb_disks = myblkd.get_disks(filters)
     for disk in usb_disks:
@@ -44,9 +47,16 @@ def get_uf2_drives():
             uf2.device_path = "/dev/" + uf2_part["name"]
             uf2.label = uf2_part["label"]
             uf2.mountpoint = uf2_part["mountpoint"]
-            yield uf2 
-        elif disk["type"] == "disk" and disk.get("children") and len(disk.get("children")) > 0:
-            if disk.get("children")[0]["type"] == "part" and disk.get("children")[0]["fstype"] == "vfat":
+            yield uf2
+        elif (
+            disk["type"] == "disk"
+            and disk.get("children")
+            and len(disk.get("children")) > 0
+        ):
+            if (
+                disk.get("children")[0]["type"] == "part"
+                and disk.get("children")[0]["fstype"] == "vfat"
+            ):
                 uf2_part = disk.get("children")[0]
                 # print( json.dumps(uf2_part, indent=4))
                 uf2 = UF2Disk()
@@ -65,11 +75,12 @@ def pmount(disk: UF2Disk):
         if not disk.label:
             disk.label = "UF2BOOT"
         disk.mountpoint = f"/media/{disk.label}"
-        subprocess.run(["pmount",disk.device_path,  disk.mountpoint ])
+        subprocess.run(["pmount", disk.device_path, disk.mountpoint])
         log.info(f"Mounted {disk.label} at {disk.mountpoint}")
         glb_dismount_me.append(disk)
     else:
         log.warning(f"{disk.label} already mounted at {disk.mountpoint}")
+
 
 def pumount(disk: UF2Disk):
     """
@@ -79,17 +90,19 @@ def pumount(disk: UF2Disk):
         log.error("pumount only works on Linux")
         return
     if disk.mountpoint:
-        subprocess.run(["pumount", disk.mountpoint]) # ), f"/media/{disk.label}"])
+        subprocess.run(["pumount", disk.mountpoint])  # ), f"/media/{disk.label}"])
         log.info(f"Unmounted {disk.label} from {disk.mountpoint}")
         disk.mountpoint = f""
     else:
         log.warning(f"{disk.label} already dismounted")
+
 
 def dismount_uf2():
     global glb_dismount_me
     for disk in glb_dismount_me:
         pumount(disk)
     glb_dismount_me = []
+
 
 def wait_for_UF2_linux():
     destination = ""
@@ -102,7 +115,7 @@ def wait_for_UF2_linux():
             pmount(drive)
             time.sleep(1)
             if Path(drive.mountpoint, "INFO_UF2.TXT").exists():
-                board_id = get_board_id(Path(drive.mountpoint)) # type: ignore
+                board_id = get_board_id(Path(drive.mountpoint))  # type: ignore
                 destination = Path(drive.mountpoint)
                 break
         time.sleep(1)

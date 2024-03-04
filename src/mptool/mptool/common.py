@@ -87,7 +87,9 @@ def micropython_versions(minver: str = "v1.9.2"):
         g = Github()
         _ = 1 / 0
         repo = g.get_repo("micropython/micropython")
-        versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
+        versions = [
+            tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)
+        ]
     except Exception:
         versions = [
             "v9.99.9-preview",
