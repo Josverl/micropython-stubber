@@ -51,7 +51,7 @@ try:from machine import reset
 except O:pass
 try:from collections import OrderedDict as k
 except O:from ucollections import OrderedDict as k
-__version__='v1.17.4'
+__version__='v1.17.5'
 A3=2
 A4=2
 A5=['lib','/lib','/sd/lib','/flash/lib',J]
@@ -131,40 +131,41 @@ class Stubber:
 			try:del N
 			except(D,q):A.warning('could not del new_module')
 		F.collect();return R
-	def write_object_stub(K,fp,object_expr,obj_name,indent,in_class=0):
-		Y=' at ';X='generator';W='{0}{1}: {3} = {2}\n';V='bound_method';U='Incomplete';N=in_class;M='Exception';L=object_expr;I=fp;D=indent;F.collect()
-		if L in K.problematic:A.warning('SKIPPING problematic module:{}'.format(L));return
-		Z,O=K.get_obj_attributes(L)
-		if O:A.error(O)
-		for(E,J,H,a,c)in Z:
-			if E in['classmethod','staticmethod','BaseException',M]:continue
+	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
+		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;D=indent;F.collect()
+		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
+		a,Q=L.get_obj_attributes(M)
+		if Q:A.error(Q)
+		for(E,H,I,b,g)in a:
+			if E in['classmethod','staticmethod','BaseException',N]:continue
 			if E[0].isdigit():A.warning('NameError: invalid name {}'.format(E));continue
-			if H=="<class 'type'>"and P(D)<=A4*4:
-				Q=B;R=E.endswith(M)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
-				if R:Q=M
-				C='\n{}class {}({}):\n'.format(D,E,Q)
-				if R:C+=D+'    ...\n';I.write(C);continue
-				I.write(C);K.write_object_stub(I,a,'{0}.{1}'.format(obj_name,E),D+'    ',N+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';I.write(C)
-			elif any(A in H for A in[A0,z,'closure']):
-				S=U;T=B
-				if N>0:T='self, '
-				if V in H or V in J:C='{}@classmethod\n'.format(D)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(D,E,S)
-				else:C='{}def {}({}*args, **kwargs) -> {}:\n'.format(D,E,T,S)
-				C+=D+'    ...\n\n';I.write(C)
-			elif H=="<class 'module'>":0
-			elif H.startswith("<class '"):
-				G=H[8:-2];C=B
-				if G in(x,v,w,y,'bytearray','bytes'):C=W.format(D,E,J,G)
-				elif G in(f,e,d):b={f:'{}',e:'[]',d:'()'};C=W.format(D,E,b[G],G)
-				elif G in('object','set','frozenset','Pin',X):
-					if G==X:G='Generator'
-					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,H,J)
+			if I=="<class 'type'>"and P(D)<=A4*4:
+				R=B;S=E.endswith(N)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
+				if S:R=N
+				C='\n{}class {}({}):\n'.format(D,E,R)
+				if S:C+=D+'    ...\n';J.write(C);continue
+				J.write(C);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,E),D+'    ',O+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';J.write(C)
+			elif any(A in I for A in[A0,z,'closure']):
+				T=V;U=B
+				if O>0:U='self, '
+				if W in I or W in H:C='{}@classmethod\n'.format(D)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(D,E,T)
+				else:C='{}def {}({}*args, **kwargs) -> {}:\n'.format(D,E,U,T)
+				C+=D+'    ...\n\n';J.write(C)
+			elif I=="<class 'module'>":0
+			elif I.startswith("<class '"):
+				G=I[8:-2];C=B
+				if G in(x,v,w,y,'bytearray','bytes'):C=X.format(D,E,H,G)
+				elif G in(f,e,d):c={f:'{}',e:'[]',d:'()'};C=X.format(D,E,c[G],G)
+				elif G in('object','set','frozenset','Pin',Y):
+					if G==Y:G='Generator'
+					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,I,H)
 				else:
-					G=U
-					if Y in J:J=J.split(Y)[0]+' at ...>'
-					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,H,J)
-				I.write(C)
-			else:I.write("# all other, type = '{0}'\n".format(H));I.write(D+E+' # type: Incomplete\n')
+					G=V
+					if K in H:H=H.split(K)[0]+Z
+					if K in H:H=H.split(K)[0]+Z
+					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,I,H)
+				J.write(C)
+			else:J.write("# all other, type = '{0}'\n".format(I));J.write(D+E+' # type: Incomplete\n')
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
