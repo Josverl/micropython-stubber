@@ -196,7 +196,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         assert not isinstance(doc_stub, str)
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node)
-        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
+        # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
         if doc_stub.def_type == "classdef":
             # Same type, we can copy over all the annotations
@@ -235,7 +235,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         assert not isinstance(doc_stub, str)
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
-        # Sometimes the firmware stubs and the doc stubs have different types : FunctionDef / ClassDef
+        # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be carefull not to copy over all the annotations if the types are different
         if doc_stub.def_type == "funcdef":
             # Same type, we can copy over the annotations

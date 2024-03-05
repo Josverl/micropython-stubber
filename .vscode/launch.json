@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Pytest --collect-only (debug)",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "module": "pytest",
             "args": [
@@ -19,14 +19,37 @@
         },
         {
             "name": "Python: file as Module",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "module": "stubber.${fileBasenameNoExtension}",
             "justMyCode": false
         },
         {
+            "name": "mptool: Module",
+            "type": "python",
+            "request": "launch",
+            "module": "mptool.cli_main",
+            "justMyCode": true,
+            // "sudo": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                // "-V",
+                "--ignore",
+                "/dev/ttyAMA0",
+                "list",
+                // "--version",
+                // "v1.22.2",
+                // "--serial",
+                // "/dev/ttyACM0",
+                // "--port",
+                // "samd",
+                // "--board",
+                // "SEEED_WIO_TERMINAL",
+            ]
+        },
+        {
             "name": "mpremote",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "module": "mpremote",
             "justMyCode": false,
@@ -39,15 +62,16 @@
         },
         {
             "name": "Python: stubber - cmdline",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
                 // "-v",
-                "get-frozen",
-                "--version",
-                "preview",
+                "get-mcu-stubs",
+                // "get-frozen",
+                // "--version",
+                // "preview",
                 // "switch",
                 // "v1.20.0",
                 // "build",
@@ -85,21 +109,8 @@
             ]
         },
         {
-            "name": "Python: board_stubber",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "scripts/board_stubber.py",
-            "cwd": "${workspaceFolder}",
-            "args": [
-                "--format",
-                "mpy",
-                "--debug"
-            ],
-            "console": "integratedTerminal"
-        },
-        {
             "name": "Python: Current File",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
@@ -107,7 +118,7 @@
         },
         {
             "name": "Python: this File - Args ",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
@@ -117,7 +128,7 @@
         },
         {
             "name": "Micro-CPython: Current File",
-            "type": "debugpy",
+            "type": "python",
             "subProcess": false,
             "justMyCode": true,
             "request": "launch",
@@ -133,7 +144,7 @@
         },
         {
             "name": "Python: Debug process --path",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "console": "integratedTerminal",
             "program": "${file}",
@@ -147,7 +158,7 @@
             "purpose": [
                 "debug-test"
             ],
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "console": "integratedTerminal",
             "justMyCode": false,

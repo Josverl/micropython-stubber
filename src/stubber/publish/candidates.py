@@ -7,13 +7,14 @@ what versions are available. This module provides functions to :
         - get a list of versions for micropython ( version candidates)
     - get the frozen stubs for a given version of micropython ( frozen candidates)
     - get a list of all the docstubs (docstub candidates)
-    - get a list of the firmware/board stubs (firmware candidates)
+    - get a list of the firmware/MCU stubs (firmware candidates)
 """
 
 import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Union
 
+from loguru import logger as log
 from packaging.version import parse
 
 import stubber.basicgit as git
@@ -25,7 +26,7 @@ from stubber.utils.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean
 
 
 def subfolder_names(path: Path):
-    "returns a list of names of the subfolders of the given path"
+    "returns a list of names of the sub folders of the given path"
     if path.exists():
         for child in path.iterdir():
             if child.is_dir():
@@ -96,7 +97,7 @@ def frozen_candidates(
     path: Path = CONFIG.stub_path,
 ) -> Generator[Dict[str, Any], None, None]:
     """
-    generate a list of possible firmware stubs for the given family (, version port and board) ?
+    generate a list of possible MCU stubs for the given family (, version port and board) ?
     - family = micropython
         board and port are ignored, they are looked up from the available frozen stubs
     - versions = 'latest' , 'auto' or a list of versions
@@ -221,7 +222,7 @@ def board_candidates(
     list is based on the micropython repo:  /ports/<list of ports>/boards/<list of boards>
     """
     if is_auto(versions):
-        versions = list(micropython_versions(start=OLDEST_VERSION))
+        versions = list(micropython_versions(minver=OLDEST_VERSION))
     elif isinstance(versions, str):
         versions = [versions]
     versions = [clean_version(v, flat=False) for v in versions]
@@ -235,6 +236,7 @@ def board_candidates(
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
+            log.warning(f"Incorrect version or did you run `stubber clone` to get the micropython repo?")
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:

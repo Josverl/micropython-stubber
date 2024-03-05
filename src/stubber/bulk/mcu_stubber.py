@@ -4,18 +4,13 @@ This script creates stubs on and for a connected micropython MCU board.
 
 import json
 import shutil
-import subprocess
 import sys
 import time
-from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
-from threading import Timer
-from typing import List, NamedTuple, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
-import rich_click as click
-import serial.tools.list_ports
 from loguru import logger as log
 from rich.console import Console
 from rich.table import Table
@@ -23,139 +18,27 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
 from stubber.publish.merge_docstubs import get_board_path, merge_all_docstubs
+from stubber.publish.pathnames import board_folder_name
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
-OK = 0
-ERROR = -1
-RETRIES = 3
-TESTING = False
+from .mpremoteboard import ERROR, OK, MPRemoteBoard
 
-# TODO : make this a bit nicer 
-REPO_ROOT = Path(__file__).parent.parent 
+# TODO : make this a bit nicer
+HERE = Path(__file__).parent
 ###############################################################################################
 # TODO: promote to cmdline params
 LOCAL_FILES = False
 reset_before = True
+TESTING = False
 ###############################################################################################
-
-
-@dataclass
-class LogTags:
-    reset_tags: List[str]
-    error_tags: List[str]
-    warning_tags: List[str]
-    success_tags: List[str]
-    ignore_tags: List[str]
-
-
-def run(
-    cmd: List[str],
-    timeout: int = 60,
-    log_errors: bool = True,
-    no_info: bool = False,
-    *,
-    reset_tags: Optional[List[str]] = None,
-    error_tags: Optional[List[str]] = None,
-    warning_tags: Optional[List[str]] = None,
-    success_tags: Optional[List[str]] = None,
-    ignore_tags: Optional[List[str]] = None,
-) -> Tuple[int, List[str]]:
-    # sourcery skip: no-long-functions
-    """
-    Run a command and return the output and return code as a tuple
-    Parameters
-    ----------
-    cmd : List[str]
-        The command to run
-    timeout : int, optional
-        The timeout in seconds, by default 60
-    log_errors : bool, optional
-        If False, don't log errors, Default: true
-    no_info : bool, optional
-        If True, don't log info, by default False
-    error_tags : Optional[List[str]], optional
-        A list of strings to look for in the output to log as errors, by default None
-    warning_tags : Optional[List[str]], optional
-        A list of strings to look for in the output to log as warnings, by default None
-    Returns
-    -------
-    Tuple[int, List[str]]
-        The return code and the output as a list of strings
-    """
-    if not reset_tags:
-        reset_tags = ["rst cause:1, boot mode:"]
-    if not error_tags:
-        error_tags = ["Traceback ", "Error: ", "Exception: ", "ERROR :", "CRIT  :"]
-    if not warning_tags:
-        warning_tags = ["WARN  :", "TRACE :"]  # , "Module not found."
-    if not success_tags:
-        success_tags = ["Created stubs for", "Path: /remote"]
-    if not ignore_tags:
-        ignore_tags = ['  File "<stdin>",']
-
-    replace_tags = ["\x1b[1A"]
-
-    output = []
-    try:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            encoding="utf-8",
-        )
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"Failed to start {cmd[0]}") from e
-
-    def timed_out():
-        proc.kill()
-        log.warning(f"Command {cmd} timed out after {timeout} seconds")
-
-    timer = Timer(timeout, timed_out)
-    try:
-        timer.start()
-        # stdout has most of the output, assign log categories based on text tags
-        if proc.stdout:
-            for line in proc.stdout:
-                if not line or not line.strip():
-                    continue
-                for tag in replace_tags:
-                    line = line.replace(tag, "")
-                output.append(line)  # full output, no trimming
-                if any(tag in line for tag in reset_tags):
-                    raise RuntimeError("Board reset detected")
-
-                line = line.rstrip("\n")
-                # if any of the error tags in the line
-                if any(tag in line for tag in error_tags):
-                    if not log_errors:
-                        continue
-                    log.error(line)
-                elif any(tag in line for tag in warning_tags):
-                    log.warning(line)
-                elif any(tag in line for tag in success_tags):
-                    log.success(line)
-                elif any(tag in line for tag in ignore_tags):
-                    continue
-                else:
-                    if not no_info:
-                        log.info(line)
-        if proc.stderr and log_errors:
-            for line in proc.stderr:
-                log.warning(line)
-    finally:
-        timer.cancel()
-
-    proc.wait(timeout=1)
-    return proc.returncode or 0, output
 
 
 ###############################################################################################
 
 
 class Variant(str, Enum):
-    """Variants of generatings stubs on a MCU"""
+    """Variants to generate stubs on a MCU"""
 
     full = "full"
     mem = "mem"
@@ -163,117 +46,11 @@ class Variant(str, Enum):
 
 
 class Form(str, Enum):
-    """Optimisation forms of scripts"""
+    """Optimization forms of scripts"""
 
     py = "py"
     min = "min"
     mpy = "mpy"
-
-
-class MPRemoteBoard:
-    """Class to run mpremote commands"""
-
-    def __init__(self, serialport: str = ""):
-        self.serialport = serialport
-        # self.board = ""
-        self.firmware = {}
-
-        self.connected = False
-        self.path: Optional[Path] = None
-        self.description = ""
-        self.version = ""
-        self.port = ""
-        self.board = ""
-
-    @staticmethod
-    def connected_boards():
-        """Get a list of connected boards"""
-        devices = [p.device for p in serial.tools.list_ports.comports()]
-        return sorted(devices)
-
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
-    def get_mcu_info(self):
-
-        rc, result = self.run_command(
-            ["run", str(REPO_ROOT / "src/stubber/board/fw_info.py")],
-            no_info=True,
-        )
-        if rc != OK:
-            raise RuntimeError(f"Failed to get mcu_info for {self.serialport}")
-        # Ok we have the info, now parse it
-        s = result[0].strip()
-        if s.startswith("{") and s.endswith("}"):
-            info = eval(s)
-            self.version = info["version"]
-            self.port = info["port"]
-            self.description = descr = info["board"]
-            pos = descr.rfind(" with")
-            if pos != -1:
-                short_descr = descr[:pos].strip()
-            else:
-                short_descr = ""
-            if board_name := find_board(
-                descr, short_descr, REPO_ROOT / "src/stubber/data/board_info.csv"
-            ):
-                self.board = board_name
-            else:
-                self.board = "UNKNOWN"
-
-    def disconnect(self) -> bool:
-        """Disconnect from a board"""
-        if not self.connected:
-            return True
-        if not self.serialport:
-            log.error("No port connected")
-            self.connected = False
-            return False
-        log.info(f"Disconnecting from {self.serialport}")
-        result = self.run_command(["disconnect"])[0] == OK
-        self.connected = False
-        return result
-
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(2))
-    def run_command(
-        self,
-        cmd: Union[str, List[str]],
-        *,
-        log_errors: bool = True,
-        no_info: bool = False,
-        timeout: int = 60,
-        **kwargs,
-    ):
-        """Run mpremote with the given command
-        Parameters
-        ----------
-        cmd : Union[str,List[str]]
-            The command to run, either a string or a list of strings
-        check : bool, optional
-            If True, raise an exception if the command fails, by default False
-        Returns
-        -------
-        bool
-            True if the command succeeded, False otherwise
-        """
-        if isinstance(cmd, str):
-            cmd = cmd.split(" ")
-        prefix = [sys.executable, "-m", "mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
-        # if connected add resume to keep state between commands
-        if self.connected:
-            prefix += ["resume"]
-        cmd = prefix + cmd
-        log.debug(" ".join(cmd))
-        result = run(cmd, timeout, log_errors, no_info, **kwargs)
-        self.connected = result[0] == OK
-        return result
-
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
-    def mip_install(self, name: str) -> bool:
-        """Install a micropython package"""
-        # install createstubs to the board
-        cmd = ["mip", "install", name]
-        result = self.run_command(cmd)[0] == OK
-        self.connected = True
-        return result
 
 
 def copy_createstubs_to_board(board: MPRemoteBoard, variant: Variant, form: Form) -> bool:
@@ -407,10 +184,10 @@ def generate_board_stubs(
     mcu: MPRemoteBoard,
     variant: Variant = Variant.db,
     form: Form = Form.mpy,
-    host_mounted=True,
+    host_mounted: bool = True,
 ) -> Tuple[int, Optional[Path]]:
     """
-    Generate the board stubs for this MCU board.
+    Generate the MCU stubs for this MCU board.
     Parameters
     ----------
     dest : Path
@@ -557,10 +334,9 @@ def set_loglevel(verbose: int) -> str:
 def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
     """Copy the generated stubs to the stubs repo.
     If the destination folder exists, it is first emptied
-    when succesfull: returns the destination path - None otherwise
+    when successful: returns the destination path - None otherwise
     """
-    # destination = CONFIG.stub_path / source.name
-    destination = get_board_path(fw)
+    destination = CONFIG.stub_path / board_folder_name(fw)
     try:
         if destination.exists() and destination.is_dir():
             # first clean the destination folder
@@ -573,56 +349,13 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
         return None
 
 
-def find_board(descr: str, short_descr: str, filename: Path) -> Optional[str]:
-    "Find the board in the provided board_info.csv file"
-    short_hit = ""
-    with open(filename, "r") as file:
-        # ugly code to make testable in python and micropython
-        # TODO: This is VERY slow on micropython whith MPREMOTE mount on esp32 (2-3 minutes to read file)
-        while 1:
-            line = file.readline()
-            if not line:
-                break
-            descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
-            if descr_ == descr:
-                return board_
-            elif short_descr and descr_ == short_descr:
-                if "with" in short_descr:
-                    # Good enough - no need to trawl the entire file
-                    # info["board"] = board_
-                    return board_
-                # good enough if not found in the rest of the file (but slow)
-                short_hit = board_
-    if short_hit:
-        return short_hit
-    return None
-
-
-@click.command()
-@click.option(
-    "--variant",
-    "-v",
-    type=click.Choice(["Full", "Mem", "DB"], case_sensitive=False),
-    default="Full",
-    show_default=True,
-    help="Variant of createstubs to run",
-)
-@click.option(
-    "--format",
-    "-f",
-    type=click.Choice(["py", "mpy"], case_sensitive=False),
-    default="py",
-    show_default=True,
-    help="Python source or pre-compiled.",
-)
-@click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
-def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
+def stub_connected_mcus(variant: str, format: str, debug: bool) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
 
     Args:
-        variant (str): The variant of the MicroPython board.
-        format (str): The format of the generated stubs.
+        variant (str): The variant of the createstubs script.
+        format (str): The format of the createstubs script.
         debug (bool): Flag indicating whether to enable debug mode.
 
     Returns:
@@ -635,16 +368,16 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
         set_loglevel(0)
     variant = Variant(variant.lower())
     form = Form(format.lower())
-
     tempdir = mkdtemp(prefix="board_stubber")
-
     temp_path = Path(tempdir)
 
-    # scan boards and just work with the ones that reponded with understandable data
+    all_built = []
+
+    # scan boards and just work with the ones that respond with understandable data
     connected_boards = scan_boards(True)
     if not connected_boards:
         log.error("No micropython boards were found")
-        sys.exit(1)
+        return ERROR
 
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Serial Port")
@@ -666,7 +399,10 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
         (temp_path / "modulelist.done").unlink(missing_ok=True)
 
         rc, my_stubs = generate_board_stubs(temp_path, board, variant, form)
-        if rc == OK and my_stubs:
+        if rc != OK:
+            log.error(f"Failed to generate stubs for {board.serialport}")
+            continue
+        if my_stubs:
             log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
             if destination := copy_to_repo(my_stubs, board.firmware):
                 log.success(f"Stubs copied to {destination}")
@@ -691,14 +427,25 @@ def run_stubber_connected_boards(variant: str, format: str, debug: bool) -> int:
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
                 )
-                # create a rich table of the results and print it'
-                console.print(table)
-                log.success("Done")
-                return OK
-        else:
-            log.error(f"Failed to generate stubs for {board.serialport}")
-            return ERROR
+                all_built.extend(built)
+
+    if all_built:
+        print_result_table(all_built, console)
+        log.success("Done")
+        return OK
+    log.error(f"Failed to generate stubs for {board.serialport}")
+    return ERROR
 
 
-if __name__ == "__main__":
-    exit(run_stubber_connected_boards())
+def print_result_table(all_built: List, console: Console):
+    # create a rich table of the results and print it'
+    table = Table(title="Results")
+
+    table.add_column("Result", style="cyan")
+    table.add_column("Name", style="cyan")
+    table.add_column("Version", style="green")
+    table.add_column("Error", style="red")
+
+    for result in all_built:
+        table.add_row(result["result"], result["name"], result["version"], result["error"])
+    console.print(table)

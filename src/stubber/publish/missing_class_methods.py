@@ -2,6 +2,7 @@
 Add missing methods to classes in the stubs that are documented in the docstubs
 
 """
+
 from pathlib import Path
 
 import libcst as cst
@@ -43,6 +44,6 @@ def add_machine_pin_call(merged_path: Path, version: str):
         source = mod_path.read_text(encoding="utf-8")
         machine_module = cst.parse_module(source)
         new_module = machine_module.visit(CallAdder(call_finder.call_meth))
-        mod_path.write_text(new_module.code)
+        mod_path.write_text(new_module.code, encoding="utf-8")
         run_black(mod_path)
     return True
