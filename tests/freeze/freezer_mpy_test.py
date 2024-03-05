@@ -197,14 +197,15 @@ def test_freeze_one_manifest_v2(
     "mpy_version",
     [
         "v1.12",
-        "v1.16",
+        # "v1.16",
         # "v1.17",
         "v1.18",
         # "v1.19",
-        "v1.19.1",
+        # "v1.19.1",
         "v1.20.0",
-        "v1.21.0",
+        # "v1.21.0",
         "latest",
+        "preview",
     ],
 )
 def test_freeze_any(

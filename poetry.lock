@@ -1143,23 +1143,18 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "mpremote"
-version = "0.4.0.post17+g26093fb"
+version = "1.22.0"
 description = "Tool for interacting remotely with MicroPython devices"
-optional = true
+optional = false
 python-versions = ">=3.4"
-files = []
-develop = false
+files = [
+    {file = "mpremote-1.22.0-py3-none-any.whl", hash = "sha256:e89750702bd0b1ce8b58101777f379986ffffe3915632cf1a9010309f01efcc6"},
+    {file = "mpremote-1.22.0.tar.gz", hash = "sha256:dbde10972819c1e0491d883adb8cbd17288246739adabddbf4a172e61ae00220"},
+]
 
 [package.dependencies]
 importlib-metadata = ">=1.4"
 pyserial = ">=3.3"
-
-[package.source]
-type = "git"
-url = "https://github.com/Josverl/mpremote"
-reference = "HEAD"
-resolved_reference = "26093fb35b3f7e4fbde2ceb12d2f1fd6218aea7f"
-subdirectory = "tools/mpremote"
 
 [[package]]
 name = "mypy"
@@ -2722,4 +2717,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "8087c890612d0971c888c17f2710bfdc158ba6789b87f4a327006710a3e4beda"
+content-hash = "7db343ac984a5a137d32c7912cac43d1528ee0140bac71b6cae3cfd9c116d17e"

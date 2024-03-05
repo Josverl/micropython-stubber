@@ -75,7 +75,7 @@ def cli_docstubs(
 
     release = git.get_local_tag(rst_path.as_posix(), abbreviate=False) or ""
 
-    dst_path = Path(target) / f"{basename}-{version}-docstubs"
+    dst_path = Path(target) / f"{basename}-{utils.clean_version(version, flat=True)}-docstubs"
 
     log.info(f"Get docstubs for MicroPython {utils.clean_version(version, drop_v=False)}")
     generate_from_rst(rst_path, dst_path, version, release=release, suffix=".pyi", black=black)

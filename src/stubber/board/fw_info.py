@@ -4,12 +4,21 @@ import sys
 
 
 def _build(s):
-    # extract a build nr from a string
+    # extract build from sys.version or os.uname().version if available
+    # sys.version: 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
-    if " on " in s:
-        s = s.split(" on ", 1)[0]
-    return s.split("-")[1] if "-" in s else ""
+    s = s.split(" on ", 1)[0] if " on " in s else s
+    if s.startswith("v"):
+        if not "-" in s:
+            return ""
+        b = s.split("-")[1]
+        return b
+    if not "-preview" in s:
+        return ""
+    b = s.split("-preview")[1].split(".")[1]
+    return b
 
 
 def _version_str(version: tuple):  #  -> str:
@@ -23,7 +32,7 @@ def _info():  # type:() -> dict[str, str]
     # sourcery skip: use-contextlib-suppress, use-fstring-for-formatting, use-named-expression
     info = dict(
         {
-            "family": sys.implementation.name,
+            "family": sys.implementation[0],  # type: ignore
             "version": "",
             "build": "",
             "ver": "",
@@ -45,22 +54,19 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
-            if "mpy" in dir(sys.implementation)
-            else ""
+            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""
         )
     except (AttributeError, IndexError):
         pass
 
     try:
-        # extract build from uname().version if available
-        info["build"] = _build(os.uname()[3])
-        if not info["build"]:
-            # extract build from uname().release if available
-            info["build"] = _build(os.uname()[2])
-        if not info["build"] and ";" in sys.version:
-            # extract build from uname().release if available
-            info["build"] = _build(sys.version.split(";")[1])
+        if hasattr(sys, "version"):
+            info["build"] = _build(sys.version)
+        elif hasattr(os, "uname"):
+            info["build"] = _build(os.uname()[3])
+            if not info["build"]:
+                # extract build from uname().release if available
+                info["build"] = _build(os.uname()[2])
     except (AttributeError, IndexError):
         pass
     # avoid  build hashes
@@ -132,4 +138,4 @@ def _info():  # type:() -> dict[str, str]
 
 
 print(_info())
-# del _info, _build, _version_str
+del _info, _build, _version_str

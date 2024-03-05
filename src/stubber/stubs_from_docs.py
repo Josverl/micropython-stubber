@@ -23,9 +23,7 @@ def generate_from_rst(
     suffix: str = ".py",
     black: bool = True,
 ) -> int:
-    # sourcery skip: remove-redundant-exception, simplify-single-exception-tuple
-    if not dst_path.exists():
-        dst_path.mkdir(parents=True)
+    dst_path.mkdir(parents=True, exist_ok=True)
     if not release:
         release = v_tag
     # skip
@@ -83,8 +81,10 @@ def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: 
         log.debug(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()
+        fname = (dst_path / file.name).with_suffix(suffix)
+        reader.write_file(fname)
         if file.stem in U_MODULES:
             # create umod.py file and mod.py file
-            reader.write_file((dst_path / ("u" + file.name)).with_suffix(suffix))
-        reader.write_file((dst_path / file.name).with_suffix(suffix))
+            fname = (dst_path / ("u" + file.name)).with_suffix(suffix)
+            reader.write_file(fname)
         del reader

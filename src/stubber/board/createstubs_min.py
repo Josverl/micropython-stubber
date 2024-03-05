@@ -50,7 +50,7 @@ try:from machine import reset
 except N:pass
 try:from collections import OrderedDict as g
 except N:from ucollections import OrderedDict as g
-__version__='v1.17.3'
+__version__='v1.17.5'
 A0=2
 A1=2
 A5=['lib','/lib','/sd/lib','/flash/lib',J]
@@ -130,40 +130,41 @@ class Stubber:
 			try:del M
 			except(E,l):A.warning('could not del new_module')
 		F.collect();return U
-	def write_object_stub(K,fp,object_expr,obj_name,indent,in_class=0):
-		Y=' at ';X='generator';W='{0}{1}: {3} = {2}\n';V='bound_method';U='Incomplete';N=in_class;M='Exception';L=object_expr;I=fp;D=indent;F.collect()
-		if L in K.problematic:A.warning('SKIPPING problematic module:{}'.format(L));return
-		Z,O=K.get_obj_attributes(L)
-		if O:A.error(O)
-		for(E,J,H,a,f)in Z:
-			if E in['classmethod','staticmethod','BaseException',M]:continue
+	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
+		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;D=indent;F.collect()
+		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
+		a,P=L.get_obj_attributes(M)
+		if P:A.error(P)
+		for(E,H,I,e,g)in a:
+			if E in['classmethod','staticmethod','BaseException',N]:continue
 			if E[0].isdigit():A.warning('NameError: invalid name {}'.format(E));continue
-			if H=="<class 'type'>"and R(D)<=A1*4:
-				P=B;Q=E.endswith(M)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
-				if Q:P=M
-				C='\n{}class {}({}):\n'.format(D,E,P)
-				if Q:C+=D+'    ...\n';I.write(C);continue
-				I.write(C);K.write_object_stub(I,a,'{0}.{1}'.format(obj_name,E),D+'    ',N+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';I.write(C)
-			elif any(A in H for A in[u,t,'closure']):
-				S=U;T=B
-				if N>0:T='self, '
-				if V in H or V in J:C='{}@classmethod\n'.format(D)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(D,E,S)
-				else:C='{}def {}({}*args, **kwargs) -> {}:\n'.format(D,E,T,S)
-				C+=D+'    ...\n\n';I.write(C)
-			elif H=="<class 'module'>":0
-			elif H.startswith("<class '"):
-				G=H[8:-2];C=B
-				if G in(r,p,q,s,'bytearray','bytes'):C=W.format(D,E,J,G)
-				elif G in(d,c,b):e={d:'{}',c:'[]',b:'()'};C=W.format(D,E,e[G],G)
-				elif G in('object','set','frozenset','Pin',X):
-					if G==X:G='Generator'
-					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,H,J)
+			if I=="<class 'type'>"and R(D)<=A1*4:
+				Q=B;S=E.endswith(N)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
+				if S:Q=N
+				C='\n{}class {}({}):\n'.format(D,E,Q)
+				if S:C+=D+'    ...\n';J.write(C);continue
+				J.write(C);L.write_object_stub(J,e,'{0}.{1}'.format(obj_name,E),D+'    ',O+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';J.write(C)
+			elif any(A in I for A in[u,t,'closure']):
+				T=V;U=B
+				if O>0:U='self, '
+				if W in I or W in H:C='{}@classmethod\n'.format(D)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(D,E,T)
+				else:C='{}def {}({}*args, **kwargs) -> {}:\n'.format(D,E,U,T)
+				C+=D+'    ...\n\n';J.write(C)
+			elif I=="<class 'module'>":0
+			elif I.startswith("<class '"):
+				G=I[8:-2];C=B
+				if G in(r,p,q,s,'bytearray','bytes'):C=X.format(D,E,H,G)
+				elif G in(d,c,b):f={d:'{}',c:'[]',b:'()'};C=X.format(D,E,f[G],G)
+				elif G in('object','set','frozenset','Pin',Y):
+					if G==Y:G='Generator'
+					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,I,H)
 				else:
-					G=U
-					if Y in J:J=J.split(Y)[0]+' at ...>'
-					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,H,J)
-				I.write(C)
-			else:I.write("# all other, type = '{0}'\n".format(H));I.write(D+E+' # type: Incomplete\n')
+					G=V
+					if K in H:H=H.split(K)[0]+Z
+					if K in H:H=H.split(K)[0]+Z
+					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,I,H)
+				J.write(C)
+			else:J.write("# all other, type = '{0}'\n".format(I));J.write(D+E+' # type: Incomplete\n')
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
@@ -219,7 +220,7 @@ def X(s):
 	if not V in s:return B
 	A=s.split(V)[1].split(J)[1];return A
 def _info():
-	Y='ev3-pybricks';W='pycopy';U='unix';T='win32';R='arch';Q='cpu';L='ver';F='mpy';E='build';A=g({O:sys.implementation.name,C:B,E:B,L:B,K:sys.platform,S:'UNKNOWN',Q:B,F:B,R:B})
+	Y='ev3-pybricks';W='pycopy';U='unix';T='win32';R='arch';Q='cpu';L='ver';F='mpy';E='build';A=g({O:sys.implementation[0],C:B,E:B,L:B,K:sys.platform,S:'UNKNOWN',Q:B,F:B,R:B})
 	if A[K].startswith('pyb'):A[K]='stm32'
 	elif A[K]==T:A[K]='windows'
 	elif A[K]=='linux':A[K]=U

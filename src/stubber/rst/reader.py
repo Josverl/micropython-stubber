@@ -118,7 +118,7 @@ class FileReadWriter:
 
     def write_file(self, filename: Path) -> bool:
         try:
-            log.debug(f" - Writing to: {filename}")
+            log.info(f" - Writing to: {filename}")
             with open(filename, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
         except OSError as e:
