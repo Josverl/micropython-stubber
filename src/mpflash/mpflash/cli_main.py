@@ -1,4 +1,4 @@
-"""mptool is a CLI to download and flash MicroPython firmware to various boards."""
+"""mpflash is a CLI to download and flash MicroPython firmware to various boards."""
 
 import rich_click as click
 
@@ -10,7 +10,7 @@ from .list import list_boards
 # from loguru import logger as log
 
 
-def mptool():
+def mpflash():
     # cli.add_command(flash_board)
     # cli.add_command(list_boards)
     # cli.add_command(download)
@@ -18,4 +18,4 @@ def mptool():
 
 
 if __name__ == "__main__":
-    mptool()
+    mpflash()

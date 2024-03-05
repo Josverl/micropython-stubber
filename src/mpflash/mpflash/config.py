@@ -1,4 +1,4 @@
-"""centralized configuration for mptool"""
+"""centralized configuration for mpflash"""
 
 from typing import List
 

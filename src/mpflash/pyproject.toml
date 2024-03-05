@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "mpflash"
+version = "0.2.0"
+description = "Download and flashing tool for MicroPython firmwares"
+authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
+license = "MIT"
+readme = "README.md"
+keywords = ["MicroPython", "firmware", "flashing", "download"]
+homepage = "https://github.com/Josverl/micropython-stubber/blob/main/src/mpflash/README.md"
+repository = "https://github.com/Josverl/micropython-stubber"
+classifiers = [
+    "Programming Language :: Python :: Implementation :: MicroPython",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Build Tools",
+]
+
+[tool.poetry.scripts]
+mpflash = "mpflash.cli_main:mpflash"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.3"
+loguru = "^0.7.2"
+esptool = "^4.7.0"
+jsonlines = "^4.0.0"
+bincopy = "^20.0.0"
+strip-ansi = "^0.1.1"
+rich-click = "^1.7.3"
+# micropython-stubber = {git = "https://github.com/josverl/micropython-stubber.git", rev = "action_board_stubber"}
+micropython-stubber = "1.17.4"
+psutil = "^5.9.8"
+blkinfo = "^0.2.0"
+pygithub = "^2.1.1"
+
+[tool.poetry.group.dev.dependencies]
+types-beautifulsoup4 = "^4.12.0.20240106"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -4,6 +4,7 @@ Additional comands are added in the submodules.
 """
 
 from typing import List
+
 import rich_click as click
 
 from .config import config
@@ -48,7 +49,7 @@ def cb_ignore(ctx, param, value):
     metavar="SERIALPORT",
 )
 def cli(verbose: bool, ignore: List[str], **kwargs):
-    """mptool - MicroPython Tool.
+    """mpflash - MicroPython Tool.
 
     A CLI to download and flash MicroPython firmware to different ports and boards.
     """
