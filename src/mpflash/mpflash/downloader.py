@@ -18,7 +18,7 @@ from loguru import logger as log
 from rich.progress import track
 
 from .cli_group import cli
-from .common import PORT_FWTYPES, clean_version
+from .common import DEFAULT_FW_PATH, PORT_FWTYPES, clean_version
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -77,9 +77,7 @@ def firmware_list(board_url: str, base_url: str, ext: str) -> List[str]:
     tags = soup.findAll(
         "a",
         recursive=True,
-        attrs={
-            "href": re.compile(r"^/resources/firmware/.*\." + ext.lstrip(".") + "$")
-        },
+        attrs={"href": re.compile(r"^/resources/firmware/.*\." + ext.lstrip(".") + "$")},
     )
     if "?" in base_url:
         base_url = base_url.split("?")[0]
@@ -94,9 +92,7 @@ FirmwareInfo = Dict[str, str]
 # boards we are interested in ( this avoids getting a lot of boards we don't care about)
 # The first run takes ~60 seconds to run for 4 ports , all boards
 # so it makes sense to cache the results and skip boards as soon as possible
-def get_boards(
-    fw_types: Dict[str, str], board_list: List[str], clean: bool
-) -> List[FirmwareInfo]:
+def get_boards(fw_types: Dict[str, str], board_list: List[str], clean: bool) -> List[FirmwareInfo]:
     board_urls: List[FirmwareInfo] = []
     for port in fw_types:
         download_page_url = f"{MICROPYTHON_ORG_URL}download/?port={port}"
@@ -107,9 +103,7 @@ def get_boards(
         for board in _urls:
             board["port"] = port
 
-        for board in track(
-            _urls, description="Checking download pages", transient=True
-        ):
+        for board in track(_urls, description="Checking download pages", transient=True):
             # add a board to the list for each firmware found
             firmwares = firmware_list(board["url"], MICROPYTHON_ORG_URL, fw_types[port])
             for _url in firmwares:
@@ -130,11 +124,7 @@ def get_boards(
                     # remove hash from firmware name
                     fname = re.sub(RE_HASH, ".", fname)
                 board["filename"] = fname
-                board["variant"] = (
-                    board["filename"].split("-v")[0]
-                    if "-v" in board["filename"]
-                    else ""
-                )
+                board["variant"] = board["filename"].split("-v")[0] if "-v" in board["filename"] else ""
                 board_urls.append(board.copy())
     return board_urls
 
@@ -171,9 +161,7 @@ def download_firmwares(
 
     firmware_folder.mkdir(exist_ok=True)
 
-    with open(
-        firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1
-    ) as f_jsonl:
+    with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
         for board in unique_boards:
             filename = firmware_folder / board["port"] / board["filename"]
             filename.parent.mkdir(exist_ok=True)
@@ -197,21 +185,16 @@ def download_firmwares(
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
 
 
-def get_firmware_list(
-    board_list: List[str], version_list: List[str], preview: bool, clean: bool
-):
+def get_firmware_list(board_list: List[str], version_list: List[str], preview: bool, clean: bool):
     log.trace("Checking MicroPython download pages")
 
-    board_urls = sorted(
-        get_boards(PORT_FWTYPES, board_list, clean), key=key_fw_variant_ver
-    )
+    board_urls = sorted(get_boards(PORT_FWTYPES, board_list, clean), key=key_fw_variant_ver)
 
     log.debug(f"Total {len(board_urls)} firmwares")
     relevant = [
         board
         for board in board_urls
-        if board["board"] in board_list
-        and (board["version"] in version_list or board["preview"] and preview)
+        if board["board"] in board_list and (board["version"] in version_list or board["preview"] and preview)
         # and b["port"] in ["esp32", "rp2"]
     ]
     log.debug(f"Matching firmwares: {len(relevant)}")
@@ -233,7 +216,7 @@ def get_firmware_list(
     "--destination",
     "-d",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
-    default="./firmware",
+    default=DEFAULT_FW_PATH,
     show_default=True,
     help="The folder to download the firmware to.",
 )
@@ -267,19 +250,13 @@ def get_firmware_list(
     help="""Force download of firmware even if it already exists.""",
     show_default=True,
 )
-def download(
-    destination: Path, boards: List[str], versions: List[str], force: bool, clean: bool
-):
+def download(destination: Path, boards: List[str], versions: List[str], force: bool, clean: bool):
     versions = list(versions)
     # preview is not a version, it is an option to include preview versions
     preview = "preview" in versions
     versions = [v for v in versions if v != "preview"]
 
     boards = list(boards) or DEFAULT_BOARDS
-    versions = [
-        clean_version(v, drop_v=True) for v in versions
-    ]  # remove leading v from version
+    versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     destination.mkdir(exist_ok=True)
-    download_firmwares(
-        destination, boards, versions, preview=preview, force=force, clean=clean
-    )
+    download_firmwares(destination, boards, versions, preview=preview, force=force, clean=clean)

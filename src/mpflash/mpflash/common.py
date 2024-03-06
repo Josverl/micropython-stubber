@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Union
 
+import platformdirs
 from github import Github
 from loguru import logger as log
 from packaging.version import parse
@@ -16,7 +17,7 @@ PORT_FWTYPES = {
     "renesas-ra": ".hex",
 }
 
-DEFAULT_FW_PATH = Path.cwd() / "firmware"
+DEFAULT_FW_PATH = platformdirs.user_downloads_path() / "firmware"
 # DEFAULT_FW_PATH = Path.home() / "mp_firmware"
 
 FWInfo = Dict[str, Union[str, bool]]
@@ -87,9 +88,7 @@ def micropython_versions(minver: str = "v1.9.2"):
         g = Github()
         _ = 1 / 0
         repo = g.get_repo("micropython/micropython")
-        versions = [
-            tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)
-        ]
+        versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
     except Exception:
         versions = [
             "v9.99.9-preview",

@@ -269,12 +269,13 @@ def flash_board(
 
     if flashed:
         log.info(f"Flashed {len(flashed)} boards")
-        conn_boards = [
-            MPRemoteBoard(sp)
-            for sp in MPRemoteBoard.connected_boards()
-            if sp not in config.ignore_ports
-        ]
-        show_boards(conn_boards, title="Connected boards after flashing")
+        # conn_boards = [
+        #     MPRemoteBoard(sp)
+        #     for sp in MPRemoteBoard.connected_boards()
+        #     if sp not in config.ignore_ports
+        # ]
+    
+        show_boards(flashed, title="Connected boards after flashing")
 
 
 # TODO:

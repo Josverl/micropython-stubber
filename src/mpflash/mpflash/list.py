@@ -24,11 +24,7 @@ from .config import config
     help="""Output in json format""",
 )
 def list_boards(as_json: bool):
-    conn_boards = [
-        MPRemoteBoard(sp)
-        for sp in MPRemoteBoard.connected_boards()
-        if sp not in config.ignore_ports
-    ]
+    conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
 
     for mcu in track(conn_boards, description="Getting board info"):
         try:
