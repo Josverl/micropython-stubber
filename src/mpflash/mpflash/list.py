@@ -44,14 +44,18 @@ def show_boards(
     refresh: bool = True,
 ):
     """Show the list of connected boards in a nice table"""
-    table = Table(title=title)
-    table.add_column("Serial")
+    table = Table(
+        title=title, expand=True, header_style="bold blue", collapse_padding=True, row_styles=["blue", "yellow"]
+    )
+    table.add_column("Serial", overflow="fold")
     table.add_column("Family")
     table.add_column("Port")
-    table.add_column("Board")
+    table.add_column("Board", overflow="fold")
+    # table.add_column("Variant") # TODO: add variant
+    # table.add_column("In") # TODO: add variant
     table.add_column("CPU")
-    table.add_column("Version")
-    table.add_column("build")
+    table.add_column("Version", overflow="fold")
+    table.add_column("build", justify="right")
 
     for mcu in track(conn_boards, transient=True, description="Updating board info"):
         if refresh:
@@ -60,10 +64,11 @@ def show_boards(
             except ConnectionError:
                 continue
         table.add_row(
-            mcu.serialport,
+            "/dev/tty" + mcu.serialport,
             mcu.family,
             mcu.port,
-            mcu.board,
+            mcu.board if mcu.board != "UNKNOWN" else mcu.description,
+            # mcu.variant,
             mcu.cpu,
             mcu.version,
             mcu.build,
