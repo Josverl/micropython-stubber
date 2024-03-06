@@ -43,9 +43,12 @@ This will download the latest stable version of the MicroPython firmware for the
 The stable version (default) is determined based on the most recent published release,
 other optionse are `--version preview` and `--version x.y.z` to download the latest preview or version x.y.z respectively.
 
+by default the firmware will be downloaded to  Downloads  in a `firmware` folder in your, but you can specify a different directory using the `--dir` option.
+
+```bash
 The directory structure will be something like this:
 ```
-firmware
+Downloads/firmware
 |   firmware.jsonl
 +---esp8266
 |       ESP8266_GENERIC-FLASH_1M-v1.22.2.bin

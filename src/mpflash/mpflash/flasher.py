@@ -104,9 +104,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     wl: WorkList = []
     for mcu in conn_boards:
         if mcu.family != "micropython":
-            log.warning(
-                f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board"
-            )
+            log.warning(f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board")
             continue
         board_firmwares = find_firmware(
             fw_folder=fw_folder,
@@ -117,19 +115,13 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
         )
 
         if not board_firmwares:
-            log.error(
-                f"No {target_version} firmware found for {mcu.board} on {mcu.serialport}."
-            )
+            log.error(f"No {target_version} firmware found for {mcu.board} on {mcu.serialport}.")
             continue
         if len(board_firmwares) > 1:
-            log.debug(
-                f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}."
-            )
+            log.debug(f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}.")
         # just use the last firmware
         fw_info = board_firmwares[-1]
-        log.info(
-            f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}."
-        )
+        log.info(f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}.")
         wl.append((mcu, fw_info))
     return wl
 
@@ -148,7 +140,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     "-f",
     "fw_folder",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
-    default="./firmware",
+    default=DEFAULT_FW_PATH,
     show_default=True,
     help="The folder to retrieve the firmware from.",
 )
@@ -233,9 +225,7 @@ def flash_board(
         if serial_port == "auto":
             # update all connected boards
             conn_boards = [
-                MPRemoteBoard(sp)
-                for sp in MPRemoteBoard.connected_boards()
-                if sp not in config.ignore_ports
+                MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports
             ]
         else:
             # just this serial port
@@ -247,9 +237,7 @@ def flash_board(
     for mcu, fw_info in todo:
         fw_file = fw_folder / fw_info["filename"]  # type: ignore
         if not fw_file.exists():
-            log.error(
-                f"File {fw_file} does not exist, skipping {mcu.board} on {mcu.serialport}"
-            )
+            log.error(f"File {fw_file} does not exist, skipping {mcu.board} on {mcu.serialport}")
             continue
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info['version']}")
 
@@ -274,7 +262,7 @@ def flash_board(
         #     for sp in MPRemoteBoard.connected_boards()
         #     if sp not in config.ignore_ports
         # ]
-    
+
         show_boards(flashed, title="Connected boards after flashing")
 
 

@@ -13,7 +13,7 @@ PORT_FWTYPES = {
     "rp2": ".uf2",
     "samd": ".uf2",
     "mimxrt": ".hex",
-    "nrf": ".hex",
+    "nrf": ".uf2",
     "renesas-ra": ".hex",
 }
 

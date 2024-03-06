@@ -40,6 +40,7 @@ DEFAULT_BOARDS = [
     "ARDUINO_NANO_RP2040_CONNECT",
     "PIMORONI_PICOLIPO_16MB",
     "SEEED_WIO_TERMINAL",
+    "PARTICLE_XENON",
 ]
 
 
@@ -103,7 +104,7 @@ def get_boards(fw_types: Dict[str, str], board_list: List[str], clean: bool) -> 
         for board in _urls:
             board["port"] = port
 
-        for board in track(_urls, description="Checking download pages", transient=True):
+        for board in track(_urls, description=f"Checking {port} download pages", transient=True):
             # add a board to the list for each firmware found
             firmwares = firmware_list(board["url"], MICROPYTHON_ORG_URL, fw_types[port])
             for _url in firmwares:
