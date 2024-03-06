@@ -259,5 +259,9 @@ def download(destination: Path, boards: List[str], versions: List[str], force: b
 
     boards = list(boards) or DEFAULT_BOARDS
     versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
-    destination.mkdir(exist_ok=True)
+    try:
+        destination.mkdir(exist_ok=True, parents=True)
+    except (PermissionError, FileNotFoundError) as e:
+        log.critical(f"Could not create folder {destination}\n{e}")
+        exit(1)
     download_firmwares(destination, boards, versions, preview=preview, force=force, clean=clean)
