@@ -40,11 +40,11 @@ def cb_ignore(ctx, param, value):
     "--ignore",
     "-i",
     is_eager=True,
-    help="Serial port(s) to ignore. Defaults to MPTOOL_IGNORE.",
+    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
     callback=cb_ignore,
     multiple=True,
     default=[],
-    envvar="MPTOOL_IGNORE",
+    envvar="MPFLASH_IGNORE",
     show_default=True,
     metavar="SERIALPORT",
 )

@@ -1,11 +1,13 @@
 from __future__ import annotations
-from pathlib import Path
+
 import subprocess
 import sys
 import time
+from pathlib import Path
+from typing import List
+
 from loguru import logger as log
 
-from typing import List
 from .uf2_boardid import get_board_id
 
 glb_dismount_me: List[UF2Disk] = []
@@ -112,10 +114,14 @@ def wait_for_UF2_linux():
         for drive in get_uf2_drives():
             pmount(drive)
             time.sleep(1)
-            if Path(drive.mountpoint, "INFO_UF2.TXT").exists():
-                board_id = get_board_id(Path(drive.mountpoint))  # type: ignore
-                destination = Path(drive.mountpoint)
-                break
+            try:
+                if Path(drive.mountpoint, "INFO_UF2.TXT").exists():
+                    board_id = get_board_id(Path(drive.mountpoint))  # type: ignore
+                    destination = Path(drive.mountpoint)
+                    break
+            except PermissionError:
+                log.debug(f"Permission error on {drive.mountpoint}")
+                continue
         time.sleep(1)
         wait -= 1
     return destination

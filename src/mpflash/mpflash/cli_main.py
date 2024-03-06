@@ -14,7 +14,7 @@ def mpflash():
     # cli.add_command(flash_board)
     # cli.add_command(list_boards)
     # cli.add_command(download)
-    cli()  # auto_envvar_prefix='MPTOOL')
+    cli(auto_envvar_prefix="MPFLASH")
 
 
 if __name__ == "__main__":
