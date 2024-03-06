@@ -11,6 +11,7 @@ from loguru import logger as log
 
 LogTagList = List[str]
 
+
 @dataclass
 class LogTags:
     reset_tags: LogTagList
@@ -115,9 +116,10 @@ def run(
         if proc.stderr and log_errors:
             for line in proc.stderr:
                 log.warning(line)
+    except UnicodeDecodeError as e:
+        log.error(f"Failed to decode output: {e}")
     finally:
         timer.cancel()
 
     proc.wait(timeout=1)
     return proc.returncode or 0, output
-
