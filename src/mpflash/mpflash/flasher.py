@@ -104,7 +104,9 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     wl: WorkList = []
     for mcu in conn_boards:
         if mcu.family != "micropython":
-            log.warning(f"Skipping {mcu.board} on {mcu.serialport} as it is not a micropython board")
+            log.warning(
+                f"Skipping {mcu.family} {mcu.port} {mcu.board} on {mcu.serialport} as it is a MicroPython firmware"
+            )
             continue
         board_firmwares = find_firmware(
             fw_folder=fw_folder,
@@ -175,15 +177,29 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     "--board",
     "-b",
     "board",
-    help="The MicroPython board ID to flash. if not specified will try to read the BOARD_ID from the connected MCU.",
+    help="The MicroPython board ID to flash. If not specified will try to read the BOARD_ID from the connected MCU.",
     metavar="BOARD_ID",
+    default="",
+)
+@click.option(
+    "--cpu",
+    "--chip",
+    "-c",
+    "cpu",
+    help="The CPU type to flash. If not specified will try to read the CPU from the connected MCU.",
+    metavar="CPU",
+)
+@click.option(
+    "--variant",
+    help="The variant of the board to flash. If not specified will try to read the VARIANT from the connected MCU.",
+    metavar="VARIANT",
     default="",
 )
 @click.option(
     "--erase/--no-erase",
     default=True,
     show_default=True,
-    help="""Erase flash before writing new firmware.""",
+    help="""Erase flash before writing new firmware. (not on UF2 boards)""",
 )
 @click.option(
     "--preview/--no-preview",
@@ -198,6 +214,7 @@ def flash_board(
     board: Optional[str] = None,
     port: Optional[str] = None,
     variant: Optional[str] = None,
+    cpu: Optional[str] = None,
     erase: bool = False,
     preview: bool = False,
 ):

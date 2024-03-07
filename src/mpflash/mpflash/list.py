@@ -24,9 +24,10 @@ from .config import config
     help="""Output in json format""",
 )
 def list_boards(as_json: bool):
+    """List the connected boards."""
     conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
 
-    for mcu in track(conn_boards, description="Getting board info"):
+    for mcu in track(conn_boards, description="Getting board info", transient=True, update_period=0.1):
         try:
             mcu.get_mcu_info()
         except ConnectionError as e:
@@ -45,26 +46,29 @@ def show_boards(
 ):
     """Show the list of connected boards in a nice table"""
     table = Table(
-        title=title, expand=True, header_style="bold blue", collapse_padding=True, row_styles=["blue", "yellow"]
+        title=title,
+        expand=True,
+        header_style="bold blue",
+        collapse_padding=True,
+        # row_styles=["blue", "yellow"]
     )
     table.add_column("Serial", overflow="fold")
     table.add_column("Family")
     table.add_column("Port")
     table.add_column("Board", overflow="fold")
     # table.add_column("Variant") # TODO: add variant
-    # table.add_column("In") # TODO: add variant
     table.add_column("CPU")
     table.add_column("Version", overflow="fold")
     table.add_column("build", justify="right")
 
-    for mcu in track(conn_boards, transient=True, description="Updating board info"):
+    for mcu in track(conn_boards, description="Updating board info", transient=True, update_period=0.1):
         if refresh:
             try:
                 mcu.get_mcu_info()
             except ConnectionError:
                 continue
         table.add_row(
-            "/dev/tty" + mcu.serialport,
+            mcu.serialport,
             mcu.family,
             mcu.port,
             mcu.board if mcu.board != "UNKNOWN" else mcu.description,
