@@ -1,4 +1,4 @@
-import sys
+"""Logging."""
 
 from loguru import logger as log
 from rich.console import Console
@@ -9,7 +9,7 @@ console = Console()
 
 
 def _log_formatter(record: dict) -> str:
-    """Log message formatter"""
+    """Log message formatter to combine loguru and rich formatting."""
     color_map = {
         "TRACE": "dim blue",
         "DEBUG": "cyan",

@@ -1,3 +1,5 @@
+""" Flashing UF2 based MCU on Linux"""
+# sourcery skip: snake-case-functions
 from __future__ import annotations
 
 import subprocess
@@ -7,6 +9,7 @@ from pathlib import Path
 from typing import List
 
 from loguru import logger as log
+from rich.progress import track
 
 from .uf2_boardid import get_board_id
 
@@ -104,12 +107,13 @@ def dismount_uf2():
     glb_dismount_me = []
 
 
-def wait_for_UF2_linux():
+def wait_for_UF2_linux(s_max: int = 10):
     destination = ""
     wait = 10
     uf2_drives = []
-    while not destination and wait > 0:
-        log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
+    # while not destination and wait > 0:
+    for _ in track(range(s_max), description="Waiting for mcu to mount as a drive", transient=True):
+        # log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
         uf2_drives += list(get_uf2_drives())
         for drive in get_uf2_drives():
             pmount(drive)
@@ -122,6 +126,8 @@ def wait_for_UF2_linux():
             except PermissionError:
                 log.debug(f"Permission error on {drive.mountpoint}")
                 continue
+        if destination:
+            break
         time.sleep(1)
         wait -= 1
     return destination

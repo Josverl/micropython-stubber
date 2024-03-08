@@ -99,7 +99,7 @@ def find_firmware(
 WorkList = List[Tuple[MPRemoteBoard, FWInfo]]
 
 
-def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder: Path):
+def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder: Path, *, preview: bool = False):
     """Builds a list of boards to update based on the connected boards and the firmware available"""
     wl: WorkList = []
     for mcu in conn_boards:
@@ -113,7 +113,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
             board=mcu.board,
             version=target_version,
             port=mcu.port,
-            preview="preview" in target_version,
+            preview=preview or "preview" in target_version,
         )
 
         if not board_firmwares:
@@ -202,9 +202,9 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     help="""Erase flash before writing new firmware. (not on UF2 boards)""",
 )
 @click.option(
-    "--preview/--no-preview",
+    "--preview",
     default=False,
-    show_default=True,
+    is_flag=True,
     help="""Include preview versions in the download list.""",
 )
 def cli_flash_board(
@@ -230,8 +230,8 @@ def cli_flash_board(
             fw_folder=fw_folder,
             board=board,
             version=target_version,
-            port=port,
             preview=preview or "preview" in target_version,
+            port=port,
         )
         if not firmwares:
             log.error(f"No firmware found for {port} {board} version {target_version}")
@@ -248,7 +248,7 @@ def cli_flash_board(
             # just this serial port
             conn_boards = [MPRemoteBoard(serial_port)]
         show_mcus(conn_boards)
-        todo = auto_update(conn_boards, target_version, fw_folder)
+        todo = auto_update(conn_boards, target_version, fw_folder, preview=preview)
 
     flashed = []
     for mcu, fw_info in todo:
