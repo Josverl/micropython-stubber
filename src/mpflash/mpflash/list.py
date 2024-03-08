@@ -11,10 +11,10 @@ from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
 from .config import config
-from .logger import make_quiet
+from .logger import console, make_quiet
 
 
-@cli.command("list", help="List the connected boards.")
+@cli.command("list", help="List the connected MCU boards.")
 @click.option(
     "--json",
     "-j",
@@ -24,28 +24,43 @@ from .logger import make_quiet
     show_default=True,
     help="""Output in json format""",
 )
-def list_boards(as_json: bool):
-    """List the connected boards."""
+@click.option(
+    "--progress/--no-progress",
+    "progress",
+    is_flag=True,
+    default=True,
+    show_default=True,
+    help="""Show progress""",
+)
+def cli_list_mcus(as_json: bool, progress: bool = True):
+    """List the connected MCU boards, and output in a nice table or json."""
     if as_json:
         # avoid noise in json output
         make_quiet()
 
-    conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
+    conn_mcus = list_mcus()
+    if as_json:
+        print(json.dumps([mcu.__dict__ for mcu in conn_mcus], indent=4))
+        progress = False
+    if progress:
+        show_mcus(conn_mcus, refresh=False)
+    return conn_mcus
 
-    for mcu in track(conn_boards, description="Getting board info", transient=True, update_period=0.1):
+
+def list_mcus():
+    conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
+
+    for mcu in track(conn_mcus, description="Getting board info", transient=True, update_period=0.1):
         try:
             mcu.get_mcu_info()
         except ConnectionError as e:
             print(f"Error: {e}")
             continue
-    if as_json:
-        print(json.dumps([mcu.__dict__ for mcu in conn_boards], indent=4))
-    else:
-        show_boards(conn_boards, refresh=False)
+    return conn_mcus
 
 
-def show_boards(
-    conn_boards: List[MPRemoteBoard],
+def show_mcus(
+    conn_mcus: List[MPRemoteBoard],
     title: str = "Connected boards",
     refresh: bool = True,
 ):
@@ -66,7 +81,7 @@ def show_boards(
     table.add_column("Version", overflow="fold")
     table.add_column("build", justify="right")
 
-    for mcu in track(conn_boards, description="Updating board info", transient=True, update_period=0.1):
+    for mcu in track(conn_mcus, description="Updating board info", transient=True, update_period=0.1):
         if refresh:
             try:
                 mcu.get_mcu_info()
@@ -82,4 +97,4 @@ def show_boards(
             mcu.version,
             mcu.build,
         )
-    print(table)
+    console.print(table)

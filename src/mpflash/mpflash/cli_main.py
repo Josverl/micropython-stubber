@@ -3,9 +3,9 @@
 import rich_click as click
 
 from .cli_group import cli
-from .downloader import download
-from .flasher import flash_board
-from .list import list_boards
+from .downloader import cli_download
+from .flasher import cli_flash_board
+from .list import cli_list_mcus
 
 # from loguru import logger as log
 

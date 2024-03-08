@@ -14,7 +14,7 @@ from .config import config
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
-from .list import show_boards
+from .list import show_mcus
 
 # #########################################################################################################
 
@@ -207,7 +207,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     show_default=True,
     help="""Include preview versions in the download list.""",
 )
-def flash_board(
+def cli_flash_board(
     target_version: str,
     fw_folder: Path,
     serial_port: Optional[str] = None,
@@ -247,7 +247,7 @@ def flash_board(
         else:
             # just this serial port
             conn_boards = [MPRemoteBoard(serial_port)]
-        show_boards(conn_boards)
+        show_mcus(conn_boards)
         todo = auto_update(conn_boards, target_version, fw_folder)
 
     flashed = []
@@ -280,7 +280,7 @@ def flash_board(
         #     if sp not in config.ignore_ports
         # ]
 
-        show_boards(flashed, title="Connected boards after flashing")
+        show_mcus(flashed, title="Connected boards after flashing")
 
 
 # TODO:
