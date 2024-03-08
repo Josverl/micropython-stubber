@@ -11,6 +11,7 @@ from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
 from .config import config
+from .logger import make_quiet
 
 
 @cli.command("list", help="List the connected boards.")
@@ -25,6 +26,10 @@ from .config import config
 )
 def list_boards(as_json: bool):
     """List the connected boards."""
+    if as_json:
+        # avoid noise in json output
+        make_quiet()
+
     conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
 
     for mcu in track(conn_boards, description="Getting board info", transient=True, update_period=0.1):

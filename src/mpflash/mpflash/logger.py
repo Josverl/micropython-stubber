@@ -3,6 +3,8 @@ import sys
 from loguru import logger as log
 from rich.console import Console
 
+from .config import config
+
 console = Console()
 
 
@@ -30,13 +32,11 @@ def set_loglevel(loglevel: str):
         log.remove()
     except ValueError:
         pass
-    log.add(
-        console.print, level=loglevel.upper(), colorize=False, format=_log_formatter
-    )
+    log.add(console.print, level=loglevel.upper(), colorize=False, format=_log_formatter)  # type: ignore
 
-    # log.add(
-    #     console.print,
-    #     level=loglevel.upper(),
-    #     format=_log_formatter,
-    #     colorize=True,
-    # )
+
+def make_quiet():
+    """Make the logger quiet"""
+    config.quiet = True
+    console.quiet = True
+    set_loglevel("CRITICAL")
