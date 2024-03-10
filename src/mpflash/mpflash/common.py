@@ -1,4 +1,4 @@
-from pathlib import Path
+import sys
 from typing import Dict, Union
 
 import platformdirs
@@ -6,8 +6,9 @@ from github import Github
 from loguru import logger as log
 from packaging.version import parse
 
+
 PORT_FWTYPES = {
-    "stm32": ".hex",
+    "stm32": ".hex" if sys.platform == "win32" else ".dfu",  # but need .dfu on linux
     "esp32": ".bin",
     "esp8266": ".bin",
     "rp2": ".uf2",
