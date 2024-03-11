@@ -67,7 +67,7 @@ def show_mcus(
     """Show the list of connected boards in a nice table"""
     table = Table(
         title=title,
-        expand=True,
+        # expand=True,
         header_style="bold blue",
         collapse_padding=True,
         # row_styles=["blue", "yellow"]

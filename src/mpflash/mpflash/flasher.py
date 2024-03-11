@@ -266,6 +266,8 @@ def cli_flash_board(
             updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
             updated = flash_stm32(mcu, fw_file=fw_file, erase=erase)
+        else:
+            log.error(f"Don't know how to flash {mcu.port}-{mcu.board} on {mcu.serialport}")
 
         if updated:
             flashed.append(updated)
