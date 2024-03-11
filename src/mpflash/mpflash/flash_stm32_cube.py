@@ -18,7 +18,7 @@ from strip_ansi import strip_ansi
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
 STM32_CLI_WIN = "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe"
-STM32_CLI_LINUX = "/home/jos/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI"
+STM32_CLI_LINUX = "~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI"
 
 
 def get_stm32_start_address(fw_file: Path):
@@ -33,9 +33,7 @@ def get_stm32_start_address(fw_file: Path):
         return ""
 
 
-def flash_stm32(
-    mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
-) -> Optional[MPRemoteBoard]:
+def flash_stm32_cubecli(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
     """
     Flash STM32 devices using STM32CubeProgrammer CLI
     - Enter bootloader mode
@@ -45,9 +43,9 @@ def flash_stm32(
     Windows only for now
     """
     if sys.platform == "linux":
-        STM32_CLI = STM32_CLI_LINUX
+        STM32_CLI = Path(STM32_CLI_LINUX).expanduser().as_posix()
     elif sys.platform == "win32":
-        STM32_CLI = STM32_CLI_WIN
+        STM32_CLI = str(Path(STM32_CLI_WIN).expanduser())
     else:
         log.error(f"OS {sys.platform} not supported")
         return None
@@ -95,16 +93,12 @@ def flash_stm32(
             "--erase",
             "all",
         ]
-        results = subprocess.run(
-            cmd, capture_output=True, text=True
-        ).stdout.splitlines()
+        results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
         results = [strip_ansi(line) for line in results]
-    log.info("Flashing")
+    log.info(f"Flashing {fw_file.name} using STM32CubeProgrammer CLI")
     start_address = get_stm32_start_address(fw_file)
 
-    log.trace(
-        f"STM32_Programmer_CLI --connect port=USB1 --write {str(fw_file)} --go {start_address}"
-    )
+    log.trace(f"STM32_Programmer_CLI --connect port=USB1 --write {str(fw_file)} --go {start_address}")
     cmd = [
         STM32_CLI,
         "--connect",

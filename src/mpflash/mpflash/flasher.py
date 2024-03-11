@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 from typing import List, Optional, Tuple
 
 import jsonlines
@@ -12,7 +13,7 @@ from .cli_group import cli
 from .common import DEFAULT_FW_PATH, FWInfo, clean_version
 from .config import config
 from .flash_esp import flash_esp
-from .flash_stm32 import flash_stm32
+from .flash_stm32_cube import flash_stm32_cubecli
 from .flash_uf2 import flash_uf2
 from .list import show_mcus
 
@@ -265,7 +266,9 @@ def cli_flash_board(
         elif mcu.port in ["esp32", "esp8266"]:
             updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
-            updated = flash_stm32(mcu, fw_file=fw_file, erase=erase)
+            # if sys.platform == "win32":
+            updated = flash_stm32_cubecli(mcu, fw_file=fw_file, erase=erase)
+
         else:
             log.error(f"Don't know how to flash {mcu.port}-{mcu.board} on {mcu.serialport}")
 
