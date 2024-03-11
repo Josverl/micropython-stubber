@@ -30,21 +30,6 @@ RE_HASH = r"(.g[0-9a-f]+\.)"
 # regex to extract the version from the firmware filename
 RE_VERSION_PREVIEW = r"(\d+\.\d+(\.\d+)?(-\w+.\d+)?)"
 
-# # boards we are interested in ( this avoids getting a lot of boards that are not relevant)
-# DEFAULT_BOARDS = [
-#     "PYBV11",
-#     "ESP8266_GENERIC",
-#     "ESP32_GENERIC",
-#     "ESP32_GENERIC_S3",
-#     "RPI_PICO",
-#     "RPI_PICO_W",
-#     "ADAFRUIT_QTPY_RP2040",
-#     "ARDUINO_NANO_RP2040_CONNECT",
-#     "PIMORONI_PICOLIPO_16MB",
-#     "SEEED_WIO_TERMINAL",
-#     "PARTICLE_XENON",
-# ]
-
 
 # use functools.lru_cache to avoid needing to download pages multiple times
 @functools.lru_cache(maxsize=500)
@@ -108,7 +93,10 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
 
         for board in track(_urls, description=f"Checking {port} download pages", transient=True):
             # add a board to the list for each firmware found
-            firmwares = firmware_list(board["url"], MICROPYTHON_ORG_URL, PORT_FWTYPES[port])
+            firmwares = []
+            for ext in PORT_FWTYPES[port]:
+                firmwares += firmware_list(board["url"], MICROPYTHON_ORG_URL, ext)
+
             for _url in firmwares:
                 board["firmware"] = _url
                 board["preview"] = "preview" in _url  # type: ignore
@@ -127,19 +115,20 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
                     # remove hash from firmware name
                     fname = re.sub(RE_HASH, ".", fname)
                 board["filename"] = fname
+                board["ext"] = Path(board["firmware"]).suffix
                 board["variant"] = board["filename"].split("-v")[0] if "-v" in board["filename"] else ""
                 board_urls.append(board.copy())
     return board_urls
 
 
-def key_fw_variant_ver(x: FirmwareInfo):
+def key_fw_ver_pre_ext_bld(x: FirmwareInfo):
     "sorting key for the retrieved board urls"
-    return x["variant"], x["version"], x["preview"], x["build"]
+    return x["variant"], x["version"], x["preview"], x["ext"], x["build"]
 
 
-def key_fw_variant(x: FirmwareInfo):
+def key_fw_var_pre_ext(x: FirmwareInfo):
     "Grouping key for the retrieved board urls"
-    return x["variant"], x["preview"]
+    return x["variant"], x["preview"], x["ext"]
 
 
 def download_firmwares(
@@ -193,7 +182,7 @@ def download_firmwares(
 def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], preview: bool, clean: bool):
     log.trace("Checking MicroPython download pages")
 
-    board_urls = sorted(get_boards(ports, boards, clean), key=key_fw_variant_ver)
+    board_urls = sorted(get_boards(ports, boards, clean), key=key_fw_ver_pre_ext_bld)
 
     log.debug(f"Total {len(board_urls)} firmwares")
     relevant = [
@@ -205,7 +194,7 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     log.debug(f"Matching firmwares: {len(relevant)}")
     # select the unique boards
     unique_boards: List[FirmwareInfo] = []
-    for _, g in itertools.groupby(relevant, key=key_fw_variant):
+    for _, g in itertools.groupby(relevant, key=key_fw_var_pre_ext):
         # list is aleady sorted by build so we can just get the last item
         sub_list = list(g)
         unique_boards.append(sub_list[-1])

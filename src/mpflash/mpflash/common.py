@@ -8,14 +8,14 @@ from packaging.version import parse
 
 
 PORT_FWTYPES = {
-    "stm32": ".hex" if sys.platform == "win32" else ".dfu",  # but need .dfu on linux
-    "esp32": ".bin",
-    "esp8266": ".bin",
-    "rp2": ".uf2",
-    "samd": ".uf2",
-    "mimxrt": ".hex",
-    "nrf": ".uf2",
-    "renesas-ra": ".hex",
+    "stm32": [".hex", ".dfu"],  # .hex for cube cli, but need .dfu for pydfu.py
+    "esp32": [".bin"],
+    "esp8266": [".bin"],
+    "rp2": [".uf2"],
+    "samd": [".uf2"],
+    "mimxrt": [".hex"],
+    "nrf": [".uf2"],
+    "renesas-ra": [".hex"],
 }
 
 DEFAULT_FW_PATH = platformdirs.user_downloads_path() / "firmware"
