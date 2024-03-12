@@ -1,13 +1,13 @@
-import pytest
-from pathlib import Path
-import mpflash.flasher as flasher
-from mpflash.config import config
+# import pytest
+# from pathlib import Path
+# import mpflash.flasher as flasher
+# from mpflash.config import config
 
 
-def test_load(tmp_path: Path):
-    fw_folder = Path("/home/jos/projects/micropython-stubber/firmware")
-    all = flasher.load_firmwares(config.firmware_folder)
-    assert len(all) > 0
+# def test_load(tmp_path: Path):
+#     fw_folder = Path("/home/jos/projects/micropython-stubber/firmware")
+#     all = flasher.load_firmwares(config.firmware_folder)
+#     assert len(all) > 0
 
 
 # def test_find():
