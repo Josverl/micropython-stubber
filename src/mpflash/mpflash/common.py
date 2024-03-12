@@ -1,12 +1,15 @@
+import time
 from typing import TypedDict
 
 from github import Github
 from loguru import logger as log
 from packaging.version import parse
+from rich.progress import track
 
+from mpflash.mpremoteboard.mpremoteboard import MPRemoteBoard
 
 PORT_FWTYPES = {
-    "stm32": [".hex", ".dfu"],  # .hex for cube cli, but need .dfu for pydfu.py
+    "stm32": [".dfu"],  # need .dfu for pydfu.py - .hex for cube cli/GUI
     "esp32": [".bin"],
     "esp8266": [".bin"],
     "rp2": [".uf2"],
@@ -19,11 +22,12 @@ PORT_FWTYPES = {
 
 class FWInfo(TypedDict):
     filename: str
-    port:str
-    board:str
-    variant:str
+    port: str
+    board: str
+    variant: str
     preview: bool
-    version:str
+    version: str
+
 
 #############################################################
 # Version handling copied from stubber/utils/versions.py
@@ -122,8 +126,22 @@ def micropython_versions(minver: str = "v1.9.2"):
 def get_stable_version() -> str:
     # read the versions from the git tags
     all_versions = micropython_versions(minver="v1.17")
-    stable_version = [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
-    return stable_version
+    return [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
 
 
 #############################################################
+def wait_for_restart(mcu: MPRemoteBoard, timeout: int = 10):
+    """wait for the board to restart"""
+    for _ in track(
+        range(timeout),
+        description="Waiting for the board to restart",
+        transient=True,
+        get_time=lambda: time.time(),
+        show_speed=False,
+    ):
+        time.sleep(1)
+        try:
+            mcu.get_mcu_info()
+            break
+        except ConnectionError:
+            pass

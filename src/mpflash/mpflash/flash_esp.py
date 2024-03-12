@@ -12,7 +12,7 @@ import esptool
 from loguru import logger as log
 
 from .mpremoteboard.mpremoteboard import MPRemoteBoard
-
+from .common import wait_for_restart
 
 def flash_esp(
     mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
@@ -59,7 +59,6 @@ def flash_esp(
         return None
 
     log.info("Done flashing, resetting the board and wait for it to restart")
-    time.sleep(5)
-    mcu.get_mcu_info()
-    log.success(f"Flashed {mcu.version} to {mcu.board} on {mcu.serialport} done")
+    wait_for_restart(mcu)
+    log.success(f"Flashed {mcu.version} to {mcu.board}")
     return mcu

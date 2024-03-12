@@ -1,17 +1,26 @@
 """Flash STM32 boards using either STM32CubeProgrammer CLI or dfu-util"""
 
 from pathlib import Path
-from .flash_stm32_dfu import flash_stm32_dfu
-from .flash_stm32_cube import flash_stm32_cubecli
 
+from loguru import logger as log
+
+from mpflash.common import wait_for_restart
+
+# from .flash_stm32_cube import flash_stm32_cubecli
+from .flash_stm32_dfu import dfu_init, flash_stm32_dfu
 from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 
-def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_hex: bool):
-    """Flash STM32 boards using either STM32CubeProgrammer CLI or dfu-util"""
-    # TODO: Check installed utilities / Lazy import
-    if stm32_hex:
-        updated = flash_stm32_cubecli(mcu, fw_file=fw_file, erase=erase)
-    else:
-        updated = flash_stm32_dfu(mcu, fw_file=fw_file, erase=erase)
+def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_dfu: bool = True):
+    # sourcery skip: lift-return-into-if
+    log.info("Using dfu-util")
+    dfu_init()
+    updated = flash_stm32_dfu(mcu, fw_file=fw_file, erase=erase)
+    # if stm32_dfu:
+    # else:
+    #     log.info("Using STM32CubeProgrammer CLI")
+    #     updated = flash_stm32_cubecli(mcu, fw_file=fw_file, erase=erase)
+
+    wait_for_restart(mcu)
+    log.success(f"Flashed {mcu.version} to {mcu.board}")
     return updated
