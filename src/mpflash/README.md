@@ -14,7 +14,23 @@ mpflash has been tested on Windows x64, Linux X64 and ARM64, but not (yet) macOS
 ## Installation
 To install mpflash, you can use pip: `pip install mpflash`
 
-## How to use
+## Basic usage
+You can use mpflash to perform various operations on your MicroPython boards. Here is an example of basic usage:
+
+| Command | Description |
+|---------|-------------|
+| `mpflash list` | List the connected board(s) including their firmware details |
+| `mpflash download` | Download the MicroPython firmware(s) for the connected board(s) |
+| `mpflash flash` | Flash the latest stable firmware to the connected board(s) |
+
+
+## Linux permissions for usb devices 
+In order to flash the firmware to the board, you need to have the correct permissions to access the USB devices.
+On Windows this will not be an issue, but on Linux you can use  udev rules to give non-root users access to the USB devices.
+[See thestm32_permissions documentation](./stm32_udev_rules.md) for more information.
+
+
+## Advanced use
 You can list the connected boards using the following command:
 ```bash
 $ mpflash list

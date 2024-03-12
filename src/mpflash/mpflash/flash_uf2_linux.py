@@ -1,4 +1,5 @@
 """ Flashing UF2 based MCU on Linux"""
+
 # sourcery skip: snake-case-functions
 from __future__ import annotations
 
@@ -79,10 +80,10 @@ def pmount(disk: UF2Disk):
         except FileNotFoundError:
             log.error("pmount not found, please install it using 'sudo apt install pmount'")
             return
-        log.info(f"Mounted {disk.label} at {disk.mountpoint}")
+        log.debug(f"Mounted {disk.label} at {disk.mountpoint}")
         glb_dismount_me.append(disk)
     else:
-        log.warning(f"{disk.label} already mounted at {disk.mountpoint}")
+        log.debug(f"\n{disk.label} already mounted at {disk.mountpoint}")
 
 
 def pumount(disk: UF2Disk):

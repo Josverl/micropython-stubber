@@ -25,18 +25,19 @@
             "justMyCode": false
         },
         {
-            "name": "mptool: Module",
+            "name": "CLI: mpflash",
             "type": "python",
             "request": "launch",
-            "module": "mptool.cli_main",
+            "module": "mpflash.cli_main",
             "justMyCode": true,
             // "sudo": true,
             "cwd": "${workspaceFolder}",
             "args": [
                 // "-V",
-                "--ignore",
-                "/dev/ttyAMA0",
+                // "--ignore",
+                // "/dev/ttyAMA0",
                 "list",
+                // "--no-erase",
                 // "--version",
                 // "v1.22.2",
                 // "--serial",

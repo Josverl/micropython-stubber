@@ -1,26 +1,29 @@
-from pathlib import Path
-from typing import Dict, Union
+from typing import TypedDict
 
-import platformdirs
 from github import Github
 from loguru import logger as log
 from packaging.version import parse
 
+
 PORT_FWTYPES = {
-    "stm32": ".hex",
-    "esp32": ".bin",
-    "esp8266": ".bin",
-    "rp2": ".uf2",
-    "samd": ".uf2",
-    "mimxrt": ".hex",
-    "nrf": ".uf2",
-    "renesas-ra": ".hex",
+    "stm32": [".hex", ".dfu"],  # .hex for cube cli, but need .dfu for pydfu.py
+    "esp32": [".bin"],
+    "esp8266": [".bin"],
+    "rp2": [".uf2"],
+    "samd": [".uf2"],
+    "mimxrt": [".hex"],
+    "nrf": [".uf2"],
+    "renesas-ra": [".hex"],
 }
 
-DEFAULT_FW_PATH = platformdirs.user_downloads_path() / "firmware"
-# DEFAULT_FW_PATH = Path.home() / "mp_firmware"
 
-FWInfo = Dict[str, Union[str, bool]]
+class FWInfo(TypedDict):
+    filename: str
+    port:str
+    board:str
+    variant:str
+    preview: bool
+    version:str
 
 #############################################################
 # Version handling copied from stubber/utils/versions.py

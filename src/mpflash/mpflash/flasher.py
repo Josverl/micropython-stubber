@@ -1,18 +1,18 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import jsonlines
+from mpflash.flash_stm32 import flash_stm32
 import rich_click as click
 from loguru import logger as log
 
 # TODO: - refactor so that we do not need the entire stubber package
-from stubber.bulk.mpremoteboard import MPRemoteBoard
+from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
-from .common import DEFAULT_FW_PATH, FWInfo, clean_version
+from .common import FWInfo, clean_version
 from .config import config
 from .flash_esp import flash_esp
-from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
 from .list import show_mcus
 
@@ -41,12 +41,11 @@ def find_firmware(
     variants: bool = False,
     fw_folder: Optional[Path] = None,
     trie: int = 1,
+    selector: Optional[Dict[str, str]] = {},
 ):
-    # TODO : better path handling
-    fw_folder = fw_folder or DEFAULT_FW_PATH
+    fw_folder = fw_folder or config.firmware_folder
     # Use the information in firmwares.jsonl to find the firmware file
     fw_list = load_firmwares(fw_folder)
-
     if not fw_list:
         log.error(f"No firmware files found. Please download the firmware first.")
         return []
@@ -68,7 +67,8 @@ def find_firmware(
         else:
             # the variant should match exactly the board name
             fw_list = [fw for fw in fw_list if fw["variant"] == board]
-
+    if selector and port in selector:
+        fw_list = [fw for fw in fw_list if fw["filename"].endswith(selector[port])]
     if not fw_list and trie < 2:
         board_id = board.replace("_", "-")
         # ESP board naming conventions have changed by adding a PORT refix
@@ -86,6 +86,7 @@ def find_firmware(
             port=port,
             preview=preview,
             trie=trie + 1,
+            selector=selector,
         )
         # hope we have a match now for the board
     # sort by filename
@@ -99,7 +100,14 @@ def find_firmware(
 WorkList = List[Tuple[MPRemoteBoard, FWInfo]]
 
 
-def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder: Path, *, preview: bool = False):
+def auto_update(
+    conn_boards: List[MPRemoteBoard],
+    target_version: str,
+    fw_folder: Path,
+    *,
+    preview: bool = False,
+    selector: Optional[Dict[str, str]] = {},
+) -> WorkList:
     """Builds a list of boards to update based on the connected boards and the firmware available"""
     wl: WorkList = []
     for mcu in conn_boards:
@@ -114,6 +122,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
             version=target_version,
             port=mcu.port,
             preview=preview or "preview" in target_version,
+            selector=selector,
         )
 
         if not board_firmwares:
@@ -121,6 +130,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
             continue
         if len(board_firmwares) > 1:
             log.debug(f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}.")
+
         # just use the last firmware
         fw_info = board_firmwares[-1]
         log.info(f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}.")
@@ -142,7 +152,7 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     "-f",
     "fw_folder",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
-    default=DEFAULT_FW_PATH,
+    default=config.firmware_folder,
     show_default=True,
     help="The folder to retrieve the firmware from.",
 )
@@ -189,12 +199,12 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     help="The CPU type to flash. If not specified will try to read the CPU from the connected MCU.",
     metavar="CPU",
 )
-@click.option(
-    "--variant",
-    help="The variant of the board to flash. If not specified will try to read the VARIANT from the connected MCU.",
-    metavar="VARIANT",
-    default="",
-)
+# @click.option(
+#     "--variant",
+#     help="The variant of the board to flash. If not specified will try to read the VARIANT from the connected MCU.",
+#     metavar="VARIANT",
+#     default="",
+# )
 @click.option(
     "--erase/--no-erase",
     default=True,
@@ -202,10 +212,16 @@ def auto_update(conn_boards: List[MPRemoteBoard], target_version: str, fw_folder
     help="""Erase flash before writing new firmware. (not on UF2 boards)""",
 )
 @click.option(
+    "--stm32-hex/--stm32-dfu",
+    default=True,
+    show_default=True,
+    help="""Use .hex (STM32CubeProgrammer CLI) or .dfu (dfu-util) to flash STM32 boards.""",
+)
+@click.option(
     "--preview",
     default=False,
     is_flag=True,
-    help="""Include preview versions in the download list.""",
+    help="""Flash preview version""",
 )
 def cli_flash_board(
     target_version: str,
@@ -217,11 +233,17 @@ def cli_flash_board(
     cpu: Optional[str] = None,
     erase: bool = False,
     preview: bool = False,
+    stm32_hex: bool = True,
 ):
     todo: WorkList = []
+    # firmware type selector
+    selector = {}
+    selector["stm32"] = ".hex" if stm32_hex else ".dfu"
+
     target_version = clean_version(target_version)
     # Update all micropython boards to the latest version
     if target_version and port and board and serial_port:
+        # TODO : Find a way to avoud needing to specify the port
         mcu = MPRemoteBoard(serial_port)
         mcu.port = port
         mcu.cpu = port if port.startswith("esp") else ""
@@ -232,6 +254,7 @@ def cli_flash_board(
             version=target_version,
             preview=preview or "preview" in target_version,
             port=port,
+            selector=selector,
         )
         if not firmwares:
             log.error(f"No firmware found for {port} {board} version {target_version}")
@@ -248,7 +271,7 @@ def cli_flash_board(
             # just this serial port
             conn_boards = [MPRemoteBoard(serial_port)]
         show_mcus(conn_boards)
-        todo = auto_update(conn_boards, target_version, fw_folder, preview=preview)
+        todo = auto_update(conn_boards, target_version, fw_folder, preview=preview, selector=selector)
 
     flashed = []
     for mcu, fw_info in todo:
@@ -265,7 +288,9 @@ def cli_flash_board(
         elif mcu.port in ["esp32", "esp8266"]:
             updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
-            updated = flash_stm32(mcu, fw_file=fw_file, erase=erase)
+            updated = flash_stm32(mcu, fw_file, erase=erase, stm32_hex=stm32_hex)
+        else:
+            log.error(f"Don't know how to flash {mcu.port}-{mcu.board} on {mcu.serialport}")
 
         if updated:
             flashed.append(updated)
@@ -281,6 +306,9 @@ def cli_flash_board(
         # ]
 
         show_mcus(flashed, title="Connected boards after flashing")
+
+
+
 
 
 # TODO:
