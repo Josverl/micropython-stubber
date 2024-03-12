@@ -1,3 +1,4 @@
+import platform
 import sys
 import time
 from pathlib import Path
@@ -5,12 +6,35 @@ from typing import Optional
 
 from loguru import logger as log
 
+from .common import wait_for_restart
 from .mpremoteboard.mpremoteboard import MPRemoteBoard
+
+
+def init_libusb_windows():
+    # on windows we need to initialze the libusb backend with the correct dll
+    import libusb
+    import usb.backend.libusb1 as libusb1
+
+    arch = "x64" if platform.architecture()[0] == "64bit" else "x86"
+    libusb1_dll = Path(libusb.__file__).parent / f"_platform\\_windows\\{arch}\\libusb-1.0.dll"
+    if not libusb1_dll.exists():
+        raise FileNotFoundError(f"libusb1.dll not found at {libusb1_dll}")
+
+    backend = libusb1.get_backend(find_library=lambda x: libusb1_dll.as_posix())
+
 
 try:
     from .vendored import pydfu as pydfu
 except ImportError:
     pydfu = None
+
+
+def dfu_init():
+    if not pydfu:
+        log.error("pydfu not found")
+        return None
+    if platform.system() == "Windows":
+        init_libusb_windows()
 
 
 def flash_stm32_dfu(
@@ -20,9 +44,9 @@ def flash_stm32_dfu(
     erase: bool = True,
 ) -> Optional[MPRemoteBoard]:
 
-    if sys.platform == "win32":
-        log.error(f"OS {sys.platform} not supported")
-        return None
+    # if sys.platform == "win32":
+    #     log.error(f"OS {sys.platform} not supported")
+    #     return None
 
     if not pydfu:
         log.error("pydfu not found, please install it with 'pip install pydfu' if supported")
@@ -63,6 +87,4 @@ def flash_stm32_dfu(
     log.debug("Exiting DFU...")
     pydfu.exit_dfu()
     log.success("Done flashing, resetting the board and wait for it to restart")
-    time.sleep(5)
-    mcu.get_mcu_info()
     return mcu
