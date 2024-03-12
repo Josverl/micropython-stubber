@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 from loguru import logger as log
+from rich.progress import track
 
 from stubber.bulk.mpremoteboard import MPRemoteBoard
 
@@ -30,7 +31,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     pmount and pumount are used to mount and unmount the drive
     as this is not done automatically by the OS in headless mode.
     """
-    if PORT_FWTYPES[mcu.port] not in [".uf2"]:
+    if ".uf2" not in PORT_FWTYPES[mcu.port]:
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
     if erase:
@@ -44,7 +45,8 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     elif sys.platform == "win32":
         destination = wait_for_UF2_windows()
     else:
-        log.error(f"OS {sys.platform} not supported")
+        log.warning(f"OS {sys.platform} not tested/supported")
+        destination = wait_for_UF2_linux()
         return None
 
     if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
@@ -55,7 +57,8 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     log.info(f"Copying {fw_file} to {destination}.")
     shutil.copy(fw_file, destination)
     log.success("Done copying, resetting the board and wait for it to restart")
-    if sys.platform == "linux":
+    if sys.platform in ["linux", "darwin"]:
         dismount_uf2()
-    time.sleep(5 * 2)  # 5 secs to short on linux
+    for _ in track(range(5 + 2)):
+        time.sleep(1)  # 5 secs to short on linux
     return mcu

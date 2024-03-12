@@ -225,10 +225,7 @@ def write_memory(addr, buf, progress=None, progress_addr=0, progress_size=0):
 
     while xfer_bytes < xfer_total:
         if __verbose and xfer_count % 512 == 0:
-            print(
-                "Addr 0x%x %dKBs/%dKBs..."
-                % (xfer_base + xfer_bytes, xfer_bytes // 1024, xfer_total // 1024)
-            )
+            print("Addr 0x%x %dKBs/%dKBs..." % (xfer_base + xfer_bytes, xfer_bytes // 1024, xfer_total // 1024))
         if progress and xfer_count % 2 == 0:
             progress(progress_addr, xfer_base + xfer_bytes - progress_addr, progress_size)
 
@@ -237,9 +234,7 @@ def write_memory(addr, buf, progress=None, progress_addr=0, progress_size=0):
 
         # Send DNLOAD with fw data
         chunk = min(__cfg_descr.wTransferSize, xfer_total - xfer_bytes)
-        __dev.ctrl_transfer(
-            0x21, __DFU_DNLOAD, 2, __DFU_INTERFACE, buf[xfer_bytes : xfer_bytes + chunk], __TIMEOUT
-        )
+        __dev.ctrl_transfer(0x21, __DFU_DNLOAD, 2, __DFU_INTERFACE, buf[xfer_bytes : xfer_bytes + chunk], __TIMEOUT)
 
         # Execute last command
         check_status("write memory", __DFU_STATE_DFU_DOWNLOAD_BUSY)
@@ -343,10 +338,7 @@ def read_dfu_file(filename):
     #   I   uint32_t    size        Size of the DFU file (without suffix)
     #   B   uint8_t     targets     Number of targets
     dfu_prefix, data = consume("<5sBIB", data, "signature version size targets")
-    print(
-        "    %(signature)s v%(version)d, image size: %(size)d, "
-        "targets: %(targets)d" % dfu_prefix
-    )
+    print("    %(signature)s v%(version)d, image size: %(size)d, " "targets: %(targets)d" % dfu_prefix)
     for target_idx in range(dfu_prefix["targets"]):
         # Decode the Image Prefix
         #
@@ -358,9 +350,7 @@ def read_dfu_file(filename):
         #   255s    char[255]   name        Name of the target
         #   I       uint32_t    size        Size of image (without prefix)
         #   I       uint32_t    elements    Number of elements in the image
-        img_prefix, data = consume(
-            "<6sBI255s2I", data, "signature altsetting named name " "size elements"
-        )
+        img_prefix, data = consume("<6sBI255s2I", data, "signature altsetting named name " "size elements")
         img_prefix["num"] = target_idx
         if img_prefix["named"]:
             img_prefix["name"] = cstring(img_prefix["name"])
@@ -404,9 +394,7 @@ def read_dfu_file(filename):
     #   3s  char[3]     ufd         "UFD"
     #   B   uint8_t     len         16
     #   I   uint32_t    crc32       Checksum
-    dfu_suffix = named(
-        struct.unpack("<4H3sBI", data[:16]), "device product vendor dfu ufd len crc"
-    )
+    dfu_suffix = named(struct.unpack("<4H3sBI", data[:16]), "device product vendor dfu ufd len crc")
     print(
         "    usb: %(vendor)04x:%(product)04x, device: 0x%(device)04x, "
         "dfu: 0x%(dfu)04x, %(ufd)s, %(len)d, 0x%(crc)08x" % dfu_suffix
@@ -544,9 +532,7 @@ def cli_progress(addr, offset, size):
     width = 25
     done = offset * width // size
     print(
-        "\r0x{:08x} {:7d} [{}{}] {:3d}% ".format(
-            addr, size, "=" * done, " " * (width - done), offset * 100 // size
-        ),
+        "\r0x{:08x} {:7d} [{}{}] {:3d}% ".format(addr, size, "=" * done, " " * (width - done), offset * 100 // size),
         end="",
     )
     try:
@@ -562,21 +548,13 @@ def main():
     global __verbose
     # Parse CMD args
     parser = argparse.ArgumentParser(description="DFU Python Util")
-    parser.add_argument(
-        "-l", "--list", help="list available DFU devices", action="store_true", default=False
-    )
+    parser.add_argument("-l", "--list", help="list available DFU devices", action="store_true", default=False)
     parser.add_argument("--vid", help="USB Vendor ID", type=lambda x: int(x, 0), default=None)
     parser.add_argument("--pid", help="USB Product ID", type=lambda x: int(x, 0), default=None)
-    parser.add_argument(
-        "-m", "--mass-erase", help="mass erase device", action="store_true", default=False
-    )
-    parser.add_argument(
-        "-u", "--upload", help="read file from DFU device", dest="path", default=False
-    )
+    parser.add_argument("-m", "--mass-erase", help="mass erase device", action="store_true", default=False)
+    parser.add_argument("-u", "--upload", help="read file from DFU device", dest="path", default=False)
     parser.add_argument("-x", "--exit", help="Exit DFU", action="store_true", default=False)
-    parser.add_argument(
-        "-v", "--verbose", help="increase output verbosity", action="store_true", default=False
-    )
+    parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true", default=False)
     args = parser.parse_args()
 
     __verbose = args.verbose

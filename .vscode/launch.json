@@ -37,6 +37,7 @@
                 // "--ignore",
                 // "/dev/ttyAMA0",
                 "flash",
+                "--no-erase",
                 // "--version",
                 // "v1.22.2",
                 // "--serial",

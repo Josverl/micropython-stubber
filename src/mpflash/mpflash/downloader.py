@@ -20,7 +20,8 @@ from rich.progress import track
 from mpflash.list import list_mcus
 
 from .cli_group import cli
-from .common import DEFAULT_FW_PATH, PORT_FWTYPES, clean_version
+from .common import PORT_FWTYPES, clean_version
+from .config import config
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -210,7 +211,7 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     "--destination",
     "-d",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
-    default=DEFAULT_FW_PATH,
+    default=config.firmware_folder,
     show_default=True,
     help="The folder to download the firmware to.",
 )

@@ -40,7 +40,7 @@ def flash_stm32_cubecli(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
     - wait 2s for the device to be detected
     - list the connected DFU devices
 
-    Windows only for now
+    On Linux: requires udev rules to allow access to the device as a regular user
     """
     if sys.platform == "linux":
         STM32_CLI = Path(STM32_CLI_LINUX).expanduser().as_posix()
