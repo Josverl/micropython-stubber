@@ -1,7 +1,8 @@
 import sys
 import time
-from typing import Optional
 from pathlib import Path
+from typing import Optional
+
 from loguru import logger as log
 
 from .mpremoteboard.mpremoteboard import MPRemoteBoard
@@ -19,7 +20,7 @@ def flash_stm32_dfu(
     erase: bool = True,
 ) -> Optional[MPRemoteBoard]:
 
-    if sys.platform != "linux":
+    if sys.platform == "win32":
         log.error(f"OS {sys.platform} not supported")
         return None
 
@@ -34,10 +35,6 @@ def flash_stm32_dfu(
     if fw_file.suffix != ".dfu":
         log.error(f"File {fw_file} is not a .dfu file")
         return None
-
-    log.info(f"Entering STM bootloader on {mcu.board} on {mcu.serialport}")
-    mcu.run_command("bootloader")
-    time.sleep(2)
 
     kwargs = {"idVendor": 0x0483, "idProduct": 0xDF11}
     log.debug("List SPECIFIED DFU devices...")

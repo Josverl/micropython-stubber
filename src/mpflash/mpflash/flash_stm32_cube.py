@@ -13,6 +13,7 @@ from typing import Optional
 
 import bincopy
 from loguru import logger as log
+from rich.progress import track
 from strip_ansi import strip_ansi
 
 from .mpremoteboard.mpremoteboard import MPRemoteBoard
@@ -56,9 +57,7 @@ def flash_stm32_cubecli(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
         )
         return None
 
-    log.info(f"Entering STM bootloader on {mcu.board} on {mcu.serialport}")
-    mcu.run_command("bootloader")
-    time.sleep(2)
+
     # run STM32_Programmer_CLI.exe --list
     cmd = [
         STM32_CLI,
@@ -110,6 +109,13 @@ def flash_stm32_cubecli(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
     ]
     results = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
     log.success("Done flashing, resetting the board and wait for it to restart")
-    time.sleep(5)
-    mcu.get_mcu_info()
+
+    for _ in track(range(10), description="Waiting for the board to restart", transient=True):
+        time.sleep(1)
+        try:
+            mcu.get_mcu_info()
+            break
+        except ConnectionError:
+            pass
+
     return mcu

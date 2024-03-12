@@ -1,13 +1,12 @@
+import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import jsonlines
-from mpflash.flash_stm32 import flash_stm32
 import rich_click as click
 from loguru import logger as log
 
-# TODO: - refactor so that we do not need the entire stubber package
-from .mpremoteboard.mpremoteboard import MPRemoteBoard
+from mpflash.flash_stm32 import flash_stm32
 
 from .cli_group import cli
 from .common import FWInfo, clean_version
@@ -15,6 +14,9 @@ from .config import config
 from .flash_esp import flash_esp
 from .flash_uf2 import flash_uf2
 from .list import show_mcus
+
+# TODO: - refactor so that we do not need the entire stubber package
+from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
 
@@ -213,9 +215,17 @@ def auto_update(
 )
 @click.option(
     "--stm32-hex/--stm32-dfu",
+    "--hex/--dfu",
     default=True,
     show_default=True,
     help="""Use .hex (STM32CubeProgrammer CLI) or .dfu (dfu-util) to flash STM32 boards.""",
+)
+@click.option(
+    "--bootloader/--no-bootloader",
+    default=True,
+    is_flag=True,
+    show_default=True,
+    help="""Enter micropython bootloader mode before flashing.""",
 )
 @click.option(
     "--preview",
@@ -234,6 +244,7 @@ def cli_flash_board(
     erase: bool = False,
     preview: bool = False,
     stm32_hex: bool = True,
+    bootloader: bool = True,
 ):
     todo: WorkList = []
     # firmware type selector
@@ -284,10 +295,14 @@ def cli_flash_board(
         updated = None
         # try:
         if mcu.port in ["samd", "rp2"]:
+            if bootloader:
+                enter_bootloader(mcu)
             updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["esp32", "esp8266"]:
             updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
+            if bootloader:
+                enter_bootloader(mcu)
             updated = flash_stm32(mcu, fw_file, erase=erase, stm32_hex=stm32_hex)
         else:
             log.error(f"Don't know how to flash {mcu.port}-{mcu.board} on {mcu.serialport}")
@@ -308,7 +323,11 @@ def cli_flash_board(
         show_mcus(flashed, title="Connected boards after flashing")
 
 
-
+def enter_bootloader(mcu: MPRemoteBoard, timeout: int = 10, wait_after: int = 2):
+    """Enter the bootloader mode for the board"""
+    log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport}")
+    mcu.run_command("bootloader", timeout=timeout)
+    time.sleep(wait_after)
 
 
 # TODO:
