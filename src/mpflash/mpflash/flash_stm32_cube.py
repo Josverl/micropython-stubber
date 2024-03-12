@@ -15,7 +15,7 @@ import bincopy
 from loguru import logger as log
 from strip_ansi import strip_ansi
 
-from stubber.bulk.mpremoteboard import MPRemoteBoard
+from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 STM32_CLI_WIN = "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe"
 STM32_CLI_LINUX = "~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI"

@@ -4,7 +4,7 @@ from typing import Optional
 from pathlib import Path
 from loguru import logger as log
 
-from stubber.bulk.mpremoteboard import MPRemoteBoard
+from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 try:
     from .vendored import pydfu as pydfu

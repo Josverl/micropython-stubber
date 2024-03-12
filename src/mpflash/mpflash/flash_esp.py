@@ -11,7 +11,7 @@ from typing import List, Optional
 import esptool
 from loguru import logger as log
 
-from stubber.bulk.mpremoteboard import MPRemoteBoard
+from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 
 def flash_esp(

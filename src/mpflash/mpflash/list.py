@@ -7,7 +7,7 @@ from rich.progress import track
 from rich.table import Table
 
 # TODO: - refactor so that we do not need the entire stubber package
-from stubber.bulk.mpremoteboard import MPRemoteBoard
+from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
 from .config import config
