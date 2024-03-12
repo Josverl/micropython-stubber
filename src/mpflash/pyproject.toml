@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mpflash"
-version = "0.2.4"
-description = "Download and flash tool for MicroPython firmwares"
+version = "0.3.0"
+description = "Flash and download tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -31,13 +31,11 @@ psutil = "^5.9.8"
 blkinfo = "^0.2.0"
 pygithub = "^2.1.1"
 platformdirs = "^4.2.0"
-pyusb = [
-    {version = "^1.2.1", platform = "linux"},
-    {version = "^1.2.1", platform = "darwin"}
-]
+pyusb = "^1.2.1"
 packaging = "23.2"
 tenacity = "8.2.3"
 mpremote = "^1.22.0"
+libusb-package = {version = "^1.0.26.2", platform = "windows"}
 
 [tool.poetry.group.dev.dependencies]
 types-beautifulsoup4 = "^4.12.0.20240106"

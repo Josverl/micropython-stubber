@@ -37,9 +37,6 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     if erase:
         log.info("Erasing not yet implemented for UF2 flashing.")
 
-    log.info(f"Entering UF2 bootloader on {mcu.board} on {mcu.serialport}")
-    mcu.run_command("bootloader", timeout=10)
-
     if sys.platform == "linux":
         destination = wait_for_UF2_linux()
     elif sys.platform == "win32":

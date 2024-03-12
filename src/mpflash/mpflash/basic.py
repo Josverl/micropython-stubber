@@ -1,6 +1,6 @@
-from .vendored import pydfu as pydfu
-from argparse import Namespace
 from pathlib import Path
+
+from .vendored import pydfu as pydfu
 
 
 def main():
