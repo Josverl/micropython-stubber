@@ -22,6 +22,7 @@ from mpflash.list import list_mcus
 from .cli_group import cli
 from .common import PORT_FWTYPES, clean_version
 from .config import config
+from .download_input import DownloadParams, ask_missing_params
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -245,22 +246,42 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     help="""Force download of firmware even if it already exists.""",
     show_default=True,
 )
-def cli_download(destination: Path, boards: List[str], versions: List[str], force: bool, clean: bool):
-    versions = list(versions)
+def cli_download(
+    **kwargs,
+    # destination: Path,
+    # boards: List[str],
+    # versions: List[str],
+    # force: bool,
+    # clean: bool,
+):
+    params = DownloadParams(**kwargs)
+
+    if not params.boards:
+        # nothing specified - detect connected boards
+        params.ports, params.boards = connected_boards()
+    # ask for any remaining parameters
+    params = ask_missing_params(params)
     # preview is not a version, it is an option to include preview versions
-    preview = "preview" in versions
-    versions = [v for v in versions if v != "preview"]
-    download(destination, [], boards, versions, force, clean, preview)
+    download(
+        params.destination,
+        params.ports,
+        params.boards,
+        params.versions,
+        params.force,
+        params.clean,
+        params.preview,
+    )
 
 
 def download(
-    destination: Path, ports: List[str], boards: List[str], versions: List[str], force: bool, clean: bool, preview: bool
+    destination: Path,
+    ports: List[str],
+    boards: List[str],
+    versions: List[str],
+    force: bool,
+    clean: bool,
+    preview: bool,
 ):
-    if not boards:
-        ports, boards = connected_boards()
-    else:
-        # use any port
-        ports = ports or list(PORT_FWTYPES.keys())
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
         exit(1)

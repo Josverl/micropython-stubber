@@ -3,9 +3,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Tuple, TypedDict, Union
 
+from mpflash.common import PORT_FWTYPES
 
-# BoardClass based on the dataclass Board
-# - scripts\get_boardnames.py
+
+# Board  based on the dataclass Board but changed to TypedDict
+# - source : get_boardnames.py
 class Board(TypedDict):
     """MicroPython Board definition"""
 
@@ -27,7 +29,7 @@ def read_boardinfo() -> List[Board]:
 def known_mp_ports() -> List[str]:
     info = read_boardinfo()
     # select the unique ports from info
-    ports = set({board["port"] for board in info})
+    ports = set({board["port"] for board in info if board["port"] in PORT_FWTYPES.keys()})
     return sorted(list(ports))
 
 
@@ -43,14 +45,3 @@ def find_mp_port(board: str) -> str:
         if board_info["board"] == board:
             return board_info["port"]
     return ""
-
-
-if __name__ == "__main__":
-
-    ports = known_mp_ports()
-    print(ports)
-
-    # select the unique boards from info for a specific port
-    port = "stm32"
-    boards = known_mp_boards(port)
-    print(boards)
