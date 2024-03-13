@@ -11,7 +11,7 @@ from typing import List, Optional
 import esptool
 from loguru import logger as log
 
-from .mpremoteboard.mpremoteboard import MPRemoteBoard
+from .mpremoteboard import MPRemoteBoard
 from .common import wait_for_restart
 
 def flash_esp(

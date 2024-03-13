@@ -6,7 +6,7 @@ from loguru import logger as log
 from packaging.version import parse
 from rich.progress import track
 
-from mpflash.mpremoteboard.mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import MPRemoteBoard
 
 PORT_FWTYPES = {
     "stm32": [".dfu"],  # need .dfu for pydfu.py - .hex for cube cli/GUI

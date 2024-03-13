@@ -16,7 +16,7 @@ from .flash_uf2 import flash_uf2
 from .list import show_mcus
 
 # TODO: - refactor so that we do not need the entire stubber package
-from .mpremoteboard.mpremoteboard import MPRemoteBoard
+from .mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
 

@@ -11,7 +11,7 @@ from typing import Optional
 from loguru import logger as log
 from rich.progress import track
 
-from .mpremoteboard.mpremoteboard import MPRemoteBoard
+from .mpremoteboard import MPRemoteBoard
 
 from .common import PORT_FWTYPES
 from .flash_uf2_linux import dismount_uf2, wait_for_UF2_linux
