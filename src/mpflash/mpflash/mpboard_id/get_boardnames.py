@@ -6,14 +6,14 @@ import json
 import re
 from dataclasses import asdict, dataclass, is_dataclass
 from pathlib import Path
-from typing import List
+from typing import List, TypedDict
 
 from tabulate import tabulate
 
 import stubber.basicgit as git
 
 
-@dataclass(kw_only=True)
+@dataclass()
 class Board:
     """MicroPython Board definition"""
 
@@ -73,9 +73,7 @@ def collect_boardinfo(mpy_path: Path, version: str) -> List[Board]:
                     mcu_name = match[1]
                     found += 1
                 if found == 2:
-                    description = (
-                        f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
-                    )
+                    description = f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
                     board_list.append(
                         Board(
                             port=port,

@@ -61,7 +61,7 @@ def show_mcus(
     conn_mcus: List[MPRemoteBoard],
     title: str = "Connected boards",
     refresh: bool = True,
-):
+):  # sourcery skip: extract-duplicate-method
     """Show the list of connected boards in a nice table"""
     table = Table(
         title=title,

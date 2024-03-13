@@ -3,12 +3,13 @@ Simple Git module, where needed via powershell
 
 Some of the functions are based on the PyGithub module
 """
+
 import os
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Union
 
-import cachetools.func
+# import cachetools.func
 from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse

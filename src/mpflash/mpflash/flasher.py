@@ -207,25 +207,12 @@ def auto_update(
     show_default=True,
     help="""Erase flash before writing new firmware. (not on UF2 boards)""",
 )
-# @click.option(
-#     "--stm32-dfu/--stm32-hex",
-#     "--dfu/--hex",
-#     default=True,
-#     show_default=True,
-#     help="""Use .dfu (dfu-util) or .hex (using external STM32CubeProgrammer CLI) to flash STM32 boards.""",
-# )
 @click.option(
     "--bootloader/--no-bootloader",
     default=True,
     is_flag=True,
     show_default=True,
     help="""Enter micropython bootloader mode before flashing.""",
-)
-@click.option(
-    "--preview",
-    default=False,
-    is_flag=True,
-    help="""Flash preview version""",
 )
 def cli_flash_board(
     target_version: str,
@@ -236,7 +223,6 @@ def cli_flash_board(
     variant: Optional[str] = None,
     cpu: Optional[str] = None,
     erase: bool = False,
-    preview: bool = False,
     # stm32_dfu: bool = True,
     bootloader: bool = True,
 ):
@@ -257,7 +243,7 @@ def cli_flash_board(
             fw_folder=fw_folder,
             board=board,
             version=target_version,
-            preview=preview or "preview" in target_version,
+            preview="preview" == target_version.lower(),
             port=port,
             selector=selector,
         )
