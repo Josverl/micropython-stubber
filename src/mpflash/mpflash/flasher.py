@@ -6,16 +6,13 @@ import jsonlines
 import rich_click as click
 from loguru import logger as log
 
-from mpflash.flash_stm32 import flash_stm32
-
 from .cli_group import cli
 from .common import FWInfo, clean_version
 from .config import config
 from .flash_esp import flash_esp
+from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
 from .list import show_mcus
-
-# TODO: - refactor so that we do not need the entire stubber package
 from .mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
@@ -43,13 +40,15 @@ def find_firmware(
     variants: bool = False,
     fw_folder: Optional[Path] = None,
     trie: int = 1,
-    selector: Optional[Dict[str, str]] = {},
+    selector: Optional[Dict[str, str]] = None,
 ):
+    if selector is None:
+        selector = {}
     fw_folder = fw_folder or config.firmware_folder
     # Use the information in firmwares.jsonl to find the firmware file
     fw_list = load_firmwares(fw_folder)
     if not fw_list:
-        log.error(f"No firmware files found. Please download the firmware first.")
+        log.error("No firmware files found. Please download the firmware first.")
         return []
     # filter by version
     version = clean_version(version, drop_v=True)
@@ -108,9 +107,11 @@ def auto_update(
     fw_folder: Path,
     *,
     preview: bool = False,
-    selector: Optional[Dict[str, str]] = {},
+    selector: Optional[Dict[str, str]] = None,
 ) -> WorkList:
     """Builds a list of boards to update based on the connected boards and the firmware available"""
+    if selector is None:
+        selector = {}
     wl: WorkList = []
     for mcu in conn_boards:
         if mcu.family != "micropython":
@@ -232,6 +233,7 @@ def cli_flash_board(
         "stm32": ".dfu",  # if stm32_dfu else ".hex",
     }
     target_version = clean_version(target_version)
+    preview = target_version == "preview"
     # Update all micropython boards to the latest version
     if target_version and port and board and serial_port:
         # TODO : Find a way to avoid needing to specify the port
@@ -243,7 +245,7 @@ def cli_flash_board(
             fw_folder=fw_folder,
             board=board,
             version=target_version,
-            preview="preview" == target_version.lower(),
+            preview=target_version.lower() == "preview",
             port=port,
             selector=selector,
         )

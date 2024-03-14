@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mpflash"
-version = "0.3.0"
+version = "0.4.0.post1"
 description = "Flash and download tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -35,7 +35,8 @@ pyusb = "^1.2.1"
 packaging = "23.2"
 tenacity = "8.2.3"
 mpremote = "^1.22.0"
-libusb-package = {version = "^1.0.26.2", platform = "windows"}
+inquirer = "^3.2.4"
+libusb = {version = "^1.0.27", platform = "win32"}
 
 [tool.poetry.group.dev.dependencies]
 types-beautifulsoup4 = "^4.12.0.20240106"
