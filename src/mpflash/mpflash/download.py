@@ -8,21 +8,15 @@ import itertools
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
 import requests
-import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
 from rich.progress import track
 
-from mpflash.list import list_mcus
-
-from .cli_group import cli
 from .common import PORT_FWTYPES, clean_version
-from .config import config
-from .download_input import DownloadParams, ask_missing_params
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -204,75 +198,6 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     return unique_boards
 
 
-@cli.command(
-    "download",
-    help="Download MicroPython firmware for specific ports, boards and versions.",
-)
-@click.option(
-    "--destination",
-    "-d",
-    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
-    default=config.firmware_folder,
-    show_default=True,
-    help="The folder to download the firmware to.",
-)
-@click.option(
-    "--version",
-    "-v",
-    "versions",
-    multiple=True,
-    help="The version of MicroPython to to download. Use 'preview' to include preview versions.",
-    show_default=True,
-    default=["stable"],
-)
-@click.option(
-    "--board",
-    "-b",
-    "boards",
-    multiple=True,
-    show_default=True,
-    help="The board(s) to download the firmware for.",  # Use '--board all' to download all boards.",
-)
-@click.option(
-    "--clean/--no-clean",
-    default=True,
-    show_default=True,
-    help="""Remove dates and hashes from the downloaded firmware filenames.""",
-)
-@click.option(
-    "--force",
-    default=False,
-    is_flag=True,
-    help="""Force download of firmware even if it already exists.""",
-    show_default=True,
-)
-def cli_download(
-    **kwargs,
-    # destination: Path,
-    # boards: List[str],
-    # versions: List[str],
-    # force: bool,
-    # clean: bool,
-):
-    params = DownloadParams(**kwargs)
-
-    if not params.boards:
-        # nothing specified - detect connected boards
-        params.ports, params.boards = connected_boards()
-    # ask for any remaining parameters
-    params = ask_missing_params(params)
-    # preview is not a version, it is an option to include preview versions
-    download(
-        params.destination,
-        params.ports,
-        params.boards,
-        params.versions,
-        params.force,
-        params.clean,
-        params.preview,
-    )
-
-
 def download(
     destination: Path,
     ports: List[str],
@@ -292,10 +217,3 @@ def download(
         log.critical(f"Could not create folder {destination}\n{e}")
         exit(1)
     download_firmwares(destination, ports, boards, versions, preview=preview, force=force, clean=clean)
-
-
-def connected_boards() -> Tuple[List[str], List[str]]:
-    mpr_boards = list_mcus()
-    ports = list({b.port for b in mpr_boards})
-    boards = list({b.board for b in mpr_boards})
-    return ports, boards

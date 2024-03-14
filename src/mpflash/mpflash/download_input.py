@@ -29,7 +29,6 @@ def ask_missing_params(params: DownloadParams) -> DownloadParams:
     params.preview = "preview" in params.versions
     params.versions = [v for v in params.versions if v != "preview"]
     questions = []
-    print("PARAMS: ", repr(params))
     if not params.boards:
         ask_port_board(questions)
 
