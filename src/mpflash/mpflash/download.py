@@ -11,12 +11,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
+from mpflash.common import PORT_FWTYPES
 import requests
 from bs4 import BeautifulSoup
 from loguru import logger as log
 from rich.progress import track
 
-from .common import PORT_FWTYPES, clean_version
+# from .common import PORT_FWTYPES, clean_version
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -210,7 +211,7 @@ def download(
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
         exit(1)
-    versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
+    # versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     try:
         destination.mkdir(exist_ok=True, parents=True)
     except (PermissionError, FileNotFoundError) as e:

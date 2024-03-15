@@ -29,11 +29,12 @@ def ask_missing_params(params: DownloadParams) -> DownloadParams:
     params.preview = "preview" in params.versions
     params.versions = [v for v in params.versions if v != "preview"]
     questions = []
-    if not params.boards:
+    if not params.boards or "?" in params.boards:
         ask_port_board(questions)
 
     answers = inquirer.prompt(questions)
-    assert answers is not None
+    if not answers:
+        return params
     # print(repr(answers))
     if "port" in answers:
         params.ports = [answers["port"]]

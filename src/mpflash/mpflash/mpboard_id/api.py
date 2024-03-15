@@ -27,6 +27,7 @@ def read_boardinfo() -> List[Board]:
 
 
 def known_mp_ports() -> List[str]:
+    # TODO: Filter for Version
     info = read_boardinfo()
     # select the unique ports from info
     ports = set({board["port"] for board in info if board["port"] in PORT_FWTYPES.keys()})

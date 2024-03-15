@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import List, Tuple
 
+from mpflash.common import clean_version
 import rich_click as click
 
 from .cli_group import cli
@@ -69,6 +70,9 @@ def cli_download(
     if not params.boards:
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
+
+    params.versions = [clean_version(v, drop_v=True) for v in params.versions]  # remove leading v from version
+
     # ask for any remaining parameters
     params = ask_missing_params(params)
     # preview is not a version, it is an option to include preview versions
