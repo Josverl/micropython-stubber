@@ -187,7 +187,7 @@ reportUntypedNamedTuple = "none"
 [tool.black]
 # use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
 line-length = 140
-target_version = ['py38']
+# target_version = ['py38']
 include = '\.pyi?$'
 exclude = '''
 (
