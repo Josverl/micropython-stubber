@@ -212,19 +212,19 @@ exclude = '''
 minversion = "7.0"
 python_functions = ["test_", "*_test"]
 python_files = ["test_*.py", "*_test.py"]
-testpaths = ["tests", "src/stubber", "repos/micropython-stubs/tests", "modules/**/tests"]
-ignore = ["tests/codemods/codemod_test_cases"]
+testpaths = [
+    "tests", 
+    "src/stubber", 
+    "src/mpflash", 
+    "repos/micropython-stubs/tests", 
+    "modules/**/tests",
+    ]
 norecursedirs = [
-    "repos",
-    "typings*",
-    ".svn",
-    "_build",
-    "tmp*",
     ".*",
-    "build",
-    "dist",
-    "{arch}",
-    "*.egg",
+    ".*/*",
+    # "repos/*",
+    "tests/codemods/codemod_test_cases/*",
+    "typings*",
 ]
 junit_family = "xunit1"
 
@@ -235,6 +235,9 @@ addopts = "--verbose --capture=no -m 'not basicgit'"
 # -n --numprocesses=numprocesses - 
 
 markers = [
+    "stubber: marks tests of the stubber tool",
+    "mpflash: marks tests of the mpflash tool",
+
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: Integration tests (slower)",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
@@ -261,7 +264,7 @@ markers = [
 [tool.coverage.run]
 parallel = false
 branch = true
-source = ["src"]
+source = ["src/stubber", "src/mpflash",]
 omit = [
     # helper files in board
     "*/boot.py",
