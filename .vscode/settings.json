@@ -1,7 +1,7 @@
 {
     "python.analysis.autoSearchPaths": true,
     "python.analysis.logLevel": "Trace",
-    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.diagnosticMode": "workspace",
     //////////////////////////////////////////////////////////////
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
