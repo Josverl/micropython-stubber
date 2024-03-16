@@ -11,7 +11,7 @@ on:
     branches: [main]
 
   push:
-    branches: [main]
+    branches: [main, dev/*, feat/*, fix/*]
     paths:
       - "src/**"
       - "tests/**"
