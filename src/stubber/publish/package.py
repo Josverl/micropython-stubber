@@ -4,7 +4,7 @@ prepare a set of stub files for publishing to PyPi
 """
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Union
 
 from loguru import logger as log
 from packaging.version import parse

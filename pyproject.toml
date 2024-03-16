@@ -72,6 +72,7 @@ executing = "^2.0.1"
 mypy-gitlab-code-quality = "^1.1.0"
 rich-click = "^1.7.3"
 mpremote = "^1.22.0"
+mpflash = "^0.4.0.post3"
 
 [tool.poetry.group.docs]
 optional = true
@@ -211,7 +212,8 @@ exclude = '''
 minversion = "7.0"
 python_functions = ["test_", "*_test"]
 python_files = ["test_*.py", "*_test.py"]
-testpaths = ["tests", "src", "repos/micropython-stubs/tests", "modules/**/tests"]
+testpaths = ["tests", "src/stubber", "repos/micropython-stubs/tests", "modules/**/tests"]
+ignore = ["tests/codemods/codemod_test_cases"]
 norecursedirs = [
     "repos",
     "typings*",
