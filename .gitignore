@@ -64,7 +64,6 @@ typings
 empty
 **/*_lock.file
 
-# do not check in any downloaded firmwares
-**/firmware
 tmp_minified.py
 src/stubber/board/board_info.json
+codecov.exe
