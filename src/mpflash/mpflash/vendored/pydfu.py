@@ -3,7 +3,7 @@
 # Copyright (c) 2013/2014 Ibrahim Abdelkader <i.abdalkader@gmail.com>
 # This work is licensed under the MIT license, see the file LICENSE for
 # details.
-
+# type: ignore
 """This module implements enough functionality to program the STM32F4xx over
 DFU, without requiring dfu-util.
 

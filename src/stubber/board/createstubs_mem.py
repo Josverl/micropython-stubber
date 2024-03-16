@@ -510,9 +510,15 @@ def _build(s):
 
 
 def _info():  # type:() -> dict[str, str]
+    try:
+        fam = sys.implementation[0]  # type: ignore
+    except TypeError:
+        # testing on CPython 3.11
+        fam = sys.implementation.name
+
     info = OrderedDict(
         {
-            "family": sys.implementation[0],  # type: ignore
+            "family": fam,
             "version": "",
             "build": "",
             "ver": "",

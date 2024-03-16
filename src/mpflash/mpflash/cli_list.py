@@ -6,10 +6,11 @@ from rich import print
 from rich.progress import track
 from rich.table import Table
 
+from mpflash.mpremoteboard import MPRemoteBoard
+
 from .cli_group import cli
 from .config import config
 from .logger import console, make_quiet
-from .mpremoteboard import MPRemoteBoard
 
 
 @cli.command("list", help="List the connected MCU boards.")

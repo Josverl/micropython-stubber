@@ -4,7 +4,7 @@ Helper functions to deal with path names and filenames for the folders in the st
 """
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from loguru import logger as log
 

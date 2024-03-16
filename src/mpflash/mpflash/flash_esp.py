@@ -11,16 +11,14 @@ from typing import List, Optional
 import esptool
 from loguru import logger as log
 
-from .mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import MPRemoteBoard
+
 from .common import wait_for_restart
 
-def flash_esp(
-    mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True
-) -> Optional[MPRemoteBoard]:
+
+def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
     if mcu.port not in ["esp32", "esp8266"] or mcu.board in ["ARDUINO_NANO_ESP32"]:
-        log.error(
-            f"esptool not supported for {mcu.port} {mcu.board} on {mcu.serialport}"
-        )
+        log.error(f"esptool not supported for {mcu.port} {mcu.board} on {mcu.serialport}")
         return None
 
     log.info(f"Flashing {fw_file} on {mcu.board} on {mcu.serialport}")
@@ -31,9 +29,7 @@ def flash_esp(
         # baud_rate = str(115_200)
     cmds: List[List[str]] = []
     if erase:
-        cmds.append(
-            f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split()
-        )
+        cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split())
 
     if mcu.cpu.upper() in ("ESP32", "ESP32S2"):
         start_addr = "0x1000"

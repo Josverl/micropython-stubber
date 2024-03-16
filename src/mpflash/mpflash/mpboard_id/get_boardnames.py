@@ -6,7 +6,7 @@ import json
 import re
 from dataclasses import asdict, dataclass, is_dataclass
 from pathlib import Path
-from typing import List, TypedDict
+from typing import List
 
 from tabulate import tabulate
 
@@ -29,7 +29,7 @@ class Board:
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o: object):
         if is_dataclass(o):
-            return asdict(o)
+            return asdict(o) # type: ignore
         elif isinstance(o, Path):
             return o.as_posix()
         return super().default(o)

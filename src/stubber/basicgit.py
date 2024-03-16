@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Optional, Union
 
-# import cachetools.func
+import cachetools.func
 from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse

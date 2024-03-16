@@ -7,7 +7,7 @@ from loguru import logger as log
 
 from .common import FWInfo, clean_version
 from .config import config
-from .mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
 WorkList = List[Tuple[MPRemoteBoard, FWInfo]]

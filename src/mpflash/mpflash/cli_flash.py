@@ -15,7 +15,7 @@ from .cli_list import show_mcus
 from .config import config
 from .flash import WorkList, auto_update, enter_bootloader, find_firmware
 from .common import clean_version
-from .mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import MPRemoteBoard
 # #########################################################################################################
 # CLI
 # #########################################################################################################

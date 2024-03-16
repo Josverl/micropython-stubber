@@ -8,7 +8,7 @@ from mpflash.common import wait_for_restart
 
 # from .flash_stm32_cube import flash_stm32_cubecli
 from .flash_stm32_dfu import dfu_init, flash_stm32_dfu
-from .mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import MPRemoteBoard
 
 
 def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_dfu: bool = True):

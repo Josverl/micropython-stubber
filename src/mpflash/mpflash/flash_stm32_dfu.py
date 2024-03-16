@@ -6,8 +6,9 @@ from typing import Optional
 
 from loguru import logger as log
 
+from mpflash.mpremoteboard import MPRemoteBoard
+
 from .common import wait_for_restart
-from .mpremoteboard import MPRemoteBoard
 
 
 def init_libusb_windows():

@@ -1,10 +1,15 @@
+# sourcery skip: require-parameter-annotation
+# sourcery skip: replace-interpolation-with-fstring
 #!/usr/bin/python
 
 # Written by Antonio Galea - 2010/11/18
 # Distributed under Gnu LGPL 3.0
 # see http://www.gnu.org/licenses/lgpl-3.0.txt
 
-import sys, struct, zlib, os
+import os
+import struct
+import sys
+import zlib
 from optparse import OptionParser
 
 DEFAULT_DEVICE = "0x0483:0xdf11"
@@ -34,9 +39,7 @@ def parse(file, dump_images=False):
     prefix, data = consume("<5sBIB", data, "signature version size targets")
     print("%(signature)s v%(version)d, image size: %(size)d, targets: %(targets)d" % prefix)
     for t in range(prefix["targets"]):
-        tprefix, data = consume(
-            "<6sBI255s2I", data, "signature altsetting named name size elements"
-        )
+        tprefix, data = consume("<6sBI255s2I", data, "signature altsetting named name size elements")
         tprefix["num"] = t
         if tprefix["named"]:
             tprefix["name"] = cstring(tprefix["name"])
@@ -74,7 +77,7 @@ def parse(file, dump_images=False):
 
 def build(file, targets, device=DEFAULT_DEVICE):
     data = b""
-    for t, target in enumerate(targets):
+    for _, target in enumerate(targets):
         tdata = b""
         for image in target:
             # pad image to 8 bytes (needed at least for L476)
@@ -82,9 +85,7 @@ def build(file, targets, device=DEFAULT_DEVICE):
             image["data"] = image["data"] + bytes(bytearray(8)[0:pad])
             #
             tdata += struct.pack("<2I", image["address"], len(image["data"])) + image["data"]
-        tdata = (
-            struct.pack("<6sBI255s2I", b"Target", 0, 1, b"ST...", len(tdata), len(target)) + tdata
-        )
+        tdata = struct.pack("<6sBI255s2I", b"Target", 0, 1, b"ST...", len(tdata), len(target)) + tdata
         data += tdata
     data = struct.pack("<5sBIB", b"DfuSe", 1, len(data) + 11, len(targets)) + data
     v, d = map(lambda x: int(x, 0) & 0xFFFF, device.split(":", 1))
