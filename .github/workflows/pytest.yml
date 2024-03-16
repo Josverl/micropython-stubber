@@ -8,18 +8,19 @@ name: pytest
 on:
   workflow_dispatch:
   pull_request:
-    # branches: [main]
+    branches: [main]
 
-  # push:
-  # paths:
-  #   - 'board/**'
-  #   - "src/**"
-  #   - "tests/**"
-  #   - "snippets/**"
-  #   - "pyproject.toml"
-  #   - "poetry.lock"
-  #   - "pyrightconfig.json"
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "**/pyproject.toml"
+      - "**/poetry.lock"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   run_tests:
