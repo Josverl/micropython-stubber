@@ -76,18 +76,17 @@ jobs:
       #----------------------------------------------
       - name: stubber clone
         run: poetry run stubber clone --add-stubs
-
-      - name: Test with pytest
+        
+      - name: Test mpflash
         if: always()
-        run: |
-          poetry run coverage run -m pytest -m "not basicgit" -m "not snippets" --junitxml=results/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+        run: poetry run coverage run -m pytest -m "mpflash" --junitxml=results/mpflash-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
-      - name: Coverage lcov
-        if: always() # ignore previous error
-        run: |
-          poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
+      - name: Test stubber
+        if: always()
+        run: poetry run coverage run -m pytest -m "stubber" --junitxml=results/stubber-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
-      - name: Coverage xml
+
+      - name: Coverage --> .lcov
         if: always() # ignore previous error
         run: |
           poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
@@ -103,11 +102,20 @@ jobs:
           path: results/
           name: results-${{ matrix.python-version }}-${{ matrix.os }}
 
-      - name: Upload coverage
+      - name: Upload mpflash coverage.xml to Codecov
         if: always() # ignore previous error
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          file: results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          file: results/mpflash-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          flags: mpflash
+          fail_ci_if_error: false
+
+      - name: Upload stubber coverage.xml to Codecov
+        if: always() # ignore previous error
+        uses: codecov/codecov-action@v4
+        with:
+          file: results/stubber-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          flags: stubber
           fail_ci_if_error: false
 
       - name: Push result to Testspace server
