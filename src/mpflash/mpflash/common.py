@@ -1,7 +1,8 @@
+import os
 import time
 from typing import TypedDict
 
-from github import Github
+from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse
 from rich.progress import track
@@ -18,6 +19,14 @@ PORT_FWTYPES = {
     "nrf": [".uf2"],
     "renesas-ra": [".hex"],
 }
+
+# Token with no permissions to avoid throttling
+# https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
+PAT_NO_ACCESS = (
+    "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
+)
+PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
+GH_CLIENT = Github(auth=Auth.Token(PAT))
 
 
 class FWInfo(TypedDict):
@@ -89,12 +98,11 @@ def clean_version(
     return version
 
 
-def micropython_versions(minver: str = "v1.9.2"):
+def micropython_versions(minver: str = "v1.10"):
     """Get the list of micropython versions from github tags"""
     try:
-        g = Github()
-        _ = 1 / 0
-        repo = g.get_repo("micropython/micropython")
+        gh_client = GH_CLIENT
+        repo = gh_client.get_repo("micropython/micropython")
         versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
     except Exception:
         versions = [
@@ -116,8 +124,6 @@ def micropython_versions(minver: str = "v1.9.2"):
             "v1.12",
             "v1.11",
             "v1.10",
-            "v1.9.4",
-            "v1.9.3",
         ]
         versions = [v for v in versions if parse(v) >= parse(minver)]
     return sorted(versions)

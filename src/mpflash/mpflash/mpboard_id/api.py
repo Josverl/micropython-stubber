@@ -1,7 +1,7 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Tuple, TypedDict, Union
+from typing import List, Optional, Tuple, TypedDict, Union
 
 from mpflash.common import PORT_FWTYPES
 
@@ -22,6 +22,7 @@ class Board(TypedDict):
 
 @lru_cache(maxsize=None)
 def read_boardinfo() -> List[Board]:
+    """Reads the board_info.json file and returns the data as a list of Board objects"""
     with open(Path(__file__).parent / "board_info.json", "r") as file:
         return json.load(file)
 
@@ -34,9 +35,15 @@ def known_mp_ports() -> List[str]:
     return sorted(list(ports))
 
 
-def known_mp_boards(port: str) -> List[Tuple[str, str]]:
+def known_mp_boards(port: str, versions: Optional[List[str]] = None) -> List[Tuple[str, str]]:
     info = read_boardinfo()
-    boards = set({(board["description"], board["board"]) for board in info if board["port"] == port})
+    # dont filter for 'preview' as they are not in the board_info.json
+    versions = [v for v in versions if "preview" not in v] if versions else None
+    if versions:
+        info = [board for board in info if board["version"] in versions]
+    info = [board for board in info if board["port"] == port]
+
+    boards = set({(board["description"], board["board"]) for board in info})
     return sorted(list(boards))
 
 

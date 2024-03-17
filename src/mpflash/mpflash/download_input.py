@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
 
+from mpflash.common import micropython_versions
 from mpflash.mpboard_id.api import known_mp_boards, known_mp_ports
 
 
@@ -29,6 +30,9 @@ def ask_missing_params(params: DownloadParams) -> DownloadParams:
     params.preview = "preview" in params.versions
     params.versions = [v for v in params.versions if v != "preview"]
     questions = []
+    if not params.versions or "?" in params.versions:
+        ask_versions(questions)
+
     if not params.boards or "?" in params.boards:
         ask_port_board(questions)
 
@@ -40,17 +44,18 @@ def ask_missing_params(params: DownloadParams) -> DownloadParams:
         params.ports = [answers["port"]]
     if "boards" in answers:
         params.boards = answers["boards"]
-    # print(repr(inputs))
+    if "versions" in answers:
+        params.versions = answers["versions"]
+
+    print(repr(params))
 
     return params
 
 
-# TODO Rename this here and in `complete_dl_inputs`
-def ask_port_board(questions: list):
+def ask_port_board(questions: list, *, action: str = "download"):
     # import only when needed to reduce load time
     import inquirer
 
-    action = "download"
     questions.extend(
         (
             inquirer.List(
@@ -62,8 +67,28 @@ def ask_port_board(questions: list):
             inquirer.Checkbox(
                 "boards",
                 message=f"What board do you want to {action}?",
-                choices=lambda answers: known_mp_boards(answers["port"]),
+                choices=lambda answers: known_mp_boards(answers["port"], answers["versions"]),
                 validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
             ),
+        )
+    )
+
+
+def ask_versions(questions: list, *, action: str = "download"):
+    # import only when needed to reduce load time
+    import inquirer
+
+    input_ux = inquirer.Checkbox if action == "download" else inquirer.List
+    mp_versions: List[str] = micropython_versions()
+    mp_versions = [v for v in mp_versions if "preview" not in v]
+    mp_versions.append("preview")
+    mp_versions.reverse()  # newest first
+    questions.append(
+        input_ux(
+            "versions",
+            message=f"What version(s) do you want to {action}?",
+            choices=mp_versions,
+            autocomplete=True,
+            validate=lambda _, x: True if x else "Please select at least one version",  # type: ignore
         )
     )

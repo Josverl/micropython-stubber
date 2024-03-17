@@ -8,9 +8,11 @@ from dataclasses import asdict, dataclass, is_dataclass
 from pathlib import Path
 from typing import List
 
+from loguru import logger as log
 from tabulate import tabulate
 
 import stubber.basicgit as git
+from mpflash.common import micropython_versions
 
 
 @dataclass()
@@ -29,7 +31,7 @@ class Board:
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o: object):
         if is_dataclass(o):
-            return asdict(o) # type: ignore
+            return asdict(o)  # type: ignore
         elif isinstance(o, Path):
             return o.as_posix()
         return super().default(o)
@@ -177,7 +179,7 @@ def get_board_list(versions: List[str], mpy_path: Path):
     # sort the board_list by description and board
     print("Total number of boards found:", len(board_list))
     seen = set()
-    board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
+    # board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
     board_list.sort(key=lambda x: x.description.lower())
     print("Unique board descriptions found:", len(board_list))
     return board_list
@@ -186,27 +188,17 @@ def get_board_list(versions: List[str], mpy_path: Path):
 def main():
     """Main function to collect and write board information."""
     mpy_path = Path("repos/micropython")
-    versions = [
-        "v1.22.0",
-        "v1.21.0",
-        "v1.20.0",
-        "v1.19.1",
-        "v1.18",
-        "v1.17",
-        "v1.16",
-        "v1.15",
-        "v1.14",
-        "v1.13",
-        "v1.12",
-        "v1.11",
-        "v1.10",
-    ]
-    # versions.reverse()
+
+    versions = micropython_versions(minver="v1.10")
+    if not versions:
+        log.error("No versions found")
+        return 1
+    versions.reverse()
     board_list = get_board_list(versions, mpy_path)
 
     print(tabulate(board_list, headers="keys"))  # type: ignore
-    write_files(board_list, folder=Path("src/stubber/data"))
-    write_files(board_list, folder=Path("src/stubber/board"))
+    write_files(board_list, folder=Path(__file__).parent)
+    write_files(board_list, folder=Path(__file__).parent)
 
 
 if __name__ == "__main__":
