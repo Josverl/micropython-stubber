@@ -20,6 +20,7 @@ pytestmark = [pytest.mark.stubber]
     ],
 )
 @pytest.mark.mocked
+@pytest.mark.version("1.19.1")
 def test_version_1_19_1(
     mocker: MockerFixture,
     fake_package: StubPackage,
@@ -40,6 +41,7 @@ def test_version_1_19_1(
     ],
 )
 @pytest.mark.mocked
+@pytest.mark.version("1.20.0")
 def test_version_1_20_0(
     mocker: MockerFixture,
     fake_package: StubPackage,
@@ -60,6 +62,7 @@ def test_version_1_20_0(
     ],
 )
 @pytest.mark.mocked
+@pytest.mark.version("1.19.0")
 def test_version_1_19_0(
     mocker: MockerFixture,
     fake_package: StubPackage,
