@@ -26,10 +26,10 @@
 # THE SOFTWARE.
 
 from __future__ import print_function
+
 import contextlib
 import os
 import sys
-import glob
 import tempfile
 from collections import namedtuple
 
@@ -270,7 +270,9 @@ class ManifestFile:
                 raise ManifestFileError("Expected .py file")
             kind = KIND_COMPILE_AS_MPY
 
-        self._manifest_files.append(ManifestOutput(FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt))
+        self._manifest_files.append(
+            ManifestOutput(FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt)
+        )
 
     def _search(self, base_path, package_path, files, exts, kind, opt=None, strict=False):
         base_path = self._resolve_path(base_path)
@@ -411,7 +413,7 @@ class ManifestFile:
 
             for lib_dir in lib_dirs:
                 # Search for {lib_dir}/**/{name}/manifest.py.
-                for root, dirnames, filenames in os.walk(os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)):
+                for root, _, filenames in os.walk(os.path.join(self._path_vars["MPY_LIB_DIR"], lib_dir)):
                     if os.path.basename(root) == name and "manifest.py" in filenames:
                         self.include(root, is_require=True, **kwargs)
                         return
