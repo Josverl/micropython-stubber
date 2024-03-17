@@ -6,7 +6,7 @@ from mock import MagicMock
 from stubber.publish.merge_docstubs import copy_and_merge_docstubs, merge_all_docstubs
 
 from .fakeconfig import FakeConfig
-
+pytestmark = [pytest.mark.stubber]
 
 @pytest.mark.mocked
 @pytest.mark.integration

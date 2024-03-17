@@ -5,7 +5,7 @@ import pytest
 from stubber.minify import cross_compile
 
 # mark all tests
-pytestmark = pytest.mark.minify
+pytestmark = [pytest.mark.stubber, pytest.mark.minify]
 
 SOURCE = '''
 """
@@ -23,6 +23,7 @@ print("test")
 
 x = 1
 '''
+
 
 # test cross compile with different sources and targets
 # sources:                  Targets

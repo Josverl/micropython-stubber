@@ -9,6 +9,8 @@ import distro
 import pytest
 from _pytest.config import Config
 
+pytestmark = [pytest.mark.stubber, pytest.mark.native]
+
 # "list of avaialble micropython versions on the current platfor"
 fw_list = []  # no tests on mac
 # Figure out ubuntu version

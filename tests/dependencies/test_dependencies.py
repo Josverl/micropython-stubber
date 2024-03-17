@@ -3,12 +3,7 @@ import subprocess
 import pytest
 from packaging import version
 
-# def test_os_path():
-#     "Only needed to debug venv installation issues"
-#     os_path = os.environ["PATH"].split(os.pathsep)
-#     print("path")
-#     for p in os_path:
-#         print(f" - {p}")
+pytestmark = [pytest.mark.stubber]
 
 
 @pytest.mark.parametrize(

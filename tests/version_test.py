@@ -1,3 +1,4 @@
+import pytest
 from pathlib import Path
 
 from packaging.version import parse
@@ -8,6 +9,8 @@ except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore
 assert tomllib  # - one out of two will work
 import stubber
+
+pytestmark = [pytest.mark.stubber]
 
 
 def test_package_versions_are_in_sync():

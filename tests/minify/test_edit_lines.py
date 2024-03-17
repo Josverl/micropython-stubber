@@ -2,7 +2,7 @@ import pytest
 from _pytest.python_api import RaisesContext
 
 from stubber.minify import edit_lines
-
+pytestmark = [pytest.mark.stubber]
 standard_edits = [
     ("keepprint", "print('Debug: "),
     ("keepprint", "print('DEBUG: "),

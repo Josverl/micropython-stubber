@@ -19,7 +19,7 @@ from .codemodcollector import TestCase as MyTestCase
 from .codemodcollector import collect_test_cases
 
 # mark all tests
-pytestmark = pytest.mark.codemod
+pytestmark = [pytest.mark.stubber,pytest.mark.codemod]
 
 
 def print_diff(before: str, after: str):

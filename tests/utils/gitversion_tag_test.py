@@ -5,6 +5,8 @@ from packaging.version import Version, parse
 
 from stubber.utils.makeversionhdr import get_version_info_from_git
 
+pytestmark = [pytest.mark.stubber]
+
 
 @pytest.mark.parametrize(
     "path",
@@ -27,7 +29,7 @@ def test_get_version(path):
         ver = parse(parts[0])
         assert isinstance(ver, Version)
     if len(parts) >= 3:
-        if parts[1] == 'preview':
+        if parts[1] == "preview":
             assert parts[2].isnumeric()
         else:
             # second part must be an integer

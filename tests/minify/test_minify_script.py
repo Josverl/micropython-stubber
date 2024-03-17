@@ -2,7 +2,7 @@ import pytest
 from _pytest.python_api import RaisesContext
 
 from stubber.minify import get_whitespace_context, minify_script
-
+pytestmark = [pytest.mark.stubber]
 
 @pytest.mark.parametrize(
     "content, index, expected",

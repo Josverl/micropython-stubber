@@ -3,7 +3,7 @@ import pytest
 
 # pytest.skip("---===*** DEBUGGING ***===---", allow_module_level=True)
 # mark all tests
-pytestmark = pytest.mark.doc_stubs
+pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
 # SOT
 from stubber.rst import sort_classes

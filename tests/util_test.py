@@ -10,6 +10,8 @@ from pytest_mock import MockerFixture
 # SOT
 import stubber.utils as utils
 
+pytestmark = [pytest.mark.stubber]
+
 
 @pytest.mark.parametrize(
     "commit, build, expected",

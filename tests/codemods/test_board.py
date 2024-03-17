@@ -12,7 +12,7 @@ from stubber.codemod._partials import Partial
 
 
 # mark all tests
-pytestmark = [pytest.mark.codemod, pytest.mark.minify]
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod, pytest.mark.minify]
 
 
 @pytest.fixture

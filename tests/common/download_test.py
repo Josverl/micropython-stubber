@@ -1,5 +1,7 @@
+import pytest
 import os
 
+pytestmark = [pytest.mark.stubber]
 # SOT
 import stubber.downloader as downloader
 

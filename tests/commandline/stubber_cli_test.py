@@ -11,7 +11,7 @@ import stubber.stubber as stubber
 from stubber.commands.switch_cmd import VERSION_LIST
 
 # mark all tests
-pytestmark = pytest.mark.cli
+pytestmark = [pytest.mark.stubber, pytest.mark.cli]
 
 
 def test_cmd_help():

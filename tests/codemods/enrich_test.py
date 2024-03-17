@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from stubber.codemod.enrich import enrich_file, enrich_folder
 
 # mark all tests
-pytestmark = pytest.mark.codemod
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
 
 @pytest.mark.parametrize(

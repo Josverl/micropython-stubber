@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
+pytestmark = [pytest.mark.stubber]
 
 def test_toplevel_config():
     # exists on top-level
