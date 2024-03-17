@@ -3,7 +3,7 @@ Lookup tables for the rst documentation stubber
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 # These are shown to import
 __all__ = [

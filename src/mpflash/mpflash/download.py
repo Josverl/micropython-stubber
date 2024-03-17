@@ -5,7 +5,6 @@ Uses the micropython.org website to get the available versions and locations to 
 
 import functools
 import itertools
-import json
 import re
 from pathlib import Path
 from typing import Dict, List, Optional

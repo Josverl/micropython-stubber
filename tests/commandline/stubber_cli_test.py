@@ -3,7 +3,6 @@ from typing import List
 
 import pytest
 from click.testing import CliRunner
-from mock import MagicMock
 from pytest_mock import MockerFixture
 
 # module under test :

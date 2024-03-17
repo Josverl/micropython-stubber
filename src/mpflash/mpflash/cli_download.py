@@ -1,6 +1,5 @@
 """CLI to Download MicroPython firmware for specific ports, boards and versions."""
 
-import pdb
 from pathlib import Path
 from typing import List, Tuple
 
