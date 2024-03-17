@@ -76,49 +76,45 @@ jobs:
       #----------------------------------------------
       - name: stubber clone
         run: poetry run stubber clone --add-stubs
-        
+
       - name: Test mpflash
         if: always()
-        run: poetry run coverage run -m pytest -m "mpflash" --junitxml=results/mpflash-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
-
-      - name: Test stubber
-        if: always()
-        run: poetry run coverage run -m pytest -m "stubber" --junitxml=results/stubber-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
-
-
-      - name: Coverage --> .lcov
-        if: always() # ignore previous error
-        run: |
-          poetry run coverage lcov -o results/coverage-${{ matrix.python-version }}-${{ matrix.os }}.lcov
-
-      #----------------------------------------------
-      # upload coverage stats
-      # .lcov to  artefacts (available for download)
-      # .XML  to Codecov
-      #----------------------------------------------
-      - uses: actions/upload-artifact@v4
-        if: always() # ignore previous error
-        with:
-          path: results/
-          name: results-${{ matrix.python-version }}-${{ matrix.os }}
+        run: poetry run coverage run -m pytest -m "mpflash" --junitxml=results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload mpflash coverage.xml to Codecov
         if: always() # ignore previous error
         uses: codecov/codecov-action@v4
         with:
-          file: results/mpflash-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          file: results/results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           flags: mpflash
           fail_ci_if_error: false
+
+      - name: Test stubber
+        if: always()
+        run: |
+          # poetry run coverage erase
+          poetry run coverage run -m pytest -m "stubber" --junitxml=results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload stubber coverage.xml to Codecov
         if: always() # ignore previous error
         uses: codecov/codecov-action@v4
         with:
-          file: results/stubber-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          file: results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
           flags: stubber
           fail_ci_if_error: false
+
+      #----------------------------------------------
+      # upload coverage stats
+      # .XML  to Codecov
+      #----------------------------------------------
 
       - name: Push result to Testspace server
         if: always() # ignore previous error
         run: |
-          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/test-results-*.xml --link codecov
+          testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
+
+      - uses: actions/upload-artifact@v4
+        if: always() # ignore previous error
+        with:
+          path: results/
+          name: results-${{ matrix.python-version }}-${{ matrix.os }}

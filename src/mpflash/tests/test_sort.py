@@ -1,9 +1,13 @@
 from pathlib import Path
+
 import pytest
+
 from mpflash.flash import find_firmware, local_firmwares
 
-pytestmark = [pytest.mark.stubber, pytest.mark.mpflash]
+pytestmark = [pytest.mark.mpflash]
 ####################
+# NOTE: this test has a conflict with tests in the stubber that load a mock of the ujson module
+# this is due to the fact that the jsonlines module tries to use ujson as a backend if it is available
 
 
 def test_load(tmp_path: Path):
