@@ -17,7 +17,13 @@ from bs4 import BeautifulSoup
 from loguru import logger as log
 from rich.progress import track
 
-# from .common import PORT_FWTYPES, clean_version
+# #########################################################################################################
+# make sure that jsonlines does not mistake the MicroPython ujson for the CPython ujson
+import jsonlines
+
+jsonlines.ujson = None  # type: ignore
+# #########################################################################################################
+
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -151,7 +157,8 @@ def download_firmwares(
 
     firmware_folder.mkdir(exist_ok=True)
 
-    with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
+    # with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
+    with jsonlines.open(firmware_folder / "firmware.jsonl", "a") as writer:
         for board in unique_boards:
             filename = firmware_folder / board["port"] / board["filename"]
             filename.parent.mkdir(exist_ok=True)
@@ -169,9 +176,9 @@ def download_firmwares(
             except requests.RequestException as e:
                 log.exception(e)
                 continue
-            # add the firmware to the jsonl file
-            json_str = json.dumps(board) + "\n"
-            f_jsonl.write(json_str)
+            # # add the firmware to the jsonl file
+            # json_str = json.dumps(board) + "\n"
+            writer.write(board)
             downloaded += 1
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
 
