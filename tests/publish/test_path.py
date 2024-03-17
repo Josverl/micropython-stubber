@@ -2,6 +2,8 @@ import pytest
 
 from stubber.publish.pathnames import board_folder_name
 
+pytestmark = [pytest.mark.stubber]
+
 
 def test_board_folder_name():
     fw = {

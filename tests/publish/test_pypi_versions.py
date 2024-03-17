@@ -1,5 +1,8 @@
+import pytest
 from packaging.version import Version
 from stubber.publish.pypi import get_pypi_versions
+
+pytestmark = [pytest.mark.stubber]
 
 
 def test_get_pypi_versions():  # sourcery skip: extract-duplicate-method

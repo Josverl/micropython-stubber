@@ -237,27 +237,28 @@ addopts = "--verbose --capture=no -m 'not basicgit'"
 markers = [
     "stubber: marks tests of the stubber tool",
     "mpflash: marks tests of the mpflash tool",
+    "snippets: test snippets to check the stubs",
+
+    "legacy: reeally old tests that need to be updated or removed",
 
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: Integration tests (slower)",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "mocked: to replace/compensate for most of the slow and git tests",
-    "snippets: test snippets to check the stubs",
     #
     "minified: marks test of the minified version of createstubs",
     "minify: marks test of the minification of createstubs",
+    "native: Createstubs run against a native micropython implementation",
     "docfix: upstream documentation fix needed",
     "micropython: tests of MicroPython code on Cpython with mocks",
     "doc_stubs: tests to generate stubs from the rst documentation",
     "codemod: test libcst code modification",
     "cli: test command line interface",
-    # os versions
+    # os platforms
     "win32: run test only on Windows",
     "linux: run test only on linux",
     "darwin: run test only on Mac",
-    "version: run test only on specific version",
-    "1.19.0: run test only on 1.19.0",
-    "1.20.0: run test only on 1.20.0",
+
 ]
 
 # coverage reports

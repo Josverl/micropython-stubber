@@ -4,6 +4,8 @@ import pytest
 
 from stubber.publish.package import get_package_info
 
+pytestmark = [pytest.mark.stubber]
+
 
 @pytest.mark.parametrize(
     "package_name, version, present",

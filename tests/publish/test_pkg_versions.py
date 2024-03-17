@@ -6,6 +6,8 @@ from pytest_mock import MockerFixture
 
 from stubber.publish.stubpackage import StubPackage
 
+pytestmark = [pytest.mark.stubber]
+
 
 # -------------------------------------------------------------------
 @pytest.mark.parametrize(
@@ -28,7 +30,6 @@ def test_version_1_19_1(
 
 
 # -------------------------------------------------------------------
-@pytest.mark.version("1.20.0")
 @pytest.mark.parametrize(
     "p_published, expected",
     [
@@ -49,7 +50,6 @@ def test_version_1_20_0(
 
 
 # -------------------------------------------------------------------
-@pytest.mark.version("1.19.0")
 @pytest.mark.parametrize(
     "p_published, expected",
     [

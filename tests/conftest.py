@@ -1,6 +1,7 @@
 """
 Shared Test Fixtures
 """
+
 import logging
 import os
 import sys

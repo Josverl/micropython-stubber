@@ -1,3 +1,6 @@
+import pytest
+pytestmark = [pytest.mark.stubber,pytest.mark.legacy]
+
 # Module Under Test
 import stubber.get_lobo as get_lobo
 

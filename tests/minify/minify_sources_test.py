@@ -7,7 +7,7 @@ import pytest
 from stubber.minify import minify
 
 # mark all tests
-pytestmark = pytest.mark.minify
+pytestmark = [pytest.mark.stubber, pytest.mark.minify]
 
 SOURCE = '''
 """

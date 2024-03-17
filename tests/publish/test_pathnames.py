@@ -2,6 +2,8 @@ import pytest
 
 from stubber.publish.pathnames import board_folder_name, get_base
 
+pytestmark = [pytest.mark.stubber]
+
 
 @pytest.mark.parametrize(
     "expected_base, candidate, version",

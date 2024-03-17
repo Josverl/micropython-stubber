@@ -11,7 +11,7 @@ from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import create_package
 
 from .fakeconfig import FakeConfig
-
+pytestmark = [pytest.mark.stubber]
 
 @pytest.fixture
 def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):

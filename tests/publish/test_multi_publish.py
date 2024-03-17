@@ -10,6 +10,8 @@ from stubber.publish.publish import publish_multiple
 
 from .fakeconfig import FakeConfig
 
+pytestmark = [pytest.mark.stubber]
+
 
 @pytest.mark.mocked
 @pytest.mark.integration

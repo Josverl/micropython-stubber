@@ -2,7 +2,7 @@ from pathlib import Path
 import pytest
 from mpflash.flash import find_firmware, local_firmwares
 
-pytestmark = pytest.mark.mpflash
+pytestmark = [pytest.mark.stubber, pytest.mark.mpflash]
 ####################
 
 

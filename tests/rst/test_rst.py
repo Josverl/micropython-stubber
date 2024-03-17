@@ -9,7 +9,7 @@ from helpers import read_stub
 
 import stubber.basicgit as git
 
-pytestmark = pytest.mark.doc_stubs
+pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
 from stubber.rst.lookup import TYPING_IMPORT
 from stubber.rst.reader import RSTWriter

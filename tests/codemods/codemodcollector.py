@@ -5,6 +5,7 @@ from typing import Any, List, NamedTuple, Tuple
 
 import pytest
 
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
 class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
