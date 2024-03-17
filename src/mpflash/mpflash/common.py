@@ -36,6 +36,7 @@ class FWInfo(TypedDict):
     variant: str
     preview: bool
     version: str
+    build: str
 
 
 #############################################################
