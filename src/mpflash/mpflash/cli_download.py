@@ -7,11 +7,11 @@ import rich_click as click
 
 from mpflash.common import clean_version
 
+from .ask_input import DownloadParams, ask_missing_params
 from .cli_group import cli
 from .cli_list import list_mcus
 from .config import config
 from .download import download
-from .download_input import DownloadParams, ask_missing_params
 
 
 def connected_ports_boards() -> Tuple[List[str], List[str]]:
@@ -27,7 +27,9 @@ def connected_ports_boards() -> Tuple[List[str], List[str]]:
 )
 @click.option(
     "--destination",
+    "--fw_folder",
     "-d",
+    "fw_folder",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=config.firmware_folder,
     show_default=True,
@@ -72,16 +74,16 @@ def cli_download(
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
     # ask for any remaining parameters
-    params = ask_missing_params(params)
+    params = ask_missing_params(params, action="download")
     assert isinstance(params, DownloadParams)
-    
+
     params.versions = [clean_version(v, drop_v=True) for v in params.versions]  # remove leading v from version
     # preview is not a version, it is an option to include preview versions
     params.preview = any("preview" in v for v in params.versions)
     params.versions = [v for v in params.versions if "preview" not in v]
 
     download(
-        params.destination,
+        params.fw_folder,
         params.ports,
         params.boards,
         params.versions,

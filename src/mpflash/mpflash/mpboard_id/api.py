@@ -18,6 +18,7 @@ class Board(TypedDict):
     mcu_name: str
     path: Union[Path, str]
     version: str
+    cpu: str
 
 
 @lru_cache(maxsize=None)
@@ -35,7 +36,15 @@ def known_mp_ports() -> List[str]:
     return sorted(list(ports))
 
 
+def last_known_version() -> str:
+    """Returns the last known version of MicroPython"""
+    info = read_boardinfo()
+    versions = set({board["version"] for board in info})
+    return sorted(versions)[-1]
+
+
 def known_mp_boards(port: str, versions: Optional[List[str]] = None) -> List[Tuple[str, str]]:
+    """Returns a list of tuples with the description and board name for the given port and version"""
     info = read_boardinfo()
     # dont filter for 'preview' as they are not in the board_info.json
     versions = [v for v in versions if "preview" not in v] if versions else None
@@ -47,9 +56,12 @@ def known_mp_boards(port: str, versions: Optional[List[str]] = None) -> List[Tup
     return sorted(list(boards))
 
 
-def find_mp_port(board: str) -> str:
+def find_mp_board(board: str) -> Board:
+    """Find the board for the given board"""
     info = read_boardinfo()
     for board_info in info:
         if board_info["board"] == board:
-            return board_info["port"]
-    return ""
+            if not board_info["cpu"] and " with " in board_info["description"]:
+                board_info["cpu"] = board_info["description"].split(" with ")[-1]
+            return board_info
+    raise LookupError(f"Board {board} not found")
