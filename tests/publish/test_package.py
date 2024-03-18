@@ -12,6 +12,8 @@ from stubber.publish.stubpackage import StubPackage
 
 from .fakeconfig import FakeConfig
 
+pytestmark = [pytest.mark.stubber]
+
 
 # test generation of different package names
 @pytest.mark.parametrize(
@@ -97,9 +99,7 @@ def test_create_package(
         # stub_source="./all-stubs",  # for debugging
     )
     assert isinstance(package, StubPackage)
-    run_common_package_tests(
-        package, pkg_name, publish_path=publish_path, stub_path=stub_path, pkg_type=pkg_type
-    )
+    run_common_package_tests(package, pkg_name, publish_path=publish_path, stub_path=stub_path, pkg_type=pkg_type)
 
 
 read_db_data = [
@@ -182,9 +182,7 @@ def run_common_package_tests(
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
     # Package path
-    assert package.package_path.relative_to(
-        publish_path
-    ), "package path should be relative to publish path"
+    assert package.package_path.relative_to(publish_path), "package path should be relative to publish path"
     assert (package.package_path).exists()
     assert (package.package_path / "pyproject.toml").exists()
     # package path is all lowercase
@@ -222,16 +220,12 @@ def run_common_package_tests(
         return
 
     package.copy_stubs()
-    filelist = list((package.package_path).rglob("*.py")) + list(
-        (package.package_path).rglob("*.pyi")
-    )
+    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1
 
     # do it all at once
     package.update_package_files()
-    filelist = list((package.package_path).rglob("*.py")) + list(
-        (package.package_path).rglob("*.pyi")
-    )
+    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1
 
     package.update_pyproject_stubs()
@@ -257,7 +251,5 @@ def run_common_package_tests(
         assert len(filelist) >= 2
 
     package.clean()
-    filelist = list((package.package_path).rglob("*.py")) + list(
-        (package.package_path).rglob("*.pyi")
-    )
+    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) == 0

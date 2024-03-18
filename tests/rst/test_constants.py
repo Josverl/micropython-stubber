@@ -6,7 +6,7 @@ from helpers import load_rst
 from stubber.rst.reader import RSTWriter
 
 # mark all tests
-pytestmark = pytest.mark.doc_stubs
+pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
 
 MACHINE_RST = """

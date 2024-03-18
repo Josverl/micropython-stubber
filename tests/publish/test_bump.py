@@ -2,7 +2,7 @@ import pytest
 from packaging.version import Version
 from stubber.publish.bump import bump_version
 
-
+pytestmark = [pytest.mark.stubber]
 @pytest.mark.parametrize(
     "before, after",
     [

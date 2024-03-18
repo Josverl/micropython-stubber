@@ -18,9 +18,10 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.17.3
+This variant was generated from createstubs.py by micropython-stubber v1.17.6
 """
-# Copyright (c) 2019-2023 Jos Verlinde
+
+# Copyright (c) 2019-2024 Jos Verlinde
 
 import gc
 import os
@@ -42,7 +43,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.17.3"
+__version__ = "v1.17.6"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -95,7 +96,7 @@ class Stubber:
             if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
-            pass
+            pass  # Allow testing on CPython 3.11
         self.info = _info()
         log.info("Port: {}".format(self.info["port"]))
         log.info("Board: {}".format(self.info["board"]))
@@ -377,6 +378,8 @@ class Stubber:
                         t = "Incomplete"
                         if " at " in item_repr:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
+                        if " at " in item_repr:
+                            item_repr = item_repr.split(" at ")[0] + " at ...>"
                         s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -516,9 +519,15 @@ def _build(s):
 
 
 def _info():  # type:() -> dict[str, str]
+    try:
+        fam = sys.implementation[0]  # type: ignore
+    except TypeError:
+        # testing on CPython 3.11
+        fam = sys.implementation.name
+
     info = OrderedDict(
         {
-            "family": sys.implementation.name,  # type: ignore
+            "family": fam,
             "version": "",
             "build": "",
             "ver": "",
@@ -548,9 +557,9 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy  # type: ignore
+            else sys.implementation.mpy
             if "mpy" in dir(sys.implementation)
-            else ""
+            else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass

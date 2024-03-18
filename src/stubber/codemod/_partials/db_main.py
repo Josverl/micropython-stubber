@@ -1,24 +1,22 @@
+# type: ignore
 """
 This file contains the `def main()` funcion for the db variant of createstubs.py
 - type_check_only is used to avoid circular imports
 The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
 """
+
 # sourcery skip: require-parameter-annotation, for-append-to-extend, use-named-expression
 
-from io import TextIOWrapper
-from typing import TYPE_CHECKING, List, type_check_only
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     import gc
     import logging
-    import sys
 
     class logging:
-        def getLogger(self, name: str) -> "logging":
-            ...
+        def getLogger(self, name: str) -> "logging": ...
 
-        def info(self, msg: str) -> None:
-            ...
+        def info(self, msg: str) -> None: ...
 
     log = logging()
 
@@ -28,36 +26,27 @@ if TYPE_CHECKING:
         modules = []
         _json_name: str
 
-        def __init__(self, path: str = "", firmware_id: str = "") -> None:
-            ...
+        def __init__(self, path: str = "", firmware_id: str = "") -> None: ...
 
-        def clean(self) -> None:
-            ...
+        def clean(self) -> None: ...
 
-        def create_one_stub(self, modulename: str) -> bool:
-            ...
+        def create_one_stub(self, modulename: str) -> bool: ...
 
-        def report_start(self, filename: str = "modules.json"):
-            ...
+        def report_start(self, filename: str = "modules.json"): ...
 
-        def report_end(self):
-            ...
+        def report_end(self): ...
 
-        def create_all_stubs(self):
-            ...
+        def create_all_stubs(self): ...
 
-    def read_path() -> str:
-        ...
+    def read_path() -> str: ...
 
     class _gc:
-        def collect(self) -> None:
-            ...
+        def collect(self) -> None: ...
 
     gc: _gc
     log = logging.getLogger("stubber")
 
-    def file_exists(filename: str) -> bool:
-        ...
+    def file_exists(filename: str) -> bool: ...
 
     LIBS = [".", "lib"]
 

@@ -1,6 +1,7 @@
 from importlib import import_module
 
 import pytest
+pytestmark = [pytest.mark.stubber]
 
 LOCATIONS = ["board", pytest.param("minified", marks=pytest.mark.minified)]
 VARIANTS = ["createstubs", "createstubs_mem", "createstubs_db"]

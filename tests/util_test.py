@@ -4,11 +4,12 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from mock import MagicMock
 from pytest_mock import MockerFixture
 
 # SOT
 import stubber.utils as utils
+
+pytestmark = [pytest.mark.stubber]
 
 
 @pytest.mark.parametrize(

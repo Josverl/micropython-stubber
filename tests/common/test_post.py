@@ -1,3 +1,6 @@
+import pytest
+pytestmark = [pytest.mark.stubber]
+
 from stubber.utils.post import run_black
 
 

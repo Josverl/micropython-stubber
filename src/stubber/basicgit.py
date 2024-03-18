@@ -3,6 +3,7 @@ Simple Git module, where needed via powershell
 
 Some of the functions are based on the PyGithub module
 """
+
 import os
 import subprocess
 from pathlib import Path

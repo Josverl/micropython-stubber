@@ -2,9 +2,12 @@
 # test the fwid naming on the different platforms
 #################################################
 
+import pytest
 
 from collections import namedtuple
 from typing import Any, Optional, Tuple
+
+pytestmark = [pytest.mark.stubber]
 
 ## os.uname()
 # import os; print(os.uname())
@@ -118,8 +121,7 @@ class MP_Implementation:
     # Define __getattr__, as the documentation states:
     # > sys.implementation may contain additional attributes specific to the Python implementation.
     # > These non-standard attributes must start with an underscore, and are not described here.
-    def __getattr__(self, name: str) -> Any:
-        ...
+    def __getattr__(self, name: str) -> Any: ...
 
     def __init__(self, name: str, version: Tuple, *, _machine=None, _mpy=None):
         self.name = name

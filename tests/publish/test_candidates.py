@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Generator, List, Union
 
 import pytest
-
+pytestmark = [pytest.mark.stubber]
 from stubber.publish.candidates import (
     COMBO_STUBS,
     DOC_STUBS,

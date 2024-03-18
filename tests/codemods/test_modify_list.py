@@ -7,7 +7,7 @@ from collections import namedtuple
 from textwrap import dedent
 
 # mark all tests
-pytestmark = pytest.mark.codemod
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
 
 Case = namedtuple("Case", ["before", "after", "changeset", "scope"], defaults=["", "", None, None])

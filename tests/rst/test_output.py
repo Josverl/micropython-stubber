@@ -5,7 +5,7 @@ import pytest
 from stubber.rst import ModuleSourceDict, ClassSourceDict, FunctionSourceDict
 
 # mark all tests
-pytestmark = pytest.mark.doc_stubs
+pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
 
 def test_Module_SD():

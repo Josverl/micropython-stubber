@@ -1,6 +1,7 @@
 """" 
 Codemods to create the different variants of createstubs.py
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -129,7 +130,9 @@ class ReadModulesCodemod(codemod.Codemod):
 
     def __init__(self, context: codemod.CodemodContext, reader_node: Optional[cst.Module] = None):
         super().__init__(context)
-        self.modules_reader_node = reader_node or cst.parse_module(Partial.MODULES_READER.contents())
+        self.modules_reader_node = reader_node or cst.parse_module(
+            Partial.MODULES_READER.contents(),  # type: ignore
+        )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         """Replaces static modules list with file-load method."""
@@ -213,7 +216,9 @@ class LVGLCodemod(codemod.Codemod):
         # return self.modules_transform.transform_module_impl(tree)
 
         docstr_transformer = ModuleDocCodemod(self.context, _LVGL_MODULE_DOC)
-        def_main_tree = cst.parse_module(Partial.LVGL_MAIN.contents())
+        def_main_tree = cst.parse_module(
+            Partial.LVGL_MAIN.contents(),  # type: ignore
+        )
 
         work_tree = docstr_transformer.transform_module_impl(tree)
         matches = m.findall(work_tree, _DEF_MAIN_MATCHER, metadata_resolver=self)
@@ -253,7 +258,9 @@ class DBCodemod(codemod.Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         """Generates createstubs.py db variant."""
         docstr_transformer = ModuleDocCodemod(self.context, _DB_MODULE_DOC)
-        def_main_tree = cst.parse_module(Partial.DB_MAIN.contents())
+        def_main_tree = cst.parse_module(
+            Partial.DB_MAIN.contents(),  # type: ignore
+        )
 
         work_tree = docstr_transformer.transform_module_impl(tree)
         matches = m.findall(work_tree, _DEF_MAIN_MATCHER, metadata_resolver=self)

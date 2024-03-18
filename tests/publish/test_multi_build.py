@@ -10,6 +10,7 @@ from stubber.publish.publish import build_multiple
 
 from .fakeconfig import FakeConfig
 
+pytestmark = [pytest.mark.stubber]
 ALL_PUBLISH_RESULTS = {"Published to PyPi", "Published to Test-PyPi", "Build successful", "-"}
 
 
