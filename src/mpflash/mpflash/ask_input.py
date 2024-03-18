@@ -2,24 +2,33 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from mpflash.common import micropython_versions
 from mpflash.mpboard_id.api import known_mp_boards, known_mp_ports
 
 
 @dataclass
-class DownloadParams:
-    destination: Path
+class Params:
     ports: List[str] = field(default_factory=list)
     boards: List[str] = field(default_factory=list)
     versions: List[str] = field(default_factory=list)
-    force: bool = False
-    clean: bool = False
     preview: bool = False
+    force: bool = False
 
 
-def ask_missing_params(params: DownloadParams) -> DownloadParams:
+@dataclass
+class DownloadParams(Params):
+    destination: Path = Path()
+    clean: bool = False
+
+
+@dataclass
+class FlashParams(Params):
+    serial: Path = Path()
+
+ParamType = Union[DownloadParams, FlashParams]
+def ask_missing_params(params: ParamType) -> ParamType:
     # import only when needed to reduce load time
     import inquirer
 

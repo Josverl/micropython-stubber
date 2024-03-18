@@ -73,11 +73,13 @@ def cli_download(
         params.ports, params.boards = connected_ports_boards()
     # ask for any remaining parameters
     params = ask_missing_params(params)
-
+    assert isinstance(params, DownloadParams)
+    
     params.versions = [clean_version(v, drop_v=True) for v in params.versions]  # remove leading v from version
     # preview is not a version, it is an option to include preview versions
     params.preview = any("preview" in v for v in params.versions)
     params.versions = [v for v in params.versions if "preview" not in v]
+
     download(
         params.destination,
         params.ports,
