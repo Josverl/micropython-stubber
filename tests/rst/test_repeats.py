@@ -4,7 +4,7 @@ import pytest
 from stubber.rst.reader import RSTWriter
 
 # mark all tests
-pytestmark = pytest.mark.doc_stubs
+pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
 #: Use this content as input for moo to do bar
 # FOOBAR: Any = 1
@@ -138,7 +138,7 @@ def test_sequence_3():
     r = RSTWriter()
     # Plug in test data
     # r.rst_text = SEQ_NUMBERS
-    r.rst_text = SEQ_3.splitlines(keepends=True) # type: ignore
+    r.rst_text = SEQ_3.splitlines(keepends=True)  # type: ignore
     r.filename = "testdata.py"
     r.current_module = "testdata"
     r.max_line = len(r.rst_text) - 1
@@ -181,7 +181,7 @@ def test_sequence_functions():
     r = RSTWriter()
     # Plug in test data
 
-    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True) # type: ignore
+    r.rst_text = FUNCTION_SEQ.splitlines(keepends=True)  # type: ignore
     r.filename = "re.py"
     r.current_module = "re"
     r.max_line = len(r.rst_text) - 1
@@ -234,7 +234,7 @@ def test_sequence_methods():
     r = RSTWriter()
     # Plug in test data
 
-    r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True) # type: ignore
+    r.rst_text = CLASS_METHOD_SEQ.splitlines(keepends=True)  # type: ignore
     r.filename = "re.py"
     r.current_module = "re"
     r.max_line = len(r.rst_text) - 1

@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from stubber.minify import minify
 
 # mark all tests
-pytestmark = pytest.mark.minify
+pytestmark = [pytest.mark.stubber, pytest.mark.minify]
 
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
@@ -30,9 +30,7 @@ def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Confi
 
 @pytest.mark.parametrize("source", ["createstubs.py", "createstubs_mem.py", "createstubs_db.py"])
 @pytest.mark.mocked
-def test_minification_quick(
-    tmp_path: Path, source: str, mocker: MockerFixture, pytestconfig: pytest.Config
-):
+def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, pytestconfig: pytest.Config):
     "test the rest of the minification functions using mocks to reduce the time needed"
     # load process.py in the same python environment
     source_path = pytestconfig.rootpath / "src" / "stubber" / "board" / source

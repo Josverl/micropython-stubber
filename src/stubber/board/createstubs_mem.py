@@ -12,7 +12,7 @@
 This variant was generated from createstubs.py by micropython-stubber v1.17.6
 """
 
-# Copyright (c) 2019-2023 Jos Verlinde
+# Copyright (c) 2019-2024 Jos Verlinde
 
 import gc
 import os
@@ -87,7 +87,7 @@ class Stubber:
             if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
         except AttributeError:
-            pass
+            pass  # Allow testing on CPython 3.11
         self.info = _info()
         log.info("Port: {}".format(self.info["port"]))
         log.info("Board: {}".format(self.info["board"]))
@@ -510,9 +510,15 @@ def _build(s):
 
 
 def _info():  # type:() -> dict[str, str]
+    try:
+        fam = sys.implementation[0]  # type: ignore
+    except TypeError:
+        # testing on CPython 3.11
+        fam = sys.implementation.name
+
     info = OrderedDict(
         {
-            "family": sys.implementation[0],  # type: ignore
+            "family": fam,
             "version": "",
             "build": "",
             "ver": "",

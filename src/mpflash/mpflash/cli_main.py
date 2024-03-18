@@ -1,19 +1,19 @@
 """mpflash is a CLI to download and flash MicroPython firmware to various boards."""
 
-import rich_click as click
+# import rich_click as click
 
+from .cli_download import cli_download
 from .cli_group import cli
-from .downloader import cli_download
-from .flasher import cli_flash_board
-from .list import cli_list_mcus
+from .cli_flash import cli_flash_board
+from .cli_list import cli_list_mcus
 
 # from loguru import logger as log
 
 
 def mpflash():
-    # cli.add_command(flash_board)
-    # cli.add_command(list_boards)
-    # cli.add_command(download)
+    cli.add_command(cli_flash_board)
+    cli.add_command(cli_list_mcus)
+    cli.add_command(cli_download)
     cli(auto_envvar_prefix="MPFLASH")
 
 

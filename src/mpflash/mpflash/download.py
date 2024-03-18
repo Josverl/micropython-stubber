@@ -5,23 +5,24 @@ Uses the micropython.org website to get the available versions and locations to 
 
 import functools
 import itertools
-import json
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
+from mpflash.common import PORT_FWTYPES
 import requests
-import rich_click as click
 from bs4 import BeautifulSoup
 from loguru import logger as log
 from rich.progress import track
 
-from mpflash.list import list_mcus
+# #########################################################################################################
+# make sure that jsonlines does not mistake the MicroPython ujson for the CPython ujson
+import jsonlines
 
-from .cli_group import cli
-from .common import PORT_FWTYPES, clean_version
-from .config import config
+jsonlines.ujson = None  # type: ignore
+# #########################################################################################################
+
 
 MICROPYTHON_ORG_URL = "https://micropython.org/"
 
@@ -155,7 +156,8 @@ def download_firmwares(
 
     firmware_folder.mkdir(exist_ok=True)
 
-    with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
+    # with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
+    with jsonlines.open(firmware_folder / "firmware.jsonl", "a") as writer:
         for board in unique_boards:
             filename = firmware_folder / board["port"] / board["filename"]
             filename.parent.mkdir(exist_ok=True)
@@ -173,9 +175,9 @@ def download_firmwares(
             except requests.RequestException as e:
                 log.exception(e)
                 continue
-            # add the firmware to the jsonl file
-            json_str = json.dumps(board) + "\n"
-            f_jsonl.write(json_str)
+            # # add the firmware to the jsonl file
+            # json_str = json.dumps(board) + "\n"
+            writer.write(board)
             downloaded += 1
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
 
@@ -203,78 +205,22 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     return unique_boards
 
 
-@cli.command(
-    "download",
-    help="Download MicroPython firmware for specific ports, boards and versions.",
-)
-@click.option(
-    "--destination",
-    "-d",
-    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
-    default=config.firmware_folder,
-    show_default=True,
-    help="The folder to download the firmware to.",
-)
-@click.option(
-    "--version",
-    "-v",
-    "versions",
-    multiple=True,
-    help="The version of MicroPython to to download. Use 'preview' to include preview versions.",
-    show_default=True,
-    default=["stable"],
-)
-@click.option(
-    "--board",
-    "-b",
-    "boards",
-    multiple=True,
-    show_default=True,
-    help="The board(s) to download the firmware for.",  # Use '--board all' to download all boards.",
-)
-@click.option(
-    "--clean/--no-clean",
-    default=True,
-    show_default=True,
-    help="""Remove dates and hashes from the downloaded firmware filenames.""",
-)
-@click.option(
-    "--force",
-    default=False,
-    is_flag=True,
-    help="""Force download of firmware even if it already exists.""",
-    show_default=True,
-)
-def cli_download(destination: Path, boards: List[str], versions: List[str], force: bool, clean: bool):
-    versions = list(versions)
-    # preview is not a version, it is an option to include preview versions
-    preview = "preview" in versions
-    versions = [v for v in versions if v != "preview"]
-    download(destination, [], boards, versions, force, clean, preview)
-
-
 def download(
-    destination: Path, ports: List[str], boards: List[str], versions: List[str], force: bool, clean: bool, preview: bool
+    destination: Path,
+    ports: List[str],
+    boards: List[str],
+    versions: List[str],
+    force: bool,
+    clean: bool,
+    preview: bool,
 ):
-    if not boards:
-        ports, boards = connected_boards()
-    else:
-        # use any port
-        ports = ports or list(PORT_FWTYPES.keys())
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
         exit(1)
-    versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
+    # versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     try:
         destination.mkdir(exist_ok=True, parents=True)
     except (PermissionError, FileNotFoundError) as e:
         log.critical(f"Could not create folder {destination}\n{e}")
         exit(1)
     download_firmwares(destination, ports, boards, versions, preview=preview, force=force, clean=clean)
-
-
-def connected_boards() -> Tuple[List[str], List[str]]:
-    mpr_boards = list_mcus()
-    ports = list({b.port for b in mpr_boards})
-    boards = list({b.board for b in mpr_boards})
-    return ports, boards

@@ -72,6 +72,7 @@ executing = "^2.0.1"
 mypy-gitlab-code-quality = "^1.1.0"
 rich-click = "^1.7.3"
 mpremote = "^1.22.0"
+mpflash = "^0.4.0.post3"
 
 [tool.poetry.group.docs]
 optional = true
@@ -186,7 +187,7 @@ reportUntypedNamedTuple = "none"
 [tool.black]
 # use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
 line-length = 140
-target_version = ['py38']
+# target_version = ['py38']
 include = '\.pyi?$'
 exclude = '''
 (
@@ -211,18 +212,19 @@ exclude = '''
 minversion = "7.0"
 python_functions = ["test_", "*_test"]
 python_files = ["test_*.py", "*_test.py"]
-testpaths = ["tests", "src", "repos/micropython-stubs/tests", "modules/**/tests"]
+testpaths = [
+    "tests", 
+    "src/stubber", 
+    "src/mpflash", 
+    "repos/micropython-stubs/tests", 
+    "modules/**/tests",
+    ]
 norecursedirs = [
-    "repos",
-    "typings*",
-    ".svn",
-    "_build",
-    "tmp*",
     ".*",
-    "build",
-    "dist",
-    "{arch}",
-    "*.egg",
+    ".*/*",
+    # "repos/*",
+    "tests/codemods/codemod_test_cases/*",
+    "typings*",
 ]
 junit_family = "xunit1"
 
@@ -233,33 +235,41 @@ addopts = "--verbose --capture=no -m 'not basicgit'"
 # -n --numprocesses=numprocesses - 
 
 markers = [
+    "stubber: marks tests of the stubber tool",
+    "mpflash: marks tests of the mpflash tool",
+    "snippets: test snippets to check the stubs",
+
+    "legacy: reeally old tests that need to be updated or removed",
+
+    "version: run test only on specific MicroPython version",
+
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: Integration tests (slower)",
     "basicgit: marks tests in the basicgit module that manipulate the checkout",
     "mocked: to replace/compensate for most of the slow and git tests",
-    "snippets: test snippets to check the stubs",
     #
     "minified: marks test of the minified version of createstubs",
     "minify: marks test of the minification of createstubs",
+    "native: Createstubs run against a native micropython implementation",
     "docfix: upstream documentation fix needed",
     "micropython: tests of MicroPython code on Cpython with mocks",
     "doc_stubs: tests to generate stubs from the rst documentation",
     "codemod: test libcst code modification",
     "cli: test command line interface",
-    # os versions
+    # os platforms
     "win32: run test only on Windows",
     "linux: run test only on linux",
     "darwin: run test only on Mac",
-    "version: run test only on specific version",
-    "1.19.0: run test only on 1.19.0",
-    "1.20.0: run test only on 1.20.0",
+    # micropython version dependencies 
+
+
 ]
 
 # coverage reports
 [tool.coverage.run]
 parallel = false
 branch = true
-source = ["src"]
+source = ["src/stubber", "src/mpflash",]
 omit = [
     # helper files in board
     "*/boot.py",

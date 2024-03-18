@@ -6,8 +6,7 @@ from rich import print
 from rich.progress import track
 from rich.table import Table
 
-# TODO: - refactor so that we do not need the entire stubber package
-from .mpremoteboard.mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import MPRemoteBoard
 
 from .cli_group import cli
 from .config import config
@@ -63,13 +62,13 @@ def show_mcus(
     conn_mcus: List[MPRemoteBoard],
     title: str = "Connected boards",
     refresh: bool = True,
-):
+):  # sourcery skip: extract-duplicate-method
     """Show the list of connected boards in a nice table"""
     table = Table(
         title=title,
-        # expand=True,
         header_style="bold blue",
         collapse_padding=True,
+        width=100,
         # row_styles=["blue", "yellow"]
     )
     table.add_column("Serial", overflow="fold")
@@ -78,7 +77,7 @@ def show_mcus(
     table.add_column("Board", overflow="fold")
     # table.add_column("Variant") # TODO: add variant
     table.add_column("CPU")
-    table.add_column("Version", overflow="fold")
+    table.add_column("Version")
     table.add_column("build", justify="right")
 
     for mcu in track(conn_mcus, description="Updating board info", transient=True, update_period=0.1):
@@ -88,7 +87,7 @@ def show_mcus(
             except ConnectionError:
                 continue
         table.add_row(
-            mcu.serialport,
+            mcu.serialport.replace("/dev/", ""),
             mcu.family,
             mcu.port,
             mcu.board if mcu.board != "UNKNOWN" else mcu.description,

@@ -8,6 +8,8 @@ import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
 
+pytestmark = [pytest.mark.stubber, pytest.mark.basicgit]
+
 # make sure that the source can be found
 RootPath = Path(os.getcwd())
 src_path = str(RootPath / "src")
@@ -33,9 +35,7 @@ def test_git_clone_shallow(tmp_path):
 
 
 def test_git_clone(tmp_path):
-    result = git.clone(
-        "https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False
-    )
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
     assert result == True
 
 
@@ -54,14 +54,10 @@ def test_git_clone_fast(mocker: MockerFixture, tmp_path):
     mock: MagicMock = mocker.MagicMock(return_value=m_result)
     mocker.patch("stubber.basicgit.subprocess.run", mock)
 
-    result = git.clone(
-        "https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False
-    )
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
     assert result == True
 
-    result = git.clone(
-        "https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True
-    )
+    result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=True)
     assert result == True
 
     result = git.clone(
@@ -110,9 +106,7 @@ def test_get_tag_latest():
     if not (repo / ".git").exists():
         pytest.skip("no git repo in current folder")
 
-    result = subprocess.run(
-        ["git", "switch", "main", "--force"], capture_output=True, check=True, cwd=repo.as_posix()
-    )
+    result = subprocess.run(["git", "switch", "main", "--force"], capture_output=True, check=True, cwd=repo.as_posix())
 
     assert result.stderr == 0
     # get tag of current repro
@@ -176,9 +170,7 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    mock_run_git = mocker.patch(
-        "stubber.basicgit._run_local_git", autospec=True, return_value=None
-    )
+    mock_run_git = mocker.patch("stubber.basicgit._run_local_git", autospec=True, return_value=None)
 
     # fail to fetch
     r = git.fetch(repo=".")

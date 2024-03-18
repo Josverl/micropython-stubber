@@ -9,7 +9,7 @@ from pathlib import Path
 import psutil
 from rich.progress import track
 
-from .uf2_boardid import get_board_id
+from .flash_uf2_boardid import get_board_id
 
 
 def wait_for_UF2_windows(s_max: int = 10):

@@ -6,6 +6,8 @@ from pytest_mock import MockerFixture
 # Module Under Test
 import stubber.get_cpython
 
+pytestmark = [pytest.mark.stubber]
+
 
 # No Mocks, does actual extraction using pip-install
 @pytest.mark.skip(reason="Does actual extraction using pip-install")
@@ -53,7 +55,9 @@ def test_get_cpython_mocked(
         # create a single file in the tempfolder
         (Path(tempfolder) / "testfile.py").touch()
 
-    m_spr: MagicMock = mocker.patch("stubber.get_cpython.subprocess.run", autospec=True, side_effect=mock_subprocess_run)
+    m_spr: MagicMock = mocker.patch(
+        "stubber.get_cpython.subprocess.run", autospec=True, side_effect=mock_subprocess_run
+    )
 
     stubber.get_cpython.get_core(requirements=requirements, stub_path=tmp_path)
     assert m_os_makedirs.call_count >= 1

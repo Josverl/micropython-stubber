@@ -18,15 +18,7 @@ from stubber.freeze.get_frozen import freeze_any, get_manifests
 from stubber.publish.defaults import GENERIC_L, GENERIC_U
 from stubber.utils.repos import switch
 
-# pylint: disable=wrong-import-position,import-error
-
-
-# if not sys.warnoptions:
-#     import os
-#     import warnings
-
-#     warnings.simplefilter("default")  # Change the filter in this process
-#     os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
+pytestmark = [pytest.mark.stubber]
 
 
 @pytest.mark.parametrize(

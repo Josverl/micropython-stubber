@@ -11,6 +11,8 @@ from mock import MagicMock
 from packaging.version import parse
 from pytest_mock import MockerFixture
 
+pytestmark = [pytest.mark.stubber]
+
 try:
     import tomllib  # type: ignore
 except ModuleNotFoundError:
@@ -18,7 +20,7 @@ except ModuleNotFoundError:
 
 from shared import LOCATIONS, VARIANTS, import_variant
 
-pytestmark = pytest.mark.micropython
+pytestmark = [pytest.mark.stubber, pytest.mark.micropython]
 
 
 @pytest.mark.parametrize("variant", VARIANTS)

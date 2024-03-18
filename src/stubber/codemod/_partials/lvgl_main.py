@@ -63,12 +63,12 @@ def main():
     except Exception:
         fw_id = "lvgl-{0}_{1}_{2}_{3}-{4}".format(8, 1, 0, "dev", sys.platform)
     finally:
-        stubber = Stubber(firmware_id=fw_id)
+        stubber = Stubber(firmware_id=fw_id) # type: ignore
     stubber.clean()
     # modules to stub : only lvgl specifics
     stubber.modules = ["io", "lodepng", "rtch", "lvgl"]  # spell-checker: enable
 
-    gc.collect()
+    gc.collect() # type: ignore
 
     stubber.create_all_stubs()
     stubber.report()

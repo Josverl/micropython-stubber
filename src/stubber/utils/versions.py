@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from github import Github
+from loguru import logger as log
 from packaging.version import parse
 
 import stubber.basicgit as git

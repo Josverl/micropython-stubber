@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
+pytestmark = [pytest.mark.stubber]
 
 # pylint: disable=wrong-import-position,import-error
 # Module Under Test

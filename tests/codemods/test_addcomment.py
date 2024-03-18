@@ -3,7 +3,7 @@ from libcst.codemod import CodemodTest
 from stubber.codemod.add_comment import AddComment
 
 # mark all tests
-pytestmark = pytest.mark.codemod
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
 
 class AddCommentTest(CodemodTest):

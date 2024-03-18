@@ -56,7 +56,18 @@ def run(
         The return code and the output as a list of strings
     """
     if not reset_tags:
-        reset_tags = ["rst cause:1, boot mode:"]
+        reset_tags = [
+            "rst cause:1, boot mode:",
+            "rst cause:2, boot mode:",
+            "rst cause:3, boot mode:",
+            "rst cause:4, boot mode:",
+        ]
+        # 0 -> normal startup by power on
+        # 1 -> hardware watch dog reset
+        # 2 -> software watch dog reset (From an exception)
+        # 3 -> software watch dog reset system_restart (Possibly unfed watchdog got angry)
+        # 4 -> soft restart (Possibly with a restart command)
+        # 5 -> wake up from deep-sleep
     if not error_tags:
         error_tags = ["Traceback ", "Error: ", "Exception: ", "ERROR :", "CRIT  :"]
     if not warning_tags:
