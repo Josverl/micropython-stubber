@@ -80,7 +80,7 @@ def cb_quiet(ctx, param, value):
     show_default=True,
     metavar="SERIALPORT",
 )
-def cli(quiet: bool, **kwargs):
+def cli(**kwargs):
     """mpflash - MicroPython Tool.
 
     A CLI to download and flash MicroPython firmware to different ports and boards.

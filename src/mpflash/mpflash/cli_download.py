@@ -27,7 +27,6 @@ def connected_ports_boards() -> Tuple[List[str], List[str]]:
 )
 @click.option(
     "--destination",
-    "--fw_folder",
     "-d",
     "fw_folder",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
@@ -39,18 +38,21 @@ def connected_ports_boards() -> Tuple[List[str], List[str]]:
     "--version",
     "-v",
     "versions",
-    multiple=True,
-    help="The version of MicroPython to to download. Use 'preview' to include preview versions.",
-    show_default=True,
     default=["stable"],
+    multiple=True,
+    show_default=True,
+    help="The version of MicroPython to to download.",
+    metavar="SEMVER, 'stable', 'preview' or '?'",
 )
 @click.option(
     "--board",
     "-b",
     "boards",
     multiple=True,
+    default=["?"],
     show_default=True,
-    help="The board(s) to download the firmware for.",  # Use '--board all' to download all boards.",
+    help="The board(s) to download the firmware for.",
+    metavar="BOARD_ID or ?",
 )
 @click.option(
     "--clean/--no-clean",
@@ -62,8 +64,8 @@ def connected_ports_boards() -> Tuple[List[str], List[str]]:
     "--force",
     default=False,
     is_flag=True,
-    help="""Force download of firmware even if it already exists.""",
     show_default=True,
+    help="""Force download of firmware even if it already exists.""",
 )
 def cli_download(
     **kwargs,
@@ -86,5 +88,4 @@ def cli_download(
         params.versions,
         params.force,
         params.clean,
-
     )
