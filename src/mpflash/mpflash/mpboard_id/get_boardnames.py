@@ -179,7 +179,7 @@ def get_board_list(versions: List[str], mpy_path: Path):
     # sort the board_list by description and board
     print("Total number of boards found:", len(board_list))
     seen = set()
-    # board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
+    board_list = [x for x in board_list if not (x.description in seen or seen.add(x.description))]
     board_list.sort(key=lambda x: x.description.lower())
     print("Unique board descriptions found:", len(board_list))
     return board_list

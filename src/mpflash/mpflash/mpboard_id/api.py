@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Tuple, TypedDict, Union
 
-from mpflash.common import PORT_FWTYPES, clean_version, micropython_versions
+from mpflash.common import PORT_FWTYPES, clean_version
 
 
 # Board  based on the dataclass Board but changed to TypedDict

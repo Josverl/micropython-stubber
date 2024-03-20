@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 import rich_click as click
 from loguru import logger as log
@@ -84,18 +83,7 @@ from .mpremoteboard import MPRemoteBoard
     show_default=True,
     help="""Enter micropython bootloader mode before flashing.""",
 )
-def cli_flash_board(
-    **kwargs,
-    # target_version: str,
-    # fw_folder: Path,
-    # serial_port: Optional[str] = None,
-    # board: Optional[str] = None,
-    # port: Optional[str] = None,
-    # variant: Optional[str] = None,
-    # cpu: Optional[str] = None,
-    # erase: bool = False,
-    # bootloader: bool = True,
-):
+def cli_flash_board(**kwargs):
     todo: WorkList = []
 
     # Ask for missing input if needed
@@ -112,7 +100,6 @@ def cli_flash_board(
         log.error(f"Only one version can be flashed at a time, not {params.versions}")
         return
     params.versions = [clean_version(v) for v in params.versions]
-    params.preview = params.versions[0] == "preview"
     # Update all micropython boards to the latest version
     if params.versions[0] and params.ports[0] and params.boards[0] and params.serial:
         todo = manual_worklist(
@@ -121,18 +108,16 @@ def cli_flash_board(
             params.serial,
             params.boards[0],
             params.ports[0],
-            params.preview,
         )
     elif params.serial:
         if params.serial == "auto":
-            todo = auto_worklist(params.versions[0], params.fw_folder, params.preview)
+            todo = auto_worklist(params.versions[0], params.fw_folder)
         else:
             # just this serial port
             todo = oneport_worklist(
                 params.versions[0],
                 params.fw_folder,
                 params.serial,
-                params.preview,
             )
 
     if flashed := flash_list(
@@ -149,22 +134,18 @@ def oneport_worklist(
     version: str,
     fw_folder: Path,
     serial_port: str,
-    preview: bool,
+    # preview: bool,
 ) -> WorkList:
     """Create a worklist for a single serial-port."""
     conn_boards = [MPRemoteBoard(serial_port)]
-    todo = auto_update(conn_boards, version, fw_folder, preview=preview)
+    todo = auto_update(conn_boards, version, fw_folder)
     show_mcus(conn_boards)
     return todo
 
 
-def auto_worklist(
-    version: str,
-    fw_folder: Path,
-    preview: bool,
-) -> WorkList:
+def auto_worklist(version: str, fw_folder: Path) -> WorkList:
     conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
-    return auto_update(conn_boards, version, fw_folder, preview=preview)
+    return auto_update(conn_boards, version, fw_folder)
 
 
 def manual_worklist(
@@ -173,7 +154,6 @@ def manual_worklist(
     serial_port: str,
     board: str,
     port: str,
-    preview: bool,
 ) -> WorkList:
     mcu = MPRemoteBoard(serial_port)
     # TODO : Find a way to avoid needing to specify the port
@@ -182,13 +162,7 @@ def manual_worklist(
     mcu.port = port
     mcu.cpu = port if port.startswith("esp") else ""
     mcu.board = board
-    firmwares = find_firmware(
-        fw_folder=fw_folder,
-        board=board,
-        version=version,
-        preview=version.lower() == "preview",
-        port=port,
-    )
+    firmwares = find_firmware(fw_folder=fw_folder, board=board, version=version, port=port)
     if not firmwares:
         log.error(f"No firmware found for {port} {board} version {version}")
         return []

@@ -65,10 +65,10 @@ def test_find_board_designator_real(test_id, descr, short_descr, expected_result
 
 
 # Test for FileNotFoundError
-def test_find_board_designator_csv_file_not_found(tmp_path):
+def test_find_board_designator_file_not_found(tmp_path):
     # Arrange
     non_existent_file = tmp_path / "non_existent.csv"
 
     # Act & Assert
     with pytest.raises(FileNotFoundError):
-        find_board_designator_csv("Board A", "A", non_existent_file)
+        find_board_designator("Board A", "A", non_existent_file)

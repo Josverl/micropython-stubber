@@ -17,7 +17,6 @@ class Params:
     ports: List[str] = field(default_factory=list)
     boards: List[str] = field(default_factory=list)
     versions: List[str] = field(default_factory=list)
-    preview: bool = False
     fw_folder: Path = Path()
 
 
@@ -49,17 +48,11 @@ def ask_missing_params(
     # import only when needed to reduce load time
     import inquirer
 
-    # from inquirer.themes import BlueComposure, load_theme_from_dict
-    # theme = BlueComposure()
-
-    params.versions = list(params.versions)
-    params.preview = "preview" in params.versions
-    params.versions = [v for v in params.versions if v != "preview"]
     questions = []
     if isinstance(params, FlashParams) and (not params.serial or "?" in params.versions):
         ask_serialport(questions, action=action)
 
-    if not (params.preview or params.versions) or "?" in params.versions:
+    if not params.versions or "?" in params.versions:
         ask_versions(questions, action=action)
 
     if not params.boards or "?" in params.boards:
