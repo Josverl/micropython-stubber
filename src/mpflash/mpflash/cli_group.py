@@ -13,14 +13,22 @@ def cb_verbose(ctx, param, value):
     """Callback to set the log level to DEBUG if verbose is set"""
     if value:
         set_loglevel("DEBUG")
+        config.verbose = True
     else:
         set_loglevel("INFO")
+        config.verbose = False
     return value
 
 
 def cb_ignore(ctx, param, value):
     if value:
         config.ignore_ports = list(value)
+    return value
+
+
+def cb_interactive(ctx, param, value):
+    if value:
+        config.interactive = value
     return value
 
 
@@ -31,6 +39,7 @@ def cb_quiet(ctx, param, value):
 
 
 @click.group()
+@click.version_option(package_name="mpflash")
 @click.option(
     "--quiet",
     "-q",
@@ -39,6 +48,16 @@ def cb_quiet(ctx, param, value):
     help="Suppresses all output.",
     callback=cb_quiet,
     envvar="MPFLASH_QUIET",
+    show_default=True,
+)
+@click.option(
+    "--interactive/--no-interactive",
+    "-i/-x",
+    is_eager=True,
+    help="Suppresses all request for Input.",
+    callback=cb_interactive,
+    # envvar="MPFLASH_QUIET",
+    default=True,
     show_default=True,
 )
 @click.option(

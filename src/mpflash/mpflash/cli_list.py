@@ -68,8 +68,8 @@ def show_mcus(
         title=title,
         header_style="bold blue",
         collapse_padding=True,
-        width=100,
-        # row_styles=["blue", "yellow"]
+        width=110,
+        row_styles=["blue", "yellow"],
     )
     table.add_column("Serial", overflow="fold")
     table.add_column("Family")
@@ -90,7 +90,7 @@ def show_mcus(
             mcu.serialport.replace("/dev/", ""),
             mcu.family,
             mcu.port,
-            mcu.board if mcu.board != "UNKNOWN" else mcu.description,
+            f"{mcu.board}\n{mcu.description}",
             # mcu.variant,
             mcu.cpu,
             mcu.version,

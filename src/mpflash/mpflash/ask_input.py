@@ -7,6 +7,7 @@ from typing import List, Sequence, Tuple, Union
 from loguru import logger as log
 
 from mpflash.common import micropython_versions
+from mpflash.config import config
 from mpflash.mpboard_id.api import known_mp_boards, known_mp_ports
 from mpflash.mpremoteboard import MPRemoteBoard
 
@@ -42,6 +43,9 @@ def ask_missing_params(
     params: ParamType,
     action: str = "download",
 ) -> ParamType:
+    if not config.interactive:
+        # no interactivity allowed
+        return params
     # import only when needed to reduce load time
     import inquirer
 
@@ -82,7 +86,12 @@ def ask_missing_params(
 
 def some_boards(answers: dict) -> Sequence[Tuple[str, str]]:
     if "versions" in answers:
-        some_boards = known_mp_boards(answers["port"], answers["versions"]) or known_mp_boards(answers["port"])
+        _versions = list(answers["versions"])
+        if "stable" in _versions:
+            _versions.remove("stable")
+            _versions.append(micropython_versions()[-1])
+
+        some_boards = known_mp_boards(answers["port"], _versions) or known_mp_boards(answers["port"])
     else:
         some_boards = known_mp_boards(answers["port"])
 
