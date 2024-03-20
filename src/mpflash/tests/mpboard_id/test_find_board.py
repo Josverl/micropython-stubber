@@ -42,25 +42,27 @@ def test_find_board_designator_fake(test_id, descr, short_descr, board_info_cont
 
 
 @pytest.mark.parametrize(
-    "test_id, descr, short_descr, board_info_content, expected_result",
+    "test_id, descr, short_descr,  expected_result",
     [
         # Happy path tests
-        ("happy-1", "Arduino Nano RP2040 Connect", None, ".", "ARDUINO_NANO_RP2040_CONNECT"),
-        ("happy-2", "Pimoroni Tiny 2040", None, "", "PIMORONI_TINY2040"),
-        ("happy-3", "Board C", "C", "Board A,BA\nBoard C,BC", "BC"),
+        ("happy-1", "Arduino Nano RP2040 Connect", None, "ARDUINO_NANO_RP2040_CONNECT"),
+        ("happy-2", "Pimoroni Tiny 2040", None, "PIMORONI_TINY2040"),
+        ("happy-3", "Pimoroni Tiny 2040", "", "PIMORONI_TINY2040"),
+        ("happy-4", "Generic ESP32 module with ESP32", "Generic ESP32 module", "ESP32_GENERIC"),
         # Edge cases
-        ("edge-1", "Board A", "A", "Board A,BA\nBoard A with feature,BAF", "BA"),
-        ("edge-2", "Board A with feature", "A", "Board A,BA\nBoard A with feature,BAF", "BAF"),
+        ("edge-1", "Pimoroni Tiny 2040 LONG", "Pimoroni Tiny 2040", "PIMORONI_TINY2040"),
+        ("edge-2", "Generic ESP32 module with ESP32 OTA", "Generic ESP32 module with ESP32", "ESP32_GENERIC"),
         # Error cases
-        ("error-1", "Board X", "X", "Board A,BA\nBoard B,BB", None),
-        ("error-2", "Board A", "A", "", None),
+        ("error-1", "Board X", "X", None),
+        ("error-2", "Board A", "A", None),
     ],
 )
-def test_find_board_designator_real(test_id, descr, short_descr, board_info_content, expected_result, tmp_path):
+def test_find_board_designator_real(test_id, descr, short_descr, expected_result):
     # Act
     result = find_board_designator(descr, short_descr)
     # Assert
     assert result == expected_result
+
 
 # Test for FileNotFoundError
 def test_find_board_designator_csv_file_not_found(tmp_path):
