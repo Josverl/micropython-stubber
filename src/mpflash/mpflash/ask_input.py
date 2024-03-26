@@ -82,9 +82,13 @@ def some_boards(answers: dict) -> Sequence[Tuple[str, str]]:
         _versions = list(answers["versions"])
         if "stable" in _versions:
             _versions.remove("stable")
+            _versions.append(micropython_versions()[-2])
+        if "preview" in _versions:
+            _versions.remove("preview")
             _versions.append(micropython_versions()[-1])
+            _versions.append(micropython_versions()[-2])
 
-        some_boards = known_mp_boards(answers["port"], _versions) or known_mp_boards(answers["port"])
+        some_boards = known_mp_boards(answers["port"], _versions)  #    or known_mp_boards(answers["port"])
     else:
         some_boards = known_mp_boards(answers["port"])
 
