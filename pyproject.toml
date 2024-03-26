@@ -293,6 +293,10 @@ omit = [
 
     # partial files for variant generation
     "*/codemod/_partials/*.py",
+
+    # pytest code
+    "*/test_*.py",
+    "*/*_test.py",
 ]
 
 
