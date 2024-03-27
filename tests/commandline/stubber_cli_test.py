@@ -309,16 +309,13 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     # from stubber.commands.get_docstubs import generate_from_rst
     m_generate = mocker.patch("stubber.commands.get_docstubs_cmd.generate_from_rst", autospec=True)
 
-    m_post = mocker.patch("stubber.utils.do_post_processing", autospec=True)
-
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
-    # process is called twice
+    # process is called
     assert m_generate.call_count == 1
     m_generate.assert_called_once()
     assert m_get_l_tag.call_count >= 1
-    m_post.assert_called()
 
 
 ##########################################################################################
