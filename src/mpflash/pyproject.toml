@@ -40,6 +40,9 @@ libusb = {version = "^1.0.27", platform = "win32"}
 
 [tool.poetry.group.dev.dependencies]
 types-beautifulsoup4 = "^4.12.0.20240106"
+pytest = "^8.1.1"
+pytest-mock = "^3.14.0"
+mock = "^5.1.0"
 
 [build-system]
 requires = ["poetry-core"]
