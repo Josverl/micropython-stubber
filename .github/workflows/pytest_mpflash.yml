@@ -100,3 +100,4 @@ jobs:
               if: always() # ignore previous error
               with:
                   path: results
+                  name: mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}
