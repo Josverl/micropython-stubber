@@ -90,7 +90,7 @@ def show_mcus(
             mcu.serialport.replace("/dev/", ""),
             mcu.family,
             mcu.port,
-            f"{mcu.board}\n{mcu.description}",
+            f"{mcu.board}\n{mcu.description}".strip(),
             # mcu.variant,
             mcu.cpu,
             mcu.version,
