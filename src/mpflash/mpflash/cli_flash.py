@@ -1,9 +1,8 @@
 from pathlib import Path
+from typing import List
 
 import rich_click as click
 from loguru import logger as log
-
-from mpflash.mpboard_id.api import find_mp_board
 
 from .ask_input import FlashParams, ask_missing_params
 from .cli_download import connected_ports_boards
@@ -15,6 +14,7 @@ from .flash import WorkList, auto_update, enter_bootloader, find_firmware
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
+from .mpboard_id.api import find_mp_board
 from .mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
@@ -85,7 +85,7 @@ from .mpremoteboard import MPRemoteBoard
     "--erase/--no-erase",
     default=True,
     show_default=True,
-    help="""Erase flash before writing new firmware. (not on UF2 boards)""",
+    help="""Erase flash before writing new firmware. (Not supported on UF2 boards)""",
 )
 @click.option(
     "--bootloader/--no-bootloader",
@@ -157,14 +157,14 @@ def oneport_worklist(
 ) -> WorkList:
     """Create a worklist for a single serial-port."""
     conn_boards = [MPRemoteBoard(serial_port)]
-    todo = auto_update(conn_boards, version, fw_folder)
-    show_mcus(conn_boards)
+    todo = auto_update(conn_boards, version, fw_folder)  # type: ignore # List / list
+    show_mcus(conn_boards)  # type: ignore
     return todo
 
 
 def auto_worklist(version: str, fw_folder: Path) -> WorkList:
     conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
-    return auto_update(conn_boards, version, fw_folder)
+    return auto_update(conn_boards, version, fw_folder)  # type: ignore
 
 
 def manual_worklist(
@@ -186,7 +186,7 @@ def manual_worklist(
         log.error(f"No firmware found for {port} {board} version {version}")
         return []
         # use the most recent matching firmware
-    return [(mcu, firmwares[-1])]
+    return [(mcu, firmwares[-1])]  # type: ignore
 
 
 def flash_list(

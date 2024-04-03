@@ -64,12 +64,13 @@ jobs:
             #   #----------------------------------------------
             - name: Install mpflash dependencies
               continue-on-error: true
+              working-directory: src/mpflash
               run: |
-                  cd src/mpflash
                   poetry install --with dev --no-interaction
 
             - name: Test mpflash
               if: always()
+              working-directory: src/mpflash
               run: |
                   poetry run coverage run -m pytest --junitxml=../../results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
