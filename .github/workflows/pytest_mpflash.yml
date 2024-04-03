@@ -13,6 +13,7 @@ on:
     push:
         branches: [main, dev/*, feat/*, fix/*]
         paths:
+            - .github/workflows/pytest_mpflash.yml
             - "src/mpflash/**"
 
 env:
@@ -32,9 +33,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
-                python-version: ["3.8", "3.9", "3.10", "3.11"]
-                # python-version: ["3.11"]
-                # os: [ubuntu-latest]
+                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
         steps:
             - name: Checkout repository
@@ -76,6 +75,7 @@ jobs:
 
             - name: Upload mpflash coverage.xml to Codecov
               if: always() # ignore previous error
+              continue-on-error: true
               uses: codecov/codecov-action@v4
               with:
                   file: results/results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
