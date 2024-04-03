@@ -93,6 +93,7 @@ jobs:
               with:
                   file: results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
                   flags: stubber
+                  token: ${{ secrets.CODECOV_TOKEN }}
                   fail_ci_if_error: false
 
             #----------------------------------------------
