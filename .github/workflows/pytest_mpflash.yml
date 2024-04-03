@@ -74,11 +74,18 @@ jobs:
               run: |
                   poetry run coverage run -m pytest --junitxml=../../results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
-            - name: Upload mpflash coverage.xml to Codecov
-              if: always() # ignore previous error
-              continue-on-error: true
-              run: codecov -F mpflash -t ${{ secrets.CODECOV_TOKEN }} -f results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+            # - name: Upload mpflash coverage.xml to Codecov
+            #   if: always() # ignore previous error
+            #   continue-on-error: true
+            #   run: codecov -F mpflash -t ${{ secrets.CODECOV_TOKEN }} -f results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
+            - name: Upload coverage reports to Codecov with GitHub Action
+              uses: codecov/codecov-action@v4
+              with:
+                  files: results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  flags: mpflash
+                  #   name: mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}
             #   #----------------------------------------------
             #   # upload coverage stats
             #   # .XML  to Codecov
@@ -93,5 +100,4 @@ jobs:
             - uses: actions/upload-artifact@v4
               if: always() # ignore previous error
               with:
-                  path: results/
-                  name: results-${{ matrix.python-version }}-${{ matrix.os }}
+                  path: results
