@@ -80,6 +80,7 @@ jobs:
               with:
                   file: results/results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
                   flags: mpflash
+                  token: ${{ secrets.CODECOV_TOKEN }}
                   fail_ci_if_error: false
 
             #   #----------------------------------------------
