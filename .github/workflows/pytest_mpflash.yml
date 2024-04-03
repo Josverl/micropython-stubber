@@ -48,8 +48,10 @@ jobs:
             #----------------------------------------------
             # poetry is not in the default image
             #----------------------------------------------
-            - name: Install poetry
-              run: pipx install poetry==1.3.1
+            - name: Install poetry and codecov
+              run: |
+                  pipx install poetry==1.3.1
+                  pipx install codecov-cli
 
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v5
@@ -69,19 +71,12 @@ jobs:
             - name: Test mpflash
               if: always()
               run: |
-                  cd src/mpflash
                   poetry run coverage run -m pytest --junitxml=../../results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
-              #   poetry run coverage run -m pytest -m "mpflash" --junitxml=results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Upload mpflash coverage.xml to Codecov
               if: always() # ignore previous error
               continue-on-error: true
-              uses: codecov/codecov-action@v4
-              with:
-                  file: results/results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
-                  flags: mpflash
-                  token: ${{ secrets.CODECOV_TOKEN }}
-                  fail_ci_if_error: false
+              run: codecov -F mpflash -t ${{ secrets.CODECOV_TOKEN }} -f results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             #   #----------------------------------------------
             #   # upload coverage stats
