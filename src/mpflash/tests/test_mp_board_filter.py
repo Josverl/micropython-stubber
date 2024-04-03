@@ -5,6 +5,8 @@ import pytest
 from mpflash.common import get_stable_mp_version
 from mpflash.mpboard_id.api import Board, get_mp_boards_for_port, known_mp_ports
 
+pytestmark = [pytest.mark.mpflash]
+
 
 @pytest.mark.parametrize("port", known_mp_ports())
 @pytest.mark.parametrize(

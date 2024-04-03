@@ -2,6 +2,8 @@ import pytest
 
 from mpflash.mpboard_id.api import find_mp_board, known_mp_boards, known_mp_ports, read_boardinfo
 
+pytestmark = [pytest.mark.mpflash]
+
 
 def test_read_boardinfo():
     boards = read_boardinfo()

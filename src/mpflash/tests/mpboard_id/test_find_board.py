@@ -4,6 +4,8 @@ import pytest
 
 from mpflash.mpboard_id.board_id import find_board_designator
 
+pytestmark = [pytest.mark.mpflash]
+
 # Constants for test
 TEST_BOARD_INFO_PATH = Path("test_board_info.csv")
 HERE = Path(__file__).parent

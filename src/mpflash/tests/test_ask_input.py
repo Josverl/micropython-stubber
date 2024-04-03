@@ -6,6 +6,8 @@ from pytest_mock import MockerFixture
 
 from mpflash.ask_input import DownloadParams, FlashParams, ask_missing_params
 
+pytestmark = [pytest.mark.mpflash]
+
 
 def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
     # Make sure that the prompt is not called when interactive is False
