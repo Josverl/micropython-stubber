@@ -13,7 +13,8 @@ on:
     push:
         branches: [main, dev/*, feat/*, fix/*]
         paths:
-            - "src/**"
+            - .github/workflows/pytest.yml
+            - "src/stubber/**"
             - "tests/**"
             - "**/pyproject.toml"
             - "**/poetry.lock"
@@ -35,9 +36,9 @@ jobs:
             fail-fast: false
             matrix:
                 # os: [ubuntu-latest, windows-latest, macos-latest]
-                # python-version: ["3.8", "3.9", "3.10", "3.11"]
+                # python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
                 os: [ubuntu-latest]
-                python-version: ["3.11"]
+                python-version: ["3.12"]
                 exclude:
                     - os: macos-latest
                       python-version: "3.9" # avoid black install problem for this version
@@ -83,9 +84,8 @@ jobs:
             - name: Test stubber
               if: always()
               run: |
-                  # poetry run coverage erase
-                  # poetry run coverage run -m pytest -m "stubber" --junitxml=results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
-                  poetry run -m pytest -m "stubber" --junitxml=results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  poetry run coverage erase
+                  poetry run coverage run -m pytest -m stubber --junitxml=results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Upload stubber coverage.xml to Codecov
               if: always() # ignore previous error

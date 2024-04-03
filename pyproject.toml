@@ -95,13 +95,13 @@ pytest-metadata = ">=2.0.2,<4.0.0"
 pytest-mock = "^3.10.0"
 mock = "^4.0.3"
 distro = "^1.8.0"
+fasteners = "^0.19"
 
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
 pydeps = "^1.10.22"
 ipykernel = "^6.23.1"
-fasteners = "^0.19"
 python-dotenv = "^1.0.0"
 pydocstyle = "^6.3.0"
 chime = "^0.7.0"
