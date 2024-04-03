@@ -79,7 +79,7 @@ jobs:
             #   run: codecov -F mpflash -t ${{ secrets.CODECOV_TOKEN }} -f results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Upload coverage reports to Codecov with GitHub Action
-              uses: codecov/codecov-action@v4
+              uses: codecov/codecov-action@v3
               with:
                   files: results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
                   token: ${{ secrets.CODECOV_TOKEN }}
