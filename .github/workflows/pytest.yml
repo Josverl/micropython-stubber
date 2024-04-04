@@ -35,8 +35,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                # os: [ubuntu-latest, windows-latest, macos-latest]
-                # python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
                 include: # for testing
                     - os: ubuntu-latest
                       python-version: "3.10"
@@ -97,7 +97,7 @@ jobs:
               run: |
                   poetry run coverage xml -o results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
-            - name: Upload stubber coverage.xml to Codecov
+            - name: Upload coverage-stubber-*.xml to Codecov
               if: always() # ignore previous error
               uses: codecov/codecov-action@v4
               with:
@@ -117,4 +117,4 @@ jobs:
               if: always() # ignore previous error
               with:
                   path: results/
-                  name: results-${{ matrix.python-version }}-${{ matrix.os }}
+                  name: results-stubber-${{ matrix.python-version }}-${{ matrix.os }}
