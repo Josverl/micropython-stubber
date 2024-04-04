@@ -25,7 +25,7 @@ build
 # ignore test coverage reports
 .coverage*
 **/coverage/*
-cov.xml
+**/coverage*.xml
 
 # no  test results 
 junit/*
@@ -67,3 +67,4 @@ empty
 tmp_minified.py
 src/stubber/board/board_info.json
 codecov.exe
+

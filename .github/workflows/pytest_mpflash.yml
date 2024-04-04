@@ -101,14 +101,14 @@ jobs:
             #   # .XML  to Codecov
             #   #----------------------------------------------
 
-            - name: Push result to Testspace server
-              continue-on-error: true
-              if: always() # ignore previous error
-              run: |
-                  testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
+            # - name: Push result to Testspace server
+            #   continue-on-error: true
+            #   if: always() # ignore previous error
+            #   run: |
+            #       testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
 
-            - uses: actions/upload-artifact@v4
-              if: always() # ignore previous error
-              with:
-                  path: results
-                  name: mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}
+            # - uses: actions/upload-artifact@v4
+            #   if: always() # ignore previous error
+            #   with:
+            #       path: results
+            #       name: mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}
