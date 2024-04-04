@@ -61,28 +61,38 @@ jobs:
             #   #----------------------------------------------
             #   # install project
             #   #----------------------------------------------
-            - name: Install mpflash dependencies
+            - name: Install mpflash & test dependencies
               continue-on-error: true
               working-directory: src/mpflash
               run: |
-                  poetry install --with dev --no-interaction
+                  poetry install --with test --no-interaction
 
             - name: Test mpflash
-              if: always()
               working-directory: src/mpflash
               run: |
-                  poetry run coverage run -m pytest --junitxml=../../results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  poetry run coverage erase
+                  poetry run coverage run -m pytest -m mpflash
 
-            # - name: Upload mpflash coverage.xml to Codecov
-            #   if: always() # ignore previous error
-            #   continue-on-error: true
-            #   run: codecov -F mpflash -t ${{ secrets.CODECOV_TOKEN }} -f results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+            - name: create coverage report
+              if: always()
+              continue-on-error: true
+              working-directory: src/mpflash
+              run: |
+                  poetry run coverage xml -o coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}.xml
+
+            - name: scripted Codecov Upload coverage-mpflash.xml
+              if: always()
+              continue-on-error: true
+              working-directory: src/mpflash
+              run: |
+                  codecov --verbose upload-process --fail-on-error -F mpflash -f coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Test & publish code coverage
               uses: paambaati/codeclimate-action@v5.0.0
               env:
                   CC_TEST_REPORTER_ID: 44dc0a73940e44086c57311eb722221bc084a258b9ffd9f3016230107c346b73
-                  coverageLocations: ${{github.workspace}}/results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+              with:
+                  coverageLocations: ${{github.workspace}}/results/mpflash-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml:coverage.py
 
             # - name: Upload coverage reports to Codecov with GitHub Action
             #   uses: codecov/codecov-action@v3
