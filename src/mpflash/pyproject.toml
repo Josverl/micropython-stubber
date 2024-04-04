@@ -38,12 +38,18 @@ mpremote = "^1.22.0"
 inquirer = "^3.2.4"
 libusb = {version = "^1.0.27", platform = "win32"}
 
-[tool.poetry.group.dev.dependencies]
-types-beautifulsoup4 = "^4.12.0.20240106"
-pytest = "^8.1.1"
-pytest-mock = "^3.14.0"
-mock = "^5.1.0"
+[tool.poetry.group.test]
+optional = true
+[tool.poetry.group.test.dependencies]
 coverage = ">=6.4.3,<8.0.0"
+pytest = "^7.1.2"
+pytest-github-actions-annotate-failures = ">=0.1.7,<0.3.0"
+pytest-json-report = "^1.5.0"
+pytest-metadata = ">=2.0.2,<4.0.0"
+pytest-mock = "^3.10.0"
+mock = "^4.0.3"
+distro = "^1.8.0"
+fasteners = "^0.19"
 
 
 [build-system]
