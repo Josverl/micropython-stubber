@@ -82,23 +82,29 @@ jobs:
               run: poetry run stubber clone --add-stubs
 
             - name: Test stubber
-              if: always()
               run: |
                   poetry run coverage erase
-                  poetry run coverage run -m pytest -m stubber --junitxml=results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  poetry run coverage run -m pytest -m stubber
+            #----------------------------------------------
+            # upload coverage stats
+            # .XML  to Codecov
+            #----------------------------------------------
+
+            - name: create coverage report
+              if: always()
+              continue-on-error: true
+              run: |
+                  poetry run coverage xml -o results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Upload stubber coverage.xml to Codecov
               if: always() # ignore previous error
               uses: codecov/codecov-action@v4
               with:
-                  file: results/stubber-coverage-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  file: results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
                   flags: stubber
                   token: ${{ secrets.CODECOV_TOKEN }}
                   fail_ci_if_error: false
 
-            #----------------------------------------------
-            # upload coverage stats
-            # .XML  to Codecov
             #----------------------------------------------
 
             - name: Push result to Testspace server
