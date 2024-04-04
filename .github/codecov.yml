@@ -4,3 +4,31 @@ coverage:
     patch:
       default:
         target: 80%
+
+codecov:
+  branch: main
+
+
+flag_management:
+  default_rules: # the rules that will be followed for any flag added, generally
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+      - type: patch
+        target: 90%
+  individual_flags: # exceptions to the default rules above, stated flag by flag
+    - name: stubber
+      paths: 
+      - src/stubber
+      carryforward: true
+    - name: mpflash
+      paths: 
+      - src/mpflash
+      carryforward: true
+      statuses:
+      - type: project
+        target: 20%
+      - type: patch
+        target: 90%
