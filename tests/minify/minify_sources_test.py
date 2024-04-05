@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-from stubber.minify import minify
+from stubber.minify import minify, python_minifier
 
 # mark all tests
 pytestmark = [pytest.mark.stubber, pytest.mark.minify]
@@ -34,6 +34,10 @@ x = 1
 # - stringIO
 def test_minify_file_to_folder(tmp_path: Path, pytestconfig: pytest.Config):
     "file -> folder"
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
+
     source = "createstubs.py"
     source_path = pytestconfig.rootpath / "src" / "stubber" / "board" / source
     result = minify(source=source_path, target=tmp_path)
@@ -46,6 +50,9 @@ def test_minify_file_to_folder(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_minify_str_to_folder(tmp_path: Path, pytestconfig: pytest.Config):
     """string -> folder"""
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
 
     result = minify(source=SOURCE, target=tmp_path)
     assert result == 0
@@ -57,6 +64,10 @@ def test_minify_str_to_folder(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_minify_str_to_strio(tmp_path: Path, pytestconfig: pytest.Config):
     "string -> file in folder"
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
+
     target = StringIO()
     ret = minify(source=SOURCE, target=target)
     assert ret == 0
@@ -68,6 +79,10 @@ def test_minify_str_to_strio(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_minify_strio_to_strio(tmp_path: Path, pytestconfig: pytest.Config):
     "string -> file in folder"
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
+
     source = StringIO(initial_value=SOURCE)
     target = StringIO()
     ret = minify(source=source, target=target)

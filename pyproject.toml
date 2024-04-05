@@ -45,7 +45,7 @@ exclude = [
 stubber = "stubber.stubber:stubber_cli"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.9,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.12" } # no support for 3.12 yet
 requests = "^2.28.0"
 mypy = "1.7.0"
@@ -72,7 +72,7 @@ executing = "^2.0.1"
 mypy-gitlab-code-quality = "^1.1.0"
 rich-click = "^1.7.3"
 mpremote = "^1.22.0"
-mpflash = "^0.4.0.post3"
+mpflash = "^0.5.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -84,21 +84,24 @@ sphinx-autoapi = "^3.0.0"
 sphinx-click = "5.1.0"
 sphinxcontrib-mermaid = ">=0.9.2"
 
-[tool.poetry.group.dev]
+[tool.poetry.group.test]
 optional = true
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 coverage = ">=6.4.3,<8.0.0"
-distro = "^1.8.0"
-mock = "^4.0.3"
-pydeps = "^1.10.22"
 pytest = "^7.1.2"
 pytest-github-actions-annotate-failures = ">=0.1.7,<0.3.0"
 pytest-json-report = "^1.5.0"
 pytest-metadata = ">=2.0.2,<4.0.0"
 pytest-mock = "^3.10.0"
-# mpremote = { git = "https://github.com/Josverl/mpremote", subdirectory = "tools/mpremote", optional = true }
-ipykernel = "^6.23.1"
+mock = "^4.0.3"
+distro = "^1.8.0"
 fasteners = "^0.19"
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+pydeps = "^1.10.22"
+ipykernel = "^6.23.1"
 python-dotenv = "^1.0.0"
 pydocstyle = "^6.3.0"
 chime = "^0.7.0"
@@ -266,33 +269,33 @@ markers = [
 ]
 
 # coverage reports
+
 [tool.coverage.run]
 parallel = false
 branch = true
-source = ["src/stubber", "src/mpflash",]
+source = [
+    "src/stubber", 
+    "src/mpflash", 
+]
 omit = [
     # helper files in board
     "*/boot.py",
     "*/main.py",
     "*/stub_lvgl.py",
 
-    "*/__init__.py",
-
-    # minfied files should be excluded 
-    # duplicate file names in different folders break the coverage reports
-    # "*/minified/*.py",
-
     # dev helper script in src
     "*/src/stubber/rst/report_return.py",
     "*/src/stubber/update_module_list.py",
 
     # not my code 
-    "*/logging.py",
-    "*/make_stub_files.py",
     "*/stubber/tools/*.py",
 
     # partial files for variant generation
     "*/codemod/_partials/*.py",
+
+    # pytest code
+    "*/test_*.py",
+    "*/*_test.py",
 ]
 
 

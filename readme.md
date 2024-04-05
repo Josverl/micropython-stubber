@@ -2,13 +2,13 @@
  
   [![pypi version](https://badgen.net/pypi/v/micropython-stubber)](https://pypi.org/project/micropython-stubber/)
   [![python versions](https://badgen.net/pypi/python/micropython-stubber)](https://badgen.net/pypi/python/micropython-stubber)
-  [![Documentation Status](https://readthedocs.org/projects/micropython-stubber/badge/?version=latest)](https://micropython-stubber.readthedocs.io/en/latest/?badge=latest "Document build status badge")
+  [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
   [![Star on GitHub](https://img.shields.io/github/stars/josverl/micropython-stubber.svg?style=social)](https://github.com/josverl/micropython-stubber/stargazers)
   [![All Contributors](https://img.shields.io/badge/all_contributors-19-green.svg?style=flat-square)](#Contributions)
   <!-- break -->
-  [![pytest tests/common](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml)
-  [![codecov](https://codecov.io/gh/Josverl/micropython-stubber/branch/main/graph/badge.svg?token=WJFGMKBHOV)](https://codecov.io/gh/Josverl/micropython-stubber)
-  [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black "Black badge")
+  [![pytest stubber](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml)
+  [![pytest mpflash](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest_mpflash.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest_mpflash.yml)
+  [![Documentation Status](https://readthedocs.org/projects/micropython-stubber/badge/?version=latest)](https://micropython-stubber.readthedocs.io/en/latest/?badge=latest "Document build status badge")
   <!-- break -->
   [![Open in VSCode](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc
 )](https://open.vscode.dev/josverl/micropython-stubber)
