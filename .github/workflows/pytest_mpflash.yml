@@ -1,8 +1,8 @@
 # This workflow will :
-# - test the workstation scripts
-# - test the createstubs on  multiple micropyton linux versions
-# - test the minified createstubs on  multiple micropyton linux versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# - test mpflash
+# - upload coverage stats to Codecov
+# - push coverage result to Testspace server
+# - upload artifacts from the results folder
 
 name: pytest mpflash
 on:
@@ -33,7 +33,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
-                python-version: ["3.8", "3.9", "3.10", "3.11.7", "3.11", "3.12"]
+                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
                 include: # for testing
                     - os: ubuntu-latest
                       python-version: "3.10"
@@ -87,7 +87,8 @@ jobs:
             #   #----------------------------------------------
 
             - name: Upload coverage-mpflash-*.xml to Codecov
-              if: always() # ignore previous error
+              if: always() # ignore errors
+              continue-on-error: true
               uses: codecov/codecov-action@v4
               with:
                   file: results/coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}.xml
@@ -95,14 +96,16 @@ jobs:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   fail_ci_if_error: false
 
-            - name: Push coverage result to Testspace server
-              continue-on-error: true
-              if: always() # ignore previous error
-              run: |
-                  testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
 
             - uses: actions/upload-artifact@v4
-              if: always() # ignore previous error
+              if: always() # ignore errors
+              continue-on-error: true
               with:
                   path: results
                   name: mpflash-coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}
+
+            - name: Push coverage result to Testspace server
+              if: always() # ignore errors
+              continue-on-error: true
+              run: |
+                  testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov

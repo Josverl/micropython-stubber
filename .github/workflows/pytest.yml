@@ -2,6 +2,10 @@
 # - test the workstation scripts
 # - test the createstubs on  multiple micropyton linux versions
 # - test the minified createstubs on  multiple micropyton linux versions
+
+# - upload coverage stats to Codecov
+# - push coverage result to Testspace server
+# - upload artifacts from the results folder
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: pytest
@@ -40,11 +44,11 @@ jobs:
                 include: # for testing
                     - os: ubuntu-latest
                       python-version: "3.10"
-                exclude:
+                exclude: # avoid black install problem for these versions on macos
                     - os: macos-latest
-                      python-version: "3.9" # avoid black install problem for this version
+                      python-version: "3.9"
                     - os: macos-latest
-                      python-version: "3.10" # avoid black install problem for this version
+                      python-version: "3.10"
 
         steps:
             - name: Checkout repository
@@ -54,6 +58,7 @@ jobs:
                   # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
             - uses: testspace-com/setup-testspace@v1
+              continue-on-error: true
               with:
                   domain: josverl
 
@@ -98,7 +103,8 @@ jobs:
                   poetry run coverage xml -o results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Upload coverage-stubber-*.xml to Codecov
-              if: always() # ignore previous error
+              if: always() # ignore errors
+              continue-on-error: true
               uses: codecov/codecov-action@v4
               with:
                   file: results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
@@ -109,12 +115,14 @@ jobs:
             #----------------------------------------------
 
             - name: Push result to Testspace server
-              if: always() # ignore previous error
+              if: always() # ignore errors
+              continue-on-error: true
               run: |
                   testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
 
             - uses: actions/upload-artifact@v4
-              if: always() # ignore previous error
+              if: always() # ignore errors
+              continue-on-error: true
               with:
                   path: results/
                   name: results-stubber-${{ matrix.python-version }}-${{ matrix.os }}
