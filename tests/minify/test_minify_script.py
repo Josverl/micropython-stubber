@@ -1,8 +1,10 @@
 import pytest
 from _pytest.python_api import RaisesContext
 
-from stubber.minify import get_whitespace_context, minify_script
+from stubber.minify import get_whitespace_context, minify_script, python_minifier
+
 pytestmark = [pytest.mark.stubber]
+
 
 @pytest.mark.parametrize(
     "content, index, expected",
@@ -42,7 +44,9 @@ pytestmark = [pytest.mark.stubber]
     ],
 )
 def test_get_whitespace_context(content, index, expected):
-    # Arrange
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
 
     # Act
     if isinstance(expected, RaisesContext):
@@ -87,6 +91,10 @@ def test_get_whitespace_context(content, index, expected):
     ],
 )
 def test_minify_script(source_script, expected, keep_report):
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
+
     # Arrange
     source = "\n".join(source_script)
 
