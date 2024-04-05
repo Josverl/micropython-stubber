@@ -54,7 +54,7 @@ class MPRemoteBoard:
 
         if not bluetooth:
             # filter out bluetooth ports
-            ports = [p for p in ports if "Bluetooth" not in p.description]
+            ports = [p for p in ports if "bluetooth" not in p.description.lower()]
             ports = [p for p in ports if "BTHENUM" not in p.hwid]
 
         return sorted([p.device for p in ports])
@@ -124,7 +124,9 @@ class MPRemoteBoard:
         """
         if isinstance(cmd, str):
             cmd = cmd.split(" ")
-        prefix = [sys.executable, "-m", "mpremote", "connect", self.serialport] if self.serialport else ["mpremote"]
+        prefix = [sys.executable, "-m", "mpremote"]
+        if self.serialport:
+            prefix += ["connect", self.serialport]
         # if connected add resume to keep state between commands
         if self.connected:
             prefix += ["resume"]
