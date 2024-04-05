@@ -10,15 +10,15 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
-from mpflash.common import PORT_FWTYPES
+# #########################################################################################################
+# make sure that jsonlines does not mistake the MicroPython ujson for the CPython ujson
+import jsonlines
 import requests
 from bs4 import BeautifulSoup
 from loguru import logger as log
 from rich.progress import track
 
-# #########################################################################################################
-# make sure that jsonlines does not mistake the MicroPython ujson for the CPython ujson
-import jsonlines
+from mpflash.common import PORT_FWTYPES
 
 jsonlines.ujson = None  # type: ignore
 # #########################################################################################################
@@ -83,6 +83,18 @@ FirmwareInfo = Dict[str, str]
 # The first run takes ~60 seconds to run for 4 ports , all boards
 # so it makes sense to cache the results and skip boards as soon as possible
 def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FirmwareInfo]:
+    """
+    Retrieves a list of firmware information for the specified ports and boards.
+
+    Args:
+        ports (List[str]): The list of ports to check for firmware.
+        boards (List[str]): The list of boards to retrieve firmware information for.
+        clean (bool): A flag indicating whether to perform a clean retrieval.
+
+    Returns:
+        List[FirmwareInfo]: A list of firmware information for the specified ports and boards.
+
+    """
     board_urls: List[FirmwareInfo] = []
     for port in ports:
         download_page_url = f"{MICROPYTHON_ORG_URL}download/?port={port}"
@@ -139,14 +151,13 @@ def download_firmwares(
     boards: List[str],
     versions: Optional[List[str]] = None,
     *,
-    preview: bool = False,
     force: bool = False,
     clean: bool = True,
 ):
     skipped = downloaded = 0
     if versions is None:
         versions = []
-    unique_boards = get_firmware_list(ports, boards, versions, preview, clean)
+    unique_boards = get_firmware_list(ports, boards, versions, clean)
 
     for b in unique_boards:
         log.debug(b["filename"])
@@ -156,7 +167,6 @@ def download_firmwares(
 
     firmware_folder.mkdir(exist_ok=True)
 
-    # with open(firmware_folder / "firmware.jsonl", "a", encoding="utf-8", buffering=1) as f_jsonl:
     with jsonlines.open(firmware_folder / "firmware.jsonl", "a") as writer:
         for board in unique_boards:
             filename = firmware_folder / board["port"] / board["filename"]
@@ -175,16 +185,28 @@ def download_firmwares(
             except requests.RequestException as e:
                 log.exception(e)
                 continue
-            # # add the firmware to the jsonl file
-            # json_str = json.dumps(board) + "\n"
             writer.write(board)
             downloaded += 1
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
 
 
-def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], preview: bool, clean: bool):
-    log.trace("Checking MicroPython download pages")
+def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], clean: bool):
+    """
+    Retrieves a list of unique firmware information based on the specified ports, boards, versions, and clean flag.
 
+    Args:
+        ports : The list of ports to check for firmware.
+        boards : The list of boards to filter the firmware by.
+        versions : The list of versions to filter the firmware by.
+        clean : A flag indicating whether to perform a clean check.
+
+    Returns:
+        List[FirmwareInfo]: A list of unique firmware information.
+
+    """
+
+    log.trace("Checking MicroPython download pages")
+    preview = "preview" in versions
     board_urls = sorted(get_boards(ports, boards, clean), key=key_fw_ver_pre_ext_bld)
 
     log.debug(f"Total {len(board_urls)} firmwares")
@@ -212,8 +234,25 @@ def download(
     versions: List[str],
     force: bool,
     clean: bool,
-    preview: bool,
 ):
+    """
+    Downloads firmware files based on the specified destination, ports, boards, versions, force flag, and clean flag.
+
+    Args:
+        destination : The destination folder to save the downloaded firmware files.
+        ports : The list of ports to check for firmware.
+        boards : The list of boards to download firmware for.
+        versions : The list of versions to download firmware for.
+        force : A flag indicating whether to force the download even if the firmware file already exists.
+        clean : A flag indicating whether to perform a clean download.
+
+    Returns:
+        None
+
+    Raises:
+        SystemExit: If no boards are found or specified.
+
+    """
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
         exit(1)
@@ -223,4 +262,4 @@ def download(
     except (PermissionError, FileNotFoundError) as e:
         log.critical(f"Could not create folder {destination}\n{e}")
         exit(1)
-    download_firmwares(destination, ports, boards, versions, preview=preview, force=force, clean=clean)
+    download_firmwares(destination, ports, boards, versions, force=force, clean=clean)

@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Optional
+from typing import List
 
 import rich_click as click
 from loguru import logger as log
 
-from mpflash.mpremoteboard import MPRemoteBoard
-
+from .ask_input import FlashParams, ask_missing_params
+from .cli_download import connected_ports_boards
 from .cli_group import cli
 from .cli_list import show_mcus
 from .common import clean_version
@@ -14,7 +14,8 @@ from .flash import WorkList, auto_update, enter_bootloader, find_firmware
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
-from .common import FWInfo, PORT_FWTYPES
+from .mpboard_id.api import find_mp_board
+from .mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
 # CLI
@@ -37,17 +38,18 @@ from .common import FWInfo, PORT_FWTYPES
 @click.option(
     "--version",
     "-v",
-    "target_version",
+    "version",  # single version
     default="stable",
+    multiple=False,
     show_default=True,
     help="The version of MicroPython to flash.",
-    metavar="SEMVER, stable or preview",
+    metavar="SEMVER, 'stable', 'preview' or '?'",
 )
 @click.option(
     "--serial",
     "--serial-port",
     "-s",
-    "serial_port",
+    "serial",
     default="auto",
     show_default=True,
     help="Which serial port(s) to flash",
@@ -56,18 +58,20 @@ from .common import FWInfo, PORT_FWTYPES
 @click.option(
     "--port",
     "-p",
-    "port",
+    "ports",
     help="The MicroPython port to flash",
     metavar="PORT",
-    default="",
+    default=[],
+    multiple=True,
 )
 @click.option(
     "--board",
     "-b",
-    "board",
+    "boards",
+    multiple=False,
+    default=[],
     help="The MicroPython board ID to flash. If not specified will try to read the BOARD_ID from the connected MCU.",
-    metavar="BOARD_ID",
-    default="",
+    metavar="BOARD_ID or ?",
 )
 @click.option(
     "--cpu",
@@ -81,7 +85,7 @@ from .common import FWInfo, PORT_FWTYPES
     "--erase/--no-erase",
     default=True,
     show_default=True,
-    help="""Erase flash before writing new firmware. (not on UF2 boards)""",
+    help="""Erase flash before writing new firmware. (Not supported on UF2 boards)""",
 )
 @click.option(
     "--bootloader/--no-bootloader",
@@ -90,77 +94,107 @@ from .common import FWInfo, PORT_FWTYPES
     show_default=True,
     help="""Enter micropython bootloader mode before flashing.""",
 )
-def cli_flash_board(
-    target_version: str,
-    fw_folder: Path,
-    serial_port: Optional[str] = None,
-    board: Optional[str] = None,
-    port: Optional[str] = None,
-    variant: Optional[str] = None,
-    cpu: Optional[str] = None,
-    erase: bool = False,
-    bootloader: bool = True,
-):
+def cli_flash_board(**kwargs):
     todo: WorkList = []
 
-    # Ask for missing input if needed	
-    
+    # version to versions
+    if "version" in kwargs:
+        kwargs["versions"] = [kwargs.pop("version")]
+    params = FlashParams(**kwargs)
+    print(f"{params=}")
+    # print(f"{params.version=}")
+    print(f"{params.versions=}")
+    if not params.boards:
+        # nothing specified - detect connected boards
+        params.ports, params.boards = connected_ports_boards()
+    # Ask for missing input if needed
+    params = ask_missing_params(params, action="flash")
+    # TODO: Just in time Download of firmware
 
-    target_version = clean_version(target_version)
-    preview = target_version == "preview"
-    # Update all micropython boards to the latest version
-    if target_version and port and board and serial_port:
-        todo = manual_worklist(target_version, fw_folder, serial_port, board, port, preview)
-    elif serial_port:
-        if serial_port == "auto":
-            todo = auto_worklist(target_version, fw_folder, preview)
+    assert isinstance(params, FlashParams)
+
+    if len(params.versions) > 1:
+        print(repr(params.versions))
+        log.error(f"Only one version can be flashed at a time, not {params.versions}")
+        return
+    params.versions = [clean_version(v) for v in params.versions]
+    if params.versions[0] and params.boards[0] and params.serial:
+        # update a single board
+        todo = manual_worklist(
+            params.versions[0],
+            params.fw_folder,
+            params.serial,
+            params.boards[0],
+            # params.ports[0],
+        )
+    elif params.serial:
+        if params.serial == "auto":
+            # Update all micropython boards to the latest version
+            todo = auto_worklist(params.versions[0], params.fw_folder)
         else:
-            # just this serial port
-            todo = oneport_worklist(target_version, fw_folder, serial_port, preview)
+            # just this serial port on auto
+            todo = oneport_worklist(
+                params.versions[0],
+                params.fw_folder,
+                params.serial,
+            )
 
-    if flashed := flash_list(todo, fw_folder, erase, bootloader):
+    if flashed := flash_list(
+        todo,
+        params.fw_folder,
+        params.erase,
+        params.bootloader,
+    ):
         log.info(f"Flashed {len(flashed)} boards")
         show_mcus(flashed, title="Connected boards after flashing")
 
 
-def oneport_worklist(target_version: str, fw_folder: Path, serial_port: str, preview: bool) -> WorkList:
+def oneport_worklist(
+    version: str,
+    fw_folder: Path,
+    serial_port: str,
+    # preview: bool,
+) -> WorkList:
     """Create a worklist for a single serial-port."""
     conn_boards = [MPRemoteBoard(serial_port)]
-    todo = auto_update(conn_boards, target_version, fw_folder, preview=preview)
-    show_mcus(conn_boards)
+    todo = auto_update(conn_boards, version, fw_folder)  # type: ignore # List / list
+    show_mcus(conn_boards)  # type: ignore
     return todo
 
 
-def auto_worklist(target_version: str, fw_folder: Path, preview: bool) -> WorkList:
+def auto_worklist(version: str, fw_folder: Path) -> WorkList:
     conn_boards = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports]
-    return auto_update(conn_boards, target_version, fw_folder, preview=preview)
+    return auto_update(conn_boards, version, fw_folder)  # type: ignore
 
 
 def manual_worklist(
-    target_version: str, fw_folder: Path, serial_port: str, board: str, port: str, preview: bool
+    version: str,
+    fw_folder: Path,
+    serial_port: str,
+    board: str,
+    # port: str,
 ) -> WorkList:
     mcu = MPRemoteBoard(serial_port)
     # TODO : Find a way to avoid needing to specify the port
     # Lookup the matching port and cpu in board_info based in the board name
-
+    port = find_mp_board(board)["port"]
     mcu.port = port
     mcu.cpu = port if port.startswith("esp") else ""
     mcu.board = board
-    firmwares = find_firmware(
-        fw_folder=fw_folder,
-        board=board,
-        version=target_version,
-        preview=target_version.lower() == "preview",
-        port=port,
-    )
+    firmwares = find_firmware(fw_folder=fw_folder, board=board, version=version, port=port)
     if not firmwares:
-        log.error(f"No firmware found for {port} {board} version {target_version}")
+        log.error(f"No firmware found for {port} {board} version {version}")
         return []
         # use the most recent matching firmware
-    return [(mcu, firmwares[-1])]
+    return [(mcu, firmwares[-1])]  # type: ignore
 
 
-def flash_list(todo: WorkList, fw_folder: Path, erase: bool, bootloader: bool):
+def flash_list(
+    todo: WorkList,
+    fw_folder: Path,
+    erase: bool,
+    bootloader: bool,
+):
     """Flash a list of boards with the specified firmware."""
     flashed = []
     for mcu, fw_info in todo:
@@ -171,7 +205,7 @@ def flash_list(todo: WorkList, fw_folder: Path, erase: bool, bootloader: bool):
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info['version']}")
         updated = None
         # try:
-        if mcu.port in ["samd", "rp2", "nrf"] : #  [k for k, v in PORT_FWTYPES.items() if v == ".uf2"]:
+        if mcu.port in ["samd", "rp2", "nrf"]:  #  [k for k, v in PORT_FWTYPES.items() if v == ".uf2"]:
             if bootloader:
                 enter_bootloader(mcu)
             updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)

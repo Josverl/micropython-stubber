@@ -1,5 +1,6 @@
 import os
 import time
+from functools import lru_cache
 from typing import TypedDict
 
 from github import Auth, Github
@@ -62,7 +63,7 @@ def clean_version(
     if version in {"", "-"}:
         return version
     if version.lower() == "stable":
-        _v = get_stable_version()
+        _v = get_stable_mp_version()
         if not _v:
             log.warning("Could not determine the latest stable version")
             return "stable"
@@ -99,7 +100,8 @@ def clean_version(
     return version
 
 
-def micropython_versions(minver: str = "v1.10"):
+@lru_cache(maxsize=10)
+def micropython_versions(minver: str = "v1.20"):
     """Get the list of micropython versions from github tags"""
     try:
         gh_client = GH_CLIENT
@@ -130,10 +132,16 @@ def micropython_versions(minver: str = "v1.10"):
     return sorted(versions)
 
 
-def get_stable_version() -> str:
+def get_stable_mp_version() -> str:
     # read the versions from the git tags
     all_versions = micropython_versions(minver="v1.17")
     return [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
+
+
+def get_preview_mp_version() -> str:
+    # read the versions from the git tags
+    all_versions = micropython_versions(minver="v1.17")
+    return [v for v in all_versions if v.endswith(V_PREVIEW)][-1]
 
 
 #############################################################

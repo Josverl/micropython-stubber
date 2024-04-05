@@ -1,0 +1,111 @@
+# This workflow will :
+# - test mpflash
+# - upload coverage stats to Codecov
+# - push coverage result to Testspace server
+# - upload artifacts from the results folder
+
+name: pytest mpflash
+on:
+    workflow_dispatch:
+    pull_request:
+        branches: [main]
+
+    push:
+        branches: [main, dev/*, feat/*, fix/*]
+        paths:
+            - .github/workflows/pytest_mpflash.yml
+            - "src/mpflash/**"
+
+env:
+    JUPYTER_PLATFORM_DIRS: "1"
+    # fix:  DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    test_mpflash:
+        name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+                include: # for testing
+                    - os: ubuntu-latest
+                      python-version: "3.10"
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Install testspace client
+              continue-on-error: true
+              uses: testspace-com/setup-testspace@v1
+              with:
+                  domain: josverl
+
+            #----------------------------------------------
+            # poetry is not in the default image
+            #----------------------------------------------
+            - name: Install poetry and codecov
+              run: |
+                  pipx install poetry==1.3.1
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  #   cache: "poetry"
+
+            #   #----------------------------------------------
+            #   # install project
+            #   #----------------------------------------------
+            - name: Install mpflash & test dependencies
+              working-directory: src/mpflash
+              run: |
+                  poetry install --with test
+
+            - name: Test mpflash
+              working-directory: src/mpflash
+              run: |
+                  poetry run coverage erase
+                  poetry run coverage run -m pytest -m mpflash
+
+            - name: create coverage report
+              if: always()
+              continue-on-error: true
+              working-directory: src/mpflash
+              run: |
+                  poetry run coverage xml -o ../../results/coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}.xml
+
+            #   #----------------------------------------------
+            #   # upload coverage stats
+            #   # .XML  to Codecov
+            #   #----------------------------------------------
+
+            - name: Upload coverage-mpflash-*.xml to Codecov
+              if: always() # ignore errors
+              continue-on-error: true
+              uses: codecov/codecov-action@v4
+              with:
+                  file: results/coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  flags: stubber
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  fail_ci_if_error: false
+
+
+            - uses: actions/upload-artifact@v4
+              if: always() # ignore errors
+              continue-on-error: true
+              with:
+                  path: results
+                  name: mpflash-coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}
+
+            - name: Push coverage result to Testspace server
+              if: always() # ignore errors
+              continue-on-error: true
+              run: |
+                  testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov

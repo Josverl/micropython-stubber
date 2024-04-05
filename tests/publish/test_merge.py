@@ -54,7 +54,7 @@ def test_copydocstubs_mocked(mocker, tmp_path, pytestconfig):
         "stubber.publish.merge_docstubs.enrich_folder", autospec=True, return_value=42
     )
     m_copytree: MagicMock = mocker.patch("stubber.publish.merge_docstubs.shutil.copytree", autospec=True)
-    m_copy: MagicMock = mocker.patch("stubber.publish.merge_docstubs.shutil.copy", autospec=True)
+    mocker.patch("stubber.publish.merge_docstubs.shutil.copy", autospec=True)
 
     # use files already in test set
     fw_path = Path(".") / "tests" / "data" / "micropython-1.18-esp32"

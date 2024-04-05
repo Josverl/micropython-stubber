@@ -307,16 +307,14 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     m_get_l_tag = mocker.patch("stubber.basicgit.get_local_tag", autospec=True, return_value="v1.42")
 
     # from stubber.commands.get_docstubs import generate_from_rst
-    mock = mocker.patch("stubber.commands.get_docstubs_cmd.generate_from_rst", autospec=True)
-
-    mock_post = mocker.patch("stubber.utils.do_post_processing", autospec=True)
+    m_generate = mocker.patch("stubber.commands.get_docstubs_cmd.generate_from_rst", autospec=True)
 
     # fake run
     result = runner.invoke(stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
-    # process is called twice
-    assert mock.call_count == 1
-    mock.assert_called_once()
+    # process is called
+    assert m_generate.call_count == 1
+    m_generate.assert_called_once()
     assert m_get_l_tag.call_count >= 1
 
 
