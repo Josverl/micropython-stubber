@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 from pytest_mock import MockerFixture
 
-from stubber.minify import minify
+from stubber.minify import minify, python_minifier
 
 # mark all tests
 pytestmark = [pytest.mark.stubber, pytest.mark.minify]
@@ -14,6 +14,10 @@ pytestmark = [pytest.mark.stubber, pytest.mark.minify]
 @pytest.mark.slow
 def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Config):
     "python script - test creation of minified version"
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
+
     # load process.py in the same python environment
     source_path = pytestconfig.rootpath / "src" / "stubber" / "board" / source
 
@@ -32,6 +36,10 @@ def test_minification_py(tmp_path: Path, source: str, pytestconfig: pytest.Confi
 @pytest.mark.mocked
 def test_minification_quick(tmp_path: Path, source: str, mocker: MockerFixture, pytestconfig: pytest.Config):
     "test the rest of the minification functions using mocks to reduce the time needed"
+    # Skip minification test if no minifier tool is available
+    if not python_minifier:
+        pytest.skip("Python minifier not available")
+
     # load process.py in the same python environment
     source_path = pytestconfig.rootpath / "src" / "stubber" / "board" / source
 
