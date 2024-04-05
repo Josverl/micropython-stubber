@@ -2655,7 +2655,10 @@ files = [
 
 [package.dependencies]
 anyascii = "*"
-astroid = {version = ">=2.7", markers = "python_version < \"3.12\""}
+astroid = [
+    {version = ">=2.7", markers = "python_version < \"3.12\""},
+    {version = ">=3.0.0a1", markers = "python_version >= \"3.12\""},
+]
 Jinja2 = "*"
 PyYAML = "*"
 sphinx = ">=6.1.0"
@@ -3150,5 +3153,5 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9,<3.12"
-content-hash = "045add31c445c5b875a96fa8e018e7676bd5679dab3fcd92fa769552bfb6f085"
+python-versions = ">=3.9,<4.0"
+content-hash = "fa7451f35f8c8b92aaa21c6f2e2caddc11cd13a42995a8972886b7f643448b98"

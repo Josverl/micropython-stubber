@@ -45,7 +45,7 @@ exclude = [
 stubber = "stubber.stubber:stubber_cli"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.9,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.12" } # no support for 3.12 yet
 requests = "^2.28.0"
 mypy = "1.7.0"
