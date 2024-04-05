@@ -48,10 +48,16 @@ class MPRemoteBoard:
         return f"MPRemoteBoard({self.serialport}, {self.family} {self.port}, {self.board}, {self.version})"
 
     @staticmethod
-    def connected_boards():
+    def connected_boards(bluetooth: bool = False) -> List[str]:
         """Get a list of connected boards"""
-        devices = [p.device for p in serial.tools.list_ports.comports()]
-        return sorted(devices)
+        ports = serial.tools.list_ports.comports()
+
+        if not bluetooth:
+            # filter out bluetooth ports
+            ports = [p for p in ports if "Bluetooth" not in p.description]
+            ports = [p for p in ports if "BTHENUM" not in p.hwid]
+
+        return sorted([p.device for p in ports])
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1), retry_error_cls=ConnectionError)  # type: ignore
     def get_mcu_info(self, timeout: int = 6):
