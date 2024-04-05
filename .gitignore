@@ -68,3 +68,4 @@ tmp_minified.py
 src/stubber/board/board_info.json
 codecov.exe
 
+src/mpflash/coverag*

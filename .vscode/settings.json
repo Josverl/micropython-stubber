@@ -1,10 +1,8 @@
 {
     "python.analysis.autoSearchPaths": true,
-    "python.analysis.logLevel": "Trace",
-    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    // "python.analysis.logLevel": "Trace",
     //////////////////////////////////////////////////////////////
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "peacock.color": "#9b5f28",
@@ -88,7 +86,6 @@
         "DOC",
         "PYRIGHT"
     ],
-    "markiscodecoverage.searchCriteria": "results/coverage*.lcov",
     "debug.allowBreakpointsEverywhere": true,
     "debug.terminal.clearBeforeReusing": true,
     "python.analysis.typeCheckingMode": "basic",
@@ -121,7 +118,6 @@
     "files.watcherExclude": {
         "**/repos/**": true
     },
-    "python.formatting.provider": "none",
     "editor.formatOnType": false,
     "editor.formatOnSave": true,
     "yaml.schemas": {
@@ -134,13 +130,6 @@
         "editor.tabSize": 4,
         "editor.formatOnSave": true
     },
-    "python.formatting.blackArgs": [
-        "--config",
-        "${workspaceFolder}/pyproject.toml",
-        "--verbose"
-    ],
-    "python.analysis.enablePytestExtra": true,
-    "testExplorer.addToEditorContextMenu": true,
     "todo-tree.tree.scanMode": "open files",
     "python.analysis.typeshedPaths": [
         "typings"
