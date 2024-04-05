@@ -58,16 +58,15 @@ jobs:
               uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
-                  cache: "poetry"
+                  #   cache: "poetry"
 
             #   #----------------------------------------------
             #   # install project
             #   #----------------------------------------------
             - name: Install mpflash & test dependencies
-              continue-on-error: true
               working-directory: src/mpflash
               run: |
-                  poetry install --with test --no-interaction
+                  poetry install --with test
 
             - name: Test mpflash
               working-directory: src/mpflash
