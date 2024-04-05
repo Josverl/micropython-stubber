@@ -269,29 +269,25 @@ markers = [
 ]
 
 # coverage reports
+
 [tool.coverage.run]
 parallel = false
 branch = true
-source = ["src/stubber", "src/mpflash",]
+source = [
+    "src/stubber", 
+    "src/mpflash", 
+]
 omit = [
     # helper files in board
     "*/boot.py",
     "*/main.py",
     "*/stub_lvgl.py",
 
-    "*/__init__.py",
-
-    # minfied files should be excluded 
-    # duplicate file names in different folders break the coverage reports
-    # "*/minified/*.py",
-
     # dev helper script in src
     "*/src/stubber/rst/report_return.py",
     "*/src/stubber/update_module_list.py",
 
     # not my code 
-    "*/logging.py",
-    "*/make_stub_files.py",
     "*/stubber/tools/*.py",
 
     # partial files for variant generation
