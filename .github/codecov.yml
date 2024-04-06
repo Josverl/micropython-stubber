@@ -11,7 +11,7 @@ codecov:
 
 flag_management:
   default_rules: # the rules that will be followed for any flag added, generally
-    carryforward: true
+    # carryforward: true
     statuses:
       - type: project
         target: auto
@@ -22,11 +22,11 @@ flag_management:
     - name: stubber
       paths: 
       - src/stubber
-      carryforward: true
+      # carryforward: true
     - name: mpflash
       paths: 
       - src/mpflash
-      carryforward: true
+      # carryforward: true
       statuses:
       - type: project
         target: 20%
