@@ -14,6 +14,7 @@ on:
         branches: [main, dev/*, feat/*, fix/*]
         paths:
             - .github/workflows/pytest_mpflash.yml
+            - .github/workflows/codecov.yml            
             - "src/mpflash/**"
 
 env:

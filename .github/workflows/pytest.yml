@@ -18,6 +18,7 @@ on:
         branches: [main, dev/*, feat/*, fix/*]
         paths:
             - .github/workflows/pytest.yml
+            - .github/workflows/codecov.yml
             - "src/stubber/**"
             - "tests/**"
             - "**/pyproject.toml"
