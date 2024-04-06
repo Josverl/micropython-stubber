@@ -4,7 +4,9 @@ import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
 
-from mpflash.mpremoteboard import MPRemoteBoard
+from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
+
+pytestmark = [pytest.mark.mpflash]
 
 
 def test_mpremoteboard_new():
@@ -36,19 +38,26 @@ def test_mpremoteboard_list(expected, comports, mocker: MockerFixture):
 
 
 @pytest.mark.parametrize(
-    "port, expected",
+    "port",
     [
-        ("COM20", "-"),
-        ("", "-"),
+        ("COM20"),
+        ("AUTO"),
+        (""),
     ],
 )
-def test_mpremoteboard_run(port, expected, mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "command",
+    [
+        (["run", "mpy_fw_info.py"]),
+        ("run mpy_fw_info.py"),
+    ],
+)
+def test_mpremoteboard_run(port, command, mocker: MockerFixture):
     # port = "COM20"
 
-    m_run = mocker.patch("mpflash.mpremoteboard.run", return_value=(0, ["output", "more output"]))
+    m_run = mocker.patch("mpflash.mpremoteboard.run", return_value=(OK, ["output", "more output"]))
 
     mprb = MPRemoteBoard(port)
-    # mprb.connected = True
     assert not mprb.connected
     command = ["run", "mpy_fw_info.py"]
     result = mprb.run_command(command)
@@ -65,9 +74,41 @@ def test_mpremoteboard_run(port, expected, mocker: MockerFixture):
     assert (port in m_run.mock_calls[0].args[0]) == (port != "")
     assert "resume" not in m_run.mock_calls[0].args[0]
 
-    # run another command, and check for resume c
+    # run another command, and check for resume
     result = mprb.run_command(command)
     assert "resume" in m_run.mock_calls[1].args[0]
+
+
+@pytest.mark.parametrize(
+    "port",
+    [
+        ("COM20"),
+        ("AUTO"),
+        (""),
+    ],
+)
+def test_mpremoteboard_disconnect(port, mocker: MockerFixture):
+    # port = "COM20"
+
+    m_run = mocker.patch("mpflash.mpremoteboard.run", return_value=(OK, ["output", "more output"]))
+
+    mprb = MPRemoteBoard(port)
+    mprb.connected = True
+    result = mprb.disconnect()
+    assert not mprb.connected
+
+    if not port:
+        assert result == False
+        return
+
+    assert result == True
+    assert m_run.called
+    assert m_run.call_count == 1
+
+    # 1st command is python executable
+    assert m_run.mock_calls[0].args[0][0] == sys.executable
+    assert "disconnect" in m_run.mock_calls[0].args[0]
+    assert (port in m_run.mock_calls[0].args[0]) == (port != "")
 
 
 def test_mpremoteboard_info(mocker: MockerFixture):

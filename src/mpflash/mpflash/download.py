@@ -46,6 +46,9 @@ def get_board_urls(page_url: str) -> List[Dict[str, str]]:
     """
     Get the urls to all the board pages listed on this page.
     Assumes that all links to firmware  have "class": "board-card"
+
+    Args:
+        page_url (str): The url of the page to get the board urls from.
     """
     downloads_html = get_page(page_url)
     soup = BeautifulSoup(downloads_html, "html.parser")
@@ -57,8 +60,17 @@ def get_board_urls(page_url: str) -> List[Dict[str, str]]:
     return [{"board": board, "url": page_url + board} for board in boards]
 
 
-def firmware_list(board_url: str, base_url: str, ext: str) -> List[str]:
-    """Get the urls to all the firmware files for a board."""
+def board_firmware_urls(board_url: str, base_url: str, ext: str) -> List[str]:
+    """
+    Get the urls to all the firmware files for a board.
+    Args:
+        page_url (str): The url of the page to get the board urls from.
+    ??? base_url (str): The base url to join the relative urls to.
+        ext (str): The extension of the firmware files to get. (with or withouth leading .)
+
+    the urls are relative urls to the site root
+
+    """
     html = get_page(board_url)
     soup = BeautifulSoup(html, "html.parser")
     # get all the a tags:
@@ -109,7 +121,7 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
             # add a board to the list for each firmware found
             firmwares = []
             for ext in PORT_FWTYPES[port]:
-                firmwares += firmware_list(board["url"], MICROPYTHON_ORG_URL, ext)
+                firmwares += board_firmware_urls(board["url"], MICROPYTHON_ORG_URL, ext)
 
             for _url in firmwares:
                 board["firmware"] = _url
