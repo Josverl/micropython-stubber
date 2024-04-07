@@ -8,7 +8,7 @@ from loguru import logger as log
 
 from mpflash.common import micropython_versions
 from mpflash.config import config
-from mpflash.mpboard_id.api import known_mp_boards, known_mp_ports
+from mpflash.mpboard_id.api import known_stored_boards, local_mp_ports
 from mpflash.mpremoteboard import MPRemoteBoard
 
 
@@ -88,9 +88,9 @@ def some_boards(answers: dict) -> Sequence[Tuple[str, str]]:
             _versions.append(micropython_versions()[-1])
             _versions.append(micropython_versions()[-2])
 
-        some_boards = known_mp_boards(answers["port"], _versions)  #    or known_mp_boards(answers["port"])
+        some_boards = known_stored_boards(answers["port"], _versions)  #    or known_mp_boards(answers["port"])
     else:
-        some_boards = known_mp_boards(answers["port"])
+        some_boards = known_stored_boards(answers["port"])
 
     if some_boards:
         # Create a dictionary where the keys are the second elements of the tuples
@@ -112,7 +112,7 @@ def ask_port_board(questions: list, *, action: str):
             inquirer.List(
                 "port",
                 message=f"What port do you want to {action}?",
-                choices=known_mp_ports(),
+                choices=local_mp_ports(),
                 autocomplete=True,
             ),
             inquirer.Checkbox(
