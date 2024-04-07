@@ -10,7 +10,7 @@ from typing import List, Optional
 import esptool
 from loguru import logger as log
 
-from mpflash.mpboard_id.api import find_mp_board
+from mpflash.mpboard_id.api import find_stored_board
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .common import wait_for_restart
@@ -24,7 +24,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optio
     log.info(f"Flashing {fw_file} on {mcu.board} on {mcu.serialport}")
     if not mcu.cpu:
         # Lookup CPU based on the board name
-        mcu.cpu = find_mp_board(mcu.board)["cpu"]
+        mcu.cpu = find_stored_board(mcu.board)["cpu"]
 
     if mcu.port == "esp8266":
         baud_rate = str(460_800)

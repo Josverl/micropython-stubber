@@ -3,12 +3,12 @@ from typing import List
 import pytest
 
 from mpflash.common import get_stable_mp_version
-from mpflash.mpboard_id.api import Board, get_mp_boards_for_port, known_mp_ports
+from mpflash.mpboard_id.api import Board, get_stored_boards_for_port, local_mp_ports
 
 pytestmark = [pytest.mark.mpflash]
 
 
-@pytest.mark.parametrize("port", known_mp_ports())
+@pytest.mark.parametrize("port", local_mp_ports())
 @pytest.mark.parametrize(
     "id, versions",
     [
@@ -24,7 +24,7 @@ def test_mp_board_filter(port: str, id, versions: List[str]):
     # Arrange
 
     # Act
-    result = get_mp_boards_for_port(port, versions)
+    result = get_stored_boards_for_port(port, versions)
     # Assert
     assert len(result) >= 1
     assert all(board["port"] == port for board in result)

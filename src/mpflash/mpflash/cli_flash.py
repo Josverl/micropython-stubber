@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import rich_click as click
 from loguru import logger as log
@@ -14,7 +13,7 @@ from .flash import WorkList, auto_update, enter_bootloader, find_firmware
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
 from .flash_uf2 import flash_uf2
-from .mpboard_id.api import find_mp_board
+from .mpboard_id.api import find_stored_board
 from .mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
@@ -67,7 +66,7 @@ from .mpremoteboard import MPRemoteBoard
 @click.option(
     "--board",
     "-b",
-    "boards",
+    "board",  # sinlge board
     multiple=False,
     default=[],
     help="The MicroPython board ID to flash. If not specified will try to read the BOARD_ID from the connected MCU.",
@@ -97,16 +96,14 @@ from .mpremoteboard import MPRemoteBoard
 def cli_flash_board(**kwargs):
     todo: WorkList = []
 
-    # version to versions
-    if "version" in kwargs:
-        kwargs["versions"] = [kwargs.pop("version")]
+    # version to versions, board to boards
+    kwargs["versions"] = [kwargs.pop("version")] if "version" in kwargs else []
+    kwargs["boards"] = [kwargs.pop("board")] if "board" in kwargs else []
     params = FlashParams(**kwargs)
-    print(f"{params=}")
-    # print(f"{params.version=}")
-    print(f"{params.versions=}")
     if not params.boards:
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
+
     # Ask for missing input if needed
     params = ask_missing_params(params, action="flash")
     # TODO: Just in time Download of firmware
@@ -177,7 +174,11 @@ def manual_worklist(
     mcu = MPRemoteBoard(serial_port)
     # TODO : Find a way to avoid needing to specify the port
     # Lookup the matching port and cpu in board_info based in the board name
-    port = find_mp_board(board)["port"]
+    try:
+        port = find_stored_board(board)["port"]
+    except LookupError:
+        log.error(f"Board {board} not found in board_info.json")
+        return []
     mcu.port = port
     mcu.cpu = port if port.startswith("esp") else ""
     mcu.board = board
