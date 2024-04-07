@@ -49,7 +49,7 @@ def connected_ports_boards() -> Tuple[List[str], List[str]]:
     "-b",
     "boards",
     multiple=True,
-    default=["?"],
+    default=[],
     show_default=True,
     help="The board(s) to download the firmware for.",
     metavar="BOARD_ID or ?",
