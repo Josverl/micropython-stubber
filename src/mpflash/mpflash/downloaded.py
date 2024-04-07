@@ -1,13 +1,13 @@
-
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import jsonlines
 from loguru import logger as log
 
-
 from .common import FWInfo, clean_version
 from .config import config
+
+
 # #########################################################################################################
 def downloaded_firmwares(fw_folder: Path) -> List[FWInfo]:
     """Load a list of locally downloaded firmwares from the jsonl file"""
@@ -24,7 +24,7 @@ def downloaded_firmwares(fw_folder: Path) -> List[FWInfo]:
 
 def find_downloaded_firmware(
     *,
-    board: str,
+    board_id: str,
     version: str = "",
     port: str = "",
     variants: bool = False,
@@ -42,21 +42,23 @@ def find_downloaded_firmware(
         return []
     # filter by version
     version = clean_version(version, drop_v=True)
-    fw_list = filter_fwlist(fw_list, board, version, port, variants, selector)
+    fw_list = filter_downloaded_fwlist(fw_list, board_id, version, port, variants, selector)
 
-    if not fw_list and trie < 2:
-        board_id = board.replace("_", "-")
-        # ESP board naming conventions have changed by adding a PORT refix
-        if port.startswith("esp") and not board_id.startswith(port.upper()):
-            board_id = f"{port.upper()}_{board_id}"
-        # RP2 board naming conventions have changed by adding a _RPIprefix
-        if port == "rp2" and not board_id.startswith("RPI_"):
-            board_id = f"RPI_{board_id}"
+    if not fw_list and trie < 3:
+        log.info(f"Try ({trie+1}) to find a firmware for the board {board_id}")
+        if trie == 1:
+            # ESP board naming conventions have changed by adding a PORT refix
+            if port.startswith("esp") and not board_id.startswith(port.upper()):
+                board_id = f"{port.upper()}_{board_id}"
+            # RP2 board naming conventions have changed by adding a _RPIprefix
+            if port == "rp2" and not board_id.startswith("RPI_"):
+                board_id = f"RPI_{board_id}"
+        elif trie == 2:
+            board_id = board_id.replace("_", "-")
 
-        log.info(f"Try ({trie}) to find a firmware for the board {board_id}")
         fw_list = find_downloaded_firmware(
             fw_folder=fw_folder,
-            board=board_id,
+            board_id=board_id,
             version=version,
             port=port,
             trie=trie + 1,
@@ -68,10 +70,9 @@ def find_downloaded_firmware(
     return fw_list
 
 
-
-def filter_fwlist(
+def filter_downloaded_fwlist(
     fw_list: List[FWInfo],
-    board: str,
+    board_id: str,
     version: str,
     port: str,
     # preview: bool,
@@ -89,12 +90,13 @@ def filter_fwlist(
     if port:
         fw_list = [fw for fw in fw_list if fw["port"] == port]
 
-    if board:
+    if board_id:
         if variants:
-            fw_list = [fw for fw in fw_list if fw["board"] == board]
+            # any variant of this board_id
+            fw_list = [fw for fw in fw_list if fw["board"] == board_id]
         else:
-            # the variant should match exactly the board name
-            fw_list = [fw for fw in fw_list if fw["variant"] == board]
+            # the firmware variant should match exactly the board_id
+            fw_list = [fw for fw in fw_list if fw["variant"] == board_id]
     if selector and port in selector:
         fw_list = [fw for fw in fw_list if fw["filename"].endswith(selector[port])]
     return fw_list
@@ -102,4 +104,3 @@ def filter_fwlist(
 
 # #########################################################################################################
 #
-
