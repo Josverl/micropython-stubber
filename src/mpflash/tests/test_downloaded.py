@@ -39,7 +39,7 @@ def test_find_downloaded_firmware(port, board_id, version, OK, test_fw_path, act
 
     if actual:
         fw_path = config.firmware_folder
-        pytest.mark.xfail(reason="This test may not work in CI, as the firmware may not be downloaded.")
+        pytest.xfail("This test may not work in CI, as the firmware may not be downloaded.")
     else:
         fw_path = test_fw_path
     result = find_downloaded_firmware(
@@ -80,11 +80,12 @@ def test_find_downloaded_firmware(port, board_id, version, OK, test_fw_path, act
         # test for board_id = board.replace("_", "-")
     ],
 )
-@pytest.mark.parametrize("actual", [False, True])
+@pytest.mark.parametrize("actual", [False, True])  # , True still fails in CI
 def test_filter_downloaded_fwlist(port, board_id, version, OK, test_fw_path, actual: bool):
     if actual:
         fw_path = config.firmware_folder
-        pytest.mark.xfail(reason="This test may not work in CI, as the firmware may not be downloaded.")
+        if not fw_path.exists():
+            pytest.xfail("This test may not work in CI, as the firmware may not be downloaded.")
     else:
         fw_path = test_fw_path
     fw_list = downloaded_firmwares(fw_path)
