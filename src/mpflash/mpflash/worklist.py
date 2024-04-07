@@ -34,7 +34,7 @@ def auto_update(
             continue
         board_firmwares = find_downloaded_firmware(
             fw_folder=fw_folder,
-            board=mcu.board,
+            board_id=mcu.board,
             version=target_version,
             port=mcu.port,
             selector=selector,
@@ -91,7 +91,7 @@ def manual_worklist(
     mcu.port = port
     mcu.cpu = port if port.startswith("esp") else ""
     mcu.board = board
-    firmwares = find_downloaded_firmware(fw_folder=fw_folder, board=board, version=version, port=port)
+    firmwares = find_downloaded_firmware(fw_folder=fw_folder, board_id=board, version=version, port=port)
     if not firmwares:
         log.error(f"No firmware found for {port} {board} version {version}")
         return []

@@ -36,8 +36,10 @@
                 // "--ignore",
                 // "/dev/ttyAMA0",
                 "flash",
-                "--version",
-                "?",
+                // "--board",
+                // "SEEED_WIO_TERMINAL",
+                // "--version",
+                // "?",
                 // "preview",
                 // "--board",
                 // "--no-erase",
@@ -46,8 +48,6 @@
                 // "/dev/ttyACM0",
                 // "--port",
                 // "samd",
-                "--board",
-                "SEEED_WIO_TERMINAL",
             ]
         },
         {
