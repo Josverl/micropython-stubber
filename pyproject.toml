@@ -288,7 +288,8 @@ omit = [
     "*/src/stubber/update_module_list.py",
 
     # not my code 
-    "*/stubber/tools/*.py",
+    "*/src/stubber/tools/*.py",
+    "*/src/mpflash/mpflash/vendored/*.py",
 
     # partial files for variant generation
     "*/codemod/_partials/*.py",
