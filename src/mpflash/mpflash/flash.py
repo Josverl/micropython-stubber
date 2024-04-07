@@ -3,6 +3,7 @@ from pathlib import Path
 
 from loguru import logger as log
 
+from mpflash.common import PORT_FWTYPES
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .flash_esp import flash_esp
@@ -29,7 +30,8 @@ def flash_list(
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info['version']}")
         updated = None
         # try:
-        if mcu.port in ["samd", "rp2", "nrf"]:  #  [k for k, v in PORT_FWTYPES.items() if v == ".uf2"]:
+        if mcu.port in [port for port, exts in PORT_FWTYPES.items() if ".uf2" in exts] and fw_file.suffix == ".uf2":
+            # any .uf2 port ["samd", "rp2", "nrf"]:
             if bootloader:
                 enter_bootloader(mcu)
             updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
@@ -47,6 +49,7 @@ def flash_list(
             flashed.append(updated)
         else:
             log.error(f"Failed to flash {mcu.board} on {mcu.serialport}")
+    return flashed
 
 
 def enter_bootloader(mcu: MPRemoteBoard, timeout: int = 10, wait_after: int = 2):
