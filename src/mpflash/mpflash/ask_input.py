@@ -49,16 +49,20 @@ def ask_missing_params(
     import inquirer
 
     questions = []
+    answers = {}
     if isinstance(params, FlashParams) and (not params.serial or "?" in params.versions):
         ask_serialport(questions, action=action)
 
     if not params.versions or "?" in params.versions:
         ask_versions(questions, action=action)
+    else:
+        # versions is used to show only the boards for the selected versions
+        answers["versions"] = params.versions
 
     if not params.boards or "?" in params.boards:
         ask_port_board(questions, action=action)
 
-    answers = inquirer.prompt(questions)
+    answers = inquirer.prompt(questions, answers=answers)
     if not answers:
         return params
     # print(repr(answers))
@@ -78,15 +82,15 @@ def ask_missing_params(
 
 
 def some_boards(answers: dict) -> Sequence[Tuple[str, str]]:
+    # if version is not asked ; then need to get the version from the inputs
     if "versions" in answers:
         _versions = list(answers["versions"])
         if "stable" in _versions:
             _versions.remove("stable")
-            _versions.append(micropython_versions()[-2])
+            _versions.append(micropython_versions()[-2])  # latest stable
         if "preview" in _versions:
             _versions.remove("preview")
-            _versions.append(micropython_versions()[-1])
-            _versions.append(micropython_versions()[-2])
+            _versions.extend((micropython_versions()[-1], micropython_versions()[-2]))  # latest preview and stable
 
         some_boards = known_stored_boards(answers["port"], _versions)  #    or known_mp_boards(answers["port"])
     else:
@@ -107,6 +111,8 @@ def ask_port_board(questions: list, *, action: str):
     # import only when needed to reduce load time
     import inquirer
 
+    # TODO: if action = flash, Use Inquirer.List for boards
+    inquirer_ux = inquirer.Checkbox if action == "download" else inquirer.List
     questions.extend(
         (
             inquirer.List(
@@ -115,7 +121,7 @@ def ask_port_board(questions: list, *, action: str):
                 choices=local_mp_ports(),
                 autocomplete=True,
             ),
-            inquirer.Checkbox(
+            inquirer_ux(
                 "boards",
                 message=f"What board do you want to {action}?",
                 choices=some_boards,
