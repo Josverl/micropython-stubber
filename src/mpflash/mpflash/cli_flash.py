@@ -98,7 +98,7 @@ def cli_flash_board(**kwargs):
         kwargs["boards"] = [kwargs.pop("board")]
 
     params = FlashParams(**kwargs)
-    if not params.boards or params.boards == [] or params.boards == ["?"]:
+    if not params.boards or params.boards == []:
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
 
@@ -109,11 +109,13 @@ def cli_flash_board(**kwargs):
     assert isinstance(params, FlashParams)
 
     if len(params.versions) > 1:
-        print(repr(params.versions))
         log.error(f"Only one version can be flashed at a time, not {params.versions}")
-        return
-    params.versions = [clean_version(v) for v in params.versions]
+        raise AttributeError("Only one version can be flashed at a time")
+    if len(params.boards) > 1:
+        log.error(f"Only one board can be flashed at a time, not {params.boards}")
+        raise AttributeError("Only one board can be flashed at a time")
 
+    params.versions = [clean_version(v) for v in params.versions]
     worklist: WorkList = []
     # if serial port == auto and there are one or more specified/detected boards
     if params.serial == "auto" and params.boards:

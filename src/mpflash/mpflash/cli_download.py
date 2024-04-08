@@ -14,13 +14,6 @@ from .config import config
 from .download import download
 
 
-def connected_ports_boards() -> Tuple[List[str], List[str]]:
-    mpr_boards = list_mcus()
-    ports = list({b.port for b in mpr_boards})
-    boards = list({b.board for b in mpr_boards})
-    return ports, boards
-
-
 @cli.command(
     "download",
     help="Download MicroPython firmware for specific ports, boards and versions.",
@@ -89,3 +82,18 @@ def cli_download(
         params.force,
         params.clean,
     )
+
+
+def connected_ports_boards() -> Tuple[List[str], List[str]]:
+    """
+    Returns a tuple containing lists of unique ports and boards from the connected MCUs.
+
+    Returns:
+        A tuple containing two lists:
+            - A list of unique ports where MCUs are connected.
+            - A list of unique board names of the connected MCUs.
+    """
+    mpr_boards = list_mcus()
+    ports = list({b.port for b in mpr_boards})
+    boards = list({b.board for b in mpr_boards})
+    return ports, boards

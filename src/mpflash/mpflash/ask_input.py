@@ -50,8 +50,11 @@ def ask_missing_params(
 
     questions = []
     answers = {}
-    if isinstance(params, FlashParams) and (not params.serial or "?" in params.versions):
-        ask_serialport(questions, action=action)
+    if isinstance(params, FlashParams):
+        if not params.serial or "?" in params.serial:
+            ask_serialport(questions, action=action)
+        else:
+            answers["serial"] = params.serial
 
     if not params.versions or "?" in params.versions:
         ask_versions(questions, action=action)
@@ -142,8 +145,10 @@ def ask_versions(questions: list, *, action: str):
     mp_versions.reverse()  # newest first
     questions.append(
         input_ux(
+            # inquirer.List(
             "versions",
             message=f"What version(s) do you want to {action}?",
+            hints=["Use space to select multiple options"],
             choices=mp_versions,
             autocomplete=True,
             validate=lambda _, x: True if x else "Please select at least one version",  # type: ignore
@@ -160,9 +165,9 @@ def ask_serialport(questions: list, *, action: str):
         inquirer.List(
             "serial",
             message="What serial port do you want use ?",
-            validate=lambda _, x: True if x else "Please enter a serial port",  # type: ignore
             choices=serialports,
             other=True,
+            validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore
         )
     )
 
