@@ -15,8 +15,12 @@ def mpflash():
     cli.add_command(cli_list_mcus)
     cli.add_command(cli_download)
     # cli(auto_envvar_prefix="MPFLASH")
-    cli()
+    try:
+        cli()
+    except AttributeError as e:
+        print(f"Error: {e}")
+        exit(-1)
 
 
-# if __name__ == "__main__":
-mpflash()
+if __name__ == "__main__":
+    mpflash()

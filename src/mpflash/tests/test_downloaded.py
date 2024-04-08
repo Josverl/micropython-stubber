@@ -34,12 +34,10 @@ def test_downloaded_firmwares(mocker: MockerFixture, test_fw_path):
 @pytest.mark.parametrize("actual", [False, True])  #
 @pytest.mark.parametrize("variants", [False, True])  #
 def test_find_downloaded_firmware(port, board_id, version, OK, test_fw_path, actual: bool, variants: bool):
-    # this works on a static included file in the test_fw_path
-    # TODO: Add a test on a newly created file
-
     if actual:
         fw_path = config.firmware_folder
-        pytest.xfail("This test may not work in CI, as the firmware may not be downloaded.")
+        if not fw_path.exists():
+            pytest.xfail("This test may not work in CI, as the firmware may not be downloaded.")
     else:
         fw_path = test_fw_path
     result = find_downloaded_firmware(
