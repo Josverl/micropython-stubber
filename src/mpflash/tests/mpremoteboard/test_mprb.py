@@ -88,9 +88,11 @@ def test_mpremoteboard_run(port, command, mocker: MockerFixture):
     ],
 )
 def test_mpremoteboard_disconnect(port, mocker: MockerFixture):
+    # sourcery skip: remove-redundant-if
     # port = "COM20"
 
     m_run = mocker.patch("mpflash.mpremoteboard.run", return_value=(OK, ["output", "more output"]))
+    m_log_error = mocker.patch("mpflash.mpremoteboard.log.error")
 
     mprb = MPRemoteBoard(port)
     mprb.connected = True
@@ -109,6 +111,13 @@ def test_mpremoteboard_disconnect(port, mocker: MockerFixture):
     assert m_run.mock_calls[0].args[0][0] == sys.executable
     assert "disconnect" in m_run.mock_calls[0].args[0]
     assert (port in m_run.mock_calls[0].args[0]) == (port != "")
+
+    if port:
+        # No error
+        m_log_error.assert_not_called()
+    else:
+        # should show error if no port
+        m_log_error.assert_called_once()
 
 
 def test_mpremoteboard_info(mocker: MockerFixture):
