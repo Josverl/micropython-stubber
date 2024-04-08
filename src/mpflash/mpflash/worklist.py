@@ -7,6 +7,7 @@ from mpflash.common import FWInfo
 
 from .config import config
 from .downloaded import find_downloaded_firmware
+from .list import show_mcus
 from .mpboard_id.api import find_stored_board
 from .mpremoteboard import MPRemoteBoard
 
