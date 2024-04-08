@@ -75,9 +75,7 @@ def known_stored_boards(port: str, versions: Optional[List[str]] = None) -> List
     """
     mp_boards = get_stored_boards_for_port(port, versions)
 
-    boards = set(
-        {(f'{board["description"]} [board["board"]] {board["version"]}', board["board"]) for board in mp_boards}
-    )
+    boards = set({(f'{board["version"]} {board["description"]}', board["board"]) for board in mp_boards})
     return sorted(list(boards))
 
 
