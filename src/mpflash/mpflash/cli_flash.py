@@ -143,4 +143,4 @@ def cli_flash_board(**kwargs):
         params.bootloader,
     ):
         log.info(f"Flashed {len(flashed)} boards")
-        show_mcus(flashed, title="Connected boards after flashing")
+        show_mcus(flashed, title="Updated boards after flashing")
