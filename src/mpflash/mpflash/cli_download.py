@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import rich_click as click
 
-from mpflash.vendored.versions import clean_version
+from mpflash.vendor.versions import clean_version
 
 from .ask_input import DownloadParams, ask_missing_params
 from .cli_group import cli

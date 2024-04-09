@@ -5,7 +5,7 @@ import jsonlines
 from loguru import logger as log
 
 from mpflash.common import FWInfo
-from mpflash.vendored.versions import clean_version
+from mpflash.vendor.versions import clean_version
 
 from .config import config
 
