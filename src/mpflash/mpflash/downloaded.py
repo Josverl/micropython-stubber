@@ -4,7 +4,9 @@ from typing import Dict, List, Optional
 import jsonlines
 from loguru import logger as log
 
-from .common import FWInfo, clean_version
+from mpflash.common import FWInfo
+from mpflash.vendored.versions import clean_version
+
 from .config import config
 
 

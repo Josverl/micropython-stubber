@@ -10,9 +10,8 @@ import serial.tools.list_ports
 from loguru import logger as log
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from mpflash.mpboard_id.board_id import find_board_designator
-
-from .runner import run
+from mpflash.mpboard_id.board_id import find_board_id
+from mpflash.mpremoteboard.runner import run
 
 ###############################################################################################
 # TODO : make this a bit nicer
@@ -84,7 +83,7 @@ class MPRemoteBoard:
             self.description = descr = info["board"]
             pos = descr.rfind(" with")
             short_descr = descr[:pos].strip() if pos != -1 else ""
-            if board_name := find_board_designator(descr, short_descr):
+            if board_name := find_board_id(descr, short_descr):
                 self.board = board_name
             else:
                 self.board = "UNKNOWN"
