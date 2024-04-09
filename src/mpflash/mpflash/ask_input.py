@@ -74,7 +74,7 @@ def ask_missing_params(
     if "port" in answers:
         params.ports = [answers["port"]]
     if "boards" in answers:
-        params.boards = answers["boards"]
+        params.boards = answers["boards"] if isinstance(answers["boards"], list) else [answers["boards"]]
     if "versions" in answers:
         # make sure it is a list
         params.versions = answers["versions"] if isinstance(answers["versions"], list) else [answers["versions"]]
