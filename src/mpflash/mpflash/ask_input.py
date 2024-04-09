@@ -9,7 +9,7 @@ from loguru import logger as log
 from mpflash.config import config
 from mpflash.mpboard_id.api import known_stored_boards, local_mp_ports
 from mpflash.mpremoteboard import MPRemoteBoard
-from mpflash.vendored.versions import micropython_versions
+from mpflash.vendor.versions import micropython_versions
 
 
 @dataclass

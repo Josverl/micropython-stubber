@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from mpflash.vendored.versions import clean_version
+from mpflash.vendor.versions import clean_version
 
 ###############################################################################################
 HERE = Path(__file__).parent

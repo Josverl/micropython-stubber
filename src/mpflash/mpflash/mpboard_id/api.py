@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, TypedDict, Union
 
 from mpflash.common import PORT_FWTYPES
-from mpflash.vendored.versions import clean_version
+from mpflash.vendor.versions import clean_version
 
 
 # Board  based on the dataclass Board but changed to TypedDict
