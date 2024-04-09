@@ -7,7 +7,7 @@ from .ask_input import FlashParams, ask_missing_params
 from .cli_download import connected_ports_boards
 from .cli_group import cli
 from .cli_list import show_mcus
-from .common import clean_version
+from mpflash.vendored.versions import clean_version
 from .config import config
 from .flash import flash_list
 from .worklist import WorkList, full_auto_worklist, manual_worklist, single_auto_worklist

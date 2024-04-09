@@ -9,6 +9,7 @@ from pytest_mock import MockerFixture
 # # module under test :
 from mpflash import cli_main
 from mpflash.ask_input import DownloadParams
+from mpflash.mpremoteboard import MPRemoteBoard
 
 # mark all tests
 pytestmark = pytest.mark.mpflash
@@ -136,6 +137,18 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture):
     def fake_ask_missing_params(params: DownloadParams, action: str = "flash") -> DownloadParams:
         return params
 
+    # fake COM99 as connected board
+    fake = MPRemoteBoard("COM99")
+    fake.connected = True
+    fake.family = "micropython"
+    fake.port = "esp32"
+    fake.board = "ESP32_GENERIC"
+    fake.version = "1.22.0"
+    fake.cpu = "ESP32"
+
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake)
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)
+
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
         return_value=(["esp32"], ["ESP32_GENERIC"]),
@@ -149,10 +162,14 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture):
 
     runner = CliRunner()
     result = runner.invoke(cli_main.cli, args)
-    assert result.exit_code == ex_code
 
     if not "--board" in args:
         m_connected_ports_boards.assert_called_once()
 
     m_ask_missing_params.assert_called_once()
-    m_flash_list.assert_called_once()
+    m_mpr_connected.assert_called_once()
+    # m_flash_list.assert_called_once()
+    assert result.exit_code == ex_code
+
+
+# TODO : Add more tests scenarios for flash

@@ -6,10 +6,10 @@ from typing import List, Sequence, Tuple, Union
 
 from loguru import logger as log
 
-from mpflash.common import micropython_versions
 from mpflash.config import config
 from mpflash.mpboard_id.api import known_stored_boards, local_mp_ports
 from mpflash.mpremoteboard import MPRemoteBoard
+from mpflash.vendored.versions import micropython_versions
 
 
 @dataclass

@@ -68,9 +68,13 @@ def single_auto_worklist(
 
 
 def full_auto_worklist(*, version: str, fw_folder: Path) -> WorkList:
-    conn_boards = [
-        MPRemoteBoard(sp, update=True) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports
-    ]
+    try:
+        conn_boards = [
+            MPRemoteBoard(sp, update=True) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports
+        ]
+    except ConnectionError as e:
+        log.error(f"Error connecting to boards: {e}")
+        return []
     return auto_update(conn_boards, version, fw_folder)  # type: ignore
 
 
