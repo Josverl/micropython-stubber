@@ -60,5 +60,5 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optio
 
     log.info("Done flashing, resetting the board and wait for it to restart")
     wait_for_restart(mcu)
-    log.success(f"Flashed {mcu.version} to {mcu.board}")
+    log.success(f"Flashed {mcu.serialport} to {mcu.board} {mcu.version}")
     return mcu

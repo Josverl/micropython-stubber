@@ -9,7 +9,7 @@ mpflash has been tested on Windows x64, Linux X64 and ARM64, but not (yet) macOS
  1. List the connected boards including their firmware details, in a tabular or json format
  2. Download MicroPython firmware for specific boards and versions.
  3. Flash one or all connected MicroPython boards with a specific firmware or version.
-    Tested ports: rp2, samd, esp32, esp32s3, esp8266 and stm32 (requires cubeprogrammer)
+    Tested ports: rp2, samd, esp32, esp32s3, esp8266 and stm32
  
 ## Installation
 To install mpflash, you can use pip: `pip install mpflash`
@@ -24,10 +24,10 @@ You can use mpflash to perform various operations on your MicroPython boards. He
 | `mpflash flash` | Flash the latest stable firmware to the connected board(s) |
 
 
-## Linux permissions for usb devices 
+## Linux permissions to access usb devices 
 In order to flash the firmware to the board, you need to have the correct permissions to access the USB devices.
 On Windows this will not be an issue, but on Linux you can use  udev rules to give non-root users access to the USB devices.
-[See thestm32_permissions documentation](./stm32_udev_rules.md) for more information.
+[See the stm32_permissions documentation](./stm32_udev_rules.md) for more information.
 
 
 ## Advanced use
