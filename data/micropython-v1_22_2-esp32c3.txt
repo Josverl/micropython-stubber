@@ -1,0 +1,19 @@
+# MicroPython v1.22.2 on 2024-02-22; ESP32C3 module with ESP32C3
+
+__main__          bluetooth         heapq             select
+_asyncio          btree             inisetup          socket
+_boot             builtins          io                ssl
+_espnow           cmath             json              struct
+_onewire          collections       machine           sys
+_thread           cryptolib         math              time
+_webrepl          deflate           micropython       uasyncio
+aioespnow         dht               mip/__init__      uctypes
+apa106            ds18x20           neopixel          umqtt/robust
+array             errno             network           umqtt/simple
+asyncio/__init__  esp               ntptime           upysh
+asyncio/core      esp32             onewire           urequests
+asyncio/event     espnow            os                webrepl
+asyncio/funcs     flashbdev         platform          webrepl_setup
+asyncio/lock      framebuf          random            websocket
+asyncio/stream    gc                re
+binascii          hashlib           requests/__init__
