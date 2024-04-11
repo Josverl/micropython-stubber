@@ -1,0 +1,4 @@
+# https://docs.micropython.org/en/latest/reference/micropython2_migration.html
+# Introduction of a new module vfs
+
+vfs
