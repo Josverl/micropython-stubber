@@ -8,7 +8,12 @@ from mpflash.mpremoteboard import MPRemoteBoard
 
 
 def init_libusb_windows() -> bool:
-    # on windows we need to initialze the libusb backend with the correct dll
+    """
+    Initializes the libusb backend on Windows.
+
+    Returns:
+        bool: True if the initialization is successful, False otherwise.
+    """
     import libusb  # type: ignore
     import usb.backend.libusb1 as libusb1
 
@@ -21,12 +26,15 @@ def init_libusb_windows() -> bool:
 
 
 try:
-    from .vendored import pydfu as pydfu
+    from .vendor import pydfu as pydfu
 except ImportError:
     pydfu = None
 
 
 def dfu_init():
+    """
+    Initializes the DFU (Device Firmware Upgrade) process.
+    """
     if not pydfu:
         log.error("pydfu not found")
         return None
@@ -40,11 +48,17 @@ def flash_stm32_dfu(
     *,
     erase: bool = True,
 ) -> Optional[MPRemoteBoard]:
+    """
+    Flashes the STM32 microcontroller using DFU (Device Firmware Upgrade).
 
-    # if sys.platform == "win32":
-    #     log.error(f"OS {sys.platform} not supported")
-    #     return None
+    Args:
+        mcu (MPRemoteBoard): The remote board to flash.
+        fw_file (Path): The path to the firmware file (.dfu).
+        erase (bool, optional): Whether to erase the memory before flashing. Defaults to True.
 
+    Returns:
+        Optional[MPRemoteBoard]: The flashed remote board if successful, None otherwise.
+    """
     if not pydfu:
         log.error("pydfu not found, please install it with 'pip install pydfu' if supported")
         return None

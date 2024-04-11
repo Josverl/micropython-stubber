@@ -9,6 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Tuple, TypedDict, Union
 
+from mpflash.errors import MPFlashError
 from mpflash.common import PORT_FWTYPES
 from mpflash.vendor.versions import clean_version
 
@@ -80,15 +81,16 @@ def known_stored_boards(port: str, versions: Optional[List[str]] = None) -> List
     return sorted(list(boards))
 
 
-def find_stored_board(board: str) -> Board:
-    """Find the board for the given board_ID and return the board info as a Board object"""
+@lru_cache(maxsize=20)
+def find_stored_board(board_id: str) -> Board:
+    """Find the board for the given board_ID or 'board description' and return the board info as a Board object"""
     info = read_stored_boardinfo()
     for board_info in info:
-        if board_info["board"] == board:
+        if board_id in (board_info["board"], board_info["description"]):
             if "cpu" not in board_info or not board_info["cpu"]:
                 if " with " in board_info["description"]:
                     board_info["cpu"] = board_info["description"].split(" with ")[-1]
                 else:
                     board_info["cpu"] = board_info["port"]
             return board_info
-    raise LookupError(f"Board {board} not found")
+    raise MPFlashError(f"Board {board_id} not found")

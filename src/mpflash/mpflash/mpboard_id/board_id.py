@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
+from mpflash.errors import MPFlashError
 from mpflash.vendor.versions import clean_version
 
 ###############################################################################################
@@ -42,16 +43,16 @@ def find_board_by_description(*, descr: str, short_descr: str, version="v1.21.0"
 
     # filter for matching version
     if version == "preview":
-        # match last stable
+        # TODO: match last stable
         version = "v1.22.2"
     version_matches = [b for b in info if b["version"].startswith(version)]
     if not version_matches:
-        raise ValueError(f"No board info found for version {version}")
+        raise MPFlashError(f"No board info found for version {version}")
     matches = [b for b in version_matches if b["description"] == descr]
     if not matches and short_descr:
         matches = [b for b in version_matches if b["description"] == short_descr]
     if not matches:
-        raise ValueError(f"No board info found for description {descr}")
+        raise MPFlashError(f"No board info found for description {descr}")
     return sorted(matches, key=lambda x: x["version"])
 
 

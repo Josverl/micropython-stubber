@@ -1,13 +1,11 @@
 import os
 import time
-from functools import lru_cache
 from typing import TypedDict
 
 from github import Auth, Github
-from loguru import logger as log
-from packaging.version import parse
 from rich.progress import track
 
+from mpflash.errors import MPFlashError
 from mpflash.mpremoteboard import MPRemoteBoard
 
 PORT_FWTYPES = {
@@ -40,7 +38,6 @@ class FWInfo(TypedDict):
     build: str
 
 
-
 def wait_for_restart(mcu: MPRemoteBoard, timeout: int = 10):
     """wait for the board to restart"""
     for _ in track(
@@ -54,5 +51,5 @@ def wait_for_restart(mcu: MPRemoteBoard, timeout: int = 10):
         try:
             mcu.get_mcu_info()
             break
-        except ConnectionError:
+        except (ConnectionError, MPFlashError):
             pass

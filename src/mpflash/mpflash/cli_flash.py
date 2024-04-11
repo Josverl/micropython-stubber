@@ -3,6 +3,8 @@ from pathlib import Path
 import rich_click as click
 from loguru import logger as log
 
+from mpflash.errors import MPFlashError
+from mpflash.mpboard_id.api import find_stored_board
 from mpflash.vendor.versions import clean_version
 
 from .ask_input import FlashParams, ask_missing_params
@@ -102,19 +104,35 @@ def cli_flash_board(**kwargs):
     if not params.boards or params.boards == []:
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
+    else:
+        for board_id in params.boards:
+            if board_id == "":
+                params.boards.remove(board_id)
+                continue
+            if " " in board_id:
+                try:
+                    info = find_stored_board(board_id)
+                    if info:
+                        log.info(f"Resolved board description: {info['board']}")
+                        params.boards.remove(board_id)
+                        params.boards.append(info["board"])
+                except Exception as e:
+                    log.warning(f"unable to resolve board description: {e}")
 
     # Ask for missing input if needed
     params = ask_missing_params(params, action="flash")
+    if not params:  # Cancelled by user
+        exit(1)
     # TODO: Just in time Download of firmware
 
     assert isinstance(params, FlashParams)
 
     if len(params.versions) > 1:
         log.error(f"Only one version can be flashed at a time, not {params.versions}")
-        raise AttributeError("Only one version can be flashed at a time")
+        raise MPFlashError("Only one version can be flashed at a time")
     if len(params.boards) > 1:
         log.error(f"Only one board can be flashed at a time, not {params.boards}")
-        raise AttributeError("Only one board can be flashed at a time")
+        raise MPFlashError("Only one board can be flashed at a time")
 
     params.versions = [clean_version(v) for v in params.versions]
     worklist: WorkList = []

@@ -4,7 +4,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 import rich_click as click
+from loguru import logger as log
 
+from mpflash.mpboard_id.api import find_stored_board
 from mpflash.vendor.versions import clean_version
 
 from .ask_input import DownloadParams, ask_missing_params
@@ -64,14 +66,19 @@ def cli_download(
     **kwargs,
 ):
     params = DownloadParams(**kwargs)
-    params.versions = list(params.versions)  # remove leading v from version
+    params.versions = list(params.versions)
     params.boards = list(params.boards)
-    if not params.boards:
-        # nothing specified - detect connected boards
+    if params.boards:
+        pass
+        # TODO Clean board - same as in cli_flash.py
+    else:
+        # no boards specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
-    # ask for any remaining parameters
+
     params = ask_missing_params(params, action="download")
-    params.versions = [clean_version(v, drop_v=True) for v in params.versions]  # remove leading v from version
+    if not params:  # Cancelled by user
+        exit(1)
+    params.versions = [clean_version(v, drop_v=True) for v in params.versions]
     assert isinstance(params, DownloadParams)
 
     download(
@@ -87,13 +94,14 @@ def cli_download(
 def connected_ports_boards() -> Tuple[List[str], List[str]]:
     """
     Returns a tuple containing lists of unique ports and boards from the connected MCUs.
+    Boards that are physically connected, but give no tangible response are ignored.
 
     Returns:
         A tuple containing two lists:
             - A list of unique ports where MCUs are connected.
             - A list of unique board names of the connected MCUs.
     """
-    mpr_boards = list_mcus()
+    mpr_boards = [b for b in list_mcus() if b.connected]
     ports = list({b.port for b in mpr_boards})
     boards = list({b.board for b in mpr_boards})
     return ports, boards
