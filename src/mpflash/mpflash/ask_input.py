@@ -1,8 +1,13 @@
-"""Download input handling for mpflash."""
+"""
+Interactive input for mpflash.
+
+Note: The prompts can use "{version}" and "{action}" to insert the version and action in the prompt without needing an f-string.
+The values are provided from the answers dictionary.
+"""
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 from loguru import logger as log
 
@@ -42,6 +47,16 @@ def ask_missing_params(
     params: ParamType,
     action: str = "download",
 ) -> ParamType:
+    """
+    Asks the user for parameters that have not been supplied on the commandline and returns the updated params.
+
+    Args:
+        params (ParamType): The parameters to be updated.
+        action (str, optional): The action to be performed. Defaults to "download".
+
+    Returns:
+        ParamType: The updated parameters.
+    """
     if not config.interactive:
         # no interactivity allowed
         return params
@@ -49,7 +64,7 @@ def ask_missing_params(
     import inquirer
 
     questions = []
-    answers = {}
+    answers = {"action": action}
     if isinstance(params, FlashParams):
         if not params.serial or "?" in params.serial:
             ask_serialport(questions, action=action)
@@ -60,14 +75,15 @@ def ask_missing_params(
         ask_versions(questions, action=action)
     else:
         # versions is used to show only the boards for the selected versions
-        answers["versions"] = params.versions
+        answers["versions"] = params.versions  # type: ignore
 
     if not params.boards or "?" in params.boards:
         ask_port_board(questions, action=action)
 
     answers = inquirer.prompt(questions, answers=answers)
     if not answers:
-        return params
+        # input cancelled by user
+        return []  # type: ignore
     # print(repr(answers))
     if isinstance(params, FlashParams) and "serial" in answers:
         params.serial = answers["serial"]
@@ -84,7 +100,16 @@ def ask_missing_params(
     return params
 
 
-def some_boards(answers: dict) -> Sequence[Tuple[str, str]]:
+def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
+    """
+    Filters the known boards based on the selected versions and returns the filtered boards.
+
+    Args:
+        answers (dict): The user's answers.
+
+    Returns:
+        Sequence[Tuple[str, str]]: The filtered boards.
+    """
     # if version is not asked ; then need to get the version from the inputs
     if "versions" in answers:
         _versions = list(answers["versions"])
@@ -111,6 +136,16 @@ def some_boards(answers: dict) -> Sequence[Tuple[str, str]]:
 
 
 def ask_port_board(questions: list, *, action: str):
+    """
+    Asks the user for the port and board selection.
+
+    Args:
+        questions (list): The list of questions to be asked.
+        action (str): The action to be performed.
+
+    Returns:
+        None
+    """
     # import only when needed to reduce load time
     import inquirer
 
@@ -120,14 +155,18 @@ def ask_port_board(questions: list, *, action: str):
         (
             inquirer.List(
                 "port",
-                message=f"What port do you want to {action}?",
+                message="Which port do you want to {action} " + "to {serial} ?" if action == "flash" else "?",
                 choices=local_mp_ports(),
                 autocomplete=True,
             ),
             inquirer_ux(
                 "boards",
-                message=f"What board do you want to {action}?",
-                choices=some_boards,
+                message=(
+                    "Which {port} board firmware do you want to {action} " + "to {serial} ?"
+                    if action == "flash"
+                    else "?"
+                ),
+                choices=filter_matching_boards,
                 validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
             ),
         )
@@ -135,6 +174,16 @@ def ask_port_board(questions: list, *, action: str):
 
 
 def ask_versions(questions: list, *, action: str):
+    """
+    Asks the user for the version selection.
+
+    Args:
+        questions (list): The list of questions to be asked.
+        action (str): The action to be performed.
+
+    Returns:
+        None
+    """
     # import only when needed to reduce load time
     import inquirer
 
@@ -147,8 +196,9 @@ def ask_versions(questions: list, *, action: str):
         input_ux(
             # inquirer.List(
             "versions",
-            message=f"What version(s) do you want to {action}?",
-            hints=["Use space to select multiple options"],
+            message="Which version(s) do you want to {action} " + ("to {serial} ?" if action == "flash" else "?"),
+            # Hints would be nice , but needs a hint for each and every option
+            # hints=["Use space to select multiple options"],
             choices=mp_versions,
             autocomplete=True,
             validate=lambda _, x: True if x else "Please select at least one version",  # type: ignore
@@ -157,6 +207,16 @@ def ask_versions(questions: list, *, action: str):
 
 
 def ask_serialport(questions: list, *, action: str):
+    """
+    Asks the user for the serial port selection.
+
+    Args:
+        questions (list): The list of questions to be asked.
+        action (str): The action to be performed.
+
+    Returns:
+        None
+    """
     # import only when needed to reduce load time
     import inquirer
 
@@ -164,7 +224,7 @@ def ask_serialport(questions: list, *, action: str):
     questions.append(
         inquirer.List(
             "serial",
-            message="What serial port do you want use ?",
+            message="Which serial port do you want to {action} ?",
             choices=serialports,
             other=True,
             validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore

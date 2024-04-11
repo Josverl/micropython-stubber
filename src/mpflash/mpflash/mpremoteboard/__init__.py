@@ -27,8 +27,14 @@ class MPRemoteBoard:
     """Class to run mpremote commands"""
 
     def __init__(self, serialport: str = "", update: bool = False):
+        """
+        Initialize MPRemoteBoard object.
+
+        Parameters:
+        - serialport (str): The serial port to connect to. Default is an empty string.
+        - update (bool): Whether to update the MCU information. Default is False.
+        """
         self.serialport = serialport
-        # self.board = ""
         self.firmware = {}
 
         self.connected = False
@@ -46,11 +52,25 @@ class MPRemoteBoard:
             self.get_mcu_info()
 
     def __str__(self):
+        """
+        Return a string representation of the MPRemoteBoard object.
+
+        Returns:
+        - str: The string representation of the object.
+        """
         return f"MPRemoteBoard({self.serialport}, {self.family} {self.port}, {self.board}, {self.version})"
 
     @staticmethod
     def connected_boards(bluetooth: bool = False) -> List[str]:
-        """Get a list of connected boards"""
+        """
+        Get a list of connected boards.
+
+        Parameters:
+        - bluetooth (bool): Whether to include Bluetooth ports. Default is False.
+
+        Returns:
+        - List[str]: A list of connected board ports.
+        """
         ports = serial.tools.list_ports.comports()
 
         if not bluetooth:
@@ -60,8 +80,17 @@ class MPRemoteBoard:
 
         return sorted([p.device for p in ports])
 
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1), retry_error_cls=ConnectionError)  # type: ignore
-    def get_mcu_info(self, timeout: int = 6):
+    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1), reraise=True)  # type: ignore ## retry_error_cls=ConnectionError,
+    def get_mcu_info(self, timeout: int = 2):
+        """
+        Get MCU information from the connected board.
+
+        Parameters:
+        - timeout (int): The timeout value in seconds. Default is 2.
+
+        Raises:
+        - ConnectionError: If failed to get mcu_info for the serial port.
+        """
         rc, result = self.run_command(
             ["run", str(HERE / "mpy_fw_info.py")],
             no_info=True,
@@ -89,7 +118,12 @@ class MPRemoteBoard:
                 self.board = "UNKNOWN"
 
     def disconnect(self) -> bool:
-        """Disconnect from a board"""
+        """
+        Disconnect from a board.
+
+        Returns:
+        - bool: True if successfully disconnected, False otherwise.
+        """
         if not self.connected:
             return True
         if not self.serialport:
@@ -101,7 +135,7 @@ class MPRemoteBoard:
         self.connected = False
         return result
 
-    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(2))
+    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(2), reraise=True)
     def run_command(
         self,
         cmd: Union[str, List[str]],
@@ -111,17 +145,17 @@ class MPRemoteBoard:
         timeout: int = 60,
         **kwargs,
     ):
-        """Run mpremote with the given command
-        Parameters
-        ----------
-        cmd : Union[str,List[str]]
-            The command to run, either a string or a list of strings
-        check : bool, optional
-            If True, raise an exception if the command fails, by default False
-        Returns
-        -------
-        bool
-            True if the command succeeded, False otherwise
+        """
+        Run mpremote with the given command.
+
+        Parameters:
+        - cmd (Union[str, List[str]]): The command to run, either a string or a list of strings.
+        - log_errors (bool): Whether to log errors. Default is True.
+        - no_info (bool): Whether to skip printing info. Default is False.
+        - timeout (int): The timeout value in seconds. Default is 60.
+
+        Returns:
+        - bool: True if the command succeeded, False otherwise.
         """
         if isinstance(cmd, str):
             cmd = cmd.split(" ")
@@ -139,7 +173,15 @@ class MPRemoteBoard:
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1))
     def mip_install(self, name: str) -> bool:
-        """Install a micropython package"""
+        """
+        Install a micropython package.
+
+        Parameters:
+        - name (str): The name of the package to install.
+
+        Returns:
+        - bool: True if the installation succeeded, False otherwise.
+        """
         # install createstubs to the board
         cmd = ["mip", "install", name]
         result = self.run_command(cmd)[0] == OK

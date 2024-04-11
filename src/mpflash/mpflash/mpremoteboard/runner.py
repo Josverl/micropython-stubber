@@ -27,6 +27,7 @@ def run(
     log_errors: bool = True,
     no_info: bool = False,
     *,
+    log_warnings: bool = False,
     reset_tags: Optional[LogTagList] = None,
     error_tags: Optional[LogTagList] = None,
     warning_tags: Optional[LogTagList] = None,
@@ -93,7 +94,8 @@ def run(
 
     def timed_out():
         proc.kill()
-        log.warning(f"Command {cmd} timed out after {timeout} seconds")
+        if log_warnings:
+            log.warning(f"Command {cmd} timed out after {timeout} seconds")
 
     timer = Timer(timeout, timed_out)
     try:

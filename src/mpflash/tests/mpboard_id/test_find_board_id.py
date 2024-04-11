@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from mpflash.errors import MPFlashError
 from mpflash.mpboard_id.board_id import find_board_id
 
 pytestmark = [pytest.mark.mpflash]
@@ -29,7 +30,7 @@ HERE = Path(__file__).parent
 def test_find_board_id_real(test_id, descr, short_descr, expected_result):
     # Act
     if not expected_result:
-        with pytest.raises(ValueError):
+        with pytest.raises(MPFlashError):
             find_board_id(descr, short_descr)
     else:
         result = find_board_id(descr, short_descr)
