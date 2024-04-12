@@ -21,6 +21,6 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_dfu: bo
     #     log.info("Using STM32CubeProgrammer CLI")
     #     updated = flash_stm32_cubecli(mcu, fw_file=fw_file, erase=erase)
 
-    wait_for_restart(mcu)
+    mcu.wait_for_restart()
     log.success(f"Flashed {mcu.version} to {mcu.board}")
     return updated

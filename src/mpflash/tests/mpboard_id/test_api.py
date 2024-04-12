@@ -1,6 +1,6 @@
 import pytest
 
-from mpflash.mpboard_id.api import find_stored_board, known_stored_boards, local_mp_ports, read_stored_boardinfo
+from mpflash.mpboard_id import find_stored_board, known_stored_boards, local_mp_ports, read_stored_boardinfo
 
 pytestmark = [pytest.mark.mpflash]
 

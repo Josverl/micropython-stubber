@@ -10,10 +10,8 @@ from typing import List, Optional
 import esptool
 from loguru import logger as log
 
-from mpflash.mpboard_id.api import find_stored_board
+from mpflash.mpboard_id import find_stored_board
 from mpflash.mpremoteboard import MPRemoteBoard
-
-from .common import wait_for_restart
 
 
 def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
@@ -56,6 +54,6 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optio
         return None
 
     log.info("Done flashing, resetting the board and wait for it to restart")
-    wait_for_restart(mcu)
+    mcu.wait_for_restart()
     log.success(f"Flashed {mcu.serialport} to {mcu.board} {mcu.version}")
     return mcu

@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from mpflash.mpboard_id.api import get_stored_boards_for_port, local_mp_ports
+from mpflash.mpboard_id import get_stored_boards_for_port, local_mp_ports
 from mpflash.vendor.versions import get_stable_mp_version
 
 pytestmark = [pytest.mark.mpflash]
