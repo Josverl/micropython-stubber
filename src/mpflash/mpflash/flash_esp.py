@@ -26,25 +26,22 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optio
         # Lookup CPU based on the board name
         mcu.cpu = find_stored_board(mcu.board)["cpu"]
 
-    if mcu.port == "esp8266":
-        baud_rate = str(460_800)
-    else:
-        baud_rate = str(512_000)
-        # baud_rate = str(115_200)
     cmds: List[List[str]] = []
     if erase:
         cmds.append(f"esptool --chip {mcu.cpu} --port {mcu.serialport} erase_flash".split())
 
-    if mcu.cpu.upper() in ("ESP32", "ESP32S2"):
-        start_addr = "0x1000"
-    elif mcu.cpu.upper() in ("ESP32S3", "ESP32C3"):
-        start_addr = "0x0"
     if mcu.cpu.upper().startswith("ESP32"):
+        baud_rate = str(921_600)
+        if mcu.cpu.upper() in ("ESP32", "ESP32S2"):
+            start_addr = "0x1000"
+        elif mcu.cpu.upper() in ("ESP32S3", "ESP32C3"):
+            start_addr = "0x0"
         cmds.append(
             f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash --compress {start_addr}".split()
             + [str(fw_file)]
         )
     elif mcu.cpu.upper() == "ESP8266":
+        baud_rate = str(460_800)
         start_addr = "0x0"
         cmds.append(
             f"esptool --chip {mcu.cpu} --port {mcu.serialport} -b {baud_rate} write_flash --flash_size=detect {start_addr}".split()
