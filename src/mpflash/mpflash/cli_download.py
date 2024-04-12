@@ -6,7 +6,7 @@ from typing import List, Tuple
 import rich_click as click
 from loguru import logger as log
 
-from mpflash.mpboard_id.api import find_stored_board
+from mpflash.mpboard_id import find_stored_board
 from mpflash.vendor.versions import clean_version
 
 from .ask_input import DownloadParams, ask_missing_params

@@ -6,7 +6,7 @@ from github import Auth, Github
 from rich.progress import track
 
 from mpflash.errors import MPFlashError
-from mpflash.mpremoteboard import MPRemoteBoard
+# from mpflash.mpremoteboard import MPRemoteBoard
 
 PORT_FWTYPES = {
     "stm32": [".dfu"],  # need .dfu for pydfu.py - .hex for cube cli/GUI
@@ -36,20 +36,3 @@ class FWInfo(TypedDict):
     preview: bool
     version: str
     build: str
-
-
-def wait_for_restart(mcu: MPRemoteBoard, timeout: int = 10):
-    """wait for the board to restart"""
-    for _ in track(
-        range(timeout),
-        description="Waiting for the board to restart",
-        transient=True,
-        get_time=lambda: time.time(),
-        show_speed=False,
-    ):
-        time.sleep(1)
-        try:
-            mcu.get_mcu_info()
-            break
-        except (ConnectionError, MPFlashError):
-            pass

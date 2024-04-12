@@ -3,13 +3,16 @@ Module to run mpremote commands, and retry on failure or timeout
 """
 
 import sys
+import time
 from pathlib import Path
 from typing import List, Optional, Union
 
 import serial.tools.list_ports
 from loguru import logger as log
+from rich.progress import track
 from tenacity import retry, stop_after_attempt, wait_fixed
 
+from mpflash.errors import MPFlashError
 from mpflash.mpboard_id.board_id import find_board_id
 from mpflash.mpremoteboard.runner import run
 
@@ -187,3 +190,19 @@ class MPRemoteBoard:
         result = self.run_command(cmd)[0] == OK
         self.connected = True
         return result
+
+    def wait_for_restart(self, timeout: int = 10):
+        """wait for the board to restart"""
+        for _ in track(
+            range(timeout),
+            description="Waiting for the board to restart",
+            transient=True,
+            get_time=lambda: time.time(),
+            show_speed=False,
+        ):
+            time.sleep(1)
+            try:
+                self.get_mcu_info()
+                break
+            except (ConnectionError, MPFlashError):
+                pass
