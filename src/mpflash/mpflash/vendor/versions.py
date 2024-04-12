@@ -34,7 +34,7 @@ def clean_version(
             log.warning("Could not determine the latest stable version")
             return "stable"
         version = _v
-        log.info(f"Using latest stable version: {version}")
+        log.trace(f"Using latest stable version: {version}")
     is_preview = "-preview" in version
     nibbles = version.split("-")
     ver_ = nibbles[0].lower().lstrip("v")
