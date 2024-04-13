@@ -79,7 +79,11 @@ jobs:
             # install project
             #----------------------------------------------
             - name: Install test dependencies
-              run: poetry install --with test
+              run: |
+                  poetry install --with test
+                  # use the latest source version of mpflash
+                  pip -y uninstall mpflash
+                  pip install src/mpflash
 
             #----------------------------------------------
             # stubber clone
