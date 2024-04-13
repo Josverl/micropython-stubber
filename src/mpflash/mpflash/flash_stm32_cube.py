@@ -16,7 +16,6 @@
 # from rich.progress import track
 # from strip_ansi import strip_ansi
 
-# from .common import wait_for_restart
 # from .mpremoteboard.mpremoteboard import MPRemoteBoard
 
 # STM32_CLI_WIN = "C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe"

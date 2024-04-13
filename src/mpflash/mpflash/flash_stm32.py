@@ -4,8 +4,6 @@ from pathlib import Path
 
 from loguru import logger as log
 
-from mpflash.common import wait_for_restart
-
 # from .flash_stm32_cube import flash_stm32_cubecli
 from .flash_stm32_dfu import dfu_init, flash_stm32_dfu
 from mpflash.mpremoteboard import MPRemoteBoard
