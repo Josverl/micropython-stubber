@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.17.6"
+version = "1.18.0"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -49,9 +49,12 @@ python = ">=3.9,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.12" } # no support for 3.12 yet
 requests = "^2.28.0"
 mypy = "1.9.0"
+mpflash = ">=0.6.0"
+mpremote = "^1.22.0"
+# others
+autoflake = ">=1.7,<3.0"
 black = ">=22.10,<23.0"
 libcst = "^1.1.0"
-autoflake = ">=1.7,<3.0"
 cachetools = "^5.3.0"
 click = "^8.1.3"
 executing = "^2.0.1"
