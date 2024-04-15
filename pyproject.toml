@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.17.6"
+version = "1.18.0"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -46,7 +46,7 @@ stubber = "stubber.stubber:stubber_cli"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-mpflash = ">=0.5.0"
+mpflash = ">=0.6.0"
 mpremote = "^1.22.0"
 # others
 autoflake = ">=1.7,<3.0"
