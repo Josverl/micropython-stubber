@@ -125,6 +125,8 @@ def run(
                     continue
                 else:
                     if not no_info:
+                        if line.startswith(("INFO  : ", "WARN  : ", "ERROR : ")):
+                            line = line[8:].lstrip()
                         log.info(line)
         if proc.stderr and log_errors:
             for line in proc.stderr:
