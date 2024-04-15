@@ -107,9 +107,9 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
     try:
-        git.fetch(CONFIG.stub_path.parent)
+        git.fetch(CONFIG.mpy_stubs_path)
     except Exception:
-        log.trace("no stubs repo found : {CONFIG.stub_path.parent}")
+        log.trace("no stubs repo found : {CONFIG.mpy_stubs_path}")
 
     if not tag:
         tag = V_PREVIEW
