@@ -15,29 +15,25 @@ from .typed_config_toml import TomlConfigSource
 @section("micropython-stubber")
 class StubberConfig(Config):
     "stubber configuration class"
-    # legacy
-    # stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
-    # "a Path to the stubs directory"
-
     # relative to stubs folder
-    fallback_path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
+    fallback_path: Path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
     "a Path to the fallback stubs directory"
 
     # ------------------------------------------------------------------------------------------
     # micropython and micropython-lib are relative to ./repo folder
-    repo_path = key(key_name="repo-path", cast=Path, required=False, default=Path("./repos"))
+    repo_path: Path = key(key_name="repo-path", cast=Path, required=False, default=Path("./repos"))
     "a Path to the repo directory"
 
-    mpy_path = key(key_name="mpy-path", cast=Path, required=False, default=Path("micropython"))
+    mpy_path: Path = key(key_name="mpy-path", cast=Path, required=False, default=Path("micropython"))
     "a Path to the micropython folder in the repos directory"
 
-    mpy_lib_path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
+    mpy_lib_path: Path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
     "a Path to the micropython-lib folder in the repos directory"
 
-    mpy_stubs_path = key(key_name="mpy-stubs-path", cast=Path, required=False, default=Path("micropython-stubs"))
+    mpy_stubs_path: Path = key(key_name="mpy-stubs-path", cast=Path, required=False, default=Path("micropython-stubs"))
     "a Path to the micropython-stubs folder in the repos directory (or current directory)"
 
-    stable_version = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
+    stable_version: str = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
 
     "last published stable"
 
@@ -101,7 +97,7 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     while not (path / filename).exists():
         path = path.parent
         if path == path.parent:
-            log.info(f"Could not find config file: {filename}")
+            log.trace(f"Could not find config file: {filename}")
             use_toml = False
             break
 

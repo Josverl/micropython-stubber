@@ -236,7 +236,7 @@ def board_candidates(
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
-            log.warning(f"Incorrect version or did you run `stubber clone` to get the micropython repo?")
+            log.warning(f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?")
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
