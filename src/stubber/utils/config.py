@@ -15,8 +15,10 @@ from .typed_config_toml import TomlConfigSource
 @section("micropython-stubber")
 class StubberConfig(Config):
     "stubber configuration class"
-    stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
-    "a Path to the stubs directory"
+    # legacy
+    # stub_path = key(key_name="stub-path", cast=Path, required=False, default=Path("./stubs"))
+    # "a Path to the stubs directory"
+
     # relative to stubs folder
     fallback_path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
     "a Path to the fallback stubs directory"
@@ -32,24 +34,8 @@ class StubberConfig(Config):
     mpy_lib_path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
     "a Path to the micropython-lib folder in the repos directory"
 
-    # mpy_stubs_repo_path = key(key_name="mpy-stubs-repo-path", cast=Path, required=False, default=Path("./micropython-stubs"))
-    # "a Path to the micropython-stubs folder in the repos directory"
-
-    publish_path = key(
-        key_name="publish-path",
-        cast=Path,
-        required=False,
-        default=Path("./repos/micropython-stubs/publish"),
-    )
-    "A Path to the folder where all stub publication artifacts are stored"
-
-    template_path = key(
-        key_name="template-path",
-        cast=Path,
-        required=False,
-        default=Path("./repos/micropython-stubs/publish/template"),
-    )
-    "a Path to the publication folder that has the template files"
+    mpy_stubs_path = key(key_name="mpy-stubs-path", cast=Path, required=False, default=Path("micropython-stubs"))
+    "a Path to the micropython-stubs folder in the repos directory (or current directory)"
 
     stable_version = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
 
@@ -66,25 +52,33 @@ class StubberConfig(Config):
     BLOCKED_PORTS = ["minimal", "bare-arm"]
     "ports that should be ignored as a source of stubs"
 
-    # def __init__(self):
-    #     super().__init__()
-    #     self.update_versions()
+    @property
+    def stub_path(self) -> Path:
+        "return the stubs path in the microypthon-stubs repo"
+        return self.mpy_stubs_path / "stubs"
 
-    # def update_versions(self):
-    #     try:
-    #         self.ALL_VERSIONS = git.get_tags(self.mpy_path, minver="v1.17")
-    #     except Exception:
-    #         self.ALL_VERSIONS = ["1.17", "1.18", "1.19", "1.19.1"]
-    #     self.STABLE_VERSION = self.ALL_VERSIONS[-1]
+    @property
+    def publish_path(self) -> Path:
+        "return the stubs path in the microypthon-stubs repo"
+        return self.mpy_stubs_path / "publish"
+
+    @property
+    def template_path(self) -> Path:
+        "return the stubs path in the microypthon-stubs repo"
+        return self.mpy_stubs_path / "publish" / "template"
 
     def post_read_hook(self) -> dict:
         config_updates = {}
         # relative to stubs
-        config_updates.update(fallback_path=self.stub_path / self.fallback_path)
+        # config_updates.update(fallback_path=self.stub_path / self.fallback_path)
 
         # relative to repo path
         config_updates.update(mpy_path=self.repo_path / self.mpy_path)
         config_updates.update(mpy_lib_path=self.repo_path / self.mpy_lib_path)
+        if self.mpy_stubs_path.is_absolute() or self.mpy_stubs_path == Path("."):
+            config_updates.update(mpy_stubs_path=self.mpy_stubs_path)
+        else:
+            config_updates.update(mpy_stubs_path=self.repo_path / self.mpy_stubs_path)
         # read the versions from the git tags
         all_versions = []
         try:
