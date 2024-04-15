@@ -16,14 +16,12 @@ from rich.console import Console
 from rich.table import Table
 from tenacity import retry, stop_after_attempt, wait_fixed
 
+from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
 from stubber import utils
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.pathnames import board_folder_name
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
-
-from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
-
 
 # TODO : make this a bit nicer
 HERE = Path(__file__).parent
@@ -443,10 +441,15 @@ def print_result_table(all_built: List, console: Console):
     table = Table(title="Results")
 
     table.add_column("Result", style="cyan")
-    table.add_column("Name", style="cyan")
+    table.add_column("Name/Path", style="cyan")
     table.add_column("Version", style="green")
     table.add_column("Error", style="red")
 
     for result in all_built:
-        table.add_row(result["result"], result["name"], result["version"], result["error"])
+        table.add_row(
+            result["result"],
+            (result["name"] + "\n" + result["path"]).strip(),
+            result["version"],
+            result["error"],
+        )
     console.print(table)
