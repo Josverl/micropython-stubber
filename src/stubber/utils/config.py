@@ -1,6 +1,7 @@
 """stubber configuration"""
 
 from pathlib import Path
+from typing import List
 
 from loguru import logger as log
 from typedconfig.config import Config, key, section
@@ -47,6 +48,11 @@ class StubberConfig(Config):
 
     BLOCKED_PORTS = ["minimal", "bare-arm"]
     "ports that should be ignored as a source of stubs"
+
+    @property
+    def repos(self) -> List[Path]:
+        "return the repo paths"
+        return [self.mpy_path, self.mpy_lib_path, self.mpy_stubs_path]
 
     @property
     def stub_path(self) -> Path:

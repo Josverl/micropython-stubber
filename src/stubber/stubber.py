@@ -21,7 +21,7 @@ from stubber.commands.switch_cmd import cli_switch
 # from stubber.commands.upd_fallback_cmd import cli_update_fallback
 # from stubber.commands.upd_module_list_cmd import cli_update_module_list
 from stubber.commands.variants_cmd import cli_variants
-from stubber.commands.mcu_cmd import cli_create_mcu_stubs
+from stubber.commands.get_mcu_cmd import cli_create_mcu_stubs
 
 ##########################################################################################
 if __name__ == "__main__":
