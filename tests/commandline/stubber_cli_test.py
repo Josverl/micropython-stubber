@@ -251,24 +251,6 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
     # )
 
 
-# ##########################################################################################
-# # get-lobo
-# ##########################################################################################
-# @pytest.mark.mocked
-# def test_cmd_get_lobo(mocker: MockerFixture, tmp_path: Path):
-#     # check basic command line sanity check
-#     runner = CliRunner()
-
-#     mock_get_frozen = mocker.patch("stubber.get_lobo.get_frozen", autospec=True)
-#     mock_post = mocker.patch("stubber.utils.do_post_processing", autospec=True)
-
-#     # fake run
-#     result = runner.invoke(stubber.stubber_cli, ["get-lobo", "--stub-folder", tmp_path.as_posix()])
-#     assert result.exit_code == 0
-#     mock_get_frozen.assert_called_once()
-#     mock_post.assert_called_once()
-#     mock_post.assert_called_once_with([tmp_path / "loboris-v3_2_24-frozen"], stubgen=True, black=True, autoflake=True)
-#     assert result.exit_code == 0
 
 
 ##########################################################################################
@@ -317,22 +299,6 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     m_generate.assert_called_once()
     assert m_get_l_tag.call_count >= 1
 
-
-##########################################################################################
-# fallback
-##########################################################################################
-# @pytest.mark.mocked
-# def test_cmd_fallback(mocker: MockerFixture, tmp_path: Path):
-#     # check basic command line sanity check
-#     runner = CliRunner()
-
-#     mock = mocker.patch("stubber.commands.upd_fallback_cmd.update_fallback", autospec=True)
-#     # mock2 = mocker.patch("stubber.update_fallback.update_fallback", autospec=True)
-#     # from .update_fallback import update_fallback,
-#     # fake run
-#     result = runner.invoke(stubber.stubber_cli, ["update-fallback", "--stub-folder", tmp_path.as_posix()])
-#     mock.assert_called_once()
-#     assert result.exit_code == 0
 
 
 ##########################################################################################
