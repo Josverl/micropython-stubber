@@ -13,7 +13,7 @@ from .cli_group import cli
 from .cli_list import show_mcus
 from .config import config
 from .flash import flash_list
-from .worklist import WorkList, full_auto_worklist, manual_worklist, single_auto_worklist
+from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_worklist, single_auto_worklist
 
 # #########################################################################################################
 # CLI
@@ -104,6 +104,11 @@ def cli_flash_board(**kwargs):
     if not params.boards or params.boards == []:
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
+        if params.boards == []:
+            # No MicroPython boards detected, but it could be unflashed or not in bootloader mode
+            # Ask for serial port and board_id to flash
+            params.serial = "?"
+            params.boards = ["?"]
     else:
         for board_id in params.boards:
             if board_id == "":
