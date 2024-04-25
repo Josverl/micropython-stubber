@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.19.0"
+__version__ = "v1.20.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -951,6 +951,7 @@ def main():
         "uwebsocket",
         "uzlib",
         "version",
+        "vfs",
         "websocket",
         "websocket_helper",
         "wipy",
