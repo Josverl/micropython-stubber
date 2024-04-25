@@ -10,8 +10,8 @@ from .config import config
 from .logger import console
 
 rp_spinner = SpinnerColumn(finished_text="✅")
-rp_text = TextColumn("{task.description} {task.fields[device]}", table_column=Column(ratio=1))
-rp_bar = BarColumn(bar_width=None, table_column=Column(ratio=2))
+rp_text = TextColumn("{task.description} {task.fields[device]}", table_column=Column())
+rp_bar = BarColumn(bar_width=None, table_column=Column())
 
 
 def list_mcus(bluetooth: bool = False):
@@ -27,7 +27,7 @@ def list_mcus(bluetooth: bool = False):
 
     # a lot of boilerplate to show a progress bar with the comport currenlty scanned
     with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn()) as progress:
-        tsk_scan = progress.add_task("[red]Scanning", visible=False)
+        tsk_scan = progress.add_task("[green]Scanning", visible=False, total=None)
         progress.tasks[tsk_scan].fields["device"] = "..."
         progress.tasks[tsk_scan].visible = True
         progress.start_task(tsk_scan)
@@ -54,11 +54,10 @@ def show_mcus(
     """Show the list of connected boards in a nice table"""
     table = Table(
         title=title,
-        title_style="bold",
-        header_style="bold blue",
+        title_style="magenta",
+        header_style="bold magenta",
         collapse_padding=True,
         width=110,
-        row_styles=["blue", "yellow"],
     )
     table.add_column("Serial", overflow="fold")
     table.add_column("Family")
@@ -75,11 +74,12 @@ def show_mcus(
                 mcu.get_mcu_info()
             except ConnectionError:
                 continue
+        description = f"[italic bright_cyan]{mcu.description}" if mcu.description else ""
         table.add_row(
             mcu.serialport.replace("/dev/", ""),
             mcu.family,
             mcu.port,
-            f"{mcu.board}\n{mcu.description}".strip(),
+            f"{mcu.board}\n{description}".strip(),
             # mcu.variant,
             mcu.cpu,
             mcu.version,
