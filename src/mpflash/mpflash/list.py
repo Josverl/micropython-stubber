@@ -1,13 +1,17 @@
 from typing import List
 
 from rich import print
-from rich.progress import track
-from rich.table import Table
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
+from rich.table import Column, Table
 
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .config import config
 from .logger import console
+
+rp_spinner = SpinnerColumn(finished_text="✅")
+rp_text = TextColumn("{task.description} {task.fields[device]}", table_column=Column(ratio=1))
+rp_bar = BarColumn(bar_width=None, table_column=Column(ratio=2))
 
 
 def list_mcus(bluetooth: bool = False):
@@ -21,12 +25,24 @@ def list_mcus(bluetooth: bool = False):
     """
     conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards(bluetooth) if sp not in config.ignore_ports]
 
-    for mcu in track(conn_mcus, description="Getting board info", transient=True, update_period=0.1):
+    # a lot of boilerplate to show a progress bar with the comport currenlty scanned
+    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn()) as progress:
+        tsk_scan = progress.add_task("[red]Scanning", visible=False)
+        progress.tasks[tsk_scan].fields["device"] = "..."
+        progress.tasks[tsk_scan].visible = True
+        progress.start_task(tsk_scan)
         try:
-            mcu.get_mcu_info()
-        except ConnectionError as e:
-            print(f"Error: {e}")
-            continue
+            for mcu in conn_mcus:
+                progress.update(tsk_scan, device=mcu.serialport.replace("/dev/", ""))
+                try:
+                    mcu.get_mcu_info()
+                except ConnectionError as e:
+                    print(f"Error: {e}")
+                    continue
+        finally:
+            # transient
+            progress.stop_task(tsk_scan)
+            progress.tasks[tsk_scan].visible = False
     return conn_mcus
 
 
