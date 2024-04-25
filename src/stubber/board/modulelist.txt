@@ -226,6 +226,7 @@ utimeq
 uwebsocket
 uzlib
 version
+vfs
 websocket
 websocket_helper
 wipy
