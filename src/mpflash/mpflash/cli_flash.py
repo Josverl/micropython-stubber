@@ -130,9 +130,9 @@ def cli_flash_board(**kwargs):
     if len(params.versions) > 1:
         log.error(f"Only one version can be flashed at a time, not {params.versions}")
         raise MPFlashError("Only one version can be flashed at a time")
-    if len(params.boards) > 1:
-        log.error(f"Only one board can be flashed at a time, not {params.boards}")
-        raise MPFlashError("Only one board can be flashed at a time")
+    # if len(params.boards) > 1:
+    #     log.error(f"Only one board can be flashed at a time, not {params.boards}")
+    #     raise MPFlashError("Only one board can be flashed at a time")
 
     params.versions = [clean_version(v) for v in params.versions]
     worklist: WorkList = []
