@@ -24,7 +24,7 @@ def auto_update(
     *,
     selector: Optional[Dict[str, str]] = None,
 ) -> WorkList:
-    """Builds a list of boards to update based on the connected boards and the firmware available
+    """Builds a list of boards to update based on the connected boards and the firmwares available locally in the firmware folder.
 
     Args:
         conn_boards (List[MPRemoteBoard]): List of connected boards

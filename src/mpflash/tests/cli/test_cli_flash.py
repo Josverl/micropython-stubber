@@ -27,7 +27,7 @@ def fakeboard(serialport="COM99"):
     return fake
 
 
-def fake_ask_missing_params(params: DownloadParams, action: str = "flash") -> DownloadParams:
+def fake_ask_missing_params(params: DownloadParams, action: str) -> DownloadParams:
     # no input during tests
     return params
 
@@ -136,3 +136,110 @@ def test_mpflash_connected_boards(
         assert result.exit_code == 0
     else:
         assert result.exit_code == 1
+
+
+## if no boards are connected , but there are serial port , then set serial --> ? and board to ? if not set
+@pytest.mark.parametrize(
+    "id, serialports, ports, boards",
+    [
+        ("One", ["COM99"], [], []),
+        ("None", [], [], []),
+    ],
+)
+def test_mpflash_no_detected_boards(
+    id,
+    serialports: List[str],
+    ports: List[str],
+    boards: List[str],
+    mocker: MockerFixture,
+):
+    # no boards specified - detect connected boards
+    args = ["flash"]
+
+    # fakes = [fakeboard(port) for port in serialports]
+
+    m_connected_ports_boards = mocker.patch(
+        "mpflash.cli_flash.connected_ports_boards",
+        return_value=(ports, boards),
+        autospec=True,
+    )
+    m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
+    m_ask_missing_params = mocker.patch(
+        "mpflash.cli_flash.ask_missing_params",
+        Mock(side_effect=fake_ask_missing_params),
+    )
+
+    m_full_auto_worklist = mocker.patch("mpflash.cli_flash.full_auto_worklist", return_value=[])
+    m_manual_worklist = mocker.patch("mpflash.cli_flash.manual_worklist", return_value=[])
+    m_single_auto_worklist = mocker.patch("mpflash.cli_flash.single_auto_worklist", return_value=[])
+
+    runner = CliRunner()
+    result = runner.invoke(cli_main.cli, args)
+
+    m_connected_ports_boards.assert_called_once()
+    m_ask_missing_params.assert_called_once()
+
+    if serialports:
+        ## if no boards are responding , but there are serial port , then set serial --> ? and board to ? if not set
+        assert m_ask_missing_params.call_args.args[0].serial == "?"
+        assert m_ask_missing_params.call_args.args[0].boards == ["?"]
+
+
+# Flash a interactive version
+
+# TEST DOES NOT REALLY ADD ANY VALUE
+# @pytest.mark.parametrize(
+#     "version, serialports, ports, boards",
+#     [
+#         ("preview", ["COM99"], ["esp32"], ["ESP32_GENERIC"]),
+#         ("v1.22.0", ["COM99"], ["esp32"], ["ESP32_GENERIC"]),
+#         ("1.22.0", ["COM99"], ["esp32"], ["ESP32_GENERIC"]),
+#     ],
+# )
+# def test_mpflash_version_interactive(
+#     version: str,
+#     serialports: List[str],
+#     ports: List[str],
+#     boards: List[str],
+#     mocker: MockerFixture,
+# ):
+#     # no boards specified - detect connected boards
+#     def fake_ask_missing_version(params: DownloadParams, action: str) -> DownloadParams:
+#         # no input during tests
+#         params.versions = [version]
+#         return params
+
+#     args = ["flash"]
+
+#     fakes = [fakeboard(port) for port in serialports]
+
+#     m_connected_ports_boards = mocker.patch(
+#         "mpflash.cli_flash.connected_ports_boards",
+#         return_value=(ports, boards),
+#         autospec=True,
+#     )
+#     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
+#     m_ask_missing_params = mocker.patch(
+#         "mpflash.cli_flash.ask_missing_params",
+#         Mock(side_effect=fake_ask_missing_version),
+#     )
+
+#     # m_full_auto_worklist = mocker.patch("mpflash.cli_flash.full_auto_worklist", return_value=[])
+#     m_manual_worklist = mocker.patch("mpflash.cli_flash.manual_worklist", return_value=[])
+#     m_single_auto_worklist = mocker.patch("mpflash.cli_flash.single_auto_worklist", return_value=[])
+
+#     runner = CliRunner()
+#     result = runner.invoke(cli_main.cli, args)
+
+#     if serialports:
+#         # m_full_auto_worklist.assert_called_once()
+#         m_manual_worklist.assert_not_called()
+#         m_single_auto_worklist.assert_not_called()
+
+#     m_connected_ports_boards.assert_called_once()
+#     m_ask_missing_params.assert_called_once()
+
+#     if serialports:
+#         assert result.exit_code == 0
+#     else:
+#         assert result.exit_code == 1

@@ -56,6 +56,6 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     log.success("Done copying, resetting the board and wait for it to restart")
     if sys.platform in ["linux", "darwin"]:
         dismount_uf2()
-    for _ in track(range(5 + 2)):
+    for _ in track(range(5 + 2), description="Waiting for the board to restart", transient=True):
         time.sleep(1)  # 5 secs to short on linux
     return mcu
