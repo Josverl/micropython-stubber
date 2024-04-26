@@ -16,7 +16,7 @@ def mpflash():
     cli.add_command(cli_download)
     # cli(auto_envvar_prefix="MPFLASH")
     try:
-        exit(cli())
+        exit(cli(standalone_mode=False))
     except AttributeError as e:
         print(f"Error: {e}")
         exit(-1)
