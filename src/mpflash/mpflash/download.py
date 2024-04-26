@@ -19,6 +19,7 @@ from loguru import logger as log
 from rich.progress import track
 
 from mpflash.common import PORT_FWTYPES
+from mpflash.errors import MPFlashError
 
 jsonlines.ujson = None  # type: ignore
 # #########################################################################################################
@@ -165,7 +166,7 @@ def download_firmwares(
     *,
     force: bool = False,
     clean: bool = True,
-):
+) -> int:
     skipped = downloaded = 0
     if versions is None:
         versions = []
@@ -200,6 +201,7 @@ def download_firmwares(
             writer.write(board)
             downloaded += 1
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
+    return downloaded + skipped
 
 
 def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], clean: bool):
@@ -246,7 +248,7 @@ def download(
     versions: List[str],
     force: bool,
     clean: bool,
-):
+) -> int:
     """
     Downloads firmware files based on the specified destination, ports, boards, versions, force flag, and clean flag.
 
@@ -259,19 +261,20 @@ def download(
         clean : A flag indicating whether to perform a clean download.
 
     Returns:
-        None
+        int: The number of downloaded firmware files.
 
     Raises:
-        SystemExit: If no boards are found or specified.
+        MPFlashError : If no boards are found or specified.
 
     """
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
-        exit(1)
+        raise MPFlashError("No boards found")
     # versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     try:
         destination.mkdir(exist_ok=True, parents=True)
     except (PermissionError, FileNotFoundError) as e:
-        log.critical(f"Could not create folder {destination}\n{e}")
-        exit(1)
-    download_firmwares(destination, ports, boards, versions, force=force, clean=clean)
+        log.critical(f"Could not create folder {destination}")
+        raise MPFlashError(f"Could not create folder {destination}") from e
+
+    return download_firmwares(destination, ports, boards, versions, force=force, clean=clean)

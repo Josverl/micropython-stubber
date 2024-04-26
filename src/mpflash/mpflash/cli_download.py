@@ -6,6 +6,7 @@ from typing import List, Tuple
 import rich_click as click
 from loguru import logger as log
 
+from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_stored_board
 from mpflash.vendor.versions import clean_version
 
@@ -62,9 +63,7 @@ from .download import download
     show_default=True,
     help="""Force download of firmware even if it already exists.""",
 )
-def cli_download(
-    **kwargs,
-):
+def cli_download(**kwargs) -> int:
     params = DownloadParams(**kwargs)
     params.versions = list(params.versions)
     params.boards = list(params.boards)
@@ -77,18 +76,23 @@ def cli_download(
 
     params = ask_missing_params(params, action="download")
     if not params:  # Cancelled by user
-        exit(1)
+        return 2
     params.versions = [clean_version(v, drop_v=True) for v in params.versions]
     assert isinstance(params, DownloadParams)
 
-    download(
-        params.fw_folder,
-        params.ports,
-        params.boards,
-        params.versions,
-        params.force,
-        params.clean,
-    )
+    try:
+        download(
+            params.fw_folder,
+            params.ports,
+            params.boards,
+            params.versions,
+            params.force,
+            params.clean,
+        )
+        return 0
+    except MPFlashError as e:
+        log.error(f"{e}")
+        return 1
 
 
 def connected_ports_boards() -> Tuple[List[str], List[str]]:

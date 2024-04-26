@@ -91,7 +91,7 @@ from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_workli
     show_default=True,
     help="""Enter micropython bootloader mode before flashing.""",
 )
-def cli_flash_board(**kwargs):
+def cli_flash_board(**kwargs) -> int:
     # version to versions, board to boards
     kwargs["versions"] = [kwargs.pop("version")] if kwargs["version"] != None else []
     if kwargs["board"] is None:
@@ -127,7 +127,7 @@ def cli_flash_board(**kwargs):
     # Ask for missing input if needed
     params = ask_missing_params(params, action="flash")
     if not params:  # Cancelled by user
-        exit(1)
+        return 2
     # TODO: Just in time Download of firmware
 
     assert isinstance(params, FlashParams)
@@ -168,3 +168,7 @@ def cli_flash_board(**kwargs):
     ):
         log.info(f"Flashed {len(flashed)} boards")
         show_mcus(flashed, title="Updated boards after flashing")
+        return 0
+    else:
+        log.error("No boards were flashed")
+        return 1

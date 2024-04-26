@@ -26,7 +26,7 @@ from .logger import make_quiet
     show_default=True,
     help="""Show progress""",
 )
-def cli_list_mcus(as_json: bool, progress: bool = True):
+def cli_list_mcus(as_json: bool, progress: bool = True) -> int:
     """List the connected MCU boards, and output in a nice table or json."""
     if as_json:
         # avoid noise in json output
@@ -38,4 +38,4 @@ def cli_list_mcus(as_json: bool, progress: bool = True):
         progress = False
     if progress:
         show_mcus(conn_mcus, refresh=False)
-    return conn_mcus
+    return 0 if conn_mcus else 1
