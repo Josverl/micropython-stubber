@@ -84,7 +84,7 @@ jobs:
               run: |
                   poetry install --with test
                   # use the latest source version of mpflash
-                  pip -y uninstall mpflash
+                  pip uninstall mpflash
                   pip install src/mpflash
 
             #----------------------------------------------
