@@ -28,7 +28,7 @@ from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_workli
     "--firmware",
     "-f",
     "fw_folder",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=config.firmware_folder,
     show_default=True,
     help="The folder to retrieve the firmware from.",
