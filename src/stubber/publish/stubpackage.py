@@ -790,6 +790,7 @@ class StubPackage(PoetryBuilder):
                 "name": self.package_name,
                 "version": self.pkg_version,
                 "error": None,
+                "path": self.package_path.as_posix(),
             }
         )
         super().__init__(

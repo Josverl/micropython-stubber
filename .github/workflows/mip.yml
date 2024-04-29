@@ -7,7 +7,9 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - .github/workflows/mip.yml
       - "src/stubber/board/**"
+      
 
 jobs:
   mip:
@@ -25,7 +27,7 @@ jobs:
           cache: "poetry"
 
       - name: Install stubber
-        run: poetry install --with dev --no-interaction
+        run: poetry install --with test --no-interaction
 
       - name: make all variants
         run: |

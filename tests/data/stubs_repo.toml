@@ -1,6 +1,7 @@
 # stripped pyproject toml file used for testing
-
+# same config used in the stubber repo
 [tool.micropython-stubber]
-repo-path = "./my-repos"
+"mpy-stubs-path" = "."
+
 
 

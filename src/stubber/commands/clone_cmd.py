@@ -31,16 +31,16 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
     dest_path = Path(path)
     if not dest_path.exists():
         os.mkdir(dest_path)
-    # repos are relative to provided path
-    if dest_path != CONFIG.repo_path:
+    if dest_path == CONFIG.repo_path:
+        # same as default
+        mpy_path = CONFIG.mpy_path
+        mpy_lib_path = CONFIG.mpy_lib_path
+        mpy_stubs_path = CONFIG.mpy_stubs_path
+    else:
+        # repos are relative to provided path
         mpy_path = dest_path / "micropython"
         mpy_lib_path = dest_path / "micropython-lib"
         mpy_stubs_path = dest_path / "micropython-stubs"
-    else:
-        mpy_path = CONFIG.mpy_path
-        mpy_lib_path = CONFIG.mpy_lib_path
-
-        mpy_stubs_path = CONFIG.stub_path.parent
 
     repos: List[Tuple[Path, str, str]] = [
         (mpy_path, "https://github.com/micropython/micropython.git", "master"),
