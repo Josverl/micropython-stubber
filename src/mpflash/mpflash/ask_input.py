@@ -12,7 +12,7 @@ from typing import Dict, List, Sequence, Tuple, Union
 from loguru import logger as log
 
 from mpflash.config import config
-from mpflash.mpboard_id import known_stored_boards, local_mp_ports
+from mpflash.mpboard_id import get_stored_boards_for_port, known_stored_boards, local_mp_ports
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import micropython_versions
 
@@ -131,7 +131,7 @@ def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
         # Get the values of the dictionary, which are the unique items from the original list
         some_boards = list(unique_dict.values())
     else:
-        some_boards = [("No boards found", "")]
+        some_boards = [(f"No {answers['port']} boards found for version(s) {_versions}", "")]
     return some_boards
 
 
@@ -186,12 +186,27 @@ def ask_versions(questions: list, *, action: str):
     """
     # import only when needed to reduce load time
     import inquirer
+    import inquirer.errors
 
     input_ux = inquirer.Checkbox if action == "download" else inquirer.List
     mp_versions: List[str] = micropython_versions()
     mp_versions = [v for v in mp_versions if "preview" not in v]
+
+    # remove the versions for which there are no known boards in the board_info.json
+    # todo: this may be a little slow
+    mp_versions = [v for v in mp_versions if get_stored_boards_for_port("stm32", [v])]
+
     mp_versions.append("preview")
     mp_versions.reverse()  # newest first
+
+    def at_least_one_validation(answers, current) -> bool:
+        if not current:
+            raise inquirer.errors.ValidationError("", reason="Please select at least one version")
+        if isinstance(current, list):
+            if not any(current):
+                raise inquirer.errors.ValidationError("", reason="Please select at least one version")
+        return True
+
     questions.append(
         input_ux(
             # inquirer.List(
@@ -201,7 +216,7 @@ def ask_versions(questions: list, *, action: str):
             # hints=["Use space to select multiple options"],
             choices=mp_versions,
             autocomplete=True,
-            validate=lambda _, x: True if x else "Please select at least one version",  # type: ignore
+            validate=at_least_one_validation,
         )
     )
 

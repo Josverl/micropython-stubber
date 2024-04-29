@@ -5,6 +5,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeEl
 from rich.table import Column, Table
 
 from mpflash.mpremoteboard import MPRemoteBoard
+from mpflash.vendor.versions import clean_version
 
 from .config import config
 from .logger import console
@@ -82,7 +83,7 @@ def show_mcus(
             f"{mcu.board}\n{description}".strip(),
             # mcu.variant,
             mcu.cpu,
-            mcu.version,
+            clean_version(mcu.version),
             mcu.build,
         )
     console.print(table)
