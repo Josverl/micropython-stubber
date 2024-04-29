@@ -43,7 +43,9 @@ jobs:
                 python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
                 include: # for testing
                     - os: ubuntu-latest
-                      python-version: "3.10"
+                      python-version: "3.11"
+                    - os: macos-13
+                      python-version: "3.11"
                 exclude: # avoid black install problem for these versions on macos
                     - os: macos-latest
                       python-version: "3.9"
