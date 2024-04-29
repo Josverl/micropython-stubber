@@ -1462,13 +1462,13 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "mpflash"
-version = "0.7.0"
+version = "0.7.1"
 description = "Flash and download tool for MicroPython firmwares"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "mpflash-0.7.0-py3-none-any.whl", hash = "sha256:cc7a000311768db811cabd5a1d2ad094f1450eb2d21814a221ff0e467f5f093a"},
-    {file = "mpflash-0.7.0.tar.gz", hash = "sha256:c0a84e5643da967ef279eafeea84bc398d689b6adcfaad6141ce0476f49ac43d"},
+    {file = "mpflash-0.7.1-py3-none-any.whl", hash = "sha256:d7d0a028948e262f4e8b9fc6b79e3bee8c92729128f2d10e04774051fb83e49f"},
+    {file = "mpflash-0.7.1.tar.gz", hash = "sha256:6c066fb2c96dea8b662826788e4f3bfa1add2640bf3fc9ee88b2f495b8cec90c"},
 ]
 
 [package.dependencies]
@@ -1488,7 +1488,6 @@ pygithub = ">=2.1.1,<3.0.0"
 pyusb = ">=1.2.1,<2.0.0"
 requests = ">=2.31.0,<3.0.0"
 rich-click = ">=1.7.3,<2.0.0"
-strip-ansi = ">=0.1.1,<0.2.0"
 tenacity = "8.2.3"
 
 [[package]]
@@ -2862,17 +2861,6 @@ doc = ["furo", "sphinx"]
 lint = ["black", "mypy", "ruff"]
 support = ["sphobjinv"]
 test = ["coverage[toml]", "pytest", "pytest-cov"]
-
-[[package]]
-name = "strip-ansi"
-version = "0.1.1"
-description = "Strip ANSI escape sequences from a string"
-optional = false
-python-versions = ">=3.6,<4.0"
-files = [
-    {file = "strip-ansi-0.1.1.tar.gz", hash = "sha256:5d60f239cc8a37fdd52b43c3e66e893d45ba0423115db59eca0d2eef83b07729"},
-    {file = "strip_ansi-0.1.1-py3-none-any.whl", hash = "sha256:9f55280e1b0ba84dac49d4f18aa6b51b90ff766b22e4918ffc01cc87b394ecd1"},
-]
 
 [[package]]
 name = "tabulate"
