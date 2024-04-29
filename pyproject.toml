@@ -53,7 +53,7 @@ mpflash = ">=0.6.0"
 mpremote = "^1.22.0"
 # others
 autoflake = ">=1.7,<3.0"
-black = ">=22.10,<23.0"
+black = ">=22.10,<25.0"
 libcst = "^1.1.0"
 cachetools = "^5.3.0"
 click = "^8.1.3"
