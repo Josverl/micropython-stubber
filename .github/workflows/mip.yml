@@ -25,7 +25,7 @@ jobs:
           cache: "poetry"
 
       - name: Install stubber
-        run: poetry install --with dev --no-interaction
+        run: poetry install --with test --no-interaction
 
       - name: make all variants
         run: |
