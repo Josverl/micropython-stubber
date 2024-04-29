@@ -73,7 +73,7 @@ jobs:
               working-directory: src/mpflash
               run: |
                   poetry run coverage erase
-                  poetry run coverage run -m pytest -m mpflash
+                  poetry run coverage run -m pytest -m mpflash --durations=20
 
             - name: create coverage report
               if: always()
