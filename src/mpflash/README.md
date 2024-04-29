@@ -1,15 +1,16 @@
-# mpflash
-mpflash is a command-line tool for working with MicroPython firmware. It provides various features to help you develop, build, and manage your MicroPython projects.
+# MPFLASH
 
-This tool was created to be used in a CI/CD pipeline to automate the process of downloading and flashing MicroPython firmware to multiple boards, but it can also be used for manual flashing and development.
+`mpflash` is a command-line tool for working with MicroPython firmware. It provides features to help you flash and update Micropython on one or more .
 
-mpflash has been tested on Windows x64, Linux X64 and ARM64, but not (yet) macOS.
+This tool was initially created to be used in a CI/CD pipeline to automate the process of downloading and flashing MicroPython firmware to multiple boards, but it has been extend with a TUI to me be used for manual downloadig, flashing and development.
+
+`mpflash` has been tested on Windows x64, Linux X64, but not (yet) macOS.
+Tested ports: `rp2`, `samd`, `esp32`, `esp32s3`, `esp32c3`, `esp8266` and `stm32`
 
 ## Features
  1. List the connected boards including their firmware details, in a tabular or json format
- 2. Download MicroPython firmware for specific boards and versions.
- 3. Flash one or all connected MicroPython boards with a specific firmware or version.
-    Tested ports: rp2, samd, esp32, esp32s3, esp8266 and stm32
+ 2. Download MicroPython firmware for versions, and matching a specified board or matches your current attached board.
+ 3. Flash one or all connected MicroPython boards with a specific firmware or version.  
  
 ## Installation
 To install mpflash, you can use pip: `pip install mpflash`
@@ -30,40 +31,40 @@ On Windows this will not be an issue, but on Linux you can use  udev rules to gi
 [See the stm32_permissions documentation](./stm32_udev_rules.md) for more information.
 
 
-## Advanced use
+## Detailed usage
 You can list the connected boards using the following command:
 ```bash
 $ mpflash list
 D:\MyPython\micropython-stubber> mpflash list
-Getting board info ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:02
-                                       Connected boards
-┏━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━┓
-┃ Serial ┃ Family      ┃ Port    ┃ Board              ┃ CPU         ┃ Version        ┃ build ┃
-┡━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━┩
-│ COM11  │ micropython │ rp2     │ RPI_PICO_W         │ RP2040      │ 1.20.0         │       │
-│ COM12  │ micropython │ esp8266 │ ESP8266_GENERIC    │ ESP8266     │ 1.22.2         │       │
-│ COM18  │ micropython │ rp2     │ RPI_PICO_W         │ RP2040      │ 1.23.0-preview │ 155   │
-│ COM3   │ micropython │ samd    │ SEEED_WIO_TERMINAL │ SAMD51P19A  │ 1.23.0-preview │ 155   │
-│ COM5   │ micropython │ stm32   │ PYBV11             │ STM32F405RG │ 1.23.0-preview │ 166   │
-│ COM8   │ micropython │ esp32   │ ESP32_GENERIC_S3   │ ESP32S3     │ 1.23.0-preview │ 155   │
-└────────┴─────────────┴─────────┴────────────────────┴─────────────┴────────────────┴───────┘
+                                               Connected boards
+┏━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━┓
+┃ Serial  ┃Family       ┃Port  ┃Board                                      ┃CPU     ┃Version          ┃build ┃
+┡━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━┩
+│ COM21   │micropython  │rp2   │RPI_PICO                                   │RP2040  │v1.23.0-preview  │  236 │
+│         │             │      │Raspberry Pi Pico with RP2040              │        │                 │      │
+│ COM23   │micropython  │rp2   │RPI_PICO_W                                 │RP2040  │v1.23.0-preview  │  176 │
+│         │             │      │Raspberry Pi Pico W with RP2040            │        │                 │      │
+│ COM9    │micropython  │rp2   │ARDUINO_NANO_RP2040_CONNECT                │RP2040  │v1.23.0-preview  │  341 │
+│         │             │      │Arduino Nano RP2040 Connect with RP2040    │        │                 │      │
+└─────────┴─────────────┴──────┴───────────────────────────────────────────┴────────┴─────────────────┴──────┘
 ```
+## Download the firmware
 
-Suppose you want to download the MicroPython firmware for some boards, you can use the following command: 
+To download the MicroPython firmware for some boards, use the following command: 
+ - `mpflash download` download the latest stable firmware for all connected boards
+ - `mpflash download --version preview` download the current preview for all connected boards
+ - `mpflash download --board ESP8266_GENERIC --board SEEED_WIO_TERMINAL` download these specific boards
+ - `mpflash download --version ? --board ?` prompt to select a specific version and board to download
 
-```bash
-# download the firmware
-$ mpflash download --board ESP8266_GENERIC --board SEEED_WIO_TERMINAL
-```	
-This will download the latest stable version of the MicroPython firmware for the boards and save it in the `firmware` directory.
+These will try to download the prebuilt MicroPython firmware for the boards from https://micropython.org/download/ and save it in your downloads folder in the  `firmware` directory.
 The stable version (default) is determined based on the most recent published release,
-other optionse are `--version preview` and `--version x.y.z` to download the latest preview or version x.y.z respectively.
+other versions are `--version preview` and `--version x.y.z` to download the latest preview or version x.y.z respectively.
 
-by default the firmware will be downloaded to  Downloads  in a `firmware` folder in your, but you can specify a different directory using the `--dir` option.
+By default the firmware will be downloaded to your OS's preferred `Downloads/firmware` folder, but you can speciy a different directory using the `--dir` option.
 
-```bash
 The directory structure will be something like this:
-```
+
+``` text
 Downloads/firmware
 |   firmware.jsonl
 +---esp8266
@@ -74,9 +75,16 @@ Downloads/firmware
 \---samd
         SEEED_WIO_TERMINAL-v1.22.2.uf2
 ```
-You can then flash the firmware to the board using the following command: `mpflash flash`
+
+## Flashing the firmware
+After you have downloaded a firmware you can  flash the firmware to a board using the following command: `mpflash flash`
 This will (try to) autodetect the connected boards, and determine the correct firmware to flash to each board.
 
+- `mpflash flash` will flash the latest stable firmware to all connected boards.
+- `mpflash flash --serial ? --board ?` will prompt to select a specific serial port and board to flash. (the firmware must be dowloaded earlier)
+
+
+### Flashing all connected boards with the latest stable firmware
 ```bash
 > mpflash flash
 22:15:55 | ℹ️  - Using latest stable version: v1.22.2
