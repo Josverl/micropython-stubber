@@ -101,7 +101,7 @@ jobs:
             - name: Test stubber
               run: |
                   poetry run coverage erase
-                  poetry run coverage run -m pytest -m stubber
+                  poetry run coverage run -m pytest -m stubber --durations=50
             #----------------------------------------------
             # upload coverage stats
             # .XML  to Codecov
