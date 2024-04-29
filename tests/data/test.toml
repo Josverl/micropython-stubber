@@ -1,31 +1,6 @@
 # stripped pyproject toml file used for testing
 
 [tool.micropython-stubber]
-stub-path = "./my-stubs"
 repo-path = "./my-repos"
 
-[tool.poetry.scripts]
-stubber = "stubber.stubber:stubber_cli"
-pyboard = "stubber.tools.pyboard:main"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-# use long lines to avoid _log lines from wrapping , as this causes issues with the minification.
-line-length = 140
-target_version = ['py38']
-include = '\.pyi?$'
-exclude = '''
-(
-    /(
-        | \..*
-        | minified
-        | micropython
-        | micropython-lib
-        | tests[\\/]mocks
-        | scratch
-    )/
-)
-'''

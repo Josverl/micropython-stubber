@@ -4,8 +4,6 @@ from pathlib import Path
 
 from loguru import logger as log
 
-from mpflash.common import wait_for_restart
-
 # from .flash_stm32_cube import flash_stm32_cubecli
 from .flash_stm32_dfu import dfu_init, flash_stm32_dfu
 from mpflash.mpremoteboard import MPRemoteBoard
@@ -21,6 +19,6 @@ def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_dfu: bo
     #     log.info("Using STM32CubeProgrammer CLI")
     #     updated = flash_stm32_cubecli(mcu, fw_file=fw_file, erase=erase)
 
-    wait_for_restart(mcu)
+    mcu.wait_for_restart()
     log.success(f"Flashed {mcu.version} to {mcu.board}")
     return updated

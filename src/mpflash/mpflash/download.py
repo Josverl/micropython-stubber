@@ -19,6 +19,7 @@ from loguru import logger as log
 from rich.progress import track
 
 from mpflash.common import PORT_FWTYPES
+from mpflash.errors import MPFlashError
 
 jsonlines.ujson = None  # type: ignore
 # #########################################################################################################
@@ -46,6 +47,9 @@ def get_board_urls(page_url: str) -> List[Dict[str, str]]:
     """
     Get the urls to all the board pages listed on this page.
     Assumes that all links to firmware  have "class": "board-card"
+
+    Args:
+        page_url (str): The url of the page to get the board urls from.
     """
     downloads_html = get_page(page_url)
     soup = BeautifulSoup(downloads_html, "html.parser")
@@ -57,8 +61,17 @@ def get_board_urls(page_url: str) -> List[Dict[str, str]]:
     return [{"board": board, "url": page_url + board} for board in boards]
 
 
-def firmware_list(board_url: str, base_url: str, ext: str) -> List[str]:
-    """Get the urls to all the firmware files for a board."""
+def board_firmware_urls(board_url: str, base_url: str, ext: str) -> List[str]:
+    """
+    Get the urls to all the firmware files for a board.
+    Args:
+        page_url (str): The url of the page to get the board urls from.
+    ??? base_url (str): The base url to join the relative urls to.
+        ext (str): The extension of the firmware files to get. (with or withouth leading .)
+
+    the urls are relative urls to the site root
+
+    """
     html = get_page(board_url)
     soup = BeautifulSoup(html, "html.parser")
     # get all the a tags:
@@ -109,7 +122,7 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
             # add a board to the list for each firmware found
             firmwares = []
             for ext in PORT_FWTYPES[port]:
-                firmwares += firmware_list(board["url"], MICROPYTHON_ORG_URL, ext)
+                firmwares += board_firmware_urls(board["url"], MICROPYTHON_ORG_URL, ext)
 
             for _url in firmwares:
                 board["firmware"] = _url
@@ -153,7 +166,7 @@ def download_firmwares(
     *,
     force: bool = False,
     clean: bool = True,
-):
+) -> int:
     skipped = downloaded = 0
     if versions is None:
         versions = []
@@ -188,6 +201,7 @@ def download_firmwares(
             writer.write(board)
             downloaded += 1
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
+    return downloaded + skipped
 
 
 def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], clean: bool):
@@ -234,7 +248,7 @@ def download(
     versions: List[str],
     force: bool,
     clean: bool,
-):
+) -> int:
     """
     Downloads firmware files based on the specified destination, ports, boards, versions, force flag, and clean flag.
 
@@ -247,19 +261,20 @@ def download(
         clean : A flag indicating whether to perform a clean download.
 
     Returns:
-        None
+        int: The number of downloaded firmware files.
 
     Raises:
-        SystemExit: If no boards are found or specified.
+        MPFlashError : If no boards are found or specified.
 
     """
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
-        exit(1)
+        raise MPFlashError("No boards found")
     # versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     try:
         destination.mkdir(exist_ok=True, parents=True)
     except (PermissionError, FileNotFoundError) as e:
-        log.critical(f"Could not create folder {destination}\n{e}")
-        exit(1)
-    download_firmwares(destination, ports, boards, versions, force=force, clean=clean)
+        log.critical(f"Could not create folder {destination}")
+        raise MPFlashError(f"Could not create folder {destination}") from e
+
+    return download_firmwares(destination, ports, boards, versions, force=force, clean=clean)

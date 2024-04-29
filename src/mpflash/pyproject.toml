@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mpflash"
-version = "0.5.0"
+version = "0.7.0"
 description = "Flash and download tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -25,7 +25,7 @@ loguru = "^0.7.2"
 esptool = "^4.7.0"
 jsonlines = "^4.0.0"
 bincopy = "^20.0.0"
-strip-ansi = "^0.1.1"
+# strip-ansi = "^0.1.1"
 rich-click = "^1.7.3"
 psutil = "^5.9.8"
 blkinfo = "^0.2.0"

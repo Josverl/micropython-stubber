@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, Mock
 from pytest_mock import MockerFixture
 
 from mpflash.ask_input import DownloadParams, FlashParams, ask_missing_params
@@ -31,9 +31,10 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
 
 
 @pytest.mark.parametrize(
-    "download, input, answers, check",
+    "id, download, input, answers, check",
     [
         (
+            "D ? preview",
             True,
             {
                 "versions": ("preview",),
@@ -49,6 +50,7 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
             {"versions": ["1.14.0"]},
         ),
         (
+            "D select version",
             True,
             {
                 "versions": ("?",),
@@ -64,6 +66,7 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
         ),
         # versions as string
         (
+            "D version string",
             True,
             {
                 "versions": ("preview",),
@@ -78,8 +81,26 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
             },
             {"versions": ["1.14.0"]},
         ),
+        (
+            "D no boards",
+            True,
+            {
+                "versions": ("stable",),
+                "boards": (),
+                "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
+                "clean": True,
+                "force": False,
+            },
+            {
+                "boards": ["FAKE_BOARD", "SEEED_WIO_TERMINAL"],
+            },
+            {
+                # "versions": ["stable"]
+            },
+        ),
         # flash
         (
+            "F ? preview",
             False,
             {
                 "versions": ("preview",),
@@ -100,17 +121,22 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
     ],
 )
 def test_ask_missing_params_with_interactivity(
+    id: str,
     download: bool,
     input: dict,
     answers: dict,
     check: dict,
     mocker: MockerFixture,
 ):
+    if download:
+        params = DownloadParams(**input)
+        action = "download"
+    else:
+        params = FlashParams(**input)
+        action = "flash"
 
-    params = DownloadParams(**input) if download else FlashParams(**input)
-
-    m_prompt: MagicMock = mocker.patch("inquirer.prompt", return_value=answers, autospec=True)
-    result = ask_missing_params(params, action="flash")
+    m_prompt: Mock = mocker.patch("inquirer.prompt", return_value=answers, autospec=True)
+    result = ask_missing_params(params, action)
     m_prompt.assert_called_once()
 
     # explicit checks
