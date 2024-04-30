@@ -166,8 +166,8 @@ Note that if no matching firmware can be found for a board, it will be skipped.
 (For example, the PYBV11 and ESP32_GENERIC_S3 boards in the example above.)
 
 ## Issues and bug reports
-mpflash is currently co-located in the [micropython-stubber](https://github.com/Josverl/micropython-stubber) repository.
-Please report any issues or bugs in the [issue tracker](https://github.com/Josverl/micropython-stubber/issues) with '[mpflash]' in the subject.
+mpflash is currently co-located in the [micropython-stubber](https://github.com/Josverl/micropython-stubber) repository.  
+Please report any issues or bugs in the [issue tracker](https://github.com/Josverl/micropython-stubber/issues) using the MPflash feedback template.
 
 ## License
 mpflash is licensed under the MIT license. See the LICENSE file for more details.

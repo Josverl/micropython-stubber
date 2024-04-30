@@ -18,20 +18,23 @@ HERE = Path(__file__).parent
 def find_board_id(
     descr: str, short_descr: str, board_info: Optional[Path] = None, version: str = "stable"
 ) -> Optional[str]:
-    # TODO: use the json file instead of the csv and get the cpu
-    boards = find_board_by_description(
-        descr=descr,
-        short_descr=short_descr,
-        board_info=board_info,
-        version=clean_version(version),
-    )
-    return boards[-1]["board"]
+    """Find the MicroPython BOARD_ID based on the description in the firmware"""
+    try:
+        boards = find_board_id_by_description(
+            descr=descr,
+            short_descr=short_descr,
+            board_info=board_info,
+            version=clean_version(version),
+        )
+        return boards[-1]["board"]
+    except MPFlashError:
+        return "UNKNOWN_BOARD"
 
 
 @functools.lru_cache(maxsize=20)
-def find_board_by_description(*, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None):
+def find_board_id_by_description(*, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None):
     """
-    Find the MicroPython BOARD designator based on the description in the firmware
+    Find the MicroPython BOARD_ID based on the description in the firmware
     using the pre-built board_info.json file
     """
     if not board_info:
@@ -52,7 +55,7 @@ def find_board_by_description(*, descr: str, short_descr: str, version="v1.21.0"
     if not matches and short_descr:
         matches = [b for b in version_matches if b["description"] == short_descr]
     if not matches:
-        raise MPFlashError(f"No board info found for description {descr}")
+        raise MPFlashError(f"No board info found for description '{descr}' or '{short_descr}'")
     return sorted(matches, key=lambda x: x["version"])
 
 
