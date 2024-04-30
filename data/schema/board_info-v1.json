@@ -1,0 +1,56 @@
+{
+    "type": "array",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Micropython board information file",
+    "minItems": 1,
+    "uniqueItems": true,
+    "items": {
+        "type": "object",
+        "required": [
+            "description",
+            "port",
+            "board",
+            "board_name",
+            "mcu_name",
+            "path",
+            "version"
+        ],
+        "properties": {
+            "family": {
+                "type": "string",
+                "minLength": 1
+            },
+            "custom": {
+                "type": "boolean"
+            },
+            "description": {
+                "type": "string",
+                "minLength": 1
+            },
+            "port": {
+                "type": "string",
+                "minLength": 1
+            },
+            "board": {
+                "type": "string",
+                "minLength": 1
+            },
+            "board_name": {
+                "type": "string",
+                "minLength": 1
+            },
+            "mcu_name": {
+                "type": "string",
+                "minLength": 1
+            },
+            "path": {
+                "type": "string",
+                "minLength": 1
+            },
+            "version": {
+                "type": "string",
+                "minLength": 1
+            }
+        }
+    }
+}
