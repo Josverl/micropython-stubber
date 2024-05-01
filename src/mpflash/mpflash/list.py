@@ -76,7 +76,6 @@ def mcu_table(
         header_style="bold magenta",
         collapse_padding=True,
         padding=(0, 0),
-        # width=80,
     )
     needs_build = any(mcu.build for mcu in conn_mcus)
     is_narrow = console.width < 100

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from mpflash.errors import MPFlashError
-from mpflash.mpboard_id.board_id import _find_board_id_by_description, find_board_id_by_description
+from mpflash.mpboard_id.board_id import _find_board_id_by_description, find_board_id_by_description  # type: ignore
 
 pytestmark = [pytest.mark.mpflash]
 
