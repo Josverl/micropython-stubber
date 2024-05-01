@@ -51,23 +51,44 @@ def show_mcus(
     conn_mcus: List[MPRemoteBoard],
     title: str = "Connected boards",
     refresh: bool = True,
-):  # sourcery skip: extract-duplicate-method
+):
+    console.print(mcu_table(conn_mcus, title, refresh))
+
+
+def abbrv_family(family: str, is_narrow: bool) -> str:
+    ABRV = {"micropython": "upy", "circuitpython": "cpy"}
+    if is_narrow:
+        if family in ABRV:
+            return ABRV[family]
+        return family[:4]
+    return family
+
+
+def mcu_table(
+    conn_mcus: List[MPRemoteBoard],
+    title: str = "Connected boards",
+    refresh: bool = True,
+):
     """Show the list of connected boards in a nice table"""
     table = Table(
         title=title,
         title_style="magenta",
         header_style="bold magenta",
         collapse_padding=True,
-        width=110,
+        padding=(0, 0),
+        # width=80,
     )
-    table.add_column("Serial", overflow="fold")
-    table.add_column("Family")
+    needs_build = any(mcu.build for mcu in conn_mcus)
+    is_narrow = console.width < 100
+    table.add_column("Ser." if is_narrow else "Serial", overflow="fold")
+    table.add_column("Fam." if is_narrow else "Family", overflow="crop", max_width=4 if is_narrow else None)
     table.add_column("Port")
     table.add_column("Board", overflow="fold")
     # table.add_column("Variant") # TODO: add variant
     table.add_column("CPU")
-    table.add_column("Version")
-    table.add_column("build", justify="right")
+    table.add_column("Version", overflow="fold", max_width=8 if is_narrow else None)
+    if needs_build:
+        table.add_column("Bld" if is_narrow else "Build", justify="right")
 
     for mcu in track(conn_mcus, description="Updating board info", transient=True, update_period=0.1):
         if refresh:
@@ -76,14 +97,17 @@ def show_mcus(
             except ConnectionError:
                 continue
         description = f"[italic bright_cyan]{mcu.description}" if mcu.description else ""
-        table.add_row(
+        row = [
             mcu.serialport.replace("/dev/", ""),
-            mcu.family,
+            abbrv_family(mcu.family, is_narrow),
             mcu.port,
             f"{mcu.board}\n{description}".strip(),
             # mcu.variant,
             mcu.cpu,
             clean_version(mcu.version),
-            mcu.build,
-        )
-    console.print(table)
+        ]
+        if needs_build:
+            row.append(mcu.build)
+
+        table.add_row(*row)
+    return table
