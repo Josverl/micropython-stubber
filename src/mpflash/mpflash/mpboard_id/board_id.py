@@ -15,12 +15,12 @@ HERE = Path(__file__).parent
 ###############################################################################################
 
 
-def find_board_id(
+def find_board_id_by_description(
     descr: str, short_descr: str, board_info: Optional[Path] = None, version: str = "stable"
 ) -> Optional[str]:
     """Find the MicroPython BOARD_ID based on the description in the firmware"""
     try:
-        boards = find_board_id_by_description(
+        boards = _find_board_id_by_description(
             descr=descr,
             short_descr=short_descr,
             board_info=board_info,
@@ -32,7 +32,9 @@ def find_board_id(
 
 
 @functools.lru_cache(maxsize=20)
-def find_board_id_by_description(*, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None):
+def _find_board_id_by_description(
+    *, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None
+):
     """
     Find the MicroPython BOARD_ID based on the description in the firmware
     using the pre-built board_info.json file
