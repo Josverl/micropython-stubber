@@ -38,11 +38,21 @@ def test_list_mcus(mocker: MockerFixture):
     assert len(result) == 1
 
 
-# accesibility
+# accessibly 
 # make sure that the tables can be displayed on a 80 char terminal
 
-
-txt = '[{"arch": "", "board": "UNKNOWN_BOARD", "build": "", "connected": true, "cpu": "nRF52840", "description": "nice!nano with nRF52840", "family": "circuitpython", "firmware": {}, "mpy": "v5.2", "path": null, "port": "nRF52840", "serialport": "COM27", "version": "8.2.10"}, {"arch": "armv7emsp", "board": "SEEED_WIO_TERMINAL", "build": "341", "connected": true, "cpu": "SAMD51P19A", "description": "Wio Terminal D51R with SAMD51P19A", "family": "micropython", "firmware": {}, "mpy": "v6.3", "path": null, "port": "samd", "serialport": "COM8", "version": "1.23.0-preview"}]'
+txt = """
+[
+    {   
+        "arch": "", "board": "UNKNOWN_BOARD", "build": "", "connected": true, "cpu": "nRF52840", "description": "nice!nano with nRF52840", 
+        "family": "circuitpython", "firmware": {}, "mpy": "v5.2", "path": null, "port": "nRF52840", "serialport": "COM27", "version": "8.2.10"
+    }, 
+    {
+        "arch": "armv7emsp", "board": "SEEED_WIO_TERMINAL", "build": "341", "connected": true, "cpu": "SAMD51P19A", "description": "Wio Terminal D51R with SAMD51P19A", 
+        "family": "micropython", "firmware": {}, "mpy": "v6.3", "path": null, "port": "samd", "serialport": "COM8", "version": "1.23.0-preview"
+    }
+]
+"""
 test_mcus = jsons.loads(txt, List[MPRemoteBoard])
 
 
