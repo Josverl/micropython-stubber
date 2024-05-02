@@ -9,9 +9,12 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Tuple, TypedDict, Union
 
-from mpflash.errors import MPFlashError
 from mpflash.common import PORT_FWTYPES
+from mpflash.errors import MPFlashError
 from mpflash.vendor.versions import clean_version
+
+# KNOWN ports and boards are sourced from the micropython repo,
+# this info is stored in the board_info.json file
 
 
 # Board  based on the dataclass Board but changed to TypedDict
@@ -30,27 +33,27 @@ class Board(TypedDict):
 
 
 @lru_cache(maxsize=None)
-def read_stored_boardinfo() -> List[Board]:
+def read_known_boardinfo() -> List[Board]:
     """Reads the board_info.json file and returns the data as a list of Board objects"""
     with open(Path(__file__).parent / "board_info.json", "r") as file:
         return json.load(file)
 
 
-def local_mp_ports() -> List[str]:
+def get_known_ports(versions) -> List[str]:
     # TODO: Filter for Version
-    mp_boards = read_stored_boardinfo()
+    mp_boards = read_known_boardinfo()
     # select the unique ports from info
     ports = set({board["port"] for board in mp_boards if board["port"] in PORT_FWTYPES.keys()})
     return sorted(list(ports))
 
 
-def get_stored_boards_for_port(port: str, versions: Optional[List[str]] = None):
+def get_known_boards_for_port(port: str, versions: Optional[List[str]] = None):
     """
     Returns a list of boards for the given port and version(s)
 
     port : str : The Micropython port to filter for
     versions : List[str] : The Micropython versions to filter for (actual versions required)"""
-    mp_boards = read_stored_boardinfo()
+    mp_boards = read_known_boardinfo()
 
     # filter for 'preview' as they are not in the board_info.json
     # instead use stable version
@@ -75,16 +78,16 @@ def known_stored_boards(port: str, versions: Optional[List[str]] = None) -> List
     port : str : The Micropython port to filter for
     versions : List[str] : The Micropython versions to filter for (actual versions required)
     """
-    mp_boards = get_stored_boards_for_port(port, versions)
+    mp_boards = get_known_boards_for_port(port, versions)
 
     boards = set({(f'{board["version"]} {board["description"]}', board["board"]) for board in mp_boards})
     return sorted(list(boards))
 
 
 @lru_cache(maxsize=20)
-def find_stored_board(board_id: str) -> Board:
-    """Find the board for the given board_ID or 'board description' and return the board info as a Board object"""
-    info = read_stored_boardinfo()
+def find_known_board(board_id: str) -> Board:
+    """Find the board for the given BOARD_ID or 'board description' and return the board info as a Board object"""
+    info = read_known_boardinfo()
     for board_info in info:
         if board_id in (board_info["board"], board_info["description"]):
             if "cpu" not in board_info or not board_info["cpu"]:

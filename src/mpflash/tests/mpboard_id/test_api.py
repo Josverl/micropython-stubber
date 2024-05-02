@@ -1,18 +1,18 @@
 import pytest
 
-from mpflash.mpboard_id import find_stored_board, known_stored_boards, local_mp_ports, read_stored_boardinfo
+from mpflash.mpboard_id import find_known_board, get_known_ports, known_stored_boards, read_known_boardinfo
 
 pytestmark = [pytest.mark.mpflash]
 
 
 def test_read_boardinfo():
-    boards = read_stored_boardinfo()
+    boards = read_known_boardinfo()
     assert isinstance(boards, list)
     assert all(isinstance(board, dict) for board in boards)
 
 
 def test_known_mp_ports():
-    ports = local_mp_ports()
+    ports = get_known_ports()
     assert isinstance(ports, list)
     assert all(isinstance(port, str) for port in ports)
 
@@ -37,7 +37,7 @@ def test_known_mp_boards(port, versions):
 
 
 def test_find_mp_board():
-    board = find_stored_board("PYBV11")
+    board = find_known_board("PYBV11")
     assert isinstance(board, dict)
     assert "board" in board
     assert "description" in board
