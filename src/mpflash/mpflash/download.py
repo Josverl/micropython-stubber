@@ -118,7 +118,7 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
         for board in _urls:
             board["port"] = port
 
-        for board in track(_urls, description=f"Checking {port} download pages", transient=True):
+        for board in track(_urls, description=f"Checking {port} download pages", transient=True,refresh_per_second=2):
             # add a board to the list for each firmware found
             firmwares = []
             for ext in PORT_FWTYPES[port]:

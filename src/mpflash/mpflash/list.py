@@ -26,8 +26,9 @@ def list_mcus(bluetooth: bool = False):
     """
     conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards(bluetooth) if sp not in config.ignore_ports]
 
-    # a lot of boilerplate to show a progress bar with the comport currenlty scanned
-    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn()) as progress:
+    # a lot of boilerplate to show a progress bar with the comport currently scanned
+    # low update rate to facilitate screen readers/narration
+    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn(), refresh_per_second=2) as progress:
         tsk_scan = progress.add_task("[green]Scanning", visible=False, total=None)
         progress.tasks[tsk_scan].fields["device"] = "..."
         progress.tasks[tsk_scan].visible = True
@@ -105,7 +106,7 @@ def mcu_table(
     if needs_build:
         table.add_column("Build" if is_wide else "Bld", justify="right")
 
-    for mcu in track(conn_mcus, description="Updating board info", transient=True, update_period=0.1):
+    for mcu in track(conn_mcus, description="Updating board info", transient=True, refresh_per_second=2):
         if refresh:
             try:
                 mcu.get_mcu_info()

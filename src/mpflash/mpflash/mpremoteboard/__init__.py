@@ -200,6 +200,7 @@ class MPRemoteBoard:
             transient=True,
             get_time=lambda: time.time(),
             show_speed=False,
+            refresh_per_second=1,
         ):
             time.sleep(1)
             try:
