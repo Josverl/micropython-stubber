@@ -93,8 +93,9 @@ jobs:
             - name: update mpflash to beta for testing
               if: ${{ matrix.mpflash-version == 'beta' }}
               run: |
-                  pip uninstall mpflash
-                  pip install src/mpflash
+                  # use poetry's environmnt
+                  poetry run pip uninstall mpflash -y
+                  poetry run pip install src/mpflash
 
             #----------------------------------------------
             # stubber clone
