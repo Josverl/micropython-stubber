@@ -55,9 +55,9 @@ def show_mcus(
     console.print(mcu_table(conn_mcus, title, refresh))
 
 
-def abbrv_family(family: str, is_narrow: bool) -> str:
+def abbrv_family(family: str, is_wide: bool) -> str:
     ABRV = {"micropython": "upy", "circuitpython": "cpy"}
-    if is_narrow:
+    if not is_wide:
         if family in ABRV:
             return ABRV[family]
         return family[:4]
@@ -69,7 +69,19 @@ def mcu_table(
     title: str = "Connected boards",
     refresh: bool = True,
 ):
-    """Show the list of connected boards in a nice table"""
+    """
+    builds a rich table with the connected boards information
+    The columns of the table are adjusted to the terminal width
+    the columns are :
+                Narrow      Wide
+    - Serial    Yes         Yes
+    - Family    abbrv.      Yes
+    - Port      -           yes
+    - Board     Yes         Yes     BOARD_ID and Description
+    - CPU       -           Yes
+    - Version   Yes         Yes
+    - Build     *           *       only if any of the mcus have a build
+    """
     table = Table(
         title=title,
         title_style="magenta",
@@ -77,17 +89,21 @@ def mcu_table(
         collapse_padding=True,
         padding=(0, 0),
     )
+    # check if the terminal is wide enough to show all columns or if we need to collapse some
+    is_wide = console.width > 99
     needs_build = any(mcu.build for mcu in conn_mcus)
-    is_narrow = console.width < 100
-    table.add_column("Ser." if is_narrow else "Serial", overflow="fold")
-    table.add_column("Fam." if is_narrow else "Family", overflow="crop", max_width=4 if is_narrow else None)
-    table.add_column("Port")
+
+    table.add_column("Serial" if is_wide else "Ser.", overflow="fold")
+    table.add_column("Family" if is_wide else "Fam.", overflow="crop", max_width=None if is_wide else 4)
+    if is_wide:
+        table.add_column("Port")
     table.add_column("Board", overflow="fold")
     # table.add_column("Variant") # TODO: add variant
-    table.add_column("CPU")
-    table.add_column("Version", overflow="fold", max_width=8 if is_narrow else None)
+    if is_wide:
+        table.add_column("CPU")
+    table.add_column("Version", overflow="fold", min_width=5, max_width=16)
     if needs_build:
-        table.add_column("Bld" if is_narrow else "Build", justify="right")
+        table.add_column("Build" if is_wide else "Bld", justify="right")
 
     for mcu in track(conn_mcus, description="Updating board info", transient=True, update_period=0.1):
         if refresh:
@@ -98,13 +114,14 @@ def mcu_table(
         description = f"[italic bright_cyan]{mcu.description}" if mcu.description else ""
         row = [
             mcu.serialport.replace("/dev/", ""),
-            abbrv_family(mcu.family, is_narrow),
-            mcu.port,
-            f"{mcu.board}\n{description}".strip(),
-            # mcu.variant,
-            mcu.cpu,
-            clean_version(mcu.version),
+            abbrv_family(mcu.family, is_wide),
         ]
+        if is_wide:
+            row.append(mcu.port)
+        row.append(f"{mcu.board}\n{description}".strip())
+        if is_wide:
+            row.append(mcu.cpu)
+        row.append(clean_version(mcu.version))
         if needs_build:
             row.append(mcu.build)
 
