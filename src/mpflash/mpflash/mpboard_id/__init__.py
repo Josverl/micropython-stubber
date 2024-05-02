@@ -39,7 +39,7 @@ def read_known_boardinfo() -> List[Board]:
         return json.load(file)
 
 
-def get_known_ports(versions) -> List[str]:
+def get_known_ports() -> List[str]:
     # TODO: Filter for Version
     mp_boards = read_known_boardinfo()
     # select the unique ports from info
