@@ -79,8 +79,8 @@ def ask_missing_params(
 
     if not params.boards or "?" in params.boards:
         ask_port_board(questions, action=action)
-
-    answers = inquirer.prompt(questions, answers=answers)
+    if questions:
+        answers = inquirer.prompt(questions, answers=answers)
     if not answers:
         # input cancelled by user
         return []  # type: ignore
@@ -96,8 +96,14 @@ def ask_missing_params(
     if "versions" in answers:
         params.versions = [v for v in params.versions if v != "?"]  # remove the "?" if present
         # make sure it is a list
-        params.versions.extend(answers["versions"] if isinstance(answers["versions"], list) else [answers["versions"]])
-
+        if isinstance(answers["versions"], (list, tuple)):
+            params.versions.extend(answers["versions"])
+        else:
+            params.versions.append(answers["versions"])
+    # remove duplicates
+    params.ports = list(set(params.ports))
+    params.boards = list(set(params.boards))
+    params.versions = list(set(params.versions))
     log.debug(repr(params))
 
     return params
