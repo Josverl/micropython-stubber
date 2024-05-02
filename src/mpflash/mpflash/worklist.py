@@ -9,7 +9,7 @@ from mpflash.errors import MPFlashError
 from .config import config
 from .downloaded import find_downloaded_firmware
 from .list import show_mcus
-from .mpboard_id import find_stored_board
+from .mpboard_id import find_known_board
 from .mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
@@ -131,7 +131,7 @@ def manual_worklist(
     # TODO : Find a way to avoid needing to specify the port
     # Lookup the matching port and cpu in board_info based in the board name
     try:
-        info = find_stored_board(board)
+        info = find_known_board(board)
         mcu.port = info["port"]
         # need the CPU type for the esptool
         mcu.cpu = info["cpu"]

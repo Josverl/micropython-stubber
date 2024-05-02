@@ -30,6 +30,7 @@ pytestmark = pytest.mark.mpflash
         ("40", 0, ["download", "--board", "ESP32_GENERIC"]),
         ("41", 0, ["download", "--board", "?"]),
         ("42", 0, ["download", "--board", "?", "--board", "ESP32_GENERIC"]),
+        ("43", 0, ["download", "--board", "ESP32_GENERIC", "--board", "?"]),
         ("50", 0, ["download", "--destination", "firmware", "--version", "1.22.0", "--board", "ESP32_GENERIC"]),
         ("60", 0, ["download", "--no-clean"]),
         ("61", 0, ["download", "--clean"]),
@@ -38,6 +39,13 @@ pytestmark = pytest.mark.mpflash
 )
 def test_mpflash_download(id, ex_code, args: List[str], mocker: MockerFixture):
     def fake_ask_missing_params(params: DownloadParams, action: str = "download") -> DownloadParams:
+        if "?" in params.ports:
+            params.ports = ["esp32"]
+        if "?" in params.boards:
+            params.ports = ["esp32"]
+            params.boards = ["ESP32_GENERIC"]
+        if "?" in params.versions:
+            params.versions = ["1.22.0"]
         return params
 
     m_connected_ports_boards = mocker.patch(
@@ -59,14 +67,16 @@ def test_mpflash_download(id, ex_code, args: List[str], mocker: MockerFixture):
     m_ask_missing_params.assert_called_once()
     m_download.assert_called_once()
 
+    assert m_download.call_args.args[1], "one or more ports should be specified for download"
+
     if "--clean" in args:
-        assert m_download.call_args.args[5] == True
+        assert m_download.call_args.args[5] == True, "clean should be True"
     if "--no-clean" in args:
-        assert m_download.call_args.args[5] == False
+        assert m_download.call_args.args[5] == False, "clean should be False"
     else:
-        assert m_download.call_args.args[5] == True
+        assert m_download.call_args.args[5] == True, "clean should be True"
 
     if "--force" in args:
-        assert m_download.call_args.args[4] == True
+        assert m_download.call_args.args[4] == True, "force should be True"
     else:
-        assert m_download.call_args.args[4] == False
+        assert m_download.call_args.args[4] == False, "force should be False"

@@ -7,7 +7,7 @@ import rich_click as click
 from loguru import logger as log
 
 from mpflash.errors import MPFlashError
-from mpflash.mpboard_id import find_stored_board
+from mpflash.mpboard_id import find_known_board
 from mpflash.vendor.versions import clean_version
 
 from .ask_input import DownloadParams, ask_missing_params
@@ -68,10 +68,17 @@ def cli_download(**kwargs) -> int:
     params.versions = list(params.versions)
     params.boards = list(params.boards)
     if params.boards:
-        pass
-        # TODO Clean board - same as in cli_flash.py
+        if not params.ports:
+            # no ports specified - resolve ports from specified boards by resolving board IDs
+            for board in params.boards:
+                if board != "?":
+                    try:
+                        board_ = find_known_board(board)
+                        params.ports.append(board_["port"])
+                    except MPFlashError as e:
+                        log.error(f"{e}")
     else:
-        # no boards specified - detect connected boards
+        # no boards specified - detect connected ports and boards
         params.ports, params.boards = connected_ports_boards()
 
     params = ask_missing_params(params, action="download")

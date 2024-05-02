@@ -2,13 +2,13 @@ from typing import List
 
 import pytest
 
-from mpflash.mpboard_id import get_stored_boards_for_port, local_mp_ports
+from mpflash.mpboard_id import get_known_boards_for_port, get_known_ports
 from mpflash.vendor.versions import get_stable_mp_version
 
 pytestmark = [pytest.mark.mpflash]
 
 
-@pytest.mark.parametrize("port", local_mp_ports())
+@pytest.mark.parametrize("port", get_known_ports())
 @pytest.mark.parametrize(
     "id, versions",
     [
@@ -24,7 +24,7 @@ def test_mp_board_filter(port: str, id, versions: List[str]):
     # Arrange
 
     # Act
-    result = get_stored_boards_for_port(port, versions)
+    result = get_known_boards_for_port(port, versions)
     # Assert
     assert len(result) >= 1
     assert all(board["port"] == port for board in result)

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from mpflash.errors import MPFlashError
-from mpflash.vendor.versions import clean_version
+from mpflash.vendor.versions import clean_version, get_stable_mp_version
 
 ###############################################################################################
 HERE = Path(__file__).parent
@@ -48,8 +48,8 @@ def _find_board_id_by_description(
 
     # filter for matching version
     if version == "preview":
-        # TODO: match last stable
-        version = "v1.22.2"
+        # match last stable
+        version = get_stable_mp_version()
     version_matches = [b for b in info if b["version"].startswith(version)]
     if not version_matches:
         raise MPFlashError(f"No board info found for version {version}")

@@ -4,7 +4,7 @@ import rich_click as click
 from loguru import logger as log
 
 from mpflash.errors import MPFlashError
-from mpflash.mpboard_id import find_stored_board
+from mpflash.mpboard_id import find_known_board
 from mpflash.vendor.versions import clean_version
 
 from .ask_input import FlashParams, ask_missing_params
@@ -116,7 +116,7 @@ def cli_flash_board(**kwargs) -> int:
                 continue
             if " " in board_id:
                 try:
-                    info = find_stored_board(board_id)
+                    info = find_known_board(board_id)
                     if info:
                         log.info(f"Resolved board description: {info['board']}")
                         params.boards.remove(board_id)

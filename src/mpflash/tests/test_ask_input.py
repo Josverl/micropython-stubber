@@ -17,8 +17,8 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
     _config.interactive = False
 
     input = {
-        "versions": ("?"),
-        "boards": ("?"),
+        "versions": ["?"],
+        "boards": ["?"],
         "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
         "clean": True,
         "force": False,
@@ -34,27 +34,49 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
     "id, download, input, answers, check",
     [
         (
-            "D ? preview",
+            "10 D -v ? -b ?",
             True,
             {
-                "versions": ("preview",),
-                "boards": ("?", "SEEED_WIO_TERMINAL"),
+                "versions": ["?"],
+                "boards": ["?"],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
                 "clean": True,
                 "force": False,
             },
             {
                 "versions": ["1.14.0"],
-                "boards": ["SEEED_WIO_TERMINAL"],
+                "boards": ["OTHER_BOARD"],
             },
-            {"versions": ["1.14.0"]},
+            {
+                "versions": ["1.14.0"],
+                "boards": ["OTHER_BOARD"],
+            },
         ),
         (
-            "D select version",
+            "11 D -v ? -b ? -b SEEED_WIO_TERMINAL",
             True,
             {
-                "versions": ("?",),
-                "boards": ("SEEED_WIO_TERMINAL"),
+                "versions": ["?"],
+                "boards": ["?", "SEEED_WIO_TERMINAL"],
+                "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
+                "clean": True,
+                "force": False,
+            },
+            {
+                "versions": ["1.14.0"],
+                "boards": ["OTHER_BOARD"],
+            },
+            {
+                "versions": ["1.14.0"],
+                "boards": ["OTHER_BOARD", "SEEED_WIO_TERMINAL"],
+            },
+        ),
+        (
+            "20 D select version",
+            True,
+            {
+                "versions": ["?"],
+                "boards": ["SEEED_WIO_TERMINAL"],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
                 "clean": True,
                 "force": False,
@@ -66,33 +88,48 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
         ),
         # versions as string
         (
-            "D version string",
+            "21 D version string",
             True,
             {
-                "versions": ("preview",),
-                "boards": ("?", "SEEED_WIO_TERMINAL"),
+                "versions": ["preview"],
+                "boards": ["SEEED_WIO_TERMINAL"],
+                "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
+                "clean": True,
+                "force": False,
+            },
+            {},
+            {"versions": ["preview"]},
+        ),
+        (
+            "22 D -v preview -v ?",
+            True,
+            {
+                "versions": ["preview", "?"],
+                "boards": ["SEEED_WIO_TERMINAL"],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
                 "clean": True,
                 "force": False,
             },
             {
                 "versions": "1.14.0",
-                "boards": ["SEEED_WIO_TERMINAL"],
             },
-            {"versions": ["1.14.0"]},
+            {"versions": ["preview", "1.14.0"]},
         ),
         (
-            "D no boards",
+            "30 D no boards",
             True,
             {
-                "versions": ("stable",),
-                "boards": (),
+                "versions": ["stable"],
+                "boards": [],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
                 "clean": True,
                 "force": False,
             },
             {
-                "boards": ["FAKE_BOARD", "SEEED_WIO_TERMINAL"],
+                "boards": [
+                    "SEEED_WIO_TERMINAL",
+                    "FAKE_BOARD",
+                ],
             },
             {
                 # "versions": ["stable"]
@@ -100,11 +137,11 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
         ),
         # flash
         (
-            "F ? preview",
+            "50 F -b ? -v preview",
             False,
             {
-                "versions": ("preview",),
-                "boards": ("?"),
+                "versions": ["preview"],
+                "boards": ["?"],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
                 "serial": "",
                 "erase": True,
@@ -112,7 +149,6 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
                 "cpu": "",
             },
             {
-                "versions": ["1.14.0"],
                 "boards": ["SEEED_WIO_TERMINAL"],
                 "serial": "COM4",
             },
@@ -137,16 +173,26 @@ def test_ask_missing_params_with_interactivity(
 
     m_prompt: Mock = mocker.patch("inquirer.prompt", return_value=answers, autospec=True)
     result = ask_missing_params(params, action)
-    m_prompt.assert_called_once()
+    if answers:
+        m_prompt.assert_called_once()
 
     # explicit checks
     for key in check:
-        assert getattr(result, key) == check[key]
+        if isinstance(check[key], list):
+            assert sorted(getattr(result, key)) == sorted(check[key])
+        else:
+            assert getattr(result, key) == check[key]
     # are all answers used in the result
     for key in answers:
         if key not in check:
-            assert getattr(result, key) == answers[key]
+            if isinstance(answers[key], list):
+                assert sorted(getattr(result, key)) == sorted(answers[key])
+            else:
+                assert getattr(result, key) == answers[key]
     # also make sure that the other attributes are not changed
     for key in input:
         if key not in answers and key not in check:
-            assert getattr(result, key) == input[key]
+            if isinstance(input[key], list):
+                assert sorted(getattr(result, key)) == sorted(input[key])
+            else:
+                assert getattr(result, key) == input[key]

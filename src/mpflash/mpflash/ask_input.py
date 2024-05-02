@@ -12,7 +12,7 @@ from typing import Dict, List, Sequence, Tuple, Union
 from loguru import logger as log
 
 from mpflash.config import config
-from mpflash.mpboard_id import get_stored_boards_for_port, known_stored_boards, local_mp_ports
+from mpflash.mpboard_id import get_known_boards_for_port, get_known_ports, known_stored_boards
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import micropython_versions
 
@@ -79,8 +79,8 @@ def ask_missing_params(
 
     if not params.boards or "?" in params.boards:
         ask_port_board(questions, action=action)
-
-    answers = inquirer.prompt(questions, answers=answers)
+    if questions:
+        answers = inquirer.prompt(questions, answers=answers)
     if not answers:
         # input cancelled by user
         return []  # type: ignore
@@ -88,13 +88,22 @@ def ask_missing_params(
     if isinstance(params, FlashParams) and "serial" in answers:
         params.serial = answers["serial"]
     if "port" in answers:
-        params.ports = [answers["port"]]
+        params.ports = [p for p in params.ports if p != "?"]  # remove the "?" if present
+        params.ports.extend(answers["port"])
     if "boards" in answers:
-        params.boards = answers["boards"] if isinstance(answers["boards"], list) else [answers["boards"]]
+        params.boards = [b for b in params.boards if b != "?"]  # remove the "?" if present
+        params.boards.extend(answers["boards"] if isinstance(answers["boards"], list) else [answers["boards"]])
     if "versions" in answers:
+        params.versions = [v for v in params.versions if v != "?"]  # remove the "?" if present
         # make sure it is a list
-        params.versions = answers["versions"] if isinstance(answers["versions"], list) else [answers["versions"]]
-
+        if isinstance(answers["versions"], (list, tuple)):
+            params.versions.extend(answers["versions"])
+        else:
+            params.versions.append(answers["versions"])
+    # remove duplicates
+    params.ports = list(set(params.ports))
+    params.boards = list(set(params.boards))
+    params.versions = list(set(params.versions))
     log.debug(repr(params))
 
     return params
@@ -149,14 +158,15 @@ def ask_port_board(questions: list, *, action: str):
     # import only when needed to reduce load time
     import inquirer
 
-    # TODO: if action = flash, Use Inquirer.List for boards
+    # if action flash,  single input
+    # if action download, multiple input
     inquirer_ux = inquirer.Checkbox if action == "download" else inquirer.List
     questions.extend(
         (
             inquirer.List(
                 "port",
                 message="Which port do you want to {action} " + "to {serial} ?" if action == "flash" else "?",
-                choices=local_mp_ports(),
+                choices=get_known_ports(),
                 autocomplete=True,
             ),
             inquirer_ux(
@@ -194,7 +204,7 @@ def ask_versions(questions: list, *, action: str):
 
     # remove the versions for which there are no known boards in the board_info.json
     # todo: this may be a little slow
-    mp_versions = [v for v in mp_versions if get_stored_boards_for_port("stm32", [v])]
+    mp_versions = [v for v in mp_versions if get_known_boards_for_port("stm32", [v])]
 
     mp_versions.append("preview")
     mp_versions.reverse()  # newest first
