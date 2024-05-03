@@ -50,6 +50,7 @@ pytest-mock = "^3.10.0"
 mock = "^4.0.3"
 distro = "^1.8.0"
 fasteners = "^0.19"
+jsons = "^1.6.3"
 
 
 [build-system]

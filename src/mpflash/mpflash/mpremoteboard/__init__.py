@@ -13,7 +13,7 @@ from rich.progress import track
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from mpflash.errors import MPFlashError
-from mpflash.mpboard_id.board_id import find_board_id
+from mpflash.mpboard_id.board_id import find_board_id_by_description
 from mpflash.mpremoteboard.runner import run
 
 ###############################################################################################
@@ -116,7 +116,7 @@ class MPRemoteBoard:
             self.description = descr = info["board"]
             pos = descr.rfind(" with")
             short_descr = descr[:pos].strip() if pos != -1 else ""
-            if board_name := find_board_id(descr, short_descr):
+            if board_name := find_board_id_by_description(descr, short_descr):
                 self.board = board_name
             else:
                 self.board = "UNKNOWN"
@@ -200,6 +200,7 @@ class MPRemoteBoard:
             transient=True,
             get_time=lambda: time.time(),
             show_speed=False,
+            refresh_per_second=1,
         ):
             time.sleep(1)
             try:

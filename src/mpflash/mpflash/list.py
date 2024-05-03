@@ -26,8 +26,9 @@ def list_mcus(bluetooth: bool = False):
     """
     conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards(bluetooth) if sp not in config.ignore_ports]
 
-    # a lot of boilerplate to show a progress bar with the comport currenlty scanned
-    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn()) as progress:
+    # a lot of boilerplate to show a progress bar with the comport currently scanned
+    # low update rate to facilitate screen readers/narration
+    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn(), refresh_per_second=2) as progress:
         tsk_scan = progress.add_task("[green]Scanning", visible=False, total=None)
         progress.tasks[tsk_scan].fields["device"] = "..."
         progress.tasks[tsk_scan].visible = True
@@ -51,39 +52,79 @@ def show_mcus(
     conn_mcus: List[MPRemoteBoard],
     title: str = "Connected boards",
     refresh: bool = True,
-):  # sourcery skip: extract-duplicate-method
-    """Show the list of connected boards in a nice table"""
+):
+    console.print(mcu_table(conn_mcus, title, refresh))
+
+
+def abbrv_family(family: str, is_wide: bool) -> str:
+    ABRV = {"micropython": "upy", "circuitpython": "cpy"}
+    if not is_wide:
+        if family in ABRV:
+            return ABRV[family]
+        return family[:4]
+    return family
+
+
+def mcu_table(
+    conn_mcus: List[MPRemoteBoard],
+    title: str = "Connected boards",
+    refresh: bool = True,
+):
+    """
+    builds a rich table with the connected boards information
+    The columns of the table are adjusted to the terminal width
+    the columns are :
+                Narrow      Wide
+    - Serial    Yes         Yes
+    - Family    abbrv.      Yes
+    - Port      -           yes
+    - Board     Yes         Yes     BOARD_ID and Description
+    - CPU       -           Yes
+    - Version   Yes         Yes
+    - Build     *           *       only if any of the mcus have a build
+    """
     table = Table(
         title=title,
         title_style="magenta",
         header_style="bold magenta",
         collapse_padding=True,
-        width=110,
+        padding=(0, 0),
     )
-    table.add_column("Serial", overflow="fold")
-    table.add_column("Family")
-    table.add_column("Port")
+    # check if the terminal is wide enough to show all columns or if we need to collapse some
+    is_wide = console.width > 99
+    needs_build = any(mcu.build for mcu in conn_mcus)
+
+    table.add_column("Serial" if is_wide else "Ser.", overflow="fold")
+    table.add_column("Family" if is_wide else "Fam.", overflow="crop", max_width=None if is_wide else 4)
+    if is_wide:
+        table.add_column("Port")
     table.add_column("Board", overflow="fold")
     # table.add_column("Variant") # TODO: add variant
-    table.add_column("CPU")
-    table.add_column("Version")
-    table.add_column("build", justify="right")
+    if is_wide:
+        table.add_column("CPU")
+    table.add_column("Version", overflow="fold", min_width=5, max_width=16)
+    if needs_build:
+        table.add_column("Build" if is_wide else "Bld", justify="right")
 
-    for mcu in track(conn_mcus, description="Updating board info", transient=True, update_period=0.1):
+    for mcu in track(conn_mcus, description="Updating board info", transient=True, refresh_per_second=2):
         if refresh:
             try:
                 mcu.get_mcu_info()
             except ConnectionError:
                 continue
         description = f"[italic bright_cyan]{mcu.description}" if mcu.description else ""
-        table.add_row(
+        row = [
             mcu.serialport.replace("/dev/", ""),
-            mcu.family,
-            mcu.port,
-            f"{mcu.board}\n{description}".strip(),
-            # mcu.variant,
-            mcu.cpu,
-            clean_version(mcu.version),
-            mcu.build,
-        )
-    console.print(table)
+            abbrv_family(mcu.family, is_wide),
+        ]
+        if is_wide:
+            row.append(mcu.port)
+        row.append(f"{mcu.board}\n{description}".strip())
+        if is_wide:
+            row.append(mcu.cpu)
+        row.append(clean_version(mcu.version))
+        if needs_build:
+            row.append(mcu.build)
+
+        table.add_row(*row)
+    return table

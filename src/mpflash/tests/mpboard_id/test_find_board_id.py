@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from mpflash.errors import MPFlashError
-from mpflash.mpboard_id.board_id import find_board_id
+from mpflash.mpboard_id.board_id import _find_board_id_by_description, find_board_id_by_description  # type: ignore
 
 pytestmark = [pytest.mark.mpflash]
 
@@ -31,9 +31,10 @@ def test_find_board_id_real(test_id, descr, short_descr, expected_result):
     # Act
     if not expected_result:
         with pytest.raises(MPFlashError):
-            find_board_id(descr, short_descr)
+            # internal method raises exception
+            _find_board_id_by_description(descr=descr, short_descr=short_descr)
     else:
-        result = find_board_id(descr, short_descr)
+        result = find_board_id_by_description(descr=descr, short_descr=short_descr)
         # Assert
         assert result == expected_result
 
@@ -45,4 +46,4 @@ def test_find_board_id_file_not_found(tmp_path):
 
     # Act & Assert
     with pytest.raises(FileNotFoundError):
-        find_board_id("Board A", "A", non_existent_file)
+        find_board_id_by_description("Board A", "A", non_existent_file)

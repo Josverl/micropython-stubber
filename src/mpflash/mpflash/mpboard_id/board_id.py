@@ -8,19 +8,19 @@ from pathlib import Path
 from typing import Optional
 
 from mpflash.errors import MPFlashError
-from mpflash.vendor.versions import clean_version
+from mpflash.vendor.versions import clean_version, get_stable_mp_version
 
 ###############################################################################################
 HERE = Path(__file__).parent
 ###############################################################################################
 
 
-def find_board_id(
+def find_board_id_by_description(
     descr: str, short_descr: str, board_info: Optional[Path] = None, version: str = "stable"
 ) -> Optional[str]:
     """Find the MicroPython BOARD_ID based on the description in the firmware"""
     try:
-        boards = find_board_id_by_description(
+        boards = _find_board_id_by_description(
             descr=descr,
             short_descr=short_descr,
             board_info=board_info,
@@ -32,7 +32,9 @@ def find_board_id(
 
 
 @functools.lru_cache(maxsize=20)
-def find_board_id_by_description(*, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None):
+def _find_board_id_by_description(
+    *, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None
+):
     """
     Find the MicroPython BOARD_ID based on the description in the firmware
     using the pre-built board_info.json file
@@ -46,8 +48,8 @@ def find_board_id_by_description(*, descr: str, short_descr: str, version="v1.21
 
     # filter for matching version
     if version == "preview":
-        # TODO: match last stable
-        version = "v1.22.2"
+        # match last stable
+        version = get_stable_mp_version()
     version_matches = [b for b in info if b["version"].startswith(version)]
     if not version_matches:
         raise MPFlashError(f"No board info found for version {version}")

@@ -14,7 +14,7 @@ on:
         branches: [main, dev/*, feat/*, fix/*]
         paths:
             - .github/workflows/pytest_mpflash.yml
-            - .github/workflows/codecov.yml            
+            - .github/workflows/codecov.yml
             - "src/mpflash/**"
 
 env:
@@ -33,11 +33,11 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ubuntu-latest, windows-latest, macos-latest]
+                os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
                 python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
                 include: # for testing
                     - os: ubuntu-latest
-                      python-version: "3.10"
+                      python-version: "3.11"
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -96,7 +96,6 @@ jobs:
                   flags: stubber
                   token: ${{ secrets.CODECOV_TOKEN }}
                   fail_ci_if_error: false
-
 
             - uses: actions/upload-artifact@v4
               if: always() # ignore errors

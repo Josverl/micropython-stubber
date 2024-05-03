@@ -17,7 +17,7 @@ def wait_for_UF2_windows(s_max: int = 10):
     if s_max < 1:
         s_max = 10
     destination = ""
-    for _ in track(range(s_max), description="Waiting for mcu to mount as a drive", transient=True):
+    for _ in track(range(s_max), description="Waiting for mcu to mount as a drive", transient=True,refresh_per_second=2):
         # log.info(f"Waiting for mcu to mount as a drive : {n} seconds left")
         drives = [drive.device for drive in psutil.disk_partitions()]
         for drive in drives:

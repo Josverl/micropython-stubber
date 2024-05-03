@@ -20,6 +20,7 @@ from rich.progress import track
 
 from mpflash.common import PORT_FWTYPES
 from mpflash.errors import MPFlashError
+from mpflash.mpboard_id import get_known_ports
 
 jsonlines.ujson = None  # type: ignore
 # #########################################################################################################
@@ -109,6 +110,8 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
 
     """
     board_urls: List[FirmwareInfo] = []
+    if ports is None:
+        ports = get_known_ports()
     for port in ports:
         download_page_url = f"{MICROPYTHON_ORG_URL}download/?port={port}"
         _urls = get_board_urls(download_page_url)
@@ -118,7 +121,7 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
         for board in _urls:
             board["port"] = port
 
-        for board in track(_urls, description=f"Checking {port} download pages", transient=True):
+        for board in track(_urls, description=f"Checking {port} download pages", transient=True,refresh_per_second=2):
             # add a board to the list for each firmware found
             firmwares = []
             for ext in PORT_FWTYPES[port]:
@@ -170,6 +173,7 @@ def download_firmwares(
     skipped = downloaded = 0
     if versions is None:
         versions = []
+
     unique_boards = get_firmware_list(ports, boards, versions, clean)
 
     for b in unique_boards:
