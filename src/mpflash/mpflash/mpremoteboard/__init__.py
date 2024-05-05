@@ -116,10 +116,10 @@ class MPRemoteBoard:
             self.description = descr = info["board"]
             pos = descr.rfind(" with")
             short_descr = descr[:pos].strip() if pos != -1 else ""
-            if board_name := find_board_id_by_description(descr, short_descr):
+            if board_name := find_board_id_by_description(descr, short_descr, version=self.version):
                 self.board = board_name
             else:
-                self.board = "UNKNOWN"
+                self.board = "UNKNOWN_BOARD"
 
     def disconnect(self) -> bool:
         """

@@ -16,15 +16,20 @@ HERE = Path(__file__).parent
 
 
 def find_board_id_by_description(
-    descr: str, short_descr: str, board_info: Optional[Path] = None, version: str = "stable"
+    descr: str,
+    short_descr: str,
+    *,
+    version: str,
+    board_info: Optional[Path] = None,
 ) -> Optional[str]:
     """Find the MicroPython BOARD_ID based on the description in the firmware"""
+
     try:
         boards = _find_board_id_by_description(
             descr=descr,
             short_descr=short_descr,
             board_info=board_info,
-            version=clean_version(version),
+            version=clean_version(version) if version else None,
         )
         return boards[-1]["board"]
     except MPFlashError:
@@ -33,7 +38,7 @@ def find_board_id_by_description(
 
 @functools.lru_cache(maxsize=20)
 def _find_board_id_by_description(
-    *, descr: str, short_descr: str, version="v1.21.0", board_info: Optional[Path] = None
+    *, descr: str, short_descr: str, version: Optional[str] = None, board_info: Optional[Path] = None
 ):
     """
     Find the MicroPython BOARD_ID based on the description in the firmware
@@ -44,18 +49,20 @@ def _find_board_id_by_description(
     if not board_info.exists():
         raise FileNotFoundError(f"Board info file not found: {board_info}")
 
-    info = _read_board_info(board_info)
+    candidate_boards = _read_board_info(board_info)
 
-    # filter for matching version
-    if version == "preview":
-        # match last stable
-        version = get_stable_mp_version()
-    version_matches = [b for b in info if b["version"].startswith(version)]
-    if not version_matches:
-        raise MPFlashError(f"No board info found for version {version}")
-    matches = [b for b in version_matches if b["description"] == descr]
+    if version:
+        # filter for matching version
+        if version in ("preview", "stable"):
+            # match last stable
+            version = get_stable_mp_version()
+        version_matches = [b for b in candidate_boards if b["version"].startswith(version)]
+        if not version_matches:
+            raise MPFlashError(f"No board info found for version {version}")
+        candidate_boards = version_matches
+    matches = [b for b in candidate_boards if b["description"] == descr]
     if not matches and short_descr:
-        matches = [b for b in version_matches if b["description"] == short_descr]
+        matches = [b for b in candidate_boards if b["description"] == short_descr]
     if not matches:
         raise MPFlashError(f"No board info found for description '{descr}' or '{short_descr}'")
     return sorted(matches, key=lambda x: x["version"])
