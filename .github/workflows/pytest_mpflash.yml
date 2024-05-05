@@ -11,7 +11,7 @@ on:
         branches: [main]
 
     push:
-        branches: [main, dev/*, feat/*, fix/*]
+        branches: [main, dev/*, mpflash/*, feat/*, fix/*]
         paths:
             - .github/workflows/pytest_mpflash.yml
             - .github/workflows/codecov.yml
