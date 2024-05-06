@@ -90,7 +90,7 @@ def ask_missing_params(
         return []  # type: ignore
     # print(repr(answers))
     if isinstance(params, FlashParams) and "serial" in answers:
-        params.serial = answers["serial"]
+        params.serial = answers["serial"].split()[0]  # split to remove the description
     if "port" in answers:
         params.ports = [p for p in params.ports if p != "?"]  # remove the "?" if present
         params.ports.append(answers["port"])
@@ -235,7 +235,7 @@ def ask_versions(questions: list, *, multi_select: bool, action: str):
     )
 
 
-def ask_serialport(questions: list, *, multi_select: bool = False):
+def ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bool = False):
     """
     Asks the user for the serial port selection.
 
@@ -249,12 +249,12 @@ def ask_serialport(questions: list, *, multi_select: bool = False):
     # import only when needed to reduce load time
     import inquirer
 
-    serialports = MPRemoteBoard.connected_boards()
+    comports = MPRemoteBoard.connected_boards(bluetooth=bluetooth, description=True)
     questions.append(
         inquirer.List(
             "serial",
             message="Which serial port do you want to {action} ?",
-            choices=serialports,
+            choices=comports,
             other=True,
             validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore
         )
