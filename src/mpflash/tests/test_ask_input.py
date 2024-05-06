@@ -26,7 +26,7 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
     params = DownloadParams(**input)
     mocker.patch("mpflash.ask_input.config", _config)
     m_prompt: MagicMock = mocker.patch("inquirer.prompt", autospec=True)
-    _ = ask_missing_params(params, action="download")
+    _ = ask_missing_params(params)
     m_prompt.assert_not_called()
 
 
@@ -166,13 +166,11 @@ def test_ask_missing_params_with_interactivity(
 ):
     if download:
         params = DownloadParams(**input)
-        action = "download"
     else:
         params = FlashParams(**input)
-        action = "flash"
 
     m_prompt: Mock = mocker.patch("inquirer.prompt", return_value=answers, autospec=True)
-    result = ask_missing_params(params, action)
+    result = ask_missing_params(params)
     if answers:
         m_prompt.assert_called_once()
 

@@ -64,7 +64,7 @@ class MPRemoteBoard:
         return f"MPRemoteBoard({self.serialport}, {self.family} {self.port}, {self.board}, {self.version})"
 
     @staticmethod
-    def connected_boards(bluetooth: bool = False) -> List[str]:
+    def connected_boards(bluetooth: bool = False, description: bool = False) -> List[str]:
         # TODO: rename to connected_comports
         """
         Get a list of connected comports.
@@ -81,8 +81,19 @@ class MPRemoteBoard:
             # filter out bluetooth ports
             comports = [p for p in comports if "bluetooth" not in p.description.lower()]
             comports = [p for p in comports if "BTHENUM" not in p.hwid]
+        if description:
+            output = [
+                f"{p.device} {(p.manufacturer + ' ') if p.manufacturer and not p.description.startswith(p.manufacturer) else ''}{p.description}"
+                for p in comports
+            ]
+        else:
+            output = [p.device for p in comports]
 
-        return sorted([p.device for p in comports])
+        if sys.platform == "win32":
+            # Windows sort of comports by number - but fallback to device name
+            return sorted(output, key=lambda x: int(x.split()[0][3:]) if x.split()[0][3:].isdigit() else x)
+        # sort by device name
+        return sorted(output)
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(1), reraise=True)  # type: ignore ## retry_error_cls=ConnectionError,
     def get_mcu_info(self, timeout: int = 2):

@@ -38,7 +38,7 @@ pytestmark = pytest.mark.mpflash
     ],
 )
 def test_mpflash_download(id, ex_code, args: List[str], mocker: MockerFixture):
-    def fake_ask_missing_params(params: DownloadParams, action: str = "download") -> DownloadParams:
+    def fake_ask_missing_params(params: DownloadParams) -> DownloadParams:
         if "?" in params.ports:
             params.ports = ["esp32"]
         if "?" in params.boards:

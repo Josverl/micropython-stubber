@@ -45,7 +45,7 @@ ParamType = Union[DownloadParams, FlashParams]
 
 def ask_missing_params(
     params: ParamType,
-    action: str = "download",
+    # action: str = "download",
 ) -> ParamType:
     """
     Asks the user for parameters that have not been supplied on the commandline and returns the updated params.
@@ -57,6 +57,10 @@ def ask_missing_params(
     Returns:
         ParamType: The updated parameters.
     """
+    # if action flash,  single input
+    # if action download, multiple input
+    multi_select = isinstance(params, DownloadParams)
+    action = "download" if isinstance(params, DownloadParams) else "flash"
     if not config.interactive:
         # no interactivity allowed
         return params
@@ -64,21 +68,21 @@ def ask_missing_params(
     import inquirer
 
     questions = []
-    answers = {"action": action}
-    if isinstance(params, FlashParams):
+    answers = {"action": "download" if isinstance(params, DownloadParams) else "flash"}
+    if not multi_select:
         if not params.serial or "?" in params.serial:
-            ask_serialport(questions, action=action)
+            ask_serialport(questions)
         else:
             answers["serial"] = params.serial
 
     if not params.versions or "?" in params.versions:
-        ask_versions(questions, action=action)
+        ask_versions(questions, multi_select=multi_select, action=action)
     else:
         # versions is used to show only the boards for the selected versions
         answers["versions"] = params.versions  # type: ignore
 
     if not params.boards or "?" in params.boards:
-        ask_port_board(questions, action=action)
+        ask_port_board(questions, multi_select=multi_select, action=action)
     if questions:
         answers = inquirer.prompt(questions, answers=answers)
     if not answers:
@@ -86,10 +90,10 @@ def ask_missing_params(
         return []  # type: ignore
     # print(repr(answers))
     if isinstance(params, FlashParams) and "serial" in answers:
-        params.serial = answers["serial"]
+        params.serial = answers["serial"].split()[0]  # split to remove the description
     if "port" in answers:
         params.ports = [p for p in params.ports if p != "?"]  # remove the "?" if present
-        params.ports.extend(answers["port"])
+        params.ports.append(answers["port"])
     if "boards" in answers:
         params.boards = [b for b in params.boards if b != "?"]  # remove the "?" if present
         params.boards.extend(answers["boards"] if isinstance(answers["boards"], list) else [answers["boards"]])
@@ -144,7 +148,7 @@ def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
     return some_boards
 
 
-def ask_port_board(questions: list, *, action: str):
+def ask_port_board(questions: list, *, multi_select: bool, action: str):
     """
     Asks the user for the port and board selection.
 
@@ -160,7 +164,7 @@ def ask_port_board(questions: list, *, action: str):
 
     # if action flash,  single input
     # if action download, multiple input
-    inquirer_ux = inquirer.Checkbox if action == "download" else inquirer.List
+    inquirer_ux = inquirer.Checkbox if multi_select else inquirer.List
     questions.extend(
         (
             inquirer.List(
@@ -183,7 +187,7 @@ def ask_port_board(questions: list, *, action: str):
     )
 
 
-def ask_versions(questions: list, *, action: str):
+def ask_versions(questions: list, *, multi_select: bool, action: str):
     """
     Asks the user for the version selection.
 
@@ -198,7 +202,7 @@ def ask_versions(questions: list, *, action: str):
     import inquirer
     import inquirer.errors
 
-    input_ux = inquirer.Checkbox if action == "download" else inquirer.List
+    input_ux = inquirer.Checkbox if multi_select else inquirer.List
     mp_versions: List[str] = micropython_versions()
     mp_versions = [v for v in mp_versions if "preview" not in v]
 
@@ -226,12 +230,12 @@ def ask_versions(questions: list, *, action: str):
             # hints=["Use space to select multiple options"],
             choices=mp_versions,
             autocomplete=True,
-            validate=at_least_one_validation,
+            validate=at_least_one_validation,  # type: ignore
         )
     )
 
 
-def ask_serialport(questions: list, *, action: str):
+def ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bool = False):
     """
     Asks the user for the serial port selection.
 
@@ -245,12 +249,12 @@ def ask_serialport(questions: list, *, action: str):
     # import only when needed to reduce load time
     import inquirer
 
-    serialports = MPRemoteBoard.connected_boards()
+    comports = MPRemoteBoard.connected_boards(bluetooth=bluetooth, description=True)
     questions.append(
         inquirer.List(
             "serial",
             message="Which serial port do you want to {action} ?",
-            choices=serialports,
+            choices=comports,
             other=True,
             validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore
         )

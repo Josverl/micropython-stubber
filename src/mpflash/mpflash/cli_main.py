@@ -3,6 +3,7 @@
 # import rich_click as click
 
 import click
+from loguru import logger as log
 
 from .cli_download import cli_download
 from .cli_flash import cli_flash_board
@@ -19,8 +20,11 @@ def mpflash():
         result = cli(standalone_mode=False)
         exit(result)
     except AttributeError as e:
-        print(f"Error: {e}")
+        log.error(f"Error: {e}")
         exit(-1)
+    except click.exceptions.ClickException as e:
+        log.error(f"Error: {e}")
+        exit(-2)
 
 
 if __name__ == "__main__":

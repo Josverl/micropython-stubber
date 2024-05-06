@@ -101,6 +101,14 @@ def cli_flash_board(**kwargs) -> int:
         kwargs["boards"] = [kwargs.pop("board")]
 
     params = FlashParams(**kwargs)
+
+    # make it simple for the user to flash one board
+    # by asking for the serial port if not specified
+    if params.boards == ["?"] and params.serial == "auto":
+        params.serial = "?"
+
+    # Detect connected boards if not specified,
+    # and ask for input if boards cannot be detected
     if not params.boards or params.boards == []:
         # nothing specified - detect connected boards
         params.ports, params.boards = connected_ports_boards()
@@ -125,7 +133,7 @@ def cli_flash_board(**kwargs) -> int:
                     log.warning(f"unable to resolve board description: {e}")
 
     # Ask for missing input if needed
-    params = ask_missing_params(params, action="flash")
+    params = ask_missing_params(params)
     if not params:  # Cancelled by user
         return 2
     # TODO: Just in time Download of firmware

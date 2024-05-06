@@ -81,7 +81,7 @@ def cli_download(**kwargs) -> int:
         # no boards specified - detect connected ports and boards
         params.ports, params.boards = connected_ports_boards()
 
-    params = ask_missing_params(params, action="download")
+    params = ask_missing_params(params)
     if not params:  # Cancelled by user
         return 2
     params.versions = [clean_version(v, drop_v=True) for v in params.versions]
