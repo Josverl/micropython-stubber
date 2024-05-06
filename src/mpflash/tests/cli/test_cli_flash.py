@@ -36,6 +36,7 @@ def fake_ask_missing_params(params: DownloadParams) -> DownloadParams:
 # flash
 
 
+@pytest.mark.parametrize("serialport", ["COM99"])
 @pytest.mark.parametrize(
     "id, ex_code, args",
     [
@@ -50,7 +51,6 @@ def fake_ask_missing_params(params: DownloadParams) -> DownloadParams:
         # ("82", -1, ["flash", "--version", "preview", "--version", "1.22.0"]),
     ],
 )
-@pytest.mark.parametrize("serialport", ["COM99"])
 def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, serialport: str):
 
     # fake COM99 as connected board
@@ -73,12 +73,13 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
     runner = CliRunner()
     result = runner.invoke(cli_main.cli, args)
 
-    if not "--board" in args:
+    if "--board" not in args:
         m_connected_ports_boards.assert_called_once()
 
     m_ask_missing_params.assert_called_once()
-    m_mpr_connected.assert_called_once()
-    # m_flash_list.assert_called_once()
+    if "?" not in args:
+        m_mpr_connected.assert_called_once()
+    m_flash_list.assert_called_once()
     assert result.exit_code == ex_code
 
 
