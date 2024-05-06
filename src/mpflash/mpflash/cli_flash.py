@@ -125,7 +125,7 @@ def cli_flash_board(**kwargs) -> int:
                     log.warning(f"unable to resolve board description: {e}")
 
     # Ask for missing input if needed
-    params = ask_missing_params(params, action="flash")
+    params = ask_missing_params(params)
     if not params:  # Cancelled by user
         return 2
     # TODO: Just in time Download of firmware

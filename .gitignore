@@ -69,3 +69,4 @@ src/stubber/board/board_info.json
 codecov.exe
 
 src/mpflash/coverag*
+Bugs to fix-MPFlash.md

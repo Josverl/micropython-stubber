@@ -27,7 +27,7 @@ def fakeboard(serialport="COM99"):
     return fake
 
 
-def fake_ask_missing_params(params: DownloadParams, action: str) -> DownloadParams:
+def fake_ask_missing_params(params: DownloadParams) -> DownloadParams:
     # no input during tests
     return params
 
