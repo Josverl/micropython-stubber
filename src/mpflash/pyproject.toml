@@ -37,6 +37,7 @@ tenacity = "8.2.3"
 mpremote = "^1.22.0"
 inquirer = "^3.2.4"
 libusb = {version = "^1.0.27", platform = "win32"}
+jsons = "^1.6.3"
 
 [tool.poetry.group.test]
 optional = true
