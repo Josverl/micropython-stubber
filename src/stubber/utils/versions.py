@@ -82,9 +82,10 @@ def micropython_versions(minver: str = "v1.9.2"):
     """Get the list of micropython versions from github tags"""
     try:
         g = Github()
-        _ = 1 / 0
         repo = g.get_repo("micropython/micropython")
         versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
+        # Only keep the last preview
+        versions = [v for v in versions if not v.endswith(V_PREVIEW) or v == versions[-1]]
     except Exception:
         versions = [
             "v9.99.9-preview",
