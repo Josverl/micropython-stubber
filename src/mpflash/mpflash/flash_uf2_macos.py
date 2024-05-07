@@ -1,4 +1,4 @@
-""" Flashing UF2 based MCU on Linux"""
+""" Flashing UF2 based MCU on macos"""
 
 # sourcery skip: snake-case-functions
 from __future__ import annotations
@@ -15,13 +15,14 @@ from rich.progress import track
 from .flash_uf2_boardid import get_board_id
 from .uf2disk import UF2Disk
 
-glb_dismount_me: List[UF2Disk] = []
-
 
 def get_uf2_drives():
     """
     Get a list of all the (un)mounted UF2 drives
     """
+    if sys.platform != "linux":
+        log.error("pumount only works on Linux")
+        return
     # import blkinfo only on linux
     from blkinfo import BlkDiskInfo
 
@@ -52,50 +53,7 @@ def get_uf2_drives():
                 yield uf2
 
 
-def pmount(disk: UF2Disk):
-    """
-    Mount a UF2 drive if there is no mountpoint yet.
-    """
-    global glb_dismount_me
-    if not disk.mountpoint:
-        if not disk.label:
-            disk.label = "UF2BOOT"
-        disk.mountpoint = f"/media/{disk.label}"
-        # capture error if pmount is not installed
-        try:
-            subprocess.run(["pmount", disk.device_path, disk.mountpoint])
-        except FileNotFoundError:
-            log.error("pmount not found, please install it using 'sudo apt install pmount'")
-            return
-        log.debug(f"Mounted {disk.label} at {disk.mountpoint}")
-        glb_dismount_me.append(disk)
-    else:
-        log.debug(f"\n{disk.label} already mounted at {disk.mountpoint}")
-
-
-def pumount(disk: UF2Disk):
-    """
-    Unmount a UF2 drive
-    """
-    if sys.platform != "linux":
-        log.error("pumount only works on Linux")
-        return
-    if disk.mountpoint:
-        subprocess.run(["pumount", disk.mountpoint])  # ), f"/media/{disk.label}"])
-        log.info(f"Unmounted {disk.label} from {disk.mountpoint}")
-        disk.mountpoint = f""
-    else:
-        log.warning(f"{disk.label} already dismounted")
-
-
-def dismount_uf2():
-    global glb_dismount_me
-    for disk in glb_dismount_me:
-        pumount(disk)
-    glb_dismount_me = []
-
-
-def wait_for_UF2_linux(s_max: int = 10):
+def wait_for_UF2_macos(s_max: int = 10):
     destination = ""
     wait = 10
     uf2_drives = []
@@ -106,7 +64,6 @@ def wait_for_UF2_linux(s_max: int = 10):
         # log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
         uf2_drives += list(get_uf2_drives())
         for drive in get_uf2_drives():
-            pmount(drive)
             time.sleep(1)
             try:
                 if Path(drive.mountpoint, "INFO_UF2.TXT").exists():

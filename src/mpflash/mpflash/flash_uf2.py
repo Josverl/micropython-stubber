@@ -14,7 +14,9 @@ from rich.progress import track
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .common import PORT_FWTYPES
+from .config import config
 from .flash_uf2_linux import dismount_uf2, wait_for_UF2_linux
+from .flash_uf2_macos import wait_for_UF2_macos
 from .flash_uf2_windows import wait_for_UF2_windows
 
 
@@ -41,9 +43,15 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         destination = wait_for_UF2_linux()
     elif sys.platform == "win32":
         destination = wait_for_UF2_windows()
+    elif sys.platform == "darwin":
+        log.warning(f"OS {sys.platform} not tested/supported")
+        # TODO: test which of the options is best
+        if "macos_uf2" in config.tests:
+            destination = wait_for_UF2_macos()
+        else:
+            destination = wait_for_UF2_linux()
     else:
         log.warning(f"OS {sys.platform} not tested/supported")
-        destination = wait_for_UF2_linux()
         return None
 
     if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
@@ -54,7 +62,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     log.info(f"Copying {fw_file} to {destination}.")
     shutil.copy(fw_file, destination)
     log.success("Done copying, resetting the board and wait for it to restart")
-    if sys.platform in ["linux", "darwin"]:
+    if sys.platform in ["linux"]:
         dismount_uf2()
     for _ in track(range(5 + 2), description="Waiting for the board to restart", transient=True, refresh_per_second=2):
         time.sleep(1)  # 5 secs to short on linux
