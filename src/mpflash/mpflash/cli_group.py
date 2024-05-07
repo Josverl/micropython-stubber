@@ -3,6 +3,8 @@ Main entry point for the CLI group.
 Additional comands are added in the submodules.
 """
 
+import sys
+
 import rich_click as click
 
 from .config import config
@@ -23,6 +25,8 @@ def cb_verbose(ctx, param, value):
 def cb_ignore(ctx, param, value):
     if value:
         config.ignore_ports = list(value)
+        if sys.platform == "win32":
+            config.ignore_ports = [port.upper() for port in config.ignore_ports]
     return value
 
 
