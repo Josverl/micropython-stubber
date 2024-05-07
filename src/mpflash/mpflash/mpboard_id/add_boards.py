@@ -228,7 +228,7 @@ def unique_boards(board_list):
 
 def make_table(board_list: List[Board]) -> rich.table.Table:
     """Creates a rich table with board information."""
-    is_wide = False
+    is_wide = True
 
     table = rich.table.Table(title="MicroPython Board Information")
     table.add_column("ID", justify="left", style="green")
@@ -259,7 +259,7 @@ def main():
     """Main function to collect and write board information."""
     console = Console()
     mpy_path = Path("D:\\MyPython\\micropython-stubber\\repos\\micropython")
-    versions = micropython_versions(minver="v1.19.1") + ["master"]
+    versions = micropython_versions(minver="v1.10") + ["master"]
     board_list = boards_for_versions(versions, mpy_path)
 
     table = make_table(board_list)
