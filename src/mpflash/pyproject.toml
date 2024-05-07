@@ -18,40 +18,41 @@ classifiers = [
 mpflash = "mpflash.cli_main:mpflash"
 
 [tool.poetry.dependencies]
-python =  ">=3.8.1,<4.0"
-requests = "^2.31.0"
 beautifulsoup4 = "^4.12.3"
-loguru = "^0.7.2"
-esptool = "^4.7.0"
-jsonlines = "^4.0.0"
 bincopy = "^20.0.0"
-# strip-ansi = "^0.1.1"
-rich-click = "^1.7.3"
-psutil = "^5.9.8"
 blkinfo = "^0.2.0"
-pygithub = "^2.1.1"
-platformdirs = "^4.2.0"
-pyusb = "^1.2.1"
-packaging = "23.2"
-tenacity = "8.2.3"
-mpremote = "^1.22.0"
+cachetools = "^5.3.0"
+esptool = "^4.7.0"
 inquirer = "^3.2.4"
-libusb = {version = "^1.0.27", platform = "win32"}
+jsonlines = "^4.0.0"
 jsons = "^1.6.3"
+libusb = {version = "^1.0.27", platform = "win32"}
+loguru = "^0.7.2"
+mpremote = "^1.22.0"
+packaging = "23.2"
+platformdirs = "^4.2.0"
+psutil = "^5.9.8"
+pygithub = "^2.1.1"
+python =  ">=3.8.1,<4.0"
+pyusb = "^1.2.1"
+requests = "^2.31.0"
+rich-click = "^1.7.3"
+tenacity = "8.2.3"
+
 
 [tool.poetry.group.test]
 optional = true
 [tool.poetry.group.test.dependencies]
-coverage = ">=6.4.3,<8.0.0"
 pytest = "^7.1.2"
 pytest-github-actions-annotate-failures = ">=0.1.7,<0.3.0"
 pytest-json-report = "^1.5.0"
 pytest-metadata = ">=2.0.2,<4.0.0"
 pytest-mock = "^3.10.0"
-mock = "^4.0.3"
+#
+coverage = ">=6.4.3,<8.0.0"
 distro = "^1.8.0"
 fasteners = "^0.19"
-jsons = "^1.6.3"
+mock = "^4.0.3"
 
 
 [build-system]
