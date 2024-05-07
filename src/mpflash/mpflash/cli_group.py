@@ -36,6 +36,12 @@ def cb_interactive(ctx, param, value):
     return value
 
 
+def cb_test(ctx, param, value):
+    if value:
+        config.tests = value
+    return value
+
+
 def cb_quiet(ctx, param, value):
     if value:
         make_quiet()
@@ -83,6 +89,17 @@ def cb_quiet(ctx, param, value):
     envvar="MPFLASH_IGNORE",
     show_default=True,
     metavar="SERIALPORT",
+)
+@click.option(
+    "--test",
+    is_eager=True,
+    help="test a specific feature",
+    callback=cb_test,
+    multiple=True,
+    default=[],
+    envvar="MPFLASH_TEST",
+    show_default=True,
+    metavar="TEST",
 )
 def cli(**kwargs):
     """mpflash - MicroPython Tool.
