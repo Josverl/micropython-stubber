@@ -123,19 +123,18 @@ def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
     Returns:
         Sequence[Tuple[str, str]]: The filtered boards.
     """
+    versions = None
     # if version is not asked ; then need to get the version from the inputs
     if "versions" in answers:
-        _versions = list(answers["versions"])
-        if "stable" in _versions:
-            _versions.remove("stable")
-            _versions.append(micropython_versions()[-2])  # latest stable
-        if "preview" in _versions:
-            _versions.remove("preview")
-            _versions.extend((micropython_versions()[-1], micropython_versions()[-2]))  # latest preview and stable
+        versions = list(answers["versions"])
+        if "stable" in versions:
+            versions.remove("stable")
+            versions.append(micropython_versions()[-2])  # latest stable
+        elif "preview" in versions:
+            versions.remove("preview")
+            versions.extend((micropython_versions()[-1], micropython_versions()[-2]))  # latest preview and stable
 
-        some_boards = known_stored_boards(answers["port"], _versions)  #    or known_mp_boards(answers["port"])
-    else:
-        some_boards = known_stored_boards(answers["port"])
+    some_boards = known_stored_boards(answers["port"], versions)  #    or known_mp_boards(answers["port"])
 
     if some_boards:
         # Create a dictionary where the keys are the second elements of the tuples
@@ -144,7 +143,7 @@ def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
         # Get the values of the dictionary, which are the unique items from the original list
         some_boards = list(unique_dict.values())
     else:
-        some_boards = [(f"No {answers['port']} boards found for version(s) {_versions}", "")]
+        some_boards = [(f"No {answers['port']} boards found for version(s) {versions}", "")]
     return some_boards
 
 
@@ -182,6 +181,7 @@ def ask_port_board(questions: list, *, multi_select: bool, action: str):
                 ),
                 choices=filter_matching_boards,
                 validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
+                autocomplete=True,
             ),
         )
     )
@@ -257,6 +257,7 @@ def ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bo
             choices=comports,
             other=True,
             validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore
+            autocomplete=True,
         )
     )
 
