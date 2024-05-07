@@ -9,6 +9,8 @@ from functools import lru_cache
 from loguru import logger as log
 from packaging.version import parse
 
+from .basicgit import GH_CLIENT
+
 V_PREVIEW = "preview"
 "Latest preview version"
 
@@ -67,12 +69,14 @@ def clean_version(
 
 
 @lru_cache(maxsize=10)
-def micropython_versions(minver: str = "v1.20"):
+def micropython_versions(minver: str = "v1.20", reverse: bool = False):
     """Get the list of micropython versions from github tags"""
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
-        versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
+        versions = sorted([tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)])
+        # Only keep the last preview
+        versions = [v for v in versions if not v.endswith(V_PREVIEW) or v == versions[-1]]
     except Exception:
         versions = [
             "v9.99.9-preview",
@@ -95,7 +99,7 @@ def micropython_versions(minver: str = "v1.20"):
             "v1.10",
         ]
         versions = [v for v in versions if parse(v) >= parse(minver)]
-    return sorted(versions)
+    return sorted(versions, reverse=reverse)
 
 
 def get_stable_mp_version() -> str:
