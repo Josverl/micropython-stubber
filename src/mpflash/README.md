@@ -1,12 +1,24 @@
 # MPFLASH
+  [![pypi version](https://badgen.net/pypi/v/mpflash)](https://pypi.org/project/mpflash/)
+  [![python versions](https://badgen.net/pypi/python/mpflash)](https://badgen.net/pypi/python/mpflash)
+[![Downloads](https://static.pepy.tech/badge/mpflash)](https://pepy.tech/project/mpflash)
+
 
 `mpflash` is a command-line tool for working with MicroPython firmware. It provides features to help you flash and update Micropython on one or more .
 
-This tool was initially created to be used in a CI/CD pipeline to automate the process of downloading and flashing MicroPython firmware to multiple boards, but it has been extend with a TUI to me be used for manual downloadig, flashing and development.
+This tool was initially created to be used in a CI/CD pipeline to automate the process of downloading and flashing MicroPython firmware to multiple boards, but it has been extend with a TUI to be used for manual downloadig, flashing and development.
 
-`mpflash` has been tested on Windows x64, Linux X64, but not (yet) macOS.
-Tested ports: `rp2`, `samd`, `esp32`, `esp32s3`, `esp32c3`, `esp8266` and `stm32`
+`mpflash` has been tested on:  
+ - OS: Windows x64, Linux X64, but not (yet) macOS.
+ - Micropython (hardware) ports: 
+    - `rp2`, using `.uf2`, using filecopy (macos not tested yet)
+    - `samd`, using ` .uf2`, using filecopy (macos not tested yet)
+    - `esp32`, using `.bin`, using esptool,
+    - `esp8266`, using `.bin`, using esptool
+    - `stm32`, using ` .dfu`, using pydfu
 
+Not yet implemented: `nrf`, `cc3200`, `mimxrt`
+ 
 ## Features
  1. List the connected boards including their firmware details, in a tabular or json format
  2. Download MicroPython firmware for versions, and matching a specified board or matches your current attached board.
@@ -34,8 +46,7 @@ On Windows this will not be an issue, but on Linux you can use  udev rules to gi
 ## Detailed usage
 You can list the connected boards using the following command:
 ```bash
-$ mpflash list
-D:\MyPython\micropython-stubber> mpflash list
+$> mpflash list
                                                Connected boards
 ┏━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━┓
 ┃ Serial  ┃Family       ┃Port  ┃Board                                      ┃CPU     ┃Version          ┃build ┃
