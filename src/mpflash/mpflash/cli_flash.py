@@ -3,6 +3,7 @@ from pathlib import Path
 import rich_click as click
 from loguru import logger as log
 
+from mpflash.common import filtered_comports
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
 from mpflash.vendor.versions import clean_version
@@ -48,10 +49,21 @@ from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_workli
     "--serial-port",
     "-s",
     "serial",
-    default="auto",
+    default="*",
     show_default=True,
     help="Which serial port(s) to flash",
-    metavar="SERIAL_PORT",
+    metavar="SERIALPORT",
+)
+@click.option(
+    "--ignore",
+    "-i",
+    is_eager=True,
+    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
+    multiple=True,
+    default=[],
+    envvar="MPFLASH_IGNORE",
+    show_default=True,
+    metavar="SERIALPORT",
 )
 @click.option(
     "--port",
@@ -102,16 +114,15 @@ def cli_flash_board(**kwargs) -> int:
 
     params = FlashParams(**kwargs)
 
-    # make it simple for the user to flash one board
-    # by asking for the serial port if not specified
-    if params.boards == ["?"] and params.serial == "auto":
+    # make it simple for the user to flash one board by asking for the serial port if not specified
+    if params.boards == ["?"] and params.serial == "*":
         params.serial = "?"
 
     # Detect connected boards if not specified,
     # and ask for input if boards cannot be detected
     if not params.boards or params.boards == []:
         # nothing specified - detect connected boards
-        params.ports, params.boards = connected_ports_boards()
+        params.ports, params.boards = connected_ports_boards(include=params.ports, ignore=params.ignore)
         if params.boards == []:
             # No MicroPython boards detected, but it could be unflashed or not in bootloader mode
             # Ask for serial port and board_id to flash
@@ -143,15 +154,14 @@ def cli_flash_board(**kwargs) -> int:
     if len(params.versions) > 1:
         log.error(f"Only one version can be flashed at a time, not {params.versions}")
         raise MPFlashError("Only one version can be flashed at a time")
-    # if len(params.boards) > 1:
-    #     log.error(f"Only one board can be flashed at a time, not {params.boards}")
-    #     raise MPFlashError("Only one board can be flashed at a time")
 
     params.versions = [clean_version(v) for v in params.versions]
     worklist: WorkList = []
     # if serial port == auto and there are one or more specified/detected boards
-    if params.serial == "auto" and params.boards:
-        worklist = full_auto_worklist(version=params.versions[0], fw_folder=params.fw_folder)
+    if params.serial == "*" and params.boards:
+        worklist = full_auto_worklist(
+            version=params.versions[0], fw_folder=params.fw_folder, include=[params.serial], ignore=params.ignore
+        )
     elif params.versions[0] and params.boards[0] and params.serial:
         # A single serial port including the board / variant
         worklist = manual_worklist(

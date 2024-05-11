@@ -23,6 +23,10 @@ class Params:
     boards: List[str] = field(default_factory=list)
     versions: List[str] = field(default_factory=list)
     fw_folder: Path = Path()
+    serial: str = ""
+    # TODO: Should Serial port be a list?
+    # serial: List[str] = field(default_factory=list)
+    ignore: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -33,8 +37,6 @@ class DownloadParams(Params):
 
 @dataclass
 class FlashParams(Params):
-    # TODO: Should Serial port be a list?
-    serial: str = ""
     erase: bool = True
     bootloader: bool = True
     cpu: str = ""
@@ -45,7 +47,6 @@ ParamType = Union[DownloadParams, FlashParams]
 
 def ask_missing_params(
     params: ParamType,
-    # action: str = "download",
 ) -> ParamType:
     """
     Asks the user for parameters that have not been supplied on the commandline and returns the updated params.

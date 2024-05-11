@@ -14,19 +14,14 @@ from .logger import make_quiet, set_loglevel
 def cb_verbose(ctx, param, value):
     """Callback to set the log level to DEBUG if verbose is set"""
     if value and not config.quiet:
-        set_loglevel("DEBUG")
         config.verbose = True
+        if value > 1:
+            set_loglevel("TRACE")
+        else:
+            set_loglevel("DEBUG")
     else:
         set_loglevel("INFO")
         config.verbose = False
-    return value
-
-
-def cb_ignore(ctx, param, value):
-    if value:
-        config.ignore_ports = list(value)
-        if sys.platform == "win32":
-            config.ignore_ports = [port.upper() for port in config.ignore_ports]
     return value
 
 
@@ -74,21 +69,9 @@ def cb_quiet(ctx, param, value):
     "-V",
     "--verbose",
     is_eager=True,
-    is_flag=True,
+    count=True,
     help="Enables verbose mode.",
     callback=cb_verbose,
-)
-@click.option(
-    "--ignore",
-    "-i",
-    is_eager=True,
-    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
-    callback=cb_ignore,
-    multiple=True,
-    default=[],
-    envvar="MPFLASH_IGNORE",
-    show_default=True,
-    metavar="SERIALPORT",
 )
 @click.option(
     "--test",

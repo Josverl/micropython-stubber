@@ -7,6 +7,7 @@ from rich.table import Column, Table
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
 
+from .common import filtered_comports
 from .config import config
 from .logger import console
 
@@ -15,7 +16,7 @@ rp_text = TextColumn("{task.description} {task.fields[device]}", table_column=Co
 rp_bar = BarColumn(bar_width=None, table_column=Column())
 
 
-def list_mcus(bluetooth: bool = False):
+def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False):
     """
     Retrieves information about connected microcontroller boards.
 
@@ -24,7 +25,14 @@ def list_mcus(bluetooth: bool = False):
     Raises:
         ConnectionError: If there is an error connecting to a board.
     """
-    conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards(bluetooth) if sp not in config.ignore_ports]
+    # conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards(bluetooth) if sp not in config.ignore_ports]
+
+    comports = filtered_comports(
+        ignore=ignore,
+        include=include,
+        bluetooth=bluetooth,
+    )
+    conn_mcus = [MPRemoteBoard(c.device) for c in comports]
 
     # a lot of boilerplate to show a progress bar with the comport currently scanned
     # low update rate to facilitate screen readers/narration

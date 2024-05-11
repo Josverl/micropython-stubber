@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 from loguru import logger as log
 
-from mpflash.common import FWInfo
+from mpflash.common import FWInfo, filtered_comports
 from mpflash.errors import MPFlashError
 
 from .config import config
@@ -87,7 +87,7 @@ def single_auto_worklist(
     return todo
 
 
-def full_auto_worklist(*, version: str, fw_folder: Path) -> WorkList:
+def full_auto_worklist(*, include: List[str], ignore: List[str], version: str, fw_folder: Path) -> WorkList:
     """
     Create a worklist for all connected micropython boards based on the information retrieved from the board.
     This allows the firmware version of one or moae boards to be changed without needing to specify the port or board_id manually.
@@ -100,9 +100,12 @@ def full_auto_worklist(*, version: str, fw_folder: Path) -> WorkList:
         WorkList: List of boards and firmware information to update
     """
     try:
-        conn_boards = [
-            MPRemoteBoard(sp, update=True) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports
-        ]
+        comports = filtered_comports(
+            ignore=ignore,
+            include=include,
+            bluetooth=False,
+        )
+        conn_boards = [MPRemoteBoard(port.device, update=True) for port in comports]
     except ConnectionError as e:
         log.error(f"Error connecting to boards: {e}")
         return []

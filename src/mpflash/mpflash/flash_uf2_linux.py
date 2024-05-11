@@ -88,7 +88,7 @@ def pumount(disk: UF2Disk):
         log.warning(f"{disk.label} already dismounted")
 
 
-def dismount_uf2():
+def dismount_uf2_linux():
     global glb_dismount_me
     for disk in glb_dismount_me:
         pumount(disk)
