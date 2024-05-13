@@ -85,4 +85,9 @@ def filtered_comports(
             comports = [p for p in comports if ".Bluetooth" not in p.device]
         log.trace(f"no Bluetooth: {[p.device for p in comports]}")
     log.debug(f"filtered_comports: {[p.device for p in comports]}")
-    return comports
+    # sort
+    if sys.platform == "win32":
+        # Windows sort of comports by number - but fallback to device name
+        return sorted(comports, key=lambda x: int(x.device.split()[0][3:]) if x.device.split()[0][3:].isdigit() else x)
+    # sort by device name
+    return sorted(comports, key=lambda x: x.device)
