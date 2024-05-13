@@ -142,6 +142,7 @@ exclude = [
 
     "**/all-stubs",
     "src/stubber/board/stubs",
+    "**/.venv"
 ]
 ignore = [
     "tests/mocks",
