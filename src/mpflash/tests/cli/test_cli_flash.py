@@ -183,7 +183,7 @@ def test_mpflash_no_detected_boards(
 
     if serialports:
         ## if no boards are responding , but there are serial port , then set serial --> ? and board to ? if not set
-        assert m_ask_missing_params.call_args.args[0].serial == "?"
+        assert m_ask_missing_params.call_args.args[0].serial == ["?"]
         assert m_ask_missing_params.call_args.args[0].boards == ["?"]
 
 

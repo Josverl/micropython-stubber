@@ -55,8 +55,9 @@ from .download import download
     "--serial-port",
     "-s",
     "serial",
-    default="*",
+    default=["*"],
     show_default=True,
+    multiple=True,
     help="Which serial port(s) to flash",
     metavar="SERIALPORT",
 )
@@ -88,6 +89,8 @@ def cli_download(**kwargs) -> int:
     params = DownloadParams(**kwargs)
     params.versions = list(params.versions)
     params.boards = list(params.boards)
+    params.serial = list(params.serial)
+    params.ignore = list(params.ignore)
     if params.boards:
         if not params.ports:
             # no ports specified - resolve ports from specified boards by resolving board IDs
@@ -100,7 +103,7 @@ def cli_download(**kwargs) -> int:
                         log.error(f"{e}")
     else:
         # no boards specified - detect connected ports and boards
-        params.ports, params.boards = connected_ports_boards(include=[params.serial], ignore=params.ignore)
+        params.ports, params.boards = connected_ports_boards(include=params.serial, ignore=params.ignore)
 
     params = ask_missing_params(params)
     if not params:  # Cancelled by user

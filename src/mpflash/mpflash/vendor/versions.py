@@ -7,6 +7,7 @@
 from functools import lru_cache
 
 from loguru import logger as log
+from mpflash.common import GH_CLIENT
 from packaging.version import parse
 
 V_PREVIEW = "preview"

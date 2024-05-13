@@ -49,7 +49,8 @@ from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_workli
     "--serial-port",
     "-s",
     "serial",
-    default="*",
+    default=["*"],
+    multiple=True,
     show_default=True,
     help="Which serial port(s) to flash",
     metavar="SERIALPORT",
@@ -113,10 +114,14 @@ def cli_flash_board(**kwargs) -> int:
         kwargs["boards"] = [kwargs.pop("board")]
 
     params = FlashParams(**kwargs)
+    params.versions = list(params.versions)
+    params.boards = list(params.boards)
+    params.serial = list(params.serial)
+    params.ignore = list(params.ignore)
 
     # make it simple for the user to flash one board by asking for the serial port if not specified
     if params.boards == ["?"] and params.serial == "*":
-        params.serial = "?"
+        params.serial = ["?"]
 
     # Detect connected boards if not specified,
     # and ask for input if boards cannot be detected
@@ -126,7 +131,7 @@ def cli_flash_board(**kwargs) -> int:
         if params.boards == []:
             # No MicroPython boards detected, but it could be unflashed or not in bootloader mode
             # Ask for serial port and board_id to flash
-            params.serial = "?"
+            params.serial = ["?"]
             params.boards = ["?"]
     else:
         for board_id in params.boards:
@@ -158,22 +163,22 @@ def cli_flash_board(**kwargs) -> int:
     params.versions = [clean_version(v) for v in params.versions]
     worklist: WorkList = []
     # if serial port == auto and there are one or more specified/detected boards
-    if params.serial == "*" and params.boards:
+    if params.serial == ["*"] and params.boards:
         worklist = full_auto_worklist(
-            version=params.versions[0], fw_folder=params.fw_folder, include=[params.serial], ignore=params.ignore
+            version=params.versions[0], fw_folder=params.fw_folder, include=params.serial, ignore=params.ignore
         )
     elif params.versions[0] and params.boards[0] and params.serial:
         # A single serial port including the board / variant
         worklist = manual_worklist(
             params.versions[0],
             params.fw_folder,
-            params.serial,
+            params.serial[0],
             params.boards[0],
         )
     else:
         # just this serial port on auto
         worklist = single_auto_worklist(
-            serial_port=params.serial,
+            serial_port=params.serial[0],
             version=params.versions[0],
             fw_folder=params.fw_folder,
         )

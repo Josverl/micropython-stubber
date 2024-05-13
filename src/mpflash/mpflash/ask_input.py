@@ -23,9 +23,9 @@ class Params:
     boards: List[str] = field(default_factory=list)
     versions: List[str] = field(default_factory=list)
     fw_folder: Path = Path()
-    serial: str = ""
+    # serial: str = ""
     # TODO: Should Serial port be a list?
-    # serial: List[str] = field(default_factory=list)
+    serial: List[str] = field(default_factory=list)
     ignore: List[str] = field(default_factory=list)
 
 
@@ -53,11 +53,14 @@ def ask_missing_params(
 
     Args:
         params (ParamType): The parameters to be updated.
-        action (str, optional): The action to be performed. Defaults to "download".
 
     Returns:
         ParamType: The updated parameters.
     """
+    import inquirer
+
+    log.trace(f"ask_missing_params: {params}")
+
     # if action flash,  single input
     # if action download, multiple input
     multi_select = isinstance(params, DownloadParams)
@@ -66,35 +69,36 @@ def ask_missing_params(
         # no interactivity allowed
         return params
     # import only when needed to reduce load time
-    import inquirer
 
     questions = []
-    answers = {"action": "download" if isinstance(params, DownloadParams) else "flash"}
+    answers: dict[str, Union[str, List]] = {"action": action}
     if not multi_select:
         if not params.serial or "?" in params.serial:
-            ask_serialport(questions)
+            append_ask_serialport(questions)
         else:
             answers["serial"] = params.serial
 
-    if not params.versions or "?" in params.versions:
-        ask_versions(questions, multi_select=multi_select, action=action)
+    if params.versions == [] or "?" in params.versions:
+        append_ask_versions(questions, multi_select=multi_select, action=action)
     else:
         # versions is used to show only the boards for the selected versions
         answers["versions"] = params.versions  # type: ignore
 
     if not params.boards or "?" in params.boards:
-        ask_port_board(questions, multi_select=multi_select, action=action)
+        append_ask_port_board(questions, multi_select=multi_select, action=action)
     if questions:
-        answers = inquirer.prompt(questions, answers=answers)
+        answers = inquirer.prompt(questions, answers=answers)  # type: ignore
     if not answers:
         # input cancelled by user
         return []  # type: ignore
-    # print(repr(answers))
+    log.trace(f"answers: {answers}")
     if isinstance(params, FlashParams) and "serial" in answers:
-        params.serial = answers["serial"].split()[0]  # split to remove the description
+        if isinstance(answers["serial"], str):
+            answers["serial"] = [answers["serial"]]
+        params.serial = [s.split()[0] for s in answers["serial"]]  # split to remove the description
     if "port" in answers:
         params.ports = [p for p in params.ports if p != "?"]  # remove the "?" if present
-        params.ports.append(answers["port"])
+        params.ports.extend(answers["port"])
     if "boards" in answers:
         params.boards = [b for b in params.boards if b != "?"]  # remove the "?" if present
         params.boards.extend(answers["boards"] if isinstance(answers["boards"], list) else [answers["boards"]])
@@ -109,7 +113,7 @@ def ask_missing_params(
     params.ports = list(set(params.ports))
     params.boards = list(set(params.boards))
     params.versions = list(set(params.versions))
-    log.debug(repr(params))
+    log.trace(f"ask_missing_params returns: {params}")
 
     return params
 
@@ -149,7 +153,7 @@ def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
     return some_boards
 
 
-def ask_port_board(questions: list, *, multi_select: bool, action: str):
+def append_ask_port_board(questions: list, *, multi_select: bool, action: str):
     """
     Asks the user for the port and board selection.
 
@@ -188,7 +192,7 @@ def ask_port_board(questions: list, *, multi_select: bool, action: str):
     )
 
 
-def ask_versions(questions: list, *, multi_select: bool, action: str):
+def append_ask_versions(questions: list, *, multi_select: bool, action: str):
     """
     Asks the user for the version selection.
 
@@ -217,9 +221,8 @@ def ask_versions(questions: list, *, multi_select: bool, action: str):
     def at_least_one_validation(answers, current) -> bool:
         if not current:
             raise inquirer.errors.ValidationError("", reason="Please select at least one version")
-        if isinstance(current, list):
-            if not any(current):
-                raise inquirer.errors.ValidationError("", reason="Please select at least one version")
+        if isinstance(current, list) and not any(current):
+            raise inquirer.errors.ValidationError("", reason="Please select at least one version")
         return True
 
     questions.append(
@@ -236,7 +239,7 @@ def ask_versions(questions: list, *, multi_select: bool, action: str):
     )
 
 
-def ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bool = False):
+def append_ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bool = False):
     """
     Asks the user for the serial port selection.
 

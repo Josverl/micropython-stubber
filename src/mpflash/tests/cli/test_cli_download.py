@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 
 import pytest
@@ -9,7 +8,6 @@ from pytest_mock import MockerFixture
 # # module under test :
 from mpflash import cli_main
 from mpflash.ask_input import DownloadParams
-from mpflash.mpremoteboard import MPRemoteBoard
 
 # mark all tests
 pytestmark = pytest.mark.mpflash
@@ -62,7 +60,7 @@ def test_mpflash_download(id, ex_code, args: List[str], mocker: MockerFixture):
     runner = CliRunner()
     result = runner.invoke(cli_main.cli, args)
     assert result.exit_code == ex_code
-    if not "--board" in args:
+    if "--board" not in args:
         m_connected_ports_boards.assert_called_once()
     m_ask_missing_params.assert_called_once()
     m_download.assert_called_once()

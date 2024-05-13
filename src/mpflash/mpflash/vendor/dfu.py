@@ -1,5 +1,6 @@
 # sourcery skip: require-parameter-annotation
 # sourcery skip: replace-interpolation-with-fstring
+# type: ignore
 #!/usr/bin/python
 
 # Written by Antonio Galea - 2010/11/18

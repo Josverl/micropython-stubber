@@ -19,6 +19,7 @@ PORT_FWTYPES = {
     "esp8266": [".bin"],
     "rp2": [".uf2"],
     "samd": [".uf2"],
+    # below this not yet implemented / tested
     "mimxrt": [".hex"],
     "nrf": [".uf2"],
     "renesas-ra": [".hex"],

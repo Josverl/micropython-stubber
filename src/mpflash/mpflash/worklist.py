@@ -6,7 +6,6 @@ from loguru import logger as log
 from mpflash.common import FWInfo, filtered_comports
 from mpflash.errors import MPFlashError
 
-from .config import config
 from .downloaded import find_downloaded_firmware
 from .list import show_mcus
 from .mpboard_id import find_known_board
@@ -131,7 +130,6 @@ def manual_worklist(
         WorkList: List of boards and firmware information to update
     """
     mcu = MPRemoteBoard(serial_port)
-    # TODO : Find a way to avoid needing to specify the port
     # Lookup the matching port and cpu in board_info based in the board name
     try:
         info = find_known_board(board)
@@ -140,6 +138,7 @@ def manual_worklist(
         mcu.cpu = info["cpu"]
     except (LookupError, MPFlashError) as e:
         log.error(f"Board {board} not found in board_info.json")
+        log.exception(e)
         return []
     mcu.board = board
     firmwares = find_downloaded_firmware(fw_folder=fw_folder, board_id=board, version=version, port=mcu.port)
