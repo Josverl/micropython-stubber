@@ -1,7 +1,9 @@
+from dataclasses import dataclass, field
 import fnmatch
 import os
+from pathlib import Path
 import sys
-from typing import List, Optional, TypedDict
+from typing import List, Optional, TypedDict, Union
 
 from github import Auth, Github
 from serial.tools import list_ports
@@ -42,6 +44,50 @@ class FWInfo(TypedDict):
     preview: bool
     version: str
     build: str
+
+
+# @dataclass
+# class Connection:
+#     """Connection information for a board"""
+
+#     serial: str
+#     port: str
+#     board: str
+
+
+@dataclass
+class Params:
+    """Common parameters for downloading and flashing firmware"""
+
+    ports: List[str] = field(default_factory=list)
+    boards: List[str] = field(default_factory=list)
+    versions: List[str] = field(default_factory=list)
+    fw_folder: Path = Path()
+    # connections: List[Connection] = field(default_factory=list)
+    # serial: str = ""
+    # TODO: Should Serial port be a list?
+    serial: List[str] = field(default_factory=list)
+    ignore: List[str] = field(default_factory=list)
+
+
+@dataclass
+class DownloadParams(Params):
+    """Parameters for downloading firmware"""
+
+    clean: bool = False
+    force: bool = False
+
+
+@dataclass
+class FlashParams(Params):
+    """Parameters for flashing a board"""
+
+    erase: bool = True
+    bootloader: bool = True
+    cpu: str = ""
+
+
+ParamType = Union[DownloadParams, FlashParams]
 
 
 def filtered_comports(

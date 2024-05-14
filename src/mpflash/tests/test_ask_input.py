@@ -4,7 +4,8 @@ import pytest
 from mock import MagicMock, Mock
 from pytest_mock import MockerFixture
 
-from mpflash.ask_input import DownloadParams, FlashParams, ask_missing_params
+from mpflash.common import DownloadParams, FlashParams
+from mpflash.ask_input import ask_missing_params
 
 pytestmark = [pytest.mark.mpflash]
 

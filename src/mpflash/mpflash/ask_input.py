@@ -5,44 +5,15 @@ Note: The prompts can use "{version}" and "{action}" to insert the version and a
 The values are provided from the answers dictionary.
 """
 
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import List, Sequence, Tuple, Union
 
 from loguru import logger as log
 
-from mpflash.config import config
-from mpflash.mpboard_id import get_known_boards_for_port, get_known_ports, known_stored_boards
-from mpflash.mpremoteboard import MPRemoteBoard
-from mpflash.vendor.versions import micropython_versions
-
-
-@dataclass
-class Params:
-    ports: List[str] = field(default_factory=list)
-    boards: List[str] = field(default_factory=list)
-    versions: List[str] = field(default_factory=list)
-    fw_folder: Path = Path()
-    # serial: str = ""
-    # TODO: Should Serial port be a list?
-    serial: List[str] = field(default_factory=list)
-    ignore: List[str] = field(default_factory=list)
-
-
-@dataclass
-class DownloadParams(Params):
-    clean: bool = False
-    force: bool = False
-
-
-@dataclass
-class FlashParams(Params):
-    erase: bool = True
-    bootloader: bool = True
-    cpu: str = ""
-
-
-ParamType = Union[DownloadParams, FlashParams]
+from .common import DownloadParams, FlashParams, ParamType
+from .config import config
+from .mpboard_id import get_known_boards_for_port, get_known_ports, known_stored_boards
+from .mpremoteboard import MPRemoteBoard
+from .vendor.versions import micropython_versions
 
 
 def ask_missing_params(

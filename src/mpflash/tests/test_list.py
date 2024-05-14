@@ -9,7 +9,7 @@ from mock import MagicMock
 from pytest_mock import MockerFixture
 
 import mpflash.list
-from mpflash.list import list_mcus, mcu_table
+from mpflash.list import mcu_table
 from mpflash.mpremoteboard import MPRemoteBoard
 
 pytestmark = [pytest.mark.mpflash]

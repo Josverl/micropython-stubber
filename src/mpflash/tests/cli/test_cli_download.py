@@ -1,5 +1,6 @@
 from typing import List
 
+from mpflash.mpremoteboard import MPRemoteBoard
 import pytest
 from click.testing import CliRunner
 from mock import Mock
@@ -7,7 +8,7 @@ from pytest_mock import MockerFixture
 
 # # module under test :
 from mpflash import cli_main
-from mpflash.ask_input import DownloadParams
+from mpflash.common import DownloadParams
 
 # mark all tests
 pytestmark = pytest.mark.mpflash
@@ -48,7 +49,7 @@ def test_mpflash_download(id, ex_code, args: List[str], mocker: MockerFixture):
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_download.connected_ports_boards",
-        return_value=(["esp32"], ["ESP32_GENERIC"]),
+        return_value=(["esp32"], ["ESP32_GENERIC"],[MPRemoteBoard("COM99")]),
         autospec=True,
     )
     m_download = mocker.patch("mpflash.cli_download.download", return_value=None, autospec=True)

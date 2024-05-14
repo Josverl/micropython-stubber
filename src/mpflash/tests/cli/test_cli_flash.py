@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 
 # # module under test :
 from mpflash import cli_main
-from mpflash.ask_input import DownloadParams
+from mpflash.common import DownloadParams
 from mpflash.mpremoteboard import MPRemoteBoard
 
 # mark all tests
@@ -58,12 +58,14 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
 
     m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake)
     m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)
+    mocker.patch("mpflash.worklist.filter_boards", return_value=[MPRemoteBoard("COM99")], autospec=True)
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
-        return_value=(["esp32"], ["ESP32_GENERIC"]),
+        return_value=(["esp32"], ["ESP32_GENERIC"], [MPRemoteBoard("COM99")]),
         autospec=True,
     )
+
     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
     m_ask_missing_params = mocker.patch(
         "mpflash.cli_flash.ask_missing_params",
@@ -109,7 +111,7 @@ def test_mpflash_connected_boards(
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
-        return_value=(ports, boards),
+        return_value=(ports, boards, [MPRemoteBoard(p) for p in serialports]),
         autospec=True,
     )
     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
@@ -162,7 +164,7 @@ def test_mpflash_no_detected_boards(
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
-        return_value=(ports, boards),
+        return_value=(ports, boards, [MPRemoteBoard(p) for p in serialports]),
         autospec=True,
     )
     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)

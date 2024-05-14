@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 
 # # module under test :
 from mpflash import cli_main
-from mpflash.ask_input import DownloadParams
+from mpflash.common import DownloadParams
 from mpflash.mpremoteboard import MPRemoteBoard
 
 # mark all tests
