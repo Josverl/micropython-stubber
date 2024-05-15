@@ -166,6 +166,7 @@ reportInvalidStringEscapeSequence = "information"
 reportUnboundVariable = "information"
 ReportSelfClsParameterName = "information"
 reportOptionalSubscript = "information"
+reportCallInDefaultInitializer = "error"
 # Section 3 -  reduce noise 
 reportMissingTypeStubs = "none"
 reportOptionalMemberAccess = "none"      # "read" is not a known member of "None" - occurs often in frozen code

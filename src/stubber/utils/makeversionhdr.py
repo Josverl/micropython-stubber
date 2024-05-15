@@ -6,14 +6,15 @@ from __future__ import print_function
 
 import subprocess
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 
-def get_version_info_from_git(path: Path = Path.cwd()) -> Tuple[Union[str, None], Union[str, None]]:
+def get_version_info_from_git(path: Optional[Path] = None) -> Tuple[Union[str, None], Union[str, None]]:
     """return the version info from the git repository specified.
     returns: a 2-tuple containing git_tag, short_hash
 
     """
+    path = path or Path.cwd()
     # Note: git describe doesn't work if no tag is available
     try:
         git_tag = subprocess.check_output(

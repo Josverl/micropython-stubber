@@ -4,7 +4,7 @@
 # get-frozen
 ##########################################################################################
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import click
 from loguru import logger as log
@@ -51,7 +51,7 @@ from .cli import stubber_cli
     show_default=True,
 )
 def cli_get_frozen(
-    stub_folder: str = CONFIG.stub_path.as_posix(),
+    stub_folder: Optional[str] = None,
     # path: str = config.repo_path.as_posix(),
     version: str = "",
     stubgen: bool = True,
@@ -63,6 +63,9 @@ def cli_get_frozen(
 
     Get the frozen modules for the checked out version of MicroPython
     """
+    # default parameter values
+    stub_folder = stub_folder or CONFIG.stub_path.as_posix()
+    # FIXME: Stub_folder is not used
 
     stub_paths: List[Path] = []
 
