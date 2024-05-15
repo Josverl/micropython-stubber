@@ -4,6 +4,7 @@ get-docstubs
 """
 
 from pathlib import Path
+from typing import Optional
 
 import click
 from loguru import logger as log
@@ -44,10 +45,10 @@ from .cli import stubber_cli
 @click.pass_context
 def cli_docstubs(
     ctx: click.Context,
-    path: str = CONFIG.repo_path.as_posix(),
-    target: str = CONFIG.stub_path.as_posix(),
+    path: Optional[str] = None,
+    target:Optional[str] = None,
     black: bool = True,
-    basename: str = "micropython",
+    basename: Optional[str] = None,
     version: str = "",
 ):
     """
@@ -55,6 +56,10 @@ def cli_docstubs(
 
     Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking.
     """
+    # default parameter values
+    path = path or CONFIG.repo_path.as_posix()
+    target = target or CONFIG.stub_path.as_posix()
+    basename = basename or "micropython"
 
     if path == CONFIG.repo_path.as_posix():
         # default
