@@ -79,8 +79,8 @@ cd my_stub_folder
 mkdir all-stubs
 
 # clone the micropython repo's and switch to a specific version 
-stubber clone
-stubber switch --version v1.18
+stubber clone --add-stubs
+stubber switch v1.22.2
 
 # get the document stubs for the current version ( v1.18 )
 stubber get-docstubs
