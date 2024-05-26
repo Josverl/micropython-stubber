@@ -7,8 +7,9 @@
 from functools import lru_cache
 
 from loguru import logger as log
-from mpflash.common import GH_CLIENT
 from packaging.version import parse
+
+from mpflash.common import GH_CLIENT
 
 V_PREVIEW = "preview"
 "Latest preview version"
@@ -74,6 +75,9 @@ def micropython_versions(minver: str = "v1.20"):
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
         versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
+        # remove all but the most recent (preview) version
+        versions = versions[:1] + [v for v in versions if "preview" not in v]
+
     except Exception:
         versions = [
             "v9.99.9-preview",

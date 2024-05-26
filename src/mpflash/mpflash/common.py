@@ -1,15 +1,13 @@
-from dataclasses import dataclass, field
 import fnmatch
 import os
-from pathlib import Path
 import sys
-from typing import List, Optional, TypedDict, Union
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List, Optional, Union
 
 from github import Auth, Github
 from serial.tools import list_ports
 from serial.tools.list_ports_common import ListPortInfo
-
-from mpflash.errors import MPFlashError
 
 from .logger import log
 
@@ -36,23 +34,35 @@ PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
 
 
-class FWInfo(TypedDict):
-    filename: str
-    port: str
-    board: str
-    variant: str
-    preview: bool
-    version: str
-    build: str
+@dataclass
+class FWInfo:
+    port: str  # MicroPython port
+    board: str  # MicroPython board
+    filename: str = ""  # relative filename of the firmware image
+    firmware: str = ""  # url or path to original firmware image
+    variant: str = ""  # MicroPython variant
+    preview: bool = False  # True if the firmware is a preview version
+    version: str = ""  # MicroPython version
+    url: str = ""  # url to the firmware image download folder
+    build: str = "0"  # The build = number of commits since the last release
+    ext: str = ""  # The build = number of commits since the last release
+    family: str = "micropython"  # The family of the firmware
+    custom: bool = False  # True if the firmware is a custom build
+    description: str = ""  # Description used by this firmware (custom only)
 
+    def to_dict(self) -> dict:
+        """Convert the object to a dictionary"""
+        return self.__dict__
 
-# @dataclass
-# class Connection:
-#     """Connection information for a board"""
-
-#     serial: str
-#     port: str
-#     board: str
+    @classmethod
+    def from_dict(cls, data: dict) -> "FWInfo":
+        """Create a FWInfo object from a dictionary"""
+        # add missing keys
+        if "ext" not in data:
+            data["ext"] = Path(data["firmware"]).suffix
+        if "family" not in data:
+            data["family"] = "micropython"
+        return cls(**data)
 
 
 @dataclass
@@ -63,9 +73,6 @@ class Params:
     boards: List[str] = field(default_factory=list)
     versions: List[str] = field(default_factory=list)
     fw_folder: Path = Path()
-    # connections: List[Connection] = field(default_factory=list)
-    # serial: str = ""
-    # TODO: Should Serial port be a list?
     serial: List[str] = field(default_factory=list)
     ignore: List[str] = field(default_factory=list)
 

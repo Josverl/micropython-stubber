@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 
 import pytest
@@ -56,8 +55,8 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
     # fake COM99 as connected board
     fake = fakeboard(serialport)
 
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake)
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake) # type: ignore
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport) # type: ignore
     mocker.patch("mpflash.worklist.filter_boards", return_value=[MPRemoteBoard("COM99")], autospec=True)
 
     m_connected_ports_boards = mocker.patch(
@@ -107,7 +106,7 @@ def test_mpflash_connected_boards(
     # no boards specified - detect connected boards
     args = ["flash"]
 
-    fakes = [fakeboard(port) for port in serialports]
+    fakes = [fakeboard(port) for port in serialports] 
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",

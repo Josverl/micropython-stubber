@@ -16,11 +16,11 @@ def downloaded_firmwares(fw_folder: Path) -> List[FWInfo]:
     firmwares: List[FWInfo] = []
     try:
         with jsonlines.open(fw_folder / "firmware.jsonl") as reader:
-            firmwares.extend(iter(reader))
+            firmwares = [FWInfo.from_dict(item) for item in reader]
     except FileNotFoundError:
         log.error(f"No firmware.jsonl found in {fw_folder}")
     # sort by filename
-    firmwares.sort(key=lambda x: x["filename"])
+    firmwares.sort(key=lambda x: x.filename)
     return firmwares
 
 
@@ -68,7 +68,7 @@ def find_downloaded_firmware(
         )
         # hope we have a match now for the board
     # sort by filename
-    fw_list.sort(key=lambda x: x["filename"])
+    fw_list.sort(key=lambda x: x.filename)
     return fw_list
 
 
@@ -84,23 +84,23 @@ def filter_downloaded_fwlist(
     """Filter the downloaded firmware list based on the provided parameters"""
     if "preview" in version:
         # never get a preview for an older version
-        fw_list = [fw for fw in fw_list if fw["preview"]]
+        fw_list = [fw for fw in fw_list if fw.preview]
     else:
-        fw_list = [fw for fw in fw_list if fw["version"] == version]
+        fw_list = [fw for fw in fw_list if fw.version == version]
 
     # filter by port
     if port:
-        fw_list = [fw for fw in fw_list if fw["port"] == port]
+        fw_list = [fw for fw in fw_list if fw.port == port]
 
     if board_id:
         if variants:
             # any variant of this board_id
-            fw_list = [fw for fw in fw_list if fw["board"] == board_id]
+            fw_list = [fw for fw in fw_list if fw.board == board_id]
         else:
             # the firmware variant should match exactly the board_id
-            fw_list = [fw for fw in fw_list if fw["variant"] == board_id]
+            fw_list = [fw for fw in fw_list if fw.variant == board_id]
     if selector and port in selector:
-        fw_list = [fw for fw in fw_list if fw["filename"].endswith(selector[port])]
+        fw_list = [fw for fw in fw_list if fw.filename.endswith(selector[port])]
     return fw_list
 
 

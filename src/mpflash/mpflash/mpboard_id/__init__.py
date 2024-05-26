@@ -47,12 +47,12 @@ def get_known_ports() -> List[str]:
     return sorted(list(ports))
 
 
-def get_known_boards_for_port(port: str, versions: Optional[List[str]] = None):
+def get_known_boards_for_port(port: Optional[str] = "", versions: Optional[List[str]] = None) -> List[Board]:
     """
     Returns a list of boards for the given port and version(s)
 
-    port : str : The Micropython port to filter for
-    versions : List[str] : The Micropython versions to filter for (actual versions required)"""
+    port: The Micropython port to filter for
+    versions:  The Micropython versions to filter for (actual versions required)"""
     mp_boards = read_known_boardinfo()
 
     # filter for 'preview' as they are not in the board_info.json
@@ -67,7 +67,8 @@ def get_known_boards_for_port(port: str, versions: Optional[List[str]] = None):
         # filter for the version(s)
         mp_boards = [board for board in mp_boards if board["version"] in versions]
     # filter for the port
-    mp_boards = [board for board in mp_boards if board["port"] == port]
+    if port:
+        mp_boards = [board for board in mp_boards if board["port"] == port]
     return mp_boards
 
 

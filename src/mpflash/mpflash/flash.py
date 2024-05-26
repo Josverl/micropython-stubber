@@ -23,11 +23,11 @@ def flash_list(
     """Flash a list of boards with the specified firmware."""
     flashed = []
     for mcu, fw_info in todo:
-        fw_file = fw_folder / fw_info["filename"]  # type: ignore
+        fw_file = fw_folder / fw_info.filename
         if not fw_file.exists():
             log.error(f"File {fw_file} does not exist, skipping {mcu.board} on {mcu.serialport}")
             continue
-        log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info['version']}")
+        log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info.version}")
         updated = None
         # try:
         if mcu.port in [port for port, exts in PORT_FWTYPES.items() if ".uf2" in exts] and fw_file.suffix == ".uf2":

@@ -3,11 +3,9 @@
 # sourcery skip: snake-case-functions
 from __future__ import annotations
 
-import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import List
 
 from loguru import logger as log
 from rich.progress import track

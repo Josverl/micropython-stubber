@@ -18,10 +18,11 @@ from bs4 import BeautifulSoup
 from loguru import logger as log
 from rich.progress import track
 
-from mpflash.common import PORT_FWTYPES
+from mpflash.common import PORT_FWTYPES, FWInfo
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import get_known_ports
 
+# avoid conflict with the ujson used by MicroPython
 jsonlines.ujson = None  # type: ignore
 # #########################################################################################################
 
@@ -51,6 +52,10 @@ def get_board_urls(page_url: str) -> List[Dict[str, str]]:
 
     Args:
         page_url (str): The url of the page to get the board urls from.
+    
+    Returns:
+        List[Dict[str, str]]: A list of dictionaries containing the board name and url.
+        
     """
     downloads_html = get_page(page_url)
     soup = BeautifulSoup(downloads_html, "html.parser")
@@ -89,14 +94,10 @@ def board_firmware_urls(board_url: str, base_url: str, ext: str) -> List[str]:
     return links
 
 
-# type alias for the firmware info
-FirmwareInfo = Dict[str, str]
-
-
 # boards we are interested in ( this avoids getting a lot of boards we don't care about)
 # The first run takes ~60 seconds to run for 4 ports , all boards
 # so it makes sense to cache the results and skip boards as soon as possible
-def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FirmwareInfo]:
+def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]:
     """
     Retrieves a list of firmware information for the specified ports and boards.
 
@@ -106,59 +107,67 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[Firmwar
         clean (bool): A flag indicating whether to perform a clean retrieval.
 
     Returns:
-        List[FirmwareInfo]: A list of firmware information for the specified ports and boards.
+        List[FWInfo]: A list of firmware information for the specified ports and boards.
 
     """
-    board_urls: List[FirmwareInfo] = []
+    board_urls: List[FWInfo] = []
     if ports is None:
         ports = get_known_ports()
     for port in ports:
         download_page_url = f"{MICROPYTHON_ORG_URL}download/?port={port}"
-        _urls = get_board_urls(download_page_url)
+        urls = get_board_urls(download_page_url)
         # filter out boards we don't care about
-        _urls = [board for board in _urls if board["board"] in boards]
+        urls = [board for board in urls if board["board"] in boards]
         # add the port to the board urls
-        for board in _urls:
+        for board in urls:
             board["port"] = port
 
-        for board in track(_urls, description=f"Checking {port} download pages", transient=True,refresh_per_second=2):
+        for board in track(urls, description=f"Checking {port} download pages", transient=True, refresh_per_second=2):
             # add a board to the list for each firmware found
-            firmwares = []
+            firmwares:List[str] = []
             for ext in PORT_FWTYPES[port]:
                 firmwares += board_firmware_urls(board["url"], MICROPYTHON_ORG_URL, ext)
-
             for _url in firmwares:
-                board["firmware"] = _url
-                board["preview"] = "preview" in _url  # type: ignore
-                if ver_match := re.search(RE_VERSION_PREVIEW, _url):
-                    board["version"] = ver_match[1]
-                else:
-                    board["version"] = ""
-                if "preview." in board["version"]:
-                    board["build"] = board["version"].split("preview.")[-1]
-                else:
-                    board["build"] = "0"
                 fname = Path(board["firmware"]).name
                 if clean:
                     # remove date from firmware name
                     fname = re.sub(RE_DATE, "-", fname)
                     # remove hash from firmware name
                     fname = re.sub(RE_HASH, ".", fname)
-                board["filename"] = fname
-                board["ext"] = Path(board["firmware"]).suffix
-                board["variant"] = board["filename"].split("-v")[0] if "-v" in board["filename"] else ""
-                board_urls.append(board.copy())
+                fw_info = FWInfo(
+                    filename=fname,
+                    port=port,
+                    board=board["board"],
+                    preview= "preview" in _url,
+                    firmware=_url,
+                    version="",
+                )
+                # board["firmware"] = _url
+                # board["preview"] = "preview" in _url  # type: ignore
+                if ver_match := re.search(RE_VERSION_PREVIEW, _url):
+                    fw_info.version = ver_match[1]
+                # else:
+                #     board.$1= ""
+                if "preview." in fw_info.version:
+                    fw_info.build = fw_info.version.split("preview.")[-1]
+                else:
+                    fw_info.build = "0"
+
+                fw_info.ext = Path(fw_info.firmware).suffix
+                fw_info.variant = fw_info.filename.split("-v")[0] if "-v" in fw_info.filename else ""
+
+                board_urls.append(fw_info)
     return board_urls
 
 
-def key_fw_ver_pre_ext_bld(x: FirmwareInfo):
+def key_fw_ver_pre_ext_bld(x: FWInfo):
     "sorting key for the retrieved board urls"
-    return x["variant"], x["version"], x["preview"], x["ext"], x["build"]
+    return x.variant, x.version, x.preview, x.ext, x.build
 
 
-def key_fw_var_pre_ext(x: FirmwareInfo):
+def key_fw_var_pre_ext(x: FWInfo):
     "Grouping key for the retrieved board urls"
-    return x["variant"], x["preview"], x["ext"]
+    return x.variant, x.preview, x.ext
 
 
 def download_firmwares(
@@ -177,7 +186,7 @@ def download_firmwares(
     unique_boards = get_firmware_list(ports, boards, versions, clean)
 
     for b in unique_boards:
-        log.debug(b["filename"])
+        log.debug(b.filename)
     # relevant
 
     log.info(f"Found {len(unique_boards)} relevant unique firmwares")
@@ -186,23 +195,23 @@ def download_firmwares(
 
     with jsonlines.open(firmware_folder / "firmware.jsonl", "a") as writer:
         for board in unique_boards:
-            filename = firmware_folder / board["port"] / board["filename"]
+            filename = firmware_folder / board.port/ board.filename
             filename.parent.mkdir(exist_ok=True)
             if filename.exists() and not force:
                 skipped += 1
                 log.debug(f" {filename} already exists, skip download")
                 continue
-            log.info(f"Downloading {board['firmware']}")
+            log.info(f"Downloading {board.firmware}")
             log.info(f"         to {filename}")
             try:
-                r = requests.get(board["firmware"], allow_redirects=True)
+                r = requests.get(board.firmware, allow_redirects=True)
                 with open(filename, "wb") as fw:
                     fw.write(r.content)
-                board["filename"] = str(filename.relative_to(firmware_folder))
+                board.filename= str(filename.relative_to(firmware_folder))
             except requests.RequestException as e:
                 log.exception(e)
                 continue
-            writer.write(board)
+            writer.write(board.to_dict())
             downloaded += 1
     log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
     return downloaded + skipped
@@ -219,7 +228,7 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
         clean : A flag indicating whether to perform a clean check.
 
     Returns:
-        List[FirmwareInfo]: A list of unique firmware information.
+        List[FWInfo]: A list of unique firmware information.
 
     """
 
@@ -231,12 +240,12 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     relevant = [
         board
         for board in board_urls
-        if board["board"] in boards and (board["version"] in versions or board["preview"] and preview)
+        if board.board in boards and (board.version in versions or board.preview and preview)
         # and b["port"] in ["esp32", "rp2"]
     ]
     log.debug(f"Matching firmwares: {len(relevant)}")
     # select the unique boards
-    unique_boards: List[FirmwareInfo] = []
+    unique_boards: List[FWInfo] = []
     for _, g in itertools.groupby(relevant, key=key_fw_var_pre_ext):
         # list is aleady sorted by build so we can just get the last item
         sub_list = list(g)

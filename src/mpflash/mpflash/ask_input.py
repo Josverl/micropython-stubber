@@ -50,7 +50,7 @@ def ask_missing_params(
             answers["serial"] = params.serial
 
     if params.versions == [] or "?" in params.versions:
-        append_ask_versions(questions, multi_select=multi_select, action=action)
+        questions.append(question_mp_version(multi_select=multi_select, action=action))
     else:
         # versions is used to show only the boards for the selected versions
         answers["versions"] = params.versions  # type: ignore
@@ -147,7 +147,7 @@ def append_ask_port_board(questions: list, *, multi_select: bool, action: str):
                 "port",
                 message="Which port do you want to {action} " + "to {serial} ?" if action == "flash" else "?",
                 choices=get_known_ports(),
-                autocomplete=True,
+                # autocomplete=True,
             ),
             inquirer_ux(
                 "boards",
@@ -163,7 +163,7 @@ def append_ask_port_board(questions: list, *, multi_select: bool, action: str):
     )
 
 
-def append_ask_versions(questions: list, *, multi_select: bool, action: str):
+def question_mp_version(multi_select: bool, action: str):
     """
     Asks the user for the version selection.
 
@@ -172,22 +172,20 @@ def append_ask_versions(questions: list, *, multi_select: bool, action: str):
         action (str): The action to be performed.
 
     Returns:
-        None
+
     """
     # import only when needed to reduce load time
     import inquirer
     import inquirer.errors
 
     input_ux = inquirer.Checkbox if multi_select else inquirer.List
+
     mp_versions: List[str] = micropython_versions()
-    mp_versions = [v for v in mp_versions if "preview" not in v]
+    mp_versions.reverse()  # newest first
 
     # remove the versions for which there are no known boards in the board_info.json
     # todo: this may be a little slow
-    mp_versions = [v for v in mp_versions if get_known_boards_for_port("stm32", [v])]
-
-    mp_versions.append("preview")
-    mp_versions.reverse()  # newest first
+    mp_versions = [v for v in mp_versions if "preview" in v or get_known_boards_for_port("stm32", [v])]
 
     def at_least_one_validation(answers, current) -> bool:
         if not current:
@@ -196,18 +194,18 @@ def append_ask_versions(questions: list, *, multi_select: bool, action: str):
             raise inquirer.errors.ValidationError("", reason="Please select at least one version")
         return True
 
-    questions.append(
-        input_ux(
-            # inquirer.List(
-            "versions",
-            message="Which version(s) do you want to {action} " + ("to {serial} ?" if action == "flash" else "?"),
-            # Hints would be nice , but needs a hint for each and every option
-            # hints=["Use space to select multiple options"],
-            choices=mp_versions,
-            autocomplete=True,
-            validate=at_least_one_validation,  # type: ignore
-        )
+    message = "Which version(s) do you want to {action} " + ("to {serial} ?" if action == "flash" else "?")
+    q = input_ux(
+        # inquirer.List(
+        "versions",
+        message=message,
+        # Hints would be nice , but needs a hint for each and every option
+        # hints=["Use space to select multiple options"],
+        choices=mp_versions,
+        autocomplete=True,
+        validate=at_least_one_validation,  # type: ignore
     )
+    return q
 
 
 def append_ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bool = False):

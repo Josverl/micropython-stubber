@@ -1,20 +1,20 @@
 """CLI to Download MicroPython firmware for specific ports, boards and versions."""
 
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
-from mpflash.connected import connected_ports_boards
-from mpflash.mpremoteboard import MPRemoteBoard
 import rich_click as click
 from loguru import logger as log
 
+from mpflash.connected import connected_ports_boards
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
+from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
 
-from .common import DownloadParams
 from .ask_input import ask_missing_params
 from .cli_group import cli
+from .common import DownloadParams
 from .config import config
 from .download import download
 
@@ -94,7 +94,7 @@ def cli_download(**kwargs) -> int:
     params.serial = list(params.serial)
     params.ignore = list(params.ignore)
 
-    all_boards: List[MPRemoteBoard] = []
+    # all_boards: List[MPRemoteBoard] = []
     if params.boards:
         if not params.ports:
             # no ports specified - resolve ports from specified boards by resolving board IDs
@@ -107,7 +107,7 @@ def cli_download(**kwargs) -> int:
                         log.error(f"{e}")
     else:
         # no boards specified - detect connected ports and boards
-        params.ports, params.boards, all_boards = connected_ports_boards(include=params.serial, ignore=params.ignore)
+        params.ports, params.boards, _ = connected_ports_boards(include=params.serial, ignore=params.ignore)
 
     params = ask_missing_params(params)
     if not params:  # Cancelled by user
@@ -128,5 +128,3 @@ def cli_download(**kwargs) -> int:
     except MPFlashError as e:
         log.error(f"{e}")
         return 1
-
-

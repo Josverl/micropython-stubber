@@ -3,8 +3,6 @@ Main entry point for the CLI group.
 Additional comands are added in the submodules.
 """
 
-import sys
-
 import rich_click as click
 
 from .config import config

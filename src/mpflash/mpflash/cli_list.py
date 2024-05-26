@@ -5,7 +5,6 @@ import rich_click as click
 from rich import print
 
 from .cli_group import cli
-from .common import filtered_comports
 from .list import show_mcus
 from .logger import make_quiet
 from .connected import list_mcus

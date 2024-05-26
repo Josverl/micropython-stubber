@@ -59,7 +59,7 @@ def auto_update(
 
         # just use the last firmware
         fw_info = board_firmwares[-1]
-        log.info(f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}.")
+        log.info(f"Found {target_version} firmware {fw_info.filename} for {mcu.board} on {mcu.serialport}.")
         wl.append((mcu, fw_info))
     return wl
 
