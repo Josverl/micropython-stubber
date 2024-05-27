@@ -74,9 +74,7 @@ def micropython_versions(minver: str = "v1.20"):
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
-        versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
-        # remove all but the most recent (preview) version
-        versions = versions[:1] + [v for v in versions if "preview" not in v]
+        versions = [tag.name for tag in repo.get_tags()]
 
     except Exception:
         versions = [
@@ -99,7 +97,9 @@ def micropython_versions(minver: str = "v1.20"):
             "v1.11",
             "v1.10",
         ]
-        versions = [v for v in versions if parse(v) >= parse(minver)]
+    versions = [v for v in versions if parse(v) >= parse(minver)]
+    # remove all but the most recent (preview) version
+    versions = versions[:1] + [v for v in versions if "preview" not in v]
     return sorted(versions)
 
 
