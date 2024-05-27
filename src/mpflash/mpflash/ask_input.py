@@ -39,24 +39,23 @@ def ask_missing_params(
     if not config.interactive:
         # no interactivity allowed
         return params
-    # import only when needed to reduce load time
 
     questions = []
     answers: dict[str, Union[str, List]] = {"action": action}
     if not multi_select:
         if not params.serial or "?" in params.serial:
-            append_ask_serialport(questions)
+            questions.append(ask_serialport(multi_select=False, bluetooth=False))
         else:
             answers["serial"] = params.serial
 
     if params.versions == [] or "?" in params.versions:
-        questions.append(question_mp_version(multi_select=multi_select, action=action))
+        questions.append(ask_mp_version(multi_select=multi_select, action=action))
     else:
         # versions is used to show only the boards for the selected versions
         answers["versions"] = params.versions  # type: ignore
 
     if not params.boards or "?" in params.boards:
-        append_ask_port_board(questions, multi_select=multi_select, action=action)
+        questions.extend(ask_port_board(multi_select=multi_select, action=action))
     if questions:
         answers = inquirer.prompt(questions, answers=answers)  # type: ignore
     if not answers:
@@ -124,7 +123,7 @@ def filter_matching_boards(answers: dict) -> Sequence[Tuple[str, str]]:
     return some_boards
 
 
-def append_ask_port_board(questions: list, *, multi_select: bool, action: str):
+def ask_port_board(*, multi_select: bool, action: str):
     """
     Asks the user for the port and board selection.
 
@@ -141,29 +140,25 @@ def append_ask_port_board(questions: list, *, multi_select: bool, action: str):
     # if action flash,  single input
     # if action download, multiple input
     inquirer_ux = inquirer.Checkbox if multi_select else inquirer.List
-    questions.extend(
-        (
-            inquirer.List(
-                "port",
-                message="Which port do you want to {action} " + "to {serial} ?" if action == "flash" else "?",
-                choices=get_known_ports(),
-                # autocomplete=True,
+    return [
+        inquirer.List(
+            "port",
+            message="Which port do you want to {action} " + "to {serial} ?" if action == "flash" else "?",
+            choices=get_known_ports(),
+            # autocomplete=True,
+        ),
+        inquirer_ux(
+            "boards",
+            message=(
+                "Which {port} board firmware do you want to {action} " + "to {serial} ?" if action == "flash" else "?"
             ),
-            inquirer_ux(
-                "boards",
-                message=(
-                    "Which {port} board firmware do you want to {action} " + "to {serial} ?"
-                    if action == "flash"
-                    else "?"
-                ),
-                choices=filter_matching_boards,
-                validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
-            ),
-        )
-    )
+            choices=filter_matching_boards,
+            validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
+        ),
+    ]
 
 
-def question_mp_version(multi_select: bool, action: str):
+def ask_mp_version(multi_select: bool, action: str):
     """
     Asks the user for the version selection.
 
@@ -208,7 +203,7 @@ def question_mp_version(multi_select: bool, action: str):
     return q
 
 
-def append_ask_serialport(questions: list, *, multi_select: bool = False, bluetooth: bool = False):
+def ask_serialport(*, multi_select: bool = False, bluetooth: bool = False):
     """
     Asks the user for the serial port selection.
 
@@ -223,14 +218,10 @@ def append_ask_serialport(questions: list, *, multi_select: bool = False, blueto
     import inquirer
 
     comports = MPRemoteBoard.connected_boards(bluetooth=bluetooth, description=True)
-    questions.append(
-        inquirer.List(
-            "serial",
-            message="Which serial port do you want to {action} ?",
-            choices=comports,
-            other=True,
-            validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore
-        )
+    return inquirer.List(
+        "serial",
+        message="Which serial port do you want to {action} ?",
+        choices=comports,
+        other=True,
+        validate=lambda _, x: True if x else "Please select or enter a serial port",  # type: ignore
     )
-
-    return questions
