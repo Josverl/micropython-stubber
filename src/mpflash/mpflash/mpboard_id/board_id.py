@@ -69,7 +69,7 @@ def _find_board_id_by_description(
 
 
 @functools.lru_cache(maxsize=20)
-def _read_board_info(board_info):
+def _read_board_info(board_info: Path):
     with open(board_info, "r") as file:
         info = json.load(file)
     return info

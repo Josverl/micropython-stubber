@@ -69,13 +69,12 @@ def clean_version(
 
 
 @lru_cache(maxsize=10)
-def micropython_versions(minver: str = "v1.20"):
+def micropython_versions(minver: str = "v1.20", reverse: bool = False):
     """Get the list of micropython versions from github tags"""
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
         versions = [tag.name for tag in repo.get_tags()]
-
     except Exception:
         versions = [
             "v9.99.9-preview",
