@@ -5,7 +5,7 @@ from mpflash.mpboard_id import find_known_board, get_known_ports, known_stored_b
 pytestmark = [pytest.mark.mpflash]
 
 
-def test_read_boardinfo():
+def test_read_known_boardinfo():
     boards = read_known_boardinfo()
     assert isinstance(boards, list)
     assert all(isinstance(board, dict) for board in boards)

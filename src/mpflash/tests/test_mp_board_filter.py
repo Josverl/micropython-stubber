@@ -27,7 +27,7 @@ def test_mp_board_filter(port: str, id, versions: List[str]):
     result = get_known_boards_for_port(port, versions)
     # Assert
     assert len(result) >= 1
-    assert all(board["port"] == port for board in result)
+    assert all(board.port == port for board in result)
 
     if not versions:
         return
@@ -36,13 +36,13 @@ def test_mp_board_filter(port: str, id, versions: List[str]):
     for board in result:
         # check if the version matches the filter
         ok = False
-        if board["version"] in versions:
+        if board.version in versions:
             ok = True
         elif "stable" in versions:
-            if board["version"] == get_stable_mp_version():
+            if board.version == get_stable_mp_version():
                 ok = True
         elif "preview" in versions:
             # preview returns the boards known for the stable version
-            if "preview" in board["version"] or board["version"] == get_stable_mp_version():
+            if "preview" in board.version or board.version == get_stable_mp_version():
                 ok = True
-        assert ok, f"board: {board['version']} does not match versions: {versions}"
+        assert ok, f"board: {board.version} does not match versions: {versions}"

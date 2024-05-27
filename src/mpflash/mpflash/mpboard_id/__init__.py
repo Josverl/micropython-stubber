@@ -4,8 +4,8 @@ that is included in the module.
 
 """
 
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
@@ -21,31 +21,49 @@ from mpflash.vendor.versions import clean_version
 # Board  based on the dataclass Board but changed to TypedDict
 # - source : get_boardnames.py
 @dataclass
-class Board():
-    """MicroPython Board definition"""
+class Board:
+    """
+    MicroPython Board definitions, parsed from the make and header files
+    """
 
-    description: str
-    port: str
-    board: str
-    board_name: str
-    mcu_name: str
+    port: str  # micropython port
+    board: str  # BOARD_ID (Foldername) as used in the make files
+    board_name: str  # Short board description
+    description: str  # Long board description
     path: Union[Path, str]
     version: str
-    cpu: str
+    mcu_name: str
+    cpu: str = ""
+    family: str = "micropython"
+
+    def __post_init__(self):
+        if not self.cpu:
+            if " with " in self.description:
+                self.cpu = self.description.split(" with ")[-1]
+            else:
+                self.cpu = self.port
+
+    @staticmethod
+    def from_dict(data: dict) -> "Board":
+        return Board(**data)
+
+    def to_dict(self) -> dict:
+        return self.__dict__
 
 
 @lru_cache(maxsize=None)
 def read_known_boardinfo() -> List[Board]:
     """Reads the board_info.json file and returns the data as a list of Board objects"""
     with open(Path(__file__).parent / "board_info.json", "r") as file:
-        return json.load(file)
+        data = json.load(file)
+    return [Board.from_dict(board) for board in data]
 
 
 def get_known_ports() -> List[str]:
     # TODO: Filter for Version
     mp_boards = read_known_boardinfo()
     # select the unique ports from info
-    ports = set({board.port for board in mp_boards if board.port in PORT_FWTYPES.keys()})
+    ports = set({board.port for board in mp_boards if board.port})
     return sorted(list(ports))
 
 
@@ -83,7 +101,7 @@ def known_stored_boards(port: str, versions: Optional[List[str]] = None) -> List
     """
     mp_boards = get_known_boards_for_port(port, versions)
 
-    boards = set({(f'{board.version} {board.description}', board.board) for board in mp_boards})
+    boards = set({(f"{board.version} {board.description}", board.board) for board in mp_boards})
     return sorted(list(boards))
 
 
