@@ -1,7 +1,6 @@
 """CLI to Download MicroPython firmware for specific ports, boards and versions."""
 
 from pathlib import Path
-from typing import List
 
 import rich_click as click
 from loguru import logger as log
@@ -9,7 +8,6 @@ from loguru import logger as log
 from mpflash.connected import connected_ports_boards
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
-from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
 
 from .ask_input import ask_missing_params
@@ -102,7 +100,7 @@ def cli_download(**kwargs) -> int:
                 if board != "?":
                     try:
                         board_ = find_known_board(board)
-                        params.ports.append(board_["port"])
+                        params.ports.append(board_.port)
                     except MPFlashError as e:
                         log.error(f"{e}")
     else:

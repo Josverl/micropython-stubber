@@ -87,9 +87,9 @@ def manual_worklist(
     # Lookup the matching port and cpu in board_info based in the board name
     try:
         info = find_known_board(board_id)
-        mcu.port = info["port"]
+        mcu.port = info.port
         # need the CPU type for the esptool
-        mcu.cpu = info["cpu"]
+        mcu.cpu = info.cpu
     except (LookupError, MPFlashError) as e:
         log.error(f"Board {board_id} not found in board_info.json")
         log.exception(e)
