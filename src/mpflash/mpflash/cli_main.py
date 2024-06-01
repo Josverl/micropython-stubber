@@ -2,6 +2,8 @@
 
 # import rich_click as click
 
+import os
+
 import click
 from loguru import logger as log
 
@@ -17,7 +19,8 @@ def mpflash():
     cli.add_command(cli_flash_board)
 
     # cli(auto_envvar_prefix="MPFLASH")
-    if 1:
+    if False and os.environ.get("COMPUTERNAME") == "JOSVERL-S4":
+        # intentional less error suppression on dev machine
         result = cli(standalone_mode=False)
     else:
         try:

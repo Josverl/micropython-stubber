@@ -36,19 +36,24 @@ GH_CLIENT = Github(auth=Auth.Token(PAT))
 
 @dataclass
 class FWInfo:
+    """
+    Downloaded Firmware information
+    is somewhat related to the BOARD class in the mpboard_id module
+    """
+
     port: str  # MicroPython port
     board: str  # MicroPython board
-    filename: str = ""  # relative filename of the firmware image
-    firmware: str = ""  # url or path to original firmware image
-    variant: str = ""  # MicroPython variant
-    preview: bool = False  # True if the firmware is a preview version
-    version: str = ""  # MicroPython version
-    url: str = ""  # url to the firmware image download folder
-    build: str = "0"  # The build = number of commits since the last release
-    ext: str = ""  # The build = number of commits since the last release
-    family: str = "micropython"  # The family of the firmware
-    custom: bool = False  # True if the firmware is a custom build
-    description: str = ""  # Description used by this firmware (custom only)
+    filename: str = field(default="")  # relative filename of the firmware image
+    firmware: str = field(default="")  # url or path to original firmware image
+    variant: str = field(default="")  # MicroPython variant
+    preview: bool = field(default=False)  # True if the firmware is a preview version
+    version: str = field(default="")  # MicroPython version
+    url: str = field(default="")  # url to the firmware image download folder
+    build: str = field(default="0")  # The build = number of commits since the last release
+    ext: str = field(default="")  # the file extension of the firmware
+    family: str = field(default="micropython")  # The family of the firmware
+    custom: bool = field(default=False)  # True if the firmware is a custom build
+    description: str = field(default="")  # Description used by this firmware (custom only)
 
     def to_dict(self) -> dict:
         """Convert the object to a dictionary"""

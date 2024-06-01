@@ -52,10 +52,10 @@ def get_board_urls(page_url: str) -> List[Dict[str, str]]:
 
     Args:
         page_url (str): The url of the page to get the board urls from.
-    
+
     Returns:
         List[Dict[str, str]]: A list of dictionaries containing the board name and url.
-        
+
     """
     downloads_html = get_page(page_url)
     soup = BeautifulSoup(downloads_html, "html.parser")
@@ -124,10 +124,11 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
 
         for board in track(urls, description=f"Checking {port} download pages", transient=True, refresh_per_second=2):
             # add a board to the list for each firmware found
-            firmwares:List[str] = []
+            firmware_urls: List[str] = []
             for ext in PORT_FWTYPES[port]:
-                firmwares += board_firmware_urls(board["url"], MICROPYTHON_ORG_URL, ext)
-            for _url in firmwares:
+                firmware_urls += board_firmware_urls(board["url"], MICROPYTHON_ORG_URL, ext)
+            for _url in firmware_urls:
+                board["firmware"] = _url
                 fname = Path(board["firmware"]).name
                 if clean:
                     # remove date from firmware name
@@ -138,7 +139,7 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
                     filename=fname,
                     port=port,
                     board=board["board"],
-                    preview= "preview" in _url,
+                    preview="preview" in _url,
                     firmware=_url,
                     version="",
                 )
@@ -195,7 +196,7 @@ def download_firmwares(
 
     with jsonlines.open(firmware_folder / "firmware.jsonl", "a") as writer:
         for board in unique_boards:
-            filename = firmware_folder / board.port/ board.filename
+            filename = firmware_folder / board.port / board.filename
             filename.parent.mkdir(exist_ok=True)
             if filename.exists() and not force:
                 skipped += 1
@@ -207,7 +208,7 @@ def download_firmwares(
                 r = requests.get(board.firmware, allow_redirects=True)
                 with open(filename, "wb") as fw:
                     fw.write(r.content)
-                board.filename= str(filename.relative_to(firmware_folder))
+                board.filename = str(filename.relative_to(firmware_folder))
             except requests.RequestException as e:
                 log.exception(e)
                 continue

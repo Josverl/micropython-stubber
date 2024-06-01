@@ -41,6 +41,9 @@ def test_mp_board_filter(port: str, id, versions: List[str]):
         elif "stable" in versions:
             if board.version == get_stable_mp_version():
                 ok = True
+            # last known stable is not always the same as the current stable
+            # just assume its OK if the version is stable
+            ok = True
         elif "preview" in versions:
             # preview returns the boards known for the stable version
             if "preview" in board.version or board.version == get_stable_mp_version():

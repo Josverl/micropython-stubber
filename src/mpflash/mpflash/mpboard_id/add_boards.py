@@ -3,43 +3,20 @@ Collects board name and description information from MicroPython and writes it t
 """
 
 import re
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
-import jsons
+import inquirer
 import rich
 import rich.table
 from rich.console import Console
 from rich.progress import track
 
 import mpflash.vendor.basicgit as git
+from mpflash.logger import log
+from mpflash.mpboard_id import Board
+from mpflash.mpboard_id.store import write_boardinfo_json
 from mpflash.vendor.versions import micropython_versions
-
-
-@dataclass()
-class Board:
-    """MicroPython Board definition"""
-
-    # TODO: add variant
-    description: str
-    board_name: str
-    mcu_name: str
-    port: str
-    path: Path
-    id: str = field(default="")  # board id
-    version: str = field(default="")  # version of MicroPython""
-    family: str = field(default="micropython")
-    board: str = field(default="")
-
-    def __post_init__(self):
-        if self.id and self.board == "":
-            self.board = self.id
-        elif self.board and self.id == "":
-            self.id = self.board
-        elif not self.id and not self.board:
-            self.id = self.board = self.description.replace(" ", "_")
-
 
 # look for all mpconfigboard.h files and extract the board name
 # from the #define MICROPY_HW_BOARD_NAME "PYBD_SF6"
@@ -97,7 +74,7 @@ def boards_from_cmake(mpy_path: Path, version: str, family: str):
                     description = match["variant"]
                     board_list.append(
                         Board(
-                            id=board,
+                            board_id=board,
                             port=port,
                             board_name=board_name,
                             mcu_name=mcu_name,
@@ -111,7 +88,7 @@ def boards_from_cmake(mpy_path: Path, version: str, family: str):
                     description = match["variant"]
                     board_list.append(
                         Board(
-                            id=board,
+                            board_id=board,
                             port=port,
                             board_name=board_name,
                             mcu_name=mcu_name,
@@ -144,7 +121,7 @@ def boards_from_headers(mpy_path: Path, version: str, family: str):
                     description = f"{board_name} with {mcu_name}" if mcu_name != "-" else board_name
                     board_list.append(
                         Board(
-                            id=board,
+                            board_id=board,
                             port=port,
                             board_name=board_name,
                             mcu_name=mcu_name,
@@ -159,7 +136,7 @@ def boards_from_headers(mpy_path: Path, version: str, family: str):
                 description = board_name
                 board_list.append(
                     Board(
-                        id=board,
+                        board_id=board,
                         port=port,
                         board_name=board_name,
                         mcu_name=mcu_name,
@@ -170,23 +147,6 @@ def boards_from_headers(mpy_path: Path, version: str, family: str):
                     )
                 )
     return board_list
-
-
-def write_json(board_list: List[Board], *, folder: Path):
-    """Writes the board information to JSON and CSV files.
-
-    Args:
-        board_list (List[Board]): The list of Board objects.
-    """
-    # write the list to json file
-    with open(folder / "board_info.json", "w") as fp:
-        fp.write(jsons.dumps(board_list, indent=4))
-
-    # # create a csv with only the board and the description of the board_list
-    # with open(folder / "board_info.csv", "w") as f:
-    #     f.write("board,description\n")
-    #     for board in board_list:
-    #         f.write(f"{board.description},{board.board}\n")
 
 
 def boards_for_versions(versions: List[str], mpy_path: Path):
@@ -216,14 +176,20 @@ def boards_for_versions(versions: List[str], mpy_path: Path):
     return board_list
 
 
-def unique_boards(board_list):
-    """Remove duplicate boards by 'description' from the list."""
+def unique_boards(board_list: List[Board], *, key_version: bool = True):
+    """Remove duplicate boards by 'BOARD_ID description' from the list."""
     seen = set()
-    board_list = [
-        x for x in board_list if not (x.id + "|" + x.description in seen or seen.add(x.id + "|" + x.description))
-    ]
-    board_list.sort(key=lambda x: x.description.lower())
-    return board_list
+    result = []
+    for x in board_list:
+        if key_version:
+            key = f"{x.board_id}|{x.version}|{x.description}"
+        else:
+            key = f"{x.board_id}|{x.description}"
+        if key not in seen:
+            result.append(x)
+            seen.add(key)
+    result.sort(key=lambda x: x.description.lower())
+    return result
 
 
 def make_table(board_list: List[Board]) -> rich.table.Table:
@@ -231,7 +197,7 @@ def make_table(board_list: List[Board]) -> rich.table.Table:
     is_wide = True
 
     table = rich.table.Table(title="MicroPython Board Information")
-    table.add_column("ID", justify="left", style="green")
+    table.add_column("BOARD_ID", justify="left", style="green")
     table.add_column("Description", justify="left", style="cyan")
     table.add_column("Port", justify="left", style="magenta")
     table.add_column("Board Name", justify="left", style="blue")
@@ -241,32 +207,48 @@ def make_table(board_list: List[Board]) -> rich.table.Table:
     table.add_column("Version", justify="left", style="blue")
     if is_wide:
         table.add_column("Family", justify="left", style="blue")
-        table.add_column("board", justify="left", style="blue")
 
     for board in board_list:
-        row = [board.id, board.description, *(board.port, board.board_name)]
+        row = [board.board_id, board.description, *(board.port, board.board_name)]
         if is_wide:
             row.append(board.mcu_name)
-        row.extend((str(board.path.suffix), board.version))
+        row.extend((str(Path(board.path).suffix), board.version))
         if is_wide:
-            row.extend((board.family, board.board))
+            row.append(board.family)
         table.add_row(*row)
 
     return table
 
 
+def ask_mpy_path():
+    """Ask the user for the path to the MicroPython repository."""
+    questions = [
+        inquirer.Text(
+            "mpy_path", message="Enter the path to the MicroPython repository", default=".\\repos\\micropython"
+        )
+    ]
+    if answers := inquirer.prompt(questions):
+        return Path(answers["mpy_path"])
+    else:
+        raise ValueError("No path provided.")
+
+
 def main():
     """Main function to collect and write board information."""
+
     console = Console()
-    mpy_path = Path("D:\\MyPython\\micropython-stubber\\repos\\micropython")
+
+    mpy_path = ask_mpy_path()
     versions = micropython_versions(minver="v1.10") + ["master"]
     board_list = boards_for_versions(versions, mpy_path)
 
-    table = make_table(board_list)
-    console.print(table)
-
-    write_json(board_list, folder=Path("."))
+    here = Path(__file__).parent
+    log.info(write_boardinfo_json(board_list, folder=here))
     # write_files(board_list, folder=CONFIG.board_path)
+
+    # table of when the board was added
+    table = make_table(unique_boards(board_list, key_version=False))
+    console.print(table)
 
 
 if __name__ == "__main__":

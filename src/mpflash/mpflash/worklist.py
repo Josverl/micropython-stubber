@@ -91,7 +91,7 @@ def manual_worklist(
         # need the CPU type for the esptool
         mcu.cpu = info.cpu
     except (LookupError, MPFlashError) as e:
-        log.error(f"Board {board_id} not found in board_info.json")
+        log.error(f"Board {board_id} not found in board_info.zip")
         log.exception(e)
         return []
     mcu.board = board_id

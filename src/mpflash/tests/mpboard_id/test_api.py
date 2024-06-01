@@ -1,6 +1,7 @@
 import pytest
 
-from mpflash.mpboard_id import Board, find_known_board, get_known_ports, known_stored_boards, read_known_boardinfo
+from mpflash.mpboard_id import find_known_board, get_known_ports, known_stored_boards, read_known_boardinfo
+from mpflash.mpboard_id.board import Board
 
 pytestmark = [pytest.mark.mpflash]
 
@@ -10,7 +11,7 @@ def test_read_known_boardinfo():
     assert isinstance(boards, list)
     assert all(isinstance(board, Board) for board in boards)
     # Must have a board_ID and a description
-    assert all(board.board for board in boards)
+    assert all(board.board_id for board in boards)
     assert all(board.description for board in boards)
 
 
@@ -43,5 +44,5 @@ def test_known_stored_boards_basic(port, versions):
 def test_find_known_board():
     board = find_known_board("PYBV11")
     assert isinstance(board, Board)
-    assert board.board == "PYBV11"
+    assert board.board_id == "PYBV11"
     assert board.port == "stm32"
