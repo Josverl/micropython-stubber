@@ -3,7 +3,8 @@ prepare a set of stub files for publishing to PyPi
 
 !!Note: anything excluded in .gitignore is not packaged by poetry
 """
-from typing import Any, Dict, List, Union
+
+from typing import Any, Dict, List, Optional, Union
 
 from loguru import logger as log
 
@@ -18,9 +19,9 @@ from stubber.utils.versions import V_PREVIEW
 
 def build_multiple(
     family: str = "micropython",
-    versions: List[str] = [V_PREVIEW],
-    ports: List[str] = ["all"],
-    boards: List[str] = [GENERIC_U],
+    versions: Optional[List[str]] = None,
+    ports: Optional[List[str]] = None,
+    boards: Optional[List[str]] = None,
     production: bool = False,
     clean: bool = False,
     force: bool = False,
@@ -28,6 +29,11 @@ def build_multiple(
     """
     Build a bunch of stub packages
     """
+    # default parameter values
+    versions = versions or [V_PREVIEW]
+    ports = ports or ["all"]
+    boards = boards or [GENERIC_U]
+
     db = get_database(CONFIG.publish_path, production=production)
     results: List[Dict[str, Any]] = []
     worklist = build_worklist(family, versions, ports, boards)
@@ -47,9 +53,9 @@ def build_multiple(
 
 def publish_multiple(
     family: str = "micropython",
-    versions: List[str] = ["v1.19.1"],
-    ports: List[str] = ["all"],
-    boards: List[str] = [GENERIC_U],
+    versions: Optional[List[str]] = None,
+    ports: Optional[List[str]] = None,
+    boards: Optional[List[str]] = None,
     production: bool = False,
     clean: bool = False,
     build: bool = False,
@@ -59,6 +65,11 @@ def publish_multiple(
     """
     Publish a bunch of stub packages
     """
+    # default parameter values
+    versions = versions or [V_PREVIEW]
+    ports = ports or ["all"]
+    boards = boards or [GENERIC_U]
+
     db = get_database(CONFIG.publish_path, production=production)
     results = []
     worklist = build_worklist(family, versions, ports, boards)
