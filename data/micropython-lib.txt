@@ -1,0 +1,4 @@
+# Modules available in the MicroPython library
+
+# MicroPython now supplies SSL/TLS functionality in a new built-in `tls` # module.
+tls

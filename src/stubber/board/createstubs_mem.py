@@ -548,9 +548,7 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
-            if "mpy" in dir(sys.implementation)
-            else ""  # type: ignore
+            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass
@@ -723,6 +721,7 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
+
     # Read stubs from modulelist in the current folder or in /libs
     # fall back to default modules
     def get_modulelist(stubber):

@@ -898,6 +898,7 @@ def main():
         "sys",
         "termios",
         "time",
+        "tls",
         "tpcalib",
         "uarray",
         "uasyncio/__init__",
