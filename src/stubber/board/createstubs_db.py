@@ -557,9 +557,7 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
-            if "mpy" in dir(sys.implementation)
-            else ""  # type: ignore
+            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass
