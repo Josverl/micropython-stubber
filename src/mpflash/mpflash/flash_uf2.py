@@ -14,7 +14,7 @@ from rich.progress import track
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .common import PORT_FWTYPES
-from .config import config
+from .flash_uf2_boardid import get_board_id
 from .flash_uf2_linux import dismount_uf2_linux, wait_for_UF2_linux
 from .flash_uf2_macos import wait_for_UF2_macos
 from .flash_uf2_windows import wait_for_UF2_windows
@@ -45,11 +45,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         destination = wait_for_UF2_windows()
     elif sys.platform == "darwin":
         log.warning(f"OS {sys.platform} not tested/supported")
-        # TODO: test which of the options is best
-        if "macos_uf2" in config.tests:
-            destination = wait_for_UF2_macos()
-        else:
-            destination = wait_for_UF2_linux()
+        destination = wait_for_UF2_macos()
     else:
         log.warning(f"OS {sys.platform} not tested/supported")
         return None
@@ -59,6 +55,8 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         return None
 
     log.info("Board is in bootloader mode")
+    board_id = get_board_id(destination)  # type: ignore
+    log.info(f"Board ID: {board_id}")
     log.info(f"Copying {fw_file} to {destination}.")
     shutil.copy(fw_file, destination)
     log.success("Done copying, resetting the board and wait for it to restart")
