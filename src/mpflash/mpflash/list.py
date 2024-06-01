@@ -1,51 +1,12 @@
 from typing import List
 
-from rich import print
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
-from rich.table import Column, Table
+from rich.progress import track
+from rich.table import Table
 
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
 
-from .config import config
 from .logger import console
-
-rp_spinner = SpinnerColumn(finished_text="✅")
-rp_text = TextColumn("{task.description} {task.fields[device]}", table_column=Column())
-rp_bar = BarColumn(bar_width=None, table_column=Column())
-
-
-def list_mcus(bluetooth: bool = False):
-    """
-    Retrieves information about connected microcontroller boards.
-
-    Returns:
-        List[MPRemoteBoard]: A list of MPRemoteBoard instances with board information.
-    Raises:
-        ConnectionError: If there is an error connecting to a board.
-    """
-    conn_mcus = [MPRemoteBoard(sp) for sp in MPRemoteBoard.connected_boards(bluetooth) if sp not in config.ignore_ports]
-
-    # a lot of boilerplate to show a progress bar with the comport currently scanned
-    # low update rate to facilitate screen readers/narration
-    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn(), refresh_per_second=2) as progress:
-        tsk_scan = progress.add_task("[green]Scanning", visible=False, total=None)
-        progress.tasks[tsk_scan].fields["device"] = "..."
-        progress.tasks[tsk_scan].visible = True
-        progress.start_task(tsk_scan)
-        try:
-            for mcu in conn_mcus:
-                progress.update(tsk_scan, device=mcu.serialport.replace("/dev/", ""))
-                try:
-                    mcu.get_mcu_info()
-                except ConnectionError as e:
-                    print(f"Error: {e}")
-                    continue
-        finally:
-            # transient
-            progress.stop_task(tsk_scan)
-            progress.tasks[tsk_scan].visible = False
-    return conn_mcus
 
 
 def show_mcus(
@@ -57,11 +18,9 @@ def show_mcus(
 
 
 def abbrv_family(family: str, is_wide: bool) -> str:
-    ABRV = {"micropython": "upy", "circuitpython": "cpy"}
     if not is_wide:
-        if family in ABRV:
-            return ABRV[family]
-        return family[:4]
+        ABRV = {"micropython": "upy", "circuitpython": "cpy", "unknown": "?"}
+        return ABRV.get(family, family[:4])
     return family
 
 

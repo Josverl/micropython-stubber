@@ -4,7 +4,8 @@ import pytest
 from mock import MagicMock, Mock
 from pytest_mock import MockerFixture
 
-from mpflash.ask_input import DownloadParams, FlashParams, ask_missing_params
+from mpflash.common import DownloadParams, FlashParams
+from mpflash.ask_input import ask_missing_params
 
 pytestmark = [pytest.mark.mpflash]
 
@@ -92,12 +93,14 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
             True,
             {
                 "versions": ["preview"],
-                "boards": ["SEEED_WIO_TERMINAL"],
+                "boards": ["?"],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
                 "clean": True,
                 "force": False,
             },
-            {},
+            {
+                "boards": ["SEEED_WIO_TERMINAL"],
+            },
             {"versions": ["preview"]},
         ),
         (
@@ -143,16 +146,37 @@ def test_ask_missing_params_no_interactivity(mocker: MockerFixture):
                 "versions": ["preview"],
                 "boards": ["?"],
                 "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
-                "serial": "",
+                "serial": [],
                 "erase": True,
                 "bootloader": True,
                 "cpu": "",
             },
             {
                 "boards": ["SEEED_WIO_TERMINAL"],
-                "serial": "COM4",
+                "serial": ["COM4"],
             },
             {},
+        ),
+        # Check that the port description is trimmed
+        (
+            "60 F -b ? -v preview",
+            False,
+            {
+                "versions": ["preview"],
+                "boards": ["?"],
+                "fw_folder": Path("C:/Users/josverl/Downloads/firmware"),
+                "serial": [],
+                "erase": True,
+                "bootloader": True,
+                "cpu": "",
+            },
+            {
+                "boards": ["SEEED_WIO_TERMINAL"],
+                "serial": ["COM4 Manufacturer Description"],
+            },
+            {
+                "serial": ["COM4"],
+            },
         ),
     ],
 )
@@ -177,6 +201,7 @@ def test_ask_missing_params_with_interactivity(
     # explicit checks
     for key in check:
         if isinstance(check[key], list):
+            assert getattr(result, key), f"{key} should be in answers"
             assert sorted(getattr(result, key)) == sorted(check[key])
         else:
             assert getattr(result, key) == check[key]

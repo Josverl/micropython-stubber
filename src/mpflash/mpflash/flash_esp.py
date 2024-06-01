@@ -22,7 +22,7 @@ def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optio
     log.info(f"Flashing {fw_file} on {mcu.board} on {mcu.serialport}")
     if not mcu.cpu:
         # Lookup CPU based on the board name
-        mcu.cpu = find_known_board(mcu.board)["cpu"]
+        mcu.cpu = find_known_board(mcu.board).cpu
 
     cmds: List[List[str]] = []
     if erase:

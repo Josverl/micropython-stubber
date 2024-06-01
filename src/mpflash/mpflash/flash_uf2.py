@@ -15,7 +15,7 @@ from mpflash.mpremoteboard import MPRemoteBoard
 
 from .common import PORT_FWTYPES
 from .config import config
-from .flash_uf2_linux import dismount_uf2, wait_for_UF2_linux
+from .flash_uf2_linux import dismount_uf2_linux, wait_for_UF2_linux
 from .flash_uf2_macos import wait_for_UF2_macos
 from .flash_uf2_windows import wait_for_UF2_windows
 
@@ -29,9 +29,9 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     - copy the firmware file to the drive
     - wait for the device to restart (5s)
 
-    for Lunix :
-    pmount and pumount are used to mount and unmount the drive
-    as this is not done automatically by the OS in headless mode.
+    for Linux - to support headless operation ( GH Actions ) :
+        pmount and pumount are used to mount and unmount the drive
+        as this is not done automatically by the OS in headless mode.
     """
     if ".uf2" not in PORT_FWTYPES[mcu.port]:
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
@@ -63,7 +63,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     shutil.copy(fw_file, destination)
     log.success("Done copying, resetting the board and wait for it to restart")
     if sys.platform in ["linux"]:
-        dismount_uf2()
+        dismount_uf2_linux()
     for _ in track(range(5 + 2), description="Waiting for the board to restart", transient=True, refresh_per_second=2):
         time.sleep(1)  # 5 secs to short on linux
     return mcu

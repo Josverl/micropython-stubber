@@ -20,5 +20,5 @@ def test_find(test_fw_path: Path):
         fw_folder=test_fw_path, port="samd", board_id="SEEED_WIO_TERMINAL", version="preview"
     )
     assert len(fws) > 0
-    assert fws[0]["board"] == "SEEED_WIO_TERMINAL"
-    assert int(fws[-1]["build"]) > 0
+    assert fws[0].board == "SEEED_WIO_TERMINAL"
+    assert int(fws[-1].build) > 0

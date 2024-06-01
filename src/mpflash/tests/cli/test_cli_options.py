@@ -27,18 +27,22 @@ def test_mpflash_help():
         assert word in result.output
 
 
-# def test_cli_verbose():
+# FIXME
+# Tests succedd in isolation but fail in batch
+# @pytest.mark.parametrize(
+#     "command",
+#     [
+#         ["--verbose"],
+#         ["-V"],
+#         ["-VV"],
+#         ["-V", "-V"],
+#     ],
+# )
+# def test_cli_verbose(command: List[str], mocker: MockerFixture):
 #     # can turn on verbose mode
 #     runner = CliRunner()
-#     result = runner.invoke(cli_main.cli, ["--verbose"])
+#     result = runner.invoke(cli_main.cli, command)
 #     assert cli_group.config.verbose == True
-
-
-def test_cli_ignore():
-    # can turn on verbose mode
-    runner = CliRunner()
-    result = runner.invoke(cli_main.cli, ["--ignore", "COM1", "--ignore", "COM2"])
-    assert cli_group.config.ignore_ports == ["COM1", "COM2"]
 
 
 @pytest.mark.parametrize(

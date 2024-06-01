@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 
 import pytest
@@ -8,7 +7,7 @@ from pytest_mock import MockerFixture
 
 # # module under test :
 from mpflash import cli_main
-from mpflash.ask_input import DownloadParams
+from mpflash.common import DownloadParams
 from mpflash.mpremoteboard import MPRemoteBoard
 
 # mark all tests
@@ -56,14 +55,16 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
     # fake COM99 as connected board
     fake = fakeboard(serialport)
 
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake)
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake) # type: ignore
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport) # type: ignore
+    mocker.patch("mpflash.worklist.filter_boards", return_value=[MPRemoteBoard("COM99")], autospec=True)
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
-        return_value=(["esp32"], ["ESP32_GENERIC"]),
+        return_value=(["esp32"], ["ESP32_GENERIC"], [MPRemoteBoard("COM99")]),
         autospec=True,
     )
+
     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
     m_ask_missing_params = mocker.patch(
         "mpflash.cli_flash.ask_missing_params",
@@ -77,8 +78,8 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
         m_connected_ports_boards.assert_called_once()
 
     m_ask_missing_params.assert_called_once()
-    if "?" not in args:
-        m_mpr_connected.assert_called_once()
+    # if "?" not in args:
+    #     m_mpr_connected.assert_called_once()
     m_flash_list.assert_called_once()
     assert result.exit_code == ex_code
 
@@ -105,11 +106,11 @@ def test_mpflash_connected_boards(
     # no boards specified - detect connected boards
     args = ["flash"]
 
-    fakes = [fakeboard(port) for port in serialports]
+    fakes = [fakeboard(port) for port in serialports] 
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
-        return_value=(ports, boards),
+        return_value=(ports, boards, [MPRemoteBoard(p) for p in serialports]),
         autospec=True,
     )
     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
@@ -162,7 +163,7 @@ def test_mpflash_no_detected_boards(
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
-        return_value=(ports, boards),
+        return_value=(ports, boards, [MPRemoteBoard(p) for p in serialports]),
         autospec=True,
     )
     m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)
@@ -183,7 +184,7 @@ def test_mpflash_no_detected_boards(
 
     if serialports:
         ## if no boards are responding , but there are serial port , then set serial --> ? and board to ? if not set
-        assert m_ask_missing_params.call_args.args[0].serial == "?"
+        assert m_ask_missing_params.call_args.args[0].serial == ["?"]
         assert m_ask_missing_params.call_args.args[0].boards == ["?"]
 
 

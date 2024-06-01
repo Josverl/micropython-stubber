@@ -2,6 +2,8 @@
 
 # import rich_click as click
 
+import os
+
 import click
 from loguru import logger as log
 
@@ -12,19 +14,24 @@ from .cli_list import cli_list_mcus
 
 
 def mpflash():
-    cli.add_command(cli_flash_board)
     cli.add_command(cli_list_mcus)
     cli.add_command(cli_download)
+    cli.add_command(cli_flash_board)
+
     # cli(auto_envvar_prefix="MPFLASH")
-    try:
+    if False and os.environ.get("COMPUTERNAME") == "JOSVERL-S4":
+        # intentional less error suppression on dev machine
         result = cli(standalone_mode=False)
-        exit(result)
-    except AttributeError as e:
-        log.error(f"Error: {e}")
-        exit(-1)
-    except click.exceptions.ClickException as e:
-        log.error(f"Error: {e}")
-        exit(-2)
+    else:
+        try:
+            result = cli(standalone_mode=False)
+            exit(result)
+        except AttributeError as e:
+            log.error(f"Error: {e}")
+            exit(-1)
+        except click.exceptions.ClickException as e:
+            log.error(f"Error: {e}")
+            exit(-2)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
+from mpflash.common import FWInfo
 from mpflash.flash import enter_bootloader, flash_list
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.worklist import WorkList
@@ -34,17 +35,17 @@ def test_flash_list(mocker: MockerFixture, test_fw_path: Path, bootloader, port)
     todo: WorkList = [
         (
             board,
-            {
-                "board": "ESP32_GENERIC",
-                "port": "esp32",
+            FWInfo(
+                board="ESP32_GENERIC",
+                port="esp32",
                 #                "firmware": "https://micropython.org/resources/firmware/ESP32_GENERIC-20240222-v1.22.2.bin",
-                "preview": False,
-                "version": "1.22.2",
-                "build": "0",
-                "filename": "rp2/RPI_PICO_W-v1.22.2.uf2",  # Bit of a Hack : uf2 test depend on a .uf2 file
-                #                "ext": ".bin",
-                "variant": "ESP32_GENERIC",
-            },
+                preview=False,
+                version="1.22.2",
+                build="0",
+                filename="rp2/RPI_PICO_W-v1.22.2.uf2",  # Bit of a Hack : uf2 test depend on a .uf2 file
+                # "ext": ".bin",
+                variant="ESP32_GENERIC",
+            ),
         )
     ]
 

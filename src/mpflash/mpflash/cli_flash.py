@@ -1,19 +1,23 @@
 from pathlib import Path
+from typing import List
 
 import rich_click as click
 from loguru import logger as log
 
+# from mpflash.common import filtered_comports
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
+from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
 
-from .ask_input import FlashParams, ask_missing_params
+from .ask_input import ask_missing_params
 from .cli_download import connected_ports_boards
 from .cli_group import cli
 from .cli_list import show_mcus
+from .common import FlashParams
 from .config import config
 from .flash import flash_list
-from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_worklist, single_auto_worklist
+from .worklist import WorkList, full_auto_worklist, manual_worklist, single_auto_worklist
 
 # #########################################################################################################
 # CLI
@@ -48,10 +52,22 @@ from .worklist import MPRemoteBoard, WorkList, full_auto_worklist, manual_workli
     "--serial-port",
     "-s",
     "serial",
-    default="auto",
+    default=["*"],
+    multiple=True,
     show_default=True,
     help="Which serial port(s) to flash",
-    metavar="SERIAL_PORT",
+    metavar="SERIALPORT",
+)
+@click.option(
+    "--ignore",
+    "-i",
+    is_eager=True,
+    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
+    multiple=True,
+    default=[],
+    envvar="MPFLASH_IGNORE",
+    show_default=True,
+    metavar="SERIALPORT",
 )
 @click.option(
     "--port",
@@ -101,36 +117,28 @@ def cli_flash_board(**kwargs) -> int:
         kwargs["boards"] = [kwargs.pop("board")]
 
     params = FlashParams(**kwargs)
+    params.versions = list(params.versions)
+    params.boards = list(params.boards)
+    params.serial = list(params.serial)
+    params.ignore = list(params.ignore)
 
-    # make it simple for the user to flash one board
-    # by asking for the serial port if not specified
-    if params.boards == ["?"] and params.serial == "auto":
-        params.serial = "?"
+    # make it simple for the user to flash one board by asking for the serial port if not specified
+    if params.boards == ["?"] and params.serial == "*":
+        params.serial = ["?"]
 
     # Detect connected boards if not specified,
     # and ask for input if boards cannot be detected
+    all_boards: List[MPRemoteBoard] = []
     if not params.boards or params.boards == []:
         # nothing specified - detect connected boards
-        params.ports, params.boards = connected_ports_boards()
+        params.ports, params.boards, all_boards = connected_ports_boards(include=params.ports, ignore=params.ignore)
         if params.boards == []:
             # No MicroPython boards detected, but it could be unflashed or not in bootloader mode
             # Ask for serial port and board_id to flash
-            params.serial = "?"
+            params.serial = ["?"]
             params.boards = ["?"]
     else:
-        for board_id in params.boards:
-            if board_id == "":
-                params.boards.remove(board_id)
-                continue
-            if " " in board_id:
-                try:
-                    info = find_known_board(board_id)
-                    if info:
-                        log.info(f"Resolved board description: {info['board']}")
-                        params.boards.remove(board_id)
-                        params.boards.append(info["board"])
-                except Exception as e:
-                    log.warning(f"unable to resolve board description: {e}")
+        resolve_board_ids(params)
 
     # Ask for missing input if needed
     params = ask_missing_params(params)
@@ -143,27 +151,33 @@ def cli_flash_board(**kwargs) -> int:
     if len(params.versions) > 1:
         log.error(f"Only one version can be flashed at a time, not {params.versions}")
         raise MPFlashError("Only one version can be flashed at a time")
-    # if len(params.boards) > 1:
-    #     log.error(f"Only one board can be flashed at a time, not {params.boards}")
-    #     raise MPFlashError("Only one board can be flashed at a time")
 
     params.versions = [clean_version(v) for v in params.versions]
     worklist: WorkList = []
     # if serial port == auto and there are one or more specified/detected boards
-    if params.serial == "auto" and params.boards:
-        worklist = full_auto_worklist(version=params.versions[0], fw_folder=params.fw_folder)
+    if params.serial == ["*"] and params.boards:
+        if not all_boards:
+            log.trace("No boards detected yet, scanning for connected boards")
+            _, _, all_boards = connected_ports_boards(include=params.ports, ignore=params.ignore)
+        worklist = full_auto_worklist(
+            all_boards=all_boards,
+            version=params.versions[0],
+            fw_folder=params.fw_folder,
+            include=params.serial,
+            ignore=params.ignore,
+        )
     elif params.versions[0] and params.boards[0] and params.serial:
-        # A single serial port including the board / variant
+        # A one or more  serial port including the board / variant
         worklist = manual_worklist(
-            params.versions[0],
-            params.fw_folder,
-            params.serial,
-            params.boards[0],
+            params.serial[0],
+            board_id=params.boards[0],
+            version=params.versions[0],
+            fw_folder=params.fw_folder,
         )
     else:
         # just this serial port on auto
         worklist = single_auto_worklist(
-            serial_port=params.serial,
+            serial=params.serial[0],
             version=params.versions[0],
             fw_folder=params.fw_folder,
         )
@@ -180,3 +194,19 @@ def cli_flash_board(**kwargs) -> int:
     else:
         log.error("No boards were flashed")
         return 1
+
+
+def resolve_board_ids(params):
+    """Resolve board descriptions to board_id, and remove empty strings from list of boards"""
+    for board_id in params.boards:
+        if board_id == "":
+            params.boards.remove(board_id)
+            continue
+        if " " in board_id:
+            try:
+                if info := find_known_board(board_id):
+                    log.info(f"Resolved board description: {info.board_id}")
+                    params.boards.remove(board_id)
+                    params.boards.append(info.board_id)
+            except Exception as e:
+                log.warning(f"Unable to resolve board description: {e}")

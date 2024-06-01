@@ -1,18 +1,18 @@
 """CLI to Download MicroPython firmware for specific ports, boards and versions."""
 
 from pathlib import Path
-from typing import List, Tuple
 
 import rich_click as click
 from loguru import logger as log
 
+from mpflash.connected import connected_ports_boards
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
 from mpflash.vendor.versions import clean_version
 
-from .ask_input import DownloadParams, ask_missing_params
+from .ask_input import ask_missing_params
 from .cli_group import cli
-from .cli_list import list_mcus
+from .common import DownloadParams
 from .config import config
 from .download import download
 
@@ -51,6 +51,28 @@ from .download import download
     metavar="BOARD_ID or ?",
 )
 @click.option(
+    "--serial",
+    "--serial-port",
+    "-s",
+    "serial",
+    default=["*"],
+    show_default=True,
+    multiple=True,
+    help="Which serial port(s) to flash",
+    metavar="SERIALPORT",
+)
+@click.option(
+    "--ignore",
+    "-i",
+    is_eager=True,
+    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
+    multiple=True,
+    default=[],
+    envvar="MPFLASH_IGNORE",
+    show_default=True,
+    metavar="SERIALPORT",
+)
+@click.option(
     "--clean/--no-clean",
     default=True,
     show_default=True,
@@ -67,6 +89,10 @@ def cli_download(**kwargs) -> int:
     params = DownloadParams(**kwargs)
     params.versions = list(params.versions)
     params.boards = list(params.boards)
+    params.serial = list(params.serial)
+    params.ignore = list(params.ignore)
+
+    # all_boards: List[MPRemoteBoard] = []
     if params.boards:
         if not params.ports:
             # no ports specified - resolve ports from specified boards by resolving board IDs
@@ -74,12 +100,12 @@ def cli_download(**kwargs) -> int:
                 if board != "?":
                     try:
                         board_ = find_known_board(board)
-                        params.ports.append(board_["port"])
+                        params.ports.append(board_.port)
                     except MPFlashError as e:
                         log.error(f"{e}")
     else:
         # no boards specified - detect connected ports and boards
-        params.ports, params.boards = connected_ports_boards()
+        params.ports, params.boards, _ = connected_ports_boards(include=params.serial, ignore=params.ignore)
 
     params = ask_missing_params(params)
     if not params:  # Cancelled by user
@@ -100,19 +126,3 @@ def cli_download(**kwargs) -> int:
     except MPFlashError as e:
         log.error(f"{e}")
         return 1
-
-
-def connected_ports_boards() -> Tuple[List[str], List[str]]:
-    """
-    Returns a tuple containing lists of unique ports and boards from the connected MCUs.
-    Boards that are physically connected, but give no tangible response are ignored.
-
-    Returns:
-        A tuple containing two lists:
-            - A list of unique ports where MCUs are connected.
-            - A list of unique board names of the connected MCUs.
-    """
-    mpr_boards = [b for b in list_mcus() if b.connected]
-    ports = list({b.port for b in mpr_boards})
-    boards = list({b.board for b in mpr_boards})
-    return ports, boards

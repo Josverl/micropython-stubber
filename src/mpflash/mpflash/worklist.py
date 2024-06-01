@@ -3,10 +3,9 @@ from typing import Dict, List, Optional, Tuple
 
 from loguru import logger as log
 
-from mpflash.common import FWInfo
+from mpflash.common import FWInfo, filtered_comports
 from mpflash.errors import MPFlashError
 
-from .config import config
 from .downloaded import find_downloaded_firmware
 from .list import show_mcus
 from .mpboard_id import find_known_board
@@ -60,14 +59,53 @@ def auto_update(
 
         # just use the last firmware
         fw_info = board_firmwares[-1]
-        log.info(f"Found {target_version} firmware {fw_info['filename']} for {mcu.board} on {mcu.serialport}.")
+        log.info(f"Found {target_version} firmware {fw_info.filename} for {mcu.board} on {mcu.serialport}.")
         wl.append((mcu, fw_info))
     return wl
 
 
-def single_auto_worklist(
+def manual_worklist(
+    serial: str,
     *,
-    serial_port: str,
+    board_id: str,
+    version: str,
+    fw_folder: Path,
+) -> WorkList:
+    """Create a worklist for a single board specified manually.
+
+    Args:
+        serial (str): Serial port of the board
+        board (str): Board_ID
+        version (str): Firmware version
+        fw_folder (Path): Path to the firmware folder
+
+    Returns:
+        WorkList: List of boards and firmware information to update
+    """
+    log.trace(f"Manual updating {serial} to {board_id} {version}")
+    mcu = MPRemoteBoard(serial)
+    # Lookup the matching port and cpu in board_info based in the board name
+    try:
+        info = find_known_board(board_id)
+        mcu.port = info.port
+        # need the CPU type for the esptool
+        mcu.cpu = info.cpu
+    except (LookupError, MPFlashError) as e:
+        log.error(f"Board {board_id} not found in board_info.zip")
+        log.exception(e)
+        return []
+    mcu.board = board_id
+    firmwares = find_downloaded_firmware(fw_folder=fw_folder, board_id=board_id, version=version, port=mcu.port)
+    if not firmwares:
+        log.error(f"No firmware found for {mcu.port} {board_id} version {version}")
+        return []
+    # use the most recent matching firmware
+    return [(mcu, firmwares[-1])]  # type: ignore
+
+
+def single_auto_worklist(
+    serial: str,
+    *,
     version: str,
     fw_folder: Path,
 ) -> WorkList:
@@ -81,13 +119,16 @@ def single_auto_worklist(
     Returns:
         WorkList: List of boards and firmware information to update
     """
-    conn_boards = [MPRemoteBoard(serial_port)]
+    log.trace(f"Auto updating {serial} to {version}")
+    conn_boards = [MPRemoteBoard(serial)]
     todo = auto_update(conn_boards, version, fw_folder)  # type: ignore # List / list
     show_mcus(conn_boards)  # type: ignore
     return todo
 
 
-def full_auto_worklist(*, version: str, fw_folder: Path) -> WorkList:
+def full_auto_worklist(
+    all_boards: List[MPRemoteBoard], *, include: List[str], ignore: List[str], version: str, fw_folder: Path
+) -> WorkList:
     """
     Create a worklist for all connected micropython boards based on the information retrieved from the board.
     This allows the firmware version of one or moae boards to be changed without needing to specify the port or board_id manually.
@@ -99,49 +140,31 @@ def full_auto_worklist(*, version: str, fw_folder: Path) -> WorkList:
     Returns:
         WorkList: List of boards and firmware information to update
     """
+    log.trace(f"Auto updating all boards to {version}")
+    if selected_boards := filter_boards(all_boards, include=include, ignore=ignore):
+        return auto_update(selected_boards, version, fw_folder)
+    else:
+        return []
+
+
+def filter_boards(
+    all_boards: List[MPRemoteBoard],
+    *,
+    include: List[str],
+    ignore: List[str],
+):
     try:
-        conn_boards = [
-            MPRemoteBoard(sp, update=True) for sp in MPRemoteBoard.connected_boards() if sp not in config.ignore_ports
+        comports = [
+            p.device
+            for p in filtered_comports(
+                ignore=ignore,
+                include=include,
+                bluetooth=False,
+            )
         ]
+        selected_boards = [b for b in all_boards if b.serialport in comports]
+        # [MPRemoteBoard(port.device, update=True) for port in comports]
     except ConnectionError as e:
         log.error(f"Error connecting to boards: {e}")
         return []
-    return auto_update(conn_boards, version, fw_folder)  # type: ignore
-
-
-def manual_worklist(
-    version: str,
-    fw_folder: Path,
-    serial_port: str,
-    board: str,
-    # port: str,
-) -> WorkList:
-    """Create a worklist for a single board specified manually.
-
-    Args:
-        version (str): Firmware version
-        fw_folder (Path): Path to the firmware folder
-        serial_port (str): Serial port of the board
-        board (str): Board name
-
-    Returns:
-        WorkList: List of boards and firmware information to update
-    """
-    mcu = MPRemoteBoard(serial_port)
-    # TODO : Find a way to avoid needing to specify the port
-    # Lookup the matching port and cpu in board_info based in the board name
-    try:
-        info = find_known_board(board)
-        mcu.port = info["port"]
-        # need the CPU type for the esptool
-        mcu.cpu = info["cpu"]
-    except (LookupError, MPFlashError) as e:
-        log.error(f"Board {board} not found in board_info.json")
-        return []
-    mcu.board = board
-    firmwares = find_downloaded_firmware(fw_folder=fw_folder, board_id=board, version=version, port=mcu.port)
-    if not firmwares:
-        log.error(f"No firmware found for {mcu.port} {board} version {version}")
-        return []
-        # use the most recent matching firmware
-    return [(mcu, firmwares[-1])]  # type: ignore
+    return selected_boards  # type: ignore
