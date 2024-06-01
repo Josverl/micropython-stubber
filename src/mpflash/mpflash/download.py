@@ -290,5 +290,10 @@ def download(
     except (PermissionError, FileNotFoundError) as e:
         log.critical(f"Could not create folder {destination}")
         raise MPFlashError(f"Could not create folder {destination}") from e
+    try:
+        result = download_firmwares(destination, ports, boards, versions, force=force, clean=clean)
+    except requests.exceptions.RequestException as e:
+        log.exception(e)
+        raise MPFlashError("Could not connect to micropython.org") from e
 
-    return download_firmwares(destination, ports, boards, versions, force=force, clean=clean)
+    return result
