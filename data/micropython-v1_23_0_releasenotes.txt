@@ -1,0 +1,15 @@
+# https://github.com/micropython/micropython/releases/tag/v1.23.0
+
+
+# all  ports
+vfs
+tls
+
+
+
+# stm32
+openamp 
+
+# webassembly
+js
+jsffi

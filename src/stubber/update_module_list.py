@@ -12,8 +12,6 @@ for this :
     - board/createstubs.py 
 
 - TODO: remove the frozen modules from this list
-- TODO: bump patch number if there are actual changes
-
 """
 
 from pathlib import Path
@@ -32,7 +30,7 @@ def read_modules(path: Optional[Path] = None) -> Set[str]:
     """
     path = Path(path or "./data")
     assert path
-    all_modules = set()
+    all_modules: Set[str] = set()
     for file in path.glob("*.txt"):
         log.debug(f"processing: {file.name}")
         with file.open("r") as f:
@@ -45,27 +43,7 @@ def read_modules(path: Optional[Path] = None) -> Set[str]:
                     file_mods = [m for m in file_mods if not m.endswith("_test")]
                     all_modules = set(all_modules | set(file_mods))
     log.trace(">" * 40)
-
-    return all_modules
-
-
-# def wrapped(modules: Union[Set, List]) -> str:
-#     "wrap code line at spaces"
-#     long_line = str(modules)
-#     _wrapped = "        self.modules = "
-#     IDENT = len(_wrapped)
-#     MAX_WIDTH = 135
-
-#     # find seperator
-#     while len(long_line) > MAX_WIDTH:
-#         p1 = long_line.find("', ", MAX_WIDTH)
-#         # drop space
-#         p1 += 3
-#         short = long_line[0 : p1 - 1]
-#         _wrapped += short + "\n" + " " * IDENT
-#         long_line = long_line[p1 - 1 :]
-#     _wrapped += long_line
-#     return _wrapped
+    return {m.replace(".", "/") for m in all_modules}
 
 
 def update_module_list():
