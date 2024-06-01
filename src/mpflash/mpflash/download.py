@@ -32,8 +32,18 @@ MICROPYTHON_ORG_URL = "https://micropython.org/"
 # Regexes to remove dates and hashes in the filename that just get in the way
 RE_DATE = r"(-\d{8}-)"
 RE_HASH = r"(.g[0-9a-f]+\.)"
-# regex to extract the version from the firmware filename
-RE_VERSION_PREVIEW = r"(\d+\.\d+(\.\d+)?(-\w+.\d+)?)"
+# regex to extract the version and the build from the firmware filename
+# group 1 is the version, group 2 is the build
+RE_VERSION_PREVIEW = r"v([\d\.]+)-?(?:preview\.)?(\d+)?\."
+# 'RPI_PICO_W-v1.23.uf2'
+# 'RPI_PICO_W-v1.23.0.uf2'
+# 'RPI_PICO_W-v1.23.0-406.uf2'
+# 'RPI_PICO_W-v1.23.0-preview.406.uf2'
+# 'RPI_PICO_W-v1.23.0-preview.4.uf2'
+# 'RPI_PICO_W-v1.23.0.uf2'
+# 'https://micropython.org/resources/firmware/RPI_PICO_W-20240531-v1.24.0-preview.10.gc1a6b95bf.uf2'
+# 'https://micropython.org/resources/firmware/RPI_PICO_W-20240531-v1.24.0-preview.10.uf2'
+# 'RPI_PICO_W-v1.24.0-preview.10.gc1a6b95bf.uf2'
 
 
 # use functools.lru_cache to avoid needing to download pages multiple times
@@ -98,6 +108,7 @@ def board_firmware_urls(board_url: str, base_url: str, ext: str) -> List[str]:
 # The first run takes ~60 seconds to run for 4 ports , all boards
 # so it makes sense to cache the results and skip boards as soon as possible
 def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]:
+    # sourcery skip: use-getitem-for-re-match-groups
     """
     Retrieves a list of firmware information for the specified ports and boards.
 
@@ -146,13 +157,15 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
                 # board["firmware"] = _url
                 # board["preview"] = "preview" in _url  # type: ignore
                 if ver_match := re.search(RE_VERSION_PREVIEW, _url):
-                    fw_info.version = ver_match[1]
+                    fw_info.version = ver_match.group(1)
+                    fw_info.build = ver_match.group(2) or "0"
+                fw_info.preview = fw_info.build != "0"
+                # # else:
+                # #     board.$1= ""
+                # if "preview." in fw_info.version:
+                #     fw_info.build = fw_info.version.split("preview.")[-1]
                 # else:
-                #     board.$1= ""
-                if "preview." in fw_info.version:
-                    fw_info.build = fw_info.version.split("preview.")[-1]
-                else:
-                    fw_info.build = "0"
+                #     fw_info.build = "0"
 
                 fw_info.ext = Path(fw_info.firmware).suffix
                 fw_info.variant = fw_info.filename.split("-v")[0] if "-v" in fw_info.filename else ""
@@ -191,6 +204,11 @@ def download_firmwares(
     # relevant
 
     log.info(f"Found {len(unique_boards)} relevant unique firmwares")
+    if not unique_boards:
+        log.error("No relevant firmwares could be found on https://micropython.org/download")
+        log.info(f"{versions=} {ports=} {boards=}")
+        log.info("Please check the website for the latest firmware files or try the preview version.")
+        return 0
 
     firmware_folder.mkdir(exist_ok=True)
 
@@ -238,12 +256,15 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     board_urls = sorted(get_boards(ports, boards, clean), key=key_fw_ver_pre_ext_bld)
 
     log.debug(f"Total {len(board_urls)} firmwares")
+
     relevant = [
         board
         for board in board_urls
-        if board.board in boards and (board.version in versions or board.preview and preview)
-        # and b["port"] in ["esp32", "rp2"]
+        if board.version in versions and board.build == "0" and board.board in boards and not board.preview
     ]
+
+    if preview:
+        relevant.extend([board for board in board_urls if board.board in boards and board.preview])
     log.debug(f"Matching firmwares: {len(relevant)}")
     # select the unique boards
     unique_boards: List[FWInfo] = []
