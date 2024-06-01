@@ -113,6 +113,8 @@ inisetup
 interstate75
 io
 jpegdec
+js
+jsffi
 json
 lcd160cr
 lodepng
@@ -138,6 +140,7 @@ neopixel
 network
 ntptime
 onewire
+openamp
 os
 pcf85063a
 picoexplorer
@@ -216,6 +219,12 @@ urandom
 ure
 urequests
 urllib/urequest
+usb/device
+usb/device/cdc
+usb/device/hid
+usb/device/keyboard
+usb/device/midi
+usb/device/mouse
 uselect
 usocket
 ussl

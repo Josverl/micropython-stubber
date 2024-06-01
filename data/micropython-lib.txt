@@ -2,3 +2,13 @@
 
 # MicroPython now supplies SSL/TLS functionality in a new built-in `tls` # module.
 tls
+
+
+# usb hid 
+# https://github.com/micropython/micropython-lib/tree/50ed36fbeb919753bcc26ce13a8cffd7691d06ef/micropython/usb
+usb.device
+usb.device.hid
+usb.device.cdc
+usb.device.keyboard 
+usb.device.midi
+usb.device.mouse
