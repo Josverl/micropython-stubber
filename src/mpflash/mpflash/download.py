@@ -232,7 +232,7 @@ def download_firmwares(
                 continue
             writer.write(board.to_dict())
             downloaded += 1
-    log.info(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
+    log.success(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
     return downloaded + skipped
 
 
