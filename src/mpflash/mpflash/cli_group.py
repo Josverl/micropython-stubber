@@ -5,8 +5,8 @@ Additional comands are added in the submodules.
 
 import rich_click as click
 
-from .config import config
-from .logger import make_quiet, set_loglevel
+from .config import __version__, config
+from .logger import log, make_quiet, set_loglevel
 
 
 def cb_verbose(ctx, param, value):
@@ -17,6 +17,7 @@ def cb_verbose(ctx, param, value):
             set_loglevel("TRACE")
         else:
             set_loglevel("DEBUG")
+        log.debug(f"version: {__version__}")
     else:
         set_loglevel("INFO")
         config.verbose = False

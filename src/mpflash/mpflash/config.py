@@ -3,7 +3,16 @@
 from pathlib import Path
 from typing import List
 
+import pkg_resources
 import platformdirs
+
+
+def get_version():
+    name = __package__ or "mpflash"
+    try:
+        return pkg_resources.get_distribution(name).version
+    except pkg_resources.DistributionNotFound:
+        return "Package not found"
 
 
 class MPtoolConfig:
@@ -19,3 +28,4 @@ class MPtoolConfig:
 
 
 config = MPtoolConfig()
+__version__ = get_version()
