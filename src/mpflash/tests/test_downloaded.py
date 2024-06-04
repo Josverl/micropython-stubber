@@ -23,8 +23,12 @@ def test_downloaded_firmwares(mocker: MockerFixture, test_fw_path):
     [
         ("esp32", "ESP32_GENERIC", "preview", True),
         ("esp32", "GENERIC", "preview", True),
+        # Old and new names for PICO
         ("rp2", "RPI_PICO", "1.22.2", True),
         ("rp2", "PICO", "1.22.2", True),
+        # old name for PICO
+        ("rp2", "PICO", "1.19.1", True),
+        # old and new name for PICO_W
         ("rp2", "RPI_PICO_W", "1.22.2", True),
         ("rp2", "PICO_W", "1.22.2", True),
         ("fake", "NO_BOARD", "1.22.2", False),
