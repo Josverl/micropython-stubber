@@ -44,7 +44,23 @@ def _find_board_id_by_description(
     """
     Find the MicroPython BOARD_ID based on the description in the firmware
     using the pre-built board_info.json file
+
+    Parameters:
+    descr: str
+        Description of the board
+    short_descr: str
+        Short description of the board (optional)
+    version: str
+        Version of the MicroPython firmware
+    board_info: Path
+        Path to the board_info.json file (optional)
+
     """
+    # FIXME: functional overlap with
+    # src\mpflash\mpflash\mpboard_id\__init__.py find_known_board
+
+    if not short_descr and " with " in descr:
+        short_descr = descr.split(" with ")[0]
 
     candidate_boards = read_known_boardinfo(board_info)
 
@@ -58,10 +74,10 @@ def _find_board_id_by_description(
             # FIXME if latest stable is newer than the last version in the boardlist this will fail
             log.trace(f"Version {version} not found in board info, using latest known version {known_versions[-1]}")
             version = known_versions[-1]
-        version_matches = [b for b in candidate_boards if b.version.startswith(version)]
-        if not version_matches:
+        if version_matches := [b for b in candidate_boards if b.version.startswith(version)]:
+            candidate_boards = version_matches
+        else:
             raise MPFlashError(f"No board info found for version {version}")
-        candidate_boards = version_matches
     matches = [b for b in candidate_boards if b.description == descr]
     if not matches and short_descr:
         matches = [b for b in candidate_boards if b.description == short_descr]

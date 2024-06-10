@@ -77,10 +77,14 @@ def known_stored_boards(port: str, versions: Optional[List[str]] = None) -> List
 @lru_cache(maxsize=20)
 def find_known_board(board_id: str) -> Board:
     """Find the board for the given BOARD_ID or 'board description' and return the board info as a Board object"""
+    # FIXME : functional overlap with:
+    # mpboard_id\board_id.py _find_board_id_by_description
     info = read_known_boardinfo()
     for board_info in info:
         if board_id in (board_info.board_id, board_info.description):
             if not board_info.cpu:
+                # safeguard for older board_info.json files
+                print(f"Board {board_id} has no CPU info, using port as CPU")
                 if " with " in board_info.description:
                     board_info.cpu = board_info.description.split(" with ")[-1]
                 else:

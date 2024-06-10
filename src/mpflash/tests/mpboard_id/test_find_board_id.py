@@ -39,7 +39,7 @@ HERE = Path(__file__).parent
         ("esp32_v1.22.0-a", None, "ESP32 module with ESP32", None, "GENERIC"),
         # PICO
         ("pico_v1.19.1-old", "v1.19.1", "Raspberry Pi Pico with RP2040", "Raspberry Pi Pico", "PICO"),
-        ("pico_v1.19.1-new", "v1.19.1", "Raspberry Pi Pico with RP2040", "Raspberry Pi Pico", "RPI_PICO"),
+        ("pico_v1.23.0", "v1.23.0", "Raspberry Pi Pico with RP2040", "Raspberry Pi Pico", "RPI_PICO"),
         # Error cases
         ("error-1", "stable", "Board X", "X", None),
         ("error-2", "stable", "Board A", "A", None),

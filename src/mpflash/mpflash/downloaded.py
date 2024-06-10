@@ -27,7 +27,7 @@ def downloaded_firmwares(fw_folder: Path) -> List[FWInfo]:
 def find_downloaded_firmware(
     *,
     board_id: str,
-    version: str = "",
+    version: str = "",  # v1.2.3
     port: str = "",
     variants: bool = False,
     fw_folder: Optional[Path] = None,
@@ -43,16 +43,16 @@ def find_downloaded_firmware(
         log.error("No firmware files found. Please download the firmware first.")
         return []
     # filter by version
-    version = clean_version(version, drop_v=True)
+    version = clean_version(version)
     fw_list = filter_downloaded_fwlist(fw_list, board_id, version, port, variants, selector)
 
     if not fw_list and trie < 3:
         log.info(f"Try ({trie+1}) to find a firmware for the board {board_id}")
         if trie == 1:
-            # ESP board naming conventions have changed by adding a PORT refix
+            # ESP board naming conventions have changed by adding a PORT prefix
             if port.startswith("esp") and not board_id.startswith(port.upper()):
                 board_id = f"{port.upper()}_{board_id}"
-            # RP2 board naming conventions have changed by adding a _RPIprefix
+            # RP2 board naming conventions have changed by adding a _RPI prefix
             if port == "rp2" and not board_id.startswith("RPI_"):
                 board_id = f"RPI_{board_id}"
         elif trie == 2:
@@ -75,7 +75,7 @@ def find_downloaded_firmware(
 def filter_downloaded_fwlist(
     fw_list: List[FWInfo],
     board_id: str,
-    version: str,
+    version: str,  # v1.2.3
     port: str,
     # preview: bool,
     variants: bool,
@@ -86,7 +86,9 @@ def filter_downloaded_fwlist(
         # never get a preview for an older version
         fw_list = [fw for fw in fw_list if fw.preview]
     else:
-        fw_list = [fw for fw in fw_list if fw.version == version]
+        # FWInfo version has no v1.2.3 prefix
+        _version = clean_version(version, drop_v=True)
+        fw_list = [fw for fw in fw_list if fw.version == _version]
 
     # filter by port
     if port:
