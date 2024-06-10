@@ -19,6 +19,7 @@ from loguru import logger as log
 from rich.progress import track
 
 from mpflash.common import PORT_FWTYPES, FWInfo
+from mpflash.downloaded import clean_downloaded_firmwares
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import get_known_ports
 from mpflash.vendor.versions import clean_version
@@ -194,6 +195,17 @@ def download_firmwares(
     force: bool = False,
     clean: bool = True,
 ) -> int:
+    """
+    Downloads firmware files based on the specified firmware folder, ports, boards, versions, force flag, and clean flag.
+
+    Args:
+        firmware_folder : The folder to save the downloaded firmware files.
+        ports : The list of ports to check for firmware.
+        boards : The list of boards to download firmware for.
+        versions : The list of versions to download firmware for.
+        force : A flag indicating whether to force the download even if the firmware file already exists.
+        clean : A flag indicating to clean the date from the firmware filename.
+    """
     skipped = downloaded = 0
     versions = [] if versions is None else [clean_version(v) for v in versions]
     # handle renamed boards
@@ -234,6 +246,8 @@ def download_firmwares(
                 continue
             writer.write(board.to_dict())
             downloaded += 1
+    if downloaded > 0:
+        clean_downloaded_firmwares(firmware_folder)
     log.success(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
     return downloaded + skipped
 
@@ -295,7 +309,7 @@ def download(
         boards : The list of boards to download firmware for.
         versions : The list of versions to download firmware for.
         force : A flag indicating whether to force the download even if the firmware file already exists.
-        clean : A flag indicating whether to perform a clean download.
+        clean : A flag indicating whether to clean the date from the firmware filename.
 
     Returns:
         int: The number of downloaded firmware files.
@@ -308,7 +322,6 @@ def download(
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
         raise MPFlashError("No boards found")
 
-    # versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     try:
         destination.mkdir(exist_ok=True, parents=True)
     except (PermissionError, FileNotFoundError) as e:

@@ -24,6 +24,21 @@ def downloaded_firmwares(fw_folder: Path) -> List[FWInfo]:
     return firmwares
 
 
+def clean_downloaded_firmwares(fw_folder: Path) -> None:
+    """
+    Remove duplicate entries from the firmware.jsonl file, keeping the latest one
+    uniqueness is based on the filename
+    """
+    firmwares = downloaded_firmwares(fw_folder)
+    if not firmwares:
+        return
+    # keep the latest entry
+    unique_fw = {fw.filename: fw for fw in firmwares}
+    with jsonlines.open(fw_folder / "firmware.jsonl", "w") as writer:
+        for fw in unique_fw.values():
+            writer.write(fw.to_dict())
+    log.info(f"Removed duplicate entries from firmware.jsonl in {fw_folder}")
+
 def find_downloaded_firmware(
     *,
     board_id: str,
