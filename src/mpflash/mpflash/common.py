@@ -47,7 +47,7 @@ class FWInfo:
     firmware: str = field(default="")  # url or path to original firmware image
     variant: str = field(default="")  # MicroPython variant
     preview: bool = field(default=False)  # True if the firmware is a preview version
-    version: str = field(default="")  # MicroPython version
+    version: str = field(default="")  # MicroPython version (NO v prefix)
     url: str = field(default="")  # url to the firmware image download folder
     build: str = field(default="0")  # The build = number of commits since the last release
     ext: str = field(default="")  # the file extension of the firmware

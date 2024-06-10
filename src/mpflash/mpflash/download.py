@@ -21,6 +21,7 @@ from rich.progress import track
 from mpflash.common import PORT_FWTYPES, FWInfo
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import get_known_ports
+from mpflash.vendor.versions import clean_version
 
 # avoid conflict with the ujson used by MicroPython
 jsonlines.ujson = None  # type: ignore
@@ -157,7 +158,7 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
                 # board["firmware"] = _url
                 # board["preview"] = "preview" in _url  # type: ignore
                 if ver_match := re.search(RE_VERSION_PREVIEW, _url):
-                    fw_info.version = ver_match.group(1)
+                    fw_info.version = clean_version(ver_match.group(1))
                     fw_info.build = ver_match.group(2) or "0"
                 fw_info.preview = fw_info.build != "0"
                 # # else:
@@ -194,8 +195,9 @@ def download_firmwares(
     clean: bool = True,
 ) -> int:
     skipped = downloaded = 0
-    if versions is None:
-        versions = []
+    versions = [] if versions is None else [clean_version(v) for v in versions]
+    # handle renamed boards
+    boards = add_renamed_boards(boards)
 
     unique_boards = get_firmware_list(ports, boards, versions, clean)
 
@@ -305,6 +307,7 @@ def download(
     if not boards:
         log.critical("No boards found, please connect a board or specify boards to download firmware for.")
         raise MPFlashError("No boards found")
+
     # versions = [clean_version(v, drop_v=True) for v in versions]  # remove leading v from version
     try:
         destination.mkdir(exist_ok=True, parents=True)
@@ -318,3 +321,28 @@ def download(
         raise MPFlashError("Could not connect to micropython.org") from e
 
     return result
+
+
+def add_renamed_boards(boards: List[str]) -> List[str]:
+    """
+    Adds the renamed boards to the list of boards.
+
+    Args:
+        boards : The list of boards to add the renamed boards to.
+
+    Returns:
+        List[str]: The list of boards with the renamed boards added.
+
+    """
+    renamed = {
+        "PICO": ["RPI_PICO"],
+        "PICO_W": ["RPI_PICO_W"],
+        "GENERIC": ["ESP32_GENERIC", "ESP8266_GENERIC"],  # just add both of them
+    }
+    _boards = boards.copy()
+    for board in boards:
+        if board in renamed and renamed[board] not in boards:
+            _boards.extend(renamed[board])
+        if board != board.upper() and board.upper() not in boards:
+            _boards.append(board.upper())
+    return _boards

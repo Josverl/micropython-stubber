@@ -13,10 +13,11 @@ HERE = Path(__file__).parent
 
 
 def write_boardinfo_json(board_list: List[Board], *, folder: Path):
-    """Writes the board information to JSON and CSV files.
+    """Writes the board information to a JSON file.
 
     Args:
         board_list (List[Board]): The list of Board objects.
+        folder (Path): The folder where the compressed JSON file will be saved.
     """
     import zipfile
 
