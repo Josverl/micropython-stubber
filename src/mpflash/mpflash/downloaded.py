@@ -39,6 +39,7 @@ def clean_downloaded_firmwares(fw_folder: Path) -> None:
             writer.write(fw.to_dict())
     log.info(f"Removed duplicate entries from firmware.jsonl in {fw_folder}")
 
+
 def find_downloaded_firmware(
     *,
     board_id: str,
@@ -53,6 +54,7 @@ def find_downloaded_firmware(
         selector = {}
     fw_folder = fw_folder or config.firmware_folder
     # Use the information in firmwares.jsonl to find the firmware file
+    log.debug(f"{trie}] Looking for firmware for {board_id} {version} ")
     fw_list = downloaded_firmwares(fw_folder)
     if not fw_list:
         log.error("No firmware files found. Please download the firmware first.")
@@ -102,12 +104,13 @@ def filter_downloaded_fwlist(
         fw_list = [fw for fw in fw_list if fw.preview]
     else:
         # FWInfo version has no v1.2.3 prefix
-        _version = clean_version(version, drop_v=True)
-        fw_list = [fw for fw in fw_list if fw.version == _version]
-
+        _version = {clean_version(version, drop_v=True), clean_version(version, drop_v=False)}
+        fw_list = [fw for fw in fw_list if fw.version in _version]
+    log.trace(f"Filtering firmware for {version} : {len(fw_list)} found.")
     # filter by port
     if port:
         fw_list = [fw for fw in fw_list if fw.port == port]
+        log.trace(f"Filtering firmware for {port} : {len(fw_list)} found.")
 
     if board_id:
         if variants:
@@ -116,6 +119,7 @@ def filter_downloaded_fwlist(
         else:
             # the firmware variant should match exactly the board_id
             fw_list = [fw for fw in fw_list if fw.variant == board_id]
+        log.trace(f"Filtering firmware for {board_id} : {len(fw_list)} found.")
     if selector and port in selector:
         fw_list = [fw for fw in fw_list if fw.filename.endswith(selector[port])]
     return fw_list
