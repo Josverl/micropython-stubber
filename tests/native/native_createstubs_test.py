@@ -1,6 +1,5 @@
 # run createstubs in the unix version of micropython
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path

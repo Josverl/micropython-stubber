@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
-from mock import MagicMock
+
 
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
@@ -15,7 +15,7 @@ from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 
 # Module Under Test
 from stubber.freeze.get_frozen import freeze_any, get_manifests
-from stubber.publish.defaults import GENERIC_L, GENERIC_U
+from stubber.publish.defaults import GENERIC_U
 from stubber.utils.repos import switch
 
 pytestmark = [pytest.mark.stubber]
@@ -258,14 +258,14 @@ def test_freeze_any_mocked(
     m_freeze_one_manifest_2 = mocker.patch(
         "stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1
     )
-    x = freeze_any(
+    freeze_any(
         tmp_path,
         version=mpy_version,
         mpy_path=testrepo_micropython,
         mpy_lib_path=testrepo_micropython_lib,
     )
     # calls = m_freeze_folders.call_count + m_freeze_one_manifest_1.call_count + m_freeze_one_manifest_2.call_count
-    calls = m_freeze_folders.call_count + m_freeze_one_manifest_2.call_count
+    calls = m_freeze_folders.call_count + m_freeze_one_manifest_2.call_count # type: ignore
     print(f" m_freeze_folders.call_count {m_freeze_folders.call_count}")
     # print(f" m_freeze_one_manifest_1.call_count {m_freeze_one_manifest_1.call_count}")
     print(f" m_freeze_one_manifest_2.call_count {m_freeze_one_manifest_2.call_count}")
