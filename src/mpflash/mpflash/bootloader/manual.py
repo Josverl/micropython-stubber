@@ -1,3 +1,5 @@
+"""Manual bootloader mode entry for various MCUs."""
+
 from click.exceptions import Abort
 from rich.console import Console
 from rich.highlighter import RegexHighlighter
@@ -5,7 +7,7 @@ from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.theme import Theme
 
-from mpflash.logger import console, log
+# from mpflash.logger import console, log
 from mpflash.mpremoteboard import MPRemoteBoard
 
 
@@ -97,4 +99,4 @@ Please put your {mcu.port.upper()} device into bootloader mode by:
         answer = Confirm.ask("Press Enter to continue", default="y")
     except Abort:
         return False
-    return answer in ["y", True]
+    return answer in ["y", "Y", True]

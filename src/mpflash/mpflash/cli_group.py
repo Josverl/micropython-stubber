@@ -3,8 +3,6 @@ Main entry point for the CLI group.
 Additional comands are added in the submodules.
 """
 
-from typing import Any, Dict
-
 import rich_click as click
 
 from mpflash.vendor.click_aliases import ClickAliasedGroup

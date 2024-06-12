@@ -3,15 +3,12 @@
 # sourcery skip: snake-case-functions
 from __future__ import annotations
 
-import sys
 import time
 from pathlib import Path
 from typing import Optional
 
-from loguru import logger as log
 from rich.progress import track
 
-from .flash_uf2_boardid import get_board_id
 
 
 def wait_for_UF2_macos(s_max: int = 10) -> Optional[Path]:

@@ -27,7 +27,7 @@ def test_flash_list(mocker: MockerFixture, test_fw_path: Path, bootloader, port)
     m_flash_uf2 = mocker.patch("mpflash.flash.flash_uf2")
     m_flash_stm32 = mocker.patch("mpflash.flash.flash_stm32")
     m_flash_esp = mocker.patch("mpflash.flash.flash_esp")
-    m_mpr_run = mocker.patch("mpflash.bootloader.MPRemoteBoard.run_command")
+    m_mpr_run = mocker.patch("mpflash.bootloader.MPRemoteBoard.run_command") # type: ignore
     m_bootloader = mocker.patch("mpflash.flash.enter_bootloader")
 
     board = MPRemoteBoard("COM1")

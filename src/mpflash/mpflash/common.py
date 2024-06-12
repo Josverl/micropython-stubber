@@ -94,8 +94,9 @@ class DownloadParams(Params):
 class BootloaderMethod(Enum):
     MANUAL = "manual"
     MPY = "mpy"
-    TOUCH_1200BPS = "touch1200bps"
+    TOUCH_1200 = "touch1200"
     NONE = "none"
+
 
 
 @dataclass

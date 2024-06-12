@@ -1,15 +1,11 @@
-from pathlib import Path
 from typing import List
 
 import pytest
 from click.testing import CliRunner
-from mock import Mock
 from pytest_mock import MockerFixture
 
 # # module under test :
 from mpflash import cli_main
-from mpflash.common import DownloadParams
-from mpflash.mpremoteboard import MPRemoteBoard
 
 # mark all tests
 pytestmark = pytest.mark.mpflash

@@ -1,7 +1,4 @@
-import sys
 import time
-
-import serial
 
 from mpflash.common import BootloaderMethod
 from mpflash.errors import MPFlashError
@@ -9,6 +6,8 @@ from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .manual import enter_bootloader_manual
+from .micropython import enter_bootloader_mpy
+from .touch1200 import enter_bootloader_cdc_1200bps
 
 
 def enter_bootloader(
@@ -27,7 +26,7 @@ def enter_bootloader(
         result = enter_bootloader_mpy(mcu, timeout=timeout)
     elif method == BootloaderMethod.MANUAL:
         result = enter_bootloader_manual(mcu, timeout=timeout)
-    elif method == BootloaderMethod.TOUCH_1200BPS:
+    elif method == BootloaderMethod.TOUCH_1200:
         result = enter_bootloader_cdc_1200bps(mcu, timeout=timeout)
     else:
         raise MPFlashError(f"Unknown bootloader method {method}")
@@ -35,45 +34,3 @@ def enter_bootloader(
         time.sleep(wait_after)
     log.error(f"Failed to enter bootloader on {mcu.serialport}")
     return result
-
-
-def enter_bootloader_mpy(mcu: MPRemoteBoard, timeout: int = 10):
-    """Enter the bootloader mode for the board"""
-    mcu.run_command("bootloader", timeout=timeout)
-    # todo: check if mpremote command was successful
-    return True
-
-
-def enter_bootloader_cdc_1200bps(mcu: MPRemoteBoard, timeout: int = 10):
-    if sys.platform == "win32":
-        log.warning("Touch 1200bps method is currently not supported on Windows, switching to manual")
-        return enter_bootloader_manual(mcu, timeout=timeout)
-
-    log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport} using CDC 1200bps")
-    # if port argument is present perform soft reset
-    if not mcu.serialport:
-        raise MPFlashError("No serial port specified")
-    # try to initiate serial port connection on PORT with 1200 baudrate
-    try:
-        with serial.Serial(
-            port=mcu.serialport,
-            baudrate=1200,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS,
-            rtscts=True,
-        ) as connection:
-            print("Connection established")
-            connection.rts = True
-            connection.dtr = False
-            time.sleep(0.4)
-
-    except serial.SerialException as e:
-        log.exception(e)
-        raise MPFlashError("pySerial error: " + str(e) + "\n") from e
-    except Exception as e:
-        log.exception(e)
-        raise MPFlashError("Error: " + str(e) + "\n") from e
-
-    # be optimistic
-    return True

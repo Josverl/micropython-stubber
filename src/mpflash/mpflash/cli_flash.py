@@ -132,7 +132,7 @@ def cli_flash_board(**kwargs) -> int:
     # Detect connected boards if not specified,
     # and ask for input if boards cannot be detected
     all_boards: List[MPRemoteBoard] = []
-    if not params.boards or params.boards == []:
+    if not params.boards:
         # nothing specified - detect connected boards
         params.ports, params.boards, all_boards = connected_ports_boards(include=params.ports, ignore=params.ignore)
         if params.boards == []:

@@ -19,7 +19,6 @@ from loguru import logger as log
 from rich.progress import track
 
 from mpflash.common import PORT_FWTYPES, FWInfo
-from mpflash.downloaded import clean_downloaded_firmwares
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import get_known_ports
 from mpflash.vendor.versions import clean_version

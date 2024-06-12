@@ -4,7 +4,6 @@ from loguru import logger as log
 
 from mpflash.bootloader import enter_bootloader
 from mpflash.common import PORT_FWTYPES, BootloaderMethod
-from mpflash.mpremoteboard import MPRemoteBoard
 
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
