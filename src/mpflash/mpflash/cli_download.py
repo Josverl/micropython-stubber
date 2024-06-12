@@ -80,6 +80,7 @@ from .download import download
 )
 @click.option(
     "--force",
+    "-f",
     default=False,
     is_flag=True,
     show_default=True,

@@ -1,19 +1,15 @@
 import sys
 import time
-from enum import Enum
 
 import serial
 
+
+from mpflash.common import BootloaderMethod
 from mpflash.errors import MPFlashError
 from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
 
-
-class BootloaderMethod(Enum):
-    MANUAL = "manual"
-    MPY = "mpy"
-    TOUCH_1200BPS = "touch1200bps"
-
+from .manual import enter_bootloader_manual
 
 def enter_bootloader(
     mcu: MPRemoteBoard,
@@ -22,42 +18,30 @@ def enter_bootloader(
     wait_after: int = 2,
 ):
     """Enter the bootloader mode for the board"""
-
+    log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport} using method: {method.value}")
     if method == BootloaderMethod.MPY:
-        return enter_bootloader_mpy(mcu, timeout=timeout, wait_after=wait_after)
+        result = enter_bootloader_mpy(mcu, timeout=timeout)
     elif method == BootloaderMethod.MANUAL:
-        return enter_bootloader_manual(mcu, timeout=timeout, wait_after=wait_after)
+        result = enter_bootloader_manual(mcu, timeout=timeout)
     elif method == BootloaderMethod.TOUCH_1200BPS:
-        return enter_bootloader_cdc_1200bps(mcu, timeout=timeout, wait_after=wait_after)
+        result = enter_bootloader_cdc_1200bps(mcu, timeout=timeout)
     else:
         raise MPFlashError(f"Unknown bootloader method {method}")
+    if result:
+        time.sleep(wait_after)
+    return result
 
 
-def enter_bootloader_mpy(mcu: MPRemoteBoard, timeout: int = 10, wait_after: int = 2):
+def enter_bootloader_mpy(mcu: MPRemoteBoard, timeout: int = 10):
     """Enter the bootloader mode for the board"""
-    log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport}")
-    mcu.run_command("bootloader", timeout=timeout)
-    time.sleep(wait_after)
-
-
-def enter_bootloader_manual(mcu: MPRemoteBoard, timeout: int = 10, wait_after: int = 2):
-
-    message: str
-    if mcu.port == "rp2":
-        message = "Please Unplug the USB cable, press and hold the BOOTSEL button on the device, Plug the USB cable back in, and press Enter"
-    elif mcu.port == "samd":
-        message = "Please press the reset button twice in fast succession on the device, and press Enter"
-    else:
-        message = "Please press the reset button on the device and press Enter"
-
-    input(message)
+    result = mcu.run_command("bootloader", timeout=timeout)
+    # todo: check if mpremote command was successful
     return True
 
-
-def enter_bootloader_cdc_1200bps(mcu: MPRemoteBoard, timeout: int = 10, wait_after: int = 2):
-
+def enter_bootloader_cdc_1200bps(mcu: MPRemoteBoard, timeout: int = 10):
     if sys.platform == "win32":
-        raise MPFlashError("Touch 1200bps method is currently not supported on Windows")
+        log.warning("Touch 1200bps method is currently not supported on Windows, switching to manual")
+        return enter_bootloader_manual(mcu, timeout=timeout)
 
     log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport} using CDC 1200bps")
     # if port argument is present perform soft reset
@@ -85,5 +69,5 @@ def enter_bootloader_cdc_1200bps(mcu: MPRemoteBoard, timeout: int = 10, wait_aft
         log.exception(e)
         raise MPFlashError("Error: " + str(e) + "\n") from e
 
-    time.sleep(0.4)
-    return
+    # be optimistic
+    return True

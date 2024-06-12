@@ -3,7 +3,7 @@ from pathlib import Path
 from loguru import logger as log
 
 from mpflash.bootloader import enter_bootloader
-from mpflash.common import PORT_FWTYPES
+from mpflash.common import PORT_FWTYPES, BootloaderMethod
 
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
@@ -17,7 +17,7 @@ def flash_list(
     todo: WorkList,
     fw_folder: Path,
     erase: bool,
-    bootloader: bool,
+    bootloader: BootloaderMethod,
 ):
     """Flash a list of boards with the specified firmware."""
     flashed = []
@@ -31,12 +31,20 @@ def flash_list(
         # try:
         if mcu.port in [port for port, exts in PORT_FWTYPES.items() if ".uf2" in exts] and fw_file.suffix == ".uf2":
             # any .uf2 port ["samd", "rp2", "nrf"]:
-            if bootloader:
-                enter_bootloader(mcu)
+            if bootloader and bootloader.value != "none":
+                ok = enter_bootloader(mcu, bootloader)
+                if not ok:
+                    log.error(f"Failed to enter bootloader on {mcu.serialport}")
+                    continue
+
             updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
-            if bootloader:
-                enter_bootloader(mcu)
+            if bootloader and bootloader.value != "none":
+                ok = enter_bootloader(mcu, bootloader)
+                if not ok:
+                    log.error(f"Failed to enter bootloader on {mcu.serialport}")
+                    continue
+
             updated = flash_stm32(mcu, fw_file, erase=erase)
         elif mcu.port in ["esp32", "esp8266"]:
             #  bootloader is handled by esptool for esp32/esp8266
