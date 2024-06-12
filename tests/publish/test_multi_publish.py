@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-from mock import MagicMock
 from pytest_mock import MockerFixture
 
 from stubber.publish.publish import publish_multiple

@@ -51,7 +51,7 @@ def test_get_whitespace_context(content, index, expected):
     # Act
     if isinstance(expected, RaisesContext):
         # error expected
-        with expected as exc_info:
+        with expected :
             result = list(get_whitespace_context(content, index))
         return
 
@@ -100,7 +100,7 @@ def test_minify_script(source_script, expected, keep_report):
 
     # Act
     if isinstance(expected, RaisesContext):
-        with expected as exc_info:
+        with expected:
             minify_script(source, keep_report, diff=False)
     else:
         result = minify_script(source, keep_report, diff=True)

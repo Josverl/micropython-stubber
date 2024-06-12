@@ -1,6 +1,6 @@
 {
     "python.analysis.autoSearchPaths": true,
-    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.diagnosticMode": "workspace",
     // "python.analysis.logLevel": "Trace",
     //////////////////////////////////////////////////////////////
     "python.testing.pytestEnabled": true,
@@ -135,5 +135,6 @@
         "typings"
     ],
     "austin.mode": "Wall time",
-    "austin.binaryMode": true
+    "austin.binaryMode": true,
+    "python.languageServer": "Pylance"
 }
