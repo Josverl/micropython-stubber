@@ -44,7 +44,7 @@ def fake_ask_missing_params(params: DownloadParams) -> DownloadParams:
         ("21", 0, ["flash", "--version", "stable"]),
         ("30", 0, ["flash", "--board", "ESP32_GENERIC"]),
         ("31", 0, ["flash", "--board", "?"]),
-        ("40", 0, ["flash", "--no-bootloader"]),
+        ("40", 0, ["flash", "--bootloader", "none"]),
         # faulty
         # ("81", -1, ["flash", "--board", "RPI_PICO", "--board", "ESP32_GENERIC"]),
         # ("82", -1, ["flash", "--version", "preview", "--version", "1.22.0"]),
@@ -55,8 +55,8 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
     # fake COM99 as connected board
     fake = fakeboard(serialport)
 
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake) # type: ignore
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport) # type: ignore
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake)  # type: ignore
+    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)  # type: ignore
     mocker.patch("mpflash.worklist.filter_boards", return_value=[MPRemoteBoard("COM99")], autospec=True)
 
     m_connected_ports_boards = mocker.patch(
@@ -106,7 +106,7 @@ def test_mpflash_connected_boards(
     # no boards specified - detect connected boards
     args = ["flash"]
 
-    fakes = [fakeboard(port) for port in serialports] 
+    fakes = [fakeboard(port) for port in serialports]
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",

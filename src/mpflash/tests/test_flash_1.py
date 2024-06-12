@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
-from mpflash.common import FWInfo
+from mpflash.common import BootloaderMethod, FWInfo
 from mpflash.flash import enter_bootloader, flash_list
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.worklist import WorkList
@@ -21,14 +21,14 @@ def test_enter_bootloader(mocker: MockerFixture):
     m_sleep.assert_called_once_with(2)
 
 
-@pytest.mark.parametrize("bootloader", [False, True])
+@pytest.mark.parametrize("bootloader", [BootloaderMethod.NONE, BootloaderMethod.MPY])
 @pytest.mark.parametrize("port", ["esp32", "esp8266", "rp2", "stm32", "samd"])
 def test_flash_list(mocker: MockerFixture, test_fw_path: Path, bootloader, port):
     m_flash_uf2 = mocker.patch("mpflash.flash.flash_uf2")
     m_flash_stm32 = mocker.patch("mpflash.flash.flash_stm32")
     m_flash_esp = mocker.patch("mpflash.flash.flash_esp")
     m_mpr_run = mocker.patch("mpflash.bootloader.MPRemoteBoard.run_command")
-    m_bootloader = mocker.patch("mpflash.bootloader.enter_bootloader")
+    m_bootloader = mocker.patch("mpflash.flash.enter_bootloader")
 
     board = MPRemoteBoard("COM1")
     board.port = "esp32"
@@ -66,8 +66,8 @@ def test_flash_list(mocker: MockerFixture, test_fw_path: Path, bootloader, port)
         m_flash_stm32.assert_called_once()
     else:
         m_flash_stm32.assert_not_called()
-    if bootloader and port not in ["esp32", "esp8266"]:
-        # no enter bootloader on esp32
-        m_bootloader.assert_called_once()
-    else:
-        m_bootloader.assert_not_called()
+
+    if port in ["esp32", "esp8266"]:
+        return
+    # bootloader is always called - but not for esp32/esp8266
+    m_bootloader.assert_called_once()

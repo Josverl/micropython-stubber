@@ -3,13 +3,13 @@ import time
 
 import serial
 
-
 from mpflash.common import BootloaderMethod
 from mpflash.errors import MPFlashError
 from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
 
 from .manual import enter_bootloader_manual
+
 
 def enter_bootloader(
     mcu: MPRemoteBoard,
@@ -18,6 +18,10 @@ def enter_bootloader(
     wait_after: int = 2,
 ):
     """Enter the bootloader mode for the board"""
+    if method == BootloaderMethod.NONE:
+        # NO bootloader requested, so must be OK to flash
+        return True
+
     log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport} using method: {method.value}")
     if method == BootloaderMethod.MPY:
         result = enter_bootloader_mpy(mcu, timeout=timeout)
@@ -29,14 +33,16 @@ def enter_bootloader(
         raise MPFlashError(f"Unknown bootloader method {method}")
     if result:
         time.sleep(wait_after)
+    log.error(f"Failed to enter bootloader on {mcu.serialport}")
     return result
 
 
 def enter_bootloader_mpy(mcu: MPRemoteBoard, timeout: int = 10):
     """Enter the bootloader mode for the board"""
-    result = mcu.run_command("bootloader", timeout=timeout)
+    mcu.run_command("bootloader", timeout=timeout)
     # todo: check if mpremote command was successful
     return True
+
 
 def enter_bootloader_cdc_1200bps(mcu: MPRemoteBoard, timeout: int = 10):
     if sys.platform == "win32":

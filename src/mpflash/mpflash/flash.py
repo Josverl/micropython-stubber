@@ -4,6 +4,7 @@ from loguru import logger as log
 
 from mpflash.bootloader import enter_bootloader
 from mpflash.common import PORT_FWTYPES, BootloaderMethod
+from mpflash.mpremoteboard import MPRemoteBoard
 
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
@@ -13,6 +14,7 @@ from .worklist import WorkList
 # #########################################################################################################
 
 
+
 def flash_list(
     todo: WorkList,
     fw_folder: Path,
@@ -20,6 +22,7 @@ def flash_list(
     bootloader: BootloaderMethod,
 ):
     """Flash a list of boards with the specified firmware."""
+    UF2_PORTS = [port for port, exts in PORT_FWTYPES.items() if ".uf2" in exts]
     flashed = []
     for mcu, fw_info in todo:
         fw_file = fw_folder / fw_info.filename
@@ -29,22 +32,13 @@ def flash_list(
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info.version}")
         updated = None
         # try:
-        if mcu.port in [port for port, exts in PORT_FWTYPES.items() if ".uf2" in exts] and fw_file.suffix == ".uf2":
-            # any .uf2 port ["samd", "rp2", "nrf"]:
-            if bootloader and bootloader.value != "none":
-                ok = enter_bootloader(mcu, bootloader)
-                if not ok:
-                    log.error(f"Failed to enter bootloader on {mcu.serialport}")
-                    continue
-
+        if mcu.port in UF2_PORTS and fw_file.suffix == ".uf2":
+            if not enter_bootloader(mcu, bootloader):
+                continue
             updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
         elif mcu.port in ["stm32"]:
-            if bootloader and bootloader.value != "none":
-                ok = enter_bootloader(mcu, bootloader)
-                if not ok:
-                    log.error(f"Failed to enter bootloader on {mcu.serialport}")
-                    continue
-
+            if not enter_bootloader(mcu, bootloader):
+                continue
             updated = flash_stm32(mcu, fw_file, erase=erase)
         elif mcu.port in ["esp32", "esp8266"]:
             #  bootloader is handled by esptool for esp32/esp8266
