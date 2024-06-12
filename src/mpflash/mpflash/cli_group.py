@@ -3,7 +3,11 @@ Main entry point for the CLI group.
 Additional comands are added in the submodules.
 """
 
+from typing import Any, Dict
+
 import rich_click as click
+
+from mpflash.vendor.click_aliases import ClickAliasedGroup
 
 from .config import __version__, config
 from .logger import log, make_quiet, set_loglevel
@@ -42,7 +46,8 @@ def cb_quiet(ctx, param, value):
     return value
 
 
-@click.group()
+@click.group(cls=ClickAliasedGroup)
+# @click.group()
 @click.version_option(package_name="mpflash")
 @click.option(
     "--quiet",
