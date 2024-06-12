@@ -1,9 +1,7 @@
-from pathlib import Path
 from typing import List
 
 import pytest
 from click.testing import CliRunner
-from pytest_mock import MockerFixture
 
 # module under test :
 import mpflash.cli_group as cli_group
@@ -58,5 +56,6 @@ def test_cli_quiet(params: List[str]):
     # can turn on verbose mode
     runner = CliRunner()
     result = runner.invoke(cli_main.cli, params)
+    assert result
     assert cli_group.config.quiet == True
     assert cli_group.config.verbose == False

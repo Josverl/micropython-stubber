@@ -5,8 +5,6 @@ import jsons
 import pytest
 import rich
 import rich.measure
-from mock import MagicMock
-from pytest_mock import MockerFixture
 
 import mpflash.list
 from mpflash.list import mcu_table

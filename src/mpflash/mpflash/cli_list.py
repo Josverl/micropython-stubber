@@ -5,12 +5,16 @@ import rich_click as click
 from rich import print
 
 from .cli_group import cli
+from .connected import list_mcus
 from .list import show_mcus
 from .logger import make_quiet
-from .connected import list_mcus
 
 
-@cli.command("list", help="List the connected MCU boards.")
+@cli.command(
+    "list",
+    help="List the connected MCU boards. alias: devs",
+    aliases=["devs"],
+)
 @click.option(
     "--json",
     "-j",

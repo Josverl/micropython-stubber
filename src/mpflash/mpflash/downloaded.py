@@ -103,9 +103,9 @@ def filter_downloaded_fwlist(
         # never get a preview for an older version
         fw_list = [fw for fw in fw_list if fw.preview]
     else:
-        # FWInfo version has no v1.2.3 prefix
-        _version = {clean_version(version, drop_v=True), clean_version(version, drop_v=False)}
-        fw_list = [fw for fw in fw_list if fw.version in _version]
+        # older FWInfo version has no v1.2.3 prefix
+        either = [clean_version(version, drop_v=False), clean_version(version, drop_v=True)]
+        fw_list = [fw for fw in fw_list if fw.version in either]
     log.trace(f"Filtering firmware for {version} : {len(fw_list)} found.")
     # filter by port
     if port:

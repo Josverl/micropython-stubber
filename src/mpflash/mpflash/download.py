@@ -19,7 +19,6 @@ from loguru import logger as log
 from rich.progress import track
 
 from mpflash.common import PORT_FWTYPES, FWInfo
-from mpflash.downloaded import clean_downloaded_firmwares
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import get_known_ports
 from mpflash.vendor.versions import clean_version
@@ -246,8 +245,8 @@ def download_firmwares(
                 continue
             writer.write(board.to_dict())
             downloaded += 1
-    if downloaded > 0:
-        clean_downloaded_firmwares(firmware_folder)
+    # if downloaded > 0:
+    #     clean_downloaded_firmwares(firmware_folder)
     log.success(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
     return downloaded + skipped
 

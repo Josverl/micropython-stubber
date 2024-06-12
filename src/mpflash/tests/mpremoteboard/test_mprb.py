@@ -4,7 +4,7 @@ import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
 
-from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
+from mpflash.mpremoteboard import OK, MPRemoteBoard
 
 pytestmark = [pytest.mark.mpflash]
 
@@ -60,7 +60,8 @@ def test_mpremoteboard_run(port, command, mocker: MockerFixture):
     mprb = MPRemoteBoard(port)
     assert not mprb.connected
     command = ["run", "mpy_fw_info.py"]
-    result = mprb.run_command(command)
+    result = mprb.run_command(command)  # type: ignore
+
     assert mprb.connected
     assert m_run.called
     assert m_run.call_count == 1
@@ -75,7 +76,7 @@ def test_mpremoteboard_run(port, command, mocker: MockerFixture):
     assert "resume" not in m_run.mock_calls[0].args[0]
 
     # run another command, and check for resume
-    result = mprb.run_command(command)
+    result = mprb.run_command(command)  # type: ignore
     assert "resume" in m_run.mock_calls[1].args[0]
 
 
@@ -127,7 +128,8 @@ def test_mpremoteboard_info(mocker: MockerFixture):
 
     m_run = mocker.patch("mpflash.mpremoteboard.run", return_value=(0, output))
     mprb = MPRemoteBoard("COM20")
-    result = mprb.get_mcu_info()
+    result = mprb.get_mcu_info()  # type: ignore
+
     assert m_run.called
 
     assert mprb.family == "micropython"

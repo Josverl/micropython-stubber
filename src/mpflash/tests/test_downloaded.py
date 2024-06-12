@@ -1,8 +1,6 @@
-from pathlib import Path
-from typing import Dict
+
 
 import pytest
-from mock import MagicMock, Mock
 from pytest_mock import MockerFixture
 
 from mpflash.common import FWInfo

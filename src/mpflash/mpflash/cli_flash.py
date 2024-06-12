@@ -4,7 +4,7 @@ from typing import List
 import rich_click as click
 from loguru import logger as log
 
-# from mpflash.common import filtered_comports
+from mpflash.common import BootloaderMethod
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
 from mpflash.mpremoteboard import MPRemoteBoard
@@ -101,11 +101,13 @@ from .worklist import WorkList, full_auto_worklist, manual_worklist, single_auto
     help="""Erase flash before writing new firmware. (Not supported on UF2 boards)""",
 )
 @click.option(
-    "--bootloader/--no-bootloader",
-    default=True,
-    is_flag=True,
+    "--bootloader",
+    "-b",
+    "bootloader",
+    type=click.Choice([e.value for e in BootloaderMethod]),
+    default="mpy",
     show_default=True,
-    help="""Enter micropython bootloader mode before flashing.""",
+    help="""How to enter the (MicroPython) bootloader before flashing.""",
 )
 def cli_flash_board(**kwargs) -> int:
     # version to versions, board to boards
@@ -121,6 +123,7 @@ def cli_flash_board(**kwargs) -> int:
     params.boards = list(params.boards)
     params.serial = list(params.serial)
     params.ignore = list(params.ignore)
+    params.bootloader = BootloaderMethod(params.bootloader)
 
     # make it simple for the user to flash one board by asking for the serial port if not specified
     if params.boards == ["?"] and params.serial == "*":
@@ -129,14 +132,16 @@ def cli_flash_board(**kwargs) -> int:
     # Detect connected boards if not specified,
     # and ask for input if boards cannot be detected
     all_boards: List[MPRemoteBoard] = []
-    if not params.boards or params.boards == []:
+    if not params.boards:
         # nothing specified - detect connected boards
         params.ports, params.boards, all_boards = connected_ports_boards(include=params.ports, ignore=params.ignore)
         if params.boards == []:
-            # No MicroPython boards detected, but it could be unflashed or not in bootloader mode
+            # No MicroPython boards detected, but it could be unflashed or in bootloader mode
             # Ask for serial port and board_id to flash
             params.serial = ["?"]
             params.boards = ["?"]
+            # assume manual mode if no board is detected
+            params.bootloader = BootloaderMethod("manual")
     else:
         resolve_board_ids(params)
 

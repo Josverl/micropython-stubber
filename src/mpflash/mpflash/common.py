@@ -2,6 +2,7 @@ import fnmatch
 import os
 import sys
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -90,13 +91,25 @@ class DownloadParams(Params):
     force: bool = False
 
 
+class BootloaderMethod(Enum):
+    MANUAL = "manual"
+    MPY = "mpy"
+    TOUCH_1200 = "touch1200"
+    NONE = "none"
+
+
+
 @dataclass
 class FlashParams(Params):
     """Parameters for flashing a board"""
 
     erase: bool = True
-    bootloader: bool = True
+    bootloader: BootloaderMethod = BootloaderMethod.NONE
     cpu: str = ""
+
+    def __post_init__(self):
+        if isinstance(self.bootloader, str):
+            self.bootloader = BootloaderMethod(self.bootloader)
 
 
 ParamType = Union[DownloadParams, FlashParams]

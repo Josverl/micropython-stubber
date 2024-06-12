@@ -1,8 +1,5 @@
-import sys
 
 import pytest
-import requests
-from mock import MagicMock, Mock
 from pytest_mock import MockerFixture
 
 from mpflash.download import board_firmware_urls, get_board_urls, get_page
