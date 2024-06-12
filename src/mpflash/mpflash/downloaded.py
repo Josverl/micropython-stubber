@@ -39,6 +39,7 @@ def clean_downloaded_firmwares(fw_folder: Path) -> None:
             writer.write(fw.to_dict())
     log.info(f"Removed duplicate entries from firmware.jsonl in {fw_folder}")
 
+
 def find_downloaded_firmware(
     *,
     board_id: str,
@@ -101,9 +102,9 @@ def filter_downloaded_fwlist(
         # never get a preview for an older version
         fw_list = [fw for fw in fw_list if fw.preview]
     else:
-        # FWInfo version has no v1.2.3 prefix
-        _version = clean_version(version, drop_v=True)
-        fw_list = [fw for fw in fw_list if fw.version == _version]
+        # older FWInfo version has no v1.2.3 prefix
+        either = [version, clean_version(version, drop_v=True)]
+        fw_list = [fw for fw in fw_list if fw.version in either]
 
     # filter by port
     if port:

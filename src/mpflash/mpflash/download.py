@@ -246,8 +246,8 @@ def download_firmwares(
                 continue
             writer.write(board.to_dict())
             downloaded += 1
-    if downloaded > 0:
-        clean_downloaded_firmwares(firmware_folder)
+    # if downloaded > 0:
+    #     clean_downloaded_firmwares(firmware_folder)
     log.success(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
     return downloaded + skipped
 
