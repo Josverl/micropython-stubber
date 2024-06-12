@@ -14,8 +14,8 @@ pytestmark = [pytest.mark.mpflash]
 def test_enter_bootloader(mocker: MockerFixture):
     # test enter_bootloader
     board = MPRemoteBoard("COM1")
-    m_mpr_run = mocker.patch("mpflash.flash.MPRemoteBoard.run_command")
-    m_sleep = mocker.patch("mpflash.flash.time.sleep")
+    m_mpr_run = mocker.patch("mpflash.bootloader.MPRemoteBoard.run_command")
+    m_sleep = mocker.patch("mpflash.bootloader.time.sleep")
     enter_bootloader(board)
     m_mpr_run.assert_called_once_with("bootloader", timeout=10)
     m_sleep.assert_called_once_with(2)
@@ -27,8 +27,8 @@ def test_flash_list(mocker: MockerFixture, test_fw_path: Path, bootloader, port)
     m_flash_uf2 = mocker.patch("mpflash.flash.flash_uf2")
     m_flash_stm32 = mocker.patch("mpflash.flash.flash_stm32")
     m_flash_esp = mocker.patch("mpflash.flash.flash_esp")
-    m_mpr_run = mocker.patch("mpflash.flash.MPRemoteBoard.run_command")
-    m_bootloader = mocker.patch("mpflash.flash.enter_bootloader")
+    m_mpr_run = mocker.patch("mpflash.bootloader.MPRemoteBoard.run_command")
+    m_bootloader = mocker.patch("mpflash.bootloader.enter_bootloader")
 
     board = MPRemoteBoard("COM1")
     board.port = "esp32"

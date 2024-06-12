@@ -1,10 +1,9 @@
-import time
 from pathlib import Path
 
 from loguru import logger as log
 
+from mpflash.bootloader import enter_bootloader
 from mpflash.common import PORT_FWTYPES
-from mpflash.mpremoteboard import MPRemoteBoard
 
 from .flash_esp import flash_esp
 from .flash_stm32 import flash_stm32
@@ -50,20 +49,3 @@ def flash_list(
         else:
             log.error(f"Failed to flash {mcu.board} on {mcu.serialport}")
     return flashed
-
-
-def enter_bootloader(mcu: MPRemoteBoard, timeout: int = 10, wait_after: int = 2):
-    """Enter the bootloader mode for the board"""
-    log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport}")
-    mcu.run_command("bootloader", timeout=timeout)
-    time.sleep(wait_after)
-
-
-# TODO:
-# flash from some sort of queue to allow different images to be flashed to the same board
-#  - flash variant 1
-#  - stub variant 1
-#  - flash variant 2
-#  - stub variant 2
-#
-# JIT download / download any missing firmwares based on the detected boards
