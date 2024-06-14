@@ -10,8 +10,6 @@ for this :
 - write updates to:
     - board/modulelist.txt
     - board/createstubs.py 
-
-- TODO: remove the frozen modules from this list
 """
 
 from pathlib import Path

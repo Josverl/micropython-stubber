@@ -63,7 +63,7 @@ def test_update_package(fake_package: StubPackage):
 
     changed_after_update = pkg.is_changed()
     assert changed_after_update, "should be changed initially"
-
+    # FIXME± this has a dpendency on a connection to PyPI.org
     ok = pkg.update_distribution(production=True)
     assert ok, "should be ok"
 
@@ -102,7 +102,7 @@ def test_update_package(fake_package: StubPackage):
 @pytest.mark.integration
 def test_build_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
     pkg = fake_package
-
+    # FIXME: dependency on online test.pypi.org
     result = pkg.build_distribution(production=False, force=False)
 
     assert result, "should be ok"
@@ -135,6 +135,8 @@ def test_publish_package(
 
     # allow the publishing logic to run during test
     pkg._publish = True  # type: ignore
+
+    # FIXME : dependency to access to test.pypi.org
     result = pkg.publish_distribution_ifchanged(production=False, force=False, db=db)
 
     assert result, "should be ok"

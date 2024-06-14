@@ -227,7 +227,6 @@ class Stubber:
         # Start a new file
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
-            # todo: improve header
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
                 module_name, self._fwid, info_, __version__
