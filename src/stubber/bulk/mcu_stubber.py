@@ -23,7 +23,6 @@ from stubber.publish.pathnames import board_folder_name
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
-# TODO : make this a bit nicer
 HERE = Path(__file__).parent
 ###############################################################################################
 # TODO: promote to cmdline params

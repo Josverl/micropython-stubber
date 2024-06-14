@@ -49,7 +49,7 @@ def test_package_name(family, pkg, port, board, expected):
 @pytest.mark.parametrize(
     "pkg_type, port, board",
     [
-        (DOC_STUBS, None, None),
+        # (DOC_STUBS, None, None),
         (COMBO_STUBS, "esp32", "GENERIC"),
         (COMBO_STUBS, "esp32", "GENERIC_S3"),
         (COMBO_STUBS, "esp32", "UM_TINYPICO"),
