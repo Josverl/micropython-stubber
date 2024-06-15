@@ -20,7 +20,8 @@ from packaging.version import parse
 import stubber.basicgit as git
 from stubber import utils
 from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
-from stubber.publish.enums import COMBO_STUBS, DOC_STUBS, FIRMWARE_STUBS
+
+# from stubber.publish.enums import COMBO_STUBS
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean_version, micropython_versions
 
@@ -139,7 +140,7 @@ def frozen_candidates(
                     "version": version,
                     "port": port,
                     "board": GENERIC_L,
-                    "pkg_type": COMBO_STUBS,
+                    # "pkg_type": COMBO_STUBS,
                 }
             # if not auto_board:
             #     for board in boards:
@@ -177,7 +178,7 @@ def frozen_candidates(
                         "version": version,
                         "port": port,
                         "board": board,
-                        "pkg_type": COMBO_STUBS,
+                        # "pkg_type": COMBO_STUBS,
                     }
 
 
@@ -189,33 +190,11 @@ def is_auto(thing: Union[None, str, List[str]]):
         return any(i in ["auto", "all"] for i in thing)
 
 
-def docstub_candidates(
-    family: str = "micropython",
-    versions: Union[str, List[str]] = V_PREVIEW,
-    path: Path = CONFIG.stub_path,
-):
-    """
-    Generate a list of possible documentation stub candidates for the given family and version.
-
-    Note that the folders do not need to exist, with the exception of auto which will scan the stubs folder for versions of docstubs
-    """
-    if isinstance(versions, str):
-        if is_auto(versions):  # auto with vprefix ...
-            versions = list(version_candidates(suffix="docstubs", prefix=family, path=path))
-        else:
-            versions = [versions]
-    versions = [clean_version(v, flat=True) for v in versions]
-
-    for version in versions:
-        yield {"family": family, "version": version, "pkg_type": DOC_STUBS}
-
-
 def board_candidates(
     family: str = "micropython",
     versions: Union[str, List[str]] = V_PREVIEW,
     *,
     mpy_path: Path = CONFIG.mpy_path,
-    pt: str = FIRMWARE_STUBS,
 ):
     """
     generate a list of possible board stub candidates for the given family and version.
@@ -236,7 +215,9 @@ def board_candidates(
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
-            log.warning(f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?")
+            log.warning(
+                f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?"
+            )
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
@@ -246,7 +227,6 @@ def board_candidates(
                 "version": version,
                 "port": port,
                 "board": GENERIC_U,
-                "pkg_type": pt,
             }
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
                 if board not in GENERIC:
@@ -255,7 +235,6 @@ def board_candidates(
                         "version": version,
                         "port": port,
                         "board": board,
-                        "pkg_type": pt,
                     }
 
 
