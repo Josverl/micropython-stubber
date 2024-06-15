@@ -12,7 +12,7 @@ from packaging.version import parse
 from pysondb import PysonDB
 
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
-from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
+from stubber.publish.enums import StubSource
 from stubber.publish.stubpackage import StubPackage, StubSources
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import clean_version
@@ -22,25 +22,12 @@ log.remove()
 log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 
-def package_name(pkg_type: str, *, port: str = "", board: str = "", family: str = "micropython", **kwargs) -> str:
+def package_name(*, port: str = "", board: str = "", family: str = "micropython", **kwargs) -> str:
     "generate a package name for the given package type"
-    if pkg_type == COMBO_STUBS:
-        # # {family}-{port}-{board}-stubs
-        name = f"{family}-{port}-{board}-stubs".lower()
-        name = name.replace("-generic-stubs", "-stubs")
-        # Use explicit generic_ names for the stubs
-        # name = name.replace("-generic_", "-")  # @GENERIC Prefix
-        return name
-    elif pkg_type == DOC_STUBS:
-        return f"{family}-doc-stubs".lower()
-    elif pkg_type == CORE_STUBS:
-        return f"{family}-core-stubs".lower()
-    # # {family}-{port}-{board}-{type}-stubs
-    name = f"{family}-{port}-{board}-{pkg_type}-stubs".lower()
+    # # {family}-{port}[-{board}[-{variant}]]-stubs
+    name = f"{family}-{port}-{board}-stubs".lower()
+    name = name.replace("-generic-stubs", "-stubs")
     # Use explicit generic_ names for the stubs
-    # # remove -generic- from the name
-    # name = name.replace(f"-generic-{pkg_type}-stubs", f"-{pkg_type}-stubs")
-    # # remove -genetic_ from the name
     # name = name.replace("-generic_", "-")  # @GENERIC Prefix
     return name
 
@@ -48,14 +35,13 @@ def package_name(pkg_type: str, *, port: str = "", board: str = "", family: str 
 def get_package(
     db: PysonDB,
     *,
-    pkg_type: str,
     version: str,
     port: str,
     board: str = GENERIC_L,
     family: str = "micropython",
 ) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
-    pkg_name = package_name(pkg_type, port=port, board=board, family=family)
+    pkg_name = package_name(port=port, board=board, family=family)
     version = clean_version(version, drop_v=True)
     if package_info := get_package_info(
         db,
@@ -73,7 +59,6 @@ def get_package(
         port=port,
         board=board,
         family=family,
-        pkg_type=pkg_type,
     )
 
 
@@ -106,33 +91,19 @@ def create_package(
     port: str,
     board: str = "",
     family: str = "micropython",
-    pkg_type: str = COMBO_STUBS,
+    # pkg_type: str = COMBO_STUBS,
 ) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
     stubs: StubSources = []
-    if pkg_type != COMBO_STUBS:
-        raise ValueError("Not Supported")
+    # if pkg_type != COMBO_STUBS:
+    #     raise ValueError("Not Supported")
 
     assert port != "", "port must be specified for combo stubs"
     stubs = combo_sources(family, port, board, ver_flat)
     return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stubs=stubs)
-    # elif pkg_type == DOC_STUBS:
-    #     stubs = [
-    #         (
-    #             StubSource.DOC,
-    #             Path(f"{family}-{ver_flat}-docstubs"),
-    #         ),
-    #     ]
-    # elif pkg_type == CORE_STUBS:
-    #     # TODO add core stubs
-    #     raise NotImplementedError(type)
-    # else:
-    #     raise NotImplementedError(type)
-
-    # return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stubs=stubs)
 
 
 def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSources:

@@ -4,11 +4,10 @@ from pathlib import Path
 from typing import Generator, List, Union
 
 import pytest
+
 pytestmark = [pytest.mark.stubber]
-from stubber.publish.candidates import (
-    COMBO_STUBS,
-    DOC_STUBS,
-    docstub_candidates,
+from stubber.publish.candidates import (  # DOC_STUBS,; docstub_candidates,
+    # COMBO_STUBS,
     frozen_candidates,
     subfolder_names,
     version_candidates,
@@ -45,24 +44,24 @@ def test_version_prefix(pytestconfig, prefix, suffix, count):
     assert len(l) == count
 
 
-@pytest.mark.parametrize(
-    "family, versions, count",
-    [
-        ("micropython", "latest", 1),
-        ("micropython", "v1.18", 1),
-        ("micropython", "1.18", 1),
-        ("micropython", "auto", 2),
-    ],
-)
-def test_docstub_candidates(pytestconfig, family, versions, count):
-    # test data
-    path: Path = pytestconfig.rootpath / "tests/publish/data/stub-version"
-    docstubs = docstub_candidates(path=path, family=family, versions=versions)
-    assert isinstance(docstubs, Generator)
-    l = list(docstubs)
-    assert len(l) == count
-    if len(l) > 0:
-        assert l[0]["pkg_type"] == DOC_STUBS
+# @pytest.mark.parametrize(
+#     "family, versions, count",
+#     [
+#         ("micropython", "latest", 1),
+#         ("micropython", "v1.18", 1),
+#         ("micropython", "1.18", 1),
+#         ("micropython", "auto", 2),
+#     ],
+# )
+# def test_docstub_candidates(pytestconfig, family, versions, count):
+#     # test data
+#     path: Path = pytestconfig.rootpath / "tests/publish/data/stub-version"
+#     docstubs = docstub_candidates(path=path, family=family, versions=versions)
+#     assert isinstance(docstubs, Generator)
+#     l = list(docstubs)
+#     assert len(l) == count
+#     if len(l) > 0:
+#         assert l[0]["pkg_type"] == DOC_STUBS
 
 
 @pytest.mark.parametrize(
@@ -103,8 +102,7 @@ def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count)
     for i in l:
         print(i)
     assert len(l) == count, f"{len(l)} != {count}, {l}"
-    if len(l) > 0:
-        assert l[0]["pkg_type"] == COMBO_STUBS
+
 
 
 @pytest.mark.parametrize(
