@@ -11,7 +11,8 @@ from loguru import logger as log
 
 from .common import DownloadParams, FlashParams, ParamType
 from .config import config
-from .mpboard_id import get_known_boards_for_port, get_known_ports, known_stored_boards
+from .mpboard_id import (get_known_boards_for_port, get_known_ports,
+                         known_stored_boards)
 from .mpremoteboard import MPRemoteBoard
 from .vendor.versions import micropython_versions
 
@@ -28,6 +29,11 @@ def ask_missing_params(
     Returns:
         ParamType: The updated parameters.
     """
+    if not config.interactive:
+        # no interactivity allowed
+        log.info("Interactive mode disabled. Skipping ask for user input.")
+        return params
+
     import inquirer
 
     log.trace(f"ask_missing_params: {params}")
@@ -36,9 +42,6 @@ def ask_missing_params(
     # if action download, multiple input
     multi_select = isinstance(params, DownloadParams)
     action = "download" if isinstance(params, DownloadParams) else "flash"
-    if not config.interactive:
-        # no interactivity allowed
-        return params
 
     questions = []
     answers: dict[str, Union[str, List]] = {"action": action}

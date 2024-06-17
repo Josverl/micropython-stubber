@@ -14,6 +14,7 @@ from .logger import log, make_quiet, set_loglevel
 def cb_verbose(ctx, param, value):
     """Callback to set the log level to DEBUG if verbose is set"""
     if value and not config.quiet:
+        # log.debug(f"Setting verbose mode to {value}")
         config.verbose = True
         if value > 1:
             set_loglevel("TRACE")
@@ -26,19 +27,21 @@ def cb_verbose(ctx, param, value):
     return value
 
 
-def cb_interactive(ctx, param, value):
-    if value:
-        config.interactive = value
+def cb_interactive(ctx, param, value:bool):
+    log.trace(f"Setting interactive mode to {value}")
+    config.interactive = value
     return value
 
 
 def cb_test(ctx, param, value):
     if value:
+        log.trace(f"Setting tests to {value}")
         config.tests = value
     return value
 
 
 def cb_quiet(ctx, param, value):
+    log.trace(f"Setting quiet mode to {value}")
     if value:
         make_quiet()
     return value

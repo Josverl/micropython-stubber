@@ -5,7 +5,8 @@ from pytest_mock import MockerFixture
 
 from mpflash.common import FWInfo
 from mpflash.config import config
-from mpflash.downloaded import downloaded_firmwares, filter_downloaded_fwlist, find_downloaded_firmware
+from mpflash.downloaded import (downloaded_firmwares, filter_downloaded_fwlist,
+                                find_downloaded_firmware)
 
 pytestmark = [pytest.mark.mpflash]
 
@@ -15,6 +16,14 @@ def test_downloaded_firmwares(mocker: MockerFixture, test_fw_path):
     assert firmwares
     assert all(f.filename for f in firmwares)
 
+
+#########################################################################
+# minimal Local test setup # TODO: Add to CI
+# mpflash download --version 1.19.1 --board PICO
+# mpflash download --version 1.22.2 --board RPI_PICO
+# mpflash download --version 1.22.2 --board RPI_PICO_W
+# mpflash download --version preview --board ESP32_GENRIC
+#########################################################################
 
 @pytest.mark.parametrize(
     "port, board_id, version, OK",
@@ -60,7 +69,10 @@ def test_find_downloaded_firmware(port, board_id, version, OK, test_fw_path, act
     # same board ; or PORT_board
     assert all(fw.board in (board_id, f"{port.upper()}_{board_id}", f"RPI_{board_id}") for fw in result)
 
-    assert all(version in fw.version for fw in result)
+    if version == "preview":
+        assert all( fw.preview for fw in result)
+    else:
+        assert all(version in fw.version for fw in result) 
     assert all(version in fw.filename for fw in result)
     if not variants:
         # variante ==  board or PORT_board
