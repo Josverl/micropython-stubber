@@ -199,6 +199,9 @@ def test_rst_parse_class_10(line: str):
         # ("(id5, foo=-1, [bar=2])","(id5, foo=-1, bar: Optional[Any]=2)"),
         # ESPNow extra notation
         ("ESPNow.config('param')   (ESP32 only)", "ESPNow.config(param)"),
+        # machine.USBDevice
+        # Extranous / `USBDevice.active(self, [value] /)`
+        ("USBDevice.active(self, [value]/)", "USBDevice.active(self, value: Optional[Any]=None)"),
     ],
 )
 def test_fix_param(param_in, expected):

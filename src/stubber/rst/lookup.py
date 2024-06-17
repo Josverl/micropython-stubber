@@ -254,7 +254,7 @@ PARAM_FIXES = [
     Fix("\\*", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"\**", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"/*", "*"),  # change weirdly written wildcards \* --> *
-    # ("**", "*"),  # change weirdly written wildcards \* --> *
+    Fix(r"/)", ")"),  # strange terminator in machine.USBDevice `USBDevice.active(self, [value] /)`
     Fix("'param'", "param"),  # loose notation in documentation
     # illegal keywords
     Fix(
@@ -484,17 +484,17 @@ PARAM_FIXES = [
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {
     # machine
-    # SoftSPI is defined before SPI, so baseclass is not yet available - but in a .pyi that is OK 
-    "SoftSPI": "SPI",  
+    # SoftSPI is defined before SPI, so baseclass is not yet available - but in a .pyi that is OK
+    "SoftSPI": "SPI",
     "SoftI2C": "I2C",
     "Switch": "Pin",
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
     # "IOBase": "IO",  # DOCME  not in documentation
-    "TextIOWrapper": "IO", # "TextIOBase, TextIO",  # based on Stdlib
-    "FileIO": "IO", #  "RawIOBase, BinaryIO",  # based on Stdlib
-    "StringIO": "IO", #  "BufferedIOBase, BinaryIO",  # based on Stdlib
-    "BytesIO": "IO", # "BufferedIOBase, BinaryIO",  # based on Stdlib
+    "TextIOWrapper": "IO",  # "TextIOBase, TextIO",  # based on Stdlib
+    "FileIO": "IO",  #  "RawIOBase, BinaryIO",  # based on Stdlib
+    "StringIO": "IO",  #  "BufferedIOBase, BinaryIO",  # based on Stdlib
+    "BytesIO": "IO",  # "BufferedIOBase, BinaryIO",  # based on Stdlib
     "BufferedWriter": "IOBase",  # DOCME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
     # uzlib
     # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
