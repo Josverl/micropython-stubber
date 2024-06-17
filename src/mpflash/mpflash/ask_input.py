@@ -70,8 +70,14 @@ def ask_missing_params(
             answers["serial"] = [answers["serial"]]
         params.serial = [s.split()[0] for s in answers["serial"]]  # split to remove the description
     if "port" in answers:
-        params.ports = [p for p in params.ports if p != "?"]  # remove the "?" if present
-        params.ports.extend(answers["port"])
+        #  params.ports = [p for p in params.ports if p != "?"]  # remove the "?" if present
+        if isinstance(answers["port"], str):
+            params.ports.append(answers["port"])
+        elif isinstance(answers["port"], list): # type: ignore
+            params.ports.extend(answers["port"])
+        else:
+            raise ValueError(f"Unexpected type for answers['port']: {type(answers['port'])}")
+        
     if "boards" in answers:
         params.boards = [b for b in params.boards if b != "?"]  # remove the "?" if present
         params.boards.extend(answers["boards"] if isinstance(answers["boards"], list) else [answers["boards"]])
@@ -155,10 +161,18 @@ def ask_port_board(*, multi_select: bool, action: str):
                 "Which {port} board firmware do you want to {action} " + "to {serial} ?" if action == "flash" else "?"
             ),
             choices=filter_matching_boards,
-            validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
+            validate=at_least_one_validation,  # type: ignore
+            # validate=lambda _, x: True if x else "Please select at least one board",  # type: ignore
         ),
     ]
 
+def at_least_one_validation(answers, current) -> bool:
+    import inquirer.errors
+    if not current:
+        raise inquirer.errors.ValidationError("", reason="Please select at least one item.")
+    if isinstance(current, list) and not any(current):
+        raise inquirer.errors.ValidationError("", reason="Please select at least one item.")
+    return True
 
 def ask_mp_version(multi_select: bool, action: str):
     """
@@ -183,13 +197,6 @@ def ask_mp_version(multi_select: bool, action: str):
     # remove the versions for which there are no known boards in the board_info.json
     # todo: this may be a little slow
     mp_versions = [v for v in mp_versions if "preview" in v or get_known_boards_for_port("stm32", [v])]
-
-    def at_least_one_validation(answers, current) -> bool:
-        if not current:
-            raise inquirer.errors.ValidationError("", reason="Please select at least one version")
-        if isinstance(current, list) and not any(current):
-            raise inquirer.errors.ValidationError("", reason="Please select at least one version")
-        return True
 
     message = "Which version(s) do you want to {action} " + ("to {serial} ?" if action == "flash" else "?")
     q = input_ux(

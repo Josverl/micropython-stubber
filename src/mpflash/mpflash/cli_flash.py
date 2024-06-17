@@ -17,7 +17,8 @@ from .cli_list import show_mcus
 from .common import FlashParams
 from .config import config
 from .flash import flash_list
-from .worklist import WorkList, full_auto_worklist, manual_worklist, single_auto_worklist
+from .worklist import (WorkList, full_auto_worklist, manual_worklist,
+                       single_auto_worklist)
 
 # #########################################################################################################
 # CLI
@@ -120,7 +121,8 @@ def cli_flash_board(**kwargs) -> int:
 
     params = FlashParams(**kwargs)
     params.versions = list(params.versions)
-    params.boards = list(params.boards)
+    params.ports = list(params.ports)
+    params.boards = list(params.boards) 
     params.serial = list(params.serial)
     params.ignore = list(params.ignore)
     params.bootloader = BootloaderMethod(params.bootloader)
