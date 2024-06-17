@@ -3,7 +3,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Iterator, cast
 
-# TODO: this way of accessing the partials is not very robust
 PARTIALS_DIR = Path(__file__).parent.absolute()
 
 PARTIAL_START = "###PARTIAL###"
@@ -18,7 +17,6 @@ def _read_partial(path: Path) -> Iterator[str]:
     lines = deque(path.read_text(encoding="utf-8").splitlines(keepends=True))
     _start = False
     _end = False
-    # todo: allow processing of files that do not have the markers
     while True:
         try:
             if not _start and (line := lines.popleft()):

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
-from stubber.publish.enums import COMBO_STUBS, CORE_STUBS, DOC_STUBS, StubSource
+from stubber.publish.enums import StubSource
 from stubber.publish.package import create_package, package_name
 from stubber.publish.stubpackage import StubPackage
 
@@ -17,23 +17,17 @@ pytestmark = [pytest.mark.stubber]
 
 # test generation of different package names
 @pytest.mark.parametrize(
-    "family, pkg, port, board, expected",
+    "family, port, board, expected",
     [
-        ("micropython", COMBO_STUBS, "esp32", "GENERIC", "micropython-esp32-stubs"),
-        ("micropython", COMBO_STUBS, "esp32", "GENERIC_S3", "micropython-esp32-generic_s3-stubs"),
-        ("micropython", COMBO_STUBS, "esp32", "generic", "micropython-esp32-stubs"),
-        ("micropython", COMBO_STUBS, "esp32", "TINY", "micropython-esp32-tiny-stubs"),
-        ("micropython", COMBO_STUBS, "esp32", "tiny", "micropython-esp32-tiny-stubs"),
-        ("micropython", DOC_STUBS, "esp32", None, "micropython-doc-stubs"),
-        ("micropython", DOC_STUBS, "esp32", "GENERIC", "micropython-doc-stubs"),
-        ("micropython", DOC_STUBS, "esp32", "generic", "micropython-doc-stubs"),
-        ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
-        ("micropython", CORE_STUBS, None, None, "micropython-core-stubs"),
-        ("pycom", CORE_STUBS, None, None, "pycom-core-stubs"),
+        ("micropython", "esp32", "GENERIC", "micropython-esp32-stubs"),
+        ("micropython", "esp32", "GENERIC_S3", "micropython-esp32-generic_s3-stubs"),
+        ("micropython", "esp32", "generic", "micropython-esp32-stubs"),
+        ("micropython", "esp32", "TINY", "micropython-esp32-tiny-stubs"),
+        ("micropython", "esp32", "tiny", "micropython-esp32-tiny-stubs"),
     ],
 )
-def test_package_name(family, pkg, port, board, expected):
-    x = package_name(family=family, pkg_type=pkg, port=port, board=board)
+def test_package_name(family, port, board, expected):
+    x = package_name(family=family, port=port, board=board)
     assert x == expected
 
 
@@ -47,20 +41,17 @@ def test_package_name(family, pkg, port, board, expected):
     ],
 )
 @pytest.mark.parametrize(
-    "pkg_type, port, board",
+    "port, board",
     [
-        (DOC_STUBS, None, None),
-        (COMBO_STUBS, "esp32", "GENERIC"),
-        (COMBO_STUBS, "esp32", "GENERIC_S3"),
-        (COMBO_STUBS, "esp32", "UM_TINYPICO"),
-        (COMBO_STUBS, "stm32", "PYBV1"),
-        (COMBO_STUBS, "esp32", "generic"),
+        ("esp32", "GENERIC"),
+        ("esp32", "GENERIC_S3"),
+        ("esp32", "UM_TINYPICO"),
+        ("stm32", "PYBV1"),
+        ("esp32", "generic"),
     ],
 )
 # CORE_STUBS
-def test_create_package(
-    tmp_path, pytestconfig, version, pkg_type, port, board, mocker, monkeypatch: pytest.MonkeyPatch
-):
+def test_create_package(tmp_path, pytestconfig, version, port, board, mocker, monkeypatch: pytest.MonkeyPatch):
     """ "
     test Create a new package with the DOC_STUBS type
     - test the different methods to manipulate the package on disk
@@ -87,7 +78,7 @@ def test_create_package(
 
     mpy_version = "v1.21.0"
     family = "micropython"
-    pkg_name = f"foobar-{pkg_type}-stubs"
+    pkg_name = f"foobar-{port}-{board.lower()}-stubs"
 
     package = create_package(
         pkg_name,
@@ -95,11 +86,10 @@ def test_create_package(
         family=family,
         port=port,
         board=board,
-        pkg_type=pkg_type,
         # stub_source="./all-stubs",  # for debugging
     )
     assert isinstance(package, StubPackage)
-    run_common_package_tests(package, pkg_name, publish_path=publish_path, stub_path=stub_path, pkg_type=pkg_type)
+    run_common_package_tests(package, pkg_name, publish_path=publish_path, stub_path=stub_path)
 
 
 read_db_data = [
@@ -169,14 +159,11 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
         pkg_name,
         config.publish_path,
         stub_path=config.stub_path,
-        pkg_type=None,
         test_build=False,
     )
 
 
-def run_common_package_tests(
-    package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, pkg_type, test_build=True
-):
+def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, test_build=True):
     # sourcery skip: no-long-functions
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)

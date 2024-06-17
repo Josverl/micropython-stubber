@@ -11,7 +11,6 @@ from loguru import logger as log
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.database import get_database
 from stubber.publish.defaults import GENERIC_U
-from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import V_PREVIEW
@@ -110,7 +109,7 @@ def build_worklist(
     if family != "micropython":
         return []
     # get all the candidates
-    worklist = list(board_candidates(family=family, versions=versions, pt=COMBO_STUBS))
+    worklist = list(board_candidates(family=family, versions=versions))
     worklist = filter_list(worklist, ports, boards)
 
     for b in boards:

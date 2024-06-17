@@ -7,7 +7,6 @@ import pytest
 from pysondb import PysonDB
 from pytest_mock import MockerFixture
 
-from stubber.publish.enums import COMBO_STUBS
 from stubber.publish.package import create_package
 
 from .fakeconfig import FakeConfig
@@ -32,7 +31,7 @@ def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: p
     else:
         # use default version
         version = "1.19.1"
-    pkg = create_package("micropython-fake-stubs", mpy_version=version, port="esp32", pkg_type=COMBO_STUBS)
+    pkg = create_package("micropython-fake-stubs", mpy_version=version, port="esp32")
     pkg._publish = False
     pkg.create_license()
     pkg.create_readme()

@@ -22,9 +22,3 @@ class StubSource(str, Enum):
         # Always force string values
         return self.value
 
-
-ALL_TYPES = ["combo", "doc", "core", "firmware"]
-COMBO_STUBS = ALL_TYPES[0]
-DOC_STUBS = ALL_TYPES[1]
-CORE_STUBS = ALL_TYPES[2]
-FIRMWARE_STUBS = ALL_TYPES[3]
