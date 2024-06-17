@@ -63,7 +63,6 @@ Note: black on python 3.7 does not like some function defs
 
 """
 
-
 import re
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -150,11 +149,7 @@ class FileReadWriter:
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while (
-            not self.is_balanced(newline)
-            and self.line_no >= 0
-            and (self.line_no + append + 1) <= self.max_line
-        ):
+        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
@@ -225,9 +220,7 @@ class RSTReader(FileReadWriter):
         "stop at heading"
         u_line = self.rst_text[min(self.line_no + 1, self.max_line - 1)].rstrip()
         # Heading  ---, ==, ~~~
-        underlined = (
-            u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
-        )
+        underlined = u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
         if underlined and self.line_no > 0:
             # check if previous line is a heading
             line = self.rst_text[self.line_no].strip()
@@ -374,12 +367,8 @@ class RSTParser(RSTReader):
     target = ".py"  # py/pyi
     # TODO: Move to lookup.py
     PARAM_RE_FIXES = [
-        Fix(
-            r"\[angle, time=0\]", "[angle], time=0", is_re=True
-        ),  # fix: method:: Servo.angle([angle, time=0])
-        Fix(
-            r"\[speed, time=0\]", "[speed], time=0", is_re=True
-        ),  # fix: .. method:: Servo.speed([speed, time=0])
+        Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
+        Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
         Fix(
             r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
         ),  # fix: network - AbstractNIC.connect
@@ -446,9 +435,7 @@ class RSTParser(RSTReader):
     def apply_fix(fix: Fix, params: str, name: str = ""):
         if fix.name and fix.name != name:
             return params
-        return (
-            re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
-        )
+        return re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
 
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
@@ -509,12 +496,10 @@ class RSTParser(RSTReader):
             if "nightly" in self.source_tag:
                 version = V_PREVIEW
             else:
-                version = self.source_tag.replace(
-                    "_", "."
-                )  # TODO Use clean_version(self.source_tag)
-            docstr[
-                0
-            ] = f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+                version = self.source_tag.replace("_", ".")  # TODO Use clean_version(self.source_tag)
+            docstr[0] = (
+                f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            )
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -546,9 +531,7 @@ class RSTParser(RSTReader):
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=this_function, module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
 
             # defaults
             name = params = ""
@@ -663,6 +646,8 @@ class RSTParser(RSTReader):
             #   - staticmethod          (       <params>) -> <ret_type>:
             #   - all other methods     (self,  <params>) -> <ret_type>:
             if name == "__init__":
+                # avoid params starting with `self ,`
+                params = self.lstrip_self(params)
                 method = FunctionSourceDict(
                     name=f"def {name}",
                     indent=parent_class.indent + 4,
@@ -688,6 +673,8 @@ class RSTParser(RSTReader):
                     is_async=is_async,
                 )
             else:  # just plain method
+                # avoid params starting with `self ,`
+                params = self.lstrip_self(params)
                 method = FunctionSourceDict(
                     name=f"def {name}",
                     indent=parent_class.indent + 4,
@@ -695,7 +682,19 @@ class RSTParser(RSTReader):
                     docstr=docstr,
                     is_async=is_async,
                 )
+
             parent_class += method
+
+    def lstrip_self(self, params):
+        """
+        To avoid duplicate selfs,
+        Remove `self,` from the start of the parameters
+        """
+        if params.startswith("self,"):
+            params = params[6:]
+        elif params.startswith("self ,"):
+            params = params[7:]
+        return params
 
     def parse_exception(self):
         log.trace(f"# {self.line.rstrip()}")
