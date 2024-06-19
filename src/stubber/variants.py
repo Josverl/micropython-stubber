@@ -39,7 +39,7 @@ def create_variants(
     target_path : Path, optional
         Path to write the variants to, by default None
     version : str, optional
-        Version of mpy-cross to use, by default uses the latest version
+        Version of mpy-cross to use, by default uses the latest published version
 
     """
     if target_path is None:

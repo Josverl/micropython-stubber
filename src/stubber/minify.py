@@ -369,7 +369,7 @@ def cross_compile(
         _target = get_temp_file(suffix=".mpy")
     result = pipx_mpy_cross(version, source_file, _target)
     if result.stderr and "No matching distribution found for mpy-cross==" in result.stderr:
-        log.warning(f"mpy-cross=={version} not found, using latest")
+        log.warning(f"mpy-cross=={version} not found, using default version.")
         result = pipx_mpy_cross(V_PREVIEW, source_file, _target)
 
     if result.returncode == 0:

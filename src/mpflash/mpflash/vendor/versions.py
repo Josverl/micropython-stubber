@@ -10,6 +10,8 @@ from loguru import logger as log
 from packaging.version import parse
 
 from mpflash.common import GH_CLIENT
+OLDEST_VERSION = "1.16"
+"This is the oldest MicroPython version to build the stubs on"
 
 V_PREVIEW = "preview"
 "Latest preview version"
@@ -74,7 +76,9 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False):
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
-        versions = [tag.name for tag in repo.get_tags()]
+        versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
+        # Only keep the last preview
+        versions = [v for v in versions if not v.endswith(V_PREVIEW) or v == versions[-1]]
     except Exception:
         versions = [
             "v9.99.9-preview",
@@ -99,19 +103,17 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False):
     versions = [v for v in versions if parse(v) >= parse(minver)]
     # remove all but the most recent (preview) version
     versions = versions[:1] + [v for v in versions if "preview" not in v]
-    return sorted(versions)
+    return sorted(versions, reverse=reverse)
 
 
 def get_stable_mp_version() -> str:
     # read the versions from the git tags
-    all_versions = micropython_versions(minver="v1.17")
+    all_versions = micropython_versions(minver=OLDEST_VERSION)
     return [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
 
 
 def get_preview_mp_version() -> str:
     # read the versions from the git tags
-    all_versions = micropython_versions(minver="v1.17")
+    all_versions = micropython_versions(minver=OLDEST_VERSION)
     return [v for v in all_versions if v.endswith(V_PREVIEW)][-1]
 
-
-#############################################################
