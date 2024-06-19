@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.20.5
+This variant was generated from createstubs.py by micropython-stubber v1.20.6
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.20.5"
+__version__ = "v1.20.6"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -597,10 +597,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.5 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.6 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.20.5 do not have a micro .0
+            # versions from 1.10.0 to 1.20.6 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
