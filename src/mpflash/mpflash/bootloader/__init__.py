@@ -32,5 +32,6 @@ def enter_bootloader(
         raise MPFlashError(f"Unknown bootloader method {method}")
     if result:
         time.sleep(wait_after)
+    else:
         log.error(f"Failed to enter bootloader on {mcu.serialport}")
     return result
