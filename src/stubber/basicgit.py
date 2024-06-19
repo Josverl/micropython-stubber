@@ -14,6 +14,9 @@ from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse
 
+# from stubber.utils.versions import get_stable_mp_version
+from mpflash.vendor.versions import get_stable_mp_version
+
 # from stubber.utils.versions import SET_PREVIEW
 
 # Token with no permissions to avoid throttling
@@ -71,6 +74,9 @@ def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str
     cmd = ["git", "clone"]
     if shallow:
         cmd += ["--depth", "1"]
+    if tag in {"stable"}:
+        tag = get_stable_mp_version()
+
     if tag in {"preview", "latest", "master"}:
         tag = None
     cmd += [remote_repo, "--branch", tag, str(path)] if tag else [remote_repo, str(path)]

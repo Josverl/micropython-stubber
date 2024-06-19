@@ -1,5 +1,6 @@
 """Handle versions of micropython based on the git tags in the repo """
 
+from functools import lru_cache
 from pathlib import Path
 
 from github import Github
@@ -13,7 +14,7 @@ OLDEST_VERSION = "1.16"
 "This is the oldest MicroPython version to build the stubs on"
 
 V_PREVIEW = "preview"
-"Latest Preview version"
+"Latest preview version"
 
 SET_PREVIEW = {"preview", "latest", "master"}
 
@@ -32,12 +33,12 @@ def clean_version(
     if version in {"", "-"}:
         return version
     if version.lower() == "stable":
-        _v = get_stable_version()
+        _v = get_stable_mp_version()
         if not _v:
             log.warning("Could not determine the latest stable version")
             return "stable"
         version = _v
-        log.info(f"Using latest stable version: {version}")
+        log.trace(f"Using latest stable version: {version}")
     is_preview = "-preview" in version
     nibbles = version.split("-")
     ver_ = nibbles[0].lower().lstrip("v")
@@ -69,6 +70,7 @@ def clean_version(
     return version
 
 
+@lru_cache(maxsize=10)
 def checkedout_version(path: Path, flat: bool = False) -> str:
     """Get the checked-out version of the repo"""
     version = git.get_local_tag(path.as_posix())
@@ -78,11 +80,11 @@ def checkedout_version(path: Path, flat: bool = False) -> str:
     return version
 
 
-def micropython_versions(minver: str = "v1.9.2"):
+def micropython_versions(minver: str = "v1.20", reverse: bool = False):
     """Get the list of micropython versions from github tags"""
     try:
-        g = Github()
-        repo = g.get_repo("micropython/micropython")
+        gh_client = Github()
+        repo = gh_client.get_repo("micropython/micropython")
         versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
         # Only keep the last preview
         versions = [v for v in versions if not v.endswith(V_PREVIEW) or v == versions[-1]]
@@ -106,15 +108,21 @@ def micropython_versions(minver: str = "v1.9.2"):
             "v1.12",
             "v1.11",
             "v1.10",
-            "v1.9.4",
-            "v1.9.3",
         ]
-        versions = [v for v in versions if parse(v) >= parse(minver)]
-    return sorted(versions)
+    versions = [v for v in versions if parse(v) >= parse(minver)]
+    # remove all but the most recent (preview) version
+    versions = versions[:1] + [v for v in versions if "preview" not in v]
+    return sorted(versions, reverse=reverse)
 
 
-def get_stable_version() -> str:
+def get_stable_mp_version() -> str:
     # read the versions from the git tags
-    all_versions = micropython_versions(minver="v1.17")
-    stable_version = [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
-    return stable_version
+    all_versions = micropython_versions(minver=OLDEST_VERSION)
+    return [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
+
+
+def get_preview_mp_version() -> str:
+    # read the versions from the git tags
+    all_versions = micropython_versions(minver=OLDEST_VERSION)
+    return [v for v in all_versions if v.endswith(V_PREVIEW)][-1]
+

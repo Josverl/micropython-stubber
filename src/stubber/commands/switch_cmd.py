@@ -23,10 +23,10 @@ from .cli import stubber_cli
 # get version list from Git tags in the repo that is provided on the command line
 
 try:
-    VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + [V_PREVIEW, "latest"]
+    VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + [V_PREVIEW, "latest", "stable"]
 except Exception:
     # offline fallback
-    VERSION_LIST = ["v1.91.1", "v1.20.1", "v1.21.0", "v1.22.1", "preview"]
+    VERSION_LIST = ["v1.91.1", "v1.20.1", "v1.21.0", "v1.22.1", "preview", "stable"]
 
 
 @stubber_cli.command(name="switch")

@@ -12,6 +12,7 @@ from loguru import logger as log
 from packaging.version import Version
 
 import stubber.basicgit as git
+from mpflash.vendor.versions import get_stable_mp_version
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
 
@@ -118,7 +119,9 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
     if tag == V_PREVIEW:
         git.switch_branch(repo=mpy_path, branch="master")
     else:
-        git.checkout_tag(repo=mpy_path, tag=tag)
+        if tag == "stable":
+            tag = get_stable_mp_version() 
+        git.switch_tag(tag, repo=mpy_path)
     result = match_lib_with_mpy(version_tag=tag, mpy_path=mpy_path, lib_path=mpy_lib_path)
 
     log.info(f"{str(mpy_path):<40} {git.get_local_tag(mpy_path)}")
