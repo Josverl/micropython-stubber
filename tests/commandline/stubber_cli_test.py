@@ -96,6 +96,7 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     [
         pytest.param(["switch", "preview"], id="preview"),
         pytest.param(["switch", "latest"], id="latest"),
+        pytest.param(["switch", "stable"], id="stable"),
         pytest.param(["switch", "v1.17"], id="v1.17"),
         pytest.param(["switch", "v1.9.4"], id="v1.9.4"),
     ],
@@ -107,8 +108,8 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
     mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
     m_fetch = mocker.patch("stubber.commands.clone_cmd.git.fetch", autospec=True, return_value=0)
 
-    m_switch = mocker.patch("stubber.commands.clone_cmd.git.switch_branch", autospec=True, return_value=0)
-    m_checkout = mocker.patch("stubber.commands.clone_cmd.git.checkout_tag", autospec=True, return_value=0)
+    m_switch_branch = mocker.patch("stubber.commands.clone_cmd.git.switch_branch", autospec=True, return_value=0)
+    m_switch_tag = mocker.patch("stubber.commands.clone_cmd.git.switch_tag", autospec=True, return_value=0)
     mocker.patch("stubber.commands.clone_cmd.git.get_local_tag", autospec=True, return_value="v1.42")
 
     m_match = mocker.patch("stubber.utils.repos.match_lib_with_mpy", autospec=True)  # Moved to other module
@@ -127,11 +128,11 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
     m_match.assert_called_once()
 
     if "latest" in params or "preview" in params:
-        m_switch.assert_called_once()
-        m_checkout.assert_not_called()
+        m_switch_branch.assert_called_once()
+        m_switch_tag.assert_not_called()
     else:
-        m_switch.assert_not_called()
-        m_checkout.assert_called_once()
+        m_switch_branch.assert_not_called()
+        m_switch_tag.assert_called_once()
 
 
 @pytest.mark.parametrize("version", VERSION_LIST)
