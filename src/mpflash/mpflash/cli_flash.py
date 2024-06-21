@@ -103,7 +103,7 @@ from .worklist import (WorkList, full_auto_worklist, manual_worklist,
 )
 @click.option(
     "--bootloader",
-    "-b",
+    "-bl",
     "bootloader",
     type=click.Choice([e.value for e in BootloaderMethod]),
     default="mpy",
