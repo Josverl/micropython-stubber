@@ -15,6 +15,7 @@ from .cli_group import cli
 from .common import DownloadParams
 from .config import config
 from .download import download
+from .errors import EXIT_CANCELLED, EXIT_DOWNLOAD_FAILED, EXIT_OK
 
 
 @cli.command(
@@ -110,12 +111,12 @@ def cli_download(**kwargs) -> int:
 
     params = ask_missing_params(params)
     if not params:  # Cancelled by user
-        return 2
+        return EXIT_CANCELLED
     params.versions = [clean_version(v, drop_v=True) for v in params.versions]
     assert isinstance(params, DownloadParams)
 
     try:
-        download(
+        return download(
             params.fw_folder,
             params.ports,
             params.boards,
@@ -123,7 +124,6 @@ def cli_download(**kwargs) -> int:
             params.force,
             params.clean,
         )
-        return 0
     except MPFlashError as e:
         log.error(f"{e}")
-        return 1
+        return EXIT_DOWNLOAD_FAILED

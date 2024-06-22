@@ -5,7 +5,7 @@ import rich_click as click
 from loguru import logger as log
 
 from mpflash.common import BootloaderMethod
-from mpflash.errors import MPFlashError
+from mpflash.errors import EXIT_CANCELLED, MPFlashError
 from mpflash.mpboard_id import find_known_board
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
@@ -150,7 +150,7 @@ def cli_flash_board(**kwargs) -> int:
     # Ask for missing input if needed
     params = ask_missing_params(params)
     if not params:  # Cancelled by user
-        return 2
+        return EXIT_CANCELLED
     # TODO: Just in time Download of firmware
 
     assert isinstance(params, FlashParams)
@@ -197,7 +197,7 @@ def cli_flash_board(**kwargs) -> int:
     ):
         log.info(f"Flashed {len(flashed)} boards")
         show_mcus(flashed, title="Updated boards after flashing")
-        return 0
+        return len(flashed)
     else:
         log.error("No boards were flashed")
         return 1

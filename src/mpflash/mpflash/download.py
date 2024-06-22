@@ -134,7 +134,12 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
         for board in urls:
             board["port"] = port
 
-        for board in track(urls, description=f"Checking {port} download pages", transient=True, refresh_per_second=2):
+        for board in track(
+            urls,
+            description=f"Checking {port} download pages",
+            transient=True,
+            refresh_per_second=2,
+        ):
             # add a board to the list for each firmware found
             firmware_urls: List[str] = []
             for ext in PORT_FWTYPES[port]:
@@ -169,7 +174,9 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
                 #     fw_info.build = "0"
 
                 fw_info.ext = Path(fw_info.firmware).suffix
-                fw_info.variant = fw_info.filename.split("-v")[0] if "-v" in fw_info.filename else ""
+                fw_info.variant = (
+                    fw_info.filename.split("-v")[0] if "-v" in fw_info.filename else ""
+                )
 
                 board_urls.append(fw_info)
     return board_urls
@@ -204,6 +211,9 @@ def download_firmwares(
         versions : The list of versions to download firmware for.
         force : A flag indicating whether to force the download even if the firmware file already exists.
         clean : A flag indicating to clean the date from the firmware filename.
+
+    Returns:
+        int: The number of downloaded firmware files.
     """
     skipped = downloaded = 0
     versions = [] if versions is None else [clean_version(v) for v in versions]
@@ -220,7 +230,9 @@ def download_firmwares(
     if not unique_boards:
         log.error("No relevant firmwares could be found on https://micropython.org/download")
         log.info(f"{versions=} {ports=} {boards=}")
-        log.info("Please check the website for the latest firmware files or try the preview version.")
+        log.info(
+            "Please check the website for the latest firmware files or try the preview version."
+        )
         return 0
 
     firmware_folder.mkdir(exist_ok=True)
@@ -248,7 +260,7 @@ def download_firmwares(
     # if downloaded > 0:
     #     clean_downloaded_firmwares(firmware_folder)
     log.success(f"Downloaded {downloaded} firmwares, skipped {skipped} existing files.")
-    return downloaded + skipped
+    return downloaded  # + skipped
 
 
 def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], clean: bool):
@@ -275,7 +287,10 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     relevant = [
         board
         for board in board_urls
-        if board.version in versions and board.build == "0" and board.board in boards and not board.preview
+        if board.version in versions
+        and board.build == "0"
+        and board.board in boards
+        and not board.preview
     ]
 
     if preview:
@@ -318,7 +333,9 @@ def download(
 
     """
     if not boards:
-        log.critical("No boards found, please connect a board or specify boards to download firmware for.")
+        log.critical(
+            "No boards found, please connect a board or specify boards to download firmware for."
+        )
         raise MPFlashError("No boards found")
 
     try:

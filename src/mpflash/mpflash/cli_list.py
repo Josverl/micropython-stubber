@@ -7,7 +7,7 @@ from rich import print
 from .cli_group import cli
 from .connected import list_mcus
 from .list import show_mcus
-from .logger import make_quiet
+from .logger import make_quiet, log
 
 
 @cli.command(
@@ -63,7 +63,9 @@ from .logger import make_quiet
     show_default=True,
     help="""Show progress""",
 )
-def cli_list_mcus(serial: List[str], ignore: List[str], bluetooth: bool, as_json: bool, progress: bool = True) -> int:
+def cli_list_mcus(
+    serial: List[str], ignore: List[str], bluetooth: bool, as_json: bool, progress: bool = True
+) -> int:
     """List the connected MCU boards, and output in a nice table or json."""
     serial = list(serial)
     ignore = list(ignore)
@@ -75,7 +77,9 @@ def cli_list_mcus(serial: List[str], ignore: List[str], bluetooth: bool, as_json
     conn_mcus = list_mcus(ignore=ignore, include=serial, bluetooth=bluetooth)
     if as_json:
         print(json.dumps([mcu.__dict__ for mcu in conn_mcus], indent=4))
-        progress = False
-    if progress:
+    elif len(conn_mcus):
         show_mcus(conn_mcus, refresh=False)
-    return 0 if conn_mcus else 1
+    else:
+        print("No connected MCUs found.")
+    log.debug(f"Found {len(conn_mcus)} connected MCUs.")
+    return len(conn_mcus)
