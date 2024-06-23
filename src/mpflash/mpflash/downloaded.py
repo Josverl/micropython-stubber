@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 import jsonlines
 from loguru import logger as log
 
-from mpflash.common import FWInfo
+from mpflash.common import PORT_FWTYPES, FWInfo
 from mpflash.vendor.versions import clean_version
 
 from .config import config
@@ -109,7 +109,7 @@ def filter_downloaded_fwlist(
     log.trace(f"Filtering firmware for {version} : {len(fw_list)} found.")
     # filter by port
     if port:
-        fw_list = [fw for fw in fw_list if fw.port == port]
+        fw_list = [fw for fw in fw_list if fw.port == port and Path(fw.firmware).suffix in PORT_FWTYPES[port]]
         log.trace(f"Filtering firmware for {port} : {len(fw_list)} found.")
 
     if board_id:
@@ -120,6 +120,7 @@ def filter_downloaded_fwlist(
             # the firmware variant should match exactly the board_id
             fw_list = [fw for fw in fw_list if fw.variant == board_id]
         log.trace(f"Filtering firmware for {board_id} : {len(fw_list)} found.")
+        
     if selector and port in selector:
         fw_list = [fw for fw in fw_list if fw.filename.endswith(selector[port])]
     return fw_list

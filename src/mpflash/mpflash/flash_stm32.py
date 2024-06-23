@@ -11,7 +11,6 @@ from mpflash.mpremoteboard import MPRemoteBoard
 
 def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_dfu: bool = True):
     # sourcery skip: lift-return-into-if
-    log.info("Using dfu-util")
     dfu_init()
     updated = flash_stm32_dfu(mcu, fw_file=fw_file, erase=erase)
     # if stm32_dfu:
