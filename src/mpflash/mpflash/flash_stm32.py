@@ -1,4 +1,4 @@
-"""Flash STM32 boards using either STM32CubeProgrammer CLI or dfu-util"""
+"""Flash STM32 boards using pydfu"""
 
 from pathlib import Path
 
@@ -12,12 +12,7 @@ from mpflash.mpremoteboard import MPRemoteBoard
 def flash_stm32(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool, stm32_dfu: bool = True):
     # sourcery skip: lift-return-into-if
     dfu_init()
-    updated = flash_stm32_dfu(mcu, fw_file=fw_file, erase=erase)
-    # if stm32_dfu:
-    # else:
-    #     log.info("Using STM32CubeProgrammer CLI")
-    #     updated = flash_stm32_cubecli(mcu, fw_file=fw_file, erase=erase)
-
-    mcu.wait_for_restart()
-    log.success(f"Flashed {mcu.version} to {mcu.board}")
+    if updated := flash_stm32_dfu(mcu, fw_file=fw_file, erase=erase):
+        mcu.wait_for_restart()
+        log.success(f"Flashed {mcu.version} to {mcu.board}")
     return updated
