@@ -15,7 +15,7 @@ on:
         branches: [main]
 
     push:
-        branches: [main, dev/*, feat/*, fix/*]
+        branches: [main, stubber/*, feat/*, fix/*]
         paths:
             - .github/workflows/pytest.yml
             - .github/workflows/codecov.yml
