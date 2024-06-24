@@ -39,6 +39,16 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
     if erase:
+        # if nuke_file := find_nuke_uf2(mcu):
+        #     log.info("Erasing board")
+        #     if nuke_destination := waitfor_uf2():
+        #         cp_firmware_to_uf2(nuke_file, nuke_destination)
+        #     else:
+        #         log.error("Failed to erase the board.")
+        #         return None
+        # else:
+        log.info(f"Erasing not yet implemented for UF2 flashing to {mcu.board}.")
+
     destination = waitfor_uf2()
 
     if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
@@ -77,6 +87,21 @@ def waitfor_uf2():
     else:
         log.warning(f"OS {sys.platform} not tested/supported")
         return None
+
+
+def find_nuke_uf2(mcu: MPRemoteBoard):
+    """
+    Find the nuke UF2 file for the board
+    """
+    if mcu.port == "rp2":
+        prefix = "pico_nuke"
+    else:
+        return None
+    nuke_uf2 = Path(__file__).parent / "uf2" / f"{prefix}_{mcu.board}.uf2"
+    if not nuke_uf2.exists():
+        log.warning("Nuke UF2 file not found for the board.")
+        return None
+    return nuke_uf2
 
 
 @tenacity.retry(stop=stop_after_attempt(3), wait=wait_fixed(1), reraise=False)
