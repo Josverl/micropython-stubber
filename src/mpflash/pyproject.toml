@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mpflash"
-version = "0.8.8"
+version = "0.9.0"
 description = "Flash and download tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -39,6 +39,10 @@ requests = "^2.31.0"
 rich-click = "^1.8.1"
 tenacity = "8.2.3"
 
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
 
 [tool.poetry.group.test]
 optional = true
