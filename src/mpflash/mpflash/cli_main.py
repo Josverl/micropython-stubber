@@ -11,6 +11,7 @@ from .cli_download import cli_download
 from .cli_flash import cli_flash_board
 from .cli_group import cli
 from .cli_list import cli_list_mcus
+from .errors import EXIT_ERROR, EXIT_CANCELLED
 
 
 def mpflash():
@@ -19,22 +20,24 @@ def mpflash():
     cli.add_command(cli_flash_board)
 
     # cli(auto_envvar_prefix="MPFLASH")
-    if False and os.environ.get("COMPUTERNAME").startswith("JOSVERL"):
+    if False and os.environ.get("COMPUTERNAME").lower().startswith("josverl"):
         # intentional less error suppression on dev machine
         result = cli(standalone_mode=False)
     else:
         try:
-            result = cli(standalone_mode=True)
-            exit(result)
+            result = cli(standalone_mode=False)
         except AttributeError as e:
             log.error(f"Error: {e}")
-            exit(-1)
-        except click.exceptions.ClickException as e:
+            exit(EXIT_ERROR)
+        except (click.exceptions.ClickException, click.exceptions.UsageError) as e:
             log.error(f"Error: {e}")
-            exit(-2)
+            exit(EXIT_ERROR)
         except click.exceptions.Abort as e:
             # Aborted - Ctrl-C
-            exit(-3)
+            log.info(f"Cancelled by user")
+            exit(EXIT_CANCELLED)
+        # return result
+        exit(result)
 
 
 if __name__ == "__main__":

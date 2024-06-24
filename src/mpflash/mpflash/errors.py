@@ -9,5 +9,6 @@ class MPFlashError(Exception):
         super().__init__(message)
 
 EXIT_OK = 0
+EXIT_ERROR = -1
 EXIT_CANCELLED = -2
 EXIT_DOWNLOAD_FAILED = -3
