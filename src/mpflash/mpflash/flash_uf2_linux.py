@@ -73,7 +73,7 @@ def pmount(disk: UF2Disk):
         log.debug(f"Mounted {disk.label} at {disk.mountpoint}")
         glb_dismount_me.append(disk)
     else:
-        log.debug(f"\n{disk.label} already mounted at {disk.mountpoint}")
+        log.trace(f"\n{disk.label} already mounted at {disk.mountpoint}")
 
 
 def pumount(disk: UF2Disk):

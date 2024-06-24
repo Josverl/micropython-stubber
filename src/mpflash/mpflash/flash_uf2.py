@@ -39,18 +39,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
     if erase:
-        log.info("Erasing not yet implemented for UF2 flashing.")
-
-    if sys.platform == "linux":
-        destination = wait_for_UF2_linux()
-    elif sys.platform == "win32":
-        destination = wait_for_UF2_windows()
-    elif sys.platform == "darwin":
-        log.warning(f"OS {sys.platform} not tested/supported")
-        destination = wait_for_UF2_macos()
-    else:
-        log.warning(f"OS {sys.platform} not tested/supported")
-        return None
+    destination = waitfor_uf2()
 
     if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
         log.error("Board is not in bootloader mode")
@@ -72,6 +61,22 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     mcu.wait_for_restart()
     # time.sleep(1)  # 5 secs to short on linux
     return mcu
+
+
+def waitfor_uf2():
+    """
+    Wait for the UF2 drive to mount
+    """
+    if sys.platform == "linux":
+        return wait_for_UF2_linux()
+    elif sys.platform == "win32":
+        return wait_for_UF2_windows()
+    elif sys.platform == "darwin":
+        log.warning(f"OS {sys.platform} not tested/supported")
+        return wait_for_UF2_macos()
+    else:
+        log.warning(f"OS {sys.platform} not tested/supported")
+        return None
 
 
 @tenacity.retry(stop=stop_after_attempt(3), wait=wait_fixed(1), reraise=False)
