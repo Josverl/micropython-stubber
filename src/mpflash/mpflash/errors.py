@@ -7,3 +7,7 @@ class MPFlashError(Exception):
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
+
+EXIT_OK = 0
+EXIT_CANCELLED = -2
+EXIT_DOWNLOAD_FAILED = -3
