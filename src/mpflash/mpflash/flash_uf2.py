@@ -68,13 +68,9 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
 
     if sys.platform in ["linux"]:
         dismount_uf2_linux()
-    for _ in track(
-        range(5 + 2),
-        description="Waiting for the board to restart",
-        transient=True,
-        refresh_per_second=2,
-    ):
-        time.sleep(1)  # 5 secs to short on linux
+
+    mcu.wait_for_restart()
+    # time.sleep(1)  # 5 secs to short on linux
     return mcu
 
 

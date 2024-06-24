@@ -42,7 +42,10 @@ def get_uf2_drives():
             uf2.mountpoint = uf2_part["mountpoint"]
             yield uf2
         elif disk["type"] == "disk" and disk.get("children") and len(disk.get("children")) > 0:
-            if disk.get("children")[0]["type"] == "part" and disk.get("children")[0]["fstype"] == "vfat":
+            if (
+                disk.get("children")[0]["type"] == "part"
+                and disk.get("children")[0]["fstype"] == "vfat"
+            ):
                 uf2_part = disk.get("children")[0]
                 # print( json.dumps(uf2_part, indent=4))
                 uf2 = UF2Disk()
@@ -101,9 +104,12 @@ def wait_for_UF2_linux(s_max: int = 10):
     uf2_drives = []
     # while not destination and wait > 0:
     for _ in track(
-        range(s_max), description="Waiting for mcu to mount as a drive", transient=True, refresh_per_second=2
+        range(s_max),
+        description="Waiting for mcu to mount as a drive",
+        transient=True,
+        refresh_per_second=2,
+        total=s_max,
     ):
-        # log.info(f"Waiting for mcu to mount as a drive : {wait} seconds left")
         uf2_drives += list(get_uf2_drives())
         for drive in get_uf2_drives():
             pmount(drive)
