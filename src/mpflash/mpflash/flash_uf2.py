@@ -12,6 +12,8 @@ from loguru import logger as log
 from rich.progress import track
 
 from mpflash.mpremoteboard import MPRemoteBoard
+import tenacity
+from tenacity import stop_after_attempt, wait_fixed
 
 from .common import PORT_FWTYPES
 from .flash_uf2_boardid import get_board_id
@@ -57,11 +59,30 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     log.info("Board is in bootloader mode")
     board_id = get_board_id(destination)  # type: ignore
     log.info(f"Board ID: {board_id}")
-    log.info(f"Copying {fw_file} to {destination}.")
-    shutil.copy(fw_file, destination)
-    log.success("Done copying, resetting the board and wait for it to restart")
+    try:
+        cp_firmware_to_uf2(fw_file, destination)
+        log.success("Done copying, resetting the board and wait for it to restart")
+    except tenacity.RetryError:
+        log.error("Failed to copy the firmware file to the board.")
+        return None
+
     if sys.platform in ["linux"]:
         dismount_uf2_linux()
-    for _ in track(range(5 + 2), description="Waiting for the board to restart", transient=True, refresh_per_second=2):
+    for _ in track(
+        range(5 + 2),
+        description="Waiting for the board to restart",
+        transient=True,
+        refresh_per_second=2,
+    ):
         time.sleep(1)  # 5 secs to short on linux
     return mcu
+
+
+@tenacity.retry(stop=stop_after_attempt(3), wait=wait_fixed(1), reraise=False)
+def cp_firmware_to_uf2(fw_file, destination):
+    """
+    Copy the firmware file to the destination,
+    Retry 3 times with 1s delay
+    """
+    log.info(f"Copying {fw_file} to {destination}.")
+    shutil.copy(fw_file, destination)
