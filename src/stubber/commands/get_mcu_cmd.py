@@ -5,7 +5,7 @@
 ##########################################################################################
 
 
-import click
+import rich_click as click
 from loguru import logger as log
 
 from stubber.bulk.mcu_stubber import stub_connected_mcus
@@ -37,7 +37,10 @@ from .cli import stubber_cli
 )
 @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
 @click.option(
-    "--reset/--no-reset", default=False, show_default=True, help="Reset the board before running createstubs."
+    "--reset/--no-reset",
+    default=False,
+    show_default=True,
+    help="Reset the board before running createstubs.",
 )
 @click.option(
     "--github/--local",
@@ -50,7 +53,9 @@ def cli_create_mcu_stubs(variant: str, format: str, debug: bool, reset: bool, gi
     # check if all repos have been cloned
     for repo in CONFIG.repos:
         if not repo.exists():
-            log.error(f"Repo {repo} not found, use 'stubber clone --add-stubs' to clone the repos.")
+            log.error(
+                f"Repo {repo} not found, use 'stubber clone --add-stubs' to clone the repos."
+            )
             exit(1)
 
     exit(stub_connected_mcus(variant=variant, format=format, debug=debug))

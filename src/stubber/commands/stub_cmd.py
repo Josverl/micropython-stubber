@@ -1,4 +1,5 @@
 """Create or update .pyi type hint files."""
+
 ##########################################################################################
 # stub
 ##########################################################################################
@@ -7,7 +8,7 @@ from loguru import logger as log
 from pathlib import Path
 from typing import Union
 
-import click
+import rich_click as click
 from stubber.utils import generate_pyi_files
 from stubber.utils.post import do_post_processing
 

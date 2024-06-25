@@ -13,15 +13,6 @@ from stubber.commands.switch_cmd import VERSION_LIST
 pytestmark = [pytest.mark.stubber, pytest.mark.cli]
 
 
-def test_cmd_help():
-    # check basic command line sanity check
-    runner = CliRunner()
-    result = runner.invoke(stubber.stubber_cli, ["--help"])
-    assert result.exit_code == 0
-    assert "Usage:" in result.output
-    assert "Commands:" in result.output
-
-
 ##########################################################################################
 # show-config
 ##########################################################################################

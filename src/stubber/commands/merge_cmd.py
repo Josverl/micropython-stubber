@@ -1,9 +1,10 @@
 """
 enrich machinestubs with docstubs
 """
+
 from typing import List, Union
 
-import click
+import rich_click as click
 from loguru import logger as log
 
 from stubber.publish.merge_docstubs import merge_all_docstubs

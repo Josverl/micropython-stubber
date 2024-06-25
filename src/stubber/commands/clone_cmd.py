@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import List, Tuple, Union
 
-import click
+import rich_click as click
 import stubber.basicgit as git
 from loguru import logger as log
 from stubber.utils.config import CONFIG
@@ -20,8 +20,19 @@ from .cli import stubber_cli
 
 
 @stubber_cli.command(name="clone")
-@click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
-@click.option("--add-stubs/--no-stubs", "stubs", default=False, is_flag=True, help="Also clone the micropython-stubs repo")
+@click.option(
+    "--path",
+    "-p",
+    default=CONFIG.repo_path.as_posix(),
+    type=click.Path(file_okay=False, dir_okay=True),
+)
+@click.option(
+    "--add-stubs/--no-stubs",
+    "stubs",
+    default=False,
+    is_flag=True,
+    help="Also clone the micropython-stubs repo",
+)
 def cli_clone(path: Union[str, Path], stubs: bool = False):
     """
     Clone/fetch the micropython repos locally.

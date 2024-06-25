@@ -7,7 +7,7 @@
 from pathlib import Path
 from typing import List
 
-import click
+import rich_click as click
 from loguru import logger as log
 
 import stubber.get_cpython as get_cpython
@@ -54,14 +54,16 @@ def cli_get_core(
     """
     # default parameter values
     stub_folder = stub_folder or CONFIG.stub_path.as_posix()
-    
+
     stub_paths: List[Path] = []
     for core_type in ["pycopy", "micropython"]:
         log.info(f"::group:: Get Cpython core :{core_type}")
         req_filename = f"requirements-core-{core_type}.txt"
         stub_path = Path(stub_folder) / f"cpython_core-{core_type}"
 
-        get_cpython.get_core(stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type)
+        get_cpython.get_core(
+            stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type
+        )
         stub_paths.append(stub_path)
 
     log.info("::group:: start post processing of retrieved stubs")
