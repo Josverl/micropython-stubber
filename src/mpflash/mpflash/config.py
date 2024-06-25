@@ -4,18 +4,15 @@ import os
 from pathlib import Path
 from typing import List
 
-import pkg_resources
 import platformdirs
+from importlib.metadata import version
 
 from mpflash.logger import log
 
 
 def get_version():
     name = __package__ or "mpflash"
-    try:
-        return pkg_resources.get_distribution(name).version
-    except pkg_resources.DistributionNotFound:
-        return "Package not found"
+    return version(name)
 
 
 class MPtoolConfig:
@@ -32,15 +29,14 @@ class MPtoolConfig:
     @property
     def interactive(self):
         # No interactions in CI
-        if os.getenv('GITHUB_ACTIONS') == 'true':
+        if os.getenv("GITHUB_ACTIONS") == "true":
             log.warning("Disabling interactive mode in CI")
             return False
         return self._interactive
-    
-    @interactive.setter
-    def interactive(self, value:bool):
-        self._interactive = value
 
+    @interactive.setter
+    def interactive(self, value: bool):
+        self._interactive = value
 
 
 config = MPtoolConfig()

@@ -30,20 +30,23 @@ def flash_list(
             continue
         log.info(f"Updating {mcu.board} on {mcu.serialport} to {fw_info.version}")
         updated = None
-        # try:
-        if mcu.port in UF2_PORTS and fw_file.suffix == ".uf2":
-            if not enter_bootloader(mcu, bootloader):
-                continue
-            updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
-        elif mcu.port in ["stm32"]:
-            if not enter_bootloader(mcu, bootloader):
-                continue
-            updated = flash_stm32(mcu, fw_file, erase=erase)
-        elif mcu.port in ["esp32", "esp8266"]:
-            #  bootloader is handled by esptool for esp32/esp8266
-            updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
-        else:
-            log.error(f"Don't (yet) know how to flash {mcu.port}-{mcu.board} on {mcu.serialport}")
+        try:
+            if mcu.port in UF2_PORTS and fw_file.suffix == ".uf2":
+                if not enter_bootloader(mcu, bootloader):
+                    continue
+                updated = flash_uf2(mcu, fw_file=fw_file, erase=erase)
+            elif mcu.port in ["stm32"]:
+                if not enter_bootloader(mcu, bootloader):
+                    continue
+                updated = flash_stm32(mcu, fw_file, erase=erase)
+            elif mcu.port in ["esp32", "esp8266"]:
+                #  bootloader is handled by esptool for esp32/esp8266
+                updated = flash_esp(mcu, fw_file=fw_file, erase=erase)
+            else:
+                log.error(f"Don't (yet) know how to flash {mcu.port}-{mcu.board} on {mcu.serialport}")
+        except Exception as e:
+            log.error(f"Failed to flash {mcu.board} on {mcu.serialport}")
+            log.exception(e)
 
         if updated:
             flashed.append(updated)

@@ -39,6 +39,7 @@ def dfu_init():
         log.error("pydfu not found")
         return None
     if platform.system() == "Windows":
+        log.debug("Initializing libusb backend on Windows...")
         init_libusb_windows()
 
 
@@ -59,6 +60,8 @@ def flash_stm32_dfu(
     Returns:
         Optional[MPRemoteBoard]: The flashed remote board if successful, None otherwise.
     """
+    log.info("Using pydfu to flash STM32 boards")
+
     if not pydfu:
         log.error("pydfu not found, please install it with 'pip install pydfu' if supported")
         return None

@@ -91,7 +91,9 @@ class MPRemoteBoard:
 
         if sys.platform == "win32":
             # Windows sort of comports by number - but fallback to device name
-            return sorted(output, key=lambda x: int(x.split()[0][3:]) if x.split()[0][3:].isdigit() else x)
+            return sorted(
+                output, key=lambda x: int(x.split()[0][3:]) if x.split()[0][3:].isdigit() else x
+            )
         # sort by device name
         return sorted(output)
 
@@ -127,7 +129,9 @@ class MPRemoteBoard:
             self.description = descr = info["board"]
             pos = descr.rfind(" with")
             short_descr = descr[:pos].strip() if pos != -1 else ""
-            if board_name := find_board_id_by_description(descr, short_descr, version=self.version):
+            if board_name := find_board_id_by_description(
+                descr, short_descr, version=self.version
+            ):
                 self.board = board_name
             else:
                 self.board = "UNKNOWN_BOARD"
@@ -211,7 +215,8 @@ class MPRemoteBoard:
             transient=True,
             get_time=lambda: time.time(),
             show_speed=False,
-            refresh_per_second=1,
+            refresh_per_second=2,
+            total=timeout,
         ):
             time.sleep(1)
             try:

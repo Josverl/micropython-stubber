@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 from loguru import logger as log
 
-from mpflash.common import FWInfo, filtered_comports
+from mpflash.common import FWInfo, filtered_comports, PORT_FWTYPES
 from mpflash.errors import MPFlashError
 
 from .downloaded import find_downloaded_firmware
@@ -54,8 +54,9 @@ def auto_update(
         if not board_firmwares:
             log.error(f"No {target_version} firmware found for {mcu.board} on {mcu.serialport}.")
             continue
+
         if len(board_firmwares) > 1:
-            log.debug(f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}.")
+            log.warning(f"Multiple {target_version} firmwares found for {mcu.board} on {mcu.serialport}.")
 
         # just use the last firmware
         fw_info = board_firmwares[-1]

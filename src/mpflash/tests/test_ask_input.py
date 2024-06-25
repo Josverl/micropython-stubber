@@ -193,7 +193,9 @@ def test_ask_missing_params_with_interactivity(
     else:
         params = FlashParams(**input)
 
+    mocker.patch("mpflash.config.config.interactive", True)
     m_prompt: Mock = mocker.patch("inquirer.prompt", return_value=answers, autospec=True)
+    # make sure we can be interactive, even in CI
     result = ask_missing_params(params)
     if answers:
         m_prompt.assert_called_once()
