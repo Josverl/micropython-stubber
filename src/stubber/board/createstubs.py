@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.20.6"
+__version__ = "v1.23.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -595,10 +595,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.6 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.20.6 do not have a micro .0
+            # versions from 1.10.0 to 1.23.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
