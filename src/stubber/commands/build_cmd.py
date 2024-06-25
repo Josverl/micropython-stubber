@@ -2,7 +2,7 @@
 
 from typing import List, Union
 
-import click
+import rich_click as click
 from loguru import logger as log
 from tabulate import tabulate
 

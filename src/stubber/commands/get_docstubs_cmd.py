@@ -6,7 +6,7 @@ get-docstubs
 from pathlib import Path
 from typing import Optional
 
-import click
+import rich_click as click
 from loguru import logger as log
 
 import stubber.basicgit as git
@@ -40,13 +40,15 @@ from .cli import stubber_cli
     show_default=True,
 )
 #  @click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
-@click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
+@click.option(
+    "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
+)
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.pass_context
 def cli_docstubs(
     ctx: click.Context,
     path: Optional[str] = None,
-    target:Optional[str] = None,
+    target: Optional[str] = None,
     black: bool = True,
     basename: Optional[str] = None,
     version: str = "",

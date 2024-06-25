@@ -1,9 +1,10 @@
 """
 command line interface - main group
 """
+
 import sys
 
-import click
+import rich_click as click
 from loguru import logger as log
 from stubber import __version__
 
@@ -11,11 +12,12 @@ from stubber import __version__
 @click.group(chain=True)
 @click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber✏️ ")
 @click.option(
+    "-V",
     "-v",
     "--verbose",
     count=True,
     default=0,
-    help="-v for DEBUG, -v -v for TRACE",
+    help="-V for DEBUG, -VV for TRACE",
     is_eager=True,
 )
 @click.pass_context
@@ -46,6 +48,8 @@ def set_loglevel(verbose: int) -> str:
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
-    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
+    log.add(
+        sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str
+    )
     log.info(f"micropython-stubber {__version__}")
     return level

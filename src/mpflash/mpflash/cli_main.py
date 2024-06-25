@@ -4,7 +4,7 @@
 
 import os
 
-import click
+import rich_click as click
 from loguru import logger as log
 
 from .cli_download import cli_download

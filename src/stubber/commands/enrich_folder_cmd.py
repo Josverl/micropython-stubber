@@ -1,10 +1,11 @@
 """
 enrich machinestubs with docstubs
 """
+
 from pathlib import Path
 from typing import Union
 
-import click
+import rich_click as click
 from loguru import logger as log
 
 from stubber.codemod.enrich import enrich_folder

@@ -2,11 +2,10 @@
 switch to a specific version of the micropython repos
 """
 
-
 from pathlib import Path
 from typing import Optional, Union
 
-import click
+import rich_click as click
 
 import stubber.basicgit as git
 from stubber.utils.config import CONFIG
@@ -23,7 +22,11 @@ from .cli import stubber_cli
 # get version list from Git tags in the repo that is provided on the command line
 
 try:
-    VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + [V_PREVIEW, "latest", "stable"]
+    VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + [
+        V_PREVIEW,
+        "latest",
+        "stable",
+    ]
 except Exception:
     # offline fallback
     VERSION_LIST = ["v1.91.1", "v1.20.1", "v1.21.0", "v1.22.1", "preview", "stable"]
@@ -31,7 +34,12 @@ except Exception:
 
 @stubber_cli.command(name="switch")
 @click.argument("tag", required=False, type=click.Choice(VERSION_LIST, case_sensitive=False))
-@click.option("--path", "-p", default=CONFIG.repo_path.as_posix(), type=click.Path(file_okay=False, dir_okay=True))
+@click.option(
+    "--path",
+    "-p",
+    default=CONFIG.repo_path.as_posix(),
+    type=click.Path(file_okay=False, dir_okay=True),
+)
 def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
     """
     Switch to a specific version of the micropython repos.
