@@ -250,6 +250,17 @@ files = [
 ]
 
 [[package]]
+name = "cache-to-disk"
+version = "2.0.0"
+description = "Local disk caching decorator for python function."
+optional = false
+python-versions = "*"
+files = [
+    {file = "cache_to_disk-2.0.0-py3-none-any.whl", hash = "sha256:ea5afe13d4284cb4a06169b0807fbc60547cbe19c54563bf90e1d44f24029481"},
+    {file = "cache_to_disk-2.0.0.tar.gz", hash = "sha256:79e19ea9b72eedc5cec83bb8aa55374afc671493e7d13d541f3b63eb3a13fb32"},
+]
+
+[[package]]
 name = "cachetools"
 version = "5.3.3"
 description = "Extensible memoizing collections and decorators"
@@ -1585,4 +1596,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<4.0"
-content-hash = "99cc10bd15b033a47635e31676205b38443b15697fb189b01a8eb7f2f175acf8"
+content-hash = "e0f5697e08c8c691e538c586c7a478cdc93de23d56435373b56abdd2147bda87"
