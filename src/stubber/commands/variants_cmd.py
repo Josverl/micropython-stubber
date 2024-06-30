@@ -13,8 +13,7 @@ from .cli import stubber_cli
 
 @click.option(
     "--version",
-    "--Version",
-    "-V",
+    "-v",
     "version",
     default=CONFIG.stable_version,
     show_default=True,

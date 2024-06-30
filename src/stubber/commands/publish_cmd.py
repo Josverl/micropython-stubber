@@ -18,8 +18,7 @@ from stubber.utils.config import CONFIG
 @click.option("--family", default="micropython", type=str, show_default=True)
 @click.option(
     "--version",
-    "--Version",
-    "-V",
+    "-v",
     "versions",
     multiple=True,
     default=[CONFIG.stable_version],
