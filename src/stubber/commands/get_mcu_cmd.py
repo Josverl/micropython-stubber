@@ -21,7 +21,7 @@ from .cli import stubber_cli
 @stubber_cli.command(name="get-mcu-stubs")
 @click.option(
     "--variant",
-    "-v",
+    # "-v",
     type=click.Choice(["Full", "Mem", "DB"], case_sensitive=False),
     default="DB",
     show_default=True,

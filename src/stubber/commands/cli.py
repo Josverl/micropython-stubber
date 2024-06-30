@@ -13,7 +13,7 @@ from stubber import __version__
 @click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber✏️ ")
 @click.option(
     "-V",
-    "-v",
+    "-V",
     "--verbose",
     count=True,
     default=0,
