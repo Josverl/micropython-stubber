@@ -11,8 +11,8 @@ This tool was initially created to be used in a CI/CD pipeline to automate the p
 `mpflash` has been tested on:  
  - OS: Windows x64, Linux X64, but not (yet) macOS.
  - Micropython (hardware) ports: 
-    - `rp2`, using `.uf2`, using filecopy (macos not tested yet)
-    - `samd`, using ` .uf2`, using filecopy (macos not tested yet)
+    - `rp2`, using `.uf2`, using filecopy 
+    - `samd`, using ` .uf2`, using filecopy 
     - `esp32`, using `.bin`, using esptool,
     - `esp8266`, using `.bin`, using esptool
     - `stm32`, using ` .dfu`, using pydfu
@@ -25,7 +25,7 @@ Not yet implemented: `nrf`, `cc3200`, `mimxrt`
  3. Flash one or all connected MicroPython boards with a specific firmware or version.  
  
 ## Installation
-To install mpflash, you can use pip: `pip install mpflash`
+To install mpflash, you can use: `pipx install mpflash` or `pip install mpflash`
 
 ## Basic usage
 You can use mpflash to perform various operations on your MicroPython boards. Here is an example of basic usage:
@@ -69,7 +69,7 @@ To download the MicroPython firmware for some boards, use the following command:
 
 These will try to download the prebuilt MicroPython firmware for the boards from https://micropython.org/download/ and save it in your downloads folder in the  `firmware` directory.
 The stable version (default) is determined based on the most recent published release,
-other versions are `--version preview` and `--version x.y.z` to download the latest preview or version x.y.z respectively.
+other options are `--version stable`, `--version preview` and `--version x.y.z` to download the latest stable, preview or version x.y.z respectively.
 
 By default the firmware will be downloaded to your OS's preferred `Downloads/firmware` folder, but you can speciy a different directory using the `--dir` option.
 
@@ -92,8 +92,18 @@ After you have downloaded a firmware you can  flash the firmware to a board usin
 This will (try to) autodetect the connected boards, and determine the correct firmware to flash to each board.
 
 - `mpflash flash` will flash the latest stable firmware to all connected boards.
+If you have a board withouth a running micropython version, you will need to specify the board and the serial port to flash.
 - `mpflash flash --serial ? --board ?` will prompt to select a specific serial port and board to flash. (the firmware must be dowloaded earlier)
 
+In order to flash the firmware some boards need to be put in bootloader mode, this is done automatically by mpflash where possible and supported by the boards hardware and current bootloader.
+The supported `--bootloader` options are:
+
+- `touch1200` bootloader is activated by connecting to the board at 1200 baud 
+- `mpy`  using  micropython to enter the bootloader
+- `manual` manual intervention is needed to enter the bootloader 
+- `none`   mpflash assumes the board is ready to flash
+
+For ESP32 and ESP8266 boards the `esptool` is used to flash the firmware, and this includes activating the bootloader.
 
 ### Flashing all connected boards with the latest stable firmware
 ```bash
