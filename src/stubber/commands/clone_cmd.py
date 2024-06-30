@@ -27,6 +27,7 @@ from .cli import stubber_cli
     type=click.Path(file_okay=False, dir_okay=True),
 )
 @click.option(
+    "--stubs/--no-stubs",
     "--add-stubs/--no-stubs",
     "stubs",
     default=False,
