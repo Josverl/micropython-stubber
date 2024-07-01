@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.20.0
+This variant was generated from createstubs.py by micropython-stubber v1.23.0
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.20.0"
+__version__ = "v1.23.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -237,7 +237,6 @@ class Stubber:
         # Start a new file
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
-            # todo: improve header
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
@@ -548,9 +547,7 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
-            if "mpy" in dir(sys.implementation)
-            else ""  # type: ignore
+            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass
@@ -600,10 +597,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            # versions from 1.10.0 to 1.23.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
@@ -723,6 +720,7 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
+
     # Read stubs from modulelist in the current folder or in /libs
     # fall back to default modules
     def get_modulelist(stubber):

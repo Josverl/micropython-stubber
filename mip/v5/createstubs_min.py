@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.20.0"
+__version__ = "v1.23.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -227,7 +227,6 @@ class Stubber:
         # Start a new file
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
-            # todo: improve header
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
                 module_name, self._fwid, info_, __version__
@@ -596,10 +595,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            # versions from 1.10.0 to 1.23.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
@@ -838,6 +837,8 @@ def main():
         "interstate75",
         "io",
         "jpegdec",
+        "js",
+        "jsffi",
         "json",
         "lcd160cr",
         "lodepng",
@@ -863,6 +864,7 @@ def main():
         "network",
         "ntptime",
         "onewire",
+        "openamp",
         "os",
         "pcf85063a",
         "picoexplorer",
@@ -898,6 +900,7 @@ def main():
         "sys",
         "termios",
         "time",
+        "tls",
         "tpcalib",
         "uarray",
         "uasyncio/__init__",
@@ -940,6 +943,12 @@ def main():
         "ure",
         "urequests",
         "urllib/urequest",
+        "usb/device",
+        "usb/device/cdc",
+        "usb/device/hid",
+        "usb/device/keyboard",
+        "usb/device/midi",
+        "usb/device/mouse",
         "uselect",
         "usocket",
         "ussl",
