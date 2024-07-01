@@ -32,7 +32,7 @@ def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: p
         # use default version
         version = "1.19.1"
     pkg = create_package("micropython-fake-stubs", mpy_version=version, port="esp32")
-    pkg._publish = False
+    pkg._publish = False # type: ignore
     pkg.create_license()
     pkg.create_readme()
     yield pkg
