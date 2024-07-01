@@ -12,7 +12,7 @@ from loguru import logger as log
 from packaging.version import Version
 
 import stubber.basicgit as git
-from mpflash.vendor.versions import get_stable_mp_version
+from mpflash.versions import get_stable_mp_version
 from stubber.utils.config import CONFIG
 from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
 
