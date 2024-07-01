@@ -31,7 +31,7 @@ def test_mpflash_list(id, ex_code, args: List[str], mocker: MockerFixture):
     m_print = mocker.patch("mpflash.cli_list.print", return_value=None, autospec=True)
 
     runner = CliRunner()
-    result = runner.invoke(cli_main.cli, args)
+    result = runner.invoke(cli_main.cli, args, standalone_mode=True)
     assert result.exit_code == ex_code
 
     m_list_mcus.assert_called_once()

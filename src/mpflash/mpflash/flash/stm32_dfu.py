@@ -26,7 +26,7 @@ def init_libusb_windows() -> bool:
 
 
 try:
-    from .vendor import pydfu as pydfu
+    from ..vendor import pydfu as pydfu
 except ImportError:
     pydfu = None
 

@@ -8,7 +8,7 @@ from mpflash.mpremoteboard import MPRemoteBoard
 
 from .manual import enter_bootloader_manual
 from .micropython import enter_bootloader_mpy
-from .touch1200 import enter_bootloader_cdc_1200bps
+from .touch1200 import enter_bootloader_touch_1200bps
 
 BL_OPTIONS = {
     "stm32": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
@@ -34,9 +34,7 @@ def enter_bootloader(
         bl_list = BL_OPTIONS.get(mcu.port, [BootloaderMethod.MPY, BootloaderMethod.MANUAL])
     else:
         bl_list = [method, BootloaderMethod.MANUAL]
-    log.info(
-        f"Entering bootloader on {mcu.serialport} using methods {[bl.value for bl in bl_list]}"
-    )
+    log.info(f"Entering bootloader on {mcu.serialport} using methods {[bl.value for bl in bl_list]}")
     for method in bl_list:
         try:
             if method == BootloaderMethod.MPY:
@@ -44,10 +42,10 @@ def enter_bootloader(
             elif method == BootloaderMethod.MANUAL:
                 result = enter_bootloader_manual(mcu, timeout=timeout)
             elif method == BootloaderMethod.TOUCH_1200:
-                result = enter_bootloader_cdc_1200bps(mcu, timeout=timeout)
+                result = enter_bootloader_touch_1200bps(mcu, timeout=timeout)
         except MPFlashError as e:
             log.warning(f"Failed to enter bootloader on {mcu.serialport} using {method.value}")
-            # log.exception(e)
+            log.exception(e)
             result = False
         if not result:
             # try a next method

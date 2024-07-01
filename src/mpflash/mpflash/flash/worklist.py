@@ -1,15 +1,17 @@
+"""Worklist for updating boards"""
+
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from loguru import logger as log
 
-from mpflash.common import FWInfo, filtered_comports, PORT_FWTYPES
+from mpflash.common import FWInfo, filtered_comports
 from mpflash.errors import MPFlashError
 
-from .downloaded import find_downloaded_firmware
-from .list import show_mcus
-from .mpboard_id import find_known_board
-from .mpremoteboard import MPRemoteBoard
+from ..downloaded import find_downloaded_firmware
+from ..list import show_mcus
+from ..mpboard_id import find_known_board
+from ..mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
 WorkList = List[Tuple[MPRemoteBoard, FWInfo]]

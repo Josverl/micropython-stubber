@@ -1,10 +1,7 @@
 """mpflash is a CLI to download and flash MicroPython firmware to various boards."""
 
-# import rich_click as click
-
 import os
 
-import rich_click as click
 import click.exceptions as click_exceptions
 from loguru import logger as log
 

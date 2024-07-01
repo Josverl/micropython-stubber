@@ -1,7 +1,7 @@
 """
 Enter bootloader using Touch 1200Bd for boards with bootloaders that support this.
 
-"""	
+"""
 
 import time
 
@@ -12,7 +12,7 @@ from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
 
 
-def enter_bootloader_cdc_1200bps(mcu: MPRemoteBoard, timeout: int = 10):
+def enter_bootloader_touch_1200bps(mcu: MPRemoteBoard, timeout: int = 10):
     if not mcu.serialport:
         raise MPFlashError("No serial port specified")
     log.info(f"Attempting bootloader on {mcu.serialport} using 'Touch 1200Bd'")

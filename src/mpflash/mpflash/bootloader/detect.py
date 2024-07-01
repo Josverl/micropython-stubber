@@ -4,7 +4,7 @@
 import os
 
 from mpflash.common import PORT_FWTYPES
-from mpflash.flash_uf2 import waitfor_uf2
+from mpflash.flash.uf2 import waitfor_uf2
 from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
 
@@ -23,8 +23,12 @@ def in_bootloader(mcu: MPRemoteBoard) -> bool:
     return False
 
 
-def in_uf2_bootloader(board_id) -> bool:
-    """Check if the board is in UF2 bootloader mode"""
+def in_uf2_bootloader(board_id: str) -> bool:
+    """
+    Check if the board is in UF2 bootloader mode.
+
+    :param board_id: The board ID to check for (SAMD or RP2)
+    """
     return bool(waitfor_uf2(board_id=board_id))
 
 
@@ -46,7 +50,7 @@ def in_stm32_bootloader() -> bool:
 def check_dfu_devices():
     """Check if there are any DFU devices connected"""
     # JIT import
-    from mpflash.flash_stm32_dfu import dfu_init
+    from mpflash.flash.stm32_dfu import dfu_init
     from mpflash.vendor.pydfu import get_dfu_devices
 
     # need to init on windows to get the right usb backend

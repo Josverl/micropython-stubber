@@ -1,7 +1,7 @@
 """Module for handling the bootloader mode for micropython boards"""
 
-from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.logger import log
+from mpflash.mpremoteboard import MPRemoteBoard
 
 
 def enter_bootloader_mpy(mcu: MPRemoteBoard, timeout: int = 10):

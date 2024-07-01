@@ -5,9 +5,9 @@ from loguru import logger as log
 from mpflash.bootloader import enter_bootloader
 from mpflash.common import PORT_FWTYPES, BootloaderMethod
 
-from .flash_esp import flash_esp
-from .flash_stm32 import flash_stm32
-from .flash_uf2 import flash_uf2
+from .esp import flash_esp
+from .stm32 import flash_stm32
+from .uf2 import flash_uf2
 from .worklist import WorkList
 
 # #########################################################################################################

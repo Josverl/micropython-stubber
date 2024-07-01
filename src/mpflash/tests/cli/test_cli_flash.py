@@ -55,9 +55,9 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
     # fake COM99 as connected board
     fake = fakeboard(serialport)
 
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard", return_value=fake)  # type: ignore
-    m_mpr_connected = mocker.patch("mpflash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)  # type: ignore
-    mocker.patch("mpflash.worklist.filter_boards", return_value=[MPRemoteBoard("COM99")], autospec=True)
+    m_mpr_connected = mocker.patch("mpflash.flash.worklist.MPRemoteBoard", return_value=fake)  # type: ignore
+    m_mpr_connected = mocker.patch("mpflash.flash.worklist.MPRemoteBoard.connected_boards", return_value=fake.serialport)  # type: ignore
+    mocker.patch("mpflash.flash.worklist.filter_boards", return_value=[MPRemoteBoard("COM99")], autospec=True)
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
@@ -72,7 +72,7 @@ def test_mpflash_flash(id, ex_code, args: List[str], mocker: MockerFixture, seri
     )
 
     runner = CliRunner()
-    result = runner.invoke(cli_main.cli, args)
+    result = runner.invoke(cli_main.cli, args, standalone_mode=True)
 
     if "--board" not in args:
         m_connected_ports_boards.assert_called_once()
@@ -106,14 +106,14 @@ def test_mpflash_connected_boards(
     # no boards specified - detect connected boards
     args = ["flash"]
 
-    fakes = [fakeboard(port) for port in serialports] # type: ignore
+    fakes = [fakeboard(port) for port in serialports]  # type: ignore
 
     m_connected_ports_boards = mocker.patch(
         "mpflash.cli_flash.connected_ports_boards",
         return_value=(ports, boards, [MPRemoteBoard(p) for p in serialports]),
         autospec=True,
     )
-    m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True) # type: ignore
+    m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)  # type: ignore
     m_ask_missing_params = mocker.patch(
         "mpflash.cli_flash.ask_missing_params",
         Mock(side_effect=fake_ask_missing_params),
@@ -124,8 +124,8 @@ def test_mpflash_connected_boards(
     m_single_auto_worklist = mocker.patch("mpflash.cli_flash.single_auto_worklist", return_value=[])
 
     runner = CliRunner()
-    result = runner.invoke(cli_main.cli, args)
-    
+    result = runner.invoke(cli_main.cli, args, standalone_mode=True)
+
     if serialports:
         m_full_auto_worklist.assert_called_once()
         m_manual_worklist.assert_not_called()
@@ -134,12 +134,9 @@ def test_mpflash_connected_boards(
     m_connected_ports_boards.assert_called_once()
     m_ask_missing_params.assert_called_once()
 
-    # unable to test exit code as the return value is not available in the test framework
+    # test exit code (standalone mode)
     assert result
-    # if serialports:
-    #     assert result.exit_code == 0
-    # else:
-    #     assert result.exit_code == 1
+    assert result.exit_code == 0
 
 
 ## if no boards are connected , but there are serial port , then set serial --> ? and board to ? if not set
@@ -167,18 +164,18 @@ def test_mpflash_no_detected_boards(
         return_value=(ports, boards, [MPRemoteBoard(p) for p in serialports]),
         autospec=True,
     )
-    m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True) # type: ignore
+    m_flash_list = mocker.patch("mpflash.cli_flash.flash_list", return_value=None, autospec=True)  # type: ignore
     m_ask_missing_params = mocker.patch(
         "mpflash.cli_flash.ask_missing_params",
         Mock(side_effect=fake_ask_missing_params),
     )
 
-    m_full_auto_worklist = mocker.patch("mpflash.cli_flash.full_auto_worklist", return_value=[]) # type: ignore
-    m_manual_worklist = mocker.patch("mpflash.cli_flash.manual_worklist", return_value=[]) # type: ignore
-    m_single_auto_worklist = mocker.patch("mpflash.cli_flash.single_auto_worklist", return_value=[]) # type: ignore
+    m_full_auto_worklist = mocker.patch("mpflash.cli_flash.full_auto_worklist", return_value=[])  # type: ignore
+    m_manual_worklist = mocker.patch("mpflash.cli_flash.manual_worklist", return_value=[])  # type: ignore
+    m_single_auto_worklist = mocker.patch("mpflash.cli_flash.single_auto_worklist", return_value=[])  # type: ignore
 
     runner = CliRunner()
-    result = runner.invoke(cli_main.cli, args)
+    result = runner.invoke(cli_main.cli, args, standalone_mode=True)
     assert result
     m_connected_ports_boards.assert_called_once()
     m_ask_missing_params.assert_called_once()
@@ -233,7 +230,7 @@ def test_mpflash_no_detected_boards(
 #     m_single_auto_worklist = mocker.patch("mpflash.cli_flash.single_auto_worklist", return_value=[])
 
 #     runner = CliRunner()
-#     result = runner.invoke(cli_main.cli, args)
+#     result = runner.invoke(cli_main.cli, args, standalone_mode=True)
 
 #     if serialports:
 #         # m_full_auto_worklist.assert_called_once()

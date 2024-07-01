@@ -12,7 +12,7 @@ from typing import List
 from loguru import logger as log
 from rich.progress import track
 
-from .flash_uf2_boardid import get_board_id
+from .boardid import get_board_id
 from .uf2disk import UF2Disk
 
 glb_dismount_me: List[UF2Disk] = []
