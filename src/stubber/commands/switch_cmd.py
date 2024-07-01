@@ -7,7 +7,7 @@ from typing import Optional, Union
 
 import rich_click as click
 
-import stubber.basicgit as git
+import mpflash.basicgit as git
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos, repo_paths
 from mpflash.versions import SET_PREVIEW, V_PREVIEW

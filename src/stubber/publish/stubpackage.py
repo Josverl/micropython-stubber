@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tenacity
 
-from stubber.basicgit import get_git_describe
+from mpflash.basicgit import get_git_describe
 from stubber.publish.helpers import get_module_docstring
 
 try:

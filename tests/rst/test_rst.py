@@ -7,7 +7,7 @@ from typing import Dict, List
 import pytest
 from helpers import read_stub
 
-import stubber.basicgit as git
+import mpflash.basicgit as git
 
 pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 

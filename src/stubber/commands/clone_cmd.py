@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Tuple, Union
 
 import rich_click as click
-import stubber.basicgit as git
+import mpflash.basicgit as git
 from loguru import logger as log
 from stubber.utils.config import CONFIG
 

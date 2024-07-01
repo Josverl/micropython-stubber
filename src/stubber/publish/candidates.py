@@ -17,7 +17,7 @@ from typing import Any, Dict, Generator, List, Optional, Union
 from loguru import logger as log
 from packaging.version import parse
 
-import stubber.basicgit as git
+import mpflash.basicgit as git
 from mpflash.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean_version, micropython_versions
 from stubber import utils
 from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
