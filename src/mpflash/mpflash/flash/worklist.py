@@ -6,12 +6,11 @@ from typing import Dict, List, Optional, Tuple
 from loguru import logger as log
 
 from mpflash.common import FWInfo, filtered_comports
+from mpflash.downloaded import find_downloaded_firmware
 from mpflash.errors import MPFlashError
-
-from ..downloaded import find_downloaded_firmware
-from ..list import show_mcus
-from ..mpboard_id import find_known_board
-from ..mpremoteboard import MPRemoteBoard
+from mpflash.list import show_mcus
+from mpflash.mpboard_id import find_known_board
+from mpflash.mpremoteboard import MPRemoteBoard
 
 # #########################################################################################################
 WorkList = List[Tuple[MPRemoteBoard, FWInfo]]
@@ -41,9 +40,7 @@ def auto_update(
     wl: WorkList = []
     for mcu in conn_boards:
         if mcu.family not in ("micropython", "unknown"):
-            log.warning(
-                f"Skipping flashing {mcu.family} {mcu.port} {mcu.board} on {mcu.serialport} as it is not a MicroPython firmware"
-            )
+            log.warning(f"Skipping flashing {mcu.family} {mcu.port} {mcu.board} on {mcu.serialport} as it is not a MicroPython firmware")
             continue
         board_firmwares = find_downloaded_firmware(
             fw_folder=fw_folder,
