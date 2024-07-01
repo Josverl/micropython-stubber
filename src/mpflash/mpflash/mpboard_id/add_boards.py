@@ -12,11 +12,11 @@ import rich.table
 from rich.console import Console
 from rich.progress import track
 
-import mpflash.vendor.basicgit as git
+import basicgit as git
 from mpflash.logger import log
 from mpflash.mpboard_id import Board
 from mpflash.mpboard_id.store import write_boardinfo_json
-from mpflash.vendor.versions import micropython_versions
+from mpflash.versions import micropython_versions
 
 # look for all mpconfigboard.h files and extract the board name
 # from the #define MICROPY_HW_BOARD_NAME "PYBD_SF6"

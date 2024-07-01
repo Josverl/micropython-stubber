@@ -3,7 +3,7 @@ from typing import List
 import pytest
 
 from mpflash.mpboard_id import get_known_boards_for_port, get_known_ports
-from mpflash.vendor.versions import get_stable_mp_version
+from mpflash.versions import get_stable_mp_version
 
 pytestmark = [pytest.mark.mpflash]
 

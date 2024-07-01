@@ -21,7 +21,7 @@ from rich.progress import track
 from mpflash.common import PORT_FWTYPES, FWInfo
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import get_known_ports
-from mpflash.vendor.versions import clean_version
+from mpflash.versions import clean_version
 
 # avoid conflict with the ujson used by MicroPython
 jsonlines.ujson = None  # type: ignore

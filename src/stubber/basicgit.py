@@ -15,7 +15,7 @@ from loguru import logger as log
 from packaging.version import parse
 
 # from stubber.utils.versions import get_stable_mp_version
-from mpflash.vendor.versions import get_stable_mp_version
+from mpflash.versions import get_stable_mp_version
 
 # from stubber.utils.versions import SET_PREVIEW
 

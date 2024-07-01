@@ -8,7 +8,7 @@ from mpflash.common import BootloaderMethod
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id import find_known_board
 from mpflash.mpremoteboard import MPRemoteBoard
-from mpflash.vendor.versions import clean_version
+from mpflash.versions import clean_version
 
 from .ask_input import ask_missing_params
 from .cli_download import connected_ports_boards

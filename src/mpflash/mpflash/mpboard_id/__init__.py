@@ -10,7 +10,7 @@ from typing import List, Optional, Tuple
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id.board import Board
 from mpflash.mpboard_id.store import read_known_boardinfo
-from mpflash.vendor.versions import clean_version
+from mpflash.versions import clean_version
 
 # KNOWN ports and boards are sourced from the micropython repo,
 # this info is stored in the board_info.json file

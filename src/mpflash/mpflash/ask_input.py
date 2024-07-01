@@ -14,7 +14,7 @@ from .config import config
 from .mpboard_id import (get_known_boards_for_port, get_known_ports,
                          known_stored_boards)
 from .mpremoteboard import MPRemoteBoard
-from .vendor.versions import micropython_versions
+from .versions import micropython_versions
 
 
 def ask_missing_params(

@@ -11,7 +11,7 @@ from mpremote.mip import _rewrite_url as rewrite_url  # type: ignore
 
 from mpflash.common import FWInfo
 from mpflash.config import config
-from mpflash.vendor.versions import get_preview_mp_version, get_stable_mp_version
+from mpflash.versions import get_preview_mp_version, get_stable_mp_version
 
 
 def add_firmware(

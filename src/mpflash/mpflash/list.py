@@ -5,7 +5,7 @@ from rich.table import Table
 
 from mpflash.config import config
 from mpflash.mpremoteboard import MPRemoteBoard
-from mpflash.vendor.versions import clean_version
+from mpflash.versions import clean_version
 
 from .logger import console
 

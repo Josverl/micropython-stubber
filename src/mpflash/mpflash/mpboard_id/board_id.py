@@ -9,7 +9,7 @@ from typing import Optional
 from mpflash.errors import MPFlashError
 from mpflash.logger import log
 from mpflash.mpboard_id.store import read_known_boardinfo
-from mpflash.vendor.versions import clean_version, get_stable_mp_version
+from mpflash.versions import clean_version, get_stable_mp_version
 
 
 def find_board_id_by_description(
