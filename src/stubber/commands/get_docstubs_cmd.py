@@ -9,7 +9,7 @@ from typing import Optional
 import rich_click as click
 from loguru import logger as log
 
-import stubber.basicgit as git
+import mpflash.basicgit as git
 import stubber.utils as utils
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG

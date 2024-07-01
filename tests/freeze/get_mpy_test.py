@@ -14,7 +14,7 @@ if not sys.warnoptions:
 
 
 # Dependencies
-import stubber.basicgit as git
+import mpflash.basicgit as git
 import stubber.freeze.get_frozen as get_frozen
 from mpflash.versions import clean_version
 from stubber.utils.repos import read_micropython_lib_commits, switch

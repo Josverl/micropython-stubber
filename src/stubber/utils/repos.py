@@ -11,7 +11,7 @@ from typing import Tuple
 from loguru import logger as log
 from packaging.version import Version
 
-import stubber.basicgit as git
+import mpflash.basicgit as git
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, get_stable_mp_version
 from stubber.utils.config import CONFIG
 

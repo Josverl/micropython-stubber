@@ -7,7 +7,7 @@ from loguru import logger as log
 from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
 
-import stubber.basicgit as git
+import mpflash.basicgit as git
 from mpflash.versions import V_PREVIEW
 
 from .typed_config_toml import TomlConfigSource
