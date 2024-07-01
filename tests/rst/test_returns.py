@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 # SOT
-from stubber.rst.rst_utils import _type_from_context, return_type_from_context
+from stubber.rst.rst_utils import _type_from_context, return_type_from_context # type: ignore
 
 # mark all tests
 pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
