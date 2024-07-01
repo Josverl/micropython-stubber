@@ -38,6 +38,7 @@ pyusb = "^1.2.1"
 requests = "^2.31.0"
 rich-click = "^1.8.1"
 tenacity = "8.2.3"
+cache-to-disk = "^2.0.0"
 
 
 [tool.poetry.group.dev]

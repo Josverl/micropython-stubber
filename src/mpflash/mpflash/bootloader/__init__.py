@@ -21,7 +21,6 @@ def enter_bootloader(
         # NO bootloader requested, so must be OK to flash
         return True
 
-    log.info(f"Entering bootloader on {mcu.board} on {mcu.serialport} using method: {method.value}")
     if method == BootloaderMethod.MPY:
         result = enter_bootloader_mpy(mcu, timeout=timeout)
     elif method == BootloaderMethod.MANUAL:

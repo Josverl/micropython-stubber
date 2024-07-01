@@ -4,12 +4,12 @@
 #############################################################
 """
 
-from functools import lru_cache
-
+from cache_to_disk import cache_to_disk, NoCacheCondition
 from loguru import logger as log
 from packaging.version import parse
 
 from mpflash.common import GH_CLIENT
+
 OLDEST_VERSION = "1.16"
 "This is the oldest MicroPython version to build the stubs on"
 
@@ -70,9 +70,10 @@ def clean_version(
     return version
 
 
-@lru_cache(maxsize=10)
+@cache_to_disk(n_days_to_cache=1)
 def micropython_versions(minver: str = "v1.20", reverse: bool = False):
     """Get the list of micropython versions from github tags"""
+    cache_it = True
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
@@ -100,10 +101,15 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False):
             "v1.11",
             "v1.10",
         ]
+        cache_it = False
     versions = [v for v in versions if parse(v) >= parse(minver)]
     # remove all but the most recent (preview) version
     versions = versions[:1] + [v for v in versions if "preview" not in v]
-    return sorted(versions, reverse=reverse)
+    versions = sorted(versions, reverse=reverse)
+    if cache_it:
+        return versions
+    # returns - but does not cache
+    raise NoCacheCondition(function_value=versions)
 
 
 def get_stable_mp_version() -> str:
@@ -116,4 +122,3 @@ def get_preview_mp_version() -> str:
     # read the versions from the git tags
     all_versions = micropython_versions(minver=OLDEST_VERSION)
     return [v for v in all_versions if v.endswith(V_PREVIEW)][-1]
-
