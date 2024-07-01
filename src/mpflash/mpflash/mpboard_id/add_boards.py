@@ -12,7 +12,7 @@ import rich.table
 from rich.console import Console
 from rich.progress import track
 
-import basicgit as git
+import mpflash.basicgit as git
 from mpflash.logger import log
 from mpflash.mpboard_id import Board
 from mpflash.mpboard_id.store import write_boardinfo_json
@@ -222,11 +222,7 @@ def make_table(board_list: List[Board]) -> rich.table.Table:
 
 def ask_mpy_path():
     """Ask the user for the path to the MicroPython repository."""
-    questions = [
-        inquirer.Text(
-            "mpy_path", message="Enter the path to the MicroPython repository", default=".\\repos\\micropython"
-        )
-    ]
+    questions = [inquirer.Text("mpy_path", message="Enter the path to the MicroPython repository", default=".\\repos\\micropython")]
     if answers := inquirer.prompt(questions):
         return Path(answers["mpy_path"])
     else:
