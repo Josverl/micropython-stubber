@@ -10,7 +10,7 @@ import rich_click as click
 import stubber.basicgit as git
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos, repo_paths
-from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
+from mpflash.versions import SET_PREVIEW, V_PREVIEW
 
 from .cli import stubber_cli
 

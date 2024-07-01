@@ -8,10 +8,10 @@ from typing import Dict, Optional
 
 from loguru import logger as log
 
+from mpflash.versions import V_PREVIEW, clean_version
 from stubber.publish.defaults import default_board
 from stubber.publish.package import GENERIC
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import V_PREVIEW, clean_version
 
 
 ## Helper functions

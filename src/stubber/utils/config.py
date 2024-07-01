@@ -8,7 +8,7 @@ from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
 
 import stubber.basicgit as git
-from stubber.utils.versions import V_PREVIEW
+from mpflash.versions import V_PREVIEW
 
 from .typed_config_toml import TomlConfigSource
 
@@ -113,9 +113,7 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     # add provider sources to the config
     config.add_source(EnvironmentConfigSource())
     if use_toml:
-        config.add_source(
-            TomlConfigSource(filename, prefix=prefix, must_exist=must_exist)
-        )  # ,"tools.micropython-stubber"))
+        config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
     config.read()
     return config
 

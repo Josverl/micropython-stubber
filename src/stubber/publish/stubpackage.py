@@ -24,12 +24,12 @@ from loguru import logger as log
 from packaging.version import Version, parse
 from pysondb import PysonDB
 
+from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import SET_PREVIEW, V_PREVIEW, clean_version
 
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
@@ -906,9 +906,7 @@ class StubPackage(PoetryBuilder):
             self.pkg_version = self.next_package_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
-            log.debug(
-                f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}"
-            )
+            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}")
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
             if self.poetry_build():

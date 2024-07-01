@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from .. import __version__
-from .versions import clean_version
+from mpflash.versions import clean_version
 
 # # log = logging.getLogger(__name__)
 # # logging.basicConfig(level=logging.INFO)
@@ -65,9 +65,7 @@ def make_manifest(folder: Path, family: str, port: str, version: str, release: s
     mod_manifest = manifest(family=family, port=port, machine=board, sysname=family, version=version, release=release, stubtype=stubtype)
     try:
         # list all *.py files, not strictly modules but decent enough for documentation
-        files = list(folder.glob("**/*.py"))
-        if not files:
-            files = list(folder.glob("**/*.pyi"))
+        files = list(folder.glob("**/*.py")) or list(folder.glob("**/*.pyi"))
 
         # sort the list
         for file in sorted(files):

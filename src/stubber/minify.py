@@ -2,6 +2,7 @@
 Processing for createstubs.py
 Minimizes and cross-compiles a MicroPyton file.
 """
+
 import itertools
 import subprocess
 import tempfile
@@ -10,14 +11,14 @@ from io import BytesIO, IOBase, StringIO, TextIOWrapper
 from pathlib import Path
 from typing import List, Tuple, Union
 
-try: 
+try:
     import python_minifier
 except ImportError:
     python_minifier = None
 
 from loguru import logger as log
 
-from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
+from mpflash.versions import SET_PREVIEW, V_PREVIEW
 
 # Type Aliases for minify
 StubSource = Union[Path, str, StringIO, TextIOWrapper]
@@ -243,7 +244,7 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             ],
             # remove_pass=True,  # no dead code
             # convert_posargs_to_args=True, # Does not save any space
-    )
+        )
     len_3 = len(min_source)
     if 1:
         # write to temp file for debugging

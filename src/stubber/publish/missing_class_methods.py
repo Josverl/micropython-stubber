@@ -8,10 +8,10 @@ from pathlib import Path
 import libcst as cst
 from loguru import logger as log
 
+from mpflash.versions import clean_version
 from stubber.codemod.add_method import CallAdder, CallFinder
 from stubber.utils.config import CONFIG
 from stubber.utils.post import run_black
-from stubber.utils.versions import clean_version
 
 
 def add_machine_pin_call(merged_path: Path, version: str):

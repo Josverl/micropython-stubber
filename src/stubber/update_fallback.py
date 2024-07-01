@@ -9,7 +9,7 @@
 
 # from loguru import logger as log
 
-# from stubber.utils.versions import V_PREVIEW
+# from mpflash.versions import V_PREVIEW
 
 # # log = logging.getLogger()
 
