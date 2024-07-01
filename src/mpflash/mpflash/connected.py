@@ -50,11 +50,13 @@ def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False)
         include=include,
         bluetooth=bluetooth,
     )
-    conn_mcus = [MPRemoteBoard(c.device) for c in comports]
+    conn_mcus = [MPRemoteBoard(c.device, location=c.location or "?") for c in comports]
 
     # a lot of boilerplate to show a progress bar with the comport currently scanned
     # low update rate to facilitate screen readers/narration
-    with Progress(rp_spinner, rp_text, rp_bar, TimeElapsedColumn(), refresh_per_second=2) as progress:
+    with Progress(
+        rp_spinner, rp_text, rp_bar, TimeElapsedColumn(), refresh_per_second=2
+    ) as progress:
         tsk_scan = progress.add_task("[green]Scanning", visible=False, total=None)
         progress.tasks[tsk_scan].fields["device"] = "..."
         progress.tasks[tsk_scan].visible = True

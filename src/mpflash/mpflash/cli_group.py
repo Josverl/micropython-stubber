@@ -27,7 +27,7 @@ def cb_verbose(ctx, param, value):
     return value
 
 
-def cb_interactive(ctx, param, value:bool):
+def cb_interactive(ctx, param, value: bool):
     log.trace(f"Setting interactive mode to {value}")
     config.interactive = value
     return value
@@ -37,6 +37,10 @@ def cb_test(ctx, param, value):
     if value:
         log.trace(f"Setting tests to {value}")
         config.tests = value
+    return value
+
+def cb_usb(ctx, param, value: bool):
+    config.usb = bool(value)
     return value
 
 
@@ -79,18 +83,27 @@ def cb_quiet(ctx, param, value):
     callback=cb_verbose,
 )
 @click.option(
+    "--usb",
+    "-u",
+    is_eager=True,
+    is_flag=True,
+    default=False,
+    help="Shows USB location of the connected boards.",
+    callback=cb_usb,
+    show_default=True,
+)
+@click.option(
     "--test",
     is_eager=True,
-    help="test a specific feature",
+    help="Test a specific feature.",
     callback=cb_test,
     multiple=True,
     default=[],
     envvar="MPFLASH_TEST",
-    show_default=True,
-    metavar="TEST",
+    metavar="FLAG",
 )
 def cli(**kwargs):
-    """mpflash - MicroPython Tool.
+    """mpflash - MicroPython flashing tool.
 
     A CLI to download and flash MicroPython firmware to different ports and boards.
     """

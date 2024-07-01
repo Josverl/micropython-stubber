@@ -29,7 +29,7 @@ RETRIES = 3
 class MPRemoteBoard:
     """Class to run mpremote commands"""
 
-    def __init__(self, serialport: str = "", update: bool = False):
+    def __init__(self, serialport: str = "", update: bool = False, *, location: str = ""):
         """
         Initialize MPRemoteBoard object.
 
@@ -37,7 +37,7 @@ class MPRemoteBoard:
         - serialport (str): The serial port to connect to. Default is an empty string.
         - update (bool): Whether to update the MCU information. Default is False.
         """
-        self.serialport = serialport
+        self.serialport: str = serialport
         self.firmware = {}
 
         self.connected = False
@@ -51,6 +51,7 @@ class MPRemoteBoard:
         self.arch = ""
         self.mpy = ""
         self.build = ""
+        self.location = location
         if update:
             self.get_mcu_info()
 

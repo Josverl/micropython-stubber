@@ -3,6 +3,7 @@ from typing import List
 from rich.progress import track
 from rich.table import Table
 
+from mpflash.config import config
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.vendor.versions import clean_version
 
@@ -54,7 +55,9 @@ def mcu_table(
     needs_build = any(mcu.build for mcu in conn_mcus)
 
     table.add_column("Serial" if is_wide else "Ser.", overflow="fold")
-    table.add_column("Family" if is_wide else "Fam.", overflow="crop", max_width=None if is_wide else 4)
+    table.add_column(
+        "Family" if is_wide else "Fam.", overflow="crop", max_width=None if is_wide else 4
+    )
     if is_wide:
         table.add_column("Port")
     table.add_column("Board", overflow="fold")
@@ -64,8 +67,11 @@ def mcu_table(
     table.add_column("Version", overflow="fold", min_width=5, max_width=16)
     if needs_build:
         table.add_column("Build" if is_wide else "Bld", justify="right")
-
-    for mcu in track(conn_mcus, description="Updating board info", transient=True, refresh_per_second=2):
+    if config.usb:
+        table.add_column("Location", overflow="fold", max_width=40)
+    for mcu in track(
+        conn_mcus, description="Updating board info", transient=True, refresh_per_second=2
+    ):
         if refresh:
             try:
                 mcu.get_mcu_info()
@@ -84,6 +90,8 @@ def mcu_table(
         row.append(clean_version(mcu.version))
         if needs_build:
             row.append(mcu.build)
+        if config.usb:
+            row.append(mcu.location)
 
         table.add_row(*row)
     return table
