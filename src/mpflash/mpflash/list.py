@@ -55,9 +55,7 @@ def mcu_table(
     needs_build = any(mcu.build for mcu in conn_mcus)
 
     table.add_column("Serial" if is_wide else "Ser.", overflow="fold")
-    table.add_column(
-        "Family" if is_wide else "Fam.", overflow="crop", max_width=None if is_wide else 4
-    )
+    table.add_column("Family" if is_wide else "Fam.", overflow="crop", max_width=None if is_wide else 4)
     if is_wide:
         table.add_column("Port")
     table.add_column("Board", overflow="fold")
@@ -70,7 +68,11 @@ def mcu_table(
     if config.usb:
         table.add_column("Location", overflow="fold", max_width=40)
     for mcu in track(
-        conn_mcus, description="Updating board info", transient=True, refresh_per_second=2
+        conn_mcus,
+        description="Updating board info",
+        transient=True,
+        show_speed=False,
+        refresh_per_second=1,
     ):
         if refresh:
             try:

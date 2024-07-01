@@ -50,7 +50,7 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
     log.info(f"Board ID: {board_id}")
     try:
         cp_firmware_to_uf2(fw_file, destination)
-        log.success("Done copying, resetting the board and wait for it to restart")
+        log.success("Done copying, resetting the board.")
     except tenacity.RetryError:
         log.error("Failed to copy the firmware file to the board.")
         return None

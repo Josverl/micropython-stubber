@@ -134,7 +134,13 @@ def get_boards(ports: List[str], boards: List[str], clean: bool) -> List[FWInfo]
         for board in urls:
             board["port"] = port
 
-        for board in track(urls, description=f"Checking {port} download pages", transient=True, refresh_per_second=2):
+        for board in track(
+            urls,
+            description=f"Checking {port} download pages",
+            transient=True,
+            refresh_per_second=1,
+            show_speed=False,
+        ):
             # add a board to the list for each firmware found
             firmware_urls: List[str] = []
             for ext in PORT_FWTYPES[port]:
@@ -273,9 +279,7 @@ def get_firmware_list(ports: List[str], boards: List[str], versions: List[str], 
     log.debug(f"Total {len(board_urls)} firmwares")
 
     relevant = [
-        board
-        for board in board_urls
-        if board.version in versions and board.build == "0" and board.board in boards and not board.preview
+        board for board in board_urls if board.version in versions and board.build == "0" and board.board in boards and not board.preview
     ]
 
     if preview:

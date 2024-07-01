@@ -17,12 +17,12 @@ def wait_for_UF2_macos(s_max: int = 10) -> Optional[Path]:
     destination = None
     for _ in track(
         range(s_max),
-        description="Waiting for mcu to mount as a drive",
+        description=f"Waiting for mcu to mount as a drive ({s_max}s)",
         transient=True,
-        refresh_per_second=2,
+        show_speed=False,
+        refresh_per_second=1,
         total=s_max,
     ):
-        # log.info(f"Waiting for mcu to mount as a drive : {n} seconds left")
         vol_mounts = Path("/Volumes").iterdir()
         for vol in vol_mounts:
             try:

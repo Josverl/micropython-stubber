@@ -9,9 +9,7 @@ from mpflash.mpremoteboard import MPRemoteBoard
 from .common import filtered_comports
 
 
-def connected_ports_boards(
-    *, include: List[str], ignore: List[str]
-) -> Tuple[List[str], List[str], List[MPRemoteBoard]]:
+def connected_ports_boards(*, include: List[str], ignore: List[str]) -> Tuple[List[str], List[str], List[MPRemoteBoard]]:
     """
     Returns a tuple containing lists of unique ports and boards from the connected MCUs.
     Boards that are physically connected, but give no tangible response are ignored.
@@ -55,7 +53,11 @@ def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False)
     # a lot of boilerplate to show a progress bar with the comport currently scanned
     # low update rate to facilitate screen readers/narration
     with Progress(
-        rp_spinner, rp_text, rp_bar, TimeElapsedColumn(), refresh_per_second=2
+        rp_spinner,
+        rp_text,
+        rp_bar,
+        TimeElapsedColumn(),
+        refresh_per_second=1,
     ) as progress:
         tsk_scan = progress.add_task("[green]Scanning", visible=False, total=None)
         progress.tasks[tsk_scan].fields["device"] = "..."

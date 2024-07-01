@@ -105,9 +105,10 @@ def wait_for_UF2_linux(s_max: int = 10):
     # while not destination and wait > 0:
     for _ in track(
         range(s_max),
-        description="Waiting for mcu to mount as a drive",
+        description=f"Waiting for mcu to mount as a drive ({s_max}s)",
         transient=True,
-        refresh_per_second=2,
+        show_speed=False,
+        refresh_per_second=1,
         total=s_max,
     ):
         uf2_drives += list(get_uf2_drives())
