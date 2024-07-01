@@ -12,7 +12,7 @@ from .touch1200 import enter_bootloader_cdc_1200bps
 
 BL_OPTIONS = {
     "stm32": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
-    "rp2": [BootloaderMethod.MPY, BootloaderMethod.MANUAL],
+    "rp2": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
     "samd": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
     "esp32": [BootloaderMethod.NONE],
     "esp8266": [BootloaderMethod.NONE],
