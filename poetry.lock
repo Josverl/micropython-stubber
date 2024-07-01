@@ -1490,13 +1490,13 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "mpflash"
-version = "0.9.1"
+version = "0.9.1.post2"
 description = "Flash and download tool for MicroPython firmwares"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "mpflash-0.9.1-py3-none-any.whl", hash = "sha256:1bfc8f3a493b57a2e592351d7346ed0a1e27f98741fc53cbc702e84ffcf580b1"},
-    {file = "mpflash-0.9.1.tar.gz", hash = "sha256:f0d51c6f713892eeebcd4fc0fdeb91e5ba4d2da4b2238404e990a61b6d6c2fdd"},
+    {file = "mpflash-0.9.1.post2-py3-none-any.whl", hash = "sha256:a45e4106a3f6fd5d2273178ac8628895395a6abf396ab1eecd88d66549927662"},
+    {file = "mpflash-0.9.1.post2.tar.gz", hash = "sha256:69d237d4468077d26da15c7b30c87e4300c20f00fc80f2a30ce8f80e92faeff7"},
 ]
 
 [package.dependencies]
@@ -3177,4 +3177,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "4417edbf5e75fe724353fe63b1ea61483834afc4149fcde33b5f46d5d3b7e49d"
+content-hash = "797507808e1046b170b4d4b8650d3e295c3c5b8cf9698646874a83fc3b529757"
