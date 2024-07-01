@@ -12,9 +12,8 @@ from loguru import logger as log
 from packaging.version import Version
 
 import stubber.basicgit as git
-from mpflash.versions import get_stable_mp_version
+from mpflash.versions import SET_PREVIEW, V_PREVIEW, get_stable_mp_version
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
 
 # # log = logging.getLogger(__name__)
 
@@ -64,11 +63,7 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
         reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
         rows = list(reader)
         # create a dict version --> commit_hash
-        version_commit = {
-            row["version"].split("/")[-1]: row["lib_commit_hash"]
-            for row in rows
-            if row["version"].startswith("refs/tags/")
-        }
+        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
     # add default
     version_commit = defaultdict(lambda: "master", version_commit)
     return version_commit
@@ -96,9 +91,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
                 return False
         return git.sync_submodules(mpy_path)
     else:
-        log.info(
-            f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
-        )
+        log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
         return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 
@@ -120,7 +113,7 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         git.switch_branch(repo=mpy_path, branch="master")
     else:
         if tag == "stable":
-            tag = get_stable_mp_version() 
+            tag = get_stable_mp_version()
         git.switch_tag(tag, repo=mpy_path)
     result = match_lib_with_mpy(version_tag=tag, mpy_path=mpy_path, lib_path=mpy_lib_path)
 

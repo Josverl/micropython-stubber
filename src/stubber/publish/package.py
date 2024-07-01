@@ -11,11 +11,11 @@ from loguru import logger as log
 from packaging.version import parse
 from pysondb import PysonDB
 
+from mpflash.versions import clean_version
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.stubpackage import StubPackage, StubSources
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import clean_version
 
 # replace std log handler with a custom one capped on INFO level
 log.remove()

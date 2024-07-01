@@ -14,16 +14,14 @@ from github import Auth, Github
 from loguru import logger as log
 from packaging.version import parse
 
-# from stubber.utils.versions import get_stable_mp_version
+# from mpflash.versions import get_stable_mp_version
 from mpflash.versions import get_stable_mp_version
 
-# from stubber.utils.versions import SET_PREVIEW
+# from mpflash.versions import SET_PREVIEW
 
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
-PAT_NO_ACCESS = (
-    "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
-)
+PAT_NO_ACCESS = "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
 
@@ -40,9 +38,7 @@ def _run_local_git(
         if repo:
             if isinstance(repo, str):
                 repo = Path(repo)
-            result = subprocess.run(
-                cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix(), encoding="utf-8"
-            )
+            result = subprocess.run(cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix(), encoding="utf-8")
         else:
             result = subprocess.run(cmd, capture_output=capture_output, check=True, encoding="utf-8")
     except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover

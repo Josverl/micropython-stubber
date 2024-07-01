@@ -4,10 +4,14 @@
 #############################################################
 """
 
-from cache_to_disk import cache_to_disk, NoCacheCondition
+from functools import lru_cache
+from pathlib import Path
+
+from cache_to_disk import NoCacheCondition, cache_to_disk
 from loguru import logger as log
 from packaging.version import parse
 
+import mpflash.basicgit as git
 from mpflash.common import GH_CLIENT
 
 OLDEST_VERSION = "1.16"
@@ -122,3 +126,13 @@ def get_preview_mp_version() -> str:
     # read the versions from the git tags
     all_versions = micropython_versions(minver=OLDEST_VERSION)
     return [v for v in all_versions if v.endswith(V_PREVIEW)][-1]
+
+
+# Do not cache , same path will have different versions checked out
+def checkedout_version(path: Path, flat: bool = False) -> str:
+    """Get the checked-out version of the repo"""
+    version = git.get_local_tag(path.as_posix())
+    if not version:
+        raise ValueError("No valid Tag found")
+    version = clean_version(version, flat=flat, drop_v=False)
+    return version

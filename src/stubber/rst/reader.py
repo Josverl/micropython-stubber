@@ -69,6 +69,7 @@ from typing import List, Optional, Tuple
 
 from loguru import logger as log
 
+from mpflash.versions import V_PREVIEW
 from stubber.rst import (
     CHILD_PARENT_CLASS,
     MODULE_GLUE,
@@ -82,7 +83,6 @@ from stubber.rst import (
 )
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import V_PREVIEW
 
 SEPERATOR = "::"
 
@@ -369,9 +369,7 @@ class RSTParser(RSTReader):
     PARAM_RE_FIXES = [
         Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
         Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
-        Fix(
-            r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
-        ),  # fix: network - AbstractNIC.connect
+        Fix(r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True),  # fix: network - AbstractNIC.connect
     ]
 
     def __init__(self, v_tag: str) -> None:
@@ -497,9 +495,7 @@ class RSTParser(RSTReader):
                 version = V_PREVIEW
             else:
                 version = self.source_tag.replace("_", ".")  # TODO Use clean_version(self.source_tag)
-            docstr[0] = (
-                f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
-            )
+            docstr[0] = f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -637,9 +633,7 @@ class RSTParser(RSTReader):
             params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -759,9 +753,7 @@ class RSTParser(RSTReader):
 
         # deal with documentation wildcards
         for name in names:
-            r_type = return_type_from_context(
-                docstring=docstr, signature=name, module=self.current_module, literal=True
-            )
+            r_type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
             if r_type in ["None"]:  # None does not make sense
                 r_type = "Incomplete"  # Default to Incomplete/ Unknown / int
             name = self.strip_prefixes(name)

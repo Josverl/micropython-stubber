@@ -25,11 +25,11 @@ from typing import List, Optional
 from loguru import logger as log
 from packaging.version import Version
 
+from mpflash.versions import SET_PREVIEW, V_PREVIEW
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import SET_PREVIEW, V_PREVIEW
 
 FAMILY = "micropython"
 

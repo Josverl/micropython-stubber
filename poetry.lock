@@ -415,6 +415,17 @@ files = [
 ]
 
 [[package]]
+name = "cache-to-disk"
+version = "2.0.0"
+description = "Local disk caching decorator for python function."
+optional = false
+python-versions = "*"
+files = [
+    {file = "cache_to_disk-2.0.0-py3-none-any.whl", hash = "sha256:ea5afe13d4284cb4a06169b0807fbc60547cbe19c54563bf90e1d44f24029481"},
+    {file = "cache_to_disk-2.0.0.tar.gz", hash = "sha256:79e19ea9b72eedc5cec83bb8aa55374afc671493e7d13d541f3b63eb3a13fb32"},
+]
+
+[[package]]
 name = "cachetools"
 version = "5.3.3"
 description = "Extensible memoizing collections and decorators"
@@ -1479,19 +1490,20 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "mpflash"
-version = "0.9.0"
+version = "0.9.1"
 description = "Flash and download tool for MicroPython firmwares"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "mpflash-0.9.0-py3-none-any.whl", hash = "sha256:a7ba60f94607f130bfa223934a0aa79f80b2235f8764ce83a8caa193e7f9bf04"},
-    {file = "mpflash-0.9.0.tar.gz", hash = "sha256:d41158e8dbd6fa5db5107e230fe7080553528204b28cce193bd4c906b95a8910"},
+    {file = "mpflash-0.9.1-py3-none-any.whl", hash = "sha256:1bfc8f3a493b57a2e592351d7346ed0a1e27f98741fc53cbc702e84ffcf580b1"},
+    {file = "mpflash-0.9.1.tar.gz", hash = "sha256:f0d51c6f713892eeebcd4fc0fdeb91e5ba4d2da4b2238404e990a61b6d6c2fdd"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.12.3,<5.0.0"
 bincopy = ">=20.0.0,<21.0.0"
 blkinfo = ">=0.2.0,<0.3.0"
+cache-to-disk = ">=2.0.0,<3.0.0"
 cachetools = ">=5.3.0,<6.0.0"
 esptool = ">=4.7.0,<5.0.0"
 inquirer = ">=3.2.4,<4.0.0"
@@ -3165,4 +3177,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "a5a9ba3a979964a570f07d367cdf43269ed50c70773099a67f5f4b0ec88e076b"
+content-hash = "4417edbf5e75fe724353fe63b1ea61483834afc4149fcde33b5f46d5d3b7e49d"

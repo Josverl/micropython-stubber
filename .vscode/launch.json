@@ -33,7 +33,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-VV",
-                "flash",
+                "list",
                 // "--board",
                 // "SEEED_WIO_TERMINAL",
                 // "PICO",

@@ -16,14 +16,12 @@ if not sys.warnoptions:
 # Dependencies
 import stubber.basicgit as git
 import stubber.freeze.get_frozen as get_frozen
+from mpflash.versions import clean_version
 from stubber.utils.repos import read_micropython_lib_commits, switch
-from stubber.utils.versions import clean_version
 
 
 @pytest.mark.parametrize("tag, manifest_count, frozen_count", [("v1.9.4", 4, 10)])
-def test_get_mpy(
-    tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path, tag: str, manifest_count, frozen_count
-):
+def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path, tag: str, manifest_count, frozen_count):
     # set state of repos
     switch(tag=tag, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
@@ -38,9 +36,7 @@ def test_get_mpy(
     # folder/{family}-{version}-frozen
     family = "micropython"
     stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_frozen.freeze_any(
-        (tmp_path / stub_path), version=version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib
-    )
+    get_frozen.freeze_any((tmp_path / stub_path), version=version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
     modules = list((tmp_path / stub_path).glob("**/modules.json"))
     stubs = list((tmp_path / stub_path).glob("**/*.py"))

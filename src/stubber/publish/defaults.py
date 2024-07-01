@@ -1,8 +1,9 @@
 """Build and packaging defaults for stubber"""
+
 from typing import Dict, List
 
+from mpflash.versions import V_PREVIEW, clean_version
 from stubber.utils.config import CONFIG
-from stubber.utils.versions import V_PREVIEW, clean_version
 
 # The default board for the ports modules documented with base name only
 # as the MicroPython BOARD naming convention has changed over time there are different options to try
@@ -29,15 +30,9 @@ def default_board(port: str, version=V_PREVIEW) -> str:  # sourcery skip: assign
     ver_flat = clean_version(version, flat=True)
     if port in DEFAULT_BOARDS:
         for board in DEFAULT_BOARDS[port]:
-            base = (
-                f"micropython-{ver_flat}-{port}-{board}"
-                if board
-                else f"micropython-{ver_flat}-{port}"
-            )
+            base = f"micropython-{ver_flat}-{port}-{board}" if board else f"micropython-{ver_flat}-{port}"
             # check if we have a (merged)stub for this version and port
-            if (CONFIG.stub_path / f"{base}-merged").exists() or (
-                CONFIG.stub_path / base
-            ).exists():
+            if (CONFIG.stub_path / f"{base}-merged").exists() or (CONFIG.stub_path / base).exists():
                 return board
         # fallback to first listed board
         return DEFAULT_BOARDS[port][0]
