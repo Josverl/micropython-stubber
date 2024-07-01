@@ -106,7 +106,7 @@ from .worklist import (WorkList, full_auto_worklist, manual_worklist,
     "-bl",
     "bootloader",
     type=click.Choice([e.value for e in BootloaderMethod]),
-    default="mpy",
+    default="auto",
     show_default=True,
     help="""How to enter the (MicroPython) bootloader before flashing.""",
 )

@@ -12,13 +12,14 @@ from mpflash.mpremoteboard import MPRemoteBoard
 
 
 class MCUHighlighter(RegexHighlighter):
-    """Apply style to anything that looks like an email."""
+    """Apply style to things that should stand out."""
 
     base_style = "mcu."
     highlights = [
         r"(?P<bold>Method[\s\d\:]*)",
         r"(?P<bold> \d.)",  # numbered items
         r"(?P<bold> - )",  # bullets
+        # mcu things
         r"(?P<pad>GPIO[\d]*)",
         r"(?P<pad>GPI[\d]*)",
         r"(?P<pad>IO[\d]*)",
@@ -33,21 +34,19 @@ class MCUHighlighter(RegexHighlighter):
         r"(?P<button>reset)",
         # other
         r"(?P<cable>USB)",
-        # r"(?P<mcu>SAMD[\d]*)",
-        # r"(?P<mcu>ESP[\d]*)",
-        # r"(?P<mcu>rp2)",
-        # r"(?P<mcu>rp2040)",
+        r"(?P<cable>USB-C)",
+        r"(?P<cable>Serial)",
     ]
 
 
 # https://rich.readthedocs.io/en/stable/appendix/colors.html?highlight=colors#standard-colors
+# use 3 colors to keep things simple but clear
 mcu_theme = Theme(
     {
-        "mcu.bold": "orange3",
-        "mcu.mcu": "orange3",
-        "mcu.button": "bold green",
-        "mcu.pad": "dodger_blue2",
-        "mcu.cable": "dodger_blue2",
+        "mcu.bold": "orange3",  # readers guidance
+        "mcu.button": "bold green",  # things to press
+        "mcu.pad": "dodger_blue2",  # things to connect
+        "mcu.cable": "dodger_blue2",  # things to connect
     }
 )
 
@@ -84,7 +83,7 @@ Please put your {mcu.port.upper()} device into bootloader mode by:
 """
 
     # todo: would be nice to re-use the console instance from logger
-    console = Console(highlighter=MCUHighlighter(), theme=mcu_theme)
+    console = Console(highlighter=MCUHighlighter(), theme=mcu_theme)  # type: ignore
     message += "\nIf you are unsure how to enter bootloader mode, please refer to the device documentation."
     console.print(
         Panel(

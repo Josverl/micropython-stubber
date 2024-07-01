@@ -92,6 +92,7 @@ class DownloadParams(Params):
 
 
 class BootloaderMethod(Enum):
+    AUTO = "auto"
     MANUAL = "manual"
     MPY = "mpy"
     TOUCH_1200 = "touch1200"
