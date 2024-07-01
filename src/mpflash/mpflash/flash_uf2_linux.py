@@ -42,10 +42,7 @@ def get_uf2_drives():
             uf2.mountpoint = uf2_part["mountpoint"]
             yield uf2
         elif disk["type"] == "disk" and disk.get("children") and len(disk.get("children")) > 0:
-            if (
-                disk.get("children")[0]["type"] == "part"
-                and disk.get("children")[0]["fstype"] == "vfat"
-            ):
+            if disk.get("children")[0]["type"] == "part" and disk.get("children")[0]["fstype"] == "vfat":
                 uf2_part = disk.get("children")[0]
                 # print( json.dumps(uf2_part, indent=4))
                 uf2 = UF2Disk()
@@ -98,7 +95,7 @@ def dismount_uf2_linux():
     glb_dismount_me = []
 
 
-def wait_for_UF2_linux(s_max: int = 10):
+def wait_for_UF2_linux(board_id: str, s_max: int = 10):
     destination = ""
     wait = 10
     uf2_drives = []
@@ -117,9 +114,12 @@ def wait_for_UF2_linux(s_max: int = 10):
             time.sleep(1)
             try:
                 if Path(drive.mountpoint, "INFO_UF2.TXT").exists():
-                    board_id = get_board_id(Path(drive.mountpoint))  # type: ignore
-                    destination = Path(drive.mountpoint)
-                    break
+                    this_board_id = get_board_id(Path(drive.mountpoint))
+                    if not board_id or board_id.upper() in this_board_id.upper():
+                        # is it the correct board?
+                        destination = Path(drive.mountpoint)
+                        break
+                    continue
             except PermissionError:
                 log.debug(f"Permission error on {drive.mountpoint}")
                 continue

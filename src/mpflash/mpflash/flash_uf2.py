@@ -8,12 +8,12 @@ import time
 from pathlib import Path
 from typing import Optional
 
+import tenacity
 from loguru import logger as log
 from rich.progress import track
+from tenacity import stop_after_attempt, wait_fixed
 
 from mpflash.mpremoteboard import MPRemoteBoard
-import tenacity
-from tenacity import stop_after_attempt, wait_fixed
 
 from .common import PORT_FWTYPES
 from .flash_uf2_boardid import get_board_id
@@ -39,7 +39,9 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
     if erase:
-        destination = waitfor_uf2()
+        log.warning("Erase not (yet) supported on .UF2, skipping erase.")
+
+    destination = waitfor_uf2(board_id=mcu.port.upper())
 
     if not destination or not destination.exists() or not (destination / "INFO_UF2.TXT").exists():
         log.error("Board is not in bootloader mode")
@@ -59,31 +61,29 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         dismount_uf2_linux()
 
     mcu.wait_for_restart()
-    # time.sleep(1)  # 5 secs to short on linux
     return mcu
 
 
-def waitfor_uf2():
+def waitfor_uf2(board_id: str):
     """
     Wait for the UF2 drive to mount
     """
     if sys.platform == "linux":
-        return wait_for_UF2_linux()
+        return wait_for_UF2_linux(board_id=board_id)
     elif sys.platform == "win32":
-        return wait_for_UF2_windows()
+        return wait_for_UF2_windows(board_id=board_id)
     elif sys.platform == "darwin":
-        log.warning(f"OS {sys.platform} not tested/supported")
-        return wait_for_UF2_macos()
+        return wait_for_UF2_macos(board_id=board_id)
     else:
         log.warning(f"OS {sys.platform} not tested/supported")
         return None
 
 
 @tenacity.retry(stop=stop_after_attempt(3), wait=wait_fixed(1), reraise=False)
-def cp_firmware_to_uf2(fw_file, destination):
+def cp_firmware_to_uf2(fw_file: Path, destination: Path):
     """
     Copy the firmware file to the destination,
     Retry 3 times with 1s delay
     """
     log.info(f"Copying {fw_file} to {destination}.")
-    shutil.copy(fw_file, destination)
+    return shutil.copy(fw_file, destination)

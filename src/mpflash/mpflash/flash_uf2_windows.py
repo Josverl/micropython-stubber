@@ -7,11 +7,12 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from mpflash.flash_uf2_boardid import get_board_id
 import psutil
 from rich.progress import track
 
 
-def wait_for_UF2_windows(s_max: int = 10) -> Optional[Path]:
+def wait_for_UF2_windows(board_id: str, s_max: int = 10)-> Optional[Path]:
     """Wait for the MCU to mount as a drive"""
     if s_max < 1:
         s_max = 10
@@ -28,8 +29,12 @@ def wait_for_UF2_windows(s_max: int = 10) -> Optional[Path]:
         for drive in drives:
             try:
                 if Path(drive, "INFO_UF2.TXT").exists():
-                    destination = Path(drive)
-                    break
+                    this_board_id = get_board_id(Path(drive))
+                    if not board_id or board_id.upper() in this_board_id.upper():
+                        # is it the correct board?
+                        destination = Path(drive)
+                        break
+                    continue
             except OSError:
                 pass
         if destination:

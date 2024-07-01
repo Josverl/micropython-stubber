@@ -2,17 +2,17 @@
 """
 
 import os
+
 from mpflash.common import PORT_FWTYPES
 from mpflash.flash_uf2 import waitfor_uf2
 from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
 
 
-
 def in_bootloader(mcu: MPRemoteBoard) -> bool:
     """Check if the board is in bootloader mode"""
     if ".uf2" in PORT_FWTYPES[mcu.port]:
-        return in_uf2_bootloader()
+        return in_uf2_bootloader(mcu.port.upper())
     elif mcu.port in ["stm32"]:
         return in_stm32_bootloader()
     elif mcu.port in ["esp32", "esp8266"]:
@@ -23,9 +23,9 @@ def in_bootloader(mcu: MPRemoteBoard) -> bool:
     return False
 
 
-def in_uf2_bootloader() -> bool:
+def in_uf2_bootloader(board_id) -> bool:
     """Check if the board is in UF2 bootloader mode"""
-    return bool(waitfor_uf2())
+    return bool(waitfor_uf2(board_id=board_id))
 
 
 def in_stm32_bootloader() -> bool:
@@ -38,9 +38,7 @@ def in_stm32_bootloader() -> bool:
         print()
         if status != "OK":
             log.warning(f"STM32 BOOTLOADER device found, Device status: {status}")
-            log.error(
-                "Please use Zadig to install a WinUSB (libusb)  driver.\nhttps://github.com/pbatard/libwdi/wiki/Zadig"
-            )
+            log.error("Please use Zadig to install a WinUSB (libusb)  driver.\nhttps://github.com/pbatard/libwdi/wiki/Zadig")
             return False
     return check_dfu_devices()
 
