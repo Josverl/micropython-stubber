@@ -4,7 +4,6 @@
 #############################################################
 """
 
-from functools import lru_cache
 from pathlib import Path
 
 from cache_to_disk import NoCacheCondition, cache_to_disk
@@ -31,7 +30,7 @@ def clean_version(
     commit: bool = False,
     drop_v: bool = False,
     flat: bool = False,
-):
+):  # sourcery skip: assign-if-exp
     "Clean up and transform the many flavours of versions"
     # 'v1.13.0-103-gb137d064e' --> 'v1.13-103'
     if version in {"", "-"}:
@@ -52,14 +51,12 @@ def clean_version(
     if len(nibbles) == 1:
         version = nibbles[0]
     elif build and not is_preview:
-        version = "-".join(nibbles) if commit else "-".join(nibbles[:-1])
-    else:
-        # version = "-".join((nibbles[0], LATEST))
         # HACK: this is not always right, but good enough most of the time
-        if is_preview:
-            version = "-".join((nibbles[0], V_PREVIEW))
-        else:
-            version = V_PREVIEW
+        version = "-".join(nibbles) if commit else "-".join(nibbles[:-1])
+    elif is_preview:
+        version = "-".join((nibbles[0], V_PREVIEW))
+    else:
+        version = V_PREVIEW
     if flat:
         version = version.strip().replace(".", "_").replace("-", "_")
     else:
