@@ -10,7 +10,7 @@ from typing import List, Optional
 
 import libcst as cst
 import libcst.codemod as codemod
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet  # type: ignore

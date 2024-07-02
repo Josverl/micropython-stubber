@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Union
 
-from loguru import logger as log
+from mpflash.logger import log
 from packaging.version import parse
 from pysondb import PysonDB
 
@@ -62,7 +62,9 @@ def get_package(
     )
 
 
-def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str) -> Union[Dict, None]:
+def get_package_info(
+    db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str
+) -> Union[Dict, None]:
     """
     get a package's record from the json db if it can be found
     matches om the package name and version
@@ -70,7 +72,9 @@ def get_package_info(db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version:
         mpy_version: micropython/firmware version (1.18)
     """
     # find in the database
-    recs = db.get_by_query(query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name)
+    recs = db.get_by_query(
+        query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name
+    )
     # dict to list
     recs = [{"id": key, "data": recs[key]} for key in recs]
     # sort

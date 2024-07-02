@@ -7,7 +7,7 @@ from typing import Optional
 
 from packaging.version import Version, parse
 from pypi_simple import PyPISimple, NoSuchProjectError
-from loguru import logger as log
+from mpflash.logger import log
 
 
 def get_pypi_versions(package_name: str, base: Optional[Version] = None, production: bool = True):
@@ -28,7 +28,11 @@ def get_pypi_versions(package_name: str, base: Optional[Version] = None, product
     if not package_info:
         return []
 
-    versions = [parse(pkg.version) for pkg in package_info.packages if pkg.package_type == "wheel" and pkg.version]
+    versions = [
+        parse(pkg.version)
+        for pkg in package_info.packages
+        if pkg.package_type == "wheel" and pkg.version
+    ]
     # print(versions)
 
     if base:

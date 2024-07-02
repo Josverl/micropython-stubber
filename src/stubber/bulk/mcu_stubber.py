@@ -11,12 +11,15 @@ from pathlib import Path
 from tempfile import mkdtemp
 from typing import List, Optional, Tuple
 
-from loguru import logger as log
+
 from rich.console import Console
 from rich.table import Table
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
+from mpflash.connected import list_mcus
+from mpflash.list import show_mcus
+from mpflash.logger import log
 from stubber import utils
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.pathnames import board_folder_name
@@ -145,7 +148,9 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
         mcu.run_command("reset", timeout=5)
         time.sleep(2)
 
-    log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
+    log.info(
+        f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}"
+    )
     cmd = build_cmd(dest, variant)
     log.info(f"Running : mpremote {' '.join(cmd)}")
     mcu.run_command.retry.wait = wait_fixed(15)
@@ -155,7 +160,13 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
     timeout = 90 if mcu.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = mcu.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
-    if rc != OK and out and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
+    if (
+        rc != OK
+        and out
+        and ":" in out[-1]
+        and not out[-1].startswith("INFO")
+        and not out[-1].startswith("WARN")
+    ):
         log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
@@ -250,7 +261,10 @@ def copy_boardname_to_board(mcu: MPRemoteBoard):
         None
     """
     if mcu.board:
-        cmd = ["exec", f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board}\"')"]
+        cmd = [
+            "exec",
+            f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board}\"')",
+        ]
         log.info(f"Writing BOARDNAME='{mcu.board}' to boardname.py")
     else:
         cmd = ["rm", "boardname.py"]
@@ -285,29 +299,10 @@ def copy_scripts_to_board(mcu: MPRemoteBoard, variant: Variant, form: Form):
 
 def get_stubfolder(out: List[str]):
     return (
-        lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("INFO  : Path: ")]) else ""
+        lines[-1].split("/remote/")[-1].strip()
+        if (lines := [l for l in out if l.startswith("INFO  : Path: ")])
+        else ""
     )
-
-
-def scan_boards(optimistic: bool = False) -> List[MPRemoteBoard]:
-    """
-    This function scans for boards and returns a list of MPRemoteBoard objects.
-    :return: list of MPRemoteBoard objects
-    """
-    boards = []
-    for mpr_port in MPRemoteBoard.connected_boards():
-        board = MPRemoteBoard(mpr_port)
-        log.debug(f"Attempt to connect to: {board.serialport}")
-        try:
-            board.get_mcu_info()
-            log.success(f"Detected board {board.description} {board.version}")
-            boards.append(board)
-        except Exception:
-            log.error(f"Failed to get mcu_info for {board.serialport}")
-            if optimistic:
-                boards.append(board)
-            continue
-    return boards
 
 
 def set_loglevel(verbose: int) -> str:
@@ -324,7 +319,9 @@ def set_loglevel(verbose: int) -> str:
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level: <8}</level>|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
-    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
+    log.add(
+        sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str
+    )
     # log.info(f"micropython-stubber {__version__}")
     return level
 
@@ -347,7 +344,14 @@ def copy_to_repo(source: Path, fw: dict) -> Optional[Path]:
         return None
 
 
-def stub_connected_mcus(variant: str, format: str, debug: bool) -> int:
+def stub_connected_mcus(
+    variant: str,
+    format: str,
+    debug: bool,
+    serial: List[str],
+    ignore: List[str],
+    bluetooth: bool,
+) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
 
@@ -372,24 +376,16 @@ def stub_connected_mcus(variant: str, format: str, debug: bool) -> int:
     all_built = []
 
     # scan boards and just work with the ones that respond with understandable data
-    connected_boards = scan_boards(True)
-    if not connected_boards:
+    connected_mcus = list_mcus(ignore=ignore, include=serial, bluetooth=bluetooth)
+
+    if not connected_mcus:
         log.error("No micropython boards were found")
         return ERROR
 
-    table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Serial Port")
-    table.add_column("Port")
-    table.add_column("Description")
-    table.add_column("Version")
-
-    for b in connected_boards:
-        table.add_row(b.serialport, b.port, b.description, b.version)
-    console = Console()
-    console.print(table)
+    show_mcus(connected_mcus, refresh=False)
 
     # scan boards and generate stubs
-    for board in connected_boards:
+    for board in connected_mcus:
         log.info(
             f"Connecting using {board.serialport} to {board.port} {board.board} {board.version}: {board.description}"
         )
@@ -428,14 +424,16 @@ def stub_connected_mcus(variant: str, format: str, debug: bool) -> int:
                 all_built.extend(built)
 
     if all_built:
-        print_result_table(all_built, console)
+        print_result_table(all_built)
         log.success("Done")
         return OK
     log.error(f"Failed to generate stubs for {board.serialport}")
     return ERROR
 
 
-def print_result_table(all_built: List, console: Console):
+def print_result_table(all_built: List, console: Optional[Console] = None):
+    if not console:
+        console = Console()
     # create a rich table of the results and print it'
     table = Table(title="Results")
 

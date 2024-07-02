@@ -4,6 +4,7 @@ typed-config-toml
 Extend typed-config to read configuration from .toml files
 
 """
+
 # TODO : extend support for . notation in section names
 
 from pathlib import Path
@@ -15,7 +16,7 @@ except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore
 assert tomllib
 
-from loguru import logger as log
+from mpflash.logger import log
 from typedconfig.source import ConfigSource
 
 
@@ -69,7 +70,9 @@ class TomlConfigSource(ConfigSource):
                 # do not assume/require that all values are strings
                 # assert isinstance(v_v, str)
         # Convert all keys to lowercase
-        self.data = {k.lower(): {v_k.lower(): v_v for v_k, v_v in v.items()} for k, v in self.data.items()}
+        self.data = {
+            k.lower(): {v_k.lower(): v_v for v_k, v_v in v.items()} for k, v in self.data.items()
+        }
 
     def get_config_value(self, section_name: str, key_name: str) -> Optional[str]:
         # Extract info from data which we read in during __init__

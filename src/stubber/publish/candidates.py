@@ -14,11 +14,17 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Union
 
-from loguru import logger as log
+from mpflash.logger import log
 from packaging.version import parse
 
 import mpflash.basicgit as git
-from mpflash.versions import OLDEST_VERSION, SET_PREVIEW, V_PREVIEW, clean_version, micropython_versions
+from mpflash.versions import (
+    OLDEST_VERSION,
+    SET_PREVIEW,
+    V_PREVIEW,
+    clean_version,
+    micropython_versions,
+)
 from stubber import utils
 from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
 
@@ -108,7 +114,9 @@ def frozen_candidates(
     auto_port = is_auto(ports)
     auto_board = is_auto(boards)
     if is_auto(versions):
-        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_PREVIEW]
+        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [
+            V_PREVIEW
+        ]
     else:
         versions = [versions] if isinstance(versions, str) else versions
 
@@ -126,7 +134,9 @@ def frozen_candidates(
                 # lookup the (frozen) micropython ports
                 ports = list_frozen_ports(family, version, path=path)
             else:
-                raise NotImplementedError(f"auto ports not implemented for family {family}")  # pragma: no cover
+                raise NotImplementedError(
+                    f"auto ports not implemented for family {family}"
+                )  # pragma: no cover
             # elif family == "pycom":
             #     ports = ["esp32"]
             # elif family == "lobo":
@@ -159,7 +169,9 @@ def frozen_candidates(
 
                 else:
                     # raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
-                    raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
+                    raise NotImplementedError(
+                        f"auto boards not implemented for family {family}"
+                    )  # pragma: no cover
                 # elif family == "pycom":
                 #     boards = ["wipy", "lopy", "gpy", "fipy"]
             # ---------------------------------------------------------------------------
@@ -215,7 +227,9 @@ def board_candidates(
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
-            log.warning(f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?")
+            log.warning(
+                f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?"
+            )
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
@@ -252,5 +266,10 @@ def filter_list(
         worklist = [i for i in worklist if i["port"].lower() in ports_]
     if boards and not is_auto(boards):
         boards_ = [i.lower() for i in boards]
-        worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_", "") in boards_]
+        worklist = [
+            i
+            for i in worklist
+            if i["board"].lower() in boards_
+            or i["board"].lower().replace("generic_", "") in boards_
+        ]
     return worklist

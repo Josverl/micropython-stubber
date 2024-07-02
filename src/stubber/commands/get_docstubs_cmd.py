@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 
 import mpflash.basicgit as git
 import stubber.utils as utils
@@ -22,7 +22,10 @@ from .cli import stubber_cli
 #########################################################################################
 
 
-@stubber_cli.command(name="get-docstubs")
+@stubber_cli.command(
+    name="get-docstubs",
+    aliases=["get-doc-stubs", "docstubs"],
+)
 @click.option(
     "--path",
     "-p",

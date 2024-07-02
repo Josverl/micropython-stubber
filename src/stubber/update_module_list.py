@@ -15,7 +15,7 @@ for this :
 from pathlib import Path
 from typing import List, Optional, Set
 
-from loguru import logger as log
+from mpflash.logger import log
 
 
 def read_modules(path: Optional[Path] = None) -> Set[str]:

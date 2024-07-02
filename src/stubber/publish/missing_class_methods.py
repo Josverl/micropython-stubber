@@ -6,7 +6,7 @@ Add missing methods to classes in the stubs that are documented in the docstubs
 from pathlib import Path
 
 import libcst as cst
-from loguru import logger as log
+from mpflash.logger import log
 
 from mpflash.versions import clean_version
 from stubber.codemod.add_method import CallAdder, CallFinder
@@ -23,7 +23,9 @@ def add_machine_pin_call(merged_path: Path, version: str):
     # and to avoid having to parse the file twice
 
     # first find the __call__ method in the default stubs
-    mod_path = CONFIG.stub_path / f"micropython-{clean_version(version, flat=True)}-docstubs/machine.pyi"
+    mod_path = (
+        CONFIG.stub_path / f"micropython-{clean_version(version, flat=True)}-docstubs/machine.pyi"
+    )
     if not mod_path.exists():
         log.error(f"no docstubs found for {version}")
         return False

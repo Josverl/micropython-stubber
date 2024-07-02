@@ -9,7 +9,7 @@ from typing import List, Tuple, Union
 
 import rich_click as click
 import mpflash.basicgit as git
-from loguru import logger as log
+from mpflash.logger import log
 from stubber.utils.config import CONFIG
 
 from .cli import stubber_cli

@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List
 
-from loguru import logger as log
+from mpflash.logger import log
 from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
 
@@ -17,7 +17,9 @@ from .typed_config_toml import TomlConfigSource
 class StubberConfig(Config):
     "stubber configuration class"
     # relative to stubs folder
-    fallback_path: Path = key(key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback"))
+    fallback_path: Path = key(
+        key_name="fallback-path", cast=Path, required=False, default=Path("typings/fallback")
+    )
     "a Path to the fallback stubs directory"
 
     # ------------------------------------------------------------------------------------------
@@ -25,16 +27,24 @@ class StubberConfig(Config):
     repo_path: Path = key(key_name="repo-path", cast=Path, required=False, default=Path("./repos"))
     "a Path to the repo directory"
 
-    mpy_path: Path = key(key_name="mpy-path", cast=Path, required=False, default=Path("micropython"))
+    mpy_path: Path = key(
+        key_name="mpy-path", cast=Path, required=False, default=Path("micropython")
+    )
     "a Path to the micropython folder in the repos directory"
 
-    mpy_lib_path: Path = key(key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib"))
+    mpy_lib_path: Path = key(
+        key_name="mpy-lib-path", cast=Path, required=False, default=Path("micropython-lib")
+    )
     "a Path to the micropython-lib folder in the repos directory"
 
-    mpy_stubs_path: Path = key(key_name="mpy-stubs-path", cast=Path, required=False, default=Path("micropython-stubs"))
+    mpy_stubs_path: Path = key(
+        key_name="mpy-stubs-path", cast=Path, required=False, default=Path("micropython-stubs")
+    )
     "a Path to the micropython-stubs folder in the repos directory (or current directory)"
 
-    stable_version: str = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
+    stable_version: str = key(
+        key_name="stable-version", cast=str, required=False, default="1.20.0"
+    )
 
     "last published stable"
 
@@ -113,7 +123,9 @@ def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exi
     # add provider sources to the config
     config.add_source(EnvironmentConfigSource())
     if use_toml:
-        config.add_source(TomlConfigSource(filename, prefix=prefix, must_exist=must_exist))  # ,"tools.micropython-stubber"))
+        config.add_source(
+            TomlConfigSource(filename, prefix=prefix, must_exist=must_exist)
+        )  # ,"tools.micropython-stubber"))
     config.read()
     return config
 

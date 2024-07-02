@@ -6,7 +6,7 @@ Helper functions to deal with path names and filenames for the folders in the st
 from pathlib import Path
 from typing import Dict, Optional
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from mpflash.versions import V_PREVIEW, clean_version
 from stubber.publish.defaults import default_board

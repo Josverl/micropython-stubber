@@ -2,6 +2,7 @@
 Download or update the MicroPython compatibility modules from pycopy and stores them in the all_stubs folder
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
 """
+
 # pragma: no cover
 import json
 import os
@@ -12,7 +13,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Union
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from . import __version__
 
@@ -22,7 +23,9 @@ from .utils.config import CONFIG
 # # log = logging.getLogger(__name__)
 
 
-def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"):
+def get_core(
+    requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"
+):
     "Download MicroPython compatibility modules"
     if not stub_path:
         stub_path = CONFIG.stub_path / "cpython-core"  # pragma: no cover
@@ -71,7 +74,9 @@ def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, fa
 
         except OSError as err:  # pragma: no cover
             log.error(
-                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err)
+                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(
+                    err
+                )
             )
 
         # copy *.py files in build folder to stub_path
@@ -86,7 +91,13 @@ def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, fa
                 log.exception(err)
 
     # build modules.json
-    mod_manifest = utils.manifest(family="cpython-core", port=family, version=__version__, stubtype="core", platform="cpython")
+    mod_manifest = utils.manifest(
+        family="cpython-core",
+        port=family,
+        version=__version__,
+        stubtype="core",
+        platform="cpython",
+    )
     mod_manifest["modules"] += modlist
 
     if mod_manifest and len(modlist):

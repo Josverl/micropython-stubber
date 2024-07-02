@@ -4,7 +4,7 @@
 # stub
 ##########################################################################################
 
-from loguru import logger as log
+from mpflash.logger import log
 from pathlib import Path
 from typing import Union
 

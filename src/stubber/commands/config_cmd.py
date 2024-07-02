@@ -2,7 +2,7 @@
 
 # pragma: no cover
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.utils.config import CONFIG
 

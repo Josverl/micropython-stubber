@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import stubber.utils as utils
-from loguru import logger as log
+from mpflash.logger import log
 
 
 def process(folder: Path, pattern: str):
@@ -34,7 +34,9 @@ def process(folder: Path, pattern: str):
                     signature = str(item[3]).split("::")[-1].strip()
                     docstring = item[4]
 
-                    r = utils._type_from_context(docstring=docstring, signature=signature, module=module_name)
+                    r = utils._type_from_context(
+                        docstring=docstring, signature=signature, module=module_name
+                    )
                     report.append(
                         {
                             "signature": signature,
@@ -49,11 +51,17 @@ def process(folder: Path, pattern: str):
                         }
                     )
                     # isGood = r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
-                    isBad = float(r["confidence"]) <= 0.5 and float(r["confidence"]) <= 0.8 and item[2] != ""
+                    isBad = (
+                        float(r["confidence"]) <= 0.5
+                        and float(r["confidence"]) <= 0.8
+                        and item[2] != ""
+                    )
                     if isBad:
                         context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
-                            log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
+                            log.debug(
+                                f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}"
+                            )
                         except Exception:
                             log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 

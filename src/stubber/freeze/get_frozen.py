@@ -22,7 +22,7 @@ import shutil  # start moving from os & glob to pathlib
 from pathlib import Path
 from typing import List, Optional
 
-from loguru import logger as log
+from mpflash.logger import log
 from packaging.version import Version
 
 from mpflash.versions import SET_PREVIEW, V_PREVIEW
@@ -83,7 +83,9 @@ def freeze_any(
         frozen_stub_path = get_fsp(version, stub_folder)
         log.debug("MicroPython v1.11, older or other")
         # others
-        modules = freeze_folders(frozen_stub_path.as_posix(), mpy_path.as_posix(), mpy_lib_path.as_posix(), version)
+        modules = freeze_folders(
+            frozen_stub_path.as_posix(), mpy_path.as_posix(), mpy_lib_path.as_posix(), version
+        )
         count = len(modules)
     else:
         # get the current checked out version
@@ -120,7 +122,9 @@ def freeze_any(
 
 def get_fsp(version: str, stub_folder: Optional[Path] = None) -> Path:
     if not stub_folder:
-        frozen_stub_path = CONFIG.stub_path / f"{FAMILY}-{utils.clean_version(version, flat=True)}-frozen"
+        frozen_stub_path = (
+            CONFIG.stub_path / f"{FAMILY}-{utils.clean_version(version, flat=True)}-frozen"
+        )
         frozen_stub_path = frozen_stub_path.absolute()
     else:
         frozen_stub_path: Path = Path(stub_folder).absolute()

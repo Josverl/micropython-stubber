@@ -1,11 +1,12 @@
 """Download files from a public github repo"""
+
 # Copyright (c) 2020 Jos Verlinde
 # MIT license
 # pylint: disable= invalid-name
 import os
 
 import requests
-from loguru import logger as log
+from mpflash.logger import log
 
 # # log = logging.getLogger(__name__)
 # log.setLevel(level=logging.INFO)
