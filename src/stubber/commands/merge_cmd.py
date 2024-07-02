@@ -5,7 +5,7 @@ enrich machinestubs with docstubs
 from typing import List, Union
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.package import GENERIC_L

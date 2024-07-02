@@ -16,7 +16,7 @@ try:
 except ImportError:
     python_minifier = None
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from mpflash.versions import SET_PREVIEW, V_PREVIEW
 
@@ -205,7 +205,9 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     elif isinstance(source_script, str):  # type: ignore
         source_content = source_script
     else:
-        raise TypeError(f"source_script must be str, Path, or file-like object, not {type(source_script)}")
+        raise TypeError(
+            f"source_script must be str, Path, or file-like object, not {type(source_script)}"
+        )
 
     if not source_content:
         raise ValueError("No source content")
@@ -400,7 +402,9 @@ def pipx_mpy_cross(version: str, source_file, _target):
     # Add params
     cmd += ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
     log.trace(" ".join(cmd))
-    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")  # Specify the encoding
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8"
+    )  # Specify the encoding
     return result
 
 

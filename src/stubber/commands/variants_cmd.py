@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 from stubber.utils.config import CONFIG
 from stubber.variants import create_variants
 import stubber

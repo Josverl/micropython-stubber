@@ -8,7 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Tuple
 
-from loguru import logger as log
+from mpflash.logger import log
 from packaging.version import Version
 
 import mpflash.basicgit as git
@@ -63,7 +63,11 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
         reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
         rows = list(reader)
         # create a dict version --> commit_hash
-        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
+        version_commit = {
+            row["version"].split("/")[-1]: row["lib_commit_hash"]
+            for row in rows
+            if row["version"].startswith("refs/tags/")
+        }
     # add default
     version_commit = defaultdict(lambda: "master", version_commit)
     return version_commit
@@ -91,7 +95,9 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
                 return False
         return git.sync_submodules(mpy_path)
     else:
-        log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
+        log.info(
+            f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
+        )
         return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 

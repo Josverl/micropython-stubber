@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from typing import Tuple
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.publish.defaults import GENERIC_U
 
@@ -17,7 +17,9 @@ def get_portboard(manifest_path: Path):
     raises an ValueError if neither a port or board can be found
     """
     # https://regex101.com/r/tv7JX4/1
-    re_pb = r".*micropython[\/\\]ports[\/\\](?P<port>[\w_-]*)([\/\\]boards[\/\\](?P<board>\w*))?[\/\\]"
+    re_pb = (
+        r".*micropython[\/\\]ports[\/\\](?P<port>[\w_-]*)([\/\\]boards[\/\\](?P<board>\w*))?[\/\\]"
+    )
     mpy_port = mpy_board = ""
     if matches := re.search(re_pb, manifest_path.absolute().as_posix()):
         # port and board
@@ -50,7 +52,9 @@ def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
     apply common fixes to the fozen modules to improve stub generation
     """
     # NOTE: FIX 1 add __init__.py to umqtt
-    if (freeze_path / "umqtt/robust.py").exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
+    if (
+        freeze_path / "umqtt/robust.py"
+    ).exists():  # and not (freeze_path / "umqtt" / "__init__.py").exists():
         log.debug("add missing : umqtt/__init__.py")
         with open(freeze_path / "umqtt" / "__init__.py", "a") as f:
             f.write("")

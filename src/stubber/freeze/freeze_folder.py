@@ -6,7 +6,7 @@ import shutil
 import warnings
 from pathlib import Path  # start moving from os & glob to pathlib
 
-from loguru import logger as log
+from mpflash.logger import log
 from stubber.utils.repos import match_lib_with_mpy
 
 from .. import utils
@@ -25,7 +25,7 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
     - 'ports/<port>/modules/*.py'
     - 'ports/<port>/boards/<board>/modules/*.py'
     """
-    match_lib_with_mpy(version_tag=version, mpy_path=Path(mpy_folder),lib_path=Path(lib_folder))
+    match_lib_with_mpy(version_tag=version, mpy_path=Path(mpy_folder), lib_path=Path(lib_folder))
 
     targets = []
     scripts = glob.glob(mpy_folder + "/ports/**/modules/*.py", recursive=True)

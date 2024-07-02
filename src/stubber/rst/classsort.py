@@ -4,10 +4,11 @@ note that this does not take multiple inheritance into account
 ref : https://stackoverflow.com/questions/34964878/python-generate-a-dictionarytree-from-a-list-of-tuples/35049729#35049729
 with modification 
 """
+
 import re
 from typing import List
 
-from loguru import logger as log
+from mpflash.logger import log
 
 __all__ = ["sort_classes"]
 RE_CLASS = re.compile(r"class\s+(?P<class>\w+)(\((?P<parent>\w*)\))?")

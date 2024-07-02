@@ -3,7 +3,7 @@
 from typing import List, Union
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 from tabulate import tabulate
 
 from stubber.commands.cli import stubber_cli

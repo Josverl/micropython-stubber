@@ -1,6 +1,6 @@
 {
     "python.analysis.autoSearchPaths": true,
-    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticMode": "openFilesOnly",
     // "python.analysis.logLevel": "Trace",
     //////////////////////////////////////////////////////////////
     "python.testing.pytestEnabled": true,

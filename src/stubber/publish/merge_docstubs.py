@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional, Union
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
@@ -49,7 +49,9 @@ def merge_all_docstubs(
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
-            candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
+            candidate["board"] = default_board(
+                port=candidate["port"], version=candidate["version"]
+            )
         # check if we have MCU stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 
 import stubber.utils as utils
 from stubber.codemod.enrich import enrich_folder
@@ -20,7 +20,10 @@ from .cli import stubber_cli
 ##########################################################################################
 
 
-@stubber_cli.command(name="get-frozen")
+@stubber_cli.command(
+    name="get-frozen",
+    aliases=["get-frozen-stubs", "frozen"],
+)
 @click.option(
     "--stub-folder",
     "-stubs",

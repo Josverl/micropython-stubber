@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import mypy.stubgen as stubgen
-from loguru import logger as log
+from mpflash.logger import log
 from mypy.errors import CompileError
 
 # default stubgen options

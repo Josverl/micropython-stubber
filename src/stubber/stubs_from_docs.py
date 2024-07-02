@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber import utils
 from stubber.rst import DOCSTUB_SKIP, U_MODULES

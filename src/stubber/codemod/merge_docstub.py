@@ -13,7 +13,7 @@ import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
 from libcst.helpers.module import insert_header_comments
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.cst_transformer import (
     MODULE_KEY,

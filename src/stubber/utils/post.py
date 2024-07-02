@@ -1,11 +1,12 @@
 """Pre/Post Processing for createstubs.py"""
+
 import subprocess
 import sys
 from pathlib import Path
 from typing import List
 
 import autoflake
-from loguru import logger as log
+from mpflash.logger import log
 
 from .stubmaker import generate_pyi_files
 

@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber import utils
 from stubber.tools.manifestfile import MODE_FREEZE, ManifestFile, ManifestFileError, ManifestOutput
@@ -51,7 +51,9 @@ def make_path_vars(
     }
 
 
-def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path, mpy_lib_path: Path, version: str):
+def freeze_one_manifest_2(
+    manifest: Path, frozen_stub_path: Path, mpy_path: Path, mpy_lib_path: Path, version: str
+):
     # apparently there can be multiple manifest files to a board ?
     # save cwd for 'misbehaving' older esp8266 manifest files
     cwd = Path.cwd()
@@ -61,7 +63,9 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
 
     log.info("port-board: {}".format((port + "-" + board).rstrip("-")))
 
-    path_vars = make_path_vars(port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
+    path_vars = make_path_vars(
+        port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path
+    )
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
     try:
         # assume manifestneeds to be run from the port's folder
@@ -75,11 +79,18 @@ def freeze_one_manifest_2(manifest: Path, frozen_stub_path: Path, mpy_path: Path
     # restore working directory
     os.chdir(cwd)
     # save the frozen files to the stubs
-    copy_frozen_to_stubs(frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path)
+    copy_frozen_to_stubs(
+        frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path
+    )
 
 
 def copy_frozen_to_stubs(
-    stub_path: Path, port: str, board: str, files: List[ManifestOutput], version: str, mpy_path: Path
+    stub_path: Path,
+    port: str,
+    board: str,
+    files: List[ManifestOutput],
+    version: str,
+    mpy_path: Path,
 ):
     """
     copy the frozen files from the manifest to the stubs folder
@@ -110,4 +121,6 @@ def copy_frozen_to_stubs(
 
     # make a module manifest
     FAMILY = "micropython"
-    utils.make_manifest(freeze_path, FAMILY, port=port, board=board, version=version, stubtype="frozen")
+    utils.make_manifest(
+        freeze_path, FAMILY, port=port, board=board, version=version, stubtype="frozen"
+    )

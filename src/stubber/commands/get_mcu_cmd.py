@@ -5,8 +5,9 @@
 ##########################################################################################
 
 
+from typing import List
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.bulk.mcu_stubber import stub_connected_mcus
 from stubber.utils.config import CONFIG
@@ -18,7 +19,10 @@ from .cli import stubber_cli
 #########################################################################################
 
 
-@stubber_cli.command(name="get-mcu-stubs")
+@stubber_cli.command(
+    name="get-mcu-stubs",
+    aliases=["get-mcu-stubs", "mcu-stubs", "mcu"],
+)
 @click.option(
     "--variant",
     # "-v",
@@ -35,22 +39,50 @@ from .cli import stubber_cli
     show_default=True,
     help="Python source or pre-compiled.",
 )
-@click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
 @click.option(
-    "--reset/--no-reset",
+    "--serial",
+    "--serial-port",
+    "-s",
+    "serial",
+    default=["*"],
+    multiple=True,
+    show_default=True,
+    help="Which serial port(s) to list. ",
+    metavar="SERIALPORT",
+)
+@click.option(
+    "--ignore",
+    "-i",
+    is_eager=True,
+    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
+    multiple=True,
+    default=[],
+    envvar="MPFLASH_IGNORE",
+    show_default=True,
+    metavar="SERIALPORT",
+)
+@click.option(
+    "--bluetooth/--no-bluetooth",
+    "-b/-nb",
+    is_flag=True,
     default=False,
     show_default=True,
-    help="Reset the board before running createstubs.",
+    help="""Include bluetooth ports in the list""",
 )
-@click.option(
-    "--github/--local",
-    default=True,
-    show_default=True,
-    help="where to install the board files from. local is intended for development.",
-)
-def cli_create_mcu_stubs(variant: str, format: str, debug: bool, reset: bool, github: bool) -> int:
+@click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
+def cli_create_mcu_stubs(
+    variant: str,
+    format: str,
+    debug: bool,
+    serial: List[str],
+    ignore: List[str],
+    bluetooth: bool,
+) -> int:
     """Run createstubs on one or more MCUs, and add the stubs to the micropython-stub repo."""
     # check if all repos have been cloned
+    serial = list(serial)
+    ignore = list(ignore)
+
     for repo in CONFIG.repos:
         if not repo.exists():
             log.error(
@@ -58,4 +90,13 @@ def cli_create_mcu_stubs(variant: str, format: str, debug: bool, reset: bool, gi
             )
             exit(1)
 
-    exit(stub_connected_mcus(variant=variant, format=format, debug=debug))
+    exit(
+        stub_connected_mcus(
+            variant=variant,
+            format=format,
+            debug=debug,
+            serial=serial,
+            ignore=ignore,
+            bluetooth=bluetooth,
+        )
+    )

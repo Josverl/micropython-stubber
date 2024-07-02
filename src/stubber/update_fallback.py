@@ -7,7 +7,7 @@
 # from pathlib import Path
 # from typing import List, Optional, Tuple
 
-# from loguru import logger as log
+# from mpflash.logger import log
 
 # from mpflash.versions import V_PREVIEW
 

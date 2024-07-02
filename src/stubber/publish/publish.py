@@ -6,7 +6,7 @@ prepare a set of stub files for publishing to PyPi
 
 from typing import Any, Dict, List, Optional, Union
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from mpflash.versions import V_PREVIEW
 from stubber.publish.candidates import board_candidates, filter_list

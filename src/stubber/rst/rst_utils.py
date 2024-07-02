@@ -32,13 +32,14 @@ to do:
         https://docs.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources
     - 
 """
+
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/Ni8g2z/2
 
 import re
 from typing import Dict, List, Optional, Union
 
-from loguru import logger as log
+from mpflash.logger import log
 
 from .lookup import LOOKUP_LIST, NONE_VERBS, TYPING_IMPORT
 

@@ -20,7 +20,7 @@ except ModuleNotFoundError:
 from typing import NewType
 
 import tomli_w
-from loguru import logger as log
+from mpflash.logger import log
 from packaging.version import Version, parse
 from pysondb import PysonDB
 
@@ -125,9 +125,15 @@ class VersionedPackage(object):
         parts = describe.split("-", 3)
         ver = parts[0]
         if len(parts) > 1:
-            rc = parts[1] if parts[1].isdigit() else parts[2] if len(parts) > 2 and parts[2].isdigit() else 1
+            rc = (
+                parts[1]
+                if parts[1].isdigit()
+                else parts[2] if len(parts) > 2 and parts[2].isdigit() else 1
+            )
         rc = int(rc)
-        base = bump_version(Version(ver), minor_bump=True) if parts[1] != V_PREVIEW else Version(ver)
+        base = (
+            bump_version(Version(ver), minor_bump=True) if parts[1] != V_PREVIEW else Version(ver)
+        )
         return str(bump_version(base, rc=rc))
         # raise ValueError("cannot determine next version number micropython")
 
@@ -304,7 +310,9 @@ class Builder(VersionedPackage):
             # Check if all stub source folders exist
             for stub_type, src_path in self.stub_sources:
                 if not (CONFIG.stub_path / src_path).exists():
-                    raise FileNotFoundError(f"Could not find stub source folder {CONFIG.stub_path / src_path}")
+                    raise FileNotFoundError(
+                        f"Could not find stub source folder {CONFIG.stub_path / src_path}"
+                    )
 
             # 1 - Copy  the stubs to the package, directly in the package folder (no folders)
             # for stub_type, fw_path in [s for s in self.stub_sources]:
@@ -315,7 +323,9 @@ class Builder(VersionedPackage):
                     self.copy_folder(stub_type, src_path)
                 except OSError as e:
                     if stub_type != StubSource.FROZEN:
-                        raise FileNotFoundError(f"Could not find stub source folder {src_path}") from e
+                        raise FileNotFoundError(
+                            f"Could not find stub source folder {src_path}"
+                        ) from e
                     else:
                         log.debug(f"Error copying stubs from : {CONFIG.stub_path / src_path}, {e}")
         finally:
@@ -707,7 +717,8 @@ class PoetryBuilder(Builder):
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
         _pyproject["tool"]["poetry"]["packages"] = [
-            {"include": p.relative_to(self.package_path).as_posix()} for p in sorted((self.package_path).rglob("*.pyi"))
+            {"include": p.relative_to(self.package_path).as_posix()}
+            for p in sorted((self.package_path).rglob("*.pyi"))
         ]
         # write out the pyproject.toml file
         self.pyproject = _pyproject
@@ -851,7 +862,9 @@ class StubPackage(PoetryBuilder):
         # check if the sources exist
         ok = self.are_package_sources_available()
         if not ok:
-            log.debug(f"{self.package_name}: skipping as one or more source stub folders are missing")
+            log.debug(
+                f"{self.package_name}: skipping as one or more source stub folders are missing"
+            )
             self.status["error"] = "Skipped, stub folder(s) missing"
             shutil.rmtree(self.package_path.as_posix())
             self._publish = False  # type: ignore
@@ -873,7 +886,9 @@ class StubPackage(PoetryBuilder):
         self,
         production: bool,  # PyPI or Test-PyPi - USED TO FIND THE NEXT VERSION NUMBER
         force=False,  # BUILD even if no changes
-    ) -> bool:  # sourcery skip: default-mutable-arg, extract-duplicate-method, require-parameter-annotation
+    ) -> (
+        bool
+    ):  # sourcery skip: default-mutable-arg, extract-duplicate-method, require-parameter-annotation
         """
         Build a package
         look up the previous package version in the dabase
@@ -899,14 +914,18 @@ class StubPackage(PoetryBuilder):
             if force:
                 log.info(f"Force build: {self.package_name} {self.pkg_version} ")
             else:
-                log.info(f"Found changes to package sources: {self.package_name} {self.pkg_version} ")
+                log.info(
+                    f"Found changes to package sources: {self.package_name} {self.pkg_version} "
+                )
                 log.trace(f"Old hash {self.hash} != New hash {self.calculate_hash()}")
             #  Build the distribution files
             old_ver = self.pkg_version
             self.pkg_version = self.next_package_version(production)
             self.status["version"] = self.pkg_version
             # to get the next version
-            log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}")
+            log.debug(
+                f"{self.package_name}: bump version for {old_ver} to {self.pkg_version } {'production' if production else 'test'}"
+            )
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
             if self.poetry_build():
@@ -959,7 +978,9 @@ class StubPackage(PoetryBuilder):
         # Publish the package to PyPi, Test-PyPi or Github
         if self.is_changed():
             if self.mpy_version in SET_PREVIEW and production and not force:
-                log.warning("version: `latest` package will only be available on Github, and not published to PyPi.")
+                log.warning(
+                    "version: `latest` package will only be available on Github, and not published to PyPi."
+                )
                 self.status["result"] = "Published to GitHub"
             else:
                 return self.publish_distribution(dry_run, production, db)
@@ -988,7 +1009,9 @@ class StubPackage(PoetryBuilder):
         if not dry_run:
             pub_ok = self.poetry_publish(production=production)
         else:
-            log.warning(f"{self.package_name}: Dry run, not publishing to {'' if production else 'Test-'}PyPi")
+            log.warning(
+                f"{self.package_name}: Dry run, not publishing to {'' if production else 'Test-'}PyPi"
+            )
             pub_ok = True
         if not pub_ok:
             log.warning(f"{self.package_name}: Publish failed for {self.pkg_version}")

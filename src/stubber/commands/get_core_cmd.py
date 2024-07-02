@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 
 import stubber.get_cpython as get_cpython
 import stubber.utils as utils

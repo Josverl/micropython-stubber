@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Union
 
 import rich_click as click
-from loguru import logger as log
+from mpflash.logger import log
 
 from stubber.codemod.enrich import enrich_folder
 from stubber.utils.config import CONFIG
