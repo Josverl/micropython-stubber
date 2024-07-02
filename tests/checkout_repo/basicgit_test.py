@@ -52,7 +52,7 @@ def test_git_clone_fast(mocker: MockerFixture, tmp_path):
     )
 
     mock: MagicMock = mocker.MagicMock(return_value=m_result)
-    mocker.patch("stubber.basicgit.subprocess.run", mock)
+    mocker.patch("mpflash.basicgit.subprocess.run", mock)
 
     result = git.clone("https://github.com/micropython/micropython.git", tmp_path / "micropython", shallow=False)
     assert result == True
@@ -170,7 +170,7 @@ def test_fetch():
 def test_run_git_fails(mocker: MockerFixture):
     "test what happens if _run_git fails"
 
-    mock_run_git = mocker.patch("stubber.basicgit._run_local_git", autospec=True, return_value=None)
+    mock_run_git = mocker.patch("mpflash.basicgit._run_local_git", autospec=True, return_value=None)
 
     # fail to fetch
     r = git.fetch(repo=".")
