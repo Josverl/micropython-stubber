@@ -120,7 +120,7 @@ for more info see [**Renaming a branch**](https://docs.github.com/en/repositorie
 
 ## Licensing 
 
-MicroPython-Stubber is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
+Both `MicroPython-Stubber` and `mpflash` are licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
 
 
 # Contributions
