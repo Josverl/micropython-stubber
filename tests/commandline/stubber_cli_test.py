@@ -161,33 +161,6 @@ def test_cmd_switch_version(mocker: MockerFixture, version: str):
 
 
 ##########################################################################################
-# minify
-##########################################################################################
-# @pytest.mark.mocked
-# def test_cmd_minify(mocker: MockerFixture):
-#     # check basic command line sanity check
-#     runner = CliRunner()
-#     mock_minify = mocker.MagicMock(return_value=0)
-#     mocker.patch("stubber.commands.minify_cmd.minify", mock_minify)
-
-#     result = runner.invoke(stubber.stubber_cli, ["minify"])
-#     assert result.exit_code == 0
-#     mock_minify.assert_called_once()
-
-
-# @pytest.mark.mocked
-# def test_cmd_minify_all(mocker: MockerFixture):
-#     # check basic command line sanity check
-#     runner = CliRunner()
-#     mock_minify = mocker.MagicMock(return_value=0)
-#     mocker.patch("stubber.commands.minify_cmd.minify", mock_minify)
-
-#     result = runner.invoke(stubber.stubber_cli, ["minify", "--all"])
-#     assert result.exit_code == 0
-#     assert mock_minify.call_count == 3
-
-
-##########################################################################################
 # stub
 ##########################################################################################
 @pytest.mark.mocked
