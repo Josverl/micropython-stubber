@@ -74,6 +74,10 @@ def cli_list_mcus(serial: List[str], ignore: List[str], bluetooth: bool, as_json
 
     conn_mcus = list_mcus(ignore=ignore, include=serial, bluetooth=bluetooth)
     if as_json:
+        # remove the path and firmware attibutes from the json output as they are always empty
+        for mcu in conn_mcus:
+            del mcu.path
+            del mcu.firmware
         print(json.dumps([mcu.__dict__ for mcu in conn_mcus], indent=4))
         progress = False
     if progress:

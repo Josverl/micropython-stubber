@@ -4,9 +4,8 @@ from rich import print
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Column
 
+from mpflash.common import filtered_comports
 from mpflash.mpremoteboard import MPRemoteBoard
-
-from .common import filtered_comports
 
 
 def connected_ports_boards(*, include: List[str], ignore: List[str]) -> Tuple[List[str], List[str], List[MPRemoteBoard]]:
@@ -32,7 +31,7 @@ rp_text = TextColumn("{task.description} {task.fields[device]}", table_column=Co
 rp_bar = BarColumn(bar_width=None, table_column=Column())
 
 
-def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False):
+def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False) -> List[MPRemoteBoard]:
     """
     Retrieves information about connected microcontroller boards.
 
