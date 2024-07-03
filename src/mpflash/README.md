@@ -36,6 +36,32 @@ You can use mpflash to perform various operations on your MicroPython boards. He
 | `mpflash download` | Download the MicroPython firmware(s) for the connected board(s) |
 | `mpflash flash` | Flash the latest stable firmware to the connected board(s) |
 
+## selecting or ignoring specific serial ports
+
+You can use the `--serial` option to select a specific serial port to flash, or the `--ignore` option to ignore a specific serial port.
+both options can be specified multiple times 
+Both can be globs (e.g. COM*) or exact port names (e.g. COM1)
+in addition there is a --bluetooth option to simplify ignoring bluetooth ports
+
+```
+--serial,--serial-port      -s      SERIALPORT  Serial port(s) (or globs) to list. [default: *]                                                                                                                                                                           > > --ignore                    -i      SERIALPORT  Serial port(s) (or globs) to ignore. Defaults to MPFLASH_IGNORE.                                                                                                                                                          │
+--bluetooth/--no-bluetooth  -b/-nb              Include bluetooth ports in the list [default: no-bluetooth] 
+```
+
+## Distinguishing similar boards 
+The `mpflash list` command will list all connected boards, but sometimes you have multiple boards of the same type connected.
+To help you identify the boards, you can add a board_info.toml file to the top/default folder for the board.
+This file can contain a description of the board, which will be shown in the list and json output.
+```toml
+description = "Blue Norwegian actuator"
+```
+
+If you want the board to be ignored by mpflash, you can add the following to the board_info.toml file:
+```toml
+[mpflash]
+ignore = true
+```
+
 
 ## Linux permissions to access usb devices 
 In order to flash the firmware to the board, you need to have the correct permissions to access the USB devices.

@@ -58,7 +58,7 @@ from .download import download
     default=["*"],
     show_default=True,
     multiple=True,
-    help="Which serial port(s) to flash",
+    help="Which serial port(s) (or globs) to flash",
     metavar="SERIALPORT",
 )
 @click.option(

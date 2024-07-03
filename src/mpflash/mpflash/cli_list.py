@@ -32,14 +32,14 @@ from .logger import make_quiet
     default=["*"],
     multiple=True,
     show_default=True,
-    help="Which serial port(s) to list. ",
+    help="Serial port(s) (or globs) to list. ",
     metavar="SERIALPORT",
 )
 @click.option(
     "--ignore",
     "-i",
     is_eager=True,
-    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
+    help="Serial port(s) (or globs) to ignore. Defaults to MPFLASH_IGNORE.",
     multiple=True,
     default=[],
     envvar="MPFLASH_IGNORE",
@@ -73,6 +73,8 @@ def cli_list_mcus(serial: List[str], ignore: List[str], bluetooth: bool, as_json
     # TODO? Ask user to select a serialport if [?] is given ?
 
     conn_mcus = list_mcus(ignore=ignore, include=serial, bluetooth=bluetooth)
+    # ignore boards that have the [micropython-stubber] ignore flag set
+    conn_mcus = [item for item in conn_mcus if not (item.toml.get("mpflash", {}).get("ignore", False))]    
     if as_json:
         # remove the path and firmware attibutes from the json output as they are always empty
         for mcu in conn_mcus:

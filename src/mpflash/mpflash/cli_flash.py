@@ -53,7 +53,7 @@ from mpflash.versions import clean_version
     default=["*"],
     multiple=True,
     show_default=True,
-    help="Which serial port(s) to flash",
+    help="Which serial port(s) (or globs) to flash",
     metavar="SERIALPORT",
 )
 @click.option(

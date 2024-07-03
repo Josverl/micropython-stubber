@@ -122,7 +122,8 @@ def filtered_comports(
     bluetooth: bool = False,
 ) -> List[ListPortInfo]:  # sourcery skip: assign-if-exp
     """
-    Get a list of filtered comports.
+    Get a list of filtered comports using the include and ignore lists.
+    both can be globs (e.g. COM*) or exact port names (e.g. COM1)
     """
     if not ignore:
         ignore = []
