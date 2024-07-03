@@ -5,6 +5,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
+import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tenacity
@@ -12,10 +13,10 @@ import tenacity
 from mpflash.basicgit import get_git_describe
 from stubber.publish.helpers import get_module_docstring
 
-try:
-    import tomllib  # type: ignore
-except ModuleNotFoundError:
-    import tomli as tomllib  # type: ignore
+if sys.version_info >= (3, 11):
+    import tomllib # type: ignore
+else:
+    import tomli as tomllib # type: ignore
 
 from typing import NewType
 

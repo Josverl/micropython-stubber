@@ -38,11 +38,25 @@ def mcu_table(
     - Serial    Yes         Yes
     - Family    abbrv.      Yes
     - Port      -           yes
-    - Board     Yes         Yes     BOARD_ID and Description
+    - Board     Yes         Yes     BOARD_ID and Description, and the description from board_info.toml
     - CPU       -           Yes
     - Version   Yes         Yes
     - Build     *           *       only if any of the mcus have a build
+    - Location  -           -       only if --usb is given
     """
+    # refresh if requested
+    if refresh:
+        for mcu in track(
+            conn_mcus,
+            description="Updating board info",
+            transient=True,
+            show_speed=False,
+            refresh_per_second=1,
+        ):
+            try:
+                mcu.get_mcu_info()
+            except ConnectionError:
+                continue
     table = Table(
         title=title,
         title_style="magenta",
@@ -50,6 +64,7 @@ def mcu_table(
         collapse_padding=True,
         padding=(0, 0),
     )
+    # Build the table
     # check if the terminal is wide enough to show all columns or if we need to collapse some
     is_wide = console.width > 99
     needs_build = any(mcu.build for mcu in conn_mcus)
@@ -67,19 +82,11 @@ def mcu_table(
         table.add_column("Build" if is_wide else "Bld", justify="right")
     if config.usb:
         table.add_column("Location", overflow="fold", max_width=40)
-    for mcu in track(
-        conn_mcus,
-        description="Updating board info",
-        transient=True,
-        show_speed=False,
-        refresh_per_second=1,
-    ):
-        if refresh:
-            try:
-                mcu.get_mcu_info()
-            except ConnectionError:
-                continue
+    # fill the table with the data
+    for mcu in conn_mcus:
         description = f"[italic bright_cyan]{mcu.description}" if mcu.description else ""
+        if "description" in mcu.toml:
+            description += f"\n[italic bright_green]{mcu.toml['description']}"
         row = [
             mcu.serialport.replace("/dev/", ""),
             abbrv_family(mcu.family, is_wide),

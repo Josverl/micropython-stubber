@@ -4,21 +4,18 @@ from typing import List
 import rich_click as click
 from loguru import logger as log
 
-from mpflash.common import BootloaderMethod
+from mpflash.ask_input import ask_missing_params
+from mpflash.cli_download import connected_ports_boards
+from mpflash.cli_group import cli
+from mpflash.cli_list import show_mcus
+from mpflash.common import BootloaderMethod, FlashParams, Params
+from mpflash.config import config
 from mpflash.errors import MPFlashError
+from mpflash.flash import flash_list
+from mpflash.flash.worklist import WorkList, full_auto_worklist, manual_worklist, single_auto_worklist
 from mpflash.mpboard_id import find_known_board
 from mpflash.mpremoteboard import MPRemoteBoard
 from mpflash.versions import clean_version
-
-from .ask_input import ask_missing_params
-from .cli_download import connected_ports_boards
-from .cli_group import cli
-from .cli_list import show_mcus
-from .common import FlashParams
-from .config import config
-from .flash import flash_list
-from .flash.worklist import (WorkList, full_auto_worklist, manual_worklist,
-                       single_auto_worklist)
 
 # #########################################################################################################
 # CLI
@@ -122,7 +119,7 @@ def cli_flash_board(**kwargs) -> int:
     params = FlashParams(**kwargs)
     params.versions = list(params.versions)
     params.ports = list(params.ports)
-    params.boards = list(params.boards) 
+    params.boards = list(params.boards)
     params.serial = list(params.serial)
     params.ignore = list(params.ignore)
     params.bootloader = BootloaderMethod(params.bootloader)
@@ -203,7 +200,7 @@ def cli_flash_board(**kwargs) -> int:
         return 1
 
 
-def resolve_board_ids(params):
+def resolve_board_ids(params: Params):
     """Resolve board descriptions to board_id, and remove empty strings from list of boards"""
     for board_id in params.boards:
         if board_id == "":

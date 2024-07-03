@@ -43,6 +43,8 @@ exclude = [
 
 [tool.poetry.scripts]
 stubber = "stubber.stubber:stubber_cli"
+mpflash = "mpflash.cli_main:mpflash"
+mpremote = "mpremote.main:main"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
@@ -143,7 +145,7 @@ exclude = [
 
     "**/all-stubs",
     "src/stubber/board/stubs",
-    "**/.venv"
+    "**/.venv",
 ]
 ignore = [
     "tests/mocks",
@@ -221,12 +223,12 @@ minversion = "7.0"
 python_functions = ["test_", "*_test"]
 python_files = ["test_*.py", "*_test.py"]
 testpaths = [
-    "tests", 
-    "src/stubber", 
-    "src/mpflash", 
-    "repos/micropython-stubs/tests", 
+    "tests",
+    "src/stubber",
+    "src/mpflash",
+    "repos/micropython-stubs/tests",
     "modules/**/tests",
-    ]
+]
 norecursedirs = [
     ".*",
     ".*/*",
@@ -278,10 +280,7 @@ markers = [
 [tool.coverage.run]
 parallel = false
 branch = true
-source = [
-    "src/stubber", 
-    "src/mpflash", 
-]
+source = ["src/stubber", "src/mpflash"]
 omit = [
     # helper files in board
     "*/boot.py",

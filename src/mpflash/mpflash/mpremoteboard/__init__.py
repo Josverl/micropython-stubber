@@ -8,16 +8,20 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import serial.tools.list_ports
-from loguru import logger as log
 from rich.progress import track
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from mpflash.errors import MPFlashError
+from mpflash.logger import log
 from mpflash.mpboard_id.board_id import find_board_id_by_description
 from mpflash.mpremoteboard.runner import run
 
+if sys.version_info >= (3, 11):
+    import tomllib  # type: ignore
+else:
+    import tomli as tomllib  # type: ignore
+
 ###############################################################################################
-# TODO : make this a bit nicer
 HERE = Path(__file__).parent
 
 OK = 0
@@ -52,6 +56,7 @@ class MPRemoteBoard:
         self.mpy = ""
         self.build = ""
         self.location = location
+        self.toml = {}
         if update:
             self.get_mcu_info()
 
@@ -115,9 +120,9 @@ class MPRemoteBoard:
         if rc != OK:
             raise ConnectionError(f"Failed to get mcu_info for {self.serialport}")
         # Ok we have the info, now parse it
-        s = result[0].strip()
-        if s.startswith("{") and s.endswith("}"):
-            info = eval(s)
+        raw_info = result[0].strip()
+        if raw_info.startswith("{") and raw_info.endswith("}"):
+            info = eval(raw_info)
             self.family = info["family"]
             self.version = info["version"]
             self.build = info["build"]
@@ -132,6 +137,35 @@ class MPRemoteBoard:
                 self.board = board_name
             else:
                 self.board = "UNKNOWN_BOARD"
+            # get the board_info.toml
+            self.get_board_info_toml()
+
+    @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(0.2), reraise=True)  # type: ignore ## retry_error_cls=ConnectionError,
+    def get_board_info_toml(self, timeout: int = 1):
+        """
+        Reads the content of the board_info.toml file from the connected board,
+        and adds that to the board object.
+
+        Parameters:
+        - timeout (int): The timeout value in seconds.
+
+        Raises:
+        - ConnectionError: If failed to communicate with the serial port.
+        """
+        rc, result = self.run_command(
+            ["cat", "board_info.toml"],
+            no_info=True,
+            timeout=timeout,
+            log_errors=False,
+        )
+        # this is optional - so only parse if we got the file
+        self.toml = {}
+        if rc == OK:
+            try:
+                # Ok we have the info, now parse it
+                self.toml = tomllib.loads("".join(result))
+            except Exception as e:
+                log.error(f"Failed to parse board_info.toml: {e}")
 
     def disconnect(self) -> bool:
         """
