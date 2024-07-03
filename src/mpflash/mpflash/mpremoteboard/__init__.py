@@ -116,6 +116,7 @@ class MPRemoteBoard:
             ["run", str(HERE / "mpy_fw_info.py")],
             no_info=True,
             timeout=timeout,
+            resume=True,  # Avoid restarts
         )
         if rc != OK:
             raise ConnectionError(f"Failed to get mcu_info for {self.serialport}")
@@ -139,6 +140,8 @@ class MPRemoteBoard:
                 self.board = "UNKNOWN_BOARD"
             # get the board_info.toml
             self.get_board_info_toml()
+        # now we know the board is connected
+        self.connected = True
 
     @retry(stop=stop_after_attempt(RETRIES), wait=wait_fixed(0.2), reraise=True)  # type: ignore ## retry_error_cls=ConnectionError,
     def get_board_info_toml(self, timeout: int = 1):
@@ -152,20 +155,26 @@ class MPRemoteBoard:
         Raises:
         - ConnectionError: If failed to communicate with the serial port.
         """
-        rc, result = self.run_command(
-            ["cat", "board_info.toml"],
-            no_info=True,
-            timeout=timeout,
-            log_errors=False,
-        )
+        try:
+            rc, result = self.run_command(
+                ["cat", ":board_info.toml"],
+                no_info=True,
+                timeout=timeout,
+                log_errors=False,
+            )
+        except Exception as e:
+            raise ConnectionError(f"Failed to get board_info.toml for {self.serialport}: {e}")
         # this is optional - so only parse if we got the file
         self.toml = {}
-        if rc == OK:
+        if rc in [OK]:  # sometimes we get an -9 ???
             try:
                 # Ok we have the info, now parse it
                 self.toml = tomllib.loads("".join(result))
+                log.debug(f"board_info.toml: {self.toml}")
             except Exception as e:
                 log.error(f"Failed to parse board_info.toml: {e}")
+        else:
+            log.trace(f"Failed to read board_info.toml: {result}")
 
     def disconnect(self) -> bool:
         """
@@ -193,6 +202,7 @@ class MPRemoteBoard:
         log_errors: bool = True,
         no_info: bool = False,
         timeout: int = 60,
+        resume: bool = False,
         **kwargs,
     ):
         """
@@ -213,7 +223,7 @@ class MPRemoteBoard:
         if self.serialport:
             prefix += ["connect", self.serialport]
         # if connected add resume to keep state between commands
-        if self.connected:
+        if self.connected or resume:
             prefix += ["resume"]
         cmd = prefix + cmd
         log.debug(" ".join(cmd))

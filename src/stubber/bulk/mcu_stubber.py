@@ -11,15 +11,14 @@ from pathlib import Path
 from tempfile import mkdtemp
 from typing import List, Optional, Tuple
 
-
 from rich.console import Console
 from rich.table import Table
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
 from mpflash.connected import list_mcus
 from mpflash.list import show_mcus
 from mpflash.logger import log
+from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
 from stubber import utils
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.pathnames import board_folder_name
@@ -148,9 +147,7 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
         mcu.run_command("reset", timeout=5)
         time.sleep(2)
 
-    log.info(
-        f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}"
-    )
+    log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
     cmd = build_cmd(dest, variant)
     log.info(f"Running : mpremote {' '.join(cmd)}")
     mcu.run_command.retry.wait = wait_fixed(15)
@@ -160,13 +157,7 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
     timeout = 90 if mcu.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = mcu.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
-    if (
-        rc != OK
-        and out
-        and ":" in out[-1]
-        and not out[-1].startswith("INFO")
-        and not out[-1].startswith("WARN")
-    ):
+    if rc != OK and out and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
         log.warning(f"createstubs: {out[-1]}")
         raise RuntimeError(out[-1]) from eval(out[-1].split(":")[0])
 
@@ -298,11 +289,7 @@ def copy_scripts_to_board(mcu: MPRemoteBoard, variant: Variant, form: Form):
 
 
 def get_stubfolder(out: List[str]):
-    return (
-        lines[-1].split("/remote/")[-1].strip()
-        if (lines := [l for l in out if l.startswith("INFO  : Path: ")])
-        else ""
-    )
+    return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("INFO  : Path: ")]) else ""
 
 
 def set_loglevel(verbose: int) -> str:
@@ -319,9 +306,7 @@ def set_loglevel(verbose: int) -> str:
     else:
         format_str = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level: <8}</level>|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
-    log.add(
-        sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str
-    )
+    log.add(sys.stderr, level=level, backtrace=True, diagnose=True, colorize=True, format=format_str)
     # log.info(f"micropython-stubber {__version__}")
     return level
 
@@ -377,6 +362,8 @@ def stub_connected_mcus(
 
     # scan boards and just work with the ones that respond with understandable data
     connected_mcus = list_mcus(ignore=ignore, include=serial, bluetooth=bluetooth)
+    # ignore boards that have the [micropython-stubber] ignore flag set
+    connected_mcus = [item for item in connected_mcus if not (item.toml.get("micropython-stubber", {}).get("ignore", False))]
 
     if not connected_mcus:
         log.error("No micropython boards were found")
@@ -386,9 +373,7 @@ def stub_connected_mcus(
 
     # scan boards and generate stubs
     for board in connected_mcus:
-        log.info(
-            f"Connecting using {board.serialport} to {board.port} {board.board} {board.version}: {board.description}"
-        )
+        log.info(f"Connecting using {board.serialport} to {board.port} {board.board} {board.version}: {board.description}")
         # remove the modulelist.done file before starting createstubs on each board
         (temp_path / "modulelist.done").unlink(missing_ok=True)
 

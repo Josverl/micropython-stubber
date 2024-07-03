@@ -51,7 +51,7 @@ python = ">=3.9,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.12" } # no support for 3.12 yet
 requests = "^2.32.3"
 mypy = "1.9.0"
-mpflash = "0.9.1.post2"
+mpflash = "^1.0.0"
 mpremote = "^1.23.0"
 # others
 autoflake = ">=1.7,<3.0"
