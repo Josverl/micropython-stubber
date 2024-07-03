@@ -47,14 +47,14 @@ from .cli import stubber_cli
     default=["*"],
     multiple=True,
     show_default=True,
-    help="Which serial port(s) to list. ",
+    help="Which serial port(s) (or globs) to list. ",
     metavar="SERIALPORT",
 )
 @click.option(
     "--ignore",
     "-i",
     is_eager=True,
-    help="Serial port(s) to ignore. Defaults to MPFLASH_IGNORE.",
+    help="Serial port(s) (or globs) to ignore. Defaults to MPFLASH_IGNORE.",
     multiple=True,
     default=[],
     envvar="MPFLASH_IGNORE",
