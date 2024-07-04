@@ -75,32 +75,18 @@
             "type": "shell",
             "command": "autoflake src -r --in-place --remove-all-unused-imports --ignore-init-module-import"
         },
-        {
-            "type": "austin",
-            "label": "Profile tests",
-            "command": [
-                "poetry",
-                "run"
-            ],
-            "args": [
-                "python",
-                "-m",
-                "pytest"
-            ]
-        },
-        {
-            "type": "austin",
-            "label": "Austin: stubber",
-            "detail": "Python Profiler",
-            "args": [
-                "stubber",
-                "-v",
-                "--help"
-                //     "get-docstubs",
-                //     "--version",
-                //     "preview"
-            ],
-            "problemMatcher": []
-        }
+        // {
+        //     "type": "austin",
+        //     "label": "Profile tests",
+        //     "command": [
+        //         "poetry",
+        //         "run"
+        //     ],
+        //     "args": [
+        //         "python",
+        //         "-m",
+        //         "pytest"
+        //     ]
+        // }
     ]
 }
