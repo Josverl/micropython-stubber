@@ -247,6 +247,7 @@ MODULE_GLUE = {
     #
     # "builtins": ["from stdlib.builtins import *"],  # integrate STDLIB
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
+    "espnow": ["from _espnow import ESPNowBase"],  # ESPNowBase is an undocumented base class
 }
 
 
