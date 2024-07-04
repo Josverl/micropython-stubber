@@ -1,4 +1,5 @@
 import fnmatch
+import glob
 import os
 import sys
 from dataclasses import dataclass, field
@@ -28,9 +29,7 @@ PORT_FWTYPES = {
 
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
-PAT_NO_ACCESS = (
-    "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
-)
+PAT_NO_ACCESS = "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
 
@@ -99,7 +98,6 @@ class BootloaderMethod(Enum):
     NONE = "none"
 
 
-
 @dataclass
 class FlashParams(Params):
     """Parameters for flashing a board"""
@@ -164,3 +162,30 @@ def filtered_comports(
         return sorted(comports, key=lambda x: int(x.device.split()[0][3:]) if x.device.split()[0][3:].isdigit() else x)
     # sort by device name
     return sorted(comports, key=lambda x: x.device)
+
+
+def find_serial_by_path(target_port: str):
+    """Find the symbolic link path of a serial port by its device path."""
+    # sourcery skip: use-next
+    
+    if os.name == "nt":
+        return None
+    # List all available serial ports
+    available_ports = list_ports.comports()
+    # Filter to get the device path of the target port
+    target_device_path = None
+    for port in available_ports:
+        if port.device == target_port:
+            target_device_path = port.device
+            break
+
+    if not target_device_path:
+        return None  # Target port not found among available ports
+
+    # Search for all symbolic links in /dev/serial/by-path/
+    for symlink in glob.glob("/dev/serial/by-path/*"):
+        # Resolve the symbolic link to its target
+        if os.path.realpath(symlink) == target_device_path:
+            return symlink  # Return the matching symlink path
+
+    return None  # Return None if no match is found

@@ -81,14 +81,14 @@ def mcu_table(
     if needs_build:
         table.add_column("Build" if is_wide else "Bld", justify="right")
     if config.usb:
-        table.add_column("Location", overflow="fold", max_width=40)
+        table.add_column("Location", overflow="fold", max_width=60)
     # fill the table with the data
     for mcu in conn_mcus:
         description = f"[italic bright_cyan]{mcu.description}" if mcu.description else ""
         if "description" in mcu.toml:
             description += f"\n[italic bright_green]{mcu.toml['description']}"
         row = [
-            mcu.serialport.replace("/dev/", ""),
+            mcu.serialport if is_wide else mcu.serialport.replace("/dev/tty", "tty"),
             abbrv_family(mcu.family, is_wide),
         ]
         if is_wide:

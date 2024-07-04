@@ -4,7 +4,7 @@ from rich import print
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Column
 
-from mpflash.common import filtered_comports
+from mpflash.common import filtered_comports, find_serial_by_path
 from mpflash.mpremoteboard import MPRemoteBoard
 
 
@@ -47,7 +47,13 @@ def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False)
         include=include,
         bluetooth=bluetooth,
     )
-    conn_mcus = [MPRemoteBoard(c.device, location=c.location or "?") for c in comports]
+    connected_mcus = [
+        MPRemoteBoard(
+            c.device,
+            location=find_serial_by_path(c.device) or c.location or "?",
+        )
+        for c in comports
+    ]
 
     # a lot of boilerplate to show a progress bar with the comport currently scanned
     # low update rate to facilitate screen readers/narration
@@ -63,8 +69,8 @@ def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False)
         progress.tasks[tsk_scan].visible = True
         progress.start_task(tsk_scan)
         try:
-            for mcu in conn_mcus:
-                progress.update(tsk_scan, device=mcu.serialport.replace("/dev/", ""))
+            for mcu in connected_mcus:
+                progress.update(tsk_scan, device=mcu.serialport.replace("/dev/tty", "tty"))
                 try:
                     mcu.get_mcu_info()
                 except ConnectionError as e:
@@ -74,4 +80,4 @@ def list_mcus(*, ignore: List[str], include: List[str], bluetooth: bool = False)
             # transient
             progress.stop_task(tsk_scan)
             progress.tasks[tsk_scan].visible = False
-    return conn_mcus
+    return connected_mcus
