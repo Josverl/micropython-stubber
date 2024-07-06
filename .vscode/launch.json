@@ -5,26 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Pytest --collect-only (debug)",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                ".",
-                "--collect-only",
-                "--capture=no",
-            ],
-            "cwd": "${workspaceFolder}/snippets",
-            "justMyCode": false
-        },
-        {
-            "name": "Python: file as Module",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "mpflash.mpboard_id.${fileBasenameNoExtension}",
-            "justMyCode": false
-        },
-        {
             "name": "CLI: mpflash",
             "type": "debugpy",
             "request": "launch",
@@ -51,19 +31,6 @@
                 // "v1.22.2",
                 // "--port",
                 // "samd",
-            ]
-        },
-        {
-            "name": "mpremote",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "mpremote",
-            "justMyCode": false,
-            "cwd": "${workspaceFolder}",
-            "args": [
-                "resume",
-                "exec",
-                "print(42)",
             ]
         },
         {
@@ -112,6 +79,39 @@
                 // "--force",
                 // "clone"
                 // "${input:cmdlineParams}"
+            ]
+        },
+        {
+            "name": "Pytest --collect-only (debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                ".",
+                "--collect-only",
+                "--capture=no",
+            ],
+            "cwd": "${workspaceFolder}/snippets",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: file as Module",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "mpflash.mpboard_id.${fileBasenameNoExtension}",
+            "justMyCode": false
+        },
+        {
+            "name": "mpremote",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "mpremote",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "resume",
+                "exec",
+                "print(42)",
             ]
         },
         {
