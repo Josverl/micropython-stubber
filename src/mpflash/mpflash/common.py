@@ -29,7 +29,9 @@ PORT_FWTYPES = {
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
 PAT_NO_ACCESS = (
-    "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
+    "github_pat"
+    + "_11AAHPVFQ0qAkDnSUaMKSp"
+    + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
 )
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
@@ -99,7 +101,6 @@ class BootloaderMethod(Enum):
     NONE = "none"
 
 
-
 @dataclass
 class FlashParams(Params):
     """Parameters for flashing a board"""
@@ -136,13 +137,20 @@ def filtered_comports(
 
     # remove ports that are to be ignored
     log.trace(f"{include=}, {ignore=}, {bluetooth=}")
-    comports = [p for p in list_ports.comports() if not any(fnmatch.fnmatch(p.device, i) for i in ignore)]
+    # use p.location to filter out the bogus ports on newer Linux kernels
+    comports = [
+        p
+        for p in list_ports.comports()
+        if p.location and not any(fnmatch.fnmatch(p.device, i) for i in ignore)
+    ]
     log.trace(f"comports: {[p.device for p in comports]}")
     # remove bluetooth ports
 
     if include != ["*"]:
         # if there are explicit ports to include, add them to the list
-        explicit = [p for p in list_ports.comports() if any(fnmatch.fnmatch(p.device, i) for i in include)]
+        explicit = [
+            p for p in list_ports.comports() if any(fnmatch.fnmatch(p.device, i) for i in include)
+        ]
         log.trace(f"explicit: {[p.device for p in explicit]}")
         if ignore == []:
             # if nothing to ignore, just use the explicit list as a sinple sane default
@@ -161,6 +169,9 @@ def filtered_comports(
     # sort
     if sys.platform == "win32":
         # Windows sort of comports by number - but fallback to device name
-        return sorted(comports, key=lambda x: int(x.device.split()[0][3:]) if x.device.split()[0][3:].isdigit() else x)
+        return sorted(
+            comports,
+            key=lambda x: int(x.device.split()[0][3:]) if x.device.split()[0][3:].isdigit() else x,
+        )
     # sort by device name
     return sorted(comports, key=lambda x: x.device)
