@@ -55,8 +55,24 @@ def test_filtered_comports_linux(id, include, ignore, bluetooth, expected, mocke
         ListPortInfo(device="/dev/tty001", skip_link_detection=True),
         ListPortInfo(device="/dev/tty002", skip_link_detection=True),
     ]
+    n = 0
+    for port in linux_ports:
+        port.location = f"1-1.{n}:x.0"
+        n += 1
     mocker.patch("mpflash.common.list_ports.comports", return_value=linux_ports)
     result = filtered_comports(include=include, ignore=ignore, bluetooth=bluetooth)
     devices = [port.device for port in result]
     assert all([(e in devices) for e in expected])
     assert all([(d in expected) for d in devices])
+
+
+def test_skip_bogus_comports_linux(mocker):
+    linux_ports = [
+        ListPortInfo(device="/dev/tty001", skip_link_detection=True),
+        ListPortInfo(device="/dev/tty002", skip_link_detection=True),
+    ]
+    linux_ports[0].location = f"1-1.1:x.0"
+    mocker.patch("mpflash.common.list_ports.comports", return_value=linux_ports)
+    result = filtered_comports(include=["*"], ignore=[], bluetooth=False)
+    devices = [port.device for port in result]
+    assert len(devices) == 1
