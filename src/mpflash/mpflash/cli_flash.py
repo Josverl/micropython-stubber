@@ -68,6 +68,14 @@ from mpflash.versions import clean_version
     metavar="SERIALPORT",
 )
 @click.option(
+    "--bluetooth/--no-bluetooth",
+    "-b/-nb",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="""Include bluetooth ports in the list""",
+)
+@click.option(
     "--port",
     "-p",
     "ports",
@@ -133,7 +141,7 @@ def cli_flash_board(**kwargs) -> int:
     all_boards: List[MPRemoteBoard] = []
     if not params.boards:
         # nothing specified - detect connected boards
-        params.ports, params.boards, all_boards = connected_ports_boards(include=params.ports, ignore=params.ignore)
+        params.ports, params.boards, all_boards = connected_ports_boards(include=params.ports, ignore=params.ignore, bluetooth=params.bluetooth)
         if params.boards == []:
             # No MicroPython boards detected, but it could be unflashed or in bootloader mode
             # Ask for serial port and board_id to flash

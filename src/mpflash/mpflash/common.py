@@ -1,6 +1,7 @@
 import fnmatch
 import glob
 import os
+import platform
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
@@ -84,6 +85,7 @@ class Params:
     fw_folder: Path = Path()
     serial: List[str] = field(default_factory=list)
     ignore: List[str] = field(default_factory=list)
+    bluetooth: bool = False
 
 
 @dataclass
@@ -138,12 +140,15 @@ def filtered_comports(
 
     # remove ports that are to be ignored
     log.trace(f"{include=}, {ignore=}, {bluetooth=}")
-    # use p.location to filter out the bogus ports on newer Linux kernels
+
     comports = [
-        p
-        for p in list_ports.comports()
-        if p.location and not any(fnmatch.fnmatch(p.device, i) for i in ignore)
+        p for p in list_ports.comports() if not any(fnmatch.fnmatch(p.device, i) for i in ignore)
     ]
+    if platform.system() == "Linux":
+        # use p.location to filter out the bogus ports on newer Linux kernels
+        # filter out the bogus ports on newer Linux kernels
+        comports = [p for p in comports if p.location]
+
     log.trace(f"comports: {[p.device for p in comports]}")
     # remove bluetooth ports
 

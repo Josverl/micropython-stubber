@@ -71,6 +71,12 @@ def test_skip_bogus_comports_linux(mocker):
         ListPortInfo(device="/dev/tty001", skip_link_detection=True),
         ListPortInfo(device="/dev/tty002", skip_link_detection=True),
     ]
+
+    def platform_system():
+        return "Linux"
+
+    mocker.patch("mpflash.common.platform.system", platform_system)
+
     linux_ports[0].location = f"1-1.1:x.0"
     mocker.patch("mpflash.common.list_ports.comports", return_value=linux_ports)
     result = filtered_comports(include=["*"], ignore=[], bluetooth=False)
