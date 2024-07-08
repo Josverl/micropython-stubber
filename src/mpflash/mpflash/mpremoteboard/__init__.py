@@ -55,7 +55,7 @@ class MPRemoteBoard:
         self.arch = ""
         self.mpy = ""
         self.build = ""
-        self.location = location
+        self.location = location # USB location
         self.toml = {}
         if update:
             self.get_mcu_info()

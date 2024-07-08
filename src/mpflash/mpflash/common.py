@@ -1,4 +1,5 @@
 import fnmatch
+import glob
 import os
 import sys
 from dataclasses import dataclass, field
@@ -175,3 +176,30 @@ def filtered_comports(
         )
     # sort by device name
     return sorted(comports, key=lambda x: x.device)
+
+
+def find_serial_by_path(target_port: str):
+    """Find the symbolic link path of a serial port by its device path."""
+    # sourcery skip: use-next
+
+    if os.name == "nt":
+        return None
+    # List all available serial ports
+    available_ports = list_ports.comports()
+    # Filter to get the device path of the target port
+    target_device_path = None
+    for port in available_ports:
+        if port.device == target_port:
+            target_device_path = port.device
+            break
+
+    if not target_device_path:
+        return None  # Target port not found among available ports
+
+    # Search for all symbolic links in /dev/serial/by-path/
+    for symlink in glob.glob("/dev/serial/by-path/*"):
+        # Resolve the symbolic link to its target
+        if os.path.realpath(symlink) == target_device_path:
+            return symlink  # Return the matching symlink path
+
+    return None  # Return None if no match is found
