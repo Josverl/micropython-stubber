@@ -12,8 +12,8 @@
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "args": [
-                "-VV",
-                "list",
+                // "-VV",
+                "flash",
                 // "--board",
                 // "SEEED_WIO_TERMINAL",
                 // "PICO",
@@ -40,9 +40,9 @@
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
-                // "-v",
-                "get-docstubs",
-                // "get-frozen",
+                "-VV",
+                // "get-mcu-stubs",
+                "get-frozen",
                 // "--version",
                 // "preview",
                 // "switch",
