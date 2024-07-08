@@ -7,15 +7,7 @@ from rich.table import Column
 from mpflash.common import filtered_comports
 from mpflash.mpremoteboard import MPRemoteBoard
 
-import os
-
-if os.name == "linux":
-    from mpflash.common import find_serial_by_path  # type: ignore
-else:
-
-    def find_serial_by_path(path: str) -> str:
-        # log.warning(f"find_serial_by_path not implemented for {os.name}")
-        return path
+from mpflash.common import find_serial_by_path
 
 
 def connected_ports_boards(
@@ -71,7 +63,7 @@ def list_mcus(
     connected_mcus = [
         MPRemoteBoard(
             c.device,
-            location=find_serial_by_path(c.device) or c.location or "?",
+            location=find_serial_by_path(c.device) or c.location or c.hwid or  "?",
         )
         for c in comports
     ]
