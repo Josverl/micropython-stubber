@@ -40,8 +40,10 @@
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
-                // "-v",
-                "get-docstubs",
+                "-VV",
+                "get-mcu-stubs",
+                "--serial",
+                "/dev/ttyUSB0",
                 // "get-frozen",
                 // "--version",
                 // "preview",
