@@ -1855,8 +1855,8 @@ files = [
 annotated-types = ">=0.4.0"
 pydantic-core = "2.20.1"
 typing-extensions = [
-    {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
     {version = ">=4.6.1", markers = "python_version < \"3.13\""},
+    {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
 ]
 
 [package.extras]
@@ -2685,8 +2685,8 @@ files = [
 
 [package.dependencies]
 astroid = [
-    {version = ">=3.0.0a1", markers = "python_version >= \"3.12\""},
     {version = ">=2.7", markers = "python_version < \"3.12\""},
+    {version = ">=3.0.0a1", markers = "python_version >= \"3.12\""},
 ]
 Jinja2 = "*"
 PyYAML = "*"
@@ -2697,19 +2697,19 @@ docs = ["furo", "sphinx", "sphinx-design"]
 
 [[package]]
 name = "sphinx-click"
-version = "5.1.0"
+version = "6.0.0"
 description = "Sphinx extension that automatically documents click applications"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "sphinx-click-5.1.0.tar.gz", hash = "sha256:6812c2db62d3fae71a4addbe5a8a0a16c97eb491f3cd63fe34b4ed7e07236f33"},
-    {file = "sphinx_click-5.1.0-py3-none-any.whl", hash = "sha256:ae97557a4e9ec646045089326c3b90e026c58a45e083b8f35f17d5d6558d08a0"},
+    {file = "sphinx_click-6.0.0-py3-none-any.whl", hash = "sha256:1e0a3c83bcb7c55497751b19d07ebe56b5d7b85eb76dd399cf9061b497adc317"},
+    {file = "sphinx_click-6.0.0.tar.gz", hash = "sha256:f5d664321dc0c6622ff019f1e1c84e58ce0cecfddeb510e004cf60c2a3ab465b"},
 ]
 
 [package.dependencies]
-click = ">=7.0"
+click = ">=8.0"
 docutils = "*"
-sphinx = ">=2.0"
+sphinx = ">=4.0"
 
 [[package]]
 name = "sphinx-rtd-theme"
@@ -3170,4 +3170,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "c3518107c1c656474e96a8ff2dd3cb30ee9072c16fa3eeee566c81b1e6f3304f"
+content-hash = "b52fce40834a40ca6c05dc8097dd7883059df8705bbd29ee8b498b9cc85b1994"
