@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.23.1
+This variant was generated from createstubs.py by micropython-stubber v1.23.2a0
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.23.1"
+__version__ = "v1.23.2a0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -492,7 +492,7 @@ def ensure_folder(path: str):
 
 def _build(s):
     # extract build from sys.version or os.uname().version if available
-    # sys.version: 'MicroPython v1.23.1-preview.6.g3d0b6276f'
+    # sys.version: 'MicroPython v1.23.2a0-preview.6.g3d0b6276f'
     # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
@@ -597,10 +597,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.1 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.23.1 do not have a micro .0
+            # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
