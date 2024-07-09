@@ -248,10 +248,10 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             # convert_posargs_to_args=True, # Does not save any space
         )
     len_3 = len(min_source)
-    if 1:
-        # write to temp file for debugging
-        with open("tmp_minified.py", "w+") as f:
-            f.write(min_source)
+    # if 1:
+    #     # write to temp file for debugging
+    #     with open("tmp_minified.py", "w+") as f:
+    #         f.write(min_source)
 
     log.info(f"Original length : {len_1}")
     log.info(f"Reduced length  : {len_2}")
