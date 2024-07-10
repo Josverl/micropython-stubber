@@ -66,10 +66,14 @@ def merge_all_docstubs(
             log.info(f"skipping {merged_path.name}, no MCU stubs found in {board_path}")
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
-        result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
-        # Add methods from docstubs to the MCU stubs that do not exist in the MCU stubs
-        # Add the __call__ method to the machine.Pin and pyb.Pin class
-        add_machine_pin_call(merged_path, candidate["version"])
+        try:
+            result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
+            # Add methods from docstubs to the MCU stubs that do not exist in the MCU stubs
+            # Add the __call__ method to the machine.Pin and pyb.Pin class
+            add_machine_pin_call(merged_path, candidate["version"])
+        except Exception as e:
+            log.error(f"Error parsing {candidate['version']} docstubs: {e}")
+            continue
         if result:
             merged += 1
     log.info(f"merged {merged} of {len(candidates)} candidates")

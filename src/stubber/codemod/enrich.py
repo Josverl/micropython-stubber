@@ -6,6 +6,7 @@ Both (.py or .pyi) files are supported.
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
 from mpflash.logger import log
@@ -113,6 +114,7 @@ def enrich_folder(
         raise FileNotFoundError(f"Source {source_path} does not exist")
     if not docstub_path.exists():
         raise FileNotFoundError(f"Docstub {docstub_path} does not exist")
+    log.debug(f"Enrich folder {source_path}.")
     count = 0
     # list all the .py and .pyi files in the source folder
     if source_path.is_file():
@@ -138,6 +140,10 @@ def enrich_folder(
             # no docstub to enrich with
             if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub file found for {source_file}")) from e
+        except (Exception, ParserSyntaxError) as e:
+            log.error(f"Error parsing {source_file}")
+            log.exception(e)
+            continue
     # run black on the destination folder
     run_black(source_path)
     # DO NOT run Autoflake as this removes some relevant (unused) imports
