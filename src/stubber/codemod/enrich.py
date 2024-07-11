@@ -4,7 +4,7 @@ Both (.py or .pyi) files are supported.
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
@@ -48,22 +48,7 @@ def enrich_file(
         )
 
     # find a matching doc-stub file in the docstub_path
-    docstub_file = None
-    if docstub_path.is_file():
-        candidates = [docstub_path]
-    else:
-        candidates = []
-        for ext in [".py", ".pyi"]:
-            candidates = list(docstub_path.rglob(package_name + ext))
-            if package_name[0].lower() == "u":
-                # also look for candidates without leading u ( usys.py <- sys.py)
-                candidates += list(docstub_path.rglob(package_name[1:] + ext))
-            elif package_name[0] == "_":
-                # also look for candidates without leading _ ( _rp2.py <- rp2.py )
-                candidates += list(docstub_path.rglob(package_name[1:] + ext))
-            else:
-                # also look for candidates with leading u ( sys.py <- usys.py)
-                candidates += list(docstub_path.rglob("u" + package_name + ext))
+    candidates = merge_source_candidates(package_name, docstub_path)
 
     for docstub_file in candidates:
         if docstub_file.exists():
@@ -95,6 +80,40 @@ def enrich_file(
         # write updated code to file
         target_path.write_text(new_code, encoding="utf-8")
     return diff_code(old_code, new_code, 5, filename=target_path.name) if diff else new_code
+
+
+def merge_source_candidates(package_name: str, docstub_path: Path) -> List[Path]:
+    """Return a list of candidate files in the docstub path that can be used to enrich the provided package_name.
+
+    The package_name is used to find a matching file in the docstub_path.
+    """
+    if docstub_path.is_file():
+        candidates = [docstub_path]
+        return candidates
+    # selectc from .py and .pyi files
+    candidates: List[Path] = []
+    for ext in [".py", ".pyi"]:
+        candidates.extend(file_package(package_name, docstub_path, ext))
+        if package_name[0].lower() in ["u", "_"]:
+            # also look for candidates without leading u ( usys.py <- sys.py)
+            # also look for candidates without leading _ ( _rp2.py <- rp2.py )
+            candidates.extend(file_package(package_name[1:], docstub_path, ext))
+        else:
+            # also look for candidates with leading u ( sys.py <- usys.py)
+            candidates.extend(file_package("u" + package_name, docstub_path, ext))
+    return candidates
+
+
+def file_package(name: str, docstub_path: Path, ext: str) -> List[Path]:
+    """
+    Return a list of candidate files in the docstub path that can be used to enrich the provided package_name.
+    package_name can be ufoo, foo, _foo, foo or foo.bar
+    """
+    candidates: List[Path] = []
+    candidates.extend(docstub_path.rglob(name.replace(".", "/") + ext))
+    if (docstub_path / name).is_dir():
+        candidates.extend(docstub_path.rglob(f"{name}/*{ext}"))
+    return candidates
 
 
 def enrich_folder(

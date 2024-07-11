@@ -32,8 +32,8 @@ def generate_from_rst(
 
     files = get_rst_sources(rst_path, pattern)
 
-    # simplify debugging
-    # files = [f for f in files if f.name == "collections.rst"]
+    # reduce files for test/debugging
+    # files = [f for f in files if f.name == "machine.rst"]
 
     clean_destination(dst_path)
     make_docstubs(dst_path, v_tag, release, suffix, files)
@@ -81,8 +81,10 @@ def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: 
         log.debug(f"Reading: {file}")
         reader.read_file(file)
         reader.parse()
-        fname = (dst_path / file.name).with_suffix(suffix)
-        reader.write_file(fname)
+        # Destination = "module.__init__.pyi"
+        target = dst_path / file.stem / "__init__.pyi"
+        # fname = (dst_path / file.name).with_suffix(suffix)
+        reader.write_file(target)
         if file.stem in U_MODULES:
             # create umod.py file and mod.py file
             fname = (dst_path / ("u" + file.name)).with_suffix(suffix)
