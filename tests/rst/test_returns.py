@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 # SOT
-from stubber.rst.rst_utils import _type_from_context, return_type_from_context # type: ignore
+from stubber.rst.rst_utils import _type_from_context, return_type_from_context  # type: ignore
 
 # mark all tests
 pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
@@ -59,8 +59,33 @@ def make_ids(val):
     return val
 
 
-@pytest.mark.parametrize("expected_type, module, signature, docstring", return_type_testcases(), ids=make_ids)
+@pytest.mark.parametrize(
+    "expected_type, module, signature, docstring", return_type_testcases(), ids=make_ids
+)
 def test_returns(module, signature, docstring, expected_type):
+    # return type should be included in the signature
+    # except for classes
+    # confidence = 0.1
+    r = _type_from_context(docstring=docstring, signature=signature, module=module)
+    assert r["type"] == expected_type
+    # assert r["confidence"] >= confidence
+    t = return_type_from_context(docstring=docstring, signature=signature, module=module)
+    assert t == expected_type
+
+
+@pytest.mark.parametrize(
+    "expected_type, module, signature, docstring",
+    [
+        (
+            "Incomplete",
+            "machine.UART",
+            ".. method:: UART.irq(trigger, priority=1, handler=None, wake=machine.IDLE)",
+            "",
+        ),
+    ],
+    ids=make_ids,
+)
+def test_package_modules(module, signature, docstring, expected_type):
     # return type should be included in the signature
     # except for classes
     # confidence = 0.1

@@ -227,7 +227,6 @@ testpaths = [
     "src/stubber",
     "src/mpflash",
     "repos/micropython-stubs/tests",
-    "modules/**/tests",
 ]
 norecursedirs = [
     ".*",

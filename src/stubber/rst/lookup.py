@@ -229,11 +229,10 @@ NONE_VERBS = [
 # - to add missing abstract classes
 
 MODULE_GLUE = {
-    "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
-    "esp32": ["from __future__ import annotations"],  # Class methods return Class
+    "lcd160cr": ["from machine.SPI import SPI"],  # module returns SPI objects defined in machine
     "collections": [
         "from queue import Queue",
-        "from stdlib.collections import OrderedDict as stdlib_OrderedDict, deque as stdlib_deque, namedtuple as stdlib_namedtuple",
+        "from stdlib.collections import OrderedDict as stdlib_OrderedDict, deque as stdlib_deque, namedtuple as stdlib_namedtuple  # type: ignore",
     ],  # dequeu is a subclass
     "os": [
         # "from stdlib.os import uname_result",  # uname returns uname_result
@@ -245,16 +244,27 @@ MODULE_GLUE = {
     # const: 3 -  paired with param and return typing
     "micropython": ["Const_T = TypeVar('Const_T',int, float, str, bytes, Tuple) # constant"],
     #
-    # "builtins": ["from stdlib.builtins import *"],  # integrate STDLIB
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
-    "espnow": ["from _espnow import ESPNowBase"],  # ESPNowBase is an undocumented base class
+    "espnow": [
+        "from _espnow import ESPNowBase  # type: ignore"
+    ],  # ESPNowBase is an undocumented base class
+    "machine.I2C": ["from .Pin import Pin"],  #  uses Pin
+    "machine.Signal": ["from .Pin import Pin"],  #  uses Pin
+    "machine.ADC": ["ATTN_0DB:int = ..."],  #  uses Pin
+    "machine.RTC": ["from machine import IDLE"],  #  uses Pin
+    "machine.UART": ["from machine import IDLE"],  #  uses Pin
+    "network": ["from abc import ABC"],  #  for AbstractNIC
+    "rp2": ["from .PIO import PIO"],  #
+    "pyb": ["from .UART import UART"],  #  uses Pin
+    "pyb.Switch": ["from .Pin import Pin"],  #  uses Pin
 }
 
 
 PARAM_FIXES = [
     Fix("\\*", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"\**", "*"),  # change weirdly written wildcards \* --> *
-    Fix(r"/*", "*"),  # change weirdly written wildcards \* --> *
+    Fix(r"/*", "*"),  # change weirdly written wildcards /* --> *
+    Fix(r"**", "*"),  # change weirdly written wildcards ** --> *
     Fix(r"/)", ")"),  # strange terminator in machine.USBDevice `USBDevice.active(self, [value] /)`
     Fix("'param'", "param"),  # loose notation in documentation
     # illegal keywords
@@ -485,7 +495,6 @@ PARAM_FIXES = [
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {
     # machine
-    # SoftSPI is defined before SPI, so baseclass is not yet available - but in a .pyi that is OK
     "SoftSPI": "SPI",
     "SoftI2C": "I2C",
     "Switch": "Pin",
@@ -515,10 +524,12 @@ CHILD_PARENT_CLASS = {
     "namedtuple": "tuple",
     "deque": "stdlib_deque",
     # ESPNow
-    "ESPNow": "ESPNowBase,Iterator",  # causes issue with mypy
+    "ESPNow": "ESPNowBase, Iterator",  # causes issue with mypy
     "AIOESPNow": "ESPNow",
     # array
     "array": "List",
+    # network
+    "AbstractNIC": "ABC",
 }
 
 
