@@ -50,40 +50,34 @@ def enrich_file(
     # find a matching doc-stub file in the docstub_path
     candidates = merge_source_candidates(package_name, docstub_path)
 
+    # read source file
+    old_code = current_code = target_path.read_text(encoding="utf-8")
 
-    
-    docstub_file = None
+    # try to apply all candidates
+    success = False
     for docstub_file in candidates:
         if docstub_file.exists():
-            break
-        else:
-            
-            docstub_file = None
-    if not docstub_file:
+            log.debug(f"Merge {target_path} from {docstub_file}")
+            codemod_instance = merge_docstub.MergeCommand(context, docstub_file=docstub_file)
+            if new_code := exec_transform_with_prettyprint(
+                codemod_instance,
+                current_code,
+                # include_generated=False,
+                generated_code_marker=config["generated_code_marker"],
+                # format_code=not args.no_format,
+                formatter_args=config["formatter"],
+                # python_version=args.python_version,
+            ):
+                current_code = new_code
+                success = True
+    if not success:
         raise FileNotFoundError(f"No doc-stub file found for {target_path}")
 
-    log.debug(f"Merge {target_path} from {docstub_file}")
-    # read source file
-    old_code = target_path.read_text(encoding="utf-8")
-
-    codemod_instance = merge_docstub.MergeCommand(context, docstub_file=docstub_file)
-    if not (
-        new_code := exec_transform_with_prettyprint(
-            codemod_instance,
-            old_code,
-            # include_generated=False,
-            generated_code_marker=config["generated_code_marker"],
-            # format_code=not args.no_format,
-            formatter_args=config["formatter"],
-            # python_version=args.python_version,
-        )
-    ):
-        return None
     if write_back:
         log.trace(f"Write back enriched file {target_path}")
         # write updated code to file
-        target_path.write_text(new_code, encoding="utf-8")
-    return diff_code(old_code, new_code, 5, filename=target_path.name) if diff else new_code
+        target_path.write_text(current_code, encoding="utf-8")
+    return diff_code(old_code, current_code, 5, filename=target_path.name) if diff else new_code
 
 
 def merge_source_candidates(package_name: str, docstub_path: Path) -> List[Path]:
