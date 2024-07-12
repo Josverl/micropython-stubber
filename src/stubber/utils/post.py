@@ -52,10 +52,13 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
         return -1
     log.info(f"Running autoflake on: {path}")
     # create a list of files to be formatted
-    files: List[str] = []
-    files.extend([str(f) for f in path.rglob("*.py")])
+    files: List[Path] = []
+    files.extend(path.rglob("*.py"))
     if process_pyi:
-        files.extend([str(f) for f in path.rglob("*.pyi")])
+        files.extend(path.rglob("*.pyi"))
+
+    # do not process umodules as that would remove all imports
+    files = [f for f in files if not f.name.startswith("u")]
 
     # build an argument list
     autoflake_args = {
@@ -75,6 +78,6 @@ def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = 
     }
     # format the files
     exit_status = 0
-    for name in files:
-        log.debug(f"Running autoflake on: {name}")
-        exit_status |= autoflake.fix_file(name, args=autoflake_args)
+    for f in files:
+        log.debug(f"Running autoflake on: {f}")
+        exit_status |= autoflake.fix_file(str(f), args=autoflake_args)

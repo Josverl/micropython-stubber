@@ -499,7 +499,15 @@ def _type_from_context(
     except IndexError:
         function_name = signature.strip().strip(":()")
 
-    function_name = ".".join((module, function_name))
+    if (
+        "." in module
+        and "." in function_name
+        and module.split(".")[1] == function_name.split(".")[0]
+    ):
+        # avoid machine.UART.UART.irq
+        function_name = function_name = ".".join((module, ".".join(function_name.split(".")[1:])))
+    else:
+        function_name = ".".join((module, function_name))
 
     if function_name in LOOKUP_LIST.keys():
         sig_type = LOOKUP_LIST[function_name][0]

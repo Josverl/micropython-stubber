@@ -40,11 +40,9 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-VV",
-                "merge",
+                "get-docstubs",
                 "--version",
                 "preview",
-                "--port",
-                "esp8266",
                 // "get-mcu-stubs",
                 // "--serial",
                 // "/dev/ttyUSB0",

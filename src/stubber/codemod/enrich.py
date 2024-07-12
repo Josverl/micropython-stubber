@@ -50,10 +50,14 @@ def enrich_file(
     # find a matching doc-stub file in the docstub_path
     candidates = merge_source_candidates(package_name, docstub_path)
 
+
+    
+    docstub_file = None
     for docstub_file in candidates:
         if docstub_file.exists():
             break
         else:
+            
             docstub_file = None
     if not docstub_file:
         raise FileNotFoundError(f"No doc-stub file found for {target_path}")
