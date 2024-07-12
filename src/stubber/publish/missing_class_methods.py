@@ -23,13 +23,18 @@ def add_machine_pin_call(merged_path: Path, version: str):
     # and to avoid having to parse the file twice
 
     # first find the __call__ method in the default stubs
-    mod_path = (
-        CONFIG.stub_path
-        / f"micropython-{clean_version(version, flat=True)}-docstubs/machine/Pin.pyi"
-    )
+    for suffix in ["machine/Pin.pyi", "machine.pyi", "machine/__init__.pyi"]:
+        mod_path = (
+            CONFIG.stub_path / f"micropython-{clean_version(version, flat=True)}-docstubs" / suffix
+        )
+        if mod_path.exists():
+            break
+        else:
+            log.debug(f"{mod_path} not found")
     if not mod_path.exists():
-        log.error(f"no machine.Pin docstub found for {version}")
+        log.error(f"No machine.Pin.pyi or machine.pyi docstub found for {version}")
         return False
+
     log.trace(f"Parsing {mod_path} for __call__ method")
     source = mod_path.read_text(encoding="utf-8")
     module = cst.parse_module(source)
