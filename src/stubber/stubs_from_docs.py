@@ -20,7 +20,7 @@ def generate_from_rst(
     v_tag: str,
     release: Optional[str] = None,
     pattern: str = "*.rst",
-    suffix: str = ".py",
+    suffix: str = ".pyi",
     black: bool = True,
 ) -> int:
     dst_path.mkdir(parents=True, exist_ok=True)
@@ -33,7 +33,7 @@ def generate_from_rst(
     files = get_rst_sources(rst_path, pattern)
 
     # reduce files for test/debugging
-    # files = [f for f in files if f.name == "machine.rst"]
+    # files = [f for f in files if "machine" in f.name]
 
     clean_destination(dst_path)
     make_docstubs(dst_path, v_tag, release, suffix, files)
@@ -65,7 +65,7 @@ def clean_destination(dst_path: Path):
 
 def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
     """Get the list of rst files to process"""
-    files = [f for f in rst_path.glob(pattern) if f.stem != "index" and "." not in f.stem]
+    files = [f for f in rst_path.glob(pattern) if f.stem != "index"]  # and "." not in f.stem]
 
     # - excluded modules, ones that offer little advantage  or cause much problems
     files = [f for f in files if f.name not in DOCSTUB_SKIP]
@@ -82,11 +82,26 @@ def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: 
         reader.read_file(file)
         reader.parse()
         # Destination = "module.__init__.pyi"
-        target = dst_path / file.stem / "__init__.pyi"
+        if "." in file.stem:
+            target = dst_path / f"{(file.stem).replace('.', '/')}{suffix}"
+        else:
+            target = dst_path / file.stem / f"__init__{suffix}"
         # fname = (dst_path / file.name).with_suffix(suffix)
         reader.write_file(target)
-        if file.stem in U_MODULES:
-            # create umod.py file and mod.py file
-            fname = (dst_path / ("u" + file.name)).with_suffix(suffix)
-            reader.write_file(fname)
+        # if file.stem in U_MODULES:
+        #     # create umod.py file and mod.py file
+        #     fname = (dst_path / ("u" + file.name)).with_suffix(suffix)
+        #     reader.write_file(fname)
         del reader
+    for name in U_MODULES:
+        # create a file "umodule.pyi" for each module
+        # and add a line : from module import *
+        # this is to allow the use of the u modules in the code
+
+        # create the file
+        target = dst_path / f"u{name}.pyi"
+        with open(target, "w") as f:
+            f.write(f"# {name} module\n")
+            f.write(f"# Allow the use of micro-module notation \n\n")
+            f.write(f"from {name} import *  # type: ignore\n")
+            f.flush()

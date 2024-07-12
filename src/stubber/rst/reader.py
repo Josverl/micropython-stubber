@@ -90,9 +90,9 @@ class FileReadWriter:
     """base class for reading rst files"""
 
     def __init__(self):
-        self.filename: Path = Path("")
-        self.modulename: str = ""
-        self.out_file: str = "__init__.pyi"
+        self.filename: str = ""
+        # self.modulename: str = ""
+        # self.out_file: str = "__init__.pyi"
         # input buffer
         self.rst_text: List[str] = []
         self.max_line = 0
@@ -486,11 +486,12 @@ class RSTParser(RSTReader):
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
         # Now parse all files mentioned in the toc
-        for file in toctree:
-            #
-            file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
-            self.read_file(file_path)
-            self.parse()
+        # sub modules are now processed as individual files
+        # for file in toctree:
+        #     #
+        #     file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
+        #     self.read_file(file_path)
+        #     self.parse()
         # reset this file to done
         self.rst_text = []
         self.line_no = 1
@@ -522,20 +523,24 @@ class RSTParser(RSTReader):
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
         self.output_dict.add_comment(f"# origin module:: {self.filename}")
         self.output_dict.add_docstr(docstr)
-        # Add additional imports to allow one module te refer to another
+        # Add additional imports to allow one module to refer to another
         if module_name in MODULE_GLUE.keys():
             self.output_dict.add_import(MODULE_GLUE[module_name])
 
     def parse_current_module(self):
         log.trace(f"# {self.line.rstrip()}")
-        module_name = self.line.split(SEPERATOR)[-1].strip()
-        mod_comment = f"# + module: {self.current_module}.rst"
-        self.current_module = module_name
+        # module_name = self.line.split(SEPERATOR)[-1].strip()
+        # mod_comment = f"# + module: {self.current_module}.rst"
+        # now that each .rst is a (sub) module we can process them as such
+        # log.debug(mod_comment)
+        # self.current_module = module_name
         self.current_function = self.current_class = ""
-        log.debug(mod_comment)
-        self.output_dict.name = module_name
-        self.output_dict.add_comment(mod_comment)
+        self.output_dict.name = self.current_module
+        # self.output_dict.add_comment(mod_comment)
         self.line_no += 1  # advance as we did not read any docstring
+        # Add additional imports to allow one module to refer to another
+        if self.current_module in MODULE_GLUE.keys():
+            self.output_dict.add_import(MODULE_GLUE[self.current_module])
 
     def parse_function(self):
         log.trace(f"# {self.line.rstrip()}")
