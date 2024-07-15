@@ -329,7 +329,7 @@ class RSTReader(FileReadWriter):
             # https://regex101.com/r/5RN8rj/1
             # Link to python 3 documentation
             _l = re.sub(
-                r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|\s]*)`)[.]?",
+                r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|]*)\s?`)[.]?",
                 r"\g<1> https://docs.python.org/3/library/\g<mod>.html .",
                 block[i],
             )
