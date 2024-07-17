@@ -142,6 +142,8 @@ LOOKUP_LIST = {
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
+    "pyb.hid_keyboard": ("Tuple", 0.95),  # ?
+    "pyb.hid_mouse": ("Tuple", 0.95),  # plain wrong
     "ubluetooth.BLE.irq": ("Any", 0.95),  # never returns
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
