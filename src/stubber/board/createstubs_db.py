@@ -18,7 +18,7 @@ Create stubs for (all) modules on a MicroPython board.
     - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
 
 
-This variant was generated from createstubs.py by micropython-stubber v1.23.2a0
+This variant was generated from createstubs.py by micropython-stubber v1.23.2
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -43,7 +43,8 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.23.2a0"
+__version__ = "v1.23.2"
+version_str = __version__.rsplit(".", 1)[0]
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -247,7 +248,7 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, version_str)
             fp.write(s)
             fp.write("from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
@@ -442,7 +443,7 @@ class Stubber:
                 f.write("{")
                 f.write(dumps({"firmware": self.info})[1:-1])
                 f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
+                f.write(dumps({"stubber": {"version": version_str}, "stubtype": "firmware"})[1:-1])
                 f.write(",\n")
                 f.write('"modules" :[\n')
 
@@ -501,7 +502,7 @@ def ensure_folder(path: str):
 
 def _build(s):
     # extract build from sys.version or os.uname().version if available
-    # sys.version: 'MicroPython v1.23.2a0-preview.6.g3d0b6276f'
+    # sys.version: 'MicroPython v1.23.2-preview.6.g3d0b6276f'
     # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
@@ -606,10 +607,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.2 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
+            # versions from 1.10.0 to 1.23.2 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
