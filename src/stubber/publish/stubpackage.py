@@ -14,9 +14,9 @@ from mpflash.basicgit import get_git_describe
 from stubber.publish.helpers import get_module_docstring
 
 if sys.version_info >= (3, 11):
-    import tomllib # type: ignore
+    import tomllib  # type: ignore
 else:
-    import tomli as tomllib # type: ignore
+    import tomli as tomllib  # type: ignore
 
 from typing import NewType
 
@@ -252,8 +252,12 @@ class Builder(VersionedPackage):
         pyproject = None
         _toml = self.toml_path
         if (_toml).exists():
-            with open(_toml, "rb") as f:
-                pyproject = tomllib.load(f)
+            log.info(f"Load pyproject from {_toml}")
+            try:
+                with open(_toml, "rb") as f:
+                    pyproject = tomllib.load(f)
+            except tomllib.TOMLDecodeError as e:
+                log.error(f"Could not load pyproject.toml file {e}")
         return pyproject
 
     @pyproject.setter
