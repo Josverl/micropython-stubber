@@ -255,8 +255,12 @@ class Builder(VersionedPackage):
         pyproject = None
         _toml = self.toml_path
         if (_toml).exists():
-            with open(_toml, "rb") as f:
-                pyproject = tomllib.load(f)
+            log.info(f"Load pyproject from {_toml}")
+            try:
+                with open(_toml, "rb") as f:
+                    pyproject = tomllib.load(f)
+            except tomllib.TOMLDecodeError as e:
+                log.error(f"Could not load pyproject.toml file {e}")
         return pyproject
 
     @pyproject.setter
