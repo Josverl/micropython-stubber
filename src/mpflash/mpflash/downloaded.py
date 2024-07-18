@@ -14,6 +14,7 @@ from .config import config
 def downloaded_firmwares(fw_folder: Path) -> List[FWInfo]:
     """Load a list of locally downloaded firmwares from the jsonl file"""
     firmwares: List[FWInfo] = []
+    log.debug(f"Reading  {fw_folder / 'firmware.jsonl' }")
     try:
         with jsonlines.open(fw_folder / "firmware.jsonl") as reader:
             firmwares = [FWInfo.from_dict(item) for item in reader]
