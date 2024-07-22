@@ -50,7 +50,7 @@ mpremote = "mpremote.main:main"
 python = ">=3.9,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.12" } # no support for 3.12 yet
 requests = "^2.32.3"
-mypy = "1.10.1"
+mypy = "1.11.0"
 mpflash = "^1.0.2"
 mpremote = "^1.23.0"
 # others
