@@ -2,6 +2,7 @@ import time
 
 from mpflash.bootloader.detect import in_bootloader
 from mpflash.common import BootloaderMethod
+from mpflash.config import config
 from mpflash.errors import MPFlashError
 from mpflash.logger import log
 from mpflash.mpremoteboard import MPRemoteBoard
@@ -11,9 +12,10 @@ from .micropython import enter_bootloader_mpy
 from .touch1200 import enter_bootloader_touch_1200bps
 
 BL_OPTIONS = {
-    "stm32": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
-    "rp2": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
-    "samd": [BootloaderMethod.TOUCH_1200, BootloaderMethod.MPY, BootloaderMethod.MANUAL],
+    # removed BootloaderMethod.TOUCH_1200, as it is not supported by all boards
+    "stm32": [BootloaderMethod.MPY, BootloaderMethod.TOUCH_1200, BootloaderMethod.MANUAL],
+    "rp2": [BootloaderMethod.MPY, BootloaderMethod.TOUCH_1200, BootloaderMethod.MANUAL],
+    "samd": [BootloaderMethod.MPY, BootloaderMethod.TOUCH_1200, BootloaderMethod.MANUAL],
     "esp32": [BootloaderMethod.NONE],
     "esp8266": [BootloaderMethod.NONE],
 }
@@ -34,7 +36,14 @@ def enter_bootloader(
         bl_list = BL_OPTIONS.get(mcu.port, [BootloaderMethod.MPY, BootloaderMethod.MANUAL])
     else:
         bl_list = [method, BootloaderMethod.MANUAL]
-    log.info(f"Entering bootloader on {mcu.serialport} using methods {[bl.value for bl in bl_list]}")
+
+    if not config.interactive:
+        # in CI we don't want to wait for manual intervention
+        bl_list = [bl for bl in bl_list if bl != BootloaderMethod.MANUAL]
+
+    log.info(
+        f"Entering bootloader for {mcu.board} on {mcu.serialport} using methods {[bl.value for bl in bl_list]}"
+    )
     for method in bl_list:
         try:
             if method == BootloaderMethod.MPY:
