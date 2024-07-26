@@ -18,7 +18,7 @@ __all__ = [
     "U_MODULES",
 ]
 
-# all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
+# all possible Types needed for the stubs - excess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
     "from __future__ import annotations",
     "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
@@ -288,7 +288,7 @@ PARAM_FIXES = [
     # pyb.hid((buttons, x, y, z))
     Fix(
         "(buttons, x, y, z)",
-        "hidtuple:Tuple",
+        "hid_tuple:Tuple",
     ),
     # esp v1.15.2 .. function:: getaddrinfo((hostname, port, lambda))
     Fix(
@@ -502,16 +502,16 @@ CHILD_PARENT_CLASS = {
     "Switch": "Pin",
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
-    # "IOBase": "IO",  # DOCME  not in documentation
+    # "IOBase": "IO",  # DOC_ME  not in documentation
     "TextIOWrapper": "IO",  # "TextIOBase, TextIO",  # based on Stdlib
     "FileIO": "IO",  #  "RawIOBase, BinaryIO",  # based on Stdlib
     "StringIO": "IO",  #  "BufferedIOBase, BinaryIO",  # based on Stdlib
     "BytesIO": "IO",  # "BufferedIOBase, BinaryIO",  # based on Stdlib
-    "BufferedWriter": "IOBase",  # DOCME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
+    "BufferedWriter": "IOBase",  # DOC_ME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
     # uzlib
     # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # -------------------------------------------------------------------------------------
-    # network - AbstractNIC is definined in docstub network.pyi , but not actually used
+    # network - AbstractNIC is defined in docstub network.pyi , but not actually used
     # "WLAN": "AbstractNIC",
     # "WLANWiPy": "AbstractNIC",
     # "CC3K": "AbstractNIC",
@@ -536,9 +536,9 @@ CHILD_PARENT_CLASS = {
 
 
 # TODO : implement the execution of this list during merge
-#  - this is a list of functions, classes methods and constantsn  that are not detected at runtime, but are avaialble and documented
+#  - this is a list of functions, classes methods and constants  that are not detected at runtime, but are available and documented
 # the standard merge only adds documentation to detected functions.
-FORCE_NON_DETECED = [
+FORCE_NON_DETECTED = [
     ("btree", "Btree", ["esp32", "esp8266"]),  # Is not detected runtime
     ("espnow", "ESPNow.peers_table", ["esp32"]),  # Is not detected runtime
 ]
