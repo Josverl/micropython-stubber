@@ -83,7 +83,7 @@ from stubber.rst import (
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
 
-SEPERATOR = "::"
+SEPARATOR = "::"
 
 
 class FileReadWriter:
@@ -223,7 +223,7 @@ class RSTReader(FileReadWriter):
         # return _l.startswith("..") and not any(_l.startswith(a) for a in self.docstring_anchors)
 
     # @property
-    def at_heading(self, large=False) -> bool:
+    def at_heading(self, large:bool=False) -> bool:
         "stop at heading"
         u_line = self.rst_text[min(self.line_no + 1, self.max_line - 1)].rstrip()
         # Heading  ---, ==, ~~~
@@ -288,7 +288,7 @@ class RSTReader(FileReadWriter):
         # remove empty lines at beginning/end of block
         block = self.clean_docstr(block)
         # add clickable hyperlinks to CPython docpages
-        block = self.add_link_to_docsstr(block)
+        block = self.add_link_to_docstr(block)
         # make sure the first char of the first line is a capital
         if len(block) > 0 and len(block[0]) > 0:
             block[0] = block[0][0].upper() + block[0][1:]
@@ -322,7 +322,7 @@ class RSTReader(FileReadWriter):
         return block
 
     @staticmethod
-    def add_link_to_docsstr(block: List[str]):
+    def add_link_to_docstr(block: List[str]):
         """Add clickable hyperlinks to CPython docpages"""
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
@@ -343,7 +343,7 @@ class RSTReader(FileReadWriter):
             # Clean up note and other docstring anchors
             _l = _l.replace(".. note:: ", "``Note:`` ")
             _l = _l.replace(".. data:: ", "")
-            _l = _l.replace(".. admonition:: ", "")
+            _l = _l.replace(".. admonition:: ", "Admonition:")
             _l = _l.replace("|see_cpython_module|", "CPython module:")
             # clean up unsupported escape sequences in rst
             _l = _l.replace(r"\ ", " ")
@@ -357,7 +357,7 @@ class RSTReader(FileReadWriter):
         return m[1] if m else ""
 
     def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
-        "Remove the modulename. and or the classname. from the begining of a name"
+        "Remove the modulename. and or the classname. from the beginning of a name"
         prefixes = self.module_names if strip_mod else []
         if strip_class and self.current_class != "":
             prefixes += [self.current_class]
@@ -460,7 +460,9 @@ class RSTParser(RSTReader):
             class_def = self.output_dict[full_name]
         else:
             parent = CHILD_PARENT_CLASS[name] if name in CHILD_PARENT_CLASS.keys() else ""
-            if parent == "" and (name.endswith("Error") or name.endswith("Exception")):
+            if parent == "" and (
+                name.endswith("Error") or name.endswith("Exception") or name in {"GeneratorExit"}
+            ):
                 parent = "Exception"
             class_def = ClassSourceDict(
                 f"class {name}({parent}):",
@@ -499,7 +501,7 @@ class RSTParser(RSTReader):
     def parse_module(self):
         "parse a module tag and set the module's docstring"
         log.trace(f"# {self.line.rstrip()}")
-        module_name = self.line.split(SEPERATOR)[-1].strip()
+        module_name = self.line.split(SEPARATOR)[-1].strip()
 
         self.current_module = module_name
         self.current_function = self.current_class = ""
@@ -529,7 +531,7 @@ class RSTParser(RSTReader):
 
     def parse_current_module(self):
         log.trace(f"# {self.line.rstrip()}")
-        # module_name = self.line.split(SEPERATOR)[-1].strip()
+        # module_name = self.line.split(SEPARATOR)[-1].strip()
         # mod_comment = f"# + module: {self.current_module}.rst"
         # now that each .rst is a (sub) module we can process them as such
         # log.debug(mod_comment)
@@ -544,7 +546,7 @@ class RSTParser(RSTReader):
 
     def parse_function(self):
         log.trace(f"# {self.line.rstrip()}")
-        # this_function = self.line.split(SEPERATOR)[-1].strip()
+        # this_function = self.line.split(SEPARATOR)[-1].strip()
         # name = this_function
 
         # Get one or more names
@@ -577,7 +579,7 @@ class RSTParser(RSTReader):
             # fixup parameters
             params = self.fix_parameters(params, name)
             # ASSUME no functions in classes,
-            # so with ther cursor at a function this probably means that we are no longer in a class
+            # so with the cursor at a function this probably means that we are no longer in a class
             self.leave_class()
 
             fn_def = FunctionSourceDict(
@@ -589,7 +591,7 @@ class RSTParser(RSTReader):
 
     def parse_class(self):
         log.trace(f"# {self.line.rstrip()}")
-        this_class = self.line.split(SEPERATOR)[-1].strip()  # raw
+        this_class = self.line.split(SEPARATOR)[-1].strip()  # raw
         if "(" in this_class:
             name, params = this_class.split("(", 2)
         else:
@@ -723,7 +725,7 @@ class RSTParser(RSTReader):
 
     def parse_exception(self):
         log.trace(f"# {self.line.rstrip()}")
-        name = self.line.split(SEPERATOR)[1].strip()
+        name = self.line.split(SEPARATOR)[1].strip()
         if name == "Exception":
             # no need to redefine Exception
             self.line_no += 1
@@ -740,9 +742,9 @@ class RSTParser(RSTReader):
         "get the constant/function/class name from a line with an identifier"
         # '.. data:: espnow.MAX_DATA_LEN(=250)\n'
         if line:
-            return line.split(SEPERATOR)[-1].strip()
+            return line.split(SEPARATOR)[-1].strip()
         else:
-            return self.line.split(SEPERATOR)[-1].strip()
+            return self.line.split(SEPARATOR)[-1].strip()
 
     def parse_names(self, oneliner: bool = True):
         """get a list of constant/function/class names from and following a line with an identifier
@@ -765,7 +767,7 @@ class RSTParser(RSTReader):
             log.trace("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
-        # now advance the linecounter
+        # now advance the line counter
         self.line_no += counter - 1
         # clean up before returning
         names = [n.strip() for n in names if n.strip() != "etc."]  # remove etc.
