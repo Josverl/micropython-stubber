@@ -23,7 +23,7 @@ def read_modules(path: Optional[Path] = None) -> Set[str]:
     read text files with modules per firmware.
     each contains the output of help("modules")
     - lines starting with # are comments.
-    - split the other lines at whitespace seperator,
+    - split the other lines at whitespace separator,
     - and add each module to a set
     """
     path = Path(path or "./data")
@@ -73,7 +73,7 @@ def update_module_list():
         "upip_utarfile",
         "upysh",
         "uasyncio",
-        "builtins",
+        # "builtins", # may be used for type hints
         "re",
     }
     log.info("Update the module list in createstubs.py")

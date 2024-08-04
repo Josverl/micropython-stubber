@@ -22,6 +22,7 @@ def generate_from_rst(
     pattern: str = "*.rst",
     suffix: str = ".pyi",
     black: bool = True,
+    clean_rst: bool = True,
 ) -> int:
     dst_path.mkdir(parents=True, exist_ok=True)
     if not release:
@@ -36,7 +37,7 @@ def generate_from_rst(
     # files = [f for f in files if "machine" in f.name]
 
     clean_destination(dst_path)
-    make_docstubs(dst_path, v_tag, release, suffix, files)
+    make_docstubs(dst_path, v_tag, release, suffix, files, clean_rst=clean_rst)
 
     log.info("::group:: start post processing of retrieved stubs")
     # do not run stubgen
@@ -72,11 +73,12 @@ def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
     return files
 
 
-def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path]):
+def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path],clean_rst:bool):
     """Create the docstubs"""
 
     for file in files:
         reader = RSTWriter(v_tag)
+        reader.clean_rst = clean_rst
         reader.source_release = release
         log.debug(f"Reading: {file}")
         reader.read_file(file)

@@ -47,12 +47,14 @@ from .cli import stubber_cli
     "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
 )
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
+@click.option("--clean-rst/--no-clean-rst", "-b/-nb", default=True, help="remove .rST constructs from the docstrings", show_default=True)
 @click.pass_context
 def cli_docstubs(
     ctx: click.Context,
     path: Optional[str] = None,
     target: Optional[str] = None,
     black: bool = True,
+    clean_rst: bool = True,
     basename: Optional[str] = None,
     version: str = "",
 ):
@@ -88,5 +90,5 @@ def cli_docstubs(
     dst_path = Path(target) / f"{basename}-{utils.clean_version(version, flat=True)}-docstubs"
 
     log.info(f"Get docstubs for MicroPython {utils.clean_version(version, drop_v=False)}")
-    generate_from_rst(rst_path, dst_path, version, release=release, suffix=".pyi", black=black)
+    generate_from_rst(rst_path, dst_path, version, release=release, suffix=".pyi", black=black, clean_rst=clean_rst)
     log.info("::group:: Done")
