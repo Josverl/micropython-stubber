@@ -73,6 +73,7 @@ from stubber.rst import (
     CHILD_PARENT_CLASS,
     MODULE_GLUE,
     PARAM_FIXES,
+    PARAM_RE_FIXES,
     RST_DOC_FIXES,
     TYPING_IMPORT,
     ClassSourceDict,
@@ -185,6 +186,7 @@ class RSTReader(FileReadWriter):
         self.current_module = ""
         self.current_class = ""
         self.current_function = ""  # function & method
+        self.clean_rst = True
         super().__init__()
 
     def read_file(self, filename: Path):
@@ -223,7 +225,7 @@ class RSTReader(FileReadWriter):
         # return _l.startswith("..") and not any(_l.startswith(a) for a in self.docstring_anchors)
 
     # @property
-    def at_heading(self, large:bool=False) -> bool:
+    def at_heading(self, large: bool = False) -> bool:
         "stop at heading"
         u_line = self.rst_text[min(self.line_no + 1, self.max_line - 1)].rstrip()
         # Heading  ---, ==, ~~~
@@ -294,16 +296,17 @@ class RSTReader(FileReadWriter):
             block[0] = block[0][0].upper() + block[0][1:]
         return block
 
-    @staticmethod
-    def clean_docstr(block: List[str]):
+    # @staticmethod
+    def clean_docstr(self, block: List[str]):
         """Clean up a docstring"""
-        # if a Quoted Literal Block , then remove the first character of each line
-        # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
-        if block and len(block[0]) > 0 and block[0][0] != " ":
-            q_char = block[0][0]
-            if all(l.startswith(q_char) for l in block):
-                # all lines start with the same character, so skip that character
-                block = [l[1:] for l in block]
+        if self.clean_rst:
+            # if a Quoted Literal Block , then remove the first character of each line
+            # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
+            if block and len(block[0]) > 0 and block[0][0] != " ":
+                q_char = block[0][0]
+                if all(l.startswith(q_char) for l in block):
+                    # all lines start with the same character, so skip that character
+                    block = [l[1:] for l in block]
         # rstrip all lines
         block = [l.rstrip() for l in block]
         # remove empty lines at beginning/end of block
@@ -311,7 +314,6 @@ class RSTReader(FileReadWriter):
             block = block[1:]
         while len(block) and len(block[-1]) == 0:
             block = block[:-1]
-
         # Clean up Synopsis
         if len(block) and ":synopsis:" in block[0]:
             block[0] = re.sub(
@@ -321,9 +323,11 @@ class RSTReader(FileReadWriter):
             )
         return block
 
-    @staticmethod
-    def add_link_to_docstr(block: List[str]):
+    def add_link_to_docstr(self, block: List[str]):
         """Add clickable hyperlinks to CPython docpages"""
+        if not self.clean_rst:
+            return block
+
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
@@ -374,18 +378,6 @@ class RSTParser(RSTReader):
     """
 
     target = ".py"  # py/pyi
-    # TODO: Move to lookup.py
-    PARAM_RE_FIXES = [
-        Fix(
-            r"\[angle, time=0\]", "[angle], time=0", is_re=True
-        ),  # fix: method:: Servo.angle([angle, time=0])
-        Fix(
-            r"\[speed, time=0\]", "[speed], time=0", is_re=True
-        ),  # fix: .. method:: Servo.speed([speed, time=0])
-        Fix(
-            r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
-        ),  # fix: network - AbstractNIC.connect
-    ]
 
     def __init__(self, v_tag: str) -> None:
         super().__init__()
@@ -414,7 +406,7 @@ class RSTParser(RSTReader):
 
         ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
 
-        for fix in self.PARAM_RE_FIXES:
+        for fix in PARAM_RE_FIXES:
             params = self.apply_fix(fix, params, name)
 
         # ###########################################################################################################
