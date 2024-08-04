@@ -12,6 +12,7 @@ __all__ = [
     "NONE_VERBS",
     "CHILD_PARENT_CLASS",
     "PARAM_FIXES",
+    "PARAM_RE_FIXES",
     "MODULE_GLUE",
     "RST_DOC_FIXES",
     "DOCSTUB_SKIP",
@@ -494,6 +495,18 @@ PARAM_FIXES = [
     ),
 ]
 
+# and some param fixes that require a regex
+PARAM_RE_FIXES = [
+    Fix(
+        r"\[angle, time=0\]", "[angle], time=0", is_re=True
+    ),  # fix: method:: Servo.angle([angle, time=0])
+    Fix(
+        r"\[speed, time=0\]", "[speed], time=0", is_re=True
+    ),  # fix: .. method:: Servo.speed([speed, time=0])
+    Fix(
+        r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+    ),  # fix: network - AbstractNIC.connect
+]
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {
     # machine
