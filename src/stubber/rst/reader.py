@@ -479,13 +479,22 @@ class RSTParser(RSTReader):
         toctree = self.read_docstring()
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
-        # Now parse all files mentioned in the toc
-        # sub modules are now processed as individual files
-        # for file in toctree:
-        #     #
-        #     file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
-        #     self.read_file(file_path)
-        #     self.parse()
+        use_sub_modules = True
+
+        if use_sub_modules:
+            # add sub modules imports
+            for file in toctree:
+                rel_name = file.replace(f"{self.modulename}.", ".").replace(".rst", "")
+                self.output_dict.add_import(f"from {rel_name} import *")
+
+        else:
+            # Now parse all files mentioned in the toc
+            # sub modules are now processed as individual files
+            for file in toctree:
+                #
+                file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
+                self.read_file(file_path)
+                self.parse()
         # reset this file to done
         self.rst_text = []
         self.line_no = 1

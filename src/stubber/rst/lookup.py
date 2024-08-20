@@ -174,6 +174,9 @@ LOOKUP_LIST = {
     "_onewire.crc8": ("int", 0.95),
     # espnow
     "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]]", 0.95),  # list / ? tuple of bytestrings
+    # esp32
+    "esp21.Partition.readblocks": ("None", 0.95),
+    "esp21.Partition.writeblocks": ("None", 0.95),
 }
 
 
