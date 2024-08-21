@@ -44,9 +44,12 @@ class StubTypingCollector(cst.CSTVisitor):
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            Union[TypeInfo, str],
+            Union[TypeInfo, 
+                  str, 
+                  List[TypeInfo], # list of overloads 
+                  ],
         ] = {}
-        self.comments :List[str] = []
+        self.comments: List[str] = []
 
     # ------------------------------------------------------------
     def visit_Module(self, node: cst.Module) -> bool:
@@ -55,6 +58,7 @@ class StubTypingCollector(cst.CSTVisitor):
         if docstr:
             self.annotations[MODULE_KEY] = docstr
         return True
+
     def visit_Comment(self, node: cst.Comment) -> None:
         """
         connect comments from the source
@@ -105,7 +109,15 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="funcdef",
             def_node=node,
         )
-        self.annotations[tuple(self.stack)] = ti
+        key = tuple(self.stack)
+        if key not in self.annotations:
+            self.annotations[key] = []
+        assert isinstance(self.annotations[key], list)
+        self.annotations[key].append(ti)
+        # if node.decorators[0].decorator.value == "overload":
+        #     # overload functions are not stored in the annotations
+        #     return False
+        # self.annotations[tuple(self.stack)] = ti
 
     def update_append_first_node(self, node):
         """Store the function/method docstring or function/method sig"""
