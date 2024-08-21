@@ -19,6 +19,7 @@ from stubber.cst_transformer import (
     MODULE_KEY,
     StubTypingCollector,
     TypeInfo,
+    AnnoValue,
     update_def_docstr,
     update_module_docstr,
 )
@@ -72,7 +73,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            Union[TypeInfo, str, List[TypeInfo]],  # value: TypeInfo
+            AnnoValue,
+            # Union[TypeInfo, str, List[TypeInfo]],  # value: TypeInfo
         ] = {}
         self.comments: List[str] = []
 
@@ -150,7 +152,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         # update/replace  module docstrings
         # todo: or should we add / merge the docstrings?
-        docstub_docstr = self.annotations[MODULE_KEY]
+        docstub_docstr = self.annotations[MODULE_KEY].docstring
         assert isinstance(docstub_docstr, str)
         src_docstr = original_node.get_docstring() or ""
         if src_docstr or docstub_docstr:
@@ -176,11 +178,11 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         # hack to 2nd foo annotation
         # updated_node = updated_node.with_changes( children=updated_node.children.append(self.annotations[('foo',)][1]))
-
-        # Insert the new function at the end of the module
-        new_function = self.annotations[("foo",)][1].def_node
-        modified_body = tuple(list(updated_node.body) + [new_function])
-        updated_node = updated_node.with_changes(body=modified_body)
+        if "overload" in docstub_docstr.lower():
+            # Insert the new function at the end of the module
+            new_function = self.annotations[("foo",)].overloads[-1].def_node
+            modified_body = tuple(list(updated_node.body) + [new_function])
+            updated_node = updated_node.with_changes(body=modified_body)
 
         return updated_node
         # --------------------------------------------------------------------
@@ -200,12 +202,11 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the class
             return updated_node
         # update the firmware_stub from the doc_stub information
-        doc_stub = self.annotations[stack_id]
-        assert not isinstance(doc_stub, str)
+        doc_stub = self.annotations[stack_id].type_info
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node)
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
-        # we need to be carefull not to copy over all the annotations if the types are different
+        # we need to be careful not to copy over all the annotations if the types are different
         if doc_stub.def_type == "classdef":
             # Same type, we can copy over all the annotations
             # combine the decorators from the doc-stub and the firmware stub
@@ -225,13 +226,6 @@ class MergeCommand(VisitorBasedCodemodCommand):
             return updated_node
 
     # ------------------------------------------------------------------------
-    # def visit_Iterable(self, node) -> Optional[bool]:
-    #     return True
-
-    # def leave_Iterable(self, node) -> Optional[bool]:
-    #     return True
-
-    # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return True
@@ -246,11 +240,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the function
             return updated_node
         # update the firmware_stub from the doc_stub information
-        if isinstance(self.annotations[stack_id], List) and self.annotations[stack_id]:
-            doc_stub = self.annotations[stack_id][0]
-        else:
-            doc_stub = self.annotations[stack_id]
+        doc_stub = self.annotations[stack_id].type_info
         assert isinstance(doc_stub, TypeInfo)
+        assert doc_stub
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
@@ -293,7 +285,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         elif doc_stub.def_type == "classdef":
             # Different type: ClassDef != FuncDef ,
             if doc_stub.def_node and self.replace_functiondef_with_classdef:
-                # replace the functiondef with the classdef from the stub file
+                # replace the functionDef with the classdef from the stub file
                 return doc_stub.def_node
             # for now just return the updated node
             return updated_node

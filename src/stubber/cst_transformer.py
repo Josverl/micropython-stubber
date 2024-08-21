@@ -1,7 +1,7 @@
 """helper functions for stub transformations"""
 
 # sourcery skip: snake-case-functions
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import libcst as cst
@@ -9,14 +9,22 @@ import libcst as cst
 
 @dataclass
 class TypeInfo:
-    "contains the functiondefs and classdefs info read from the stubs source"
+    "contains the functionDefs and classDefs info read from the stubs source"
     name: str
     decorators: Sequence[cst.Decorator]
     params: Optional[cst.Parameters] = None
     returns: Optional[cst.Annotation] = None
     docstr_node: Optional[cst.SimpleStatementLine] = None
     def_node: Optional[Union[cst.FunctionDef, cst.ClassDef]] = None
-    def_type: str = "?"  # funcdef or classdef or module
+    def_type: str = "?"  # funcDef or classDef or module
+
+
+@dataclass
+class AnnoValue:
+    "The different values for the annotations"
+    docstring: Optional[str] = ""  # strings
+    type_info: Optional[TypeInfo] = None  # simple type
+    overloads: List[TypeInfo] = field(default_factory=list)  # store function / method overloads
 
 
 class TransformError(Exception):
@@ -27,7 +35,7 @@ class TransformError(Exception):
 
 
 MODULE_KEY = ("__module",)
-MODDOC_KEY = ("__module_docstring",)
+MOD_DOCSTR_KEY = ("__module_docstring",)
 
 # debug helper
 _m = cst.parse_module("")
@@ -44,10 +52,7 @@ class StubTypingCollector(cst.CSTVisitor):
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            Union[TypeInfo, 
-                  str, 
-                  List[TypeInfo], # list of overloads 
-                  ],
+            AnnoValue,  # The TypeInfo or list of TypeInfo
         ] = {}
         self.comments: List[str] = []
 
@@ -56,7 +61,7 @@ class StubTypingCollector(cst.CSTVisitor):
         """Store the module docstring"""
         docstr = node.get_docstring()
         if docstr:
-            self.annotations[MODULE_KEY] = docstr
+            self.annotations[MODULE_KEY] = AnnoValue(docstring=docstr)
         return True
 
     def visit_Comment(self, node: cst.Comment) -> None:
@@ -86,7 +91,7 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="classdef",
             def_node=node,
         )
-        self.annotations[tuple(self.stack)] = ti
+        self.annotations[tuple(self.stack)] = AnnoValue(type_info=ti)
 
     def leave_ClassDef(self, original_node: cst.ClassDef) -> None:
         """remove the class name from the stack"""
@@ -110,14 +115,13 @@ class StubTypingCollector(cst.CSTVisitor):
             def_node=node,
         )
         key = tuple(self.stack)
-        if key not in self.annotations:
-            self.annotations[key] = []
-        assert isinstance(self.annotations[key], list)
-        self.annotations[key].append(ti)
-        # if node.decorators[0].decorator.value == "overload":
-        #     # overload functions are not stored in the annotations
-        #     return False
-        # self.annotations[tuple(self.stack)] = ti
+        if not key in self.annotations:
+            # store the first function/method signature
+            self.annotations[key] = AnnoValue(type_info=ti)
+
+        if len(node.decorators) > 0 and node.decorators[0].decorator.value == "overload":  # type: ignore
+            # and store the overloads
+            self.annotations[key].overloads.append(ti)
 
     def update_append_first_node(self, node):
         """Store the function/method docstring or function/method sig"""
