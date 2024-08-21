@@ -72,7 +72,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            Union[TypeInfo, str],  # value: TypeInfo
+            Union[TypeInfo, str, List[TypeInfo]],  # value: TypeInfo
         ] = {}
         self.comments: List[str] = []
 
@@ -174,6 +174,14 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # update the comments
         updated_node = insert_header_comments(updated_node, self.comments)
 
+        # hack to 2nd foo annotation
+        # updated_node = updated_node.with_changes( children=updated_node.children.append(self.annotations[('foo',)][1]))
+
+        # Insert the new function at the end of the module
+        new_function = self.annotations[("foo",)][1].def_node
+        modified_body = tuple(list(updated_node.body) + [new_function])
+        updated_node = updated_node.with_changes(body=modified_body)
+
         return updated_node
         # --------------------------------------------------------------------
 
@@ -217,6 +225,13 @@ class MergeCommand(VisitorBasedCodemodCommand):
             return updated_node
 
     # ------------------------------------------------------------------------
+    # def visit_Iterable(self, node) -> Optional[bool]:
+    #     return True
+
+    # def leave_Iterable(self, node) -> Optional[bool]:
+    #     return True
+
+    # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return True
@@ -231,12 +246,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the function
             return updated_node
         # update the firmware_stub from the doc_stub information
-        doc_stub = self.annotations[stack_id]
-        assert not isinstance(doc_stub, str)
+        if isinstance(self.annotations[stack_id], List) and self.annotations[stack_id]:
+            doc_stub = self.annotations[stack_id][0]
+        else:
+            doc_stub = self.annotations[stack_id]
+        assert isinstance(doc_stub, TypeInfo)
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
-        # we need to be carefull not to copy over all the annotations if the types are different
+        # we need to be careful not to copy over all the annotations if the types are different
         if doc_stub.def_type == "funcdef":
             # Same type, we can copy over the annotations
             # params that should  not be overwritten by the doc-stub ?
