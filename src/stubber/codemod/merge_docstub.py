@@ -7,7 +7,7 @@
 #
 import argparse
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, TypeVar, Union
 
 import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
@@ -147,43 +147,83 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         )
         # --------------------------------------------------------------------
         # update the docstring.
-        if MODULE_KEY not in self.annotations:
-            return updated_node
+        if MODULE_KEY in self.annotations:
 
-        # update/replace  module docstrings
-        # todo: or should we add / merge the docstrings?
-        docstub_docstr = self.annotations[MODULE_KEY].docstring
-        assert isinstance(docstub_docstr, str)
-        src_docstr = original_node.get_docstring() or ""
-        if src_docstr or docstub_docstr:
-            if docstub_docstr.strip() != src_docstr.strip():
-                if src_docstr:
-                    new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
-                else:
-                    new_docstr = f'"""\n' + docstub_docstr + '\n"""'
+            # update/replace  module docstrings
+            # todo: or should we add / merge the docstrings?
+            docstub_docstr = self.annotations[MODULE_KEY].docstring
+            assert isinstance(docstub_docstr, str)
+            src_docstr = original_node.get_docstring() or ""
+            if src_docstr or docstub_docstr:
+                if docstub_docstr.strip() != src_docstr.strip():
+                    if src_docstr:
+                        new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
+                    else:
+                        new_docstr = f'"""\n' + docstub_docstr + '\n"""'
 
-                docstr_node = cst.SimpleStatementLine(
-                    body=[
-                        cst.Expr(
-                            value=cst.SimpleString(
-                                value=new_docstr,
+                    docstr_node = cst.SimpleStatementLine(
+                        body=[
+                            cst.Expr(
+                                value=cst.SimpleString(
+                                    value=new_docstr,
+                                )
                             )
-                        )
-                    ]
-                )
-                updated_node = update_module_docstr(updated_node, docstr_node)
+                        ]
+                    )
+                    updated_node = update_module_docstr(updated_node, docstr_node)
         # --------------------------------------------------------------------
         # update the comments
         updated_node = insert_header_comments(updated_node, self.comments)
 
+        # --------------------------------------------------------------------
+        # make sure that any @overloads that are in the docstub are also in the firmware stub
         # hack to 2nd foo annotation
         # updated_node = updated_node.with_changes( children=updated_node.children.append(self.annotations[('foo',)][1]))
-        if "overload" in docstub_docstr.lower():
-            # Insert the new function at the end of the module
-            new_function = self.annotations[("foo",)].overloads[-1].def_node
-            modified_body = tuple(list(updated_node.body) + [new_function])
-            updated_node = updated_node.with_changes(body=modified_body)
 
+        updated_node = self.add_missed_overloads(updated_node, stack_id=())
+
+        return updated_node
+
+    Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
+
+    def add_missed_overloads(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
+        """
+        Add any missing overloads to the updated_node
+
+        """
+        missing_overloads = []
+        scope_keys = [k for k in self.annotations.keys() if k[: (len(stack_id))] == stack_id]
+
+        for key in scope_keys:
+            for overload in self.annotations[key].overloads:
+                missing_overloads.append(overload.def_node)
+            self.annotations[key].overloads = []  # remove for list, assume  works
+
+        if missing_overloads:
+            if isinstance(updated_node, cst.Module):
+                updated_body = list(updated_node.body)  # type: ignore
+            elif isinstance(updated_node, cst.ClassDef):
+                updated_body = list(updated_node.body.body)  # type: ignore
+            else:
+                raise ValueError(f"Unsupported node type: {updated_node}")
+            # insert each overload just after a function with the same name
+            # reversed to keep insertions in same order as in the docstub
+            for overload in reversed(missing_overloads):
+                for i, node in enumerate(updated_body):
+                    if (
+                        isinstance(node, cst.FunctionDef)
+                        and node.name.value == overload.name.value
+                    ):
+                        break
+                updated_body.insert(i + 1, overload)
+
+            if isinstance(updated_node, cst.Module):
+                updated_node = updated_node.with_changes(body=tuple(updated_body))
+            elif isinstance(updated_node, cst.ClassDef):
+                b1 = updated_node.body.with_changes(body=tuple(updated_body))
+                updated_node = updated_node.with_changes( body = b1)
+
+                # cst.IndentedBlock(body=tuple(updated_body)))  # type: ignore
         return updated_node
         # --------------------------------------------------------------------
 
@@ -216,14 +256,16 @@ class MergeCommand(VisitorBasedCodemodCommand):
             if updated_node.decorators:
                 new_decorators.extend(updated_node.decorators)
 
-            return updated_node.with_changes(
+            updated_node = updated_node.with_changes(
                 decorators=new_decorators,
                 bases=doc_stub.def_node.bases,  # type: ignore
             )
-        else:
-            # Different type: ClassDef != FuncDef ,
-            # for now just return the updated node
-            return updated_node
+        # else:
+        # Different type: ClassDef != FuncDef ,
+        # for now just return the updated node
+        # Add any missing methods overloads
+        updated_node = self.add_missed_overloads(updated_node, stack_id)
+        return updated_node
 
     # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
@@ -241,8 +283,13 @@ class MergeCommand(VisitorBasedCodemodCommand):
             return updated_node
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
-        assert isinstance(doc_stub, TypeInfo)
-        assert doc_stub
+        # Check if it is an @overload decorator
+        if any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and self.annotations[stack_id].overloads:  # type: ignore
+            # If there are overloads in the documentation , lets use the first one
+            doc_stub = self.annotations[stack_id].overloads.pop(0)
+
+        # assert isinstance(doc_stub, TypeInfo)
+        # assert doc_stub
         # first update the docstring
         updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
@@ -273,6 +320,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             new_decorators = []
             if doc_stub.decorators:
                 new_decorators.extend(doc_stub.decorators)
+
             if updated_node.decorators:
                 new_decorators.extend(updated_node.decorators)
 
