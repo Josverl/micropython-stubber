@@ -70,3 +70,6 @@ codecov.exe
 
 src/mpflash/coverag*
 Bugs to fix-MPFlash.md
+
+# no hypothesis patches
+**/.hypothesis
