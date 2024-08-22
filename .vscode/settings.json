@@ -8,7 +8,10 @@
     "peacock.color": "#9b5f28",
     "peacock.remoteColor": "#e2b991",
     "cSpell.words": [
-
+        "asname",
+        "classdef",
+        "functiondef",
+        "stubfile"
     ],
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "workbench.colorCustomizations": {

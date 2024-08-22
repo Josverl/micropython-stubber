@@ -43,6 +43,7 @@
                 "get-docstubs",
                 "--version",
                 "preview",
+                "--no-clean-rst",
                 // "get-mcu-stubs",
                 // "--serial",
                 // "/dev/ttyUSB0",

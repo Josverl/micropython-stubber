@@ -2,7 +2,9 @@
 Overloaded functions
 """
 
-# fmt: off
+from typing import overload
+
+
 @overload
 def foo(value: int) -> None:
     """
@@ -17,5 +19,14 @@ def foo(value: None) -> str:
     """
     Get foo value
     Second overload
+    """
+    ...
+
+
+@overload
+def foo(value: str) -> None:
+    """
+    Get foo string
+    Third overload
     """
     ...

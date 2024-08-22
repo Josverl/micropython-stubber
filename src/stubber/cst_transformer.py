@@ -118,8 +118,8 @@ class StubTypingCollector(cst.CSTVisitor):
         if not key in self.annotations:
             # store the first function/method signature
             self.annotations[key] = AnnoValue(type_info=ti)
-
-        if len(node.decorators) > 0 and node.decorators[0].decorator.value == "overload":  # type: ignore
+        
+        if any(dec.decorator.value == "overload" for dec in node.decorators): # type: ignore
             # and store the overloads
             self.annotations[key].overloads.append(ti)
 
