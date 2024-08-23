@@ -209,19 +209,22 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # insert each overload just after a function with the same name
             # reversed to keep insertions in same order as in the docstub
             for overload in reversed(missing_overloads):
+                matched = False
                 for i, node in enumerate(updated_body):
                     if (
                         isinstance(node, cst.FunctionDef)
                         and node.name.value == overload.name.value
                     ):
+                        matched = True
                         break
-                updated_body.insert(i + 1, overload)
+                if matched:
+                    updated_body.insert(i + 1, overload)
 
             if isinstance(updated_node, cst.Module):
                 updated_node = updated_node.with_changes(body=tuple(updated_body))
             elif isinstance(updated_node, cst.ClassDef):
                 b1 = updated_node.body.with_changes(body=tuple(updated_body))
-                updated_node = updated_node.with_changes( body = b1)
+                updated_node = updated_node.with_changes(body=b1)
 
                 # cst.IndentedBlock(body=tuple(updated_body)))  # type: ignore
         return updated_node
