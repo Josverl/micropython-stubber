@@ -324,7 +324,8 @@ class RSTReader(FileReadWriter):
         return block
 
     def add_link_to_docstr(self, block: List[str]):
-        """Add clickable hyperlinks to CPython docpages"""
+        """Add clickable hyperlinks to CPython docpages,
+        and clean the docstring from rst constructs"""
         if not self.clean_rst:
             return block
 
@@ -348,6 +349,9 @@ class RSTReader(FileReadWriter):
             _l = _l.replace(".. note:: ", "``Note:`` ")
             _l = _l.replace(".. data:: ", "")
             _l = _l.replace(".. admonition:: ", "Admonition:")
+            # remove rst highlights from docstrings
+            _l = _l.replace(":class: attention\n", "")
+            # Sphinx directive to link to CPython documentation
             _l = _l.replace("|see_cpython_module|", "CPython module:")
             # clean up unsupported escape sequences in rst
             _l = _l.replace(r"\ ", " ")

@@ -74,8 +74,6 @@ but can also be imported with a `u` prefix
 # also applies correction for some classes are documented as functions
 
 RST_DOC_FIXES: List[Tuple[str, str]] = [
-    # remove rst highlights from docstrings
-    (":class: attention\n", ""),
     # ------------------------------------------------------------------------------------------------
     # re.rst - function and class with the same name
     # done: issue https://github.com/micropython/micropython/issues/8273
