@@ -202,8 +202,16 @@ def test_rst_parse_class_10(line: str):
         # ESPNow extra notation
         ("ESPNow.config('param')   (ESP32 only)", "ESPNow.config(param)"),
         # machine.USBDevice
-        # Extranous / `USBDevice.active(self, [value] /)`
-        ("USBDevice.active(self, [value]/)", "USBDevice.active(self, value: Optional[Any]=None)"),
+        # Positional Only indicator should not be removed / `USBDevice.active(self, [value] /)`
+        (
+            "USBDevice.active(self, [value]/)",
+            "USBDevice.active(self, value: Optional[Any]=None ,/)",
+        ),
+        (
+            "USBDevice.active(self, [value] /)",
+            "USBDevice.active(self, value: Optional[Any]=None ,/)",
+        ),
+        # USBDevice.active(self, [value] /)
     ],
 )
 def test_fix_param(param_in, expected):
@@ -378,7 +386,7 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
 def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
     content = read_stub(rst_stubs / "machine", "__init__.pyi")
-    # return type omitted as this is tested seperately
+    # return type omitted as this is tested separately
     found = any(line.startswith("def deepsleep(time_ms") for line in content)
     assert (
         found
@@ -425,8 +433,8 @@ def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname:
     content = read_stub(rst_stubs / modulename, "__init__.pyi")
     if content == [] and modulename[0] == "u":
         # module name change to select.py in v1.17+
-        filename = filename[1:]
-        content = read_stub(rst_stubs, filename)
+        modulename = modulename[1:]
+        content = read_stub(rst_stubs, modulename)
         if content == []:
             assert f"module {modulename} was not stubbed"
     found = any(line.startswith(f"def {classname}") for line in content)

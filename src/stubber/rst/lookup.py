@@ -257,7 +257,7 @@ MODULE_GLUE = {
     "machine.ADC": ["ATTN_0DB:int = ..."],  #  uses Pin
     "machine.RTC": ["from machine import IDLE"],  #  uses Pin
     "machine.UART": ["from machine import IDLE"],  #  uses Pin
-    "network": ["from abc import ABC"],  #  for AbstractNIC
+    "network": ["from typing import Protocol"],  #  for AbstractNIC
     "rp2": ["from .PIO import PIO"],  #
     "pyb": ["from .UART import UART"],  #  uses Pin
     "pyb.Switch": ["from .Pin import Pin"],  #  uses Pin
@@ -269,7 +269,12 @@ PARAM_FIXES = [
     Fix(r"\**", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"/*", "*"),  # change weirdly written wildcards /* --> *
     Fix(r"**", "*"),  # change weirdly written wildcards ** --> *
-    Fix(r"/)", ")"),  # strange terminator in machine.USBDevice `USBDevice.active(self, [value] /)`
+    # do not remove / , this indicates positional only notation before the ,/
+    # RE to insert missing , before /
+    Fix(from_=r"(\w+.*?[^,])\s*/", to=r"\1 ,/", is_re=True),
+    Fix(",  ,/", ", /"),  # remove double commas ( cause by the above fix) its a kludge
+    # Fix("]=None /)", "]=None, /)")
+    # ref: https://regex101.com/r/crVQfA/1
     Fix("'param'", "param"),  # loose notation in documentation
     # illegal keywords
     Fix(
@@ -545,7 +550,7 @@ CHILD_PARENT_CLASS = {
     # array
     "array": "List",
     # network
-    "AbstractNIC": "ABC",
+    "AbstractNIC": "Protocol",
 }
 
 
