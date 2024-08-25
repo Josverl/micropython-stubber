@@ -152,7 +152,11 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+                _errors.append(
+                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
+                        name, item_instance, e
+                    )
+                )
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -218,7 +222,9 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
+            log.info(
+                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
+            )
 
         except ImportError:
             # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -233,7 +239,7 @@ class Stubber:
             )
             fp.write(s)
             fp.write(
-                "from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n"
+                "from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n"
             )
             self.write_object_stub(fp, new_module, module_name, "")
 
@@ -249,7 +255,9 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
+    def write_object_stub(
+        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
+    ):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -325,11 +333,13 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
-                        indent, item_name, ret
-                    )
+                    s = "{}@classmethod\n".format(
+                        indent
+                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
+                        indent, item_name, first, ret
+                    )
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -345,7 +355,10 @@ class Stubber:
                 if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
                     # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                    if item_name.upper() == item_name:
+                        s = "{0}{1}: {3} = Final[{2}]\n".format(indent, item_name, item_repr, t)
+                    else:
+                        s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
                 elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
@@ -358,7 +371,9 @@ class Stubber:
                         # use these types for the attribute
                         if t == "generator":
                             t = "Generator"
-                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
@@ -366,7 +381,9 @@ class Stubber:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
                         if " at " in item_repr:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
@@ -449,7 +466,9 @@ class Stubber:
                     f.write(",\n")
                 else:
                     self._json_first = False
-                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
+                line = '{{"module": "{}", "file": "{}"}}'.format(
+                    module_name, stub_file.replace("\\", "/")
+                )
                 f.write(line)
 
         except OSError:
@@ -592,10 +611,11 @@ def _info():  # type:() -> dict[str, str]
 
     if info["family"] == "micropython":
         info["version"]
+        # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
+            and info["version"] >= "1.10.0"
             and info["version"] <= "1.19.9"
         ):
             # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
@@ -801,6 +821,7 @@ def main():
         "breakout_trackball",
         "breakout_vl53l5cx",
         "btree",
+        "builtins",
         "cmath",
         "collections",
         "crypto",
