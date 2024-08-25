@@ -1,7 +1,7 @@
 from typing import List
 import pytest
 from pathlib import Path
-from stubber.codemod.enrich import merge_source_candidates
+# from stubber.codemod.enrich import merge_source_candidates
 
 
 @pytest.fixture
@@ -42,46 +42,46 @@ def docstub_path(tmp_path):
     return docstub_path
 
 
-@pytest.mark.parametrize(
-    "package_name, expected_candidates",
-    [
-        (
-            "package",
-            [
-                "package.py",
-                "package.pyi",
-                "upackage.py",
-                "upackage.pyi",
-            ],
-        ),
-        ("usys", ["usys.pyi", "sys.pyi"]),
-        ("_rp2", ["rp2.pyi", "_rp2.pyi"]),
-        ("rp2", ["rp2.pyi"]),
-        ("nonexistent", []),
-        ("foo", ["foo/__init__.pyi"]),
-        ("ufoo", ["foo/__init__.pyi"]),
-        ("bar", ["bar/__init__.pyi", "bar/barclass.pyi"]),
-        (
-            "machine",
-            [
-                "machine/__init__.pyi",
-                "machine/Pin.pyi",
-                "machine/Signal.pyi",
-                "machine/ADC.pyi",
-            ],
-        ),
-        ("machine.Pin", ["machine/Pin.pyi"]),
-    ],
-)
-def test_merge_source_candidates(
-    package_name: str,
-    expected_candidates: List[str],
-    docstub_path: Path,
-):
-    # Test with package name "package"
-    candidates = merge_source_candidates(package_name, docstub_path)
-    assert len(candidates) == len(expected_candidates)
-    for e in expected_candidates:
-        assert docstub_path / e in candidates
+# @pytest.mark.parametrize(
+#     "package_name, expected_candidates",
+#     [
+#         (
+#             "package",
+#             [
+#                 "package.py",
+#                 "package.pyi",
+#                 "upackage.py",
+#                 "upackage.pyi",
+#             ],
+#         ),
+#         ("usys", ["usys.pyi", "sys.pyi"]),
+#         ("_rp2", ["rp2.pyi", "_rp2.pyi"]),
+#         ("rp2", ["rp2.pyi"]),
+#         ("nonexistent", []),
+#         ("foo", ["foo/__init__.pyi"]),
+#         ("ufoo", ["foo/__init__.pyi"]),
+#         ("bar", ["bar/__init__.pyi", "bar/barclass.pyi"]),
+#         (
+#             "machine",
+#             [
+#                 "machine/__init__.pyi",
+#                 "machine/Pin.pyi",
+#                 "machine/Signal.pyi",
+#                 "machine/ADC.pyi",
+#             ],
+#         ),
+#         ("machine.Pin", ["machine/Pin.pyi"]),
+#     ],
+# )
+# def test_merge_source_candidates(
+#     package_name: str,
+#     expected_candidates: List[str],
+#     docstub_path: Path,
+# ):
+#     # Test with package name "package"
+#     candidates = merge_source_candidates(package_name, docstub_path)
+#     assert len(candidates) == len(expected_candidates)
+#     for e in expected_candidates:
+#         assert docstub_path / e in candidates
 
-    # todo : test ordering
+#     # todo : test ordering

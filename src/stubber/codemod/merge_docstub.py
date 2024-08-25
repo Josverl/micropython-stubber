@@ -141,7 +141,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         # bit of a hack to get the full module name
                         empty_mod = cst.parse_module("")
                         full_module_name = empty_mod.code_for_node(imp.module)  # type: ignore
-                        log.trace(f"add: from {full_module_name} import *")
+                        log.info(f"add: from {full_module_name} import *")
                         AddImportsVisitor.add_needed_import(
                             self.context,
                             module=full_module_name,
@@ -159,6 +159,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             if src_docstr or docstub_docstr:
                 if docstub_docstr.strip() != src_docstr.strip():
                     if src_docstr:
+                        log.trace(f"Append module docstrings. (new --- old) ")
                         new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
                     else:
                         new_docstr = f'"""\n' + docstub_docstr + '\n"""'
@@ -212,6 +213,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 matched = False
                 matched, i = self.locate_function_by_name(overload, updated_body)
                 if matched:
+                    log.trace(f"Add @overload for {overload.name.value}")
                     updated_body.insert(i + 1, overload)
 
             if isinstance(updated_node, cst.Module):
@@ -288,18 +290,18 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the function in docstub
             return updated_node
         if updated_node.decorators and any(
-            dec.decorator.value == "overload" for dec in updated_node.decorators
+            dec.decorator.value == "overload" for dec in updated_node.decorators # type: ignore
         ):
             # do not overwrite existing @overload functions
             # ASSUME: they are OK as they are
-            # A
             return updated_node
 
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
         # Check if it is an @overload decorator
-        if any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and self.annotations[stack_id].overloads:  # type: ignore
+        if any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1:  # type: ignore
             # If there are overloads in the documentation , lets use the first one
+            log.info(f"Change {updated_node.name.value} to @overload")
             doc_stub = self.annotations[stack_id].overloads.pop(0)
 
         # assert isinstance(doc_stub, TypeInfo)
