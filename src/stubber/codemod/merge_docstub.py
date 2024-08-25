@@ -24,10 +24,12 @@ from stubber.cst_transformer import (
     update_module_docstr,
 )
 
+Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
+"""TypeVar for Module or ClassDef that both support overloads"""
 ##########################################################################################
 # # log = logging.getLogger(__name__)
 #########################################################################################
-empty_module = cst.parse_module("")
+empty_module = cst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -184,8 +186,6 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         return updated_node
 
-    Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
-
     def add_missed_overloads(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
         """
         Add any missing overloads to the updated_node
@@ -207,16 +207,10 @@ class MergeCommand(VisitorBasedCodemodCommand):
             else:
                 raise ValueError(f"Unsupported node type: {updated_node}")
             # insert each overload just after a function with the same name
-            # reversed to keep insertions in same order as in the docstub
-            for overload in reversed(missing_overloads):
+
+            for overload in missing_overloads:
                 matched = False
-                for i, node in enumerate(updated_body):
-                    if (
-                        isinstance(node, cst.FunctionDef)
-                        and node.name.value == overload.name.value
-                    ):
-                        matched = True
-                        break
+                matched, i = self.locate_function_by_name(overload, updated_body)
                 if matched:
                     updated_body.insert(i + 1, overload)
 
@@ -228,6 +222,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
                 # cst.IndentedBlock(body=tuple(updated_body)))  # type: ignore
         return updated_node
+
+    def locate_function_by_name(self, overload, updated_body):
+        """locate the (last) function by name"""
+        matched = False
+        for i, node in reversed(list(enumerate(updated_body))):
+            if isinstance(node, cst.FunctionDef) and node.name.value == overload.name.value:
+                matched = True
+                break
+        return matched, i
         # --------------------------------------------------------------------
 
     # ------------------------------------------------------------
@@ -282,8 +285,16 @@ class MergeCommand(VisitorBasedCodemodCommand):
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
-            # no changes to the function
+            # no changes to the function in docstub
             return updated_node
+        if updated_node.decorators and any(
+            dec.decorator.value == "overload" for dec in updated_node.decorators
+        ):
+            # do not overwrite existing @overload functions
+            # ASSUME: they are OK as they are
+            # A
+            return updated_node
+
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
         # Check if it is an @overload decorator
