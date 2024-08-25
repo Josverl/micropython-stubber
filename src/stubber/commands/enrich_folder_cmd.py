@@ -1,5 +1,5 @@
 """
-enrich machinestubs with docstubs
+Enrich mcu/firmware stubs with information from the docstubs
 """
 
 from pathlib import Path
@@ -17,20 +17,22 @@ from .cli import stubber_cli
 @stubber_cli.command(name="enrich")
 @click.option(
     "--stubs",
+    "--dest",
     "-s",
     "stubs_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the MCU stubs to be updated",
+    help="File or folder containing the MCU stubs to be updated (destination)",
     show_default=True,
 )
 @click.option(
     "--docstubs",
+    "--source",
     "-ds",
     "docstubs_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the docstubs to be applied",
+    help="File or folder containing the docstubs to be read from (source)",
     show_default=True,
 )
 @click.option("--diff", default=False, help="Show diff", show_default=True, is_flag=True)

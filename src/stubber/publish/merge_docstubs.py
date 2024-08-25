@@ -128,7 +128,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
                 (dest_path / name).with_suffix(suffix).unlink()  # type: ignore
 
     # 2 - Enrich the MCU stubs with the document stubs
-    result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
+    result = enrich_folder(dest_path, source_path=docstub_path, write_back=True)
 
     # copy the docstubs manifest.json file to the package folder
     if (docstub_path / "modules.json").exists():
