@@ -7,6 +7,7 @@ import pytest
 
 pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
+
 class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
     expected: str  # The source code after the transformation.
@@ -48,7 +49,7 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
         with open(doc_stubs[0], encoding="utf-8") as file:
             doc_stub = file.read()
 
-        output = test_case_directory.joinpath("output.py")
+        output = test_case_directory.joinpath("output.xxx").with_suffix(before_files[0].suffix)
 
         test_cases.append(
             pytest.param(

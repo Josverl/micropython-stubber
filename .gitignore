@@ -53,7 +53,7 @@ scripts/bulk_stubber.json
 dist/
 
 # code modding output saved for tests / comparison
-tests/codemods/codemod_test_cases/**/output.py
+tests/codemods/codemod_test_cases/**/output.*
 
 # ignore the typings folders used in testing.
 snippets/*/typings
