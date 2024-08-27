@@ -151,7 +151,7 @@ class Stubber:
 			elif I.startswith("<class '"):
 				G=I[8:-2];D=B
 				if G in(r,p,q,s,'bytearray','bytes'):
-					if C.upper()==C:D='{0}{1}: {3} = Final[{2}]\n'.format(F,C,H,G)
+					if C.upper()==C:D='{0}{1}: Final[{3}] = {2}\n'.format(F,C,H,G)
 					else:D=X.format(F,C,H,G)
 				elif G in(e,d,c):f={e:'{}',d:'[]',c:'()'};D=X.format(F,C,f[G],G)
 				elif G in('object','set','frozenset','Pin',Y):
