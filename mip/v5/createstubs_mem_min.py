@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.23.0
+This variant was generated from createstubs.py by micropython-stubber v1.23.2
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.23.0"
+__version__ = "v1.23.2a0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -240,7 +240,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -348,8 +348,10 @@ class Stubber:
 
                 if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
-                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                    if item_name.upper() == item_name:  # ALL_CAPS --> Final
+                        s = "{0}{1}: Final[{3}] = {2}\n".format(indent, item_name, item_repr, t)
+                    else:
+                        s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
                 elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
@@ -492,7 +494,7 @@ def ensure_folder(path: str):
 
 def _build(s):
     # extract build from sys.version or os.uname().version if available
-    # sys.version: 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.version: 'MicroPython v1.23.2a0-preview.6.g3d0b6276f'
     # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
@@ -594,13 +596,9 @@ def _info():  # type:() -> dict[str, str]
 
     if info["family"] == "micropython":
         info["version"]
-        if (
-            info["version"]
-            and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.0 do not have a micro .0
-            and info["version"] <= "1.19.9"
-        ):
-            # versions from 1.10.0 to 1.23.0 do not have a micro .0
+        # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
+        if info["version"] and info["version"].endswith(".0") and info["version"] >= "1.10.0" and info["version"] <= "1.19.9":
+            # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
