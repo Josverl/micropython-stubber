@@ -99,7 +99,7 @@ def enrich_file(
     diff: bool = False,
     write_back: bool = False,
     package_name="",
-):
+) -> Generator[str, None, None]:
     """
     Enrich a MCU stubs using the doc-stubs in another folder.
     Both (.py or .pyi) files are supported.
