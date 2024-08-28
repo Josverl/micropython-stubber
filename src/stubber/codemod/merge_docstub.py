@@ -340,6 +340,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             if updated_node.decorators:
                 new_decorators.extend(updated_node.decorators)
 
+            ):
             return updated_node.with_changes(
                 decorators=new_decorators,
                 params=doc_stub.params if overwrite_params else updated_node.params,
