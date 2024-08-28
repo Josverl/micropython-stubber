@@ -19,17 +19,18 @@ pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 )
 def test_enrich_file_with_stub(source_file: Path, expected: bool):
     #    source_file = Path("./tests/data/stub_merge/micropython-v1_18-esp32/esp32.py")
-    diff = None
+    diffs = []
     docstub_path = Path("./tests/data/stub_merge/micropython-v1_18-docstubs")
     try:
-        diff = enrich_file(source_file, docstub_path, diff=True, write_back=False)
+        diff_gen = enrich_file(source_file, docstub_path, diff=True, write_back=False)
+        diffs = list(diff_gen)
     except FileNotFoundError:
         assert not expected, "docstub File not found but expected"
 
     if expected == False:
-        assert diff is None, "no change to the stub was expected but found: \n{}".format(diff)
+        assert len(diffs) == 0, "no change to the stub was expected but found: \n{}".format(diffs)
     else:
-        assert len(diff) > 0, "change to the stub was expected but not found"
+        assert diffs, "change to the stub was expected but not found"
 
 
 @pytest.mark.parametrize(
@@ -78,4 +79,4 @@ def test_enrich_folder(
     ), f"Expected at least {expected_count} files to be enriched but found {count}"
     m_run_black.assert_called_once()
     m_enrich_file.assert_called()
-    assert m_enrich_file.call_count >= count
+    assert m_enrich_file.call_count >= expected_count
