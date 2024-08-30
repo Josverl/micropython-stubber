@@ -1,18 +1,18 @@
 import functools
 import zipfile
 from pathlib import Path
-from typing import List, Optional
+from typing import Final, List, Optional
 
 import jsons
 
 from mpflash.mpboard_id.board import Board
 
 ###############################################################################################
-HERE = Path(__file__).parent
+HERE: Final = Path(__file__).parent
 ###############################################################################################
 
 
-def write_boardinfo_json(board_list: List[Board], *, folder: Path):
+def write_boardinfo_json(board_list: List[Board], *, folder: Optional[Path] = None):
     """Writes the board information to a JSON file.
 
     Args:
@@ -21,6 +21,8 @@ def write_boardinfo_json(board_list: List[Board], *, folder: Path):
     """
     import zipfile
 
+    if not folder:
+        folder = HERE
     # create a zip file with the json file
     with zipfile.ZipFile(folder / "board_info.zip", "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         # write the list to json file inside the zip
@@ -30,6 +32,9 @@ def write_boardinfo_json(board_list: List[Board], *, folder: Path):
 
 @functools.lru_cache(maxsize=20)
 def read_known_boardinfo(board_info: Optional[Path] = None) -> List[Board]:
+    """Reads the board information from a JSON file in a zip file."""
+
+    import zipfile
 
     if not board_info:
         board_info = HERE / "board_info.zip"

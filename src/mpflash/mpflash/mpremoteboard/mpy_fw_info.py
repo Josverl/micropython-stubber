@@ -36,7 +36,9 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": (
+                "stm32" if sys.platform.startswith("pyb") else sys.platform
+            ),  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
@@ -48,7 +50,11 @@ def _info():  # type:() -> dict[str, str]
     except AttributeError:
         pass
     try:
-        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine
+        machine = (
+            sys.implementation._machine
+            if "_machine" in dir(sys.implementation)
+            else os.uname().machine
+        )
         info["board"] = machine.strip()
         info["cpu"] = machine.split("with")[-1].strip() if "with" in machine else ""
         info["mpy"] = (
@@ -100,7 +106,8 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"]
+            >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # drop the .0 for newer releases
@@ -110,19 +117,23 @@ def _info():  # type:() -> dict[str, str]
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
         # .mpy architecture
-        arch = [
-            None,
-            "x86",
-            "x64",
-            "armv6",
-            "armv6m",
-            "armv7m",
-            "armv7em",
-            "armv7emsp",
-            "armv7emdp",
-            "xtensa",
-            "xtensawin",
-        ][sys_mpy >> 10]
+        try:
+            arch = [
+                None,
+                "x86",
+                "x64",
+                "armv6",
+                "armv6m",
+                "armv7m",
+                "armv7em",
+                "armv7emsp",
+                "armv7emdp",
+                "xtensa",
+                "xtensawin",
+                "hazard3riscv",  # assumed
+            ][sys_mpy >> 10]
+        except IndexError:
+            arch = "unknown"
         if arch:
             info["arch"] = arch
         # .mpy version.minor
