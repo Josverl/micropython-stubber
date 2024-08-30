@@ -27,7 +27,7 @@ def start_new_thread(function: Callable, args: Tuple) -> None:
     When the function returns, the thread silently exits.
 
     - rp2040 : only one additional thread is supported, so this function will raise an exception if called more than once unless the first thread has already exited.
-    
+
     """
     ...
 
@@ -54,10 +54,11 @@ def allocate_lock() -> lock:  # Lock object
 class lock:
     def __init__(self) -> None:
         """
-        Locks should be allocaded via `allocate_lock()`.
+        Locks should be allocated via `allocate_lock()`.
         Initially, it is unlocked.
         """
         ...
+
     def acquire(self, blocking: bool = True, timeout: int = -1) -> bool:
         """
         Without any optional argument, this method acquires the lock unconditionally, if necessary waiting until it is released by another thread (only one thread at a time can acquire a lock — that’s their reason for existence).
@@ -65,10 +66,13 @@ class lock:
         The return value is True if the lock is acquired successfully, False if not.
         """
         ...
+
     def release(self) -> None:
         """Releases the lock. The lock must have been acquired earlier, but not necessarily by the same thread."""
         ...
+
     def locked(self) -> bool:
         """
-        Return the status of the lock: True if it has been acquired by some thread, False if not."""
+        Return the status of the lock: True if it has been acquired by some thread, False if not.
+        """
         ...

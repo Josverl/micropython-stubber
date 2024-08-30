@@ -40,10 +40,15 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-VV",
-                "get-docstubs",
-                "--version",
-                "preview",
-                "--no-clean-rst",
+                "enrich",
+                "--stubs",
+                "repos\\micropython-stubs\\stubs\\micropython-v1_23_0-docstubs\\network",
+                "--docstubs",
+                "repos\\intellij-micropython\\typehints\\micropython",
+                // "get-docstubs",
+                // "--version",
+                // "preview",
+                // "--no-clean-rst",
                 // "get-mcu-stubs",
                 // "--serial",
                 // "/dev/ttyUSB0",
@@ -179,13 +184,6 @@
             // false : Avoid debugpy trying to debug micropython
             // but may cause issue with pytest-cov coverage reporting 
             "subProcess": false,
-        },
-        {
-            "name": "PowerShell Launch Current File",
-            "type": "PowerShell",
-            "request": "launch",
-            "script": "${file}",
-            "cwd": "${file}"
         },
     ],
     "inputs": [

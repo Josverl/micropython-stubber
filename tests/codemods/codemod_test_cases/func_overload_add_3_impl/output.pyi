@@ -4,6 +4,7 @@ Overloaded functions
 """
 from typing import overload
 
+
 @overload
 def foo(value: int) -> None:
     """
