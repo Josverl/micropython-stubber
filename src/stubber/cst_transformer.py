@@ -23,8 +23,13 @@ class TypeInfo:
 class AnnoValue:
     "The different values for the annotations"
     docstring: Optional[str] = ""  # strings
+    "Module docstring or function/method docstring"
+    docstring_node: Optional[cst.SimpleStatementLine] = None
+    "the docstring node for a function method to reuse with overloads"
     type_info: Optional[TypeInfo] = None  # simple type
-    overloads: List[TypeInfo] = field(default_factory=list)  # store function / method overloads
+    "function/method or class definition read from the docstub source"
+    overloads: List[TypeInfo] = field(default_factory=list)
+    "function / method overloads read from the docstub source"
 
 
 class TransformError(Exception):
@@ -118,8 +123,8 @@ class StubTypingCollector(cst.CSTVisitor):
         if not key in self.annotations:
             # store the first function/method signature
             self.annotations[key] = AnnoValue(type_info=ti)
-        
-        if any(dec.decorator.value == "overload" for dec in node.decorators): # type: ignore
+
+        if any(dec.decorator.value == "overload" for dec in node.decorators):  # type: ignore
             # and store the overloads
             self.annotations[key].overloads.append(ti)
 
@@ -139,17 +144,31 @@ class StubTypingCollector(cst.CSTVisitor):
 
 def update_def_docstr(
     dest_node: Union[cst.FunctionDef, cst.ClassDef],
-    src_comment: Optional[cst.SimpleStatementLine],
+    src_docstr: Optional[Union[cst.SimpleStatementLine, str]] = None,
     src_node=None,
 ) -> Any:
     """
     Update the docstring of a function/method or class
+    The supplied `src_docstr` can be a string or a SimpleStatementLine
 
-    for functiondefs ending in an ellipsis, the entire body needs to be replaced.
-    in this case the src_body is mandatory.
+    for function defs ending in an ellipsis, the entire body needs to be replaced.
+    in this case `src_node` is required.
     """
-    if not src_comment:
+    if not src_docstr:
         return dest_node
+    if isinstance(src_docstr, str):
+        if not src_docstr[0] in ('"', "'"):
+            src_docstr = f'"""{src_docstr}"""'
+        # convert the string to a SimpleStatementLine
+        src_docstr = cst.SimpleStatementLine(
+            body=[
+                cst.Expr(
+                    value=cst.SimpleString(
+                        value=src_docstr,
+                    ),
+                ),
+            ]
+        )
 
     # function def on a single line ending with an ellipsis (...)
     if isinstance(dest_node.body, cst.SimpleStatementSuite):
@@ -160,13 +179,13 @@ def update_def_docstr(
         raise TransformError("Expected Def with Indented body")
 
     # classdef of functiondef with an indented body
-    # need some funcky casting to avoid issues with changing the body
-    # note : indented body is nested : body.body
+    # need some funky casting to avoid issues with changing the body
+    # note : indented body is nested : IndentedBlock.body.body
     if dest_node.get_docstring() is None:
         # append the new docstring and append the function body
-        body = tuple([src_comment] + list(dest_node.body.body))
+        body = tuple([src_docstr] + list(dest_node.body.body))
     else:
-        body = tuple([src_comment] + list(dest_node.body.body[1:]))
+        body = tuple([src_docstr] + list(dest_node.body.body[1:]))
     body_2 = dest_node.body.with_changes(body=body)
 
     return dest_node.with_changes(body=body_2)
