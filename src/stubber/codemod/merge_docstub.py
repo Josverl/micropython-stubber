@@ -7,7 +7,7 @@
 #
 import argparse
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
@@ -53,7 +53,6 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """Add command-line args that a user can specify for running this codemod."""
 
         arg_parser.add_argument(
-            # "-sf",
             "--stubfile",
             dest="docstub_file",
             metavar="PATH",
@@ -62,7 +61,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
             required=True,
         )
 
-    def __init__(self, context: CodemodContext, docstub_file: Union[Path, str]) -> None:
+        arg_parser.add_argument(
+            "--use-docstrings",
+            "--ds",
+            dest="use_docstrings",
+            default=True,
+        )
+
+    def __init__(
+        self,
+        context: CodemodContext,
+        docstub_file: Union[Path, str],
+        update_docstrings: bool = True,
+    ) -> None:
         """initialize the base class with context, and save our args."""
         super().__init__(context)
         self.replace_functiondef_with_classdef = True
@@ -79,6 +90,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # Union[TypeInfo, str, List[TypeInfo]],  # value: TypeInfo
         ] = {}
         self.comments: List[str] = []
+
+        self.update_docstrings = update_docstrings
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
@@ -157,12 +170,12 @@ class MergeCommand(VisitorBasedCodemodCommand):
             assert isinstance(docstub_docstr, str)
             src_docstr = original_node.get_docstring() or ""
             if src_docstr or docstub_docstr:
-                if docstub_docstr.strip() != src_docstr.strip():
+                if self.update_docstrings and (docstub_docstr.strip() != src_docstr.strip()):
                     if src_docstr:
                         log.trace(f"Append module docstrings. (new --- old) ")
-                        new_docstr = f'"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
+                        new_docstr = '"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
                     else:
-                        new_docstr = f'"""\n' + docstub_docstr + '\n"""'
+                        new_docstr = '"""\n' + docstub_docstr + '\n"""'
 
                     docstr_node = cst.SimpleStatementLine(
                         body=[
@@ -179,10 +192,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         updated_node = insert_header_comments(updated_node, self.comments)
 
         # --------------------------------------------------------------------
-        # make sure that any @overloads that are in the docstub are also in the firmware stub
-        # hack to 2nd foo annotation
-        # updated_node = updated_node.with_changes( children=updated_node.children.append(self.annotations[('foo',)][1]))
-
+        # make sure that any @overloads that not yet applied  are also added to the firmware stub
         updated_node = self.add_missed_overloads(updated_node, stack_id=())
 
         return updated_node
@@ -197,7 +207,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         for key in scope_keys:
             for overload in self.annotations[key].overloads:
-                missing_overloads.append(overload.def_node)
+                missing_overloads.append((overload.def_node, key))
             self.annotations[key].overloads = []  # remove for list, assume  works
 
         if missing_overloads:
@@ -209,11 +219,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 raise ValueError(f"Unsupported node type: {updated_node}")
             # insert each overload just after a function with the same name
 
-            for overload in missing_overloads:
+            for overload, key in missing_overloads:
                 matched = False
                 matched, i = self.locate_function_by_name(overload, updated_body)
                 if matched:
                     log.trace(f"Add @overload for {overload.name.value}")
+                    if not self.update_docstrings:
+                        docstring_node = self.annotations[key].docstring_node or ""
+                        # Use the new overload - but with the existing docstring
+                        overload = update_def_docstr(overload, docstring_node)
                     updated_body.insert(i + 1, overload)
 
             if isinstance(updated_node, cst.Module):
@@ -290,7 +304,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # no changes to the function in docstub
             return updated_node
         if updated_node.decorators and any(
-            dec.decorator.value == "overload" for dec in updated_node.decorators # type: ignore
+            dec.decorator.value == "overload" for dec in updated_node.decorators  # type: ignore
         ):
             # do not overwrite existing @overload functions
             # ASSUME: they are OK as they are
@@ -299,15 +313,39 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
         # Check if it is an @overload decorator
-        if any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1:  # type: ignore
-            # If there are overloads in the documentation , lets use the first one
+        add_overload = any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1  # type: ignore
+
+        # If there are overloads in the documentation , lets use the first one
+        if add_overload:
             log.info(f"Change {updated_node.name.value} to @overload")
+            # Use the new overload - but with the existing docstring
             doc_stub = self.annotations[stack_id].overloads.pop(0)
+            assert doc_stub.def_node
+
+            if self.update_docstrings:
+                # we have copied over the entire function definition, no further processing should be done on this node
+                doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)
+                updated_node = doc_stub.def_node
+
+            else:
+                # Save (first) existing docstring if any
+                existing_ds = None
+                if updated_node.get_docstring():
+                    # if there is one , then get it including the layout
+                    existing_ds = original_node.body.body[0]
+                    assert isinstance(existing_ds, cst.SimpleStatementLine)
+
+                self.annotations[stack_id].docstring_node = existing_ds
+                updated_node = update_def_docstr(doc_stub.def_node, existing_ds)
+            return updated_node
 
         # assert isinstance(doc_stub, TypeInfo)
         # assert doc_stub
         # first update the docstring
-        updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
+        # TODO: DO Not overwrite existing docstring
+        if self.update_docstrings:
+            updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
+
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
         # we need to be careful not to copy over all the annotations if the types are different
         if doc_stub.def_type == "funcdef":
@@ -320,6 +358,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 "*args, **kwargs",
                 "self",
                 "self, *args, **kwargs",
+                "cls",
+                "cls, *args, **kwargs",
             ]
             # return that should not be overwritten by the doc-stub ?
             overwrite_return = True
@@ -337,10 +377,18 @@ class MergeCommand(VisitorBasedCodemodCommand):
             if doc_stub.decorators:
                 new_decorators.extend(doc_stub.decorators)
 
-            if updated_node.decorators:
-                new_decorators.extend(updated_node.decorators)
+            for decorator in updated_node.decorators:
+                if not decorator.decorator.value in [n.decorator.value for n in new_decorators]:  # type: ignore
+                    new_decorators.append(decorator)
 
+            # if there is both a static and a class method, we remove the class decorator to avoid inconsistencies
+            if any(dec.decorator.value == "staticmethod" for dec in doc_stub.decorators) and any(  # type: ignore
+                dec.decorator.value == "staticmethod" for dec in doc_stub.decorators  # type: ignore
             ):
+                new_decorators = [
+                    dec for dec in new_decorators if dec.decorator.value != "classmethod"
+                ]
+
             return updated_node.with_changes(
                 decorators=new_decorators,
                 params=doc_stub.params if overwrite_params else updated_node.params,

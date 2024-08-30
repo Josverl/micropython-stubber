@@ -19,7 +19,7 @@ from .codemodcollector import TestCase as MyTestCase
 from .codemodcollector import collect_test_cases
 
 # mark all tests
-pytestmark = [pytest.mark.stubber,pytest.mark.codemod]
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
 
 def print_diff(before: str, after: str):
@@ -124,10 +124,11 @@ class TestMergeDocStubs(PytestCodemodTest):
             pytest.skip("Skipping test because of _skip")
         if "_xfail" in str(test_case.path):
             pytest.xfail("xfail")
-
+        no_docstrings = str(test_case.path).endswith("no-docstring")
         self.assertCodemod(
             test_case.before,
             test_case.expected,
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
+            update_docstrings=not no_docstrings,
         )

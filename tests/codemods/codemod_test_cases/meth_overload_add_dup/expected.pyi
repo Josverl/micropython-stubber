@@ -5,9 +5,9 @@ Overloaded methods
 from typing import overload
 
 class Parrot:
-
     @overload
-    def speak(number: int):
+    @classmethod
+    def speak(cls, number: int):
         """
         Speak a number
         First overload
@@ -15,7 +15,8 @@ class Parrot:
         ...
 
     @overload
-    def speak(words: str):
+    @classmethod
+    def speak(cls, words: str):
         """
         Speak a word
         Second overload

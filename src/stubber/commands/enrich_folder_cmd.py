@@ -44,6 +44,15 @@ from .cli import stubber_cli
     is_flag=True,
 )
 @click.option(
+    "--docstrings/--no-docstrings",
+    "--ds/--no-ds",
+    "use_docstrings",
+    default=True,
+    help="Use docstrings from the (docstub) source.",
+    show_default=True,
+    is_flag=True,
+)
+@click.option(
     "--package-name",
     "-p",
     "package_name",
@@ -56,6 +65,7 @@ def cli_enrich_folder(
     docstubs_folder: Union[str, Path],
     diff: bool = False,
     dry_run: bool = False,
+    use_docstrings: bool = True,
     package_name: str = "",
 ):
     """
@@ -70,4 +80,5 @@ def cli_enrich_folder(
         write_back=write_back,
         require_docstub=False,
         package_name=package_name,
+        use_docstrings=use_docstrings,
     )
