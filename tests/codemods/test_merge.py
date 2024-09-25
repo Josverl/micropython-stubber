@@ -113,7 +113,7 @@ class PytestCodemodTest(_CodemodTest):
             self.assertSequenceEqual(expected_warnings, context.warnings)
 
 
-@pytest.mark.parametrize("test_case", collect_test_cases())
+@pytest.mark.parametrize("test_case", collect_test_cases(folder="codemod_test_cases"))
 class TestMergeDocStubs(PytestCodemodTest):
     # The codemod that will be instantiated for us in assertCodemod.
     TRANSFORM = MergeCommand
@@ -124,11 +124,32 @@ class TestMergeDocStubs(PytestCodemodTest):
             pytest.skip("Skipping test because of _skip")
         if "_xfail" in str(test_case.path):
             pytest.xfail("xfail")
-        no_docstrings = str(test_case.path).endswith("no-docstring")
+
         self.assertCodemod(
             test_case.before,
             test_case.expected,
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
-            update_docstrings=not no_docstrings,
+            # params_only =False,
+        )
+
+
+@pytest.mark.parametrize("test_case", collect_test_cases(folder="params_test_cases"))
+class TestMergeParams(PytestCodemodTest):
+    # The codemod that will be instantiated for us in assertCodemod.
+    TRANSFORM = MergeCommand
+
+    def test_merge_params(self, test_case: MyTestCase) -> None:
+        # context will allows the detection of relative imports
+        if "_skip" in str(test_case.path):
+            pytest.skip("Skipping test because of _skip")
+        if "_xfail" in str(test_case.path):
+            pytest.xfail("xfail")
+
+        self.assertCodemod(
+            test_case.before,
+            test_case.expected,
+            docstub_file=test_case.stub_file,
+            save_output=test_case.output,
+            params_only=True,
         )

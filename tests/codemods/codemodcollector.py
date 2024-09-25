@@ -17,14 +17,14 @@ class TestCase(NamedTuple):
     path: Path = None  # where are the tests
 
 
-def collect_test_cases() -> List[Tuple[Any, ...]]:
+def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
     """
     Collect tests cases for the test case folder , each containing a
     - before.py||.pyi
     - after.py||.pyi
     - stub.py||.pyi
     """
-    root_test_cases_directory = Path(__file__).parent.joinpath("codemod_test_cases")
+    root_test_cases_directory = Path(__file__).parent.joinpath(folder)
     print(root_test_cases_directory)
 
     test_cases: List = []

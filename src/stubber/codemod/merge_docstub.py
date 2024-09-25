@@ -62,17 +62,16 @@ class MergeCommand(VisitorBasedCodemodCommand):
         )
 
         arg_parser.add_argument(
-            "--use-docstrings",
-            "--ds",
-            dest="use_docstrings",
-            default=True,
+            "--params-only",
+            dest="params_only",
+            default=False,
         )
 
     def __init__(
         self,
         context: CodemodContext,
         docstub_file: Union[Path, str],
-        update_docstrings: bool = True,
+        params_only: bool = False,
     ) -> None:
         """initialize the base class with context, and save our args."""
         super().__init__(context)
@@ -91,7 +90,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         ] = {}
         self.comments: List[str] = []
 
-        self.update_docstrings = update_docstrings
+        self.params_only = params_only
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
@@ -170,7 +169,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             assert isinstance(docstub_docstr, str)
             src_docstr = original_node.get_docstring() or ""
             if src_docstr or docstub_docstr:
-                if self.update_docstrings and (docstub_docstr.strip() != src_docstr.strip()):
+                if not self.params_only and (docstub_docstr.strip() != src_docstr.strip()):
                     if src_docstr:
                         log.trace(f"Append module docstrings. (new --- old) ")
                         new_docstr = '"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
@@ -224,7 +223,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 matched, i = self.locate_function_by_name(overload, updated_body)
                 if matched:
                     log.trace(f"Add @overload for {overload.name.value}")
-                    if not self.update_docstrings:
+                    if self.params_only:
                         docstring_node = self.annotations[key].docstring_node or ""
                         # Use the new overload - but with the existing docstring
                         overload = update_def_docstr(overload, docstring_node)
@@ -322,7 +321,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             doc_stub = self.annotations[stack_id].overloads.pop(0)
             assert doc_stub.def_node
 
-            if self.update_docstrings:
+            if not self.params_only:
                 # we have copied over the entire function definition, no further processing should be done on this node
                 doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)
                 updated_node = doc_stub.def_node
@@ -342,8 +341,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # assert isinstance(doc_stub, TypeInfo)
         # assert doc_stub
         # first update the docstring
-        # TODO: DO Not overwrite existing docstring
-        if self.update_docstrings:
+        no_docstring = updated_node.get_docstring() == None
+        if (not self.params_only) or no_docstring:
+            # DO Not overwrite existing docstring
             updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
 
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
@@ -351,16 +351,22 @@ class MergeCommand(VisitorBasedCodemodCommand):
         if doc_stub.def_type == "funcdef":
             # Same type, we can copy over the annotations
             # params that should  not be overwritten by the doc-stub ?
-            params_txt = empty_module.code_for_node(original_node.params)
-            overwrite_params = params_txt in [
-                "",
-                "...",
-                "*args, **kwargs",
-                "self",
-                "self, *args, **kwargs",
-                "cls",
-                "cls, *args, **kwargs",
-            ]
+            if self.params_only:
+                # we are copying rich type definitions, just assume they are better than what is currently
+                # in the destination stub
+                overwrite_params = True
+            else:
+                params_txt = empty_module.code_for_node(original_node.params)
+                overwrite_params = params_txt in [
+                    "",
+                    "...",
+                    "*args, **kwargs",
+                    "self",
+                    "self, *args, **kwargs",
+                    "cls",
+                    "cls, *args, **kwargs",
+                ]
+
             # return that should not be overwritten by the doc-stub ?
             overwrite_return = True
             if original_node.returns:

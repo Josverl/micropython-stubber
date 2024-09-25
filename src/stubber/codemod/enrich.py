@@ -143,7 +143,7 @@ def enrich_file(
             log.info(f"Merge {target} from {source}")
             # read source file
             codemod_instance = merge_docstub.MergeCommand(
-                context, docstub_file=source, update_docstrings=use_docstrings
+                context, docstub_file=source, params_only=use_docstrings
             )
             if new_code := exec_transform_with_prettyprint(
                 codemod_instance,
