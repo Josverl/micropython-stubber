@@ -376,3 +376,26 @@ method_length = 50
 method_cyclomatic_complexity = 99
 method_cognitive_complexity = 99
 method_working_memory = 99
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [".*", "__*", "dist"]
+
+# Same as Black.
+line-length = 140
+indent-width = 4
+
+# Assume Python 3.8
+target-version = "py38"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F", "U"]
+ignore = ["E402", "F821", "F403"]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
