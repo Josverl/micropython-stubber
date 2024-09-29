@@ -85,6 +85,7 @@ from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
 
 SEPARATOR = "::"
+USE_SUBMODULES = True
 
 
 class FileReadWriter:
@@ -483,9 +484,8 @@ class RSTParser(RSTReader):
         toctree = self.read_docstring()
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
-        use_sub_modules = True
 
-        if use_sub_modules:
+        if USE_SUBMODULES:
             # add sub modules imports
             for file in toctree:
                 rel_name = file.replace(f"{self.modulename}.", ".").replace(".rst", "")

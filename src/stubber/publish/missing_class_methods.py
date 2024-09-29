@@ -37,7 +37,11 @@ def add_machine_pin_call(merged_path: Path, version: str):
 
     log.trace(f"Parsing {mod_path} for __call__ method")
     source = mod_path.read_text(encoding="utf-8")
-    module = cst.parse_module(source)
+    try:
+        module = cst.parse_module(source)
+    except Exception as e:
+        log.error(f"Error parsing {mod_path}: {e}")
+        raise e
 
     call_finder = CallFinder()
     module.visit(call_finder)

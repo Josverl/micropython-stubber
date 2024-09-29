@@ -22,6 +22,7 @@ def generate_from_rst(
     pattern: str = "*.rst",
     suffix: str = ".pyi",
     black: bool = True,
+    autoflake: bool = True,
     clean_rst: bool = True,
 ) -> int:
     dst_path.mkdir(parents=True, exist_ok=True)
@@ -41,7 +42,7 @@ def generate_from_rst(
 
     log.info("::group:: start post processing of retrieved stubs")
     # do not run stubgen
-    utils.do_post_processing([dst_path], stubgen=False, black=black, autoflake=True)
+    utils.do_post_processing([dst_path], stubgen=False, black=black, autoflake=autoflake)
 
     # Generate a module manifest for the docstubs
     utils.make_manifest(
@@ -73,7 +74,9 @@ def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
     return files
 
 
-def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path],clean_rst:bool):
+def make_docstubs(
+    dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path], clean_rst: bool
+):
     """Create the docstubs"""
 
     for file in files:

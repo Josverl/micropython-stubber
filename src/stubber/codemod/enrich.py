@@ -99,7 +99,7 @@ def enrich_file(
     diff: bool = False,
     write_back: bool = False,
     package_name="",
-    use_docstrings: bool = True,
+    params_only: bool = False,
 ) -> Generator[str, None, None]:
     """
     Enrich a MCU stubs using the doc-stubs in another folder.
@@ -143,7 +143,7 @@ def enrich_file(
             log.info(f"Merge {target} from {source}")
             # read source file
             codemod_instance = merge_docstub.MergeCommand(
-                context, docstub_file=source, params_only=use_docstrings
+                context, docstub_file=source, params_only=params_only
             )
             if new_code := exec_transform_with_prettyprint(
                 codemod_instance,
@@ -205,7 +205,7 @@ def enrich_folder(
     show_diff: bool = False,
     write_back: bool = False,
     require_docstub: bool = False,
-    use_docstrings: bool = True,
+    params_only: bool = False,
     package_name: str = "",
 ) -> int:
     """\
@@ -236,7 +236,7 @@ def enrich_folder(
                     diff=True,
                     write_back=write_back,
                     package_name=package_name,
-                    use_docstrings=use_docstrings,
+                    params_only=params_only,
                 )
             )
             if diffs:

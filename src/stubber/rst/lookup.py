@@ -22,8 +22,10 @@ __all__ = [
 # all possible Types needed for the stubs - excess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
     "from __future__ import annotations",
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
     "from _typeshed import Incomplete",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple",
+    "from typing_extensions import TypeVar, TypeAlias, Awaitable",
+    "# TYPING_IMPORT",
 ]
 
 
@@ -143,7 +145,7 @@ LOOKUP_LIST = {
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.hid_keyboard": ("Tuple", 0.95),  # ?
     "pyb.hid_mouse": ("Tuple", 0.95),  # plain wrong
-    "ubluetooth.BLE.irq": ("Any", 0.95),  # never returns
+    "ubluetooth.BLE.irq": ("Any", 0.95),
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
@@ -173,8 +175,9 @@ LOOKUP_LIST = {
     # espnow
     "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]]", 0.95),  # list / ? tuple of bytestrings
     # esp32
-    "esp21.Partition.readblocks": ("None", 0.95),
-    "esp21.Partition.writeblocks": ("None", 0.95),
+    "esp32.Partition.readblocks": ("None", 0.95),
+    "esp32.Partition.writeblocks": ("None", 0.95),
+    "rp2.PIO.irq": ("Incomplete", 0.95),  # no IRQ type defined
 }
 
 
@@ -231,36 +234,139 @@ NONE_VERBS = [
 # - to allow one module te refer to another,
 # - to import other supporting modules
 # - to add missing abstract classes
+# - to add TypeAliases and TypeVars
+
+# TODO: avoid defining AnyReadableBuf and AnyWritableBuf in multile modules
+ANY_BUF = ["from _mpy_shed import AnyReadableBuf, AnyWritableBuf"]
 
 MODULE_GLUE = {
-    "lcd160cr": ["from machine.SPI import SPI"],  # module returns SPI objects defined in machine
+    "array": ['_T: Final = TypeVar("_T", int, float, Text)'],
+    "asyncio": ANY_BUF
+    + [
+        '_T = TypeVar("_T")',
+        "# `Coroutine` `_T` is covariant and `Awaitable` `_T` is invariant.",
+        "_C :TypeAlias = Coroutine[Any, None, _T] | Awaitable[_T]",
+        'StreamReader:TypeAlias = "Stream"',
+        'StreamWriter:TypeAlias = "Stream"',
+    ],
+    "bluetooth": ANY_BUF
+    + [
+        "_Flag: TypeAlias = int",
+        '_Descriptor: TypeAlias = tuple["UUID", _Flag]',
+        '_Characteristic: TypeAlias = (tuple["UUID", _Flag] | tuple["UUID", _Flag, tuple[_Descriptor, ...]])',
+        '_Service: TypeAlias = tuple["UUID", tuple[_Characteristic, ...]]',
+    ],
     "collections": [
         "from queue import Queue",
         "from stdlib.collections import OrderedDict as stdlib_OrderedDict, deque as stdlib_deque, namedtuple as stdlib_namedtuple  # type: ignore",
-    ],  # dequeu is a subclass
+        '_KT: Final = TypeVar("_KT")',
+        '_VT: Final = TypeVar("_VT")',
+    ],
+    "io": ANY_BUF,
+    "micropython": ["Const_T = TypeVar('Const_T',int, float, str, bytes, Tuple) # constant"],
+    "cmath": [
+        "from typing_extensions import TypeAlias",
+        "_C: TypeAlias = SupportsFloat | SupportsComplex | SupportsIndex | complex",
+    ],
+    "cryptolib": ANY_BUF,
+    "esp": ANY_BUF,
+    "espnow": [
+        "from _espnow import ESPNowBase  # type: ignore",
+    ],  # ESPNowBase is an undocumented base class
+    "framebuf": ANY_BUF,
+    "hashlib": ANY_BUF,
+    "heapq": [
+        '_T: Final = TypeVar("_T")',
+    ],
+    "lcd160cr": ANY_BUF + ["from machine.SPI import SPI"],  # uses SPI
     "os": [
-        # "from stdlib.os import uname_result",  # uname returns uname_result
         "from stdlib.os import *  # type: ignore",  # integrate STDLIB
     ],
-    "io": ["from stdlib.io import *  # type: ignore"],  # integrate STDLIB
-    "socket": ["from stdlib.socket import *  # type: ignore"],  # integrate STDLIB
-    "ssl": ["from stdlib.ssl import *  # type: ignore"],  # integrate STDLIB
-    # const: 3 -  paired with param and return typing
-    "micropython": ["Const_T = TypeVar('Const_T',int, float, str, bytes, Tuple) # constant"],
-    #
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
-    "espnow": [
-        "from _espnow import ESPNowBase  # type: ignore"
-    ],  # ESPNowBase is an undocumented base class
-    "machine.I2C": ["from .Pin import Pin"],  #  uses Pin
+    "machine.ADC": [
+        "from .Pin import Pin",
+        "ATTN_0DB:int = ...",
+    ],
+    "machine.I2C": ANY_BUF + ["from .Pin import Pin"],  #  uses Pin
+    "machine.I2S": ANY_BUF + ["from .Pin import Pin"],
+    "machine.PWM": ANY_BUF + ["from .Pin import Pin"],
+    "machine.RTC": [
+        "from machine import IDLE",
+    ],
+    "machine.SD": ["from .Pin import Pin"],  #  uses Pin
+    "machine.SDCard": ["from .Pin import Pin"],  #  uses Pin
     "machine.Signal": ["from .Pin import Pin"],  #  uses Pin
-    "machine.ADC": ["ATTN_0DB:int = ..."],  #  uses Pin
-    "machine.RTC": ["from machine import IDLE"],  #  uses Pin
-    "machine.UART": ["from machine import IDLE"],  #  uses Pin
+    "machine.SPI": ANY_BUF + ["from .Pin import Pin"],  #  uses Pin
+    "machine.UART": ANY_BUF
+    + [
+        "from machine import IDLE",
+        "from .Pin import Pin",
+    ],  #  uses Pin
+    "micropython": [
+        "from typing import Tuple",
+        '_T: Final = TypeVar("_T")',
+        '_F: Final = TypeVar("_F", bound=Callable[..., Any])',
+        'Const_T = TypeVar("Const_T", int, float, str, bytes, Tuple)  # constant',
+    ],
     "network": ["from typing import Protocol"],  #  for AbstractNIC
-    "rp2": ["from .PIO import PIO"],  #
-    "pyb": ["from .UART import UART"],  #  uses Pin
+    "neopixel": [
+        "from typing_extensions import TypeAlias",
+        "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
+    ],  #  for AbstractNIC
+    # "rp2": ["from .PIO import PIO"],  #
+    "rp2.StateMachine": ["from .PIO import PIO"],  #
+    "pyb": ANY_BUF
+    + [
+        "from .UART import UART",
+    ],
+    "pyb.ADC": ANY_BUF + ["from .Pin import Pin", "from .Timer import Timer"],
+    "pyb.CAN": ANY_BUF,
+    "pyb.DAC": ANY_BUF
+    + [
+        "from .Pin import Pin",
+        "from .Timer import Timer",
+    ],
+    "pyb.ExtInt": ["from .Pin import Pin"],
+    "pyb.I2C": ANY_BUF,
+    "pyb.SPI": ANY_BUF,
+    "pyb.UART": ANY_BUF,
+    "pyb.USB_HID": ANY_BUF,
+    "pyb.USB_VCP": ANY_BUF,
     "pyb.Switch": ["from .Pin import Pin"],  #  uses Pin
+    "pyb.Timer": [
+        "from abc import ABC, abstractmethod",
+        "from .Pin import Pin",
+    ],  #  uses Pin
+    "socket": [
+        "from stdlib.socket import *  # type: ignore",
+        "from typing_extensions import TypeAlias",
+        "_Address: TypeAlias = tuple[str, int] | tuple[str, int, int, int] | str",
+    ],  # integrate STDLIB
+    "ssl": [
+        "from _mpy_shed import StrOrBytesPath",
+        "from stdlib.ssl import *  # type: ignore",
+    ],  # integrate STDLIB
+    "struct": ANY_BUF,
+    "time": [
+        "from typing_extensions import TypeAlias",
+        "class _TicksMs: ...",
+        "class _TicksUs: ...",
+        "class _TicksCPU: ...",
+        "_Ticks: TypeAlias = _TicksMs | _TicksUs | _TicksCPU | int",
+    ],
+    "uctypes": ANY_BUF
+    + [
+        "from typing_extensions import TypeAlias",
+        "_ScalarProperty: TypeAlias = int",
+        "_RecursiveProperty: TypeAlias = tuple[int, _property]",
+        "_ArrayProperty: TypeAlias = tuple[int, int]",
+        "_ArrayOfAggregateProperty: TypeAlias = tuple[int, int, _property]",
+        "_PointerToAPrimitiveProperty: TypeAlias = tuple[int, int]",
+        "_PointerToAaAggregateProperty: TypeAlias = tuple[int, _property]",
+        "_BitfieldProperty: TypeAlias = int",
+        "_property: TypeAlias = _ScalarProperty | _RecursiveProperty | _ArrayProperty | _ArrayOfAggregateProperty | _PointerToAPrimitiveProperty | _PointerToAaAggregateProperty | _BitfieldProperty",
+        "_descriptor: TypeAlias = tuple[str, _property]",
+    ],
 }
 
 
@@ -357,10 +463,10 @@ PARAM_FIXES = [
         "pins:Optional[Tuple]",
     ),  #
     ## rp2.PIO.irq
-    Fix(
-        "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
-        "trigger=IRQ_SM0",
-    ),
+    # Fix( No longer needed with py 3.12 notation
+    #     "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
+    #     "trigger=IRQ_SM0",
+    # ),
     # SPI.INIT - to fix error: Non-default argument follows default argument
     # ✅ fixed in doc v1.18+
     Fix(
@@ -551,6 +657,7 @@ CHILD_PARENT_CLASS = {
     "array": "List",
     # network
     "AbstractNIC": "Protocol",
+    "NeoPixel": "Sequence",
 }
 
 
