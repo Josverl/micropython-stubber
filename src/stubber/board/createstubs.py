@@ -657,7 +657,7 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
         # unix port
         c = "."
     r = c
-    for r in [c, "/sd", "/flash", "/", "."]:
+    for r in ["/sd", "/flash", "/", c, "."]:
         try:
             _ = os.stat(r)
             break
