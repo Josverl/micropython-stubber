@@ -24,16 +24,22 @@ class GatherTypeVarsVisitor(ContextAwareVisitor):
         self.all_typevars: List[Union[libcst.Assign, libcst.AnnAssign]] = []
 
     def visit_Assign(self, node: libcst.Assign) -> None:
-
+        """
+        Find all TypeVar assignments in the module.
+        format: T = TypeVar("T", int, float, str, bytes, Tuple)
+        """
         # is this a TypeVar assignment?
         # needs to be more robust
-
         if isinstance(node.value, libcst.Call) and node.value.func.value == "TypeVar":
             self.all_typevars.append(node)
 
-    # def visit_AnnAssign(self, node: libcst.AnnAssign) -> None:
-    #     # Track this import statement for later analysis.
-    #     self.all_typevars.append(node)
+    def visit_AnnAssign(self, node: libcst.AnnAssign) -> None:
+        """ "
+        Find all TypeAlias assignments in the module.
+        format: T: TypeAlias = str
+        """
+        if isinstance(node.annotation.annotation, libcst.Name) and node.annotation.annotation.value == "TypeAlias":
+            self.all_typevars.append(node)
 
 
 class AddTypeVarsVisitor(ContextAwareTransformer):
