@@ -17,12 +17,13 @@ from mpflash.logger import log
 
 from stubber.cst_transformer import (
     MODULE_KEY,
-    StubTypingCollector,
-    TypeInfo,
     AnnoValue,
+    StubTypingCollector,
     update_def_docstr,
     update_module_docstr,
 )
+
+from .visitors.typevars import AddTypeVarsVisitor, GatherTypeVarsVisitor
 
 Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 """TypeVar for Module or ClassDef that both support overloads"""
@@ -105,6 +106,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # create the collectors
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)
+            typevar_collector = GatherTypeVarsVisitor(context)
             # visit the doc-stub file with all collectors
             stub_tree.visit(typing_collector)
             self.annotations = typing_collector.annotations
@@ -113,6 +115,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
             self.all_imports = import_collector.all_imports
+            # Get typevars
+            stub_tree.visit(typevar_collector)
+            self.typevars = typevar_collector.all_typevars
 
     # ------------------------------------------------------------------------
 
@@ -159,6 +164,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
                             module=full_module_name,
                             obj="*",
                         )
+        # --------------------------------------------------------------------
+        # Add any typevars to the module
+        if self.typevars:
+            for tv in self.typevars:
+                AddTypeVarsVisitor.add_typevar(self.context, tv)  # type: ignore
+
+            atv = AddTypeVarsVisitor(self.context)
+            updated_node = atv.transform_module(updated_node)
+
         # --------------------------------------------------------------------
         # update the docstring.
         if MODULE_KEY in self.annotations:
