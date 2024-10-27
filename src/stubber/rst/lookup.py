@@ -177,7 +177,18 @@ LOOKUP_LIST = {
     # esp32
     "esp32.Partition.readblocks": ("None", 0.95),
     "esp32.Partition.writeblocks": ("None", 0.95),
-    "rp2.PIO.irq": ("Incomplete", 0.95),  # no IRQ type defined
+    "_rp2.bootsel_button": ("int", 0.95),
+    "_rp2.DMA.active": ("bool", 0.95),
+    "_rp2.DMA.pack_ctrl": ("int", 0.95),
+    "_rp2.DMA.unpack_ctrl": ("dict", 0.95),
+    "_rp2.DMA.close": ("None", 0.95),
+    "_rp2.DMA.config": ("None", 0.95),
+    "_rp2.DMA.irq": ("irq", 0.95),
+    "_rp2.PIO.state_machine": ("StateMachine", 0.95),
+    "_rp2.PIO.irq": ("irq", 0.95),
+    "_rp2.PIO.remove_program": ("None", 0.95),
+    "_rp2.PIO.add_program": ("None", 0.95),
+    "rp2.PIO.irq": ("irq", 0.95),
 }
 
 
@@ -258,7 +269,9 @@ MODULE_GLUE = {
     ],
     "collections": [
         "from queue import Queue",
-        "from stdlib.collections import OrderedDict as stdlib_OrderedDict, deque as stdlib_deque, namedtuple as stdlib_namedtuple  # type: ignore",
+        "from stdlib.collections import OrderedDict as stdlib_OrderedDict  # type: ignore",
+        "from stdlib.collections import deque as stdlib_deque  # type: ignore",
+        "from stdlib.collections import namedtuple as stdlib_namedtuple  # type: ignore",
         '_KT: Final = TypeVar("_KT")',
         '_VT: Final = TypeVar("_VT")',
     ],
@@ -313,11 +326,11 @@ MODULE_GLUE = {
         "from typing_extensions import TypeAlias",
         "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
     ],  #  for AbstractNIC
-    # "rp2": ["from .PIO import PIO"],  #
-    "rp2.StateMachine": ["from .PIO import PIO"],  #
     "pyb": ANY_BUF
     + [
         "from .UART import UART",
+        "_OldAbstractBlockDev: TypeAlias = Any",
+        "_OldAbstractReadOnlyBlockDev: TypeAlias = Any",
     ],
     "pyb.ADC": ANY_BUF + ["from .Pin import Pin", "from .Timer import Timer"],
     "pyb.CAN": ANY_BUF,
@@ -337,6 +350,8 @@ MODULE_GLUE = {
         "from abc import ABC, abstractmethod",
         "from .Pin import Pin",
     ],  #  uses Pin
+    # "rp2": ["from .PIO import PIO"],  #
+    # "rp2.PIO": ["from .irq import irq"],  #
     "socket": [
         "from stdlib.socket import *  # type: ignore",
         "from typing_extensions import TypeAlias",
