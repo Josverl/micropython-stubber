@@ -1,5 +1,3 @@
-import ast
-import os
 from pathlib import Path
 from typing import Any, List, NamedTuple, Tuple
 
@@ -12,9 +10,9 @@ class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
     expected: str  # The source code after the transformation.
     doc_stub: str  # The stub to apply
-    stub_file: str  # The path to stub file to apply
-    output: Path = None  # where to save the output for testing the tests
-    path: Path = None  # where are the tests
+    stub_file: Path | str  # The path to stub file to apply
+    output: Path | None = None  # where to save the output for testing the tests
+    path: Path | None = None  # where are the tests
 
 
 def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
@@ -64,7 +62,7 @@ def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
                 id=test_case_directory.name,
             )
         )
-    return tuple(test_cases)
+    return tuple(test_cases)  # type: ignore
 
 
 # class ExceptionCase(NamedTuple):
@@ -109,4 +107,4 @@ def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
 
 # Just for debugging purposes.
 if __name__ == "__main__":
-    collect_test_cases()
+    collect_test_cases(".")
