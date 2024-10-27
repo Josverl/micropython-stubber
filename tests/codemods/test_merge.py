@@ -1,18 +1,17 @@
 # sourcery skip: snake-case-functions
 import difflib
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 import pytest
+from libcst._parser.entrypoints import parse_module
+from libcst._parser.types.config import PartialParserConfig
+from libcst.codemod import CodemodContext
+from libcst.codemod._runner import SkipFile
 from libcst.codemod._testing import (
-    CodemodContext,
     CodemodTest,
-    PartialParserConfig,
-    SkipFile,
-    _CodemodTest,
-    parse_module,
+    _CodemodTest,  # type: ignore
 )
-
 from stubber.codemod.merge_docstub import MergeCommand
 
 from .codemodcollector import TestCase as MyTestCase
@@ -103,10 +102,11 @@ class PytestCodemodTest(_CodemodTest):
                 # pyre-ignore This mixin needs to be used with a UnitTest subclass.
                 self.fail("Expected SkipFile but was not raised")
 
-        # pyre-ignore This mixin needs to be used with a UnitTest subclass.
+        # pyre-ignore This mixin needs to be used with a UnitTest subclass
+        # ignore spacing in # fmt: on/off
         self.assertEqual(
-            CodemodTest.make_fixture_data(after),
-            CodemodTest.make_fixture_data(output_tree.code),
+            CodemodTest.make_fixture_data(after.replace("#fmt: o", "# fmt: o")),
+            CodemodTest.make_fixture_data(output_tree.code.replace("#fmt: o", "# fmt: o")),
         )
         if expected_warnings is not None:
             # pyre-ignore This mixin needs to be used with a UnitTest subclass.
