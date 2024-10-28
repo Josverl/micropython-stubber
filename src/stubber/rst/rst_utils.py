@@ -318,6 +318,7 @@ def distill_return(return_text: str) -> List[Dict]:
         match_string,
         [
             "tuple",
+            "a tuple",
             "a pair",
             "1-tuple",
             "2-tuple",
@@ -459,7 +460,7 @@ def _type_from_context(
     - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
     - builds a list return type candidates
     - selects the highest ranking candidate
-    - the default Type is 'Any'
+    - the default Type is 'Incomplete'
     """
 
     if isinstance(docstring, list):
@@ -494,27 +495,31 @@ def _type_from_context(
 
     # ------------------------------------------------------
     # lookup returns that cannot be found based on the docstring from the lookup list
-    try:
-        function_name = function_re.findall(signature)[0]
-    except IndexError:
-        function_name = signature.strip().strip(":()")
-
-    if (
-        "." in module
-        and "." in function_name
-        and module.split(".")[1] == function_name.split(".")[0]
-    ):
-        # avoid machine.UART.UART.irq
-        function_name = function_name = ".".join((module, ".".join(function_name.split(".")[1:])))
+    if "(" in signature:
+        # method / function / class
+        try:
+            item_name = function_re.findall(signature)[0]
+        except IndexError:
+            item_name = signature.strip().strip(":()")
     else:
-        function_name = ".".join((module, function_name))
+        # module or class attribute
+        item_name = signature.replace(".. data::", "").strip()
 
-    if function_name in LOOKUP_LIST.keys():
-        sig_type = LOOKUP_LIST[function_name][0]
+    mod_last = module.split(".")[-1]
+    item_first = item_name.split(".")[0]
+    name_repeat = mod_last == item_first
+    if name_repeat:
+        # avoid machine.UART.UART.irq or pyb.pyb.hid_mouse
+        item_name = f"{module}.{item_name}".replace(f"{mod_last}.{item_first}", mod_last)
+    else:
+        item_name = f"{module}.{item_name}"
+
+    if item_name in LOOKUP_LIST.keys():
+        sig_type = LOOKUP_LIST[item_name][0]
         return {
             "type": sig_type,
             "confidence": C_LOOKUP * WEIGHT_LOOPUPS,
-            "match": function_name,
+            "match": item_name,
         }
     # ------------------------------------------------------
     # parse the docstring for simple start verbs,
