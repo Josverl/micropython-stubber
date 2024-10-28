@@ -25,7 +25,7 @@ TYPING_IMPORT: List[str] = [
     "from _typeshed import Incomplete",
     "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple",
     "from typing_extensions import TypeVar, TypeAlias, Awaitable",
-    "# TYPING_IMPORT",
+    # "# TYPING_IMPORT",
 ]
 
 
@@ -122,7 +122,7 @@ LOOKUP_LIST = {
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
-    "collections.namedtuple": ("stdlib_namedtuple", 0.95),
+    "collections.namedtuple": ("type[Tuple[Any, ...]]", 0.95),
     "gc.collect": ("None", 0.95),
     "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
@@ -143,19 +143,19 @@ LOOKUP_LIST = {
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
-    "pyb.hid_keyboard": ("Tuple", 0.95),  # ?
-    "pyb.hid_mouse": ("Tuple", 0.95),  # plain wrong
+    "pyb.hid_keyboard": ("HID_Tuple", 0.95),  # ?
+    "pyb.hid_mouse": ("HID_Tuple", 0.95),  # plain wrong
     "ubluetooth.BLE.irq": ("Any", 0.95),
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
-    "ssl.ssl.wrap_socket": (
-        "IO",
-        0.95,
-    ),  # undocumented class ssl.SSLSocket #TODO: or wrapped-socket object ?
-    "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
+    # undocumented CPython class ssl.SSLSocket
+    # TODO: include  ssl.SSLSocket from stdlib / mpy_typeshed, currently Incomplete
+    "ssl.wrap_socket": ("SSLSocket", 0.95),
+    "ussl.wrap_socket": ("SSLSocket", 0.95),
+    #
     "usys.exit": ("NoReturn", 0.95),  # never returns
     "utime.sleep_ms": (
         "Coroutine[None, None, None]",  # Micropython V1.15+ ?
@@ -252,34 +252,17 @@ ANY_BUF = ["from _mpy_shed import AnyReadableBuf, AnyWritableBuf"]
 
 MODULE_GLUE = {
     "array": ['_T: Final = TypeVar("_T", int, float, Text)'],
-    "asyncio": ANY_BUF
-    + [
-        '_T = TypeVar("_T")',
-        "# `Coroutine` `_T` is covariant and `Awaitable` `_T` is invariant.",
-        "_C :TypeAlias = Coroutine[Any, None, _T] | Awaitable[_T]",
-        'StreamReader:TypeAlias = "Stream"',
-        'StreamWriter:TypeAlias = "Stream"',
-    ],
-    "bluetooth": ANY_BUF
-    + [
-        "_Flag: TypeAlias = int",
-        '_Descriptor: TypeAlias = tuple["UUID", _Flag]',
-        '_Characteristic: TypeAlias = (tuple["UUID", _Flag] | tuple["UUID", _Flag, tuple[_Descriptor, ...]])',
-        '_Service: TypeAlias = tuple["UUID", tuple[_Characteristic, ...]]',
-    ],
+    "asyncio": ANY_BUF,
+    "bluetooth": ANY_BUF,
     "collections": [
         "from queue import Queue",
-        "from stdlib.collections import OrderedDict as stdlib_OrderedDict  # type: ignore",
-        "from stdlib.collections import deque as stdlib_deque  # type: ignore",
-        "from stdlib.collections import namedtuple as stdlib_namedtuple  # type: ignore",
+        # "from _mpy_shed.collections import namedtuple as stdlib_namedtuple  # type: ignore",
         '_KT: Final = TypeVar("_KT")',
         '_VT: Final = TypeVar("_VT")',
     ],
-    "io": ANY_BUF,
-    "micropython": ["Const_T = TypeVar('Const_T',int, float, str, bytes, Tuple) # constant"],
     "cmath": [
         "from typing_extensions import TypeAlias",
-        "_C: TypeAlias = SupportsFloat | SupportsComplex | SupportsIndex | complex",
+        # "_C: TypeAlias = SupportsFloat | SupportsComplex | SupportsIndex | complex",
     ],
     "cryptolib": ANY_BUF,
     "esp": ANY_BUF,
@@ -291,10 +274,8 @@ MODULE_GLUE = {
     "heapq": [
         '_T: Final = TypeVar("_T")',
     ],
+    "io": ANY_BUF,
     "lcd160cr": ANY_BUF + ["from machine.SPI import SPI"],  # uses SPI
-    "os": [
-        "from stdlib.os import *  # type: ignore",  # integrate STDLIB
-    ],
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
     "machine.ADC": [
         "from .Pin import Pin",
@@ -316,21 +297,27 @@ MODULE_GLUE = {
         "from .Pin import Pin",
     ],  #  uses Pin
     "micropython": [
-        "from typing import Tuple",
+        "from typing import Tuple, Final, TypeVar",
         '_T: Final = TypeVar("_T")',
         '_F: Final = TypeVar("_F", bound=Callable[..., Any])',
         'Const_T = TypeVar("Const_T", int, float, str, bytes, Tuple)  # constant',
     ],
     "network": ["from typing import Protocol"],  #  for AbstractNIC
     "neopixel": [
-        "from typing_extensions import TypeAlias",
-        "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
+        # "from typing_extensions import TypeAlias",
+        # "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
     ],  #  for AbstractNIC
+    "os": [
+        "from stdlib.os import *  # type: ignore",  # integrate STDLIB
+        "from _mpy_shed import uname_result",
+    ],
     "pyb": ANY_BUF
     + [
         "from .UART import UART",
-        "_OldAbstractBlockDev: TypeAlias = Any",
-        "_OldAbstractReadOnlyBlockDev: TypeAlias = Any",
+        "from _mpy_shed import _OldAbstractBlockDev, _OldAbstractReadOnlyBlockDev",
+        # "_OldAbstractBlockDev: TypeAlias = Any",
+        # "_OldAbstractReadOnlyBlockDev: TypeAlias = Any",
+        "HID_Tuple:TypeAlias = tuple[int, int, int, int, bytes]",
     ],
     "pyb.ADC": ANY_BUF + ["from .Pin import Pin", "from .Timer import Timer"],
     "pyb.CAN": ANY_BUF,
@@ -355,11 +342,13 @@ MODULE_GLUE = {
     "socket": [
         "from stdlib.socket import *  # type: ignore",
         "from typing_extensions import TypeAlias",
-        "_Address: TypeAlias = tuple[str, int] | tuple[str, int, int, int] | str",
+        "from _mpy_shed import AnyReadableBuf, AnyWritableBuf",
     ],  # integrate STDLIB
     "ssl": [
+        "from typing_extensions import TypeAlias",
         "from _mpy_shed import StrOrBytesPath",
         "from stdlib.ssl import *  # type: ignore",
+        "SSLSocket : TypeAlias = Incomplete",
     ],  # integrate STDLIB
     "struct": ANY_BUF,
     "time": [
@@ -371,16 +360,16 @@ MODULE_GLUE = {
     ],
     "uctypes": ANY_BUF
     + [
-        "from typing_extensions import TypeAlias",
-        "_ScalarProperty: TypeAlias = int",
-        "_RecursiveProperty: TypeAlias = tuple[int, _property]",
-        "_ArrayProperty: TypeAlias = tuple[int, int]",
-        "_ArrayOfAggregateProperty: TypeAlias = tuple[int, int, _property]",
-        "_PointerToAPrimitiveProperty: TypeAlias = tuple[int, int]",
-        "_PointerToAaAggregateProperty: TypeAlias = tuple[int, _property]",
-        "_BitfieldProperty: TypeAlias = int",
-        "_property: TypeAlias = _ScalarProperty | _RecursiveProperty | _ArrayProperty | _ArrayOfAggregateProperty | _PointerToAPrimitiveProperty | _PointerToAaAggregateProperty | _BitfieldProperty",
-        "_descriptor: TypeAlias = tuple[str, _property]",
+        # "from typing_extensions import TypeAlias",
+        # "_ScalarProperty: TypeAlias = int",
+        # "_RecursiveProperty: TypeAlias = tuple[int, _property]",
+        # "_ArrayProperty: TypeAlias = tuple[int, int]",
+        # "_ArrayOfAggregateProperty: TypeAlias = tuple[int, int, _property]",
+        # "_PointerToAPrimitiveProperty: TypeAlias = tuple[int, int]",
+        # "_PointerToAaAggregateProperty: TypeAlias = tuple[int, _property]",
+        # "_BitfieldProperty: TypeAlias = int",
+        # "_property: TypeAlias = _ScalarProperty | _RecursiveProperty | _ArrayProperty | _ArrayOfAggregateProperty | _PointerToAPrimitiveProperty | _PointerToAaAggregateProperty | _BitfieldProperty",
+        # "_descriptor: TypeAlias = tuple[str, _property]",
     ],
 }
 
@@ -416,7 +405,7 @@ PARAM_FIXES = [
     # pyb.hid((buttons, x, y, z))
     Fix(
         "(buttons, x, y, z)",
-        "hid_tuple:Tuple",
+        "hid_tuple:HID_Tuple",
     ),
     # esp v1.15.2 .. function:: getaddrinfo((hostname, port, lambda))
     Fix(
