@@ -95,8 +95,9 @@ def cli_docstubs(
         result = fetch_repos(version, CONFIG.mpy_path, CONFIG.mpy_lib_path)
         if not result:
             return -1
-    # get the current checked out version
-    version = utils.checkedout_version(CONFIG.mpy_path)
+    else:
+        # get the current checked out version
+        version = utils.checkedout_version(CONFIG.mpy_path)
 
     release = git.get_local_tag(rst_path.as_posix(), abbreviate=False) or ""
 
