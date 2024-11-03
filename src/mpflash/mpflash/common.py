@@ -30,11 +30,8 @@ PORT_FWTYPES = {
 
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
-PAT_NO_ACCESS = (
-    "github_pat"
-    + "_11AAHPVFQ0qAkDnSUaMKSp"
-    + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
-)
+PAT_NO_ACCESS = "github_pat_"+"11AAHPVFQ0G4NTaQ73Bw5J"+"_fAp7K9sZ1qL8VFnI9g78eUlCdmOXHB3WzSdj2jtEYb4XF3N7PDJBl32qIxq"
+
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
 
