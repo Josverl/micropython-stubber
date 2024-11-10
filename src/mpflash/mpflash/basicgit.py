@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import cachetools.func
-from github import Auth, Github
+from github import Auth, BadCredentialsException, Github
 from loguru import logger as log
 from packaging.version import parse
 
@@ -18,7 +18,11 @@ from packaging.version import parse
 
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
-PAT_NO_ACCESS = "github_pat" + "_11AAHPVFQ0qAkDnSUaMKSp" + "_ZkDl5NRRwBsUN6EYg9ahp1Dvj4FDDONnXVgimxC2EtpY7Q7BUKBoQ0Jq72X"
+PAT_NO_ACCESS = (
+    "github_pat_"
+    + "11AAHPVFQ0G4NTaQ73Bw5J"
+    + "_fAp7K9sZ1qL8VFnI9g78eUlCdmOXHB3WzSdj2jtEYb4XF3N7PDJBl32qIxq"
+)
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
 
@@ -35,9 +39,17 @@ def _run_local_git(
         if repo:
             if isinstance(repo, str):
                 repo = Path(repo)
-            result = subprocess.run(cmd, capture_output=capture_output, check=True, cwd=repo.absolute().as_posix(), encoding="utf-8")
+            result = subprocess.run(
+                cmd,
+                capture_output=capture_output,
+                check=True,
+                cwd=repo.absolute().as_posix(),
+                encoding="utf-8",
+            )
         else:
-            result = subprocess.run(cmd, capture_output=capture_output, check=True, encoding="utf-8")
+            result = subprocess.run(
+                cmd, capture_output=capture_output, check=True, encoding="utf-8"
+            )
     except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
         return None
     except subprocess.CalledProcessError as e:  # pragma: no cover
@@ -76,7 +88,9 @@ def clone(remote_repo: str, path: Path, shallow: bool = False, tag: Optional[str
         return False
 
 
-def get_local_tag(repo: Optional[Union[str, Path]] = None, abbreviate: bool = True) -> Union[str, None]:
+def get_local_tag(
+    repo: Optional[Union[str, Path]] = None, abbreviate: bool = True
+) -> Union[str, None]:
     """
     get the most recent git version tag of a local repo
     repo Path should be in the form of : repo = "./repo/micropython"
@@ -125,12 +139,16 @@ def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) ->
 @cachetools.func.ttl_cache(maxsize=16, ttl=60)  # 60 seconds
 def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
     """
-    Get list of tag of a repote github repo
+    Get list of tag of a repote github repo.
+    only the last -preview tag is kept
     """
     if not repo or not isinstance(repo, str) or "/" not in repo:  # type: ignore
         return []
     try:
         gh_repo = GH_CLIENT.get_repo(repo)
+    except BadCredentialsException as e:
+        log.error(f"Github authentication error - {e}")
+        return []
     except ConnectionError as e:
         # TODO: unable to capture the exeption
         log.warning(f"Unable to get tags - {e}")
@@ -138,7 +156,9 @@ def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
     tags = [tag.name for tag in gh_repo.get_tags()]
     if minver:
         tags = [tag for tag in tags if parse(tag) >= parse(minver)]
-    return sorted(tags)
+    # remove all but the last preview
+    tags = [t for t in sorted(tags[:-1]) if "-preview" not in t] + sorted(tags)[-1:]
+    return tags
 
 
 def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
