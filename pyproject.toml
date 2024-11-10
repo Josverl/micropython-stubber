@@ -48,10 +48,10 @@ mpremote = "mpremote.main:main"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-python-minifier = { version = "^2.7.0", python = "<3.12" } # no support for 3.12 yet
+python-minifier = { version = "^2.7.0", python = "<3.14" }
 requests = "^2.32.3"
 mypy = "1.10.1"
-mpflash = "^1.0.2"
+mpflash = "^1.0.3"
 mpremote = "^1.23.0"
 # others
 autoflake = ">=1.7,<3.0"
