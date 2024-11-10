@@ -95,6 +95,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
+        self.typevars = []
         # parse the doc-stub file
         if self.docstub_source:
             try:
