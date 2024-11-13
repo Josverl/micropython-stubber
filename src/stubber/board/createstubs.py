@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.23.2a0"
+__version__ = "v1.23.3"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -488,7 +488,7 @@ def ensure_folder(path: str):
 
 def _build(s):
     # extract build from sys.version or os.uname().version if available
-    # sys.version: 'MicroPython v1.23.2a0-preview.6.g3d0b6276f'
+    # sys.version: 'MicroPython v1.23.3-preview.6.g3d0b6276f'
     # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
@@ -595,10 +595,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.3 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.23.2a0 do not have a micro .0
+            # versions from 1.10.0 to 1.23.3 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
