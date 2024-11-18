@@ -129,7 +129,7 @@ LOOKUP_LIST = {
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.Signal.value": ("int", 0.95),
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
-    "machine.UART.irq": ("Incomplete", 0.95),  # no IRQ type defined
+    "machine.UART.irq": ("_IRQ", 0.95),  # no IRQ type defined
     "machine.UART.write": ("Union[int,None]", 0.95),
     "machine.UART.readinto": ("Union[int,None]", 0.95),
     "machine.UART.readline": ("Union[str,None]", 0.95),
@@ -145,7 +145,8 @@ LOOKUP_LIST = {
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.hid_keyboard": ("HID_Tuple", 0.95),  # ?
     "pyb.hid_mouse": ("HID_Tuple", 0.95),  # plain wrong
-    "ubluetooth.BLE.irq": ("Any", 0.95),
+    "bluetooth.BLE.irq": ("_IRQ", 0.95),
+    "ubluetooth.BLE.irq": ("_IRQ", 0.95),
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
@@ -183,12 +184,12 @@ LOOKUP_LIST = {
     "_rp2.DMA.unpack_ctrl": ("dict", 0.95),
     "_rp2.DMA.close": ("None", 0.95),
     "_rp2.DMA.config": ("None", 0.95),
-    "_rp2.DMA.irq": ("irq", 0.95),
+    "_rp2.DMA.irq": ("_IRQ", 0.95),
     "_rp2.PIO.state_machine": ("StateMachine", 0.95),
-    "_rp2.PIO.irq": ("irq", 0.95),
+    "_rp2.PIO.irq": ("_IRQ", 0.95),
     "_rp2.PIO.remove_program": ("None", 0.95),
     "_rp2.PIO.add_program": ("None", 0.95),
-    "rp2.PIO.irq": ("irq", 0.95),
+    "rp2.PIO.irq": ("_IRQ", 0.95),
 }
 
 
@@ -247,18 +248,21 @@ NONE_VERBS = [
 # - to add missing abstract classes
 # - to add TypeAliases and TypeVars
 
-# TODO: avoid defining AnyReadableBuf and AnyWritableBuf in multile modules
+# avoid defining AnyReadableBuf and AnyWritableBuf in m modules
 ANY_BUF = ["from _mpy_shed import AnyReadableBuf, AnyWritableBuf"]
 
 MODULE_GLUE = {
-    "array": ['_T: Final = TypeVar("_T", int, float, Text)'],
+    "array": ['_T = TypeVar("_T", int, float, str)'],
     "asyncio": ANY_BUF,
-    "bluetooth": ANY_BUF,
+    "bluetooth": ANY_BUF
+    + [
+        "from _mpy_shed import _IRQ",
+    ],
     "collections": [
         "from queue import Queue",
         # "from _mpy_shed.collections import namedtuple as stdlib_namedtuple  # type: ignore",
-        '_KT: Final = TypeVar("_KT")',
-        '_VT: Final = TypeVar("_VT")',
+        '_KT = TypeVar("_KT")',
+        '_VT = TypeVar("_VT")',
     ],
     "cmath": [
         "from typing_extensions import TypeAlias",
@@ -272,9 +276,12 @@ MODULE_GLUE = {
     "framebuf": ANY_BUF,
     "hashlib": ANY_BUF,
     "heapq": [
-        '_T: Final = TypeVar("_T")',
+        '_T = TypeVar("_T")',
     ],
-    "io": ANY_BUF,
+    "io": ANY_BUF
+    + [
+        "from _mpy_shed import IOBase",
+    ],
     "lcd160cr": ANY_BUF + ["from machine.SPI import SPI"],  # uses SPI
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
     "machine.ADC": [
@@ -295,11 +302,12 @@ MODULE_GLUE = {
     + [
         "from machine import IDLE",
         "from .Pin import Pin",
+        "from _mpy_shed import _IRQ",
     ],  #  uses Pin
     "micropython": [
         "from typing import Tuple, Final, TypeVar",
-        '_T: Final = TypeVar("_T")',
-        '_F: Final = TypeVar("_F", bound=Callable[..., Any])',
+        '_T = TypeVar("_T")',
+        '_F = TypeVar("_F", bound=Callable[..., Any])',
         'Const_T = TypeVar("Const_T", int, float, str, bytes, Tuple)  # constant',
     ],
     "network": ["from typing import Protocol"],  #  for AbstractNIC
@@ -338,7 +346,9 @@ MODULE_GLUE = {
         "from .Pin import Pin",
     ],  #  uses Pin
     # "rp2": ["from .PIO import PIO"],  #
-    # "rp2.PIO": ["from .irq import irq"],  #
+    "_rp2.DMA": ["from _mpy_shed import _IRQ"],
+    "_rp2.PIO": ["from _mpy_shed import _IRQ"],
+    "rp2.PIO": ["from _mpy_shed import _IRQ"],
     "socket": [
         "from stdlib.socket import *  # type: ignore",
         "from typing_extensions import TypeAlias",
@@ -352,11 +362,11 @@ MODULE_GLUE = {
     ],  # integrate STDLIB
     "struct": ANY_BUF,
     "time": [
-        "from typing_extensions import TypeAlias",
-        "class _TicksMs: ...",
-        "class _TicksUs: ...",
-        "class _TicksCPU: ...",
-        "_Ticks: TypeAlias = _TicksMs | _TicksUs | _TicksCPU | int",
+        "from typing_extensions import TypeAlias, TypeVar",
+        "_TicksMs: TypeAlias = int",
+        "_TicksUs: TypeAlias = int",
+        "_TicksCPU: TypeAlias = int",
+        '_Ticks = TypeVar("_Ticks", _TicksMs, _TicksUs, _TicksCPU, int)',
     ],
     "uctypes": ANY_BUF
     + [
