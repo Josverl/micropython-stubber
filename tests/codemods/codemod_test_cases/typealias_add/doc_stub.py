@@ -4,7 +4,7 @@ add typealias
 """
 
 
-from typing import TypeAlias
+from typing_extensions import TypeAlias
 
 UUID: TypeAlias = str
 _Flag: TypeAlias = int
