@@ -190,6 +190,7 @@ LOOKUP_LIST = {
     "_rp2.PIO.remove_program": ("None", 0.95),
     "_rp2.PIO.add_program": ("None", 0.95),
     "rp2.PIO.irq": ("_IRQ", 0.95),
+    "rp2.DMA.irq": ("_IRQ", 0.95),
 }
 
 
@@ -349,6 +350,7 @@ MODULE_GLUE = {
     "_rp2.DMA": ["from _mpy_shed import _IRQ"],
     "_rp2.PIO": ["from _mpy_shed import _IRQ"],
     "rp2.PIO": ["from _mpy_shed import _IRQ"],
+    "rp2.DMA": ["from _mpy_shed import _IRQ"],
     "socket": [
         "from stdlib.socket import *  # type: ignore",
         "from typing_extensions import TypeAlias",
@@ -477,7 +479,7 @@ PARAM_FIXES = [
         "pins:Optional[Tuple]",
     ),  #
     ## rp2.PIO.irq
-    # Fix( No longer needed with py 3.12 notation
+    # Fix( No longer needed with py 3.10 notation
     #     "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
     #     "trigger=IRQ_SM0",
     # ),
