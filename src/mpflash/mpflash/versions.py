@@ -78,9 +78,11 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
-        versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
+        tags = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
         # Only keep the last preview
-        versions = [v for v in versions if not v.endswith(V_PREVIEW) or v == versions[-1]]
+        versions = [v for v in tags if not v.endswith(V_PREVIEW)]
+        preview = sorted([v for v in tags if v.endswith(V_PREVIEW)], reverse=True)[1]
+        versions.append(preview)
     except Exception as e:
         versions = [
             "v9.99.9-preview",
@@ -105,7 +107,6 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=
         cache_it = False
     versions = [v for v in versions if parse(v) >= parse(minver)]
     # remove all but the most recent (preview) version
-    versions = versions[:1] + [v for v in versions if "preview" not in v]
     versions = sorted(versions, reverse=reverse)
     if cache_it:
         return versions
