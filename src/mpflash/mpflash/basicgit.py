@@ -136,6 +136,9 @@ def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) ->
     return sorted(tags)
 
 
+from github.GithubException import BadCredentialsException
+
+
 @cachetools.func.ttl_cache(maxsize=16, ttl=60)  # 60 seconds
 def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
     """
