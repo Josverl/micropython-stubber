@@ -72,16 +72,16 @@ def clean_version(
 
 
 @cache_to_disk(n_days_to_cache=1)
-def micropython_versions(minver: str = "v1.20", reverse: bool = False):
+def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=True):
     """Get the list of micropython versions from github tags"""
-    cache_it = True
+
     try:
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
         versions = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
         # Only keep the last preview
         versions = [v for v in versions if not v.endswith(V_PREVIEW) or v == versions[-1]]
-    except Exception:
+    except Exception as e:
         versions = [
             "v9.99.9-preview",
             "v1.22.2",
