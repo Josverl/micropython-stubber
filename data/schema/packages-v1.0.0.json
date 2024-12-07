@@ -1,0 +1,55 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Root",
+    "type": "object",
+    "required": [
+        "$schema",
+        "packages"
+    ],
+    "description": "A list of  MicroPython stub/version combinations that have been published to PyPI.",
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "$id": "#root/$schema",
+            "title": "$schema",
+            "type": "string"
+        },
+        "packages": {
+            "$id": "#root/packages",
+            "title": "Stub Packages",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "array",
+                "description": "An object representing a stub/version combination.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the package as published on PyPI."
+                    },
+                    "mpy_version": {
+                        "type": "string",
+                        "description": "The MicroPython version for which the stubs are valid. Must be a valid SemVer string."
+                    },
+                    "port": {
+                        "type": "string",
+                        "description": "The port for the package."
+                    },
+                    "board": {
+                        "type": "string",
+                        "description": "The board for the package. [Optional]"
+                    },
+                    "variant": {
+                        "type": "string",
+                        "description": "The variant of the package. [Optional]"
+                    }
+                },
+                "required": [
+                    "name",
+                    "mpy_version",
+                    "port"
+                ]
+            }
+        }
+    }
+}
