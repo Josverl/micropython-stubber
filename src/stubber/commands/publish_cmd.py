@@ -100,7 +100,6 @@ def cli_publish(
             "Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487"
         )
 
-    # db = get_database(publish_path=CONFIG.publish_path, production=production)
     destination = "pypi" if production else "test-pypi"
     log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
 
