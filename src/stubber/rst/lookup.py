@@ -283,7 +283,7 @@ MODULE_GLUE = {
     + [
         "from _mpy_shed import IOBase",
     ],
-    "lcd160cr": ANY_BUF + ["from machine.SPI import SPI"],  # uses SPI
+    "lcd160cr": ANY_BUF + ["from pyb import SPI"],  # uses SPI
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
     "machine.ADC": [
         "from .Pin import Pin",
@@ -306,7 +306,8 @@ MODULE_GLUE = {
         "from _mpy_shed import _IRQ",
     ],  #  uses Pin
     "micropython": [
-        "from typing import Tuple, Final, TypeVar",
+        "from typing import Tuple, Final",
+        "from typing_extensions import TypeVar",
         '_T = TypeVar("_T")',
         '_F = TypeVar("_F", bound=Callable[..., Any])',
         'Const_T = TypeVar("Const_T", int, float, str, bytes, Tuple)  # constant',
@@ -346,7 +347,14 @@ MODULE_GLUE = {
         "from abc import ABC, abstractmethod",
         "from .Pin import Pin",
     ],  #  uses Pin
-    # "rp2": ["from .PIO import PIO"],  #
+    "rp2": [
+        # import classess from _rp2
+        "from _rp2.DMA import DMA as DMA",
+        "from _rp2.Flash import Flash as Flash",
+        "from _rp2.StateMachine import StateMachine as StateMachine",
+        "from _rp2.PIO import PIO as PIO",
+        "from _rp2.PIOASMEmit import PIOASMEmit",
+    ],  #
     "_rp2.DMA": ["from _mpy_shed import _IRQ"],
     "_rp2.PIO": ["from _mpy_shed import _IRQ"],
     "rp2.PIO": ["from _mpy_shed import _IRQ"],
