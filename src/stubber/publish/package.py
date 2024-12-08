@@ -3,15 +3,16 @@ prepare a set of stub files for publishing to PyPi
 
 """
 
+import sqlite3
 import sys
 from pathlib import Path
 from typing import Dict, Union
 
 from mpflash.logger import log
+from mpflash.versions import clean_version
 from packaging.version import parse
 from pysondb import PysonDB
 
-from mpflash.versions import clean_version
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.stubpackage import StubPackage, StubSources
@@ -33,7 +34,7 @@ def package_name(*, port: str = "", board: str = "", family: str = "micropython"
 
 
 def get_package(
-    db: PysonDB,
+    db_conn: sqlite3.Connection,
     *,
     version: str,
     port: str,
@@ -44,7 +45,7 @@ def get_package(
     pkg_name = package_name(port=port, board=board, family=family)
     version = clean_version(version, drop_v=True)
     if package_info := get_package_info(
-        db,
+        db_conn,
         CONFIG.publish_path,
         pkg_name=pkg_name,
         mpy_version=version,
@@ -63,7 +64,11 @@ def get_package(
 
 
 def get_package_info(
-    db: PysonDB, pub_path: Path, *, pkg_name: str, mpy_version: str
+    db_conn: sqlite3.Connection,
+    pub_path: Path,
+    *,
+    pkg_name: str,
+    mpy_version: str,
 ) -> Union[Dict, None]:
     """
     get a package's record from the json db if it can be found
@@ -72,16 +77,23 @@ def get_package_info(
         mpy_version: micropython/firmware version (1.18)
     """
     # find in the database
-    recs = db.get_by_query(
-        query=lambda x: x["mpy_version"] == mpy_version and x["name"] == pkg_name
-    )
-    # dict to list
-    recs = [{"id": key, "data": recs[key]} for key in recs]
-    # sort
-    packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
+
+    SQL_Q = f"""
+        SELECT * 
+            FROM packages 
+            WHERE name = '{pkg_name}' AND mpy_version LIKE '{mpy_version}%'
+            ORDER BY pkg_version DESC
+    """
+    log.trace(f"SQL Query: {SQL_Q}")
+    cursor = db_conn.cursor()
+    cursor.execute(SQL_Q)
+    cursor.row_factory = sqlite3.Row # to get dict like access
+    packages = cursor.fetchall()
+    log.debug(f"Found {len(packages)} packages for {pkg_name} == {mpy_version}")
 
     if len(packages) > 0:
-        pkg_from_db = packages[-1]["data"]
+        pkg_from_db = dict(packages[-1])
+
         log.debug(f"Found latest {pkg_name} == {pkg_from_db['pkg_version']}")
         return pkg_from_db
     else:

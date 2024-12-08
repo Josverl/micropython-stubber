@@ -7,8 +7,8 @@ prepare a set of stub files for publishing to PyPi
 from typing import Any, Dict, List, Optional, Union
 
 from mpflash.logger import log
-
 from mpflash.versions import V_PREVIEW
+
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.database import get_database
 from stubber.publish.defaults import GENERIC_U
@@ -33,7 +33,7 @@ def build_multiple(
     ports = ports or ["all"]
     boards = boards or [GENERIC_U]
 
-    db = get_database(CONFIG.publish_path, production=production)
+    db_conn = get_database(CONFIG.publish_path, production=production)
     results: List[Dict[str, Any]] = []
     worklist = build_worklist(family, versions, ports, boards)
     if len(worklist) == 0:
@@ -42,7 +42,7 @@ def build_multiple(
     log.info(f"checking {len(worklist)} possible board candidates")
 
     for todo in worklist:
-        if package := get_package(db, **todo):
+        if package := get_package(db_conn, **todo):
             package.build_distribution(force=force, production=production)
             results.append(package.status)
         else:
@@ -69,7 +69,7 @@ def publish_multiple(
     ports = ports or ["all"]
     boards = boards or [GENERIC_U]
 
-    db = get_database(CONFIG.publish_path, production=production)
+    db_conn = get_database(CONFIG.publish_path, production=production)
     results = []
     worklist = build_worklist(family, versions, ports, boards)
 
@@ -78,9 +78,9 @@ def publish_multiple(
         return results
 
     for todo in worklist:
-        if package := get_package(db, **todo):
+        if package := get_package(db_conn, **todo):
             package.publish_distribution_ifchanged(
-                db=db,
+                db_conn=db_conn,
                 clean=clean,
                 force=force,
                 build=build,

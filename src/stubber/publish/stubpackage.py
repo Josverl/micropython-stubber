@@ -3,29 +3,30 @@
 import hashlib
 import json
 import shutil
+import sqlite3
 import subprocess
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tenacity
-
 from mpflash.basicgit import get_git_describe
+
 from stubber.publish.helpers import get_module_docstring
 
 if sys.version_info >= (3, 11):
-    import tomllib # type: ignore
+    import tomllib  # type: ignore
 else:
-    import tomli as tomllib # type: ignore
+    import tomli as tomllib  # type: ignore
 
 from typing import NewType
 
 import tomli_w
 from mpflash.logger import log
+from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from packaging.version import Version, parse
 from pysondb import PysonDB
 
-from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
@@ -53,7 +54,7 @@ STUBS_COPY_FILTER = {
 STDLIB_UMODULES = ["ucollections"]
 
 
-class VersionedPackage(object):
+class VersionedPackage:
     """
     Represents a versioned package.
 
@@ -939,7 +940,7 @@ class StubPackage(PoetryBuilder):
 
     def publish_distribution_ifchanged(
         self,
-        db: PysonDB,
+        db_conn: sqlite3.Connection,
         *,
         production: bool,  # PyPI or Test-PyPi
         build=False,  #
@@ -984,9 +985,9 @@ class StubPackage(PoetryBuilder):
                 )
                 self.status["result"] = "Published to GitHub"
             else:
-                return self.publish_distribution(dry_run, production, db)
+                return self.publish_distribution(dry_run, production, db_conn)
         elif force:
-            return self.publish_distribution(dry_run, production, db)
+            return self.publish_distribution(dry_run, production, db_conn)
         else:
             log.info(f"No changes to package : {self.package_name} {self.pkg_version}")
 
@@ -994,7 +995,12 @@ class StubPackage(PoetryBuilder):
             self.clean()
         return True
 
-    def publish_distribution(self, dry_run, production, db):
+    def publish_distribution(
+        self,
+        dry_run: bool,
+        production: bool,
+        db_conn: sqlite3.Connection,
+    ) -> bool:
         """
         Publishes the package to PyPi or Test-PyPi.
 
@@ -1023,9 +1029,18 @@ class StubPackage(PoetryBuilder):
         if dry_run:
             log.warning(f"{self.package_name}: Dry run, not saving to database")
         else:
-            # get the package state and add it to the database
-            db.add(self.to_dict())
-            db.commit()
+            cursor = db_conn.cursor()
+            variant = ""  # TODO: get the variant
+            row = f"""
+            INSERT INTO packages (id, name, description, mpy_version, pkg_version, publish, stub_sources, path, hash, stub_hash, port, board, variant)
+            VALUES ({key}, '{self.package_name}', '{self.description}', '{self.mpy_version}', 
+                '{self.pkg_version}', {self._publish}, '{json.dumps(self.stub_sources)}', '{self.package_path}, '{variant}', 
+                '{self.hash}', '{self.stub_hash} ', '{self.port}', '{self.board}');
+            """
+            cursor.execute(row)
+            # # get the package state and add it to the database
+            # db_conn.add(self.to_dict())
+            db_conn.commit()
         return True
 
     def are_package_sources_available(self) -> bool:
