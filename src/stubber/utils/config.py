@@ -4,11 +4,9 @@ from pathlib import Path
 from typing import List
 
 from mpflash.logger import log
+from mpflash.versions import V_PREVIEW, micropython_versions
 from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
-
-import mpflash.basicgit as git
-from mpflash.versions import V_PREVIEW
 
 from .typed_config_toml import TomlConfigSource
 
@@ -94,7 +92,7 @@ class StubberConfig(Config):
         # read the versions from the git tags
         all_versions = []
         try:
-            all_versions = git.get_tags("micropython/micropython", minver="v1.17")
+            all_versions = micropython_versions(minver="v1.17")
         except Exception as e:
             log.warning(f"Could not read micropython versions from git: {e}")
             all_versions = ["1.19", "1.19.1", "1.20.0", "1.21.0"]
