@@ -7,10 +7,9 @@ from typing import Optional, Union
 
 import rich_click as click
 
-import mpflash.basicgit as git
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos, repo_paths
-from mpflash.versions import SET_PREVIEW, V_PREVIEW
+from mpflash.versions import SET_PREVIEW, V_PREVIEW, micropython_versions
 
 from .cli import stubber_cli
 
@@ -22,7 +21,7 @@ from .cli import stubber_cli
 # get version list from Git tags in the repo that is provided on the command line
 
 try:
-    VERSION_LIST = git.get_tags("micropython/micropython", minver="v1.9.3") + [
+    VERSION_LIST = micropython_versions( minver="v1.9.3") + [
         V_PREVIEW,
         "latest",
         "stable",
