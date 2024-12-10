@@ -1,9 +1,11 @@
 from pathlib import Path
 
 import pytest
-
 from mpflash.errors import MPFlashError
-from mpflash.mpboard_id.board_id import _find_board_id_by_description, find_board_id_by_description  # type: ignore
+from mpflash.mpboard_id.board_id import (  # type: ignore
+    _find_board_id_by_description,
+    find_board_id_by_description,
+)
 
 pytestmark = [pytest.mark.mpflash]
 
@@ -18,10 +20,22 @@ HERE = Path(__file__).parent
         ("happy-1", "stable", "Arduino Nano RP2040 Connect", None, "ARDUINO_NANO_RP2040_CONNECT"),
         ("happy-2", "stable", "Pimoroni Tiny 2040", None, "PIMORONI_TINY2040"),
         ("happy-3", "stable", "Pimoroni Tiny 2040", "", "PIMORONI_TINY2040"),
-        ("happy-4", "stable", "Generic ESP32 module with ESP32", "Generic ESP32 module", "ESP32_GENERIC"),
+        (
+            "happy-4",
+            "stable",
+            "Generic ESP32 module with ESP32",
+            "Generic ESP32 module",
+            "ESP32_GENERIC",
+        ),
         # Edge cases
         ("edge-1", "stable", "Pimoroni Tiny 2040 LONG", "Pimoroni Tiny 2040", "PIMORONI_TINY2040"),
-        ("edge-2", "stable", "Generic ESP32 module with ESP32 OTA", "Generic ESP32 module with ESP32", "ESP32_GENERIC"),
+        (
+            "edge-2",
+            "stable",
+            "Generic ESP32 module with ESP32 OTA",
+            "Generic ESP32 module with ESP32",
+            "ESP32_GENERIC",
+        ),
         # v13.0
         ("esp32_v1.13-a", "v1.13", "ESP32 module with ESP32", None, "GENERIC"),
         ("esp32_v1.13-b", "v1.13", "ESP32 module with ESP32", "ESP32 module", "GENERIC"),
@@ -38,11 +52,23 @@ HERE = Path(__file__).parent
         ("esp32_v1.21.0-a", None, "ESP32 module with ESP32", None, "GENERIC"),
         ("esp32_v1.22.0-a", None, "ESP32 module with ESP32", None, "GENERIC"),
         # PICO
-        ("pico_v1.19.1-old", "v1.19.1", "Raspberry Pi Pico with RP2040", "Raspberry Pi Pico", "PICO"),
-        ("pico_v1.23.0", "v1.23.0", "Raspberry Pi Pico with RP2040", "Raspberry Pi Pico", "RPI_PICO"),
+        (
+            "pico_v1.19.1-old",
+            "v1.19.1",
+            "Raspberry Pi Pico with RP2040",
+            "Raspberry Pi Pico",
+            "PICO",
+        ),
+        (
+            "pico_v1.23.0",
+            "v1.23.0",
+            "Raspberry Pi Pico with RP2040",
+            "Raspberry Pi Pico",
+            "RPI_PICO",
+        ),
         # Error cases
-        ("error-1", "stable", "Board X", "X", None),
-        ("error-2", "stable", "Board A", "A", None),
+        ("error-1", "stable", "Board FOO", "FOO", None),
+        ("error-2", "stable", "Board BAR", "BAR", None),
     ],
 )
 def test_find_board_id_real(test_id, descr, short_descr, expected_result, version):
@@ -52,7 +78,9 @@ def test_find_board_id_real(test_id, descr, short_descr, expected_result, versio
             # internal method raises exception
             _find_board_id_by_description(descr=descr, short_descr=short_descr, version=version)
     else:
-        result = find_board_id_by_description(descr=descr, short_descr=short_descr, version=version)
+        result = find_board_id_by_description(
+            descr=descr, short_descr=short_descr, version=version
+        )
         # Assert
         assert result == expected_result
 
@@ -64,4 +92,6 @@ def test_find_board_id_file_not_found(tmp_path):
 
     # Act & Assert
     with pytest.raises(FileNotFoundError):
-        find_board_id_by_description("Board A", "A", version="stable", board_info=non_existent_file)
+        find_board_id_by_description(
+            "Board A", "A", version="stable", board_info=non_existent_file
+        )

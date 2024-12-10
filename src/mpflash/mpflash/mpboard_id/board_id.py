@@ -56,14 +56,12 @@ def _find_board_id_by_description(
         Path to the board_info.json file (optional)
 
     """
-    # FIXME: functional overlap with
+    # Some functional overlap with
     # src\mpflash\mpflash\mpboard_id\__init__.py find_known_board
 
+    candidate_boards = read_known_boardinfo(board_info)
     if not short_descr and " with " in descr:
         short_descr = descr.split(" with ")[0]
-
-    candidate_boards = read_known_boardinfo(board_info)
-
     if version:
         # filter for matching version
         if version in ("preview", "stable"):
@@ -71,16 +69,22 @@ def _find_board_id_by_description(
             version = get_stable_mp_version()
         known_versions = sorted({b.version for b in candidate_boards})
         if version not in known_versions:
-            # FIXME if latest stable is newer than the last version in the boardlist this will fail
             log.trace(f"Version {version} not found in board info, using latest known version {known_versions[-1]}")
-            version = known_versions[-1]
+            version = '.'.join(known_versions[-1].split('.')[:2]) # take only major.minor
         if version_matches := [b for b in candidate_boards if b.version.startswith(version)]:
             candidate_boards = version_matches
         else:
             raise MPFlashError(f"No board info found for version {version}")
+    # First try full match on description, then partial match
     matches = [b for b in candidate_boards if b.description == descr]
     if not matches and short_descr:
         matches = [b for b in candidate_boards if b.description == short_descr]
     if not matches:
+        # partial match (for added VARIANT)
+        matches = [b for b in candidate_boards if b.description.startswith(descr)]
+        if not matches and short_descr:
+            matches = [b for b in candidate_boards if b.description.startswith(short_descr)]
+    if not matches:
         raise MPFlashError(f"No board info found for description '{descr}' or '{short_descr}'")
     return sorted(matches, key=lambda x: x.version)
+
