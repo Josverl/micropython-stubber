@@ -1,0 +1,22 @@
+# manual entry 
+# ref : https://github.com/micropython/micropython/pull/16381
+# Lets assume there may be a module named for the port
+
+cc3200
+embed
+esp32
+esp8266
+mimxrt
+nrf
+pic16bit
+powerpc
+qemu
+renesas-ra
+renesas
+rp2
+samd
+stm32
+unix
+webassembly
+windows
+zephyr
