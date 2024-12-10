@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.23.0"
+__version__ = "v1.24.0"
 ENOENT = 2
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
@@ -488,7 +488,7 @@ def ensure_folder(path: str):
 
 def _build(s):
     # extract build from sys.version or os.uname().version if available
-    # sys.version: 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.version: 'MicroPython v1.24.0-preview.6.g3d0b6276f'
     # sys.implementation.version: 'v1.13-103-gb137d064e'
     if not s:
         return ""
@@ -595,10 +595,10 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.23.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
-            # versions from 1.10.0 to 1.23.0 do not have a micro .0
+            # versions from 1.10.0 to 1.24.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
     # spell-checker: disable
@@ -657,7 +657,7 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
         # unix port
         c = "."
     r = c
-    for r in [c, "/sd", "/flash", "/", "."]:
+    for r in ["/sd", "/flash", "/", c, "."]:
         try:
             _ = os.stat(r)
             break
@@ -801,6 +801,7 @@ def main():
         "breakout_trackball",
         "breakout_vl53l5cx",
         "btree",
+        "cc3200",
         "cmath",
         "collections",
         "crypto",
@@ -811,10 +812,12 @@ def main():
         "display",
         "display_driver_utils",
         "ds18x20",
+        "embed",
         "encoder",
         "errno",
         "esp",
         "esp32",
+        "esp8266",
         "espidf",
         "espnow",
         "ffi",
@@ -854,6 +857,7 @@ def main():
         "microWebSrv",
         "microWebTemplate",
         "micropython",
+        "mimxrt",
         "mip",
         "mip/__init__",
         "mip/__main__",
@@ -862,11 +866,13 @@ def main():
         "mpu9250",
         "neopixel",
         "network",
+        "nrf",
         "ntptime",
         "onewire",
         "openamp",
         "os",
         "pcf85063a",
+        "pic16bit",
         "picoexplorer",
         "picographics",
         "picokeypad",
@@ -878,12 +884,16 @@ def main():
         "pimoroni_i2c",
         "plasma",
         "platform",
+        "powerpc",
         "pyb",
         "pycom",
         "pye",
+        "qemu",
         "qrcode",
         "queue",
         "random",
+        "renesas",
+        "renesas-ra",
         "requests",
         "requests/__init__",
         "rp2",
@@ -896,6 +906,7 @@ def main():
         "ssh",
         "ssl",
         "stm",
+        "stm32",
         "struct",
         "sys",
         "termios",
@@ -936,6 +947,7 @@ def main():
         "umqtt/__init__",
         "umqtt/robust",
         "umqtt/simple",
+        "unix",
         "uos",
         "uplatform",
         "uqueue",
@@ -961,8 +973,10 @@ def main():
         "uzlib",
         "version",
         "vfs",
+        "webassembly",
         "websocket",
         "websocket_helper",
+        "windows",
         "wipy",
         "writer",
         "xpt2046",
