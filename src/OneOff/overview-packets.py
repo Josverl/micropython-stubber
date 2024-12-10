@@ -21,8 +21,6 @@ for k, v in matrix.items():
     print(f"{k:50} | {str(v):>60}")
 
 
-# print(tabulate(matrix, headers="keys"))
-# print(tabulate(matrix, headers="keys", tablefmt="fancy_grid"))
 
 # latest
 for c in frozen_candidates():

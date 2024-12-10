@@ -4,7 +4,8 @@ from typing import List, Union
 
 import rich_click as click
 from mpflash.logger import log
-from tabulate import tabulate
+from rich.console import Console
+from rich.table import Table
 
 from stubber.commands.cli import stubber_cli
 from stubber.publish.defaults import GENERIC_U
@@ -90,4 +91,16 @@ def cli_build(
     )
     # log the number of results with no error
     log.info(f"Built {len([r for r in results if not r['error']])} stub packages")
-    print(tabulate(results, headers="keys"))
+    console = Console()
+    if not results:
+        console.print("No results to publish")
+        return
+    table = Table(title="Build Results", show_header=True, header_style="bold magenta")
+
+    for key in results[0].keys():
+        table.add_column(key)
+
+    for result in results:
+        table.add_row(*[str(result[key]) for key in result.keys()])
+
+    console.print(table)
