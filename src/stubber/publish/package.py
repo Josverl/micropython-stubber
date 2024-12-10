@@ -10,8 +10,7 @@ from typing import Dict, Union
 
 from mpflash.logger import log
 from mpflash.versions import clean_version
-from packaging.version import parse
-from pysondb import PysonDB
+
 
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import StubSource
@@ -78,18 +77,16 @@ def get_package_info(
     """
     # find in the database
 
-    SQL_Q = f"""
-        SELECT * 
-            FROM packages 
-            WHERE name = '{pkg_name}' AND mpy_version LIKE '{mpy_version}%'
-            ORDER BY pkg_version DESC
-    """
-    log.trace(f"SQL Query: {SQL_Q}")
     cursor = db_conn.cursor()
-    cursor.execute(SQL_Q)
-    cursor.row_factory = sqlite3.Row # to get dict like access
+    cursor.execute(
+        """
+        SELECT * FROM packages 
+        WHERE name = ? AND mpy_version LIKE ?
+        ORDER BY pkg_version DESC
+    """,
+        (pkg_name, f"{mpy_version}%"),
+    )
     packages = cursor.fetchall()
-    log.debug(f"Found {len(packages)} packages for {pkg_name} == {mpy_version}")
 
     if len(packages) > 0:
         pkg_from_db = dict(packages[-1])

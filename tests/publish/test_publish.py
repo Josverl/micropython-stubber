@@ -1,11 +1,10 @@
 """Test publish module - refactored"""
 
+import sqlite3
 from pathlib import Path
 
 import pytest
 from mock import MagicMock
-from packaging.version import parse
-from pysondb import PysonDB
 from pytest_mock import MockerFixture
 from stubber.publish.stubpackage import StubPackage
 
@@ -127,10 +126,9 @@ def test_publish_package(
     tmp_path: Path,
     pytestconfig: pytest.Config,
     fake_package: StubPackage,
-    temp_db: PysonDB,
+    temp_db_conn: sqlite3.Connection,
 ):
     pkg = fake_package
-    db = temp_db
 
     m_publish: MagicMock = mocker.patch(
         "stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True
@@ -140,7 +138,7 @@ def test_publish_package(
     pkg._publish = True  # type: ignore
 
     # FIXME : dependency to access to test.pypi.org
-    result = pkg.publish_distribution_ifchanged(production=False, force=False, db_conn=db)
+    result = pkg.publish_distribution_ifchanged(production=False, force=False, db_conn=temp_db_conn)
 
     assert result, "should be ok"
 
@@ -158,18 +156,21 @@ def test_publish_package(
     assert m_publish.called, "should call poetry publish"
 
     # check is the hashes are added to the database
-    recs = db.get_by_query(
-        query=lambda x: x["mpy_version"] == pkg.mpy_version and x["name"] == pkg.package_name
+    cursor = temp_db_conn.cursor()
+    cursor.execute(
+        "SELECT * FROM packages where name = ? AND mpy_version = ? ORDER by pkg_version DESC",
+        (pkg.package_name, pkg.mpy_version),
     )
-    # dict to list
-    recs = [{"id": key, "data": recs[key]} for key in recs]
-    # sort
-    packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
+    cursor.row_factory = sqlite3.Row  # to get dict like access
+    recs = cursor.fetchall()
 
-    assert packages[-1]["data"]["name"] == pkg.package_name, "should be the same package name"
-    assert (
-        packages[-1]["data"]["pkg_version"] == pkg.pkg_version
-    ), "should be the same package version"
-    assert packages[-1]["data"]["mpy_version"] == pkg.mpy_version, "should be the same mpy version"
-    assert packages[-1]["data"]["hash"] == pkg.hash, "should be the same hash"
-    assert packages[-1]["data"]["stub_hash"] == pkg.stub_hash, "should be the same stub hash"
+    row = recs[0]
+    assert row["name"] == pkg.package_name, "should be the same package name"
+    assert row["port"] == pkg.port, "should be the same port"
+    assert row["board"] == pkg.board, "should be the same board"
+    assert row["variant"] == pkg.variant, "should be the same variant"
+
+    assert row["pkg_version"] == pkg.pkg_version, "should be the same package version"
+    assert row["mpy_version"] == pkg.mpy_version, "should be the same mpy version"
+    assert row["hash"] == pkg.hash, "should be the same hash"
+    assert row["stub_hash"] == pkg.stub_hash, "should be the same stub hash"
