@@ -9,7 +9,7 @@
 This tool was initially created to be used in a CI/CD pipeline to automate the process of downloading and flashing MicroPython firmware to multiple boards, but it has been extend with a TUI to be used for manual downloadig, flashing and development.
 
 `mpflash` has been tested on:  
- - OS: Windows x64, Linux X64, but not (yet) macOS.
+ - OS: Windows x64, Linux X64, and macOS.
  - Micropython (hardware) ports: 
     - `rp2`, using `.uf2`, using filecopy 
     - `samd`, using ` .uf2`, using filecopy 
@@ -17,7 +17,7 @@ This tool was initially created to be used in a CI/CD pipeline to automate the p
     - `esp8266`, using `.bin`, using esptool
     - `stm32`, using ` .dfu`, using pydfu
 
-Not yet implemented: `nrf`, `cc3200`, `mimxrt`
+Not yet implemented: `nrf`, `cc3200`, `mimxrt`, `renesas`
  
 ## Features
  1. List the connected boards including their firmware details, in a tabular or json format
