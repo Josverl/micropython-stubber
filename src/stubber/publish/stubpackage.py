@@ -25,7 +25,6 @@ import tomli_w
 from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from packaging.version import Version, parse
-from pysondb import PysonDB
 
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
@@ -216,6 +215,7 @@ class Builder(VersionedPackage):
         mpy_version: str = "0.0.1",
         port: str,
         board: str = GENERIC_U,
+        variant: Optional[str] = None,
         description: str = "MicroPython stubs",
         stubs: Optional[StubSources] = None,
         # json_data: Optional[Dict[str, Any]] = None,
@@ -226,6 +226,7 @@ class Builder(VersionedPackage):
         self.mpy_version = mpy_version
         self.port = port
         self.board = board
+        self.variant = variant or ""
         self.description = description
         self.stub_sources = stubs or []
         self.hash = None  # intial hash
@@ -405,6 +406,9 @@ class Builder(VersionedPackage):
             "description": self.description,
             "hash": self.hash,
             "stub_hash": self.stub_hash,
+            "port": self.port,
+            "board": self.board,
+            "variant": "",  # TODO: get the variant
         }
 
     def from_dict(self, json_data: Dict) -> None:
@@ -416,6 +420,10 @@ class Builder(VersionedPackage):
         self._publish = json_data["publish"]
         self.hash = json_data["hash"]
         self.stub_hash = json_data["stub_hash"]
+        self.port = json_data["port"]
+        self.board = json_data["board"]
+        self.variant = json_data["variant"]
+
         # create folder
         if not self.package_path.exists():
             self.package_path.mkdir(parents=True, exist_ok=True)
@@ -1030,14 +1038,30 @@ class StubPackage(PoetryBuilder):
             log.warning(f"{self.package_name}: Dry run, not saving to database")
         else:
             cursor = db_conn.cursor()
-            variant = ""  # TODO: get the variant
-            row = f"""
-            INSERT INTO packages (id, name, description, mpy_version, pkg_version, publish, stub_sources, path, hash, stub_hash, port, board, variant)
-            VALUES ({key}, '{self.package_name}', '{self.description}', '{self.mpy_version}', 
-                '{self.pkg_version}', {self._publish}, '{json.dumps(self.stub_sources)}', '{self.package_path}, '{variant}', 
-                '{self.hash}', '{self.stub_hash} ', '{self.port}', '{self.board}');
-            """
-            cursor.execute(row)
+
+            d = self.to_dict()
+
+            cursor.execute(
+                """
+                INSERT INTO packages (name, description, mpy_version, pkg_version, publish, stub_sources, path, hash, stub_hash, port, board, variant)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    d["name"],
+                    d["description"],
+                    d["mpy_version"],
+                    d["pkg_version"],
+                    d["publish"],
+                    json.dumps(d["stub_sources"]),
+                    d["path"],
+                    d["hash"],
+                    d["stub_hash"],
+                    d["port"],
+                    d["board"],
+                    d["variant"],
+                ),
+            )
+
             # # get the package state and add it to the database
             # db_conn.add(self.to_dict())
             db_conn.commit()
