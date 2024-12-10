@@ -263,7 +263,7 @@ def get_root():
 	try:A=os.getcwd()
 	except(F,I):A=J
 	B=A
-	for B in[A,'/sd','/flash',G,J]:
+	for B in['/sd','/flash',G,A,J]:
 		try:C=os.stat(B);break
 		except F:continue
 	return B
@@ -302,6 +302,6 @@ def main():
 	stubber.modules=[];A(stubber);D.collect();stubber.create_all_stubs()
 if __name__=='__main__'or j():
 	if not h('no_auto_stubber.txt'):
-		try:D.threshold(4*1024);D.enable()
+		try:D.threshold(4096);D.enable()
 		except BaseException:pass
 		main()
