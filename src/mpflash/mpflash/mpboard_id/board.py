@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import  Union
+from typing import Union
 
 
 # - source : get_boardnames.py
@@ -20,7 +20,7 @@ class Board:
     family: str = field(default="micropython")
     mcu_name: str = field(default="")
     cpu: str = field(default="")
-    # TODO: add variant
+    variant: str = field(default="")
 
     def __post_init__(self):
         if not self.cpu:

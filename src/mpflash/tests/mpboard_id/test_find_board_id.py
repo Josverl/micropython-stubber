@@ -95,3 +95,9 @@ def test_find_board_id_file_not_found(tmp_path):
         find_board_id_by_description(
             "Board A", "A", version="stable", board_info=non_existent_file
         )
+
+
+@pytest.mark.parametrize("test_id,version, descr, short_descr,  expected_result", [()])
+def test_check_all_boards(test_id, descr, short_descr, expected_result, version):
+    # TODO:  use algoritm from mpbuild to check all boards
+    raise NotImplementedError("Test not implemented")
