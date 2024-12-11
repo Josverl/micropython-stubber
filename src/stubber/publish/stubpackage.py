@@ -3,29 +3,29 @@
 import hashlib
 import json
 import shutil
+import sqlite3
 import subprocess
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tenacity
-
 from mpflash.basicgit import get_git_describe
+
 from stubber.publish.helpers import get_module_docstring
 
 if sys.version_info >= (3, 11):
-    import tomllib # type: ignore
+    import tomllib  # type: ignore
 else:
-    import tomli as tomllib # type: ignore
+    import tomli as tomllib  # type: ignore
 
 from typing import NewType
 
 import tomli_w
 from mpflash.logger import log
-from packaging.version import Version, parse
-from pysondb import PysonDB
-
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
+from packaging.version import Version, parse
+
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
@@ -53,7 +53,7 @@ STUBS_COPY_FILTER = {
 STDLIB_UMODULES = ["ucollections"]
 
 
-class VersionedPackage(object):
+class VersionedPackage:
     """
     Represents a versioned package.
 
@@ -215,6 +215,7 @@ class Builder(VersionedPackage):
         mpy_version: str = "0.0.1",
         port: str,
         board: str = GENERIC_U,
+        variant: Optional[str] = None,
         description: str = "MicroPython stubs",
         stubs: Optional[StubSources] = None,
         # json_data: Optional[Dict[str, Any]] = None,
@@ -225,6 +226,7 @@ class Builder(VersionedPackage):
         self.mpy_version = mpy_version
         self.port = port
         self.board = board
+        self.variant = variant or ""
         self.description = description
         self.stub_sources = stubs or []
         self.hash = None  # intial hash
@@ -404,6 +406,9 @@ class Builder(VersionedPackage):
             "description": self.description,
             "hash": self.hash,
             "stub_hash": self.stub_hash,
+            "port": self.port,
+            "board": self.board,
+            "variant": "",  # TODO: get the variant
         }
 
     def from_dict(self, json_data: Dict) -> None:
@@ -415,6 +420,10 @@ class Builder(VersionedPackage):
         self._publish = json_data["publish"]
         self.hash = json_data["hash"]
         self.stub_hash = json_data["stub_hash"]
+        self.port = json_data["port"]
+        self.board = json_data["board"]
+        self.variant = json_data["variant"]
+
         # create folder
         if not self.package_path.exists():
             self.package_path.mkdir(parents=True, exist_ok=True)
@@ -939,7 +948,7 @@ class StubPackage(PoetryBuilder):
 
     def publish_distribution_ifchanged(
         self,
-        db: PysonDB,
+        db_conn: sqlite3.Connection,
         *,
         production: bool,  # PyPI or Test-PyPi
         build=False,  #
@@ -984,9 +993,9 @@ class StubPackage(PoetryBuilder):
                 )
                 self.status["result"] = "Published to GitHub"
             else:
-                return self.publish_distribution(dry_run, production, db)
+                return self.publish_distribution(dry_run, production, db_conn)
         elif force:
-            return self.publish_distribution(dry_run, production, db)
+            return self.publish_distribution(dry_run, production, db_conn)
         else:
             log.info(f"No changes to package : {self.package_name} {self.pkg_version}")
 
@@ -994,7 +1003,12 @@ class StubPackage(PoetryBuilder):
             self.clean()
         return True
 
-    def publish_distribution(self, dry_run, production, db):
+    def publish_distribution(
+        self,
+        dry_run: bool,
+        production: bool,
+        db_conn: sqlite3.Connection,
+    ) -> bool:
         """
         Publishes the package to PyPi or Test-PyPi.
 
@@ -1023,9 +1037,34 @@ class StubPackage(PoetryBuilder):
         if dry_run:
             log.warning(f"{self.package_name}: Dry run, not saving to database")
         else:
-            # get the package state and add it to the database
-            db.add(self.to_dict())
-            db.commit()
+            cursor = db_conn.cursor()
+
+            d = self.to_dict()
+
+            cursor.execute(
+                """
+                INSERT INTO packages (name, description, mpy_version, pkg_version, publish, stub_sources, path, hash, stub_hash, port, board, variant)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    d["name"],
+                    d["description"],
+                    d["mpy_version"],
+                    d["pkg_version"],
+                    d["publish"],
+                    json.dumps(d["stub_sources"]),
+                    d["path"],
+                    d["hash"],
+                    d["stub_hash"],
+                    d["port"],
+                    d["board"],
+                    d["variant"],
+                ),
+            )
+
+            # # get the package state and add it to the database
+            # db_conn.add(self.to_dict())
+            db_conn.commit()
         return True
 
     def are_package_sources_available(self) -> bool:

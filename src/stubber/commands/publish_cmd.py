@@ -6,7 +6,8 @@ from typing import List, Union
 
 import rich_click as click
 from mpflash.logger import log
-from tabulate import tabulate
+from rich.console import Console
+from rich.table import Table
 
 from stubber.commands.cli import stubber_cli
 from stubber.publish.defaults import GENERIC_U
@@ -81,7 +82,7 @@ def cli_publish(
     versions: Union[str, List[str]],
     ports: Union[str, List[str]],
     boards: Union[str, List[str]],
-    production: bool = True,
+    production: bool = False,
     build: bool = False,
     force: bool = False,
     dry_run: bool = False,
@@ -114,4 +115,18 @@ def cli_publish(
         dry_run=dry_run,
         clean=clean,
     )
-    log.info(tabulate(results, headers="keys"))
+    console = Console()
+
+    if not results:
+        console.print("No results to publish")
+        return
+
+    table = Table(show_header=True, header_style="bold magenta", title="Publish Results")
+    headers = results[0].keys()
+    for header in headers:
+        table.add_column(header)
+
+    for result in results:
+        table.add_row(*[str(result[header]) for header in headers])
+
+    console.print(table)

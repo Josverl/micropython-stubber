@@ -1,13 +1,11 @@
 """Test publish module - refactored"""
 
+import sqlite3
 from pathlib import Path
 
 import pytest
 from mock import MagicMock
-from packaging.version import parse
-from pysondb import PysonDB
 from pytest_mock import MockerFixture
-
 from stubber.publish.stubpackage import StubPackage
 
 pytestmark = [pytest.mark.stubber]
@@ -15,7 +13,9 @@ pytestmark = [pytest.mark.stubber]
 
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_hash(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
+def test_hash(
+    mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage
+):
     pkg = fake_package
 
     pkg.update_package_files()
@@ -100,7 +100,9 @@ def test_update_package(fake_package: StubPackage):
 
 
 @pytest.mark.integration
-def test_build_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
+def test_build_package(
+    mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage
+):
     pkg = fake_package
     # FIXME: dependency on online test.pypi.org
     result = pkg.build_distribution(production=False, force=False)
@@ -124,10 +126,9 @@ def test_publish_package(
     tmp_path: Path,
     pytestconfig: pytest.Config,
     fake_package: StubPackage,
-    temp_db: PysonDB,
+    temp_db_conn: sqlite3.Connection,
 ):
     pkg = fake_package
-    db = temp_db
 
     m_publish: MagicMock = mocker.patch(
         "stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True
@@ -137,7 +138,7 @@ def test_publish_package(
     pkg._publish = True  # type: ignore
 
     # FIXME : dependency to access to test.pypi.org
-    result = pkg.publish_distribution_ifchanged(production=False, force=False, db=db)
+    result = pkg.publish_distribution_ifchanged(production=False, force=False, db_conn=temp_db_conn)
 
     assert result, "should be ok"
 
@@ -149,20 +150,26 @@ def test_publish_package(
     assert len(list(dist_path.glob("*.whl"))) == 1, "should be one wheel in the dist path"
     assert len(list(dist_path.glob("*.gz"))) == 1, "should be one tarball in the dist path"
 
-    assert not pkg.is_changed(), "should show as un changed after publish"
+    assert not pkg.is_changed(), "should show as unchanged after publish"
 
     # Check if the  has been published
     assert m_publish.called, "should call poetry publish"
 
     # check is the hashes are added to the database
-    recs = db.get_by_query(query=lambda x: x["mpy_version"] == pkg.mpy_version and x["name"] == pkg.package_name)
-    # dict to list
-    recs = [{"id": key, "data": recs[key]} for key in recs]
-    # sort
-    packages = sorted(recs, key=lambda x: parse(x["data"]["pkg_version"]))
+    cursor = temp_db_conn.cursor()
+    cursor.execute(
+        "SELECT * FROM packages where name = ? AND mpy_version = ? ORDER by pkg_version DESC",
+        (pkg.package_name, pkg.mpy_version),
+    )
+    recs = cursor.fetchall()
 
-    assert packages[-1]["data"]["name"] == pkg.package_name, "should be the same package name"
-    assert packages[-1]["data"]["pkg_version"] == pkg.pkg_version, "should be the same package version"
-    assert packages[-1]["data"]["mpy_version"] == pkg.mpy_version, "should be the same mpy version"
-    assert packages[-1]["data"]["hash"] == pkg.hash, "should be the same hash"
-    assert packages[-1]["data"]["stub_hash"] == pkg.stub_hash, "should be the same stub hash"
+    row = recs[0]
+    assert row["name"] == pkg.package_name, "should be the same package name"
+    assert row["port"] == pkg.port, "should be the same port"
+    assert row["board"] == pkg.board, "should be the same board"
+    assert row["variant"] == pkg.variant, "should be the same variant"
+
+    assert row["pkg_version"] == pkg.pkg_version, "should be the same package version"
+    assert row["mpy_version"] == pkg.mpy_version, "should be the same mpy version"
+    assert row["hash"] == pkg.hash, "should be the same hash"
+    assert row["stub_hash"] == pkg.stub_hash, "should be the same stub hash"
