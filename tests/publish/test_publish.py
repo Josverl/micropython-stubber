@@ -150,7 +150,7 @@ def test_publish_package(
     assert len(list(dist_path.glob("*.whl"))) == 1, "should be one wheel in the dist path"
     assert len(list(dist_path.glob("*.gz"))) == 1, "should be one tarball in the dist path"
 
-    assert not pkg.is_changed(), "should show as un changed after publish"
+    assert not pkg.is_changed(), "should show as unchanged after publish"
 
     # Check if the  has been published
     assert m_publish.called, "should call poetry publish"
@@ -161,7 +161,6 @@ def test_publish_package(
         "SELECT * FROM packages where name = ? AND mpy_version = ? ORDER by pkg_version DESC",
         (pkg.package_name, pkg.mpy_version),
     )
-    cursor.row_factory = sqlite3.Row  # to get dict like access
     recs = cursor.fetchall()
 
     row = recs[0]

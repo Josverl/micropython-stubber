@@ -82,7 +82,7 @@ def cli_publish(
     versions: Union[str, List[str]],
     ports: Union[str, List[str]],
     boards: Union[str, List[str]],
-    production: bool = True,
+    production: bool = False,
     build: bool = False,
     force: bool = False,
     dry_run: bool = False,
