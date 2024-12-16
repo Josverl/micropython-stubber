@@ -2,7 +2,6 @@ import fnmatch
 import glob
 import os
 import platform
-import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -30,7 +29,11 @@ PORT_FWTYPES = {
 
 # Token with no permissions to avoid throttling
 # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
-PAT_NO_ACCESS = "github_pat_"+"11AAHPVFQ0G4NTaQ73Bw5J"+"_fAp7K9sZ1qL8VFnI9g78eUlCdmOXHB3WzSdj2jtEYb4XF3N7PDJBl32qIxq"
+PAT_NO_ACCESS = (
+    "github_pat_"
+    + "11AAHPVFQ0G4NTaQ73Bw5J"
+    + "_fAp7K9sZ1qL8VFnI9g78eUlCdmOXHB3WzSdj2jtEYb4XF3N7PDJBl32qIxq"
+)
 
 PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
 GH_CLIENT = Github(auth=Auth.Token(PAT))
@@ -135,12 +138,23 @@ def filtered_comports(
     elif not isinstance(include, list):  # type: ignore
         include = list(include)
 
+    if ignore == [] and platform.system() == "Darwin":
+        # By default ignore some of the irrelevant ports on macOS
+        ignore = [
+            "/dev/*.debug-console",
+        ]
+
     # remove ports that are to be ignored
     log.trace(f"{include=}, {ignore=}, {bluetooth=}")
 
     comports = [
         p for p in list_ports.comports() if not any(fnmatch.fnmatch(p.device, i) for i in ignore)
     ]
+    
+    if False:
+        import jsons
+        print(jsons.dumps(comports).replace('{"description":', '\n{"description":'))
+
     if platform.system() == "Linux":
         # use p.location to filter out the bogus ports on newer Linux kernels
         # filter out the bogus ports on newer Linux kernels
@@ -161,16 +175,21 @@ def filtered_comports(
         else:
             # if there are ports to ignore, add the explicit list to the filtered list
             comports = list(set(explicit) | set(comports))
+    if platform.system() == "Darwin":
+        # Failsafe: filter out debug-console ports
+        comports = [p for p in comports if not p.description.endswith(".debug-console")]
+
     if not bluetooth:
         # filter out bluetooth ports
         comports = [p for p in comports if "bluetooth" not in p.description.lower()]
         comports = [p for p in comports if "BTHENUM" not in p.hwid]
-        if sys.platform == "darwin":
+        if platform.system() == "Darwin":
             comports = [p for p in comports if ".Bluetooth" not in p.device]
-        log.trace(f"no Bluetooth: {[p.device for p in comports]}")
+            # filter out ports with no hwid
+            comports = [p for p in comports if p.hwid != "n/a"]
     log.debug(f"filtered_comports: {[p.device for p in comports]}")
     # sort
-    if sys.platform == "win32":
+    if platform.system() == "Windows":
         # Windows sort of comports by number - but fallback to device name
         return sorted(
             comports,
@@ -184,7 +203,7 @@ def find_serial_by_path(target_port: str):
     """Find the symbolic link path of a serial port by its device path."""
     # sourcery skip: use-next
 
-    if os.name == "nt":
+    if platform.system() == "Windows":
         return None
     # List all available serial ports
     available_ports = list_ports.comports()
