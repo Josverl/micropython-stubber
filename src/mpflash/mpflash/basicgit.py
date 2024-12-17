@@ -242,7 +242,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
 
 def fetch(repo: Union[Path, str]) -> bool:
     """
-    fetches a repo
+    fetches a repo and all tags
     repo should be in the form of : path/.git
     repo = '../micropython/.git'
     returns True on success
