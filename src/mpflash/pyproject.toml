@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mpflash"
-version = "1.24.2"
+version = "1.24.4"
 description = "Flash and download tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
