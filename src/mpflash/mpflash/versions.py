@@ -105,7 +105,9 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=
         cache_it = False
     versions = [v for v in versions if parse(v) >= parse(minver)]
     # remove all but the most recent (preview) version
-    versions = versions[:1] + [v for v in versions if "preview" not in v]
+    versions = [v for v in versions if "preview" in v][:1] + [
+        v for v in versions if "preview" not in v
+    ]
     versions = sorted(versions, reverse=reverse)
     if cache_it:
         return versions
