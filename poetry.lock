@@ -1531,13 +1531,13 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "mpflash"
-version = "1.24.2"
+version = "1.24.4"
 description = "Flash and download tool for MicroPython firmwares"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "mpflash-1.24.2-py3-none-any.whl", hash = "sha256:af136e91459c654ea981c4638a0b7e35f5f08236c4dc8b70a968420e90769072"},
-    {file = "mpflash-1.24.2.tar.gz", hash = "sha256:6408d6dd1f0b0482b117a924e79bc2140e175ce11d362fb5113a0eb50664afe6"},
+    {file = "mpflash-1.24.4-py3-none-any.whl", hash = "sha256:b1815f94834ebfb2bf026fdfa16292d6c1ef652e5393107e77c04d586094769f"},
+    {file = "mpflash-1.24.4.tar.gz", hash = "sha256:f2d06594eff7fad145398206c7833f5062f0f069cc34f37bcfb99500a11354f8"},
 ]
 
 [package.dependencies]
@@ -3280,4 +3280,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "ef8b309b8324f5e4bde2584c3c9ba8dee0ba9377c9c0517f0dddd433410ed631"
+content-hash = "fdc74d9e13065fd808babb2b4a51e0aa30f33671c3ffb5a09f8e807da32f8083"
