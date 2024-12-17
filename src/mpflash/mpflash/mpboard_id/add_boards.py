@@ -23,8 +23,7 @@ from mpflash.versions import micropython_versions
 # and the #define MICROPY_HW_MCU_NAME "STM32F767xx"
 RE_H_MICROPY_HW_BOARD_NAME = re.compile(r"#define\s+MICROPY_HW_BOARD_NAME\s+\"(.+)\"")
 RE_H_MICROPY_HW_MCU_NAME = re.compile(r"#define\s+MICROPY_HW_MCU_NAME\s+\"(.+)\"")
-# find in the mpconfigboard.cmake files
-
+# find boards and variants in the mpconfigboard*.cmake files
 RE_CMAKE_MICROPY_HW_BOARD_NAME = re.compile(
     r"MICROPY_HW_BOARD_NAME\s?=\s?\"(?P<variant>[\w\s\S]*)\""
 )
@@ -64,7 +63,7 @@ def boards_from_repo(mpy_path: Path, version: str, family: Optional[str] = None)
 def boards_from_cmake(mpy_path: Path, version: str, family: str):
     """Get boards from the mpconfigboard.cmake files to the board_list."""
     board_list = []
-    for path in mpy_path.glob("ports/**/mpconfigboard.cmake"):
+    for path in mpy_path.glob("ports/**/mpconfigboard*.cmake"):
         board = path.parent.name
         port = path.parent.parent.parent.name
         with open(path, "r") as f:
