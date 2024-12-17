@@ -44,10 +44,8 @@ def boards_from_repo(mpy_path: Path, version: str, family: Optional[str] = None)
     """
     if not mpy_path.exists() or not mpy_path.is_dir():
         raise FileNotFoundError(f"MicroPython path {mpy_path} does not exist.")
-    if not family:
-        family = "micropython"
-    if not version:
-        version = git.get_local_tag()  # type: ignore
+    family = family or "micropython"
+    version = version or git.get_local_tag()  # type: ignore
     if not version:
         raise ValueError("No version provided and no local tag found.")
 
@@ -55,9 +53,10 @@ def boards_from_repo(mpy_path: Path, version: str, family: Optional[str] = None)
     # look in mpconfigboard.h files
     board_list = boards_from_cmake(mpy_path, version, family)
 
-    # look for variants in the .cmake files
+    # look for boards in the .cmake files
     board_list.extend(boards_from_headers(mpy_path, version, family))
-    # TODO:? look for variants in the Makefile files
+
+    # TODO:? look for variants in the board.json files
 
     return board_list
 
