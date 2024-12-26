@@ -51,7 +51,7 @@ LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
 # our own logging module to avoid dependency on and interfering with logging module
 class logging:
-    # DEBUG = 10
+    DEBUG = 10
     INFO = 20
     WARNING = 30
     ERROR = 40
@@ -66,9 +66,9 @@ class logging:
     def basicConfig(cls, level):
         cls.level = level
 
-    # def debug(self, msg):
-    #     if self.level <= logging.DEBUG:
-    #         self.prnt("DEBUG :", msg)
+    def debug(self, msg):
+        if self.level <= logging.DEBUG:
+            self.prnt("DEBUG :", msg)
 
     def info(self, msg):
         if self.level <= logging.INFO:
@@ -244,6 +244,7 @@ class Stubber:
             return False
 
         # Start a new file
+        # log.debug("Create file: {}".format(file_name))
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
@@ -491,6 +492,7 @@ def ensure_folder(path: str):
                 # folder does not exist
                 if e.args[0] == ENOENT:
                     try:
+                        log.debug("Create folder {}".format(p))
                         os.mkdir(p)
                     except OSError as e2:
                         log.error("failed to create folder {}".format(p))
@@ -668,7 +670,7 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
         # unix port
         c = "."
     r = c
-    for r in ["/sd", "/flash", "/", c, "."]:
+    for r in ["/remote", "/sd", "/flash", "/", c, "."]:
         try:
             _ = os.stat(r)
             break
@@ -817,6 +819,7 @@ def main():
 
 if __name__ == "__main__" or is_micropython():
     if not file_exists("no_auto_stubber.txt"):
+        print(f"createstubs.py: {__version__}")
         try:
             gc.threshold(4 * 1024)  # type: ignore
             gc.enable()

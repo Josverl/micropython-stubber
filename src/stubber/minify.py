@@ -17,7 +17,6 @@ except ImportError:
     python_minifier = None
 
 from mpflash.logger import log
-
 from mpflash.versions import SET_PREVIEW, V_PREVIEW
 
 # Type Aliases for minify
@@ -372,7 +371,7 @@ def cross_compile(
         _target = get_temp_file(suffix=".mpy")
     result = pipx_mpy_cross(version, source_file, _target)
     if result.stderr and "No matching distribution found for mpy-cross==" in result.stderr:
-        log.warning(f"mpy-cross=={version} not found, using default version.")
+        log.warning(f"mpy-cross=={version} not found, using most current version.")
         result = pipx_mpy_cross(V_PREVIEW, source_file, _target)
 
     if result.returncode == 0:
