@@ -126,7 +126,7 @@ def test_publish_package(
     tmp_path: Path,
     pytestconfig: pytest.Config,
     fake_package: StubPackage,
-    temp_db_conn: sqlite3.Connection,
+    test_db_conn: sqlite3.Connection,
 ):
     pkg = fake_package
 
@@ -138,7 +138,9 @@ def test_publish_package(
     pkg._publish = True  # type: ignore
 
     # FIXME : dependency to access to test.pypi.org
-    result = pkg.publish_distribution_ifchanged(production=False, force=False, db_conn=temp_db_conn)
+    result = pkg.publish_distribution_ifchanged(
+        production=False, force=False, db_conn=test_db_conn
+    )
 
     assert result, "should be ok"
 
@@ -156,7 +158,7 @@ def test_publish_package(
     assert m_publish.called, "should call poetry publish"
 
     # check is the hashes are added to the database
-    cursor = temp_db_conn.cursor()
+    cursor = test_db_conn.cursor()
     cursor.execute(
         "SELECT * FROM packages where name = ? AND mpy_version = ? ORDER by pkg_version DESC",
         (pkg.package_name, pkg.mpy_version),

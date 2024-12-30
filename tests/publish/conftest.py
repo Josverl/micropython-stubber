@@ -40,18 +40,18 @@ def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: p
 
 
 @pytest.fixture
-def temp_db_conn(
+def test_db_conn(
     pytestconfig: pytest.Config,
     tmp_path: Path,
 ):
     """"""
-    db_src = pytestconfig.rootpath / "tests/publish/data/all_packages_test.db"
+    db_src = pytestconfig.rootpath / "tests/publish/data/test_packages.db"
     db_path = tmp_path / "all_packages_test.db"
     # copy file to temp location
     shutil.copy(db_src, db_path)
 
     db_conn = sqlite3.connect(db_path)
-    db_conn.row_factory = sqlite3.Row # return rows as dicts
+    db_conn.row_factory = sqlite3.Row  # return rows as dicts
     yield db_conn
     try:
         db_conn.close()
