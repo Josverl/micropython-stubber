@@ -1,14 +1,12 @@
 """
-#############################################################
-# Version handling copied from stubber/utils/versions.py
-#############################################################
+Version handling for mpflash and micropython-stubber
 """
 
 from pathlib import Path
 
 from cache_to_disk import NoCacheCondition, cache_to_disk
 from loguru import logger as log
-from packaging.version import parse
+from packaging.version import Version, parse
 
 import mpflash.basicgit as git
 from mpflash.common import GH_CLIENT
@@ -71,6 +69,11 @@ def clean_version(
     return version
 
 
+def is_version(version: str):
+    """Check if the version is a valid version string"""
+    return Version._regex.search(version) is not None
+
+
 @cache_to_disk(n_days_to_cache=1)
 def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=True):
     """Get the list of micropython versions from github tags"""
@@ -106,7 +109,8 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=
     versions = [v for v in versions if parse(v) >= parse(minver)]
     # remove all but the most recent (preview) version
     versions = versions[:1] + [v for v in versions if "preview" not in v]
-    versions = sorted(versions, reverse=reverse)
+    # remove any duplicates and sort
+    versions = sorted(list(set(versions)), reverse=reverse, key=lambda s: (not is_version(s), s))
     if cache_it:
         return versions
     # returns - but does not cache
