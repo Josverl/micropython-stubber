@@ -82,6 +82,7 @@ class VersionedPackage:
         return f"{self.package_name}=={self.mpy_version}"
 
     def __repr__(self) -> str:
+        # todo: use pkg_version to allow for comparing different versions of the same package
         return f"{self.package_name}=={self.mpy_version}"
 
     def __eq__(self, o: object) -> bool:
@@ -388,10 +389,12 @@ class Builder(VersionedPackage):
             json.dump(self.to_dict(), f, indent=4)
 
     def to_dict(self) -> dict:
-        """return the package as a dict to store in the jsondb
+        """return the package as a Dict[str,str] to store in the db
 
         need to simplify some of the Objects to allow serialization to json
-        - the paths to posix paths
+        - stub_sources
+            List[Tuple[StubSource, Path]] -> List[List[str, str]]  # convert
+            the paths to posix paths
         - the version (semver) to a string
         - toml file to list of lines
 
@@ -402,7 +405,9 @@ class Builder(VersionedPackage):
             "publish": self._publish,
             "pkg_version": str(self.pkg_version),
             "path": self.package_path.name,  # only store the folder name , as it is relative to the publish folder
-            "stub_sources": [(name, Path(path).as_posix()) for (name, path) in self.stub_sources],
+            "stub_sources": json.dumps(
+                [(name, Path(path).as_posix()) for (name, path) in self.stub_sources]
+            ),
             "description": self.description,
             "hash": self.hash,
             "stub_hash": self.stub_hash,
@@ -432,7 +437,7 @@ class Builder(VersionedPackage):
         # set pkg version after creating the toml file
         self.pkg_version = json_data["pkg_version"]
         self.stub_sources = []
-        for name, path in json_data["stub_sources"]:
+        for name, path in json.loads(json_data["stub_sources"]):
             if path.startswith("stubs/"):
                 path = path.replace("stubs/", "")
             self.stub_sources.append((name, Path(path)))
@@ -538,13 +543,13 @@ class Builder(VersionedPackage):
         with open(self.package_path / "README.md", "w") as f:
             f.write(f"# {self.package_name}\n\n")
             f.write(TEMPLATE_README)
-            f.write(f"Included stubs:\n")
+            f.write("Included stubs:\n")
             for name, folder in self.stub_sources:
                 f.write(f"* {name} from `stubs/{Path(folder).as_posix()}`\n")
 
-            f.write(f"\n\n")
-            f.write(f"origin | Family | Port | Board | Version\n")
-            f.write(f"-------|--------|------|-------|--------\n")
+            f.write("\n\n")
+            f.write("origin | Family | Port | Board | Version\n")
+            f.write("-------|--------|------|-------|--------\n")
             try:
                 f.write(
                     f"Firmware | {firmware_stubs['firmware']['family']} | {firmware_stubs['firmware']['port']} | {firmware_stubs['firmware']['machine']} | {clean_version(firmware_stubs['firmware']['version'])} \n"
@@ -788,6 +793,14 @@ class StubPackage(PoetryBuilder):
             STUB_PATH - root-relative path to the folder where the stubs are stored ('./stubs').
 
         """
+        super().__init__(
+            package_name=package_name,
+            mpy_version=clean_version(version, drop_v=True),  # Initial version
+            port=port,
+            board=board,
+            description=description,
+            stubs=stubs or [],
+        )
         self.port = port
         self.board = board
         if json_data is not None:
@@ -796,14 +809,14 @@ class StubPackage(PoetryBuilder):
             # store essentials
             self.package_name = package_name
             self.description = description
-            self.mpy_version = clean_version(version, drop_v=True)  # Initial version
+            # self.mpy_version = clean_version(version, drop_v=True)  # Initial version
 
             self.create_update_pyproject_toml()
 
-            self.stub_sources: StubSources = []
-            # save the stub sources
-            if stubs:
-                self.stub_sources = stubs
+            # self.stub_sources: StubSources = []
+            # # save the stub sources
+            # if stubs:
+            #     self.stub_sources = stubs
 
         self.status: Status = Status(
             {
@@ -813,14 +826,6 @@ class StubPackage(PoetryBuilder):
                 "error": None,
                 "path": self.package_path.as_posix(),
             }
-        )
-        super().__init__(
-            package_name=package_name,
-            mpy_version=self.mpy_version,
-            port=port,
-            board=board,
-            description=description,
-            stubs=self.stub_sources,
         )
 
     def update_sources(self) -> StubSources:
@@ -875,7 +880,7 @@ class StubPackage(PoetryBuilder):
             log.debug(
                 f"{self.package_name}: skipping as one or more source stub folders are missing"
             )
-            self.status["error"] = "Skipped, stub folder(s) missing"
+            self.status["error"] = "Skipped, No stubs found."
             shutil.rmtree(self.package_path.as_posix())
             self._publish = False  # type: ignore
             return False
@@ -1052,7 +1057,7 @@ class StubPackage(PoetryBuilder):
                     d["mpy_version"],
                     d["pkg_version"],
                     d["publish"],
-                    json.dumps(d["stub_sources"]),
+                    d["stub_sources"],
                     d["path"],
                     d["hash"],
                     d["stub_hash"],
