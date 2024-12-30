@@ -103,11 +103,11 @@ read_db_data = [
         "publish": True,
         "pkg_version": "1.18.post6",
         "path": "foo-v1_18-bar-stubs",
-        "stub_sources": [
+        "stub_sources": """[
             ["MCU stubs", "micropython-v1_17-stm32"],
             ["Frozen stubs", "micropython-v1_17-frozen/stm32/GENERIC"],
-            ["Core Stubs", "cpython_core-pycopy"],
-        ],
+            ["Core Stubs", "cpython_core-pycopy"]
+        ]""",
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
         "stub_hash": "",
@@ -121,11 +121,11 @@ read_db_data = [
         "publish": True,
         "pkg_version": "1.18.post6",
         "path": "foo-v1_18-bar-stubs",
-        "stub_sources": [
+        "stub_sources": """[
             ["MCU stubs", "stubs/micropython-v1_17-stm32"],
             ["Frozen stubs", "stubs/micropython-v1_17-frozen/stm32/GENERIC"],
-            ["Core Stubs", "stubs/cpython_core-pycopy"],
-        ],
+            ["Core Stubs", "stubs/cpython_core-pycopy"]
+        ]""",
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
         "stub_hash": "",
@@ -139,9 +139,9 @@ read_db_data = [
         "publish": True,
         "pkg_version": "1.18.post6",
         "path": "publish/foo-v1_18-bar-stubs",
-        "stub_sources": [
-            ["MCU stubs", "micropython-v1_17-stm32"],
-        ],
+        "stub_sources": """[
+            ["MCU stubs", "micropython-v1_17-stm32"]
+        ]""",
         "description": "foo bar stubs",
         "hash": "b09f9c819c9e98cbd9dfbc8158079146587e2d66",
         "stub_hash": "1234567890",
@@ -171,7 +171,6 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
         stub_path=config.stub_path,
         test_build=False,
     )
-
 
 def run_common_package_tests(
     package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, test_build=True

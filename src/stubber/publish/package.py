@@ -11,7 +11,6 @@ from typing import Dict, Union
 from mpflash.logger import log
 from mpflash.versions import clean_version
 
-
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.stubpackage import StubPackage, StubSources
@@ -50,7 +49,14 @@ def get_package(
         mpy_version=version,
     ):
         # create package from the information retrieved from the database
-        return StubPackage(pkg_name, port, board=board, version=version, json_data=package_info)
+        p_db =  StubPackage(
+            pkg_name,
+            port,
+            board=board,
+            version=version,
+            json_data=package_info,
+        )
+        return p_db
 
     log.debug(f"No package found for {pkg_name} in database, creating new package")
     return create_package(
@@ -71,7 +77,7 @@ def get_package_info(
 ) -> Union[Dict, None]:
     """
     get a package's record from the json db if it can be found
-    matches om the package name and version
+    matches on the package name and version
         pkg_name: package name (micropython-esp32-stubs)
         mpy_version: micropython/firmware version (1.18)
     """
@@ -86,15 +92,14 @@ def get_package_info(
     """,
         (pkg_name, f"{mpy_version}%"),
     )
-    packages = cursor.fetchall()
+    packages = [dict(row) for row in cursor.fetchall()]
 
-    if len(packages) > 0:
-        pkg_from_db = dict(packages[-1])
+    if packages:
+        pkg_from_db = packages[0]
 
         log.debug(f"Found latest {pkg_name} == {pkg_from_db['pkg_version']}")
         return pkg_from_db
-    else:
-        return None
+    return None
 
 
 def create_package(
