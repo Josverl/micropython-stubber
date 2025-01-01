@@ -179,7 +179,7 @@ def checkout_tag(tag: str, repo: Optional[Union[str, Path]] = None) -> bool:
     return True
 
 
-def sync_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
+def sync_submodules(repo: Union[Path, str]) -> bool:
     """
     make sure any submodules are in sync
     """
@@ -194,7 +194,24 @@ def sync_submodules(repo: Optional[Union[Path, str]] = None) -> bool:
             log.debug(result.stderr)
         else:
             return False
+    checkout_arduino_lib(Path(repo))
     return True
+
+
+def checkout_arduino_lib(mpy_path: Path):
+    """
+    Checkout the arduino-lib submodule repo if it exists
+
+    This is needed as some of the arduino boards freeze modules originationg from the arduino-lib
+    """
+    # arduino_lib_path = mpy_path / "lib/arduino-lib"
+    if (mpy_path / "lib/arduino-lib").exists():
+        cmd = ["git", "submodule", "update", "--init", "lib/arduino-lib"]
+        try:
+            result = subprocess.run(cmd, cwd=mpy_path, check=True)
+            log.info(f"checkout arduino-lib: {result.returncode}")
+        except subprocess.CalledProcessError as e:
+            log.warning("Could not check out arduino-lib, error: ", e)
 
 
 def checkout_commit(commit_hash: str, repo: Optional[Union[Path, str]] = None) -> bool:

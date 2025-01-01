@@ -20,14 +20,13 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 import os
 import shutil  # start moving from os & glob to pathlib
 import subprocess
-
 from pathlib import Path
 from typing import List, Optional
 
 from mpflash.logger import log
+from mpflash.versions import SET_PREVIEW, V_PREVIEW
 from packaging.version import Version
 
-from mpflash.versions import SET_PREVIEW, V_PREVIEW
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
@@ -61,14 +60,6 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     pass
 
 
-def checkout_arduino_lib(mpy_path: Path):
-    """
-    Checkout the arduino-lib repo if it is not already checked out
-    """
-    # arduino_lib_path = mpy_path / "lib/arduino-lib"
-    cmd = ["git", "submodule", "update", "--init", "lib/arduino-lib"]
-    result = subprocess.run(cmd, cwd=mpy_path, check=True)
-    log.info(f"checkout arduino-lib: {result.returncode}")
 
 
 def freeze_any(
@@ -90,8 +81,6 @@ def freeze_any(
     mpy_path = Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
     mpy_lib_path = Path(mpy_lib_path).absolute() if mpy_lib_path else CONFIG.mpy_path.absolute()
 
-    if version > "v1.23.0" or version in SET_PREVIEW:
-        checkout_arduino_lib(mpy_path)
     # if old version of micropython, use the old freeze method
     if version not in SET_PREVIEW and Version(version) <= Version("1.11"):
         frozen_stub_path = get_fsp(version, stub_folder)
