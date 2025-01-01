@@ -820,6 +820,7 @@ def main():
         "breakout_trackball",
         "breakout_vl53l5cx",
         "btree",
+        "builtins",
         "cc3200",
         "cmath",
         "collections",
