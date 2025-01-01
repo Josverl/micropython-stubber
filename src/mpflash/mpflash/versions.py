@@ -82,35 +82,15 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=
         gh_client = GH_CLIENT
         repo = gh_client.get_repo("micropython/micropython")
         tags = [tag.name for tag in repo.get_tags() if parse(tag.name) >= parse(minver)]
-        # Only keep the last preview
         versions = [v for v in tags if not v.endswith(V_PREVIEW)]
-        preview = sorted([v for v in tags if v.endswith(V_PREVIEW)], reverse=True)[1]
+        # Only keep the last preview
+        preview = sorted([v for v in tags if v.endswith(V_PREVIEW)], reverse=True)[0]
         versions.append(preview)
     except Exception as e:
-        versions = [
-            "v9.99.9-preview",
-            "v1.22.2",
-            "v1.22.1",
-            "v1.22.0",
-            "v1.21.1",
-            "v1.21.0",
-            "v1.20.0",
-            "v1.19.1",
-            "v1.19",
-            "v1.18",
-            "v1.17",
-            "v1.16",
-            "v1.15",
-            "v1.14",
-            "v1.13",
-            "v1.12",
-            "v1.11",
-            "v1.10",
-        ]
-        cache_it = False
-    versions = [v for v in versions if parse(v) >= parse(minver)]
-    # remove all but the most recent (preview) version
-    versions = versions[:1] + [v for v in versions if "preview" not in v]
+        log.error(e)
+        versions = []
+        # returns - but does not cache
+        raise NoCacheCondition(function_value=versions)
     # remove any duplicates and sort
     versions = sorted(list(set(versions)), reverse=reverse, key=lambda s: (not is_version(s), s))
     if cache_it:
@@ -119,16 +99,18 @@ def micropython_versions(minver: str = "v1.20", reverse: bool = False, cache_it=
     raise NoCacheCondition(function_value=versions)
 
 
-def get_stable_mp_version() -> str:
+def get_stable_mp_version(cache_it=True) -> str:
     # read the versions from the git tags
-    all_versions = micropython_versions(minver=OLDEST_VERSION)
-    return [v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
+    all_versions = micropython_versions(minver=OLDEST_VERSION, cache_it=cache_it)
+    versions = [v for v in all_versions if not v.endswith(V_PREVIEW)]
+    return versions[-1] if versions else ""
 
 
-def get_preview_mp_version() -> str:
+def get_preview_mp_version(cache_it=True) -> str:
     # read the versions from the git tags
-    all_versions = micropython_versions(minver=OLDEST_VERSION)
-    return [v for v in all_versions if v.endswith(V_PREVIEW)][-1]
+    all_versions = micropython_versions(minver=OLDEST_VERSION, cache_it=cache_it)
+    versions = [v for v in all_versions if v.endswith(V_PREVIEW)]
+    return versions[0] if versions else ""
 
 
 # Do not cache , same path will have different versions checked out
