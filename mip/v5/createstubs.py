@@ -32,7 +32,7 @@ LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
 # our own logging module to avoid dependency on and interfering with logging module
 class logging:
-    # DEBUG = 10
+    DEBUG = 10
     INFO = 20
     WARNING = 30
     ERROR = 40
@@ -47,9 +47,9 @@ class logging:
     def basicConfig(cls, level):
         cls.level = level
 
-    # def debug(self, msg):
-    #     if self.level <= logging.DEBUG:
-    #         self.prnt("DEBUG :", msg)
+    def debug(self, msg):
+        if self.level <= logging.DEBUG:
+            self.prnt("DEBUG :", msg)
 
     def info(self, msg):
         if self.level <= logging.INFO:
@@ -152,7 +152,11 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+                _errors.append(
+                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
+                        name, item_instance, e
+                    )
+                )
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -218,13 +222,16 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
+            log.info(
+                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
+            )
 
         except ImportError:
             # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
             return False
 
         # Start a new file
+        # log.debug("Create file: {}".format(file_name))
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
@@ -249,7 +256,9 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
+    def write_object_stub(
+        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
+    ):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -325,11 +334,13 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(
-                        indent, item_name, ret
-                    )
+                    s = "{}@classmethod\n".format(
+                        indent
+                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
+                        indent, item_name, first, ret
+                    )
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -358,7 +369,9 @@ class Stubber:
                         # use these types for the attribute
                         if t == "generator":
                             t = "Generator"
-                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
@@ -366,7 +379,9 @@ class Stubber:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
                         if " at " in item_repr:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
@@ -449,7 +464,9 @@ class Stubber:
                     f.write(",\n")
                 else:
                     self._json_first = False
-                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
+                line = '{{"module": "{}", "file": "{}"}}'.format(
+                    module_name, stub_file.replace("\\", "/")
+                )
                 f.write(line)
 
         except OSError:
@@ -478,6 +495,7 @@ def ensure_folder(path: str):
                 # folder does not exist
                 if e.args[0] == ENOENT:
                     try:
+                        log.debug("Create folder {}".format(p))
                         os.mkdir(p)
                     except OSError as e2:
                         log.error("failed to create folder {}".format(p))
@@ -595,7 +613,8 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
+            and info["version"]
+            >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # versions from 1.10.0 to 1.24.0 do not have a micro .0
@@ -657,7 +676,7 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
         # unix port
         c = "."
     r = c
-    for r in ["/sd", "/flash", "/", c, "."]:
+    for r in ["/remote", "/sd", "/flash", "/", c, "."]:
         try:
             _ = os.stat(r)
             break
@@ -992,6 +1011,7 @@ def main():
 
 if __name__ == "__main__" or is_micropython():
     if not file_exists("no_auto_stubber.txt"):
+        print(f"createstubs.py: {__version__}")
         try:
             gc.threshold(4 * 1024)  # type: ignore
             gc.enable()
