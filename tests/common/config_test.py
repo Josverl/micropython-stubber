@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 pytestmark = [pytest.mark.stubber]
@@ -91,3 +90,18 @@ def test_config_no_config(change_test_dir, tmp_path: Path):
     assert config.mpy_stubs_path == Path("./repos/micropython-stubs")
 
     assert config.publish_path == Path("./repos/micropython-stubs/publish")
+
+
+def test_config_versions():
+
+    # exists on top-level
+    from stubber.utils.config import CONFIG
+
+    assert CONFIG
+    assert CONFIG.stable_version
+    assert isinstance(CONFIG.stable_version, str)
+    assert CONFIG.all_versions
+    assert isinstance(CONFIG.all_versions, list)
+
+    # are we using fake versions due to errors ?
+    assert CONFIG.stable_version != "1.21.0", "We are using fake versions, due to errors"

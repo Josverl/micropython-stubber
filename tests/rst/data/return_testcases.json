@@ -712,7 +712,7 @@
             "   Depending on the underlying module implementation in a particular",
             "   :term:`MicroPython port`, some or all keyword arguments above may be not supported."
         ],
-        "type": "IO",
+        "type": "SSLSocket",
         "confidence": 0.8,
         "match": "<re.Match object; span=(93, 1236), match='returns an instance of ssl.SSLSocket, which wraps>",
         "module": "ussl",

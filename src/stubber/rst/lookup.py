@@ -12,17 +12,20 @@ __all__ = [
     "NONE_VERBS",
     "CHILD_PARENT_CLASS",
     "PARAM_FIXES",
+    "PARAM_RE_FIXES",
     "MODULE_GLUE",
     "RST_DOC_FIXES",
     "DOCSTUB_SKIP",
     "U_MODULES",
 ]
 
-# all possible Types needed for the stubs - exxess types should be removed later , and otherwise won't do much harm
+# all possible Types needed for the stubs - excess types should be removed later , and otherwise won't do much harm
 TYPING_IMPORT: List[str] = [
     "from __future__ import annotations",
-    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple, TypeVar",
     "from _typeshed import Incomplete",
+    "from typing import IO, Any, Callable, Coroutine, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union, NamedTuple",
+    "from typing_extensions import TypeVar, TypeAlias, Awaitable",
+    # "# TYPING_IMPORT",
 ]
 
 
@@ -73,8 +76,6 @@ but can also be imported with a `u` prefix
 # also applies correction for some classes are documented as functions
 
 RST_DOC_FIXES: List[Tuple[str, str]] = [
-    # remove rst highlights from docstrings
-    (":class: attention\n", ""),
     # ------------------------------------------------------------------------------------------------
     # re.rst - function and class with the same name
     # done: issue https://github.com/micropython/micropython/issues/8273
@@ -121,14 +122,14 @@ LOOKUP_LIST = {
     "builtins.from_bytes": ("int", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
-    "collections.namedtuple": ("stdlib_namedtuple", 0.95),
+    "collections.namedtuple": ("type[Tuple[Any, ...]]", 0.95),
     "gc.collect": ("None", 0.95),
     "machine.deepsleep": ("NoReturn", 0.95),
     "machine.reset_cause": ("int", 0.95),
     "machine.reset": ("NoReturn", 0.95),  # never returns
     "machine.Signal.value": ("int", 0.95),
     "machine.soft_reset": ("NoReturn", 0.95),  # never returns
-    "machine.UART.irq": ("Incomplete", 0.95),  # no IRQ type defined
+    "machine.UART.irq": ("_IRQ", 0.95),  # no IRQ type defined
     "machine.UART.write": ("Union[int,None]", 0.95),
     "machine.UART.readinto": ("Union[int,None]", 0.95),
     "machine.UART.readline": ("Union[str,None]", 0.95),
@@ -142,17 +143,20 @@ LOOKUP_LIST = {
     "pyb.hard_reset": ("NoReturn", 0.95),  # never returns
     "pyb.I2C.recv": ("bytes", 0.95),  # complex in docstring
     "pyb.SPI.recv": ("bytes", 0.95),  # complex in docstring
-    "ubluetooth.BLE.irq": ("Any", 0.95),  # never returns
+    "pyb.hid_keyboard": ("HID_Tuple", 0.95),  # ?
+    "pyb.hid_mouse": ("HID_Tuple", 0.95),  # plain wrong
+    "bluetooth.BLE.irq": ("_IRQ", 0.95),
+    "ubluetooth.BLE.irq": ("_IRQ", 0.95),
     "uctypes.bytearray_at": ("bytearray", 0.95),
     "uctypes.bytes_at": ("bytes", 0.95),
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
-    "ssl.ssl.wrap_socket": (
-        "IO",
-        0.95,
-    ),  # undocumented class ssl.SSLSocket #TODO: or wrapped-socket object ?
-    "ussl.ussl.wrap_socket": ("IO", 0.95),  # undocumented class ssl.SSLSocket
+    # undocumented CPython class ssl.SSLSocket
+    # TODO: include  ssl.SSLSocket from stdlib / mpy_typeshed, currently Incomplete
+    "ssl.wrap_socket": ("SSLSocket", 0.95),
+    "ussl.wrap_socket": ("SSLSocket", 0.95),
+    #
     "usys.exit": ("NoReturn", 0.95),  # never returns
     "utime.sleep_ms": (
         "Coroutine[None, None, None]",  # Micropython V1.15+ ?
@@ -171,6 +175,22 @@ LOOKUP_LIST = {
     "_onewire.crc8": ("int", 0.95),
     # espnow
     "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]]", 0.95),  # list / ? tuple of bytestrings
+    # esp32
+    "esp32.Partition.readblocks": ("None", 0.95),
+    "esp32.Partition.writeblocks": ("None", 0.95),
+    "_rp2.bootsel_button": ("int", 0.95),
+    "_rp2.DMA.active": ("bool", 0.95),
+    "_rp2.DMA.pack_ctrl": ("int", 0.95),
+    "_rp2.DMA.unpack_ctrl": ("dict", 0.95),
+    "_rp2.DMA.close": ("None", 0.95),
+    "_rp2.DMA.config": ("None", 0.95),
+    "_rp2.DMA.irq": ("_IRQ", 0.95),
+    "_rp2.PIO.state_machine": ("StateMachine", 0.95),
+    "_rp2.PIO.irq": ("_IRQ", 0.95),
+    "_rp2.PIO.remove_program": ("None", 0.95),
+    "_rp2.PIO.add_program": ("None", 0.95),
+    "rp2.PIO.irq": ("_IRQ", 0.95),
+    "rp2.DMA.irq": ("_IRQ", 0.95),
 }
 
 
@@ -227,35 +247,164 @@ NONE_VERBS = [
 # - to allow one module te refer to another,
 # - to import other supporting modules
 # - to add missing abstract classes
+# - to add TypeAliases and TypeVars
+
+# avoid defining AnyReadableBuf and AnyWritableBuf in m modules
+ANY_BUF = ["from _mpy_shed import AnyReadableBuf, AnyWritableBuf"]
 
 MODULE_GLUE = {
-    "lcd160cr": ["from .machine import SPI"],  # module returns SPI objects defined in machine
-    "esp32": ["from __future__ import annotations"],  # Class methods return Class
+    "array": ['_T = TypeVar("_T", int, float, str)'],
+    "asyncio": ANY_BUF,
+    "bluetooth": ANY_BUF
+    + [
+        "from _mpy_shed import _IRQ",
+    ],
     "collections": [
         "from queue import Queue",
-        "from stdlib.collections import OrderedDict as stdlib_OrderedDict, deque as stdlib_deque, namedtuple as stdlib_namedtuple",
-    ],  # dequeu is a subclass
-    "os": [
-        # "from stdlib.os import uname_result",  # uname returns uname_result
-        "from stdlib.os import *  # type: ignore",  # integrate STDLIB
+        # "from _mpy_shed.collections import namedtuple as stdlib_namedtuple  # type: ignore",
+        '_KT = TypeVar("_KT")',
+        '_VT = TypeVar("_VT")',
     ],
-    "io": ["from stdlib.io import *  # type: ignore"],  # integrate STDLIB
-    "socket": ["from stdlib.socket import *  # type: ignore"],  # integrate STDLIB
-    "ssl": ["from stdlib.ssl import *  # type: ignore"],  # integrate STDLIB
-    # const: 3 -  paired with param and return typing
-    "micropython": ["Const_T = TypeVar('Const_T',int, float, str, bytes, Tuple) # constant"],
-    #
-    # "builtins": ["from stdlib.builtins import *"],  # integrate STDLIB
+    "cmath": [
+        "from typing_extensions import TypeAlias",
+        # "_C: TypeAlias = SupportsFloat | SupportsComplex | SupportsIndex | complex",
+    ],
+    "cryptolib": ANY_BUF,
+    "esp": ANY_BUF,
+    "espnow": [
+        "from _espnow import ESPNowBase  # type: ignore",
+    ],  # ESPNowBase is an undocumented base class
+    "framebuf": ANY_BUF,
+    "hashlib": ANY_BUF,
+    "heapq": [
+        '_T = TypeVar("_T")',
+    ],
+    "io": ANY_BUF
+    + [
+        "from _mpy_shed import IOBase",
+    ],
+    "lcd160cr": ANY_BUF + ["from pyb import SPI"],  # uses SPI
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
-    "espnow": ["from _espnow import ESPNowBase"],  # ESPNowBase is an undocumented base class
+    "machine.ADC": [
+        "from .Pin import Pin",
+        "ATTN_0DB:int = ...",
+    ],
+    "machine.I2C": ANY_BUF + ["from .Pin import Pin"],  #  uses Pin
+    "machine.I2S": ANY_BUF + ["from .Pin import Pin"],
+    "machine.PWM": ANY_BUF + ["from .Pin import Pin"],
+    "machine.RTC": [
+        "from machine import IDLE",
+    ],
+    "machine.SD": ["from .Pin import Pin"],  #  uses Pin
+    "machine.SDCard": ["from .Pin import Pin"],  #  uses Pin
+    "machine.Signal": ["from .Pin import Pin"],  #  uses Pin
+    "machine.SPI": ANY_BUF + ["from .Pin import Pin"],  #  uses Pin
+    "machine.UART": ANY_BUF
+    + [
+        "from machine import IDLE",
+        "from .Pin import Pin",
+        "from _mpy_shed import _IRQ",
+    ],  #  uses Pin
+    "micropython": [
+        "from typing import Tuple, Final",
+        "from typing_extensions import TypeVar",
+        '_T = TypeVar("_T")',
+        '_F = TypeVar("_F", bound=Callable[..., Any])',
+        'Const_T = TypeVar("Const_T", int, float, str, bytes, Tuple)  # constant',
+    ],
+    "network": ["from typing import Protocol"],  #  for AbstractNIC
+    "neopixel": [
+        # "from typing_extensions import TypeAlias",
+        # "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
+    ],  #  for AbstractNIC
+    "os": [
+        "from stdlib.os import *  # type: ignore",  # integrate STDLIB
+        "from _mpy_shed import uname_result",
+    ],
+    "pyb": ANY_BUF
+    + [
+        "from .UART import UART",
+        "from _mpy_shed import _OldAbstractBlockDev, _OldAbstractReadOnlyBlockDev",
+        # "_OldAbstractBlockDev: TypeAlias = Any",
+        # "_OldAbstractReadOnlyBlockDev: TypeAlias = Any",
+        "HID_Tuple:TypeAlias = tuple[int, int, int, int, bytes]",
+    ],
+    "pyb.ADC": ANY_BUF + ["from .Pin import Pin", "from .Timer import Timer"],
+    "pyb.CAN": ANY_BUF,
+    "pyb.DAC": ANY_BUF
+    + [
+        "from .Pin import Pin",
+        "from .Timer import Timer",
+    ],
+    "pyb.ExtInt": ["from .Pin import Pin"],
+    "pyb.I2C": ANY_BUF,
+    "pyb.SPI": ANY_BUF,
+    "pyb.UART": ANY_BUF,
+    "pyb.USB_HID": ANY_BUF,
+    "pyb.USB_VCP": ANY_BUF,
+    "pyb.Switch": ["from .Pin import Pin"],  #  uses Pin
+    "pyb.Timer": [
+        "from abc import ABC, abstractmethod",
+        "from .Pin import Pin",
+    ],  #  uses Pin
+    "rp2": [
+        # import classess from _rp2
+        "from _rp2.DMA import DMA as DMA",
+        "from _rp2.Flash import Flash as Flash",
+        "from _rp2.StateMachine import StateMachine as StateMachine",
+        "from _rp2.PIO import PIO as PIO",
+        "from _rp2.PIOASMEmit import PIOASMEmit",
+    ],  #
+    "_rp2.DMA": ["from _mpy_shed import _IRQ"],
+    "_rp2.PIO": ["from _mpy_shed import _IRQ"],
+    "rp2.PIO": ["from _mpy_shed import _IRQ"],
+    "rp2.DMA": ["from _mpy_shed import _IRQ"],
+    "socket": [
+        "from stdlib.socket import *  # type: ignore",
+        "from typing_extensions import TypeAlias",
+        "from _mpy_shed import AnyReadableBuf, AnyWritableBuf",
+    ],  # integrate STDLIB
+    "ssl": [
+        "from typing_extensions import TypeAlias",
+        "from _mpy_shed import StrOrBytesPath",
+        "from stdlib.ssl import *  # type: ignore",
+        "SSLSocket : TypeAlias = Incomplete",
+    ],  # integrate STDLIB
+    "struct": ANY_BUF,
+    "time": [
+        "from typing_extensions import TypeAlias, TypeVar",
+        "_TicksMs: TypeAlias = int",
+        "_TicksUs: TypeAlias = int",
+        "_TicksCPU: TypeAlias = int",
+        '_Ticks = TypeVar("_Ticks", _TicksMs, _TicksUs, _TicksCPU, int)',
+    ],
+    "uctypes": ANY_BUF
+    + [
+        # "from typing_extensions import TypeAlias",
+        # "_ScalarProperty: TypeAlias = int",
+        # "_RecursiveProperty: TypeAlias = tuple[int, _property]",
+        # "_ArrayProperty: TypeAlias = tuple[int, int]",
+        # "_ArrayOfAggregateProperty: TypeAlias = tuple[int, int, _property]",
+        # "_PointerToAPrimitiveProperty: TypeAlias = tuple[int, int]",
+        # "_PointerToAaAggregateProperty: TypeAlias = tuple[int, _property]",
+        # "_BitfieldProperty: TypeAlias = int",
+        # "_property: TypeAlias = _ScalarProperty | _RecursiveProperty | _ArrayProperty | _ArrayOfAggregateProperty | _PointerToAPrimitiveProperty | _PointerToAaAggregateProperty | _BitfieldProperty",
+        # "_descriptor: TypeAlias = tuple[str, _property]",
+    ],
 }
 
 
 PARAM_FIXES = [
     Fix("\\*", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"\**", "*"),  # change weirdly written wildcards \* --> *
-    Fix(r"/*", "*"),  # change weirdly written wildcards \* --> *
-    Fix(r"/)", ")"),  # strange terminator in machine.USBDevice `USBDevice.active(self, [value] /)`
+    Fix(r"/*", "*"),  # change weirdly written wildcards /* --> *
+    Fix(r"**", "*"),  # change weirdly written wildcards ** --> *
+    # do not remove / , this indicates positional only notation before the ,/
+    # RE to insert missing , before /
+    Fix(from_=r"(\w+.*?[^,])\s*/", to=r"\1 ,/", is_re=True),
+    Fix(",  ,/", ", /"),  # remove double commas ( cause by the above fix) its a kludge
+    # Fix("]=None /)", "]=None, /)")
+    # ref: https://regex101.com/r/crVQfA/1
     Fix("'param'", "param"),  # loose notation in documentation
     # illegal keywords
     Fix(
@@ -276,7 +425,7 @@ PARAM_FIXES = [
     # pyb.hid((buttons, x, y, z))
     Fix(
         "(buttons, x, y, z)",
-        "hidtuple:Tuple",
+        "hid_tuple:HID_Tuple",
     ),
     # esp v1.15.2 .. function:: getaddrinfo((hostname, port, lambda))
     Fix(
@@ -338,10 +487,10 @@ PARAM_FIXES = [
         "pins:Optional[Tuple]",
     ),  #
     ## rp2.PIO.irq
-    Fix(
-        "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
-        "trigger=IRQ_SM0",
-    ),
+    # Fix( No longer needed with py 3.10 notation
+    #     "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
+    #     "trigger=IRQ_SM0",
+    # ),
     # SPI.INIT - to fix error: Non-default argument follows default argument
     # ✅ fixed in doc v1.18+
     Fix(
@@ -482,25 +631,36 @@ PARAM_FIXES = [
     ),
 ]
 
+# and some param fixes that require a regex
+PARAM_RE_FIXES = [
+    Fix(
+        r"\[angle, time=0\]", "[angle], time=0", is_re=True
+    ),  # fix: method:: Servo.angle([angle, time=0])
+    Fix(
+        r"\[speed, time=0\]", "[speed], time=0", is_re=True
+    ),  # fix: .. method:: Servo.speed([speed, time=0])
+    Fix(
+        r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+    ),  # fix: network - AbstractNIC.connect
+]
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {
     # machine
-    # SoftSPI is defined before SPI, so baseclass is not yet available - but in a .pyi that is OK
     "SoftSPI": "SPI",
     "SoftI2C": "I2C",
     "Switch": "Pin",
     "Signal": "Pin",
     # uio # unclear regarding deprecation in python 3.12
-    # "IOBase": "IO",  # DOCME  not in documentation
+    # "IOBase": "IO",  # DOC_ME  not in documentation
     "TextIOWrapper": "IO",  # "TextIOBase, TextIO",  # based on Stdlib
     "FileIO": "IO",  #  "RawIOBase, BinaryIO",  # based on Stdlib
     "StringIO": "IO",  #  "BufferedIOBase, BinaryIO",  # based on Stdlib
     "BytesIO": "IO",  # "BufferedIOBase, BinaryIO",  # based on Stdlib
-    "BufferedWriter": "IOBase",  # DOCME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
+    "BufferedWriter": "IOBase",  # DOC_ME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
     # uzlib
     # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # -------------------------------------------------------------------------------------
-    # network - AbstractNIC is definined in docstub network.pyi , but not actually used
+    # network - AbstractNIC is defined in docstub network.pyi , but not actually used
     # "WLAN": "AbstractNIC",
     # "WLANWiPy": "AbstractNIC",
     # "CC3K": "AbstractNIC",
@@ -515,17 +675,20 @@ CHILD_PARENT_CLASS = {
     "namedtuple": "tuple",
     "deque": "stdlib_deque",
     # ESPNow
-    "ESPNow": "ESPNowBase,Iterator",  # causes issue with mypy
+    "ESPNow": "ESPNowBase, Iterator",  # causes issue with mypy
     "AIOESPNow": "ESPNow",
     # array
     "array": "List",
+    # network
+    "AbstractNIC": "Protocol",
+    "NeoPixel": "Sequence",
 }
 
 
 # TODO : implement the execution of this list during merge
-#  - this is a list of functions, classes methods and constantsn  that are not detected at runtime, but are avaialble and documented
+#  - this is a list of functions, classes methods and constants  that are not detected at runtime, but are available and documented
 # the standard merge only adds documentation to detected functions.
-FORCE_NON_DETECED = [
+FORCE_NON_DETECTED = [
     ("btree", "Btree", ["esp32", "esp8266"]),  # Is not detected runtime
     ("espnow", "ESPNow.peers_table", ["esp32"]),  # Is not detected runtime
 ]

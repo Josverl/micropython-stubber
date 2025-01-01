@@ -1,5 +1,3 @@
-import ast
-import os
 from pathlib import Path
 from typing import Any, List, NamedTuple, Tuple
 
@@ -7,23 +5,24 @@ import pytest
 
 pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
+
 class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
     expected: str  # The source code after the transformation.
     doc_stub: str  # The stub to apply
-    stub_file: str  # The path to stub file to apply
-    output: Path = None  # where to save the output for testing the tests
-    path: Path = None  # where are the tests
+    stub_file: Path | str  # The path to stub file to apply
+    output: Path | None = None  # where to save the output for testing the tests
+    path: Path | None = None  # where are the tests
 
 
-def collect_test_cases() -> List[Tuple[Any, ...]]:
+def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
     """
     Collect tests cases for the test case folder , each containing a
     - before.py||.pyi
     - after.py||.pyi
     - stub.py||.pyi
     """
-    root_test_cases_directory = Path(__file__).parent.joinpath("codemod_test_cases")
+    root_test_cases_directory = Path(__file__).parent.joinpath(folder)
     print(root_test_cases_directory)
 
     test_cases: List = []
@@ -48,7 +47,7 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
         with open(doc_stubs[0], encoding="utf-8") as file:
             doc_stub = file.read()
 
-        output = test_case_directory.joinpath("output.py")
+        output = test_case_directory.joinpath("output.xxx").with_suffix(before_files[0].suffix)
 
         test_cases.append(
             pytest.param(
@@ -63,7 +62,7 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
                 id=test_case_directory.name,
             )
         )
-    return tuple(test_cases)
+    return tuple(test_cases)  # type: ignore
 
 
 # class ExceptionCase(NamedTuple):
@@ -108,4 +107,4 @@ def collect_test_cases() -> List[Tuple[Any, ...]]:
 
 # Just for debugging purposes.
 if __name__ == "__main__":
-    collect_test_cases()
+    collect_test_cases(".")
