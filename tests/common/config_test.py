@@ -2,9 +2,14 @@ import os
 from pathlib import Path
 
 import pytest
+from cache_to_disk import delete_old_disk_caches
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 pytestmark = [pytest.mark.stubber]
+
+
+# avoid test pollution from previous incorrect results
+delete_old_disk_caches()
 
 
 def test_toplevel_config():
@@ -105,3 +110,12 @@ def test_config_versions():
 
     # are we using fake versions due to errors ?
     assert CONFIG.stable_version != "1.21.0", "We are using fake versions, due to errors"
+
+
+def test_get_preview_mp_version():
+    # exists on top-level
+    from stubber.utils.config import get_preview_mp_version
+
+    version = get_preview_mp_version(cache_it=False)
+    assert version
+    assert isinstance(version, str)
