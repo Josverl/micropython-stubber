@@ -355,8 +355,10 @@ class Stubber:
 
                 if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
-                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                    if item_name.upper() == item_name:  # ALL_CAPS --> Final
+                        s = "{0}{1}: Final[{3}] = {2}\n".format(indent, item_name, item_repr, t)
+                    else:
+                        s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
                 elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
@@ -820,6 +822,7 @@ def main():
         "breakout_trackball",
         "breakout_vl53l5cx",
         "btree",
+        "builtins",
         "cc3200",
         "cmath",
         "collections",
