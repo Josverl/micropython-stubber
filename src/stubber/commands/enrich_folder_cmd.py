@@ -1,5 +1,5 @@
 """
-enrich machinestubs with docstubs
+Enrich mcu/firmware stubs with information from the docstubs
 """
 
 from pathlib import Path
@@ -17,20 +17,22 @@ from .cli import stubber_cli
 @stubber_cli.command(name="enrich")
 @click.option(
     "--stubs",
+    "--dest",
     "-s",
     "stubs_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the MCU stubs to be updated",
+    help="File or folder containing the MCU stubs to be updated (destination)",
     show_default=True,
 )
 @click.option(
     "--docstubs",
+    "--source",
     "-ds",
     "docstubs_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the docstubs to be applied",
+    help="File or folder containing the docstubs to be read from (source)",
     show_default=True,
 )
 @click.option("--diff", default=False, help="Show diff", show_default=True, is_flag=True)
@@ -38,6 +40,14 @@ from .cli import stubber_cli
     "--dry-run",
     default=False,
     help="Dry run does not write the files back",
+    show_default=True,
+    is_flag=True,
+)
+@click.option(
+    "--params-only",
+    "params_only",
+    default=False,
+    help="Copy only the parameters, not the docstrings (unless the docstring is missing)",
     show_default=True,
     is_flag=True,
 )
@@ -54,6 +64,7 @@ def cli_enrich_folder(
     docstubs_folder: Union[str, Path],
     diff: bool = False,
     dry_run: bool = False,
+    params_only: bool = True,
     package_name: str = "",
 ):
     """
@@ -68,4 +79,5 @@ def cli_enrich_folder(
         write_back=write_back,
         require_docstub=False,
         package_name=package_name,
+        params_only=params_only,
     )

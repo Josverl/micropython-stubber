@@ -134,40 +134,42 @@ class Stubber:
 			except(D,r):A.warning('could not del new_module')
 		F.collect();return S
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
-		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;D=indent;F.collect()
+		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
 		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
 		a,P=L.get_obj_attributes(M)
 		if P:A.error(P)
-		for(E,H,I,b,d)in a:
-			if E in['classmethod','staticmethod','BaseException',N]:continue
-			if E[0].isdigit():A.warning('NameError: invalid name {}'.format(E));continue
-			if I=="<class 'type'>"and Q(D)<=A4*4:
-				R=B;S=E.endswith(N)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
+		for(C,H,I,b,d)in a:
+			if C in['classmethod','staticmethod','BaseException',N]:continue
+			if C[0].isdigit():A.warning('NameError: invalid name {}'.format(C));continue
+			if I=="<class 'type'>"and Q(E)<=A4*4:
+				R=B;S=C.endswith(N)or C.endswith('Error')or C in['KeyboardInterrupt','StopIteration','SystemExit']
 				if S:R=N
-				C='\n{}class {}({}):\n'.format(D,E,R)
-				if S:C+=D+'    ...\n';J.write(C);continue
-				J.write(C);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,E),D+'    ',O+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';J.write(C)
+				D='\n{}class {}({}):\n'.format(E,C,R)
+				if S:D+=E+'    ...\n';J.write(D);continue
+				J.write(D);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,C),E+'    ',O+1);D=E+'    def __init__(self, *argv, **kwargs) -> None:\n';D+=E+'        ...\n\n';J.write(D)
 			elif any(A in I for A in[A0,z,'closure']):
 				T=V;U=B
 				if O>0:U='self, '
-				if W in I or W in H:C='{}@classmethod\n'.format(D)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(D,E,T)
-				else:C='{}def {}({}*args, **kwargs) -> {}:\n'.format(D,E,U,T)
-				C+=D+'    ...\n\n';J.write(C)
+				if W in I or W in H:D='{}@classmethod\n'.format(E)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(E,C,T)
+				else:D='{}def {}({}*args, **kwargs) -> {}:\n'.format(E,C,U,T)
+				D+=E+'    ...\n\n';J.write(D)
 			elif I=="<class 'module'>":0
 			elif I.startswith("<class '"):
-				G=I[8:-2];C=B
-				if G in(x,v,w,y,'bytearray','bytes'):C=X.format(D,E,H,G)
-				elif G in(g,f,e):c={g:'{}',f:'[]',e:'()'};C=X.format(D,E,c[G],G)
+				G=I[8:-2];D=B
+				if G in(x,v,w,y,'bytearray','bytes'):
+					if C.upper()==C:D='{0}{1}: Final[{3}] = {2}\n'.format(E,C,H,G)
+					else:D=X.format(E,C,H,G)
+				elif G in(g,f,e):c={g:'{}',f:'[]',e:'()'};D=X.format(E,C,c[G],G)
 				elif G in('object','set','frozenset','Pin',Y):
 					if G==Y:G='Generator'
-					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,I,H)
+					D='{0}{1}: {2} ## = {4}\n'.format(E,C,G,I,H)
 				else:
 					G=V
 					if K in H:H=H.split(K)[0]+Z
 					if K in H:H=H.split(K)[0]+Z
-					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,I,H)
-				J.write(C)
-			else:J.write("# all other, type = '{0}'\n".format(I));J.write(D+E+' # type: Incomplete\n')
+					D='{0}{1}: {2} ## {3} = {4}\n'.format(E,C,G,I,H)
+				J.write(D)
+			else:J.write("# all other, type = '{0}'\n".format(I));J.write(E+C+' # type: Incomplete\n')
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
