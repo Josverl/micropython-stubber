@@ -19,6 +19,8 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.11 and older - include content of /port/modules folder if it exists
 import os
 import shutil  # start moving from os & glob to pathlib
+import subprocess
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -59,6 +61,16 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     pass
 
 
+def checkout_arduino_lib(mpy_path: Path):
+    """
+    Checkout the arduino-lib repo if it is not already checked out
+    """
+    # arduino_lib_path = mpy_path / "lib/arduino-lib"
+    cmd = ["git", "submodule", "update", "--init", "lib/arduino-lib"]
+    result = subprocess.run(cmd, cwd=mpy_path, check=True)
+    log.info(f"checkout arduino-lib: {result.returncode}")
+
+
 def freeze_any(
     stub_folder: Optional[Path] = None,
     version: str = V_PREVIEW,
@@ -78,6 +90,8 @@ def freeze_any(
     mpy_path = Path(mpy_path).absolute() if mpy_path else CONFIG.mpy_path.absolute()
     mpy_lib_path = Path(mpy_lib_path).absolute() if mpy_lib_path else CONFIG.mpy_path.absolute()
 
+    if version > "v1.23.0" or version in SET_PREVIEW:
+        checkout_arduino_lib(mpy_path)
     # if old version of micropython, use the old freeze method
     if version not in SET_PREVIEW and Version(version) <= Version("1.11"):
         frozen_stub_path = get_fsp(version, stub_folder)
