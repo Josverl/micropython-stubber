@@ -31,7 +31,8 @@ pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
             "HID_Tuple",
             0.95,
             "pyb",
-        ),        (
+        ),
+        (
             ".. data:: pyb.hid_mouse",
             """
                 A tuple of (subclass, protocol, max packet length, polling interval, report
@@ -97,7 +98,7 @@ def test_returns(module, signature, docstring, expected_type):
     "expected_type, module, signature, docstring",
     [
         (
-            "Incomplete",
+            "_IRQ",
             "machine.UART",
             ".. method:: UART.irq(trigger, priority=1, handler=None, wake=machine.IDLE)",
             "",
