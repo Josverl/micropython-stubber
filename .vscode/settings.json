@@ -1,7 +1,5 @@
 {
-    "python.analysis.autoSearchPaths": true,
     "python.analysis.diagnosticMode": "openFilesOnly",
-    // "python.analysis.logLevel": "Trace",
     //////////////////////////////////////////////////////////////
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
@@ -65,33 +63,6 @@
     ],
     "debug.allowBreakpointsEverywhere": true,
     "debug.terminal.clearBeforeReusing": true,
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.diagnosticSeverityOverrides": {
-        "reportUnusedVariable": "warning",
-        "reportUnusedImport": "warning",
-        "reportUnusedFunction": "warning",
-        "reportUnnecessaryIsInstance": "warning",
-        "reportGeneralTypeIssues": "warning",
-        "reportUnknownLambdaType": "information",
-        "reportUntypedNamedTuple": "information",
-        "reportMissingTypeArgument": "information",
-        "reportUnknownParameterType": "information",
-        "reportMissingTypeStubs": "information",
-        "reportPrivateUsage": "information",
-        "reportUnknownMemberType": "none",
-        "reportUnknownArgumentType": "none",
-        "reportUnknownVariableType": "none",
-        "reportMissingParameterType": "none",
-    },
-    "pymakr.ignore": [
-        ".vscode",
-        ".gitignore",
-        ".git",
-        "env",
-        "venv",
-        ".py_cache",
-        "__pycache__"
-    ],
     "files.watcherExclude": {
         "**/repos/**": true
     },
@@ -108,9 +79,6 @@
         "editor.formatOnSave": true
     },
     "todo-tree.tree.scanMode": "open files",
-    "python.analysis.typeshedPaths": [
-        "typings"
-    ],
     "austin.mode": "Wall time",
     "austin.binaryMode": true,
     "python.languageServer": "Pylance"
