@@ -135,40 +135,42 @@ class Stubber:
 			except(E,n):A.warning('could not del new_module')
 		F.collect();return V
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
-		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;D=indent;F.collect()
+		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
 		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
 		a,P=L.get_obj_attributes(M)
 		if P:A.error(P)
-		for(E,H,I,b,g)in a:
-			if E in['classmethod','staticmethod','BaseException',N]:continue
-			if E[0].isdigit():A.warning('NameError: invalid name {}'.format(E));continue
-			if I=="<class 'type'>"and S(D)<=A3*4:
-				Q=B;R=E.endswith(N)or E.endswith('Error')or E in['KeyboardInterrupt','StopIteration','SystemExit']
+		for(C,H,I,b,g)in a:
+			if C in['classmethod','staticmethod','BaseException',N]:continue
+			if C[0].isdigit():A.warning('NameError: invalid name {}'.format(C));continue
+			if I=="<class 'type'>"and S(E)<=A3*4:
+				Q=B;R=C.endswith(N)or C.endswith('Error')or C in['KeyboardInterrupt','StopIteration','SystemExit']
 				if R:Q=N
-				C='\n{}class {}({}):\n'.format(D,E,Q)
-				if R:C+=D+'    ...\n';J.write(C);continue
-				J.write(C);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,E),D+'    ',O+1);C=D+'    def __init__(self, *argv, **kwargs) -> None:\n';C+=D+'        ...\n\n';J.write(C)
+				D='\n{}class {}({}):\n'.format(E,C,Q)
+				if R:D+=E+'    ...\n';J.write(D);continue
+				J.write(D);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,C),E+'    ',O+1);D=E+'    def __init__(self, *argv, **kwargs) -> None:\n';D+=E+'        ...\n\n';J.write(D)
 			elif any(A in I for A in[v,u,'closure']):
 				T=V;U=B
 				if O>0:U='self, '
-				if W in I or W in H:C='{}@classmethod\n'.format(D)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(D,E,T)
-				else:C='{}def {}({}*args, **kwargs) -> {}:\n'.format(D,E,U,T)
-				C+=D+'    ...\n\n';J.write(C)
+				if W in I or W in H:D='{}@classmethod\n'.format(E)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(E,C,T)
+				else:D='{}def {}({}*args, **kwargs) -> {}:\n'.format(E,C,U,T)
+				D+=E+'    ...\n\n';J.write(D)
 			elif I=="<class 'module'>":0
 			elif I.startswith("<class '"):
-				G=I[8:-2];C=B
-				if G in(s,q,r,t,'bytearray','bytes'):C=X.format(D,E,H,G)
-				elif G in(e,d,c):f={e:'{}',d:'[]',c:'()'};C=X.format(D,E,f[G],G)
+				G=I[8:-2];D=B
+				if G in(s,q,r,t,'bytearray','bytes'):
+					if C.upper()==C:D='{0}{1}: Final[{3}] = {2}\n'.format(E,C,H,G)
+					else:D=X.format(E,C,H,G)
+				elif G in(e,d,c):f={e:'{}',d:'[]',c:'()'};D=X.format(E,C,f[G],G)
 				elif G in('object','set','frozenset','Pin',Y):
 					if G==Y:G='Generator'
-					C='{0}{1}: {2} ## = {4}\n'.format(D,E,G,I,H)
+					D='{0}{1}: {2} ## = {4}\n'.format(E,C,G,I,H)
 				else:
 					G=V
 					if K in H:H=H.split(K)[0]+Z
 					if K in H:H=H.split(K)[0]+Z
-					C='{0}{1}: {2} ## {3} = {4}\n'.format(D,E,G,I,H)
-				J.write(C)
-			else:J.write("# all other, type = '{0}'\n".format(I));J.write(D+E+' # type: Incomplete\n')
+					D='{0}{1}: {2} ## {3} = {4}\n'.format(E,C,G,I,H)
+				J.write(D)
+			else:J.write("# all other, type = '{0}'\n".format(I));J.write(E+C+' # type: Incomplete\n')
 	@property
 	def flat_fwid(self):
 		A=self._fwid;B=' .()/\\:$'
@@ -291,7 +293,7 @@ def read_path():
 def k():
 	try:A=bytes('abc',encoding='utf8');B=k.__module__;return H
 	except(l,I):return V
-def main():stubber=Stubber(path=read_path());stubber.clean();stubber.modules=['WM8960','_OTA','_asyncio','_boot_fat','_coap','_espnow','_flash_control_OTA','_main_pybytes','_mqtt','_mqtt_core','_msg_handl','_onewire','_periodical_pin','_pybytes','_pybytes_ca','_pybytes_config','_pybytes_config_reader','_pybytes_connection','_pybytes_constants','_pybytes_debug','_pybytes_library','_pybytes_machine_learning','_pybytes_main','_pybytes_protocol','_pybytes_pyconfig','_pybytes_pymesh_config','_rp2','_terminal','_thread','_uasyncio','_urequest','adcfft','aioble/__init__','aioble/central','aioble/client','aioble/core','aioble/device','aioble/l2cap','aioble/peripheral','aioble/security','aioble/server','aioespnow','ak8963','apa102','apa106','argparse','array','asyncio/__init__','asyncio/core','asyncio/event','asyncio/funcs','asyncio/lock','asyncio/stream','binascii','bluetooth','breakout_as7262','breakout_bh1745','breakout_bme280','breakout_bme68x','breakout_bmp280','breakout_dotmatrix','breakout_encoder','breakout_icp10125','breakout_ioexpander','breakout_ltr559','breakout_matrix11x7','breakout_mics6814','breakout_msa301','breakout_paa5100','breakout_pmw3901','breakout_potentiometer','breakout_rgbmatrix5x5','breakout_rtc','breakout_scd41','breakout_sgp30','breakout_trackball','breakout_vl53l5cx','btree','cc3200','cmath','collections','crypto','cryptolib','curl','deflate','dht','display','display_driver_utils','ds18x20','embed','encoder','errno','esp','esp32','esp8266','espidf','espnow','ffi','flashbdev','framebuf','freesans20','fs_driver','functools','galactic','gc','gfx_pack','gsm','hashlib','heapq','hub75','ili9341','ili9XXX','imagetools','inisetup','interstate75','io','jpegdec','js','jsffi','json','lcd160cr','lodepng',x,'lsm6dsox','lv_colors','lv_utils','lvgl','lwip','machine','math','microWebSocket','microWebSrv','microWebTemplate',b,'mimxrt','mip','mip/__init__','mip/__main__','motor','mpu6500','mpu9250','neopixel','network','nrf','ntptime','onewire','openamp','os','pcf85063a','pic16bit','picoexplorer','picographics','picokeypad','picoscroll','picounicorn','picowireless','pimoroni','pimoroni_bus','pimoroni_i2c','plasma','platform','powerpc','pyb',h,'pye','qemu','qrcode','queue','random','renesas','renesas-ra','requests','requests/__init__','rp2','rtch','samd','select','servo','socket','ssd1306','ssh','ssl','stm','stm32','struct',w,'termios','time','tls','tpcalib','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','uasyncio/tasks','ubinascii','ubluetooth','ucollections','ucrypto','ucryptolib','uctypes','uerrno','uftpd','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/__init__','umqtt/robust','umqtt/simple',g,'uos','uplatform','uqueue','urandom','ure','urequests','urllib/urequest','usb/device','usb/device/cdc','usb/device/hid','usb/device/keyboard','usb/device/midi','usb/device/mouse','uselect','usocket','ussl','ustruct','usys','utelnetserver','utime','utimeq','uwebsocket','uzlib',C,'vfs','webassembly','websocket','websocket_helper',A1,'wipy','writer','xpt2046','ymodem','zephyr','zlib'];F.collect();stubber.create_all_stubs()
+def main():stubber=Stubber(path=read_path());stubber.clean();stubber.modules=['WM8960','_OTA','_asyncio','_boot_fat','_coap','_espnow','_flash_control_OTA','_main_pybytes','_mqtt','_mqtt_core','_msg_handl','_onewire','_periodical_pin','_pybytes','_pybytes_ca','_pybytes_config','_pybytes_config_reader','_pybytes_connection','_pybytes_constants','_pybytes_debug','_pybytes_library','_pybytes_machine_learning','_pybytes_main','_pybytes_protocol','_pybytes_pyconfig','_pybytes_pymesh_config','_rp2','_terminal','_thread','_uasyncio','_urequest','adcfft','aioble/__init__','aioble/central','aioble/client','aioble/core','aioble/device','aioble/l2cap','aioble/peripheral','aioble/security','aioble/server','aioespnow','ak8963','apa102','apa106','argparse','array','asyncio/__init__','asyncio/core','asyncio/event','asyncio/funcs','asyncio/lock','asyncio/stream','binascii','bluetooth','breakout_as7262','breakout_bh1745','breakout_bme280','breakout_bme68x','breakout_bmp280','breakout_dotmatrix','breakout_encoder','breakout_icp10125','breakout_ioexpander','breakout_ltr559','breakout_matrix11x7','breakout_mics6814','breakout_msa301','breakout_paa5100','breakout_pmw3901','breakout_potentiometer','breakout_rgbmatrix5x5','breakout_rtc','breakout_scd41','breakout_sgp30','breakout_trackball','breakout_vl53l5cx','btree','builtins','cc3200','cmath','collections','crypto','cryptolib','curl','deflate','dht','display','display_driver_utils','ds18x20','embed','encoder','errno','esp','esp32','esp8266','espidf','espnow','ffi','flashbdev','framebuf','freesans20','fs_driver','functools','galactic','gc','gfx_pack','gsm','hashlib','heapq','hub75','ili9341','ili9XXX','imagetools','inisetup','interstate75','io','jpegdec','js','jsffi','json','lcd160cr','lodepng',x,'lsm6dsox','lv_colors','lv_utils','lvgl','lwip','machine','math','microWebSocket','microWebSrv','microWebTemplate',b,'mimxrt','mip','mip/__init__','mip/__main__','motor','mpu6500','mpu9250','neopixel','network','nrf','ntptime','onewire','openamp','os','pcf85063a','pic16bit','picoexplorer','picographics','picokeypad','picoscroll','picounicorn','picowireless','pimoroni','pimoroni_bus','pimoroni_i2c','plasma','platform','powerpc','pyb',h,'pye','qemu','qrcode','queue','random','renesas','renesas-ra','requests','requests/__init__','rp2','rtch','samd','select','servo','socket','ssd1306','ssh','ssl','stm','stm32','struct',w,'termios','time','tls','tpcalib','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','uasyncio/tasks','ubinascii','ubluetooth','ucollections','ucrypto','ucryptolib','uctypes','uerrno','uftpd','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/__init__','umqtt/robust','umqtt/simple',g,'uos','uplatform','uqueue','urandom','ure','urequests','urllib/urequest','usb/device','usb/device/cdc','usb/device/hid','usb/device/keyboard','usb/device/midi','usb/device/mouse','uselect','usocket','ussl','ustruct','usys','utelnetserver','utime','utimeq','uwebsocket','uzlib',C,'vfs','webassembly','websocket','websocket_helper',A1,'wipy','writer','xpt2046','ymodem','zephyr','zlib'];F.collect();stubber.create_all_stubs()
 if __name__=='__main__'or k():
 	if not A6('no_auto_stubber.txt'):
 		P(f"createstubs.py: {__version__}")

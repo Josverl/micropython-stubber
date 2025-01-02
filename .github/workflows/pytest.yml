@@ -12,7 +12,7 @@ name: pytest stubber
 on:
     workflow_dispatch:
     pull_request:
-        branches: [main]
+        # branches: [main]
 
     push:
         branches: [main, stubber/*, feat/*, fix/*]

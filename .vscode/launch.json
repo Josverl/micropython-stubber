@@ -13,7 +13,6 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-VV",
-                "list",
                 // "--board",
                 // "SEEED_WIO_TERMINAL",
                 // "PICO",
@@ -41,19 +40,30 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-VV",
-                "get-mcu-stubs",
-                "--serial",
-                "/dev/ttyUSB0",
+                "build",
+                "--port",
+                "rp2",
+                "--board",
+                "RPI_PICO",
+                //
+                // "enrich",
+                // "--stubs",
+                // "repos\\micropython-stubs\\stubs\\micropython-v1_23_0-docstubs\\network",
+                // "--docstubs",
+                // "repos\\intellij-micropython\\typehints\\micropython",
+                //
+                // "get-docstubs",
+                // "--version",
+                // "preview",
+                // "--no-clean-rst",
+                // "get-mcu-stubs",
+                // "--serial",
+                // "/dev/ttyUSB0",
                 // "get-frozen",
                 // "--version",
                 // "preview",
                 // "switch",
                 // "v1.20.0",
-                // "build",
-                // "--port",
-                // "esp32",
-                // "--board",
-                // "generic",
                 // "build",
                 // "publish",
                 // "--test-pypi",
@@ -176,13 +186,6 @@
             // false : Avoid debugpy trying to debug micropython
             // but may cause issue with pytest-cov coverage reporting 
             "subProcess": false,
-        },
-        {
-            "name": "PowerShell Launch Current File",
-            "type": "PowerShell",
-            "request": "launch",
-            "script": "${file}",
-            "cwd": "${file}"
         },
     ],
     "inputs": [

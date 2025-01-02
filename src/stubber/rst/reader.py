@@ -73,6 +73,7 @@ from stubber.rst import (
     CHILD_PARENT_CLASS,
     MODULE_GLUE,
     PARAM_FIXES,
+    PARAM_RE_FIXES,
     RST_DOC_FIXES,
     TYPING_IMPORT,
     ClassSourceDict,
@@ -83,14 +84,17 @@ from stubber.rst import (
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
 
-SEPERATOR = "::"
+SEPARATOR = "::"
+USE_SUBMODULES = True
 
 
 class FileReadWriter:
     """base class for reading rst files"""
 
     def __init__(self):
-        self.filename = ""
+        self.filename: str = ""
+        # self.modulename: str = ""
+        # self.out_file: str = "__init__.pyi"
         # input buffer
         self.rst_text: List[str] = []
         self.max_line = 0
@@ -111,6 +115,8 @@ class FileReadWriter:
         # some lines now may have \n sin them , so re-join and re-split the lines
         self.rst_text = "".join(self.rst_text).splitlines(keepends=True)
 
+        self.modulename = filename.stem
+        self.out_file = "__init__.pyi"
         self.filename = filename.as_posix()  # use fwd slashes in origin
         self.max_line = len(self.rst_text) - 1
 
@@ -148,7 +154,11 @@ class FileReadWriter:
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
+        while (
+            not self.is_balanced(newline)
+            and self.line_no >= 0
+            and (self.line_no + append + 1) <= self.max_line
+        ):
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
@@ -177,6 +187,7 @@ class RSTReader(FileReadWriter):
         self.current_module = ""
         self.current_class = ""
         self.current_function = ""  # function & method
+        self.clean_rst = True
         super().__init__()
 
     def read_file(self, filename: Path):
@@ -215,11 +226,13 @@ class RSTReader(FileReadWriter):
         # return _l.startswith("..") and not any(_l.startswith(a) for a in self.docstring_anchors)
 
     # @property
-    def at_heading(self, large=False) -> bool:
+    def at_heading(self, large: bool = False) -> bool:
         "stop at heading"
         u_line = self.rst_text[min(self.line_no + 1, self.max_line - 1)].rstrip()
         # Heading  ---, ==, ~~~
-        underlined = u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
+        underlined = (
+            u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
+        )
         if underlined and self.line_no > 0:
             # check if previous line is a heading
             line = self.rst_text[self.line_no].strip()
@@ -278,22 +291,23 @@ class RSTReader(FileReadWriter):
         # remove empty lines at beginning/end of block
         block = self.clean_docstr(block)
         # add clickable hyperlinks to CPython docpages
-        block = self.add_link_to_docsstr(block)
+        block = self.add_link_to_docstr(block)
         # make sure the first char of the first line is a capital
         if len(block) > 0 and len(block[0]) > 0:
             block[0] = block[0][0].upper() + block[0][1:]
         return block
 
-    @staticmethod
-    def clean_docstr(block: List[str]):
+    # @staticmethod
+    def clean_docstr(self, block: List[str]):
         """Clean up a docstring"""
-        # if a Quoted Literal Block , then remove the first character of each line
-        # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
-        if block and len(block[0]) > 0 and block[0][0] != " ":
-            q_char = block[0][0]
-            if all(l.startswith(q_char) for l in block):
-                # all lines start with the same character, so skip that character
-                block = [l[1:] for l in block]
+        if self.clean_rst:
+            # if a Quoted Literal Block , then remove the first character of each line
+            # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#quoted-literal-blocks
+            if block and len(block[0]) > 0 and block[0][0] != " ":
+                q_char = block[0][0]
+                if all(l.startswith(q_char) for l in block):
+                    # all lines start with the same character, so skip that character
+                    block = [l[1:] for l in block]
         # rstrip all lines
         block = [l.rstrip() for l in block]
         # remove empty lines at beginning/end of block
@@ -301,7 +315,6 @@ class RSTReader(FileReadWriter):
             block = block[1:]
         while len(block) and len(block[-1]) == 0:
             block = block[:-1]
-
         # Clean up Synopsis
         if len(block) and ":synopsis:" in block[0]:
             block[0] = re.sub(
@@ -311,15 +324,18 @@ class RSTReader(FileReadWriter):
             )
         return block
 
-    @staticmethod
-    def add_link_to_docsstr(block: List[str]):
-        """Add clickable hyperlinks to CPython docpages"""
+    def add_link_to_docstr(self, block: List[str]):
+        """Add clickable hyperlinks to CPython docpages,
+        and clean the docstring from rst constructs"""
+        if not self.clean_rst:
+            return block
+
         for i in range(len(block)):
             # hyperlink to Cpython doc pages
             # https://regex101.com/r/5RN8rj/1
             # Link to python 3 documentation
             _l = re.sub(
-                r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|\s]*)`)[.]?",
+                r"(\s*\|see_cpython_module\|\s+:mod:`python:(?P<mod>[\w|]*)\s?`)[.]?",
                 r"\g<1> https://docs.python.org/3/library/\g<mod>.html .",
                 block[i],
             )
@@ -333,7 +349,10 @@ class RSTReader(FileReadWriter):
             # Clean up note and other docstring anchors
             _l = _l.replace(".. note:: ", "``Note:`` ")
             _l = _l.replace(".. data:: ", "")
-            _l = _l.replace(".. admonition:: ", "")
+            _l = _l.replace(".. admonition:: ", "Admonition:")
+            # remove rst highlights from docstrings
+            _l = _l.replace(":class: attention\n", "")
+            # Sphinx directive to link to CPython documentation
             _l = _l.replace("|see_cpython_module|", "CPython module:")
             # clean up unsupported escape sequences in rst
             _l = _l.replace(r"\ ", " ")
@@ -347,7 +366,7 @@ class RSTReader(FileReadWriter):
         return m[1] if m else ""
 
     def strip_prefixes(self, name: str, strip_mod: bool = True, strip_class: bool = False):
-        "Remove the modulename. and or the classname. from the begining of a name"
+        "Remove the modulename. and or the classname. from the beginning of a name"
         prefixes = self.module_names if strip_mod else []
         if strip_class and self.current_class != "":
             prefixes += [self.current_class]
@@ -364,12 +383,6 @@ class RSTParser(RSTReader):
     """
 
     target = ".py"  # py/pyi
-    # TODO: Move to lookup.py
-    PARAM_RE_FIXES = [
-        Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
-        Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
-        Fix(r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True),  # fix: network - AbstractNIC.connect
-    ]
 
     def __init__(self, v_tag: str) -> None:
         super().__init__()
@@ -398,7 +411,7 @@ class RSTParser(RSTReader):
 
         ## Deal with SQUARE brackets first ( Documentation meaning := [optional])
 
-        for fix in self.PARAM_RE_FIXES:
+        for fix in PARAM_RE_FIXES:
             params = self.apply_fix(fix, params, name)
 
         # ###########################################################################################################
@@ -432,7 +445,9 @@ class RSTParser(RSTReader):
     def apply_fix(fix: Fix, params: str, name: str = ""):
         if fix.name and fix.name != name:
             return params
-        return re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
+        return (
+            re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
+        )
 
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
@@ -442,7 +457,9 @@ class RSTParser(RSTReader):
             class_def = self.output_dict[full_name]
         else:
             parent = CHILD_PARENT_CLASS[name] if name in CHILD_PARENT_CLASS.keys() else ""
-            if parent == "" and (name.endswith("Error") or name.endswith("Exception")):
+            if parent == "" and (
+                name.endswith("Error") or name.endswith("Exception") or name in {"GeneratorExit"}
+            ):
                 parent = "Exception"
             class_def = ClassSourceDict(
                 f"class {name}({parent}):",
@@ -467,12 +484,21 @@ class RSTParser(RSTReader):
         toctree = self.read_docstring()
         # cleanup toctree
         toctree = [x.strip() for x in toctree if f"{self.current_module}." in x]
-        # Now parse all files mentioned in the toc
-        for file in toctree:
-            #
-            file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
-            self.read_file(file_path)
-            self.parse()
+
+        if USE_SUBMODULES:
+            # add sub modules imports
+            for file in toctree:
+                rel_name = file.replace(f"{self.modulename}.", ".").replace(".rst", "")
+                self.output_dict.add_import(f"from {rel_name} import *")
+
+        else:
+            # Now parse all files mentioned in the toc
+            # sub modules are now processed as individual files
+            for file in toctree:
+                #
+                file_path = CONFIG.mpy_path / "docs" / "library" / file.strip()
+                self.read_file(file_path)
+                self.parse()
         # reset this file to done
         self.rst_text = []
         self.line_no = 1
@@ -480,7 +506,7 @@ class RSTParser(RSTReader):
     def parse_module(self):
         "parse a module tag and set the module's docstring"
         log.trace(f"# {self.line.rstrip()}")
-        module_name = self.line.split(SEPERATOR)[-1].strip()
+        module_name = self.line.split(SEPARATOR)[-1].strip()
 
         self.current_module = module_name
         self.current_function = self.current_class = ""
@@ -493,31 +519,39 @@ class RSTParser(RSTReader):
             if "nightly" in self.source_tag:
                 version = V_PREVIEW
             else:
-                version = self.source_tag.replace("_", ".")  # TODO Use clean_version(self.source_tag)
-            docstr[0] = f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+                version = self.source_tag.replace(
+                    "_", "."
+                )  # TODO Use clean_version(self.source_tag)
+            docstr[0] = (
+                f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
+            )
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
         self.output_dict.add_comment(f"# origin module:: {self.filename}")
         self.output_dict.add_docstr(docstr)
-        # Add additional imports to allow one module te refer to another
+        # Add additional imports to allow one module to refer to another
         if module_name in MODULE_GLUE.keys():
             self.output_dict.add_import(MODULE_GLUE[module_name])
 
     def parse_current_module(self):
         log.trace(f"# {self.line.rstrip()}")
-        module_name = self.line.split(SEPERATOR)[-1].strip()
-        mod_comment = f"# + module: {self.current_module}.rst"
-        self.current_module = module_name
+        # module_name = self.line.split(SEPARATOR)[-1].strip()
+        # mod_comment = f"# + module: {self.current_module}.rst"
+        # now that each .rst is a (sub) module we can process them as such
+        # log.debug(mod_comment)
+        # self.current_module = module_name
         self.current_function = self.current_class = ""
-        log.debug(mod_comment)
-        self.output_dict.name = module_name
-        self.output_dict.add_comment(mod_comment)
+        self.output_dict.name = self.current_module
+        # self.output_dict.add_comment(mod_comment)
         self.line_no += 1  # advance as we did not read any docstring
+        # Add additional imports to allow one module to refer to another
+        if self.current_module in MODULE_GLUE.keys():
+            self.output_dict.add_import(MODULE_GLUE[self.current_module])
 
     def parse_function(self):
         log.trace(f"# {self.line.rstrip()}")
-        # this_function = self.line.split(SEPERATOR)[-1].strip()
+        # this_function = self.line.split(SEPARATOR)[-1].strip()
         # name = this_function
 
         # Get one or more names
@@ -526,7 +560,9 @@ class RSTParser(RSTReader):
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=this_function, module=self.current_module
+            )
 
             # defaults
             name = params = ""
@@ -548,7 +584,7 @@ class RSTParser(RSTReader):
             # fixup parameters
             params = self.fix_parameters(params, name)
             # ASSUME no functions in classes,
-            # so with ther cursor at a function this probably means that we are no longer in a class
+            # so with the cursor at a function this probably means that we are no longer in a class
             self.leave_class()
 
             fn_def = FunctionSourceDict(
@@ -560,7 +596,7 @@ class RSTParser(RSTReader):
 
     def parse_class(self):
         log.trace(f"# {self.line.rstrip()}")
-        this_class = self.line.split(SEPERATOR)[-1].strip()  # raw
+        this_class = self.line.split(SEPARATOR)[-1].strip()  # raw
         if "(" in this_class:
             name, params = this_class.split("(", 2)
         else:
@@ -632,7 +668,9 @@ class RSTParser(RSTReader):
             params = self.fix_parameters(params, f"{class_name}.{name}")
 
             # parse return type from docstring
-            ret_type = return_type_from_context(docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module)
+            ret_type = return_type_from_context(
+                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
+            )
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
             #   - classmethod           (cls,   <params>) -> <ret_type>:
@@ -692,7 +730,7 @@ class RSTParser(RSTReader):
 
     def parse_exception(self):
         log.trace(f"# {self.line.rstrip()}")
-        name = self.line.split(SEPERATOR)[1].strip()
+        name = self.line.split(SEPARATOR)[1].strip()
         if name == "Exception":
             # no need to redefine Exception
             self.line_no += 1
@@ -709,9 +747,9 @@ class RSTParser(RSTReader):
         "get the constant/function/class name from a line with an identifier"
         # '.. data:: espnow.MAX_DATA_LEN(=250)\n'
         if line:
-            return line.split(SEPERATOR)[-1].strip()
+            return line.split(SEPARATOR)[-1].strip()
         else:
-            return self.line.split(SEPERATOR)[-1].strip()
+            return self.line.split(SEPARATOR)[-1].strip()
 
     def parse_names(self, oneliner: bool = True):
         """get a list of constant/function/class names from and following a line with an identifier
@@ -734,7 +772,7 @@ class RSTParser(RSTReader):
             log.trace("Sequence detected")
             names.append(self.parse_name(self.rst_text[self.line_no + counter]))
             counter += 1
-        # now advance the linecounter
+        # now advance the line counter
         self.line_no += counter - 1
         # clean up before returning
         names = [n.strip() for n in names if n.strip() != "etc."]  # remove etc.
@@ -753,7 +791,9 @@ class RSTParser(RSTReader):
 
         # deal with documentation wildcards
         for name in names:
-            r_type = return_type_from_context(docstring=docstr, signature=name, module=self.current_module, literal=True)
+            r_type = return_type_from_context(
+                docstring=docstr, signature=name, module=self.current_module, literal=True
+            )
             if r_type in ["None"]:  # None does not make sense
                 r_type = "Incomplete"  # Default to Incomplete/ Unknown / int
             name = self.strip_prefixes(name)
@@ -800,9 +840,10 @@ class RSTWriter(RSTParser):
     def __init__(self, v_tag="v1.xx"):
         super().__init__(v_tag=v_tag)
 
-    def write_file(self, filename: Path) -> bool:
+    def write_file(self, target: Path) -> bool:
         self.prepare_output()
-        return super().write_file(filename)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        return super().write_file(target)
 
     def prepare_output(self):
         "Remove trailing spaces and commas from the output."

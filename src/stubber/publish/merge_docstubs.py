@@ -66,10 +66,14 @@ def merge_all_docstubs(
             log.info(f"skipping {merged_path.name}, no MCU stubs found in {board_path}")
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
-        result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
-        # Add methods from docstubs to the MCU stubs that do not exist in the MCU stubs
-        # Add the __call__ method to the machine.Pin and pyb.Pin class
-        add_machine_pin_call(merged_path, candidate["version"])
+        try:
+            result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
+            # Add methods from docstubs to the MCU stubs that do not exist in the MCU stubs
+            # Add the __call__ method to the machine.Pin and pyb.Pin class
+            add_machine_pin_call(merged_path, candidate["version"])
+        except Exception as e:
+            log.error(f"Error parsing {candidate['version']} docstubs: {e}")
+            continue
         if result:
             merged += 1
     log.info(f"merged {merged} of {len(candidates)} candidates")
@@ -124,7 +128,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
                 (dest_path / name).with_suffix(suffix).unlink()  # type: ignore
 
     # 2 - Enrich the MCU stubs with the document stubs
-    result = enrich_folder(dest_path, docstub_path=docstub_path, write_back=True)
+    result = enrich_folder(dest_path, source_path=docstub_path, write_back=True)
 
     # copy the docstubs manifest.json file to the package folder
     if (docstub_path / "modules.json").exists():

@@ -43,12 +43,19 @@ def make_path_vars(
         raise ValueError("board path not found")
 
     # VARS must be absolute paths
-    return {
+    vars = {
         "MPY_DIR": mpy_path.absolute().as_posix(),
         "MPY_LIB_DIR": mpy_lib_path.absolute().as_posix(),
         "PORT_DIR": port_path.absolute().as_posix(),
         "BOARD_DIR": board_path.absolute().as_posix(),
     }
+
+    if board and "ARDUINO" in board:
+        log.warning(f"HACK- Adding [TOP]/lib/arduino-lib to paths: {board}")
+        # see micropython/ports/renesas-ra/boards/ARDUINO_PORTENTA_C33/mpconfigboard.mk
+        vars["ARDUINO_LIB_DIR"] = (mpy_path / "lib/arduino-lib").absolute().as_posix()
+
+    return vars
 
 
 def freeze_one_manifest_2(

@@ -1,25 +1,24 @@
 # sourcery skip: snake-case-functions
 import difflib
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 import pytest
+from libcst._parser.entrypoints import parse_module
+from libcst._parser.types.config import PartialParserConfig
+from libcst.codemod import CodemodContext
+from libcst.codemod._runner import SkipFile
 from libcst.codemod._testing import (
-    CodemodContext,
     CodemodTest,
-    PartialParserConfig,
-    SkipFile,
-    _CodemodTest,
-    parse_module,
+    _CodemodTest,  # type: ignore
 )
-
 from stubber.codemod.merge_docstub import MergeCommand
 
 from .codemodcollector import TestCase as MyTestCase
 from .codemodcollector import collect_test_cases
 
 # mark all tests
-pytestmark = [pytest.mark.stubber,pytest.mark.codemod]
+pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
 
 
 def print_diff(before: str, after: str):
@@ -103,17 +102,18 @@ class PytestCodemodTest(_CodemodTest):
                 # pyre-ignore This mixin needs to be used with a UnitTest subclass.
                 self.fail("Expected SkipFile but was not raised")
 
-        # pyre-ignore This mixin needs to be used with a UnitTest subclass.
+        # pyre-ignore This mixin needs to be used with a UnitTest subclass
+        # ignore spacing in # fmt: on/off
         self.assertEqual(
-            CodemodTest.make_fixture_data(after),
-            CodemodTest.make_fixture_data(output_tree.code),
+            CodemodTest.make_fixture_data(after.replace("#fmt: o", "# fmt: o")),
+            CodemodTest.make_fixture_data(output_tree.code.replace("#fmt: o", "# fmt: o")),
         )
         if expected_warnings is not None:
             # pyre-ignore This mixin needs to be used with a UnitTest subclass.
             self.assertSequenceEqual(expected_warnings, context.warnings)
 
 
-@pytest.mark.parametrize("test_case", collect_test_cases())
+@pytest.mark.parametrize("test_case", collect_test_cases(folder="codemod_test_cases"))
 class TestMergeDocStubs(PytestCodemodTest):
     # The codemod that will be instantiated for us in assertCodemod.
     TRANSFORM = MergeCommand
@@ -130,4 +130,26 @@ class TestMergeDocStubs(PytestCodemodTest):
             test_case.expected,
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
+            # params_only =False,
+        )
+
+
+@pytest.mark.parametrize("test_case", collect_test_cases(folder="params_test_cases"))
+class TestMergeParams(PytestCodemodTest):
+    # The codemod that will be instantiated for us in assertCodemod.
+    TRANSFORM = MergeCommand
+
+    def test_merge_params(self, test_case: MyTestCase) -> None:
+        # context will allows the detection of relative imports
+        if "_skip" in str(test_case.path):
+            pytest.skip("Skipping test because of _skip")
+        if "_xfail" in str(test_case.path):
+            pytest.xfail("xfail")
+
+        self.assertCodemod(
+            test_case.before,
+            test_case.expected,
+            docstub_file=test_case.stub_file,
+            save_output=test_case.output,
+            params_only=True,
         )

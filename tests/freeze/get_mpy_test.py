@@ -20,8 +20,21 @@ from mpflash.versions import clean_version
 from stubber.utils.repos import read_micropython_lib_commits, switch
 
 
-@pytest.mark.parametrize("tag, manifest_count, frozen_count", [("v1.9.4", 4, 10)])
-def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib: Path, tag: str, manifest_count, frozen_count):
+@pytest.mark.parametrize(
+    "tag, manifest_count, frozen_count",
+    [
+        ("v1.9.4", 4, 10),
+        ("v1.24.1", 68, 1426),
+    ],
+)
+def test_get_mpy(
+    tmp_path,
+    testrepo_micropython: Path,
+    testrepo_micropython_lib: Path,
+    tag: str,
+    manifest_count,
+    frozen_count,
+):
     # set state of repos
     switch(tag=tag, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
 
@@ -32,11 +45,16 @@ def test_get_mpy(tmp_path, testrepo_micropython: Path, testrepo_micropython_lib:
         version = "v1"
 
     assert version, "could not find micropython version"
-    print("found micropython version : {}".format(version))
+    print(f"found micropython version : {version}")
     # folder/{family}-{version}-frozen
     family = "micropython"
-    stub_path = "{}-{}-frozen".format(family, clean_version(version, flat=True))
-    get_frozen.freeze_any((tmp_path / stub_path), version=version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
+    stub_path = f"{family}-{clean_version(version, flat=True)}-frozen"
+    get_frozen.freeze_any(
+        (tmp_path / stub_path),
+        version=version,
+        mpy_path=testrepo_micropython,
+        mpy_lib_path=testrepo_micropython_lib,
+    )
 
     modules = list((tmp_path / stub_path).glob("**/modules.json"))
     stubs = list((tmp_path / stub_path).glob("**/*.py"))

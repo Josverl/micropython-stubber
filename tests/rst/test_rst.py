@@ -13,6 +13,7 @@ pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
 from stubber.rst.lookup import TYPING_IMPORT
 from stubber.rst.reader import RSTWriter
+
 # SOT
 from stubber.stubs_from_docs import generate_from_rst
 
@@ -59,7 +60,9 @@ def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path)
 
 # TODO: Source version and tag
 @pytest.fixture(scope="module")
-def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path):
+def rst_stubs(
+    tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path
+):
     "Generate stubs from RST files - once for this module"
     v_tag = micropython_repo
     # setup our on folder for testing
@@ -199,8 +202,16 @@ def test_rst_parse_class_10(line: str):
         # ESPNow extra notation
         ("ESPNow.config('param')   (ESP32 only)", "ESPNow.config(param)"),
         # machine.USBDevice
-        # Extranous / `USBDevice.active(self, [value] /)`
-        ("USBDevice.active(self, [value]/)", "USBDevice.active(self, value: Optional[Any]=None)"),
+        # Positional Only indicator should not be removed / `USBDevice.active(self, [value] /)`
+        (
+            "USBDevice.active(self, [value]/)",
+            "USBDevice.active(self, value: Optional[Any]=None ,/)",
+        ),
+        (
+            "USBDevice.active(self, [value] /)",
+            "USBDevice.active(self, value: Optional[Any]=None ,/)",
+        ),
+        # USBDevice.active(self, [value] /)
     ],
 )
 def test_fix_param(param_in, expected):
@@ -365,17 +376,21 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
     for issue in issues:
         print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
 
-    assert len(issues) == 0, f"There are {len(issues)} function or class defs that obscure earlier defs"
+    assert (
+        len(issues) == 0
+    ), f"There are {len(issues)} function or class defs that obscure earlier defs"
 
 
 @pytest.mark.docfix
 # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_deepsleep_stub(rst_stubs):
     "Deepsleep stub is generated"
-    content = read_stub(rst_stubs, "machine.py")
-    # return type omitted as this is tested seperately
+    content = read_stub(rst_stubs / "machine", "__init__.pyi")
+    # return type omitted as this is tested separately
     found = any(line.startswith("def deepsleep(time_ms") for line in content)
-    assert found, "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
+    assert (
+        found
+    ), "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
 
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
@@ -386,7 +401,7 @@ def test_doc_socket_class_def(rst_stubs: Path):
     content = read_stub(rst_stubs, "usocket.py")
     if content == []:
         # post version 1.16 documentation has been updated usocket.rst -->socket.rst
-        content = read_stub(rst_stubs, "socket.py")
+        content = read_stub(rst_stubs / "socket", "__init__.pyi")
 
     found = any(line.startswith("def socket(") for line in content)
     assert not found, "(u)socket.socket should be stubbed as a class, not as a function"
@@ -394,7 +409,7 @@ def test_doc_socket_class_def(rst_stubs: Path):
     found = any(line.startswith("class socket") for line in content)
     assert found, "(u)socket.socket classdef should be generated"
 
-    # REMOVE FLAKY TESTS - flaky due to formatting 
+    # REMOVE FLAKY TESTS - flaky due to formatting
     # found = any(
     #     line.lstrip().startswith("def __init__(self, af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP")
     #     for line in content
@@ -405,7 +420,7 @@ def test_doc_socket_class_def(rst_stubs: Path):
 @pytest.mark.parametrize(
     "modulename, classname",
     [
-        ("uselect", "poll"),  # compensated
+        ("select", "poll"),  # compensated
         ("collections", "deque"),
         ("collections", "OrderedDict"),
     ],
@@ -414,12 +429,12 @@ def test_doc_socket_class_def(rst_stubs: Path):
 # @pytest.mark.xfail(reason="upstream docfix needed", condition=XFAIL_DOCFIX)
 def test_doc_class_not_function_def(rst_stubs: Path, modulename: str, classname: str):
     "verify `collections.deque` class documented as a function - Upstream Docfix pending"
-    filename = modulename + ".py"
-    content = read_stub(rst_stubs, filename)
+
+    content = read_stub(rst_stubs / modulename, "__init__.pyi")
     if content == [] and modulename[0] == "u":
         # module name change to select.py in v1.17+
-        filename = filename[1:]
-        content = read_stub(rst_stubs, filename)
+        modulename = modulename[1:]
+        content = read_stub(rst_stubs, modulename)
         if content == []:
             assert f"module {modulename} was not stubbed"
     found = any(line.startswith(f"def {classname}") for line in content)
