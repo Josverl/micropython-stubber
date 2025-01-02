@@ -30,7 +30,7 @@ class GatherTypeVarsVisitor(ContextAwareVisitor):
         """
         # is this a TypeVar assignment?
         # needs to be more robust
-        if isinstance(node.value, libcst.Call) and node.value.func.value == "TypeVar":
+        if isinstance(node.value, libcst.Call) and node.value.func.value == "TypeVar": # type: ignore
             self.all_typevars.append(node)
 
     def visit_AnnAssign(self, node: libcst.AnnAssign) -> None:
