@@ -136,6 +136,9 @@ def get_local_tags(repo: Optional[Path] = None, minver: Optional[str] = None) ->
     return sorted(tags)
 
 
+from github.GithubException import BadCredentialsException
+
+
 @cachetools.func.ttl_cache(maxsize=16, ttl=60)  # 60 seconds
 def get_tags(repo: str, minver: Optional[str] = None) -> List[str]:
     """
@@ -242,7 +245,7 @@ def switch_branch(branch: str, repo: Optional[Union[Path, str]] = None) -> bool:
 
 def fetch(repo: Union[Path, str]) -> bool:
     """
-    fetches a repo
+    fetches a repo and all tags
     repo should be in the form of : path/.git
     repo = '../micropython/.git'
     returns True on success

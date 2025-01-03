@@ -3,8 +3,9 @@
 from pathlib import Path
 from typing import List
 
+import mpflash.basicgit as git
 from mpflash.logger import log
-from mpflash.versions import V_PREVIEW, micropython_versions
+from mpflash.versions import V_PREVIEW, get_stable_mp_version, get_preview_mp_version
 from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
 
@@ -43,8 +44,12 @@ class StubberConfig(Config):
     stable_version: str = key(
         key_name="stable-version", cast=str, required=False, default="1.20.0"
     )
-
     "last published stable"
+
+    preview_version: str = key(
+        key_name="preview-version", cast=str, required=False, default="preview"
+    )
+    "current preview version"
 
     all_versions = key(
         key_name="all-versions",
@@ -98,7 +103,7 @@ class StubberConfig(Config):
             all_versions = ["1.19", "1.19.1", "1.20.0", "1.21.0"]
         config_updates.update(all_versions=all_versions)
         config_updates.update(
-            stable_version=[v for v in all_versions if not v.endswith(V_PREVIEW)][-1]
+            stable_version=get_stable_mp_version(), preview_version=get_preview_mp_version(),
         )  # second last version - last version is the preview version
         return config_updates
 

@@ -7,9 +7,10 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
 
-from github import Auth, Github
 from serial.tools import list_ports
 from serial.tools.list_ports_common import ListPortInfo
+
+from mpflash.basicgit import GH_CLIENT as GH_CLIENT
 
 from .logger import log
 
@@ -26,17 +27,6 @@ PORT_FWTYPES = {
     "nrf": [".uf2"],
     "renesas-ra": [".hex"],
 }
-
-# Token with no permissions to avoid throttling
-# https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#getting-a-higher-rate-limit
-PAT_NO_ACCESS = (
-    "github_pat_"
-    + "11AAHPVFQ0G4NTaQ73Bw5J"
-    + "_fAp7K9sZ1qL8VFnI9g78eUlCdmOXHB3WzSdj2jtEYb4XF3N7PDJBl32qIxq"
-)
-
-PAT = os.environ.get("GITHUB_TOKEN") or PAT_NO_ACCESS
-GH_CLIENT = Github(auth=Auth.Token(PAT))
 
 
 @dataclass
@@ -150,9 +140,10 @@ def filtered_comports(
     comports = [
         p for p in list_ports.comports() if not any(fnmatch.fnmatch(p.device, i) for i in ignore)
     ]
-    
+
     if False:
         import jsons
+
         print(jsons.dumps(comports).replace('{"description":', '\n{"description":'))
 
     if platform.system() == "Linux":

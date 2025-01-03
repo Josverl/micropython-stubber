@@ -55,7 +55,7 @@ class MPRemoteBoard:
         self.arch = ""
         self.mpy = ""
         self.build = ""
-        self.location = location # USB location
+        self.location = location  # USB location
         self.toml = {}
         if update:
             self.get_mcu_info()
@@ -97,7 +97,9 @@ class MPRemoteBoard:
 
         if sys.platform == "win32":
             # Windows sort of comports by number - but fallback to device name
-            return sorted(output, key=lambda x: int(x.split()[0][3:]) if x.split()[0][3:].isdigit() else x)
+            return sorted(
+                output, key=lambda x: int(x.split()[0][3:]) if x.split()[0][3:].isdigit() else x
+            )
         # sort by device name
         return sorted(output)
 
@@ -116,9 +118,10 @@ class MPRemoteBoard:
             ["run", str(HERE / "mpy_fw_info.py")],
             no_info=True,
             timeout=timeout,
-            resume=True,  # Avoid restarts
+            resume=False,  # Avoid restarts
         )
-        if rc != OK:
+        if rc:
+            log.debug(f"rc: {rc}, result: {result}")
             raise ConnectionError(f"Failed to get mcu_info for {self.serialport}")
         # Ok we have the info, now parse it
         raw_info = result[0].strip()
@@ -134,7 +137,9 @@ class MPRemoteBoard:
             self.description = descr = info["board"]
             pos = descr.rfind(" with")
             short_descr = descr[:pos].strip() if pos != -1 else ""
-            if board_name := find_board_id_by_description(descr, short_descr, version=self.version):
+            if board_name := find_board_id_by_description(
+                descr, short_descr, version=self.version
+            ):
                 self.board = board_name
             else:
                 self.board = "UNKNOWN_BOARD"
@@ -174,7 +179,7 @@ class MPRemoteBoard:
             except Exception as e:
                 log.error(f"Failed to parse board_info.toml: {e}")
         else:
-            log.trace(f"Failed to read board_info.toml: {result}")
+            log.trace(f"Did not find a board_info.toml: {result}")
 
     def disconnect(self) -> bool:
         """
@@ -202,7 +207,7 @@ class MPRemoteBoard:
         log_errors: bool = True,
         no_info: bool = False,
         timeout: int = 60,
-        resume: bool = False,
+        resume: Optional[bool] = None,
         **kwargs,
     ):
         """
@@ -223,7 +228,7 @@ class MPRemoteBoard:
         if self.serialport:
             prefix += ["connect", self.serialport]
         # if connected add resume to keep state between commands
-        if self.connected or resume:
+        if (resume != False) and self.connected or resume:
             prefix += ["resume"]
         cmd = prefix + cmd
         log.debug(" ".join(cmd))
