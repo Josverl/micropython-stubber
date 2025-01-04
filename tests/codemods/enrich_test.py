@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
-
 from stubber.codemod.enrich import enrich_file, enrich_folder
 
 # mark all tests
@@ -27,8 +26,8 @@ def test_enrich_file_with_stub(source_file: Path, expected: bool):
     except FileNotFoundError:
         assert not expected, "docstub File not found but expected"
 
-    if expected == False:
-        assert len(diffs) == 0, "no change to the stub was expected but found: \n{}".format(diffs)
+    if not expected:
+        assert len(diffs) == 0, f"no change to the stub was expected but found: \n{diffs}"
     else:
         assert diffs, "change to the stub was expected but not found"
 
