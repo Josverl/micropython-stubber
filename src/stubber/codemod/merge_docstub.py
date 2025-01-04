@@ -118,7 +118,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             self.all_imports = import_collector.all_imports
             # Get typevars
             stub_tree.visit(typevar_collector)
-            self.typevars = typevar_collector.all_typevars
+            self.typevars = typevar_collector.all_typealias_or_vars
 
     # ------------------------------------------------------------------------
 

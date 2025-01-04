@@ -102,12 +102,11 @@ class PytestCodemodTest(_CodemodTest):
                 # pyre-ignore This mixin needs to be used with a UnitTest subclass.
                 self.fail("Expected SkipFile but was not raised")
 
-        # pyre-ignore This mixin needs to be used with a UnitTest subclass
         # ignore spacing in # fmt: on/off
-        self.assertEqual(
-            CodemodTest.make_fixture_data(after.replace("#fmt: o", "# fmt: o")),
-            CodemodTest.make_fixture_data(output_tree.code.replace("#fmt: o", "# fmt: o")),
-        )
+        after_txt = CodemodTest.make_fixture_data(after.replace("#fmt: o", "# fmt: o"))
+        before_txt = CodemodTest.make_fixture_data(output_tree.code.replace("#fmt: o", "# fmt: o"))
+
+        self.assertEqual(before_txt, after_txt)
         if expected_warnings is not None:
             # pyre-ignore This mixin needs to be used with a UnitTest subclass.
             self.assertSequenceEqual(expected_warnings, context.warnings)
