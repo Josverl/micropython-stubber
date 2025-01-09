@@ -16,23 +16,24 @@ from .cli import stubber_cli
 
 @stubber_cli.command(name="enrich")
 @click.option(
-    "--stubs",
     "--dest",
-    "-s",
-    "stubs_folder",
+    "--destination",
+    "-d",
+    "--stubs",
+    "dest_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the MCU stubs to be updated (destination)",
+    help="The destination file or folder containing the stubs stubs to be updated",
     show_default=True,
 )
 @click.option(
-    "--docstubs",
     "--source",
-    "-ds",
-    "docstubs_folder",
+    "-s",
+    "--docstubs",
+    "source_folder",
     default=CONFIG.stub_path.as_posix(),
     type=click.Path(exists=True, file_okay=True, dir_okay=True),
-    help="File or folder containing the docstubs to be read from (source)",
+    help="The source file or folder containing the docstubs to be read",
     show_default=True,
 )
 @click.option("--diff", default=False, help="Show diff", show_default=True, is_flag=True)
@@ -60,8 +61,8 @@ from .cli import stubber_cli
     show_default=True,
 )
 def cli_enrich_folder(
-    stubs_folder: Union[str, Path],
-    docstubs_folder: Union[str, Path],
+    dest_folder: Union[str, Path],
+    source_folder: Union[str, Path],
     diff: bool = False,
     dry_run: bool = False,
     params_only: bool = True,
@@ -71,10 +72,10 @@ def cli_enrich_folder(
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
     """
     write_back = not dry_run
-    log.info(f"Enriching {stubs_folder} with {docstubs_folder}")
+    log.info(f"Enriching {dest_folder} with {source_folder}")
     _ = enrich_folder(
-        Path(stubs_folder),
-        Path(docstubs_folder),
+        Path(dest_folder),
+        Path(source_folder),
         show_diff=diff,
         write_back=write_back,
         require_docstub=False,

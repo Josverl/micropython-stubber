@@ -10,8 +10,10 @@ from libcst import SimpleStatementLine
 from libcst.codemod._context import CodemodContext
 from libcst.codemod._visitor import ContextAwareTransformer, ContextAwareVisitor
 from libcst.codemod.visitors._add_imports import _skip_first
+from mpflash.logger import log
 
-_empty_module = libcst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
+_mod = libcst.parse_module("")  # Debugging aid : _mod.code_for_node(node)
+_code = _mod.code_for_node  # Debugging aid : _code(node)
 
 
 class GatherTypeVarsVisitor(ContextAwareVisitor):
@@ -86,10 +88,6 @@ class AddTypeVarsVisitor(ContextAwareTransformer):
         context.scratch[cls.CONTEXT_KEY] = new_typealias_or_vars
         # add the typevar to the module
 
-    def visit_Module(self, node: libcst.Module) -> None:
-        # self.all_typealias_or_vars = []
-        a = 1
-
     def leave_Module(
         self,
         original_node: libcst.Module,
@@ -112,7 +110,12 @@ class AddTypeVarsVisitor(ContextAwareTransformer):
         for new_tvta in self.new_typealias_or_vars:
             existing = False
             for existing_line in tv_ta_statements:
-                existing_tv = existing_line.body[0]  # type: ignore
+                try:
+                    existing_tv = existing_line.body[0]  # type: ignore
+                except (TypeError, IndexError):
+                    # catch 'SimpleStatementLine' object is not subscriptable when the statement is not a simple statement
+                    log.error("TypeVar or TypeAlias statement is not a simple statement")
+                    continue
 
                 # same type and same target?
                 if (

@@ -93,10 +93,6 @@ def make_docstubs(
             target = dst_path / file.stem / f"__init__{suffix}"
         # fname = (dst_path / file.name).with_suffix(suffix)
         reader.write_file(target)
-        # if file.stem in U_MODULES:
-        #     # create umod.py file and mod.py file
-        #     fname = (dst_path / ("u" + file.name)).with_suffix(suffix)
-        #     reader.write_file(fname)
         del reader
     for name in U_MODULES:
         # create a file "umodule.pyi" for each module
@@ -107,6 +103,6 @@ def make_docstubs(
         target = dst_path / f"u{name}.pyi"
         with open(target, "w") as f:
             f.write(f"# {name} module\n")
-            f.write(f"# Allow the use of micro-module notation \n\n")
+            f.write("# Allow the use of micro-module notation \n\n")
             f.write(f"from {name} import *  # type: ignore\n")
             f.flush()

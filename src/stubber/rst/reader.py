@@ -69,6 +69,7 @@ from typing import List, Optional, Tuple
 
 from mpflash.logger import log
 from mpflash.versions import V_PREVIEW
+
 from stubber.rst import (
     CHILD_PARENT_CLASS,
     MODULE_GLUE,
@@ -488,8 +489,12 @@ class RSTParser(RSTReader):
         if USE_SUBMODULES:
             # add sub modules imports
             for file in toctree:
-                rel_name = file.replace(f"{self.modulename}.", ".").replace(".rst", "")
-                self.output_dict.add_import(f"from {rel_name} import *")
+                submod_name = file.replace(".rst", "")
+                rel_name = submod_name.replace(f"{self.modulename}.", ".")
+                assumed_class = rel_name.lstrip(".")  # .capitalize()
+
+                # absolute class import with class name based on the module name
+                self.output_dict.add_import(f"from {submod_name} import {assumed_class}")
 
         else:
             # Now parse all files mentioned in the toc
@@ -519,9 +524,10 @@ class RSTParser(RSTReader):
             if "nightly" in self.source_tag:
                 version = V_PREVIEW
             else:
-                version = self.source_tag.replace(
-                    "_", "."
-                )  # TODO Use clean_version(self.source_tag)
+                version = self.source_tag.replace("_", ".")
+                # documentation is not available for patch versions, so use only the major.minor.0
+                version = ".".join(version.split(".")[:2]) + ".0"
+                # TODO Use clean_version(self.source_tag)
             docstr[0] = (
                 f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
             )

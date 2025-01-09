@@ -3,8 +3,10 @@ Enrich MCU stubs by copying docstrings and parameter information from doc-stubs 
 Both (.py or .pyi) files are supported.
 """
 
+from collections.abc import Generator
+from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
 
 from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
@@ -12,8 +14,8 @@ from libcst.tool import _default_config  # type: ignore
 from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
+from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
-from functools import lru_cache
 
 ##########################################################################################
 # # log = logging.getLogger(__name__)
@@ -140,6 +142,10 @@ def enrich_file(
             old_code = current_code = target.read_text(encoding="utf-8")
             current = target
         if source.exists():
+            if source.stem in U_MODULES:
+                # skip enriching from umodule.pyi files
+                log.debug(f"Skip enriching {target.name}, as it is an u-module")
+                continue
             log.info(f"Merge {target} from {source}")
             # read source file
             codemod_instance = merge_docstub.MergeCommand(
@@ -227,11 +233,15 @@ def enrich_folder(
             list(target_path.rglob("**/*.py")) + list(target_path.rglob("**/*.pyi"))
         )
     package_name = package_name or package_from_path(target_path, source_path)
-    for source_file in target_files:
+    for target in target_files:
+        if target.stem.startswith("u") and target.stem[1:] in U_MODULES:
+            # skip enriching umodule.pyi files
+            log.debug(f"Skip enriching {target.name}, as it is an u-module")
+            continue
         try:
             diffs = list(
                 enrich_file(
-                    source_file,
+                    target,
                     source_path,
                     diff=True,
                     write_back=write_back,
@@ -247,9 +257,9 @@ def enrich_folder(
         except FileNotFoundError as e:
             # no docstub to enrich with
             if require_docstub:
-                raise (FileNotFoundError(f"No doc-stub file found for {source_file}")) from e
+                raise (FileNotFoundError(f"No doc-stub file found for {target}")) from e
         except (Exception, ParserSyntaxError) as e:
-            log.error(f"Error parsing {source_file}")
+            log.error(f"Error parsing {target}")
             log.exception(e)
             continue
     # run black on the destination folder
