@@ -331,7 +331,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         # If there are overloads in the documentation , lets use the first one
         if add_overload:
-            log.info(f"Change {updated_node.name.value} to @overload")
+            log.info(f"Change to @overload :{updated_node.name.value}")
             # Use the new overload - but with the existing docstring
             doc_stub = self.annotations[stack_id].overloads.pop(0)
             assert doc_stub.def_node

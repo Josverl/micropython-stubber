@@ -189,8 +189,17 @@ LOOKUP_LIST = {
     "_rp2.PIO.irq": ("_IRQ", 0.95),
     "_rp2.PIO.remove_program": ("None", 0.95),
     "_rp2.PIO.add_program": ("None", 0.95),
-    "rp2.PIO.irq": ("_IRQ", 0.95),
+    "rp2.bootsel_button": ("int", 0.95),
+    "rp2.DMA.active": ("bool", 0.95),
+    "rp2.DMA.pack_ctrl": ("int", 0.95),
+    "rp2.DMA.unpack_ctrl": ("dict", 0.95),
+    "rp2.DMA.close": ("None", 0.95),
+    "rp2.DMA.config": ("None", 0.95),
     "rp2.DMA.irq": ("_IRQ", 0.95),
+    "rp2.PIO.state_machine": ("StateMachine", 0.95),
+    "rp2.PIO.irq": ("_IRQ", 0.95),
+    "rp2.PIO.remove_program": ("None", 0.95),
+    "rp2.PIO.add_program": ("None", 0.95),
 }
 
 
@@ -275,7 +284,10 @@ MODULE_GLUE = {
         "from _espnow import ESPNowBase  # type: ignore",
     ],  # ESPNowBase is an undocumented base class
     "framebuf": ANY_BUF,
-    "hashlib": ANY_BUF,
+    "hashlib": ANY_BUF
+    + [
+        "from _mpy_shed import _Hash",
+    ],
     "heapq": [
         '_T = TypeVar("_T")',
     ],
@@ -314,6 +326,7 @@ MODULE_GLUE = {
     ],
     "network": ["from typing import Protocol"],  #  for AbstractNIC
     "neopixel": [
+        "from _mpy_shed import _NeoPixelBase",
         # "from typing_extensions import TypeAlias",
         # "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
     ],  #  for AbstractNIC
@@ -324,10 +337,9 @@ MODULE_GLUE = {
     "pyb": ANY_BUF
     + [
         "from .UART import UART",
-        "from _mpy_shed import _OldAbstractBlockDev, _OldAbstractReadOnlyBlockDev",
+        "from _mpy_shed import _OldAbstractBlockDev, _OldAbstractReadOnlyBlockDev, HID_Tuple",
         # "_OldAbstractBlockDev: TypeAlias = Any",
         # "_OldAbstractReadOnlyBlockDev: TypeAlias = Any",
-        "HID_Tuple:TypeAlias = tuple[int, int, int, int, bytes]",
     ],
     "pyb.ADC": ANY_BUF + ["from .Pin import Pin", "from .Timer import Timer"],
     "pyb.CAN": ANY_BUF,
@@ -348,12 +360,13 @@ MODULE_GLUE = {
         "from .Pin import Pin",
     ],  #  uses Pin
     "rp2": [
-        # import classess from _rp2
-        "from _rp2.DMA import DMA as DMA",
-        "from _rp2.Flash import Flash as Flash",
-        "from _rp2.StateMachine import StateMachine as StateMachine",
-        "from _rp2.PIO import PIO as PIO",
-        "from _rp2.PIOASMEmit import PIOASMEmit",
+        # Simplified import classess from rp2 (rather than from _rp2)
+        # "from rp2.DMA import DMA",
+        # "from rp2.DMA import DMA",
+        # "from rp2.Flash import Flash",
+        # "from rp2.StateMachine import StateMachine",
+        # "from rp2.PIO import PIO",
+        # "from rp2.PIOASMEmit import PIOASMEmit",
     ],  #
     "_rp2.DMA": ["from _mpy_shed import _IRQ"],
     "_rp2.PIO": ["from _mpy_shed import _IRQ"],
@@ -681,7 +694,8 @@ CHILD_PARENT_CLASS = {
     "array": "List",
     # network
     "AbstractNIC": "Protocol",
-    "NeoPixel": "Sequence",
+    # neopixel
+    "NeoPixel": "_NeoPixelBase",
 }
 
 

@@ -347,7 +347,7 @@ class Builder(VersionedPackage):
     def update_umodules(self):
         """
         Replace the STDLIB umodules with a simple import statement
-        in order to allow the typecheckers to resove the stdlib modules in the usual stdlib location.
+        in order to allow the typecheckers to resovle the stdlib modules in the usual stdlib location.
         """
         for f in self.package_path.rglob("*.pyi"):
             if f.stem in STDLIB_UMODULES:
