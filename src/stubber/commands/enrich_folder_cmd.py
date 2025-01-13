@@ -74,8 +74,8 @@ def cli_enrich_folder(
     write_back = not dry_run
     log.info(f"Enriching {dest_folder} with {source_folder}")
     _ = enrich_folder(
-        Path(dest_folder),
         Path(source_folder),
+        Path(dest_folder),
         show_diff=diff,
         write_back=write_back,
         require_docstub=False,

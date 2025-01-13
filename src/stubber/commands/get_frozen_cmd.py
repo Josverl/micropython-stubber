@@ -102,8 +102,8 @@ def cli_get_frozen(
     if docstubs_path.exists():
         log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
         if merged := enrich_folder(
-            stub_path,
             docstubs_path,
+            stub_path,
             show_diff=False,
             write_back=True,
             require_docstub=False,
