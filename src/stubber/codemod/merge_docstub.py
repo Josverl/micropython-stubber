@@ -159,7 +159,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         # bit of a hack to get the full module name
                         empty_mod = cst.parse_module("")
                         full_module_name = empty_mod.code_for_node(imp.module)  # type: ignore
-                        log.info(f"add: from {full_module_name} import *")
+                        log.debug(f"add: from {full_module_name} import *")
                         AddImportsVisitor.add_needed_import(
                             self.context,
                             module=full_module_name,
@@ -356,7 +356,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # assert isinstance(doc_stub, TypeInfo)
         # assert doc_stub
         # first update the docstring
-        no_docstring = updated_node.get_docstring() == None
+        no_docstring = updated_node.get_docstring() is None
         if (not self.params_only) or no_docstring:
             # DO Not overwrite existing docstring
             updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
@@ -399,7 +399,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 new_decorators.extend(doc_stub.decorators)
 
             for decorator in updated_node.decorators:
-                if not decorator.decorator.value in [n.decorator.value for n in new_decorators]:  # type: ignore
+                if decorator.decorator.value not in [n.decorator.value for n in new_decorators]:  # type: ignore
                     new_decorators.append(decorator)
 
             # if there is both a static and a class method, we remove the class decorator to avoid inconsistencies

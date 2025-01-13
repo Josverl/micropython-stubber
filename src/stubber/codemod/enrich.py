@@ -4,6 +4,7 @@ Both (.py or .pyi) files are supported.
 """
 
 from collections.abc import Generator
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
@@ -17,10 +18,18 @@ import stubber.codemod.merge_docstub as merge_docstub
 from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
 
+
 ##########################################################################################
 # # log = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.INFO)
 #########################################################################################
+@dataclass
+class MergeMatch:
+    target: Path
+    source: Path
+    target_pkg: str
+    source_pkg: str
+    is_match: bool
 
 
 @lru_cache
@@ -42,11 +51,11 @@ def package_from_path(target: Path, source: Optional[Path] = None) -> str:
     # check if there is a __init__.py next to the target
     for p in _options:
         if len(list(p.parent.glob("__init__.py*"))) > 0:
-            return p.parent.stem
+            return f"{p.parent.stem}.{p.stem}"
     # check One level up - just in case
     for p in _options:
         if len(list(p.parent.parent.glob("__init__.py*"))) > 0:
-            return p.parent.parent.stem
+            return f"{p.parent.parent.stem}.{p.parent.stem}.{p.stem}"
     # then use the filename, unless it is a __**__.py
     for p in _options:
         if p.is_file() and not p.stem.startswith("__"):
@@ -54,24 +63,46 @@ def package_from_path(target: Path, source: Optional[Path] = None) -> str:
     return ""
 
 
-def upackage_equal(p1: str, p2: str) -> bool:
+def upackage_equal(src: str, target: str) -> Tuple[bool, int]:
     """
     Compare package names, return True if they are equal, ignoring an _ or u-prefix and case
     """
-    if p1 and p1[0] in ["u", "_"]:
-        p1 = p1[1:]
-    if p2 and p2[0] in ["u", "_"]:
-        p2 = p2[1:]
+    if src.startswith("u") and not target.startswith("u"):
+        # do not allow enriching from u-module to module
+        return False, 0
+    if not src.startswith("u") and target.startswith("u"):
+        # allow enriching from module to u-module
+        target = target[1:]
 
-    return p1.lower() == p2.lower()
+    # traet __init__ as a package
+    if src.endswith(".__init__"):
+        src = src[:-9]
+    if target.endswith(".__init__"):
+        target = target[:-9]
+    #
+    if src and src[0] == "_":
+        src = src[1:]
+    if target and target[0] == "_":
+        target = target[1:]
+
+    src = src.lower()
+    target = target.lower()
+
+    if src == target or f"u{src}" == target:
+        return True, len(src)
+    if "." in src and src.startswith(f"{target}."):
+        return True, len(target)
+    if "." in target and target.startswith(f"{src}."):
+        return True, len(src)
+    return False, 0
 
 
-def target_source_candidates(
-    target: Path, source: Path, package_name: str = ""
-) -> Generator[Tuple[Path, Path, str], None, None]:
+def source_target_candidates(source: Path, target: Path) -> Generator[MergeMatch, None, None]:
     """
     Given a target and source path, return a list of tuples of `(target, source, package name)` that are candidates for merging.
     Goal is to match the target and source files based on the package name, to avoid mismatched merges of docstrings and typehints
+
+    Returns a generator of tuples of `(target, source, target_package, source_package, is_partial_match)`
     """
     # first assumption on targets
     if target.is_dir():
@@ -88,16 +119,27 @@ def target_source_candidates(
     else:
         sources = []
     # filter down using the package name
-    for t in targets:
-        for s in sources:
-            if upackage_equal(package_from_path(t), package_from_path(s)):
-                yield (t, s, package_from_path(t))
+    for s in sources:
+        is_match: bool = False
+        best_match_len = 0
+        mm = None
+        for t in targets:
+            # find the best match
+            t_pkg = package_from_path(t)
+            s_pkg = package_from_path(s)
+            is_match, match_len = upackage_equal(s_pkg, t_pkg)
+            if is_match and match_len > best_match_len:
+                best_match_len = match_len
+                mm = MergeMatch(t, s, t_pkg, s_pkg, is_match)
+        if not mm:
+            continue
+        yield mm
 
 
 #########################################################################################
 def enrich_file(
-    target_path: Path,
     source_path: Path,
+    target_path: Path,
     diff: bool = False,
     write_back: bool = False,
     package_name="",
@@ -106,10 +148,12 @@ def enrich_file(
     """
     Enrich a MCU stubs using the doc-stubs in another folder.
     Both (.py or .pyi) files are supported.
+    Both source an target files must exist, and are assumed to match.
+    Any matching of source and target files should be done before calling this function.
 
     Parameters:
-        source_path: the path to the firmware stub to enrich
-        docstub_path: the path to the folder containing the doc-stubs
+        source_path: the  path to the firmware stub-file to enrich
+        docstub_path: the path to the file  containing the doc-stubs
         diff: if True, return the diff between the original and the enriched source file
         write_back: if True, write the enriched source file back to the source_path
 
@@ -120,94 +164,44 @@ def enrich_file(
     context = CodemodContext()
     package_name = package_name or package_from_path(target_path, source_path)
 
-    # find a matching doc-stub file in the docstub_path
-    # candidates = merge_source_candidates(package_name, source_path)
-    candidates = target_source_candidates(target_path, source_path)
-    # sort by target_path , to show diffs
-    candidates = sorted(candidates, key=lambda x: x[0])
-
-    # try to apply all candidates
+    if not source_path.exists() or not target_path.exists():
+        raise FileNotFoundError("Source or target file not found")
+    if not source_path.is_file() or not target_path.is_file():
+        raise FileNotFoundError("Source or target is not a file")
+    # apply a single codemod to the target file
     success = False
-    current = None
-    for target, source, name in candidates:
-        if target != current:
-            # processing a new file
-            if current:
-                # write updated code to file
-                if write_back:
-                    log.trace(f"Write back enriched file {current}")
-                    current.write_text(current_code, encoding="utf-8")
-                if diff:
-                    yield diff_code(old_code, current_code, 5, filename=current.name)
-            old_code = current_code = target.read_text(encoding="utf-8")
-            current = target
-        if source.exists():
-            if source.stem in U_MODULES:
-                # skip enriching from umodule.pyi files
-                log.debug(f"Skip enriching {target.name}, as it is an u-module")
-                continue
-            log.info(f"Merge {target} from {source}")
-            # read source file
-            codemod_instance = merge_docstub.MergeCommand(
-                context, docstub_file=source, params_only=params_only
-            )
-            if new_code := exec_transform_with_prettyprint(
-                codemod_instance,
-                current_code,
-                # include_generated=False,
-                generated_code_marker=config["generated_code_marker"],
-                # format_code=not args.no_format,
-                formatter_args=config["formatter"],
-                # python_version=args.python_version,
-            ):
-                current_code = new_code
-                success = True
+    # read target file
+    old_code = current_code = target_path.read_text(encoding="utf-8")
+    # read source file
+    codemod_instance = merge_docstub.MergeCommand(
+        context, docstub_file=source_path, params_only=params_only
+    )
+    if new_code := exec_transform_with_prettyprint(
+        codemod_instance,
+        current_code,
+        # include_generated=False,
+        generated_code_marker=config["generated_code_marker"],
+        # format_code=not args.no_format,
+        formatter_args=config["formatter"],
+        # python_version=args.python_version,
+    ):
+        current_code = new_code
+        success = True
+
     if not success:
         raise FileNotFoundError(f"No doc-stub file found for {target_path}")
+    if write_back:
+        log.trace(f"Write back enriched file {target_path}")
+        target_path.write_text(current_code, encoding="utf-8")
+    if diff:
+        yield diff_code(old_code, current_code, 5, filename=target_path.name)
 
-    if current:
-        # write (last) updated code to file
-        if write_back:
-            log.trace(f"Write back enriched file {current}")
-            current.write_text(current_code, encoding="utf-8")
-        if diff:
-            yield diff_code(old_code, current_code, 5, filename=current.name)
-
-
-# def merge_source_candidates(package_name: str, docstub_path: Path) -> List[Path]:
-#     """Return a list of candidate files in the docstub path that can be used to enrich the provided package_name."""
-#     if docstub_path.is_file():
-#         candidates = [docstub_path]
-#         return candidates
-#     # select from .py and .pyi files
-#     candidates: List[Path] = []
-#     for ext in [".py", ".pyi"]:
-#         candidates.extend(file_package(package_name, docstub_path, ext))
-#         if package_name[0].lower() in ["u", "_"]:
-#             # also look for candidates without leading u ( usys.py <- sys.py)
-#             # also look for candidates without leading _ ( _rp2.py <- rp2.py )
-#             candidates.extend(file_package(package_name[1:], docstub_path, ext))
-#         else:
-#             # also look for candidates with leading u ( sys.py <- usys.py)
-#             candidates.extend(file_package("u" + package_name, docstub_path, ext))
-#     return candidates
-
-
-def file_package(name: str, docstub_path: Path, ext: str) -> List[Path]:
-    """
-    Return a list of candidate files in the docstub path that can be used to enrich the provided package_name.
-    package_name can be ufoo, foo, _foo, foo or foo.bar
-    """
-    candidates: List[Path] = []
-    candidates.extend(docstub_path.rglob(name.replace(".", "/") + ext))
-    if (docstub_path / name).is_dir():
-        candidates.extend(docstub_path.rglob(f"{name}/*{ext}"))
-    return candidates
+    log.info(f"Enriched {target_path}")
 
 
 def enrich_folder(
-    target_path: Path,
-    source_path: Path,
+    source_folder: Path,
+    target_folder: Path,
     show_diff: bool = False,
     write_back: bool = False,
     require_docstub: bool = False,
@@ -219,51 +213,51 @@ def enrich_folder(
         
         Returns the number of files enriched.
     """
-    if not target_path.exists():
-        raise FileNotFoundError(f"Target {target_path} does not exist")
-    if not source_path.exists():
-        raise FileNotFoundError(f"Source {source_path} does not exist")
-    log.info(f"Enrich folder {target_path}.")
+    if not target_folder.exists():
+        raise FileNotFoundError(f"Target {target_folder} does not exist")
+    if not source_folder.exists():
+        raise FileNotFoundError(f"Source {source_folder} does not exist")
+    log.info(f"Enrich folder {target_folder}.")
     count = 0
-    # list all the .py and .pyi files in/under the source folder
-    if target_path.is_file():
-        target_files = [target_path]
-    else:
-        target_files = sorted(
-            list(target_path.rglob("**/*.py")) + list(target_path.rglob("**/*.pyi"))
-        )
-    package_name = package_name or package_from_path(target_path, source_path)
-    for target in target_files:
-        if target.stem.startswith("u") and target.stem[1:] in U_MODULES:
+
+    candidates = source_target_candidates(source_folder, target_folder)
+    # sort by target_path , to show diffs
+    candidates = sorted(candidates, key=lambda m: m.target)
+
+    # CHECK: is this still needed?
+    # package_name = package_name or package_from_path(target_folder, source_folder)
+
+    # for target in target_files:
+    for mm in candidates:
+        if mm.target.stem.startswith("u") and mm.target.stem[1:] in U_MODULES:
             # skip enriching umodule.pyi files
-            log.debug(f"Skip enriching {target.name}, as it is an u-module")
+            log.debug(f"Skip enriching {mm.target.name}, as it is an u-module")
             continue
         try:
-            diffs = list(
-                enrich_file(
-                    target,
-                    source_path,
-                    diff=True,
-                    write_back=write_back,
-                    package_name=package_name,
-                    params_only=params_only,
-                )
-            )
-            if diffs:
-                count += len(diffs)
+
+            if diff := enrich_file(
+                mm.source,
+                mm.target,
+                diff=True,
+                write_back=write_back,
+                package_name=mm.target_pkg,
+                params_only=params_only,
+            ):
+                count += 1
                 if show_diff:
-                    for diff in diffs:
-                        print(diff)
+                    print(diff)
         except FileNotFoundError as e:
             # no docstub to enrich with
             if require_docstub:
-                raise (FileNotFoundError(f"No doc-stub file found for {target}")) from e
+                raise (
+                    FileNotFoundError(f"No doc-stub or source  file found for {mm.target}")
+                ) from e
         except (Exception, ParserSyntaxError) as e:
-            log.error(f"Error parsing {target}")
+            log.error(f"Error parsing {mm.target}")
             log.exception(e)
             continue
-    # run black on the destination folder
-    run_black(target_path)
-    # DO NOT run Autoflake as this removes some relevant (unused) imports too early
+    # run black on the target folder
+    run_black(target_folder)
+    # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
 
     return count
