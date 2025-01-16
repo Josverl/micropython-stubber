@@ -10,7 +10,7 @@ class TestCase(NamedTuple):
     before: str  # The source code before the transformation.
     expected: str  # The source code after the transformation.
     doc_stub: str  # The stub to apply
-    stub_file: Path  # The path to stub file to apply
+    stub_file: Path  # The path to source docstub file to apply
     output: Path | None = None  # where to save the output for testing the tests
     path: Path | None = None  # where are the tests
 

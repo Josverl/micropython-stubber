@@ -170,6 +170,7 @@ reportUnboundVariable = "information"
 ReportSelfClsParameterName = "information"
 reportOptionalSubscript = "information"
 reportCallInDefaultInitializer = "error"
+# reportAssignmentType = "warning"
 # Section 3 -  reduce noise 
 reportMissingTypeStubs = "none"
 reportOptionalMemberAccess = "none"      # "read" is not a known member of "None" - occurs often in frozen code
@@ -183,6 +184,7 @@ reportUnknownMemberType = "none"
 reportUnknownLambdaType = "none"
 reportUnknownVariableType = "none"
 reportUntypedNamedTuple = "none"
+
 
 
 # "executionEnvironments" = [
@@ -395,7 +397,7 @@ target-version = "py39"
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
 select = ["E4", "E7", "E9", "F", "U"]
-ignore = ["E402", "F821", "F403"]
+ignore = ["E402", "F821", "F403", "UP015", "U031", "U032", "U035"]
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
