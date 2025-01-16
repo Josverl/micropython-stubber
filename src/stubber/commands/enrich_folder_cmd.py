@@ -52,21 +52,21 @@ from .cli import stubber_cli
     show_default=True,
     is_flag=True,
 )
-@click.option(
-    "--package-name",
-    "-p",
-    "package_name",
-    default="",
-    help="Package name to be enriched (Optional)",
-    show_default=True,
-)
+# @click.option(
+#     "--package-name",
+#     "-p",
+#     "package_name",
+#     default="",
+#     help="Package name to be enriched (Optional)",
+#     show_default=True,
+# )
 def cli_enrich_folder(
     dest_folder: Union[str, Path],
     source_folder: Union[str, Path],
     diff: bool = False,
     dry_run: bool = False,
     params_only: bool = True,
-    package_name: str = "",
+    # package_name: str = "",
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
@@ -79,6 +79,6 @@ def cli_enrich_folder(
         show_diff=diff,
         write_back=write_back,
         require_docstub=False,
-        package_name=package_name,
+        # package_name=package_name,
         params_only=params_only,
     )

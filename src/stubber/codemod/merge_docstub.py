@@ -108,11 +108,11 @@ class MergeCommand(VisitorBasedCodemodCommand):
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)
             typevar_collector = GatherTypeVarsVisitor(context)
-            # visit the doc-stub file with all collectors
+            # visit the source / doc-stub file with all collectors
             stub_tree.visit(typing_collector)
             self.annotations = typing_collector.annotations
             self.comments = typing_collector.comments
-            # Store the imports that were added to the stub file
+            # Store the imports that were added to the source / doc-stub file
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
             self.all_imports = import_collector.all_imports
@@ -136,30 +136,40 @@ class MergeCommand(VisitorBasedCodemodCommand):
         :return: The updated module node.
         """
         # --------------------------------------------------------------------
-        # add any needed imports from the doc-stub
+        # add any needed imports from the source doc-stub
         for k in self.stub_imports.keys():
-            imp = self.stub_imports[k]
-            log.trace(f"add: import {k} = {imp}")
+            import_item = self.stub_imports[k]
+            if import_item.module_name == self.context.full_module_name:
+                # this is an import from the same module we should NOT add it
+                continue
+            if import_item.module_name.split(".")[
+                0
+            ] == self.context.full_module_name and not self.context.filename.endswith(
+                "__init__.pyi"
+            ):
+                # this is an import from a module child module we should NOT add it
+                continue
+            log.trace(f"add: import {k} = {import_item}")
             AddImportsVisitor.add_needed_import(
                 self.context,
-                module=imp.module_name,
-                obj=imp.obj_name,
-                asname=imp.alias,
-                relative=imp.relative,
+                module=import_item.module_name,
+                obj=import_item.obj_name,
+                asname=import_item.alias,
+                relative=import_item.relative,
             )
 
         # add `from module import *` from the doc-stub
         # FIXME: this cases a problem if there is also a 'from module import foobar' in the firmware stub
         # also all comments get removed from the import
         if self.all_imports:
-            for imp in self.all_imports:
-                if isinstance(imp, cst.ImportFrom):
+            for import_item in self.all_imports:
+                if isinstance(import_item, cst.ImportFrom):
                     # perhaps this is an import from *
-                    if isinstance(imp.names, cst.ImportStar):
+                    if isinstance(import_item.names, cst.ImportStar):
                         # bit of a hack to get the full module name
                         empty_mod = cst.parse_module("")
-                        full_module_name = empty_mod.code_for_node(imp.module)  # type: ignore
-                        log.debug(f"add: from {full_module_name} import *")
+                        full_module_name = empty_mod.code_for_node(import_item.module)  # type: ignore
+                        log.trace(f"add: from {full_module_name} import *")
                         AddImportsVisitor.add_needed_import(
                             self.context,
                             module=full_module_name,

@@ -142,7 +142,7 @@ def enrich_file(
     target_path: Path,
     diff: bool = False,
     write_back: bool = False,
-    package_name="",
+    # package_name="",  # not used
     params_only: bool = False,
 ) -> Generator[str, None, None]:
     """
@@ -160,14 +160,18 @@ def enrich_file(
     Returns:
     - None or a string containing the diff between the original and the enriched source file
     """
-    config: Dict[str, Any] = _default_config()
-    context = CodemodContext()
-    package_name = package_name or package_from_path(target_path, source_path)
 
     if not source_path.exists() or not target_path.exists():
         raise FileNotFoundError("Source or target file not found")
     if not source_path.is_file() or not target_path.is_file():
         raise FileNotFoundError("Source or target is not a file")
+    log.info(f"Enriching file: {target_path}")
+    config: Dict[str, Any] = _default_config()
+    # fass the filename and module name to the codemod
+    context = CodemodContext(
+        filename=target_path.as_posix(),
+        full_module_name=package_from_path(target_path),
+    )
     # apply a single codemod to the target file
     success = False
     # read target file
@@ -196,8 +200,6 @@ def enrich_file(
     if diff:
         yield diff_code(old_code, current_code, 5, filename=target_path.name)
 
-    log.info(f"Enriched {target_path}")
-
 
 def enrich_folder(
     source_folder: Path,
@@ -206,7 +208,7 @@ def enrich_folder(
     write_back: bool = False,
     require_docstub: bool = False,
     params_only: bool = False,
-    package_name: str = "",
+    # package_name: str = "",
 ) -> int:
     """\
         Enrich a folder with containing MCU stubs using the doc-stubs in another folder.
@@ -235,17 +237,20 @@ def enrich_folder(
             continue
         try:
 
-            if diff := enrich_file(
-                mm.source,
-                mm.target,
-                diff=True,
-                write_back=write_back,
-                package_name=mm.target_pkg,
-                params_only=params_only,
+            if diff := list(
+                enrich_file(
+                    mm.source,
+                    mm.target,
+                    diff=True,
+                    write_back=write_back,
+                    # package_name=mm.target_pkg,
+                    params_only=params_only,
+                )
             ):
-                count += 1
+                count += len(diff)
                 if show_diff:
-                    print(diff)
+                    for d in diff:
+                        print(d)
         except FileNotFoundError as e:
             # no docstub to enrich with
             if require_docstub:

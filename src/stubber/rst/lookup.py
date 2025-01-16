@@ -327,19 +327,14 @@ MODULE_GLUE = {
     "network": ["from typing import Protocol"],  #  for AbstractNIC
     "neopixel": [
         "from _mpy_shed import _NeoPixelBase",
-        # "from typing_extensions import TypeAlias",
-        # "_Color: TypeAlias = tuple[int, int, int] | tuple[int, int, int, int]",
     ],  #  for AbstractNIC
     "os": [
-        "from stdlib.os import *  # type: ignore",  # integrate STDLIB
         "from _mpy_shed import uname_result",
     ],
     "pyb": ANY_BUF
     + [
         "from .UART import UART",
         "from _mpy_shed import _OldAbstractBlockDev, _OldAbstractReadOnlyBlockDev, HID_Tuple",
-        # "_OldAbstractBlockDev: TypeAlias = Any",
-        # "_OldAbstractReadOnlyBlockDev: TypeAlias = Any",
     ],
     "pyb.ADC": ANY_BUF + ["from .Pin import Pin", "from .Timer import Timer"],
     "pyb.CAN": ANY_BUF,
@@ -359,30 +354,19 @@ MODULE_GLUE = {
         "from abc import ABC, abstractmethod",
         "from .Pin import Pin",
     ],  #  uses Pin
-    "rp2": [
-        # Simplified import classess from rp2 (rather than from _rp2)
-        # "from rp2.DMA import DMA",
-        # "from rp2.DMA import DMA",
-        # "from rp2.Flash import Flash",
-        # "from rp2.StateMachine import StateMachine",
-        # "from rp2.PIO import PIO",
-        # "from rp2.PIOASMEmit import PIOASMEmit",
-    ],  #
     "_rp2.DMA": ["from _mpy_shed import _IRQ"],
     "_rp2.PIO": ["from _mpy_shed import _IRQ"],
     "rp2.PIO": ["from _mpy_shed import _IRQ"],
     "rp2.DMA": ["from _mpy_shed import _IRQ"],
     "socket": [
-        "from stdlib.socket import *  # type: ignore",
         "from typing_extensions import TypeAlias",
         "from _mpy_shed import AnyReadableBuf, AnyWritableBuf",
-    ],  # integrate STDLIB
+    ],
     "ssl": [
         "from typing_extensions import TypeAlias",
         "from _mpy_shed import StrOrBytesPath",
-        "from stdlib.ssl import *  # type: ignore",
         "SSLSocket : TypeAlias = Incomplete",
-    ],  # integrate STDLIB
+    ],
     "struct": ANY_BUF,
     "time": [
         "from typing_extensions import TypeAlias, TypeVar",

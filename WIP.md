@@ -1,11 +1,105 @@
 
+## stubber docstubs 
+    
+- [ ] docstubs : should automagically enrich the docstubs
+- [ ] docstubs : add _rp2 module currently not documented (_rp2 - or keep all in rp2?) 
 
+- [ ] network : should proably not add 
+     - from .WLANWiPy import *
+    - from .WIZNET5K import *
+
+## stubber enrich 
+
+ -[x] enrich cmdline : change to source and destination
+
+ - [x]  enrich : File comments are dupllicated within the same file
+    - likely cause : merge same commont from multiple source 
+
+ -[x] enrich : TypeAlias are copied in multiple times `
+  - likely cause : merge same typealias from multiple source files 
+
+ -[x] enrich : `_rp2.submodules` recieve too many imports that cannot be resolved 
+
+- [x] during import - do not enhance the "u-module" stubs as this creates a tangle of incorrect imports 
+    - there is already a list of u-modules in the stubber, so they should be simple to skip
+
+
+- [x] improve copy imports during enrich
+    - [x] do not copy imports from umodules to non-umodules
+    - [x] do not copy `from foo import *` to module foo 
+- [ ] imports :  copy trailing comments "# type: ignore "
+- [ ] copy `FOO_BAR = const(0)` from source to dest
+- [ ] copy `FOO_BAR:Final = something` from source to dest
+
+
+## stubber merge 
+- [ ] Docstring is added multiple times s from multiple source files. 
+    - likely cause : merge same docstring from multiple source files
+- [ ] some decorators are added multiple times - need to check for existing decorator @final @final @final
+- [ ] machine.Pin.__call__ @overload decorator ends up only a single time in merged Stub ?
+- [ ] vfs.class AbstractBlockDev(ABC, _BlockDeviceProtocol): 
+        AbstractBlockDev does not exist in the firmware-stubs , so is not merged into the merged stubs.
+## micropython-Reference
+ 
+- [x] _rp2.* 
+    [x] fix  `from foo import bas as bar`
+    [x] remove duplicate comments in `_rp2` files. 
+    [x] remove duplicated docstrings 
+    [x] remove rp2.irq module ( not needed, _IRQ provided from _mpy_shed )
+
+    [x] for now revert to exposing just the 'rp2' module and hide the implementation details of `_rp2`
+
+## _mpy_shed 
+- [x] deque : `deque` is not a generic class.
+- [ ] publish _mpy_shed to pypi ( or add to micropython-stdlib-stubs )
+      > d:\mypython\micropython-stubber\repos\micropython-stubs\stubs\micropython-v1_24_1-docstubs\_mpy_shed\collections\__init__.pyi:327:35 - error: Expected no type arguments for class "deque" (reportInvalidTypeArguments)
+      
+      fix: class deque(MutableSequence[_T]):
+
+## rp2 / _rp2 documentation 
+- [x] duplicate imports in `_rp2` files. 
+    WORAROUND - remove _rp2 from stubs 
+- [x] remove `rp2.irq` module ( not needed, _IRQ provided from _mpy_shed )
+
+## neopixel
  - [ ] class NeoPixel: - indexing
         https://github.com/Josverl/micropython-stubs/issues/764
 
         ERROR    root:typecheck.py:171 "tests/quality_tests/check_rp2/check_neopixel.py"(10,0): "__setitem__" method not defined on type "NeoPixel"
         ERROR    root:typecheck.py:171 "tests/quality_tests/check_rp2/check_neopixel.py"(12,10): "__getitem__" method not defined on type "NeoPixel"
 
+
+## vfs 
+
+## stdlib
+
+- [x] remove the `from from stdlib.xx import *` from lookup.py 
+- [x] remove the `from from stdlib.xx import *` reference-stubs
+- [ ] regenerate the docstubs 
+
+- [x]  fix type stubs asyncio.StreamReader
+
+
+### io
+
+- [x] stdib - io 
+- [x] IOBase
+- [x]    class StringIO(IOBase): -->  143:15 - error: Argument to class must be a base class
+
+### time 
+ - [ ] _TimeTuple has different formats/lengths on different platforms ( esp32 )
+        - allow both 8 and 9-tuples 
+        - add docstring to timetuple , refer to existing docpage
+    ```
+        d:\mypython\micropython-stubber\repos\micropython-stubs\stubs\micropython-v1_24_1-esp32-ESP32_GENERIC-merged\time.pyi:43:18 - warning: Import symbol "mktime" has type "(time_tuple: _TimeTuple | struct_time, /) -> float", which is not assignable to declared type "(local_time: _TimeTuple, /) -> int"
+        Type "(time_tuple: _TimeTuple | struct_time, /) -> float" is not assignable to type "(local_time: _TimeTuple, /) -> int"
+        Parameter 1: type "_TimeTuple" is incompatible with type "_TimeTuple | struct_time"
+            Type "_TimeTuple" is not assignable to type "_TimeTuple | struct_time"
+            "Tuple[int, int, int, int, int, int, int, int]" is not assignable to "tuple[int, int, int, int, int, int, int, int, int]"
+                Tuple size mismatch; expected 9 but received 8
+            "Tuple[int, int, int, int, int, int, int, int]" is not assignable to "struct_time"
+    ```
+### uasyncio
  - [ ] mod:socket - missing module constants 
     ERROR    root:typecheck.py:171 "tests/quality_tests/feat_micropython/check_functions.py"(5,7): "AF_INET" is not defined
     ERROR    root:typecheck.py:171 "tests/quality_tests/feat_micropython/check_functions.py"(5,16): "SOCK_STREAM" is not defined
@@ -27,63 +121,7 @@
         "Task" is incompatible with protocol "Awaitable[_T_co@Awaitable]"
             "__await__" is not present
 
-- [ ] # TODO: fix type stubs asyncio.StreamReader
-        ```python
 
-            awritestr: Generator  ## = <generator>
-            wait_closed: Generator  ## = <generator>
-            drain: Generator  ## = <generator>
-            readexactly: Generator  ## = <generator>
-            readinto: Generator  ## = <generator>
-            awrite: Generator  ## = <generator>
-            readline: Generator  ## = <generator>
-            aclose: Generator  ## = <generator>
-
-            # read: Generator  ## = <generator>
-            async def read(self, n=-1):
-                """Read up to `n` bytes from the stream.
-                
-                If `n` is not provided or set to -1,
-                read until EOF, then return all read bytes.
-                If EOF was received and the internal buffer is empty,
-                return an empty bytes object.
-
-                If `n` is 0, return an empty bytes object immediately.
-
-                If `n` is positive, return at most `n` available bytes
-                as soon as at least 1 byte is available in the internal buffer.
-                If EOF is received before any byte is read, return an empty
-                bytes object.
-
-                Returned value is not limited with limit, configured at stream
-                creation.
-
-                If stream was paused, this function will automatically resume it if
-                needed.
-                """
-
-        ```
-
- - [ ] stdib - io 
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_io.py"(11,9): "BufferedWriter" is not a known attribute of module "io"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_json/check_json.py"(38,26): No parameter named "separators"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_files.py"(40,29): Type "str | list[dict[Unknown, Unknown]]" is not assignable to declared type "List[str]"
-    Type "str | list[dict[Unknown, Unknown]]" is not assignable to type "List[str]"
-        "str" is not assignable to "List[str]"
-    INFO     root:typecheck.py:175 "tests/quality_tests/feat_stdlib/check_os/check_files.py"(56,24): Type of "subdir" is "List[str]"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_files.py"(57,17): Type "list[str | dict[Unknown, Unknown]]" is not assignable to declared type "List[dict[Unknown, Unknown]]"
-    "list[str | dict[Unknown, Unknown]]" is not assignable to "List[dict[Unknown, Unknown]]"
-        Type parameter "_T@list" is invariant, but "str | dict[Unknown, Unknown]" is not the same as "dict[Unknown, Unknown]"
-        Consider switching from "list" to "Sequence" which is covariant
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_uname.py"(19,12): "assert_type" mismatch: expected "str" but received "str | Unknown"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_uname.py"(20,12): "assert_type" mismatch: expected "str" but received "str | Unknown"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_uname.py"(21,12): "assert_type" mismatch: expected "str" but received "str | Unknown"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_uname.py"(22,12): "assert_type" mismatch: expected "str" but received "str | Unknown"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_os/check_uname.py"(23,12): "assert_type" mismatch: expected "str" but received "str | Unknown"
-    ERROR    root:typecheck.py:171 "tests/quality_tests/feat_stdlib/check_sys/check_sys.py"(24,20): Argument of type "exc" cannot be assigned to parameter "exc" of type "BaseException" in function "print_exception"
-
-
-
- - [ ] Disable ruff warnings 
+ - [x] Disable ruff warnings 
         - UP015, UP031, UP032
 

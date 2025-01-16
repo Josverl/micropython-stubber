@@ -124,11 +124,15 @@ class TestMergeDocStubs(PytestCodemodTest):
         if "_xfail" in str(test_case.path):
             pytest.xfail("xfail")
 
+        # Create a test CodemodContext
+        context = CodemodContext(filename=str(test_case.path), full_module_name="target_module")
+
         self.assertCodemod(
             test_case.before,
             test_case.expected,
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
+            context_override=context,
             # params_only =False,
         )
 
