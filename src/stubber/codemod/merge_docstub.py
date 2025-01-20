@@ -236,13 +236,16 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         if missing_overloads:
             if isinstance(updated_node, cst.Module):
+                module_level = True
                 updated_body = list(updated_node.body)  # type: ignore
             elif isinstance(updated_node, cst.ClassDef):
+                module_level = False
                 updated_body = list(updated_node.body.body)  # type: ignore
             else:
                 raise ValueError(f"Unsupported node type: {updated_node}")
             # insert each overload just after a function with the same name
 
+            new_classes = []
             for overload, key in missing_overloads:
                 matched = False
                 matched, i = self.locate_function_by_name(overload, updated_body)
@@ -254,9 +257,33 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         overload = update_def_docstr(overload, docstring_node)
                     updated_body.insert(i + 1, overload)
                 else:
-                    # add to the end of the class
-                    log.trace(f"Add @overload for {overload.name.value} at the end of the class")
-                    updated_body.append(overload)
+                    # add to the end of the module or  class
+                    if module_level and len(key) > 1:
+                        # this is a class level overload, for which no class was found
+                        class_name = key[0]
+                        if class_name not in new_classes:
+                            new_classes.append(class_name)
+                            # create a class for it, and then add all the overload methods to that class
+                            log.trace(
+                                f"Add New class  @overload for {overload.name.value} at the end of the module"
+                            )
+                            # create a list of all overloads for this class
+                            class_overloads = [
+                                overload for overload, k in missing_overloads if k[0] == class_name
+                            ]
+                            class_def = cst.ClassDef(
+                                name=cst.Name(value=class_name),
+                                body=cst.IndentedBlock(body=class_overloads),
+                            )
+                            updated_body.append(class_def)
+                        else:
+                            # already processed this class method
+                            pass
+                    else:
+                        log.trace(
+                            f"Add @overload for {overload.name.value} at the end of the class"
+                        )
+                        updated_body.append(overload)
 
             if isinstance(updated_node, cst.Module):
                 updated_node = updated_node.with_changes(body=tuple(updated_body))

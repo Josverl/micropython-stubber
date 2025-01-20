@@ -31,14 +31,19 @@
 - [ ] copy `FOO_BAR = const(0)` from source to dest
 - [ ] copy `FOO_BAR:Final = something` from source to dest
 
-
+## merge targets
+- [x] rewrite logic for determining source --> target selection 
+    - [x] reduce the number of candidates 
+    - [x] avoid mergng fro umodule to module 
+    - [x] avoid merging from __mpy_shed 
+    - [x] avoid merging from pyb.__init to pyb.Accell
 ## stubber merge 
 - [ ] Docstring is added multiple times s from multiple source files. 
     - likely cause : merge same docstring from multiple source files
 - [ ] some decorators are added multiple times - need to check for existing decorator @final @final @final
-- [ ] machine.Pin.__call__ @overload decorator ends up only a single time in merged Stub ?
-- [ ] vfs.class AbstractBlockDev(ABC, _BlockDeviceProtocol): 
-        AbstractBlockDev does not exist in the firmware-stubs , so is not merged into the merged stubs.
+- [x] machine.Pin.__call__ @overload decorator ends up only a single time in merged Stub ?
+
+
 ## micropython-Reference
  
 - [x] _rp2.* 
@@ -56,13 +61,16 @@
       
       fix: class deque(MutableSequence[_T]):
 
+ - [ ] `__call__` needs addational overloads in machine and pyb modules 
+        ![Inconsistent __call__ definitions](image.png)
+
 ## rp2 / _rp2 documentation 
 - [x] duplicate imports in `_rp2` files. 
     WORAROUND - remove _rp2 from stubs 
 - [x] remove `rp2.irq` module ( not needed, _IRQ provided from _mpy_shed )
 
 ## neopixel
- - [ ] class NeoPixel: - indexing
+ - [x] class NeoPixel: - indexing
         https://github.com/Josverl/micropython-stubs/issues/764
 
         ERROR    root:typecheck.py:171 "tests/quality_tests/check_rp2/check_neopixel.py"(10,0): "__setitem__" method not defined on type "NeoPixel"
@@ -70,6 +78,8 @@
 
 
 ## vfs 
+- [ ] vfs.class AbstractBlockDev(ABC, _BlockDeviceProtocol): 
+        AbstractBlockDev does not exist in the firmware-stubs , so is not merged into the merged stubs.
 
 ## stdlib
 
@@ -83,7 +93,7 @@
 ### io
 
 - [x] stdib - io 
-- [x] IOBase
+- [x] IOBase changed to IOBase_mp 
 - [x]    class StringIO(IOBase): -->  143:15 - error: Argument to class must be a base class
 
 ### time 
