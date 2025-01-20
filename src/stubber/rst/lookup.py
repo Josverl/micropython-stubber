@@ -293,7 +293,7 @@ MODULE_GLUE = {
     ],
     "io": ANY_BUF
     + [
-        "from _mpy_shed import IOBase",
+        "from _mpy_shed import IOBase_mp",
     ],
     "lcd160cr": ANY_BUF + ["from pyb import SPI"],  # uses SPI
     # "machine": ["from network import AbstractNIC"],  # NIC is an abstract class, although not defined or used as such
@@ -652,8 +652,9 @@ CHILD_PARENT_CLASS = {
     "TextIOWrapper": "IO",  # "TextIOBase, TextIO",  # based on Stdlib
     "FileIO": "IO",  #  "RawIOBase, BinaryIO",  # based on Stdlib
     "StringIO": "IO",  #  "BufferedIOBase, BinaryIO",  # based on Stdlib
+    "IOBase": "IOBase_mp",  # "BufferedIOBase, BinaryIO",  # based on Stdlib
     "BytesIO": "IO",  # "BufferedIOBase, BinaryIO",  # based on Stdlib
-    "BufferedWriter": "IOBase",  # DOC_ME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
+    "BufferedWriter": "IOBase_mp",  # DOC_ME: not in documentation #   "BufferedWriter": "BufferedIOBase",  # based on Stdlib
     # uzlib
     # "DecompIO": "IO",  # https://docs.python.org/3/library/typing.html#other-concrete-types
     # -------------------------------------------------------------------------------------

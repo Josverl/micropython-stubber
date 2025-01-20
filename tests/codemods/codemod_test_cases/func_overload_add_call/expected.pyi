@@ -32,6 +32,8 @@ class Pin:
     def init(self, *args, **kwargs) -> Incomplete: ...
     def value(self, *args, **kwargs) -> Incomplete: ...
     def high(self, *args, **kwargs) -> Incomplete: ...
+
+    def foo() -> None: ...
     @overload
     def __call__(self) -> int:
         """
@@ -47,3 +49,4 @@ class Pin:
         and get the value of the pin.  It is equivalent to Pin.value([x]).
         See :meth:`Pin.value` for more details.
         """
+    # no def __call__ has been defined in the original file

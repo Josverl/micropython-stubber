@@ -253,6 +253,10 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         # Use the new overload - but with the existing docstring
                         overload = update_def_docstr(overload, docstring_node)
                     updated_body.insert(i + 1, overload)
+                else:
+                    # add to the end of the class
+                    log.trace(f"Add @overload for {overload.name.value} at the end of the class")
+                    updated_body.append(overload)
 
             if isinstance(updated_node, cst.Module):
                 updated_node = updated_node.with_changes(body=tuple(updated_body))
