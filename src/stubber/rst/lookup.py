@@ -57,6 +57,7 @@ U_MODULES = [
     "binascii",
     "io",
     "json",
+    "machine",
     "os",
     "select",
     "ssl",
