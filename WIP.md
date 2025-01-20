@@ -2,7 +2,7 @@
 ## stubber docstubs 
     
 - [ ] docstubs : should automagically enrich the docstubs
-- [ ] docstubs : add _rp2 module currently not documented (_rp2 - or keep all in rp2?) 
+
 
 - [ ] network : should proably not add 
      - from .WLANWiPy import *

@@ -3,6 +3,7 @@ Enrich MCU stubs by copying docstrings and parameter information from doc-stubs 
 Both (.py or .pyi) files are supported.
 """
 
+import shutil
 from collections.abc import Generator
 from dataclasses import dataclass
 from functools import lru_cache
@@ -323,4 +324,19 @@ def enrich_folder(
     run_black(target_folder)
     # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
 
+    CP_REFERENCE_MODULES = ["rp2/PIOASMEmit.pyi", "asyncio"]
+    if params_only:
+        log.info("Adding additional type modules to the docstubs")
+        for addition in CP_REFERENCE_MODULES:
+            src = source_folder / addition
+            if src.exists():
+                if src.is_dir():
+                    target = target_folder / addition
+                    log.info(f" - add {target}")
+                    shutil.copytree(src, target, dirs_exist_ok=True)
+                else:
+                    target = target_folder / addition
+                    log.info(f" - add {target}")
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, target)
     return count
