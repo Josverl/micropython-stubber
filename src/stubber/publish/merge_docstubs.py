@@ -11,7 +11,6 @@ from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
-from stubber.publish.missing_class_methods import add_machine_pin_call
 from stubber.publish.pathnames import get_base, get_board_path, get_merged_path
 from stubber.utils.config import CONFIG
 
@@ -68,9 +67,6 @@ def merge_all_docstubs(
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         try:
             result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
-            # Add methods from docstubs to the MCU stubs that do not exist in the MCU stubs
-            # Add the __call__ method to the machine.Pin and pyb.Pin class
-            add_machine_pin_call(merged_path, candidate["version"])
         except Exception as e:
             log.error(f"Error parsing {candidate['version']} docstubs: {e}")
             continue
