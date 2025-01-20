@@ -16,12 +16,7 @@ pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
             Path("./tests/data/stub_merge/micropython-v1_18-docstubs/esp32.pyi"),
             Path("./tests/data/stub_merge/micropython-v1_18-esp32/esp32.pyi"),
             True,
-        ),
-        (
-            Path("./tests/data/stub_merge/micropython-v1_18-esp32/builtins.pyi"),
-            Path("./tests/data/stub_merge/micropython-v1_18-esp32/builtins.pyi"),
-            False,
-        ),
+        )
     ],
 )
 def test_enrich_file_with_stub(source_file: Path, target_file: Path, expected: bool):

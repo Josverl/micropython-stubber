@@ -25,6 +25,8 @@ from stubber.utils.post import run_black
 #########################################################################################
 @dataclass
 class MergeMatch:
+    """A match between a target and source file to merge docstrings and typehints"""
+
     target: Path
     source: Path
     target_pkg: str
@@ -125,9 +127,16 @@ def source_target_candidates(source: Path, target: Path) -> Generator[MergeMatch
         mm = None
         for t in targets:
             # find the best match
+            if t.stem.startswith("u") and t.stem[1:] in U_MODULES:
+                # skip enriching umodule.pyi files
+                log.debug(f"Skip enriching {t.name}, as it is an u-module")
+                continue
             t_pkg = package_from_path(t)
             s_pkg = package_from_path(s)
             is_match, match_len = upackage_equal(s_pkg, t_pkg)
+            if "_mpy_shed" in str(s) or "_mpy_shed" in str(t):
+                log.debug(f"Skip _mpy_shed file {s}")
+                continue
             if is_match and match_len > best_match_len:
                 best_match_len = match_len
                 mm = MergeMatch(t, s, t_pkg, s_pkg, is_match)
@@ -201,6 +210,59 @@ def enrich_file(
         yield diff_code(old_code, current_code, 5, filename=target_path.name)
 
 
+def merge_candidates(
+    source_folder: Path,
+    target_folder: Path,
+) -> List[MergeMatch]:
+    """
+    Generate a list of merge candidates for the source and target folders.
+    Each target is matched with exactly one source file.
+    """
+    candidates = source_target_candidates(source_folder, target_folder)
+
+    # Create a list of candidate matches for the same target
+    target_dict = {}
+    for candidate in candidates:
+        if candidate.target not in target_dict:
+            target_dict[candidate.target] = []
+        target_dict[candidate.target].append(candidate)
+
+    # first get targets with only one candidate
+    candidates = [v[0] for k, v in target_dict.items() if len(v) == 1]
+
+    # then get the best matching from the d
+    multiple_candidates = {k: v for k, v in target_dict.items() if len(v) > 1}
+    for target in multiple_candidates.keys():
+
+        # if simple module --> complex module : select the best matching or first source
+        perfect = next(
+            (
+                match
+                for match in multiple_candidates[target]
+                if match.target_pkg == match.source_pkg
+            ),
+            None,
+        )
+
+        if perfect:
+            candidates.append(perfect)
+        else:
+            close_enough = [
+                match
+                for match in multiple_candidates[target]
+                if match.source_pkg.startswith(f"{match.target_pkg}.")
+            ]
+            if close_enough:
+                candidates.extend(close_enough)
+            # else:
+            #     # take the first one
+            #     candidates.append(multiple_candidates[target][0])
+
+    # sort by target_path , to show diffs
+    candidates = sorted(candidates, key=lambda m: m.target)
+    return candidates
+
+
 def enrich_folder(
     source_folder: Path,
     target_folder: Path,
@@ -231,10 +293,6 @@ def enrich_folder(
 
     # for target in target_files:
     for mm in candidates:
-        if mm.target.stem.startswith("u") and mm.target.stem[1:] in U_MODULES:
-            # skip enriching umodule.pyi files
-            log.debug(f"Skip enriching {mm.target.name}, as it is an u-module")
-            continue
         try:
 
             if diff := list(
