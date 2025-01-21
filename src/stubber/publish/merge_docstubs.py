@@ -9,6 +9,7 @@ from typing import List, Optional, Union
 from mpflash.logger import log
 
 from stubber.codemod.enrich import enrich_folder
+from stubber.merge_config import RM_MERGED, copy_to_umodules, remove_modules
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.pathnames import get_base, get_board_path, get_merged_path
@@ -115,16 +116,13 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
                     (dest_path / f.name).with_suffix(suffix).unlink()
 
     # delete builtins.pyi in the package folder
-    for name in [
-        "builtins",  # creates conflicts, better removed
-        "pycopy_imphook",  # is not intended to be used directly, and has an unresolved subclass
-    ]:
-        for suffix in [".py", ".pyi"]:
-            if (dest_path / name).with_suffix(suffix).exists():  # type: ignore
-                (dest_path / name).with_suffix(suffix).unlink()  # type: ignore
-
+    # remove unwanted modules
+    remove_modules(dest_path, RM_MERGED)
     # 2 - Enrich the MCU stubs with the document stubs
     result = enrich_folder(source_folder=docstub_path, target_folder=dest_path, write_back=True)
+
+    # fixup the umodules
+    copy_to_umodules(dest_path)
 
     # copy the docstubs manifest.json file to the package folder
     if (docstub_path / "modules.json").exists():
