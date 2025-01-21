@@ -54,6 +54,7 @@ class Fix:
 
 U_MODULES = [
     "array",
+    "asyncio",
     "binascii",
     "io",
     "json",

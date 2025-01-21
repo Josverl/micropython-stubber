@@ -16,6 +16,7 @@ from libcst.tool import _default_config  # type: ignore
 from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
+from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
 
@@ -289,9 +290,6 @@ def enrich_folder(
     # sort by target_path , to show diffs
     candidates = sorted(candidates, key=lambda m: m.target)
 
-    # CHECK: is this still needed?
-    # package_name = package_name or package_from_path(target_folder, source_folder)
-
     # for target in target_files:
     for mm in candidates:
         try:
@@ -324,19 +322,6 @@ def enrich_folder(
     run_black(target_folder)
     # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
 
-    CP_REFERENCE_MODULES = ["rp2/PIOASMEmit.pyi", "asyncio"]
     if params_only:
-        log.info("Adding additional type modules to the docstubs")
-        for addition in CP_REFERENCE_MODULES:
-            src = source_folder / addition
-            if src.exists():
-                if src.is_dir():
-                    target = target_folder / addition
-                    log.info(f" - add {target}")
-                    shutil.copytree(src, target, dirs_exist_ok=True)
-                else:
-                    target = target_folder / addition
-                    log.info(f" - add {target}")
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, target)
+        copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
     return count
