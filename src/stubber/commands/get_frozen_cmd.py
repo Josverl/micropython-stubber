@@ -7,15 +7,14 @@ from pathlib import Path
 from typing import List, Optional
 
 import rich_click as click
-from mpflash.logger import log
 
 import stubber.utils as utils
+from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
+from stubber.commands.cli import stubber_cli
 from stubber.freeze.get_frozen import freeze_any
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos
-
-from .cli import stubber_cli
 
 ##########################################################################################
 
@@ -96,19 +95,23 @@ def cli_get_frozen(
 
     # first create .pyi files so they can be enriched
     utils.do_post_processing(stub_paths, stubgen=stubgen, black=False, autoflake=False)
+
     family = "micropython"
     _version = utils.clean_version(version, drop_v=False, flat=True)
     docstubs_path = Path(CONFIG.stub_path) / f"{family}-{_version}-docstubs"
     if docstubs_path.exists():
-        log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
-        if merged := enrich_folder(
-            docstubs_path,
-            stub_path,
-            show_diff=False,
-            write_back=True,
-            require_docstub=False,
-        ):
-            log.info(f"Enriched {merged} frozen modules from docstubs")
+        board_folders = [f.parent for f in list(stub_path.glob("**/modules.json"))]
+        for folder in board_folders:
+            log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
+            if merged := enrich_folder(
+                docstubs_path,
+                folder,
+                show_diff=False,
+                write_back=True,
+                require_docstub=False,
+                ext = ".pyi",
+            ):
+                log.info(f" > Enriched {merged} frozen modules.")
     else:
         log.info(f"No docstubs found at {docstubs_path}")
 

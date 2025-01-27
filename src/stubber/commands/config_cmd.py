@@ -4,9 +4,8 @@
 
 from mpflash.logger import log
 
+from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
-
-from .cli import stubber_cli
 
 
 @stubber_cli.command(name="show-config")
