@@ -9,9 +9,8 @@ import rich_click as click
 from mpflash.logger import log
 
 from stubber.codemod.enrich import enrich_folder
+from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
-
-from .cli import stubber_cli
 
 
 @stubber_cli.command(name="enrich")

@@ -42,6 +42,10 @@
     - likely cause : merge same docstring from multiple source files
 - [ ] some decorators are added multiple times - need to check for existing decorator @final @final @final
 - [x] machine.Pin.__call__ @overload decorator ends up only a single time in merged Stub ?
+- [x] push @overloaded functions to modules that do not have the function 
+- [x] push @overload methods to modules that do not have the method 
+- [x] push @overload methods to modules that do not have the containing class 
+- [x] remove the special case code to ensure Pin.__call__ is in machine.Pin and pyb.Pin  replaced bij @overloads in reference stubs
 
 
 ## micropython-Reference
@@ -88,6 +92,11 @@
 - [ ] regenerate the docstubs 
 
 - [x]  fix type stubs asyncio.StreamReader
+- [ ] Update all stdlib  modules from new docstubs - Add to current test/update script 
+- [ ] Update the documentation for this 
+
+- [ ] find a way to install local stdlib during testing (!)
+- [] 
 
 
 ### io
@@ -135,3 +144,45 @@
  - [x] Disable ruff warnings 
         - UP015, UP031, UP032
 
+ - [ ] merge the PinLike TypeAlias and the AnyPin TypeVar 
+        - makes it simpler to understand
+# -------------------------------------------------------
+# QA Tests
+# -------------------------------------------------------
+
+- [x] machine.UART - baudrate is not a keyword argument
+
+- [ ] AnyReadableBuf - not assignable from  Literal['hello']
+        uart_1.write("hello")
+        "tests/quality_tests/feat_machine/check_machine/check_machine.py"(33,12): Argument of type "Literal['hello']" cannot be assigned to parameter "buf" of type "AnyReadableBuf" in function "write"
+          Type "Literal['hello']" is not assignable to type "AnyReadableBuf"
+            "Literal['hello']" is not assignable to "bytearray"
+            "Literal['hello']" is not assignable to "array[Unknown]"
+            "Literal['hello']" is not assignable to "memoryview[int]"
+            "Literal['hello']" is not assignable to "bytes"
+        [x] Workaround ; Add Incomplete: 
+        `AnyReadableBuf: TypeAlias = bytearray | array | memoryview | bytes | Incomplete`
+- [ ] AnyWritableBuf - 
+        Similar workaround applied for now 
+        
+- [ ] io.BufferedWriter - Missing Class caused by stdlib in wrong location 
+        "BufferedWriter" is not a known attribute of module "io"
+        >>> dir(io)
+        ['__class__', '__name__', 'open', 'BufferedWriter', 'BytesIO', 'IOBase', 'StringIO', '__dict__']
+
+
+
+- [ ] asyncio - consider changing how the stubs that are used 
+      currently in the merge process there are multiple sources for asyncio
+        1. reference Stubs 
+        2. the docstubs --> [createstub] --> (2b) uasyncio.pyi
+        3. the frozen modules --> [createstub] --> uasyncio.pyi
+        4. the firmware stubs - merged with Docstubs --> (4b)
+
+        (1) -- merged --> (2)
+        (2) -- merged into --> (2b)
+
+        During Build : 
+            (2b) overwrites (4b)
+            [ ] option : Copy (1.asyncio) --> (4b) if there is an asyncio module 
+                ( THEN ALSO  AVOID COPYING & stubbing ASYNCIO DURIGN frozen MERGE )

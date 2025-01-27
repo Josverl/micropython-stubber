@@ -13,10 +13,14 @@ from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
 from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
-from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
-from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
+from mpflash.logger import log
+from stubber.merge_config import (
+    CP_REFERENCE_TO_DOCSTUB,
+    copy_type_modules,
+    CP_REFERENCE_TO_MERGED_PORT,
+)
 from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
 
@@ -36,7 +40,7 @@ class MergeMatch:
     is_match: bool
 
 
-@lru_cache
+@lru_cache(maxsize=2500)
 def package_from_path(target: Path, source: Optional[Path] = None) -> str:
     """
     Given a target and source path, return the package name based on the path.
@@ -49,22 +53,22 @@ def package_from_path(target: Path, source: Optional[Path] = None) -> str:
 
     # if either the source or target is a package, use that
     for p in _options:
-        if p.is_dir():
-            if len(list(p.glob("__init__.py*"))) > 0:
-                return p.stem
+        if p.is_dir() and list(p.glob("__init__.py*")):
+            return p.stem
+
     # check if there is a __init__.py next to the target
     for p in _options:
-        if len(list(p.parent.glob("__init__.py*"))) > 0:
+        if list(p.parent.glob("__init__.py*")):
             return f"{p.parent.stem}.{p.stem}"
     # check One level up - just in case
     for p in _options:
-        if len(list(p.parent.parent.glob("__init__.py*"))) > 0:
+        if list(p.parent.parent.glob("__init__.py*")):
             return f"{p.parent.parent.stem}.{p.parent.stem}.{p.stem}"
     # then use the filename, unless it is a __**__.py
-    for p in _options:
-        if p.is_file() and not p.stem.startswith("__"):
-            return p.stem
-    return ""
+    return next(
+        (p.stem for p in _options if p.is_file() and not p.stem.startswith("__")),
+        "",
+    )
 
 
 def upackage_equal(src: str, target: str) -> Tuple[bool, int]:
@@ -77,6 +81,9 @@ def upackage_equal(src: str, target: str) -> Tuple[bool, int]:
     if not src.startswith("u") and target.startswith("u"):
         # allow enriching from module to u-module
         target = target[1:]
+    # first check for exact match
+    if src == target or f"u{src}" == target:
+        return True, len(src)
 
     # traet __init__ as a package
     if src.endswith(".__init__"):
@@ -101,23 +108,28 @@ def upackage_equal(src: str, target: str) -> Tuple[bool, int]:
     return False, 0
 
 
-def source_target_candidates(source: Path, target: Path) -> Generator[MergeMatch, None, None]:
+def source_target_candidates(
+    source: Path,
+    target: Path,
+    ext: str | None = None,
+) -> Generator[MergeMatch, None, None]:
     """
     Given a target and source path, return a list of tuples of `(target, source, package name)` that are candidates for merging.
     Goal is to match the target and source files based on the package name, to avoid mismatched merges of docstrings and typehints
 
     Returns a generator of tuples of `(target, source, target_package, source_package, is_partial_match)`
     """
+    ext = ext or ".py*"
     # first assumption on targets
     if target.is_dir():
-        targets = list(target.glob("**/*.py*"))
+        targets = list(target.glob(f"**/*{ext}"))
     elif target.is_file():
         targets = [target]
     else:
         targets = []
 
     if source.is_dir():
-        sources = list(source.glob("**/*.py*"))
+        sources = list(source.glob(f"**/*{ext}"))
     elif source.is_file():
         sources = [source]
     else:
@@ -127,17 +139,17 @@ def source_target_candidates(source: Path, target: Path) -> Generator[MergeMatch
         is_match: bool = False
         best_match_len = 0
         mm = None
+        s_pkg = package_from_path(s)
         for t in targets:
             # find the best match
             if t.stem.startswith("u") and t.stem[1:] in U_MODULES:
                 # skip enriching umodule.pyi files
-                log.debug(f"Skip enriching {t.name}, as it is an u-module")
+                # log.trace(f"Skip enriching {t.name}, as it is an u-module")
                 continue
             t_pkg = package_from_path(t)
-            s_pkg = package_from_path(s)
             is_match, match_len = upackage_equal(s_pkg, t_pkg)
             if "_mpy_shed" in str(s) or "_mpy_shed" in str(t):
-                log.debug(f"Skip _mpy_shed file {s}")
+                log.trace(f"Skip _mpy_shed file {s}")
                 continue
             if is_match and match_len > best_match_len:
                 best_match_len = match_len
@@ -220,7 +232,7 @@ def merge_candidates(
     Generate a list of merge candidates for the source and target folders.
     Each target is matched with exactly one source file.
     """
-    candidates = source_target_candidates(source_folder, target_folder)
+    candidates = list(source_target_candidates(source_folder, target_folder))
 
     # Create a list of candidate matches for the same target
     target_dict = {}
@@ -272,6 +284,7 @@ def enrich_folder(
     write_back: bool = False,
     require_docstub: bool = False,
     params_only: bool = False,
+    ext: str | None = None,
     # package_name: str = "",
 ) -> int:
     """\
@@ -283,17 +296,19 @@ def enrich_folder(
         raise FileNotFoundError(f"Target {target_folder} does not exist")
     if not source_folder.exists():
         raise FileNotFoundError(f"Source {source_folder} does not exist")
-    log.info(f"Enrich folder {target_folder}.")
+    ext = ext or ".py*"
+    log.info(f"Enrich folder {target_folder}/**/*{ext}")
     count = 0
 
-    candidates = source_target_candidates(source_folder, target_folder)
+    candidates = source_target_candidates(source_folder, target_folder, ext)
     # sort by target_path , to show diffs
     candidates = sorted(candidates, key=lambda m: m.target)
 
     # for target in target_files:
     for mm in candidates:
         try:
-
+            log.debug(f"Enriching {mm.target}")
+            log.debug(f"     from {mm.source}")
             if diff := list(
                 enrich_file(
                     mm.source,
@@ -318,6 +333,11 @@ def enrich_folder(
             log.error(f"Error parsing {mm.target}")
             log.exception(e)
             continue
+    # TODO: Not sure if this is actually needed
+    # tgt_port = guess_port_from_path(target_folder)
+    # if tgt_port in CP_REFERENCE_TO_MERGED_PORT:
+    #     copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_MERGED_PORT[tgt_port])
+
     # run black on the target folder
     run_black(target_folder)
     # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
@@ -325,3 +345,21 @@ def enrich_folder(
     if params_only:
         copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
     return count
+
+
+def guess_port_from_path(folder: Path) -> str:
+    """
+    Guess the port name from the folder contents.
+    ( could also be done based on the path name)
+
+    """
+    for port in ["esp32", "samd", "rp2", "pyb"]:
+        if (folder / port).exists() or (folder / f"{port}.pyi").exists():
+            if port == "pyb":
+                return "stm32"
+            return port
+
+    if (folder / "esp").exists() or (folder / f"esp.pyi").exists():
+        return "esp8266"
+
+    return ""

@@ -6,16 +6,15 @@ get-docstubs
 from pathlib import Path
 from typing import Optional
 
+import mpflash.basicgit as git
 import rich_click as click
 from mpflash.logger import log
 
-import mpflash.basicgit as git
 import stubber.utils as utils
+from stubber.commands.cli import stubber_cli
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos
-
-from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")

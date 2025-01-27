@@ -5,53 +5,90 @@ defines constants and util functions to copy, update or remove type modules
 
 import shutil
 from pathlib import Path
-from typing import List
+from typing import Final, List
 
 from mpflash.logger import log
-
 from stubber.rst.lookup import U_MODULES
 
-EXT = [".pyi", ".py", ""]
-CP_REFERENCE_TO_DOCSTUB = ["rp2/PIOASMEmit.pyi", "asyncio"]
+EXT: Final = [".pyi", ".py", ""]
+CP_REFERENCE_TO_DOCSTUB: Final = ["rp2/PIOASMEmit.pyi", "asyncio"]
 "Modules that to copy from reference modules to the docstubs"
-CP_REFERENCE_TO_MERGED = CP_REFERENCE_TO_DOCSTUB
+
+
+CP_REFERENCE_TO_MERGED_PORT = {
+    "rp2": ["rp2/PIOASMEmit.pyi"],
+}
 "Modules that to copy from reference modules to the merged stubs"
-RM_MERGED = ["collections", "builtins", "pycopy_imphook"]
-"Modules that to remove from merged stubs"
+
+STDLIB_MODULES: Final = [
+    "collections",
+    "io",
+    "builtins",
+    "asyncio",
+    # "os",  # TODO
+    # "sys", # TODO
+]
+"""Modules that should be in /stdlib"""
+# and should not be in the individual packes as that causes duplication
+
+RM_MERGED: Final = (
+    [
+        "pycopy_imphook",
+        "asyncio",
+        "_asyncio",
+        "uasyncio",
+        "_rp2",
+    ]
+    + STDLIB_MODULES
+    + [f"u{mod}" for mod in U_MODULES]
+)
+"Modules to remove from merged stubs, U_MODULES will be recreated later"
 
 
 def copy_type_modules(source_folder: Path, target_folder: Path, CP_REFERENCE_MODULES: List[str]):
-    log.info("Adding additional type modules to the docstubs")
+    log.info("Adding additional type modules:")
     for addition in CP_REFERENCE_MODULES:
         src = source_folder / addition
         if src.exists():
             if src.is_dir():
                 target = target_folder / addition
-                log.info(f" - add {target}")
+                log.debug(f" - add {target}")
                 shutil.copytree(src, target, dirs_exist_ok=True)
             else:
                 target = target_folder / addition
-                log.info(f" - add {target}")
+                log.debug(f" - add {target}")
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, target)
 
 
-def copy_to_umodules(target_folder: Path):
-    log.info("Adding additional type modules to the docstubs")
+def recreate_umodules(target_folder: Path):
+    log.info("create umodules to refer to modules in the merged stubs")
+    # Just `create an import * from module` in the umodule.pyi
     for name in U_MODULES:
-        for ext in EXT:
-            target = target_folder / f"{name}{ext}"
-            if target.exists():
-                try:
-                    if target.is_dir():
-                        log.info(f" - add {target}")
-                        shutil.copytree(target, target_folder / f"u{name}", dirs_exist_ok=True)
-                    else:
-                        log.info(f" - add {target}")
-                        shutil.copy2(target, target_folder / f"u{name}{ext}")
+        # delete complex or simple umodule
+        uname = target_folder / f"u{name}"
+        try:
+            if uname.exists():
+                if uname.is_dir():
+                    log.debug(f" - remove {uname}")
+                    shutil.rmtree(uname)
+                else:
+                    log.debug(f" - remove {uname}")
+                    uname.unlink()
+            else:
+                uname = uname.with_suffix(".pyi")
+                if uname.exists():
+                    log.debug(f" - remove {uname}")
+                    uname.unlink()
+        except OSError as e:
+            log.error(f"Error removing {uname}: {e}")
+            continue
 
-                except OSError as e:
-                    log.error(f" - not found {target.relative_to(target_folder)}, {e}")
+        uname = target_folder / f"u{name}.pyi"
+        with uname.open("w") as f:
+            f.write(f"# This umodule is a MicroPython reference to {name}\n")
+            f.write(f"from {name} import *\n")
+        log.debug(f" - recreated {uname.name}")
 
 
 def remove_modules(target_folder: Path, RM_MODULES: List[str]):
@@ -63,10 +100,10 @@ def remove_modules(target_folder: Path, RM_MODULES: List[str]):
             if target.exists():
                 try:
                     if target.is_dir():
-                        log.info(f" - remove {target}")
+                        log.debug(f" - remove {target}")
                         shutil.rmtree(target)
                     else:
-                        log.info(f" - remove {target}")
+                        log.debug(f" - remove {target}")
                         target.unlink()
                 finally:
                     log.debug(f" - remove {target}")
