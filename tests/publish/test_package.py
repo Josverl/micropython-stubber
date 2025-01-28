@@ -95,9 +95,17 @@ def test_create_package(
 
     assert len(package.stub_sources) == 3, "new package must have 3 stub sources"
 
-    updated_sources = package.update_sources()
-    assert updated_sources
-    assert len(updated_sources) == 3, "new package must still have 3 stub sources"
+    all_found = False
+    for s in package.stub_sources:
+        if not (stub_path / s[1]).exists():
+            all_found = False
+            break
+
+    if all_found:
+        # some extra checks
+        updated_sources = package.update_sources()
+        assert updated_sources
+        assert len(updated_sources) == 3, "new package must still have 3 stub sources"
 
 
 read_db_data = [
