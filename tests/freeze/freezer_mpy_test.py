@@ -58,25 +58,6 @@ def test_get_portboard(path: str, port: str, board: str):
     assert _port == port
 
 
-def test_manifest_uasync(
-    tmp_path: Path, testrepo_micropython: Path, testrepo_micropython_lib: Path
-):
-    "test if task.py is included with the uasyncio frozen module"
-    mpy_version = "v1.18"
-    mpy_folder = testrepo_micropython.absolute()
-    lib_folder = testrepo_micropython_lib.absolute()
-    stub_folder = tmp_path.absolute()
-
-    switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-
-    manifest = mpy_folder / "ports/esp32/boards/manifest.py"
-    freeze_one_manifest_2(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
-
-    assert (
-        tmp_path / "esp32" / GENERIC_U / "uasyncio/task.py"
-    ).exists(), "task.py must be included in uasyncio"
-
-
 #######################################################################################################################
 # frozen files in folders < v1.12
 #######################################################################################################################

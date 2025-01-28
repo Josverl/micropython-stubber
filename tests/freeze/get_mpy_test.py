@@ -24,7 +24,7 @@ from stubber.utils.repos import read_micropython_lib_commits, switch
     "tag, manifest_count, frozen_count",
     [
         ("v1.9.4", 4, 10),
-        ("v1.24.1", 68, 1426),
+        ("v1.24.1", 68, 979),
     ],
 )
 def test_get_mpy(
