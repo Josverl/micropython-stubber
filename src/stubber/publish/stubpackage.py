@@ -856,8 +856,9 @@ class StubPackage(PoetryBuilder):
                 # use if folder exists , else use GENERIC folder
                 if (CONFIG.stub_path / fw_path).exists():
                     updated_sources.append((stub_type, fw_path))
-                elif fw_path.with_name("GENERIC").exists():
+                elif (CONFIG.stub_path / fw_path).with_name("GENERIC").exists():
                     updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+
             elif stub_type == StubSource.MERGED:
                 # Use the default board folder instead of the GENERIC board folder (if it exists)
                 if self.board.upper() == GENERIC_U:
