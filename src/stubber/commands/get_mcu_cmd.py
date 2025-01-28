@@ -20,7 +20,7 @@ from stubber.utils.config import CONFIG
 
 
 @stubber_cli.command(
-    name="get-mcu-stubs",
+    name="mcu-stubs",
     aliases=["get-mcu-stubs", "mcu-stubs", "mcu"],
 )
 @click.option(
