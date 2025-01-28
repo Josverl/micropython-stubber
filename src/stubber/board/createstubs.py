@@ -626,19 +626,23 @@ def _info():  # type:() -> dict[str, str]
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
         # .mpy architecture
-        arch = [
-            None,
-            "x86",
-            "x64",
-            "armv6",
-            "armv6m",
-            "armv7m",
-            "armv7em",
-            "armv7emsp",
-            "armv7emdp",
-            "xtensa",
-            "xtensawin",
-        ][sys_mpy >> 10]
+        try:
+            arch = [
+                None,
+                "x86",
+                "x64",
+                "armv6",
+                "armv6m",
+                "armv7m",
+                "armv7em",
+                "armv7emsp",
+                "armv7emdp",
+                "xtensa",
+                "xtensawin",
+                "rv32imc",
+            ][sys_mpy >> 10]
+        except IndexError:
+            arch = "unknown"
         if arch:
             info["arch"] = arch
         # .mpy version.minor
