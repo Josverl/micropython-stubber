@@ -30,9 +30,9 @@ U='-'
 T='board'
 S=len
 R=open
-Q=IndexError
-P=print
-O='family'
+Q=print
+P='family'
+O=IndexError
 N=ImportError
 M=dir
 L='port'
@@ -57,7 +57,7 @@ A2=2
 A3=2
 A7=['lib','/lib','/sd/lib','/flash/lib',K]
 class J:
-	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=P
+	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=Q
 	@staticmethod
 	def getLogger(name):return J()
 	@classmethod
@@ -80,7 +80,7 @@ class Stubber:
 		except I:pass
 		B.info=_info();A.info('Port: {}'.format(B.info[L]));A.info('Board: {}'.format(B.info[T]));F.collect()
 		if C:B._fwid=C.lower()
-		elif B.info[O]==b:B._fwid='{family}-v{version}-{port}-{board}'.format(**B.info).rstrip(U)
+		elif B.info[P]==b:B._fwid='{family}-v{version}-{port}-{board}'.format(**B.info).rstrip(U)
 		else:B._fwid='{family}-v{version}-{port}'.format(**B.info)
 		B._start_free=F.mem_free()
 		if path:
@@ -97,14 +97,14 @@ class Stubber:
 			try:
 				D=getattr(H,A)
 				try:E=Z(type(D)).split("'")[1]
-				except Q:E=B
+				except O:E=B
 				if E in{q,r,s,t,c,d,e}:G=1
 				elif E in{u,v}:G=2
 				elif E in'class':G=3
 				else:G=4
 				C.append((A,Z(D),Z(type(D)),D,G))
 			except I as J:K.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(A,H,J))
-			except MemoryError as J:P('MemoryError: {}'.format(J));sleep(1);reset()
+			except MemoryError as J:Q('MemoryError: {}'.format(J));sleep(1);reset()
 		C=m([A for A in C if not A[0].startswith('__')],key=lambda x:x[4]);F.collect();return C,K
 	def add_modules(A,modules):A.modules=m(set(A.modules)|set(modules))
 	def create_all_stubs(B):
@@ -224,40 +224,42 @@ def Y(s):
 	if not W in s:return B
 	A=s.split(W)[1].split(K)[1];return A
 def _info():
-	X='ev3-pybricks';V='pycopy';U='win32';S='arch';R='cpu';P='ver';F='mpy';E='build'
-	try:H=sys.implementation[0]
-	except a:H=sys.implementation.name
-	A=i({O:H,C:B,E:B,P:B,L:sys.platform,T:'UNKNOWN',R:B,F:B,S:B})
+	X='ev3-pybricks';V='pycopy';U='win32';S='arch';R='cpu';Q='ver';F='mpy';E='build'
+	try:J=sys.implementation[0]
+	except a:J=sys.implementation.name
+	A=i({P:J,C:B,E:B,Q:B,L:sys.platform,T:'UNKNOWN',R:B,F:B,S:B})
 	if A[L].startswith('pyb'):A[L]='stm32'
 	elif A[L]==U:A[L]=A1
 	elif A[L]=='linux':A[L]=g
 	try:A[C]=A4(sys.implementation.version)
 	except I:pass
-	try:J=sys.implementation._machine if'_machine'in M(sys.implementation)else os.uname().machine;A[T]=J;A[R]=J.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in M(sys.implementation)else sys.implementation.mpy if F in M(sys.implementation)else B
-	except(I,Q):pass
+	try:K=sys.implementation._machine if'_machine'in M(sys.implementation)else os.uname().machine;A[T]=K;A[R]=K.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in M(sys.implementation)else sys.implementation.mpy if F in M(sys.implementation)else B
+	except(I,O):pass
 	A[T]=A5()
 	try:
 		if'uname'in M(os):
 			A[E]=Y(os.uname()[3])
 			if not A[E]:A[E]=Y(os.uname()[2])
 		elif C in M(sys):A[E]=Y(sys.version)
-	except(I,Q,a):pass
+	except(I,O,a):pass
 	if A[C]==B and sys.platform not in(g,U):
 		try:Z=os.uname();A[C]=Z.release
-		except(Q,I,a):pass
+		except(O,I,a):pass
 	for(c,d,e)in[(V,V,'const'),(h,h,'FAT'),(X,'pybricks.hubs','EV3Brick')]:
-		try:f=__import__(d,D,D,e);A[O]=c;del f;break
+		try:f=__import__(d,D,D,e);A[P]=c;del f;break
 		except(N,n):pass
-	if A[O]==X:A['release']='2.0.0'
-	if A[O]==b:
+	if A[P]==X:A['release']='2.0.0'
+	if A[P]==b:
 		A[C]
 		if A[C]and A[C].endswith('.0')and A[C]>='1.10.0'and A[C]<='1.19.9':A[C]=A[C][:-2]
 	if F in A and A[F]:
-		G=int(A[F]);K=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin'][G>>10]
-		if K:A[S]=K
+		G=int(A[F])
+		try:H=[D,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][G>>10]
+		except O:H='unknown'
+		if H:A[S]=H
 		A[F]='v{}.{}'.format(G&255,G>>8&3)
 	if A[E]and not A[C].endswith(W):A[C]=A[C]+W
-	A[P]=f"{A[C]}-{A[E]}"if A[E]else f"{A[C]}";return A
+	A[Q]=f"{A[C]}-{A[E]}"if A[E]else f"{A[C]}";return A
 def A4(version):
 	A=version;B=K.join([str(A)for A in A[:3]])
 	if S(A)>3 and A[3]:B+=U+A[3]
@@ -279,7 +281,7 @@ def A6(filename):
 		if os.stat(filename)[0]>>14:return V
 		return H
 	except E:return H
-def j():P("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
+def j():Q("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
 def read_path():
 	path=B
 	if S(sys.argv)==3:
@@ -294,7 +296,7 @@ def k():
 def main():stubber=Stubber(path=read_path());stubber.clean();stubber.modules=['WM8960','_OTA','_asyncio','_boot_fat','_coap','_espnow','_flash_control_OTA','_main_pybytes','_mqtt','_mqtt_core','_msg_handl','_onewire','_periodical_pin','_pybytes','_pybytes_ca','_pybytes_config','_pybytes_config_reader','_pybytes_connection','_pybytes_constants','_pybytes_debug','_pybytes_library','_pybytes_machine_learning','_pybytes_main','_pybytes_protocol','_pybytes_pyconfig','_pybytes_pymesh_config','_rp2','_terminal','_thread','_uasyncio','_urequest','adcfft','aioble/__init__','aioble/central','aioble/client','aioble/core','aioble/device','aioble/l2cap','aioble/peripheral','aioble/security','aioble/server','aioespnow','ak8963','apa102','apa106','argparse','array','asyncio/__init__','asyncio/core','asyncio/event','asyncio/funcs','asyncio/lock','asyncio/stream','binascii','bluetooth','breakout_as7262','breakout_bh1745','breakout_bme280','breakout_bme68x','breakout_bmp280','breakout_dotmatrix','breakout_encoder','breakout_icp10125','breakout_ioexpander','breakout_ltr559','breakout_matrix11x7','breakout_mics6814','breakout_msa301','breakout_paa5100','breakout_pmw3901','breakout_potentiometer','breakout_rgbmatrix5x5','breakout_rtc','breakout_scd41','breakout_sgp30','breakout_trackball','breakout_vl53l5cx','btree','cc3200','cmath','collections','crypto','cryptolib','curl','deflate','dht','display','display_driver_utils','ds18x20','embed','encoder','errno','esp','esp32','esp8266','espidf','espnow','ffi','flashbdev','framebuf','freesans20','fs_driver','functools','galactic','gc','gfx_pack','gsm','hashlib','heapq','hub75','ili9341','ili9XXX','imagetools','inisetup','interstate75','io','jpegdec','js','jsffi','json','lcd160cr','lodepng',x,'lsm6dsox','lv_colors','lv_utils','lvgl','lwip','machine','math','microWebSocket','microWebSrv','microWebTemplate',b,'mimxrt','mip','mip/__init__','mip/__main__','motor','mpu6500','mpu9250','neopixel','network','nrf','ntptime','onewire','openamp','os','pcf85063a','pic16bit','picoexplorer','picographics','picokeypad','picoscroll','picounicorn','picowireless','pimoroni','pimoroni_bus','pimoroni_i2c','plasma','platform','powerpc','pyb',h,'pye','qemu','qrcode','queue','random','renesas','renesas-ra','requests','requests/__init__','rp2','rtch','samd','select','servo','socket','ssd1306','ssh','ssl','stm','stm32','struct',w,'termios','time','tls','tpcalib','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','uasyncio/tasks','ubinascii','ubluetooth','ucollections','ucrypto','ucryptolib','uctypes','uerrno','uftpd','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/__init__','umqtt/robust','umqtt/simple',g,'uos','uplatform','uqueue','urandom','ure','urequests','urllib/urequest','usb/device','usb/device/cdc','usb/device/hid','usb/device/keyboard','usb/device/midi','usb/device/mouse','uselect','usocket','ussl','ustruct','usys','utelnetserver','utime','utimeq','uwebsocket','uzlib',C,'vfs','webassembly','websocket','websocket_helper',A1,'wipy','writer','xpt2046','ymodem','zephyr','zlib'];F.collect();stubber.create_all_stubs()
 if __name__=='__main__'or k():
 	if not A6('no_auto_stubber.txt'):
-		P(f"createstubs.py: {__version__}")
+		Q(f"createstubs.py: {__version__}")
 		try:F.threshold(4096);F.enable()
 		except BaseException:pass
 		main()
