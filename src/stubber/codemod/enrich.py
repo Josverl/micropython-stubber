@@ -111,7 +111,7 @@ def upackage_equal(src: str, target: str) -> Tuple[bool, int]:
 def source_target_candidates(
     source: Path,
     target: Path,
-    ext: str | None = None,
+    ext: Optional[str] = None,
 ) -> Generator[MergeMatch, None, None]:
     """
     Given a target and source path, return a list of tuples of `(target, source, package name)` that are candidates for merging.
@@ -284,7 +284,7 @@ def enrich_folder(
     write_back: bool = False,
     require_docstub: bool = False,
     params_only: bool = False,
-    ext: str | None = None,
+    ext: Optional[str] = None,
     # package_name: str = "",
 ) -> int:
     """\
