@@ -421,7 +421,7 @@ class Builder(VersionedPackage):
         }
 
     def from_dict(self, json_data: Dict) -> None:
-        """load the package from a dict (from the jsondb)"""
+        """load the package from a dict (from the db)"""
         self.package_name = json_data["name"]
         # self.package_path = Path(json_data["path"])
         self.description = json_data["description"]
@@ -610,7 +610,8 @@ class PoetryBuilder(Builder):
             return self.mpy_version
         with open(_toml, "rb") as f:
             pyproject = tomllib.load(f)
-        ver = pyproject["tool"]["poetry"]["version"]
+        # ver = pyproject["tool"]["poetry"]["version"]
+        ver = pyproject["project"]["version"]
         return str(parse(ver)) if ver not in SET_PREVIEW else ver
 
     @pkg_version.setter
@@ -624,7 +625,8 @@ class PoetryBuilder(Builder):
         try:
             with open(_toml, "rb") as f:
                 pyproject = tomllib.load(f)
-            pyproject["tool"]["poetry"]["version"] = version
+            # pyproject["tool"]["poetry"]["version"] = version
+            pyproject["project"]["version"] = version
             # update the version in the toml file
             with open(_toml, "wb") as output:
                 tomli_w.dump(pyproject, output)
@@ -712,7 +714,14 @@ class PoetryBuilder(Builder):
             # update the dependencies section by reading these from the template file
             with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                 tpl = tomllib.load(f)
-            _pyproject["tool"]["poetry"]["dependencies"] = tpl["tool"]["poetry"]["dependencies"]
+
+            # copy new / poetry style dependencies
+            for section in ["dependencies"]:
+                for key in ["tool.poetry", "project"]:
+                    try:
+                        _pyproject[key][section] = tpl[key][section]
+                    except KeyError:
+                        pass
 
         else:
             # read the template pyproject.toml file from the template folder
@@ -720,14 +729,17 @@ class PoetryBuilder(Builder):
                 with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                     _pyproject = tomllib.load(f)
                 # note: can be 'latest' which is not semver
-                _pyproject["tool"]["poetry"]["version"] = self.mpy_version
+                # _pyproject["tool"]["poetry"]["version"] = self.mpy_version
+                _pyproject["project"]["version"] = self.mpy_version
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
                 raise (e)
 
         # update the name , version and description of the package
-        _pyproject["tool"]["poetry"]["name"] = self.package_name
-        _pyproject["tool"]["poetry"]["description"] = self.description
+        # _pyproject["tool"]["poetry"]["name"] = self.package_name
+        # _pyproject["tool"]["poetry"]["description"] = self.description
+        _pyproject["project"]["name"] = self.package_name
+        _pyproject["project"]["description"] = self.description
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 

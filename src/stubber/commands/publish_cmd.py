@@ -127,6 +127,7 @@ def cli_publish(
         table.add_column(header)
 
     for result in results:
-        table.add_row(*[str(result[header]) for header in headers])
+        if result["result"] != "-":
+            table.add_row(*[str(result[header]) for header in headers])
 
     console.print(table)

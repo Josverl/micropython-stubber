@@ -101,6 +101,7 @@ def cli_build(
         table.add_column(key)
 
     for result in results:
-        table.add_row(*[str(result[key]) for key in result.keys()])
+        if result["result"] != "-":
+            table.add_row(*[str(result[key]) for key in result.keys()])
 
     console.print(table)
