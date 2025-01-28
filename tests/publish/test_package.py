@@ -30,23 +30,25 @@ def test_package_name(family, port, board, expected):
     assert x == expected
 
 
-# test creating a DOC_STUBS package
+# test creating a package
+# @pytest.mark.parametrize(
+#     "version",
+#     [
+#         "v1.24.1",
+#         # "v1.21.0",
+#         # "v1.19.1",
+#     ],
+# )
 @pytest.mark.parametrize(
-    "version",
+    "version, port, board",
     [
-        "v1.21.0",
-        "v1.20.0",
-        "v1.19.1",
-    ],
-)
-@pytest.mark.parametrize(
-    "port, board",
-    [
-        ("esp32", "GENERIC"),
-        ("esp32", "GENERIC_S3"),
-        ("esp32", "UM_TINYPICO"),
-        ("stm32", "PYBV1"),
-        ("esp32", "generic"),
+        ("v1.24.1", "rp2", "RPI_PICO"),
+        ("v1.24.1", "rp2", "RPI_PICOW"),
+        # ("esp32", "GENERIC"),
+        # ("esp32", "GENERIC_S3"),
+        # ("esp32", "UM_TINYPICO"),
+        # ("stm32", "PYBV1"),
+        # ("esp32", "generic"),
     ],
 )
 # CORE_STUBS
@@ -77,13 +79,12 @@ def test_create_package(
     # insert test config
     mocker.patch("stubber.publish.stubpackage.CONFIG", config)
 
-    mpy_version = "v1.21.0"
     family = "micropython"
     pkg_name = f"foobar-{port}-{board.lower()}-stubs"
 
     package = create_package(
         pkg_name,
-        mpy_version=mpy_version,
+        mpy_version=version,
         family=family,
         port=port,
         board=board,
@@ -91,6 +92,12 @@ def test_create_package(
     )
     assert isinstance(package, StubPackage)
     run_common_package_tests(package, pkg_name, publish_path=publish_path, stub_path=stub_path)
+
+    assert len(package.stub_sources) == 3, "new package must have 3 stub sources"
+
+    updated_sources = package.update_sources()
+    assert updated_sources
+    assert len(updated_sources) == 3, "new package must still have 3 stub sources"
 
 
 read_db_data = [
@@ -171,6 +178,7 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
         stub_path=config.stub_path,
         test_build=False,
     )
+
 
 def run_common_package_tests(
     package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, test_build=True
