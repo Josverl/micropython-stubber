@@ -77,6 +77,7 @@ breakout_sgp30
 breakout_trackball
 breakout_vl53l5cx
 btree
+builtins
 cc3200
 cmath
 collections
@@ -128,6 +129,7 @@ lv_utils
 lvgl
 lwip
 machine
+marshal
 math
 microWebSocket
 microWebSrv

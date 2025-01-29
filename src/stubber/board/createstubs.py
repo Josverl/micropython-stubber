@@ -878,6 +878,7 @@ def main():
         "lvgl",
         "lwip",
         "machine",
+        "marshal",
         "math",
         "microWebSocket",
         "microWebSrv",
