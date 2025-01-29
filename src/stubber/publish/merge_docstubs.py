@@ -63,7 +63,7 @@ def merge_all_docstubs(
             log.warning(f"No docstubs found for {candidate['version']}")
             continue
         if not board_path.exists():
-            log.info(f"skipping {merged_path.name}, no MCU stubs found in {board_path}")
+            log.debug(f"skipping {merged_path.name}, no MCU stubs found in {board_path}")
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         try:
