@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, List, NamedTuple, Tuple
+from typing import Any, List, NamedTuple, Tuple, Optional
 
 import pytest
 
@@ -11,8 +11,8 @@ class TestCase(NamedTuple):
     expected: str  # The source code after the transformation.
     doc_stub: str  # The stub to apply
     stub_file: Path  # The path to source docstub file to apply
-    output: Path | None = None  # where to save the output for testing the tests
-    path: Path | None = None  # where are the tests
+    output: Optional[Path] = None  # where to save the output for testing the tests
+    path: Optional[Path] = None  # where are the tests
 
 
 def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
