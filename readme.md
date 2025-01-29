@@ -125,6 +125,21 @@ Both `MicroPython-Stubber` and `mpflash` are licensed under the MIT license, and
 
 # Contributions
 <!-- spell-checker: disable -->
+<!-- 
+To add via the cli run the following command:
+npx all-contributors-cli add user things
+
+ - bug
+ - tool
+ - stubs
+ - test
+ - doc
+ - code
+ - research
+ - ideas
+ - content
+ - mpflash
+ -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
