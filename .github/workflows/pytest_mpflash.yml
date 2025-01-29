@@ -18,8 +18,9 @@ on:
             - "src/mpflash/**"
 
 env:
-    JUPYTER_PLATFORM_DIRS: "1"
+    PYTHONIOENCODING: utf-8
     # fix:  DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+    JUPYTER_PLATFORM_DIRS: "1"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
