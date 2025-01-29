@@ -33,11 +33,13 @@ STDLIB_MODULES: Final = [
 
 RM_MERGED: Final = (
     [
-        "pycopy_imphook",
-        "asyncio",
-        "_asyncio",
-        "uasyncio",
-        "_rp2",
+        "os",  # use auto patched version from mpy_stdlib
+        "sys",  # use auto patched version from mpy_stdlib
+        "asyncio",  # use manually patched version from  mpy_stdlib
+        "_asyncio",  # ditto
+        "uasyncio",  # ditto
+        "_rp2",  # Leave out for n , to avoid conflicts with the rp2 module
+        "pycopy_imphook",  # not needed in the merged stubs
     ]
     + STDLIB_MODULES
     + [f"u{mod}" for mod in U_MODULES]
