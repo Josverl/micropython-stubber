@@ -42,7 +42,7 @@ LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
 # our own logging module to avoid dependency on and interfering with logging module
 class logging:
-    # DEBUG = 10
+    DEBUG = 10
     INFO = 20
     WARNING = 30
     ERROR = 40
@@ -57,9 +57,9 @@ class logging:
     def basicConfig(cls, level):
         cls.level = level
 
-    # def debug(self, msg):
-    #     if self.level <= logging.DEBUG:
-    #         self.prnt("DEBUG :", msg)
+    def debug(self, msg):
+        if self.level <= logging.DEBUG:
+            self.prnt("DEBUG :", msg)
 
     def info(self, msg):
         if self.level <= logging.INFO:
@@ -235,6 +235,7 @@ class Stubber:
             return False
 
         # Start a new file
+        # log.debug("Create file: {}".format(file_name))
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
@@ -348,8 +349,10 @@ class Stubber:
 
                 if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
-                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                    if item_name.upper() == item_name:  # ALL_CAPS --> Final
+                        s = "{0}{1}: Final[{3}] = {2}\n".format(indent, item_name, item_repr, t)
+                    else:
+                        s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
                 elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
@@ -482,6 +485,7 @@ def ensure_folder(path: str):
                 # folder does not exist
                 if e.args[0] == ENOENT:
                     try:
+                        log.debug("Create folder {}".format(p))
                         os.mkdir(p)
                     except OSError as e2:
                         log.error("failed to create folder {}".format(p))
@@ -607,19 +611,23 @@ def _info():  # type:() -> dict[str, str]
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
         # .mpy architecture
-        arch = [
-            None,
-            "x86",
-            "x64",
-            "armv6",
-            "armv6m",
-            "armv7m",
-            "armv7em",
-            "armv7emsp",
-            "armv7emdp",
-            "xtensa",
-            "xtensawin",
-        ][sys_mpy >> 10]
+        try:
+            arch = [
+                None,
+                "x86",
+                "x64",
+                "armv6",
+                "armv6m",
+                "armv7m",
+                "armv7em",
+                "armv7emsp",
+                "armv7emdp",
+                "xtensa",
+                "xtensawin",
+                "rv32imc",
+            ][sys_mpy >> 10]
+        except IndexError:
+            arch = "unknown"
         if arch:
             info["arch"] = arch
         # .mpy version.minor
@@ -659,7 +667,7 @@ def get_root() -> str:  # sourcery skip: use-assigned-variable
         # unix port
         c = "."
     r = c
-    for r in ["/sd", "/flash", "/", c, "."]:
+    for r in ["/remote", "/sd", "/flash", "/", c, "."]:
         try:
             _ = os.stat(r)
             break
@@ -758,6 +766,7 @@ def main():
 
 if __name__ == "__main__" or is_micropython():
     if not file_exists("no_auto_stubber.txt"):
+        print(f"createstubs.py: {__version__}")
         try:
             gc.threshold(4 * 1024)  # type: ignore
             gc.enable()

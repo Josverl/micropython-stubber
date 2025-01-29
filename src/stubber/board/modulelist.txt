@@ -129,6 +129,7 @@ lv_utils
 lvgl
 lwip
 machine
+marshal
 math
 microWebSocket
 microWebSrv
