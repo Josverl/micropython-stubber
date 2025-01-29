@@ -10,7 +10,11 @@ on:
       - .github/workflows/mip.yml
       - "src/stubber/board/**"
       
-
+env:
+    PYTHONIOENCODING: utf-8
+    # fix:  DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+    JUPYTER_PLATFORM_DIRS: "1"
+    
 jobs:
   mip:
     runs-on: ubuntu-latest
