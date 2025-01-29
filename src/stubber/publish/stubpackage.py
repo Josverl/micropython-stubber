@@ -255,7 +255,7 @@ class Builder(VersionedPackage):
         pyproject = None
         _toml = self.toml_path
         if (_toml).exists():
-            log.info(f"Load pyproject from {_toml}")
+            log.debug(f"Load pyproject from {_toml}")
             try:
                 with open(_toml, "rb") as f:
                     pyproject = tomllib.load(f)
@@ -610,8 +610,14 @@ class PoetryBuilder(Builder):
             return self.mpy_version
         with open(_toml, "rb") as f:
             pyproject = tomllib.load(f)
-        # ver = pyproject["tool"]["poetry"]["version"]
-        ver = pyproject["project"]["version"]
+        # read the version new pyproject format / old format /  self.mpy_version
+        try:
+            ver = pyproject["project"]["version"]
+        except KeyError:
+            try:
+                ver = pyproject["tool"]["poetry"]["version"]
+            except KeyError:
+                ver = self.mpy_version
         return str(parse(ver)) if ver not in SET_PREVIEW else ver
 
     @pkg_version.setter
@@ -888,7 +894,7 @@ class StubPackage(PoetryBuilder):
 
     def update_distribution(self, production: bool) -> bool:
         """Update the package .pyi files, if all the sources are available"""
-        log.info(f"- Update {self.package_path.name}")
+        log.debug(f"- Update {self.package_path.name}")
         log.trace(f"{self.package_path.as_posix()}")
 
         # check if the sources exist
@@ -931,15 +937,15 @@ class StubPackage(PoetryBuilder):
         :param force: BUILD even if no changes
         :return: True if the package was built
         """
-        log.info(f"Build: {self.package_path.name}")
 
         ok = self.update_distribution(production)
         self.status["version"] = self.pkg_version
         if not ok:
-            log.info(f"{self.package_name}: skip - Could not build/update package")
+            log.debug(f"{self.package_name}: skip - Could not build/update package")
             if not self.status["error"]:
                 self.status["error"] = "Could not build/update package"
             return False
+        log.info(f"Build: {self.package_path.name}")
 
         # If there are changes to the package, then publish it
         if self.is_changed() or force:
