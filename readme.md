@@ -178,6 +178,9 @@ Both `MicroPython-Stubber` and `mpflash` are licensed under the MIT license, and
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/DavesCodeMusings"><img src="https://avatars.githubusercontent.com/u/61114342?v=4?s=100" width="100px;" alt="David Horton"/><br /><sub><b>David Horton</b></sub></a><br /><a href="#mpflash-DavesCodeMusings" title="mpflash">💥</a> <a href="#test-DavesCodeMusings" title="Test">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hlovatt"><img src="https://avatars.githubusercontent.com/u/8424169?v=4?s=100" width="100px;" alt="Howard Lovatt"/><br /><sub><b>Howard Lovatt</b></sub></a><br /><a href="#stubs-hlovatt" title="MicroPython stubs">🖍️</a> <a href="#research-hlovatt" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://virtualwolf.org/"><img src="https://avatars.githubusercontent.com/u/1644623?v=4?s=100" width="100px;" alt="VirtualWolf"/><br /><sub><b>VirtualWolf</b></sub></a><br /><a href="#test-VirtualWolf" title="Test">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/lukaskremla"><img src="https://avatars.githubusercontent.com/u/155779787?v=4?s=100" width="100px;" alt="Lukas Kremla"/><br /><sub><b>Lukas Kremla</b></sub></a><br /><a href="#test-lukaskremla" title="Test">✅</a></td>
     </tr>
   </tbody>
 </table>
