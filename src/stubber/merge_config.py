@@ -11,14 +11,9 @@ from mpflash.logger import log
 from stubber.rst.lookup import U_MODULES
 
 EXT: Final = [".pyi", ".py", ""]
-CP_REFERENCE_TO_DOCSTUB: Final = ["rp2/PIOASMEmit.pyi", "asyncio"]
-"Modules that to copy from reference modules to the docstubs"
+CP_REFERENCE_TO_DOCSTUB: Final = ["asyncio"]
+"Modules to copy from reference modules to the docstubs"
 
-
-CP_REFERENCE_TO_MERGED_PORT = {
-    "rp2": ["rp2/PIOASMEmit.pyi"],
-}
-"Modules that to copy from reference modules to the merged stubs"
 
 STDLIB_MODULES: Final = [
     "collections",

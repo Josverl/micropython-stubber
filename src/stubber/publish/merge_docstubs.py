@@ -139,12 +139,15 @@ def refactor_rp2_module(dest_path: Path):
         # not a rp2
         return
 
+    log.info(f"refactor rps module stub")
     rp2_folder = dest_path / "rp2"
     rp2_folder.mkdir(exist_ok=True)
     if not (rp2_folder / "__init__.pyi").exists():
         # do not overwrite docstubs __init__.pyi
         rp2_file.rename(rp2_folder / "__init__.pyi")
     # copy the asm_pio.pyi file from the reference folder
-    asm_pio = CONFIG.mpy_stubs_path / "micropython-reference" / "rp2/asm_pio.pyi"
-    if asm_pio.exists():
-        shutil.copy(asm_pio, rp2_folder / "asm_pio.pyi")
+    for submod in ["rp2/asm_pio.pyi"]:
+        file = CONFIG.mpy_stubs_path / "micropython-reference" / submod
+        if file.exists():
+            shutil.copy(file, rp2_folder / file.name)
+            log.info(f" - add rp2/{ file.name}")
