@@ -19,7 +19,6 @@ from mpflash.logger import log
 from stubber.merge_config import (
     CP_REFERENCE_TO_DOCSTUB,
     copy_type_modules,
-    CP_REFERENCE_TO_MERGED_PORT,
 )
 from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
@@ -333,10 +332,6 @@ def enrich_folder(
             log.error(f"Error parsing {mm.target}")
             log.exception(e)
             continue
-    # TODO: Not sure if this is actually needed
-    # tgt_port = guess_port_from_path(target_folder)
-    # if tgt_port in CP_REFERENCE_TO_MERGED_PORT:
-    #     copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_MERGED_PORT[tgt_port])
 
     # run black on the target folder
     run_black(target_folder)
