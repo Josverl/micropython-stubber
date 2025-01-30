@@ -80,9 +80,10 @@ def merge_all_docstubs(
 def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     """
     Parameters:
-        fw_path: Path to MCU stubs (absolute path)
+        fw_path: Path to the source MCU stubs (absolute path)
         dest_path: Path to destination (absolute path)
-        mpy_version: micropython version ('1.18')
+        docstub_path: Path to docstubs
+
 
     Copy files from the firmware stub folders to the merged
     - 1 - Copy all MCU stubs to the package folder
@@ -119,10 +120,31 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     remove_modules(dest_path, RM_MERGED)
     # fixup the umodules
     recreate_umodules(dest_path)
+
     # 2 - Enrich the MCU stubs with the document stubs
     result = enrich_folder(source_folder=docstub_path, target_folder=dest_path, write_back=True)
+
+    refactor_rp2_module(dest_path)
 
     # copy the docstubs manifest.json file to the package folder
     if (docstub_path / "modules.json").exists():
         shutil.copy(docstub_path / "modules.json", dest_path / "doc_stubs.json")
     return result
+
+
+def refactor_rp2_module(dest_path: Path):
+    """refactor the rp2 module to allow for submodules"""
+    rp2_file = dest_path / "rp2.pyi"
+    if not rp2_file.exists():
+        # not a rp2
+        return
+
+    rp2_folder = dest_path / "rp2"
+    rp2_folder.mkdir(exist_ok=True)
+    if not (rp2_folder / "__init__.pyi").exists():
+        # do not overwrite docstubs __init__.pyi
+        rp2_file.rename(rp2_folder / "__init__.pyi")
+    # copy the asm_pio.pyi file from the reference folder
+    asm_pio = CONFIG.mpy_stubs_path / "micropython-reference" / "rp2/asm_pio.pyi"
+    if asm_pio.exists():
+        shutil.copy(asm_pio, rp2_folder / "asm_pio.pyi")
