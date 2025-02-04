@@ -20,8 +20,9 @@ STDLIB_MODULES: Final = [
     "io",
     "builtins",
     "asyncio",
-    # "os",  # TODO
-    # "sys", # TODO
+    "sys", 
+    # "os",  # TODO # Do not remove `os` to allow better typing by mypy for the `os` module
+    # "ssl",  # TODO
 ]
 """Modules that should be in /stdlib"""
 # and should not be in the individual packes as that causes duplication
@@ -34,7 +35,7 @@ RM_MERGED: Final = (
         "uasyncio",  # ditto
         "_rp2",  # Leave out for n , to avoid conflicts with the rp2 module
         "pycopy_imphook",  # not needed in the merged stubs
-        # "os",  # Do not remove `os` to allow better typing by mypy for the `os` module
+        # "os",  
     ]
     + STDLIB_MODULES
     + [f"u{mod}" for mod in U_MODULES]
