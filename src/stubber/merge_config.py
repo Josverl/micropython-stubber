@@ -37,8 +37,8 @@ RM_MERGED: Final = (
         "asyncio",  # use manually patched version from  mpy_stdlib
         "_asyncio",  # ditto
         "uasyncio",  # ditto
-        "_rp2",  # Leave out for n , to avoid conflicts with the rp2 module
-        "pycopy_imphook",  # not needed in the merged stubs
+        "_rp2",  # Leave out for now , to avoid conflicts with the rp2 module
+        "pycopy_imphook",  #  pycopy only: not needed in the merged stubs
         # "os",
     ]
     + STDLIB_MODULES
