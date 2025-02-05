@@ -15,7 +15,7 @@ from mpflash.mpremoteboard import MPRemoteBoard
 
 
 def flash_esp(mcu: MPRemoteBoard, fw_file: Path, *, erase: bool = True) -> Optional[MPRemoteBoard]:
-    if mcu.port not in ["esp32", "esp8266"] or mcu.board in ["ARDUINO_NANO_ESP32"]:
+    if mcu.port not in ["esp32", "esp8266"] or mcu.board.startswith("ARDUINO_"):
         log.error(f"esptool not supported for {mcu.port} {mcu.board} on {mcu.serialport}")
         return None
 
