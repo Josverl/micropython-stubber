@@ -11,7 +11,11 @@ from mpflash.logger import log
 from stubber.rst.lookup import U_MODULES
 
 EXT: Final = [".pyi", ".py", ""]
-CP_REFERENCE_TO_DOCSTUB: Final = ["asyncio"]
+CP_REFERENCE_TO_DOCSTUB: Final = [
+    "asyncio",
+    "rp2/PIOASMEmit.pyi",
+    "rp2/asm_pio.pyi",
+]
 "Modules to copy from reference modules to the docstubs"
 
 
@@ -20,7 +24,7 @@ STDLIB_MODULES: Final = [
     "io",
     "builtins",
     "asyncio",
-    "sys", 
+    "sys",
     # "os",  # TODO # Do not remove `os` to allow better typing by mypy for the `os` module
     # "ssl",  # TODO
 ]
@@ -35,7 +39,7 @@ RM_MERGED: Final = (
         "uasyncio",  # ditto
         "_rp2",  # Leave out for n , to avoid conflicts with the rp2 module
         "pycopy_imphook",  # not needed in the merged stubs
-        # "os",  
+        # "os",
     ]
     + STDLIB_MODULES
     + [f"u{mod}" for mod in U_MODULES]
