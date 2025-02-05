@@ -5,11 +5,13 @@ get-docstubs
 
 from pathlib import Path
 from typing import Optional
+from packaging.version import Version
 
 import mpflash.basicgit as git
 import rich_click as click
 from mpflash.logger import log
 
+from stubber.codemod.enrich import enrich_folder
 import stubber.utils as utils
 from stubber.commands.cli import stubber_cli
 from stubber.stubs_from_docs import generate_from_rst
@@ -59,6 +61,13 @@ from stubber.utils.repos import fetch_repos
     help="remove .rST constructs from the docstrings",
     show_default=True,
 )
+@click.option(
+    "--enrich",
+    is_flag=True,
+    default=False,
+    help="Enrich with type information from micropython-reference",
+    show_default=True,
+)
 @click.pass_context
 def cli_docstubs(
     ctx: click.Context,
@@ -69,6 +78,7 @@ def cli_docstubs(
     clean_rst: bool = True,
     basename: Optional[str] = None,
     version: str = "",
+    enrich: bool = False,
 ):
     """
     Build stubs from documentation.
@@ -113,4 +123,24 @@ def cli_docstubs(
         autoflake=autoflake,
         clean_rst=clean_rst,
     )
+
+    if enrich:
+        if Version(version) < Version("1.24"):
+            log.warning(f"Enriching is not supported for version {version}")
+        else:
+            # !stubber enrich --params-only --source {reference} --dest {docstubs}
+            reference_path = CONFIG.stub_path.parent / "micropython-reference"
+            log.info(f"Enriching from {reference_path}")
+            _ = enrich_folder(
+                reference_path,
+                dst_path,
+                show_diff=False,
+                write_back=True,
+                require_docstub=False,
+                params_only=True,
+            )
+            log.info("::group:: start post processing of retrieved stubs")
+            # do not run stubgen
+            utils.do_post_processing([dst_path], stubgen=False, black=black, autoflake=autoflake)
+
     log.info("::group:: Done")

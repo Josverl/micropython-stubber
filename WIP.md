@@ -6,16 +6,22 @@
         - [ ] pypi 
 - [x] Test v1.23.0 stubs with new stdib ( avoid regressions )
         - [x] do the same for v1.24.1 stubs
-        - [ ] If needed publish update to v1.23.0 stubs to only allow stdlib v1.23.x
+        - [?] If needed publish update to v1.23.0 stubs to only allow stdlib v1.23.x
     
-- [ ] Update install example in stubs readme for v1.24.*     
 - [x] some decorators are added multiple times - need to check for existing decorator 
-- [ ] docstubs : should automagically enrich the docstubs
+- [x] docstubs : should automagically `--enrich` the docstubs on v1.24.1 and newer ( + CI) 
+    - [ ] publish stubber
+
+
 
 - [x] `__call__` needs addational overloads in machine and pyb modules 
-- [ ] stdlib/udate.py should use same config as stubber / merge_config 
-- [ ] stdlib/udate.py should allow configuration of version  
+- [x] stdlib/udate.py should allow configuration of version  
+- [ ] stdlib/udate.py should use same config as stubber 
+    - [x] uses config / pyproject.toml
+    - [ ] uses merge_config 
 
+
+- [ ] Update install example in stubs readme for v1.24.*     
 - [ ] Update the documentation for this.
         - MyPy change
         - how to install  
@@ -36,6 +42,10 @@
 
 
 # Longer term things to fix 
+ - [ ] generate badges for the stubs 
+        https://github.com/python/typing/discussions/1391
+        ![PyPI - Types](https://img.shields.io/pypi/types/micropython-esp32-stubs?style=plastic&label=esp32%20generic-S3)
+
 
 ## pyright: 
 
