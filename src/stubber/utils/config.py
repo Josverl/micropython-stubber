@@ -1,7 +1,7 @@
 """stubber configuration"""
 
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 
 from mpflash.logger import log
 from mpflash.versions import get_preview_mp_version, get_stable_mp_version, micropython_versions
@@ -13,6 +13,8 @@ from .typed_config_toml import TomlConfigSource
 
 @section("micropython-stubber")
 class StubberConfig(Config):
+    _config_path = None
+
     "stubber configuration class"
     # relative to stubs folder
     fallback_path: Path = key(
@@ -81,6 +83,15 @@ class StubberConfig(Config):
         "return the stubs path in the microypthon-stubs repo"
         return self.mpy_stubs_path / "publish" / "template"
 
+    @property
+    def config_path(self) -> Path:
+        "return the config path"
+        return self._config_path
+
+    @config_path.setter
+    def config_path(self, value: Path):
+        self._config_path = value
+
     def post_read_hook(self) -> dict:
         config_updates = {}
         # relative to stubs
@@ -108,21 +119,27 @@ class StubberConfig(Config):
         return config_updates
 
 
-def readconfig(filename: str = "pyproject.toml", prefix: str = "tool.", must_exist: bool = True):
+def readconfig(
+    location: Optional[Path] = None,
+    filename: str = "pyproject.toml",
+    prefix: str = "tool.",
+    must_exist: bool = True,
+):
     "read the configuration from the pyproject.toml file"
     # locate the pyproject.toml file
-    path = Path.cwd()
+    config_path = location or Path.cwd()
     use_toml = True
-    while not (path / filename).exists():
-        path = path.parent
-        if path == path.parent:
+    while not (config_path / filename).exists():
+        config_path = config_path.parent
+        if config_path == config_path.parent:
             log.trace(f"Could not find config file: {filename}")
             use_toml = False
             break
 
-    filename = str(path / filename)
+    filename = str(config_path / filename)
 
     config = StubberConfig()
+    config.config_path = config_path.absolute()
     # add provider sources to the config
     config.add_source(EnvironmentConfigSource())
     if use_toml:
