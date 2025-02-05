@@ -6,13 +6,13 @@
 
 
 from typing import List
+
 import rich_click as click
 from mpflash.logger import log
 
 from stubber.bulk.mcu_stubber import stub_connected_mcus
+from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
-
-from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -20,7 +20,7 @@ from .cli import stubber_cli
 
 
 @stubber_cli.command(
-    name="get-mcu-stubs",
+    name="mcu-stubs",
     aliases=["get-mcu-stubs", "mcu-stubs", "mcu"],
 )
 @click.option(

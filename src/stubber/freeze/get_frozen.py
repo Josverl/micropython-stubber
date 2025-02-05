@@ -19,13 +19,14 @@ The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs r
 # - 1.11 and older - include content of /port/modules folder if it exists
 import os
 import shutil  # start moving from os & glob to pathlib
+import subprocess
 from pathlib import Path
 from typing import List, Optional
 
 from mpflash.logger import log
+from mpflash.versions import SET_PREVIEW, V_PREVIEW
 from packaging.version import Version
 
-from mpflash.versions import SET_PREVIEW, V_PREVIEW
 from stubber import utils
 from stubber.freeze.freeze_folder import freeze_folders  # Micropython < v1.12
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
@@ -57,6 +58,8 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     # frozen_stub_path
     # python -m libcst.tool codemod --include-stubs --no-format  add_comment.AddComment .\repos\micropython-stubs\stubs\micropython-v1_19_1-frozen\ --comment "# Micropython 1.19.1 frozen stubs"
     pass
+
+
 
 
 def freeze_any(

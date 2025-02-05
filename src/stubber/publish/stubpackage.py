@@ -255,8 +255,12 @@ class Builder(VersionedPackage):
         pyproject = None
         _toml = self.toml_path
         if (_toml).exists():
-            with open(_toml, "rb") as f:
-                pyproject = tomllib.load(f)
+            log.debug(f"Load pyproject from {_toml}")
+            try:
+                with open(_toml, "rb") as f:
+                    pyproject = tomllib.load(f)
+            except tomllib.TOMLDecodeError as e:
+                log.error(f"Could not load pyproject.toml file {e}")
         return pyproject
 
     @pyproject.setter
@@ -343,7 +347,7 @@ class Builder(VersionedPackage):
     def update_umodules(self):
         """
         Replace the STDLIB umodules with a simple import statement
-        in order to allow the typecheckers to resove the stdlib modules in the usual stdlib location.
+        in order to allow the typecheckers to resovle the stdlib modules in the usual stdlib location.
         """
         for f in self.package_path.rglob("*.pyi"):
             if f.stem in STDLIB_UMODULES:
@@ -417,7 +421,7 @@ class Builder(VersionedPackage):
         }
 
     def from_dict(self, json_data: Dict) -> None:
-        """load the package from a dict (from the jsondb)"""
+        """load the package from a dict (from the db)"""
         self.package_name = json_data["name"]
         # self.package_path = Path(json_data["path"])
         self.description = json_data["description"]
@@ -606,7 +610,14 @@ class PoetryBuilder(Builder):
             return self.mpy_version
         with open(_toml, "rb") as f:
             pyproject = tomllib.load(f)
-        ver = pyproject["tool"]["poetry"]["version"]
+        # read the version new pyproject format / old format /  self.mpy_version
+        try:
+            ver = pyproject["project"]["version"]
+        except KeyError:
+            try:
+                ver = pyproject["tool"]["poetry"]["version"]
+            except KeyError:
+                ver = self.mpy_version
         return str(parse(ver)) if ver not in SET_PREVIEW else ver
 
     @pkg_version.setter
@@ -620,7 +631,8 @@ class PoetryBuilder(Builder):
         try:
             with open(_toml, "rb") as f:
                 pyproject = tomllib.load(f)
-            pyproject["tool"]["poetry"]["version"] = version
+            # pyproject["tool"]["poetry"]["version"] = version
+            pyproject["project"]["version"] = version
             # update the version in the toml file
             with open(_toml, "wb") as output:
                 tomli_w.dump(pyproject, output)
@@ -708,7 +720,14 @@ class PoetryBuilder(Builder):
             # update the dependencies section by reading these from the template file
             with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                 tpl = tomllib.load(f)
-            _pyproject["tool"]["poetry"]["dependencies"] = tpl["tool"]["poetry"]["dependencies"]
+
+            # copy new / poetry style dependencies
+            for section in ["dependencies"]:
+                for key in ["tool.poetry", "project"]:
+                    try:
+                        _pyproject[key][section] = tpl[key][section]
+                    except KeyError:
+                        pass
 
         else:
             # read the template pyproject.toml file from the template folder
@@ -716,14 +735,17 @@ class PoetryBuilder(Builder):
                 with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
                     _pyproject = tomllib.load(f)
                 # note: can be 'latest' which is not semver
-                _pyproject["tool"]["poetry"]["version"] = self.mpy_version
+                # _pyproject["tool"]["poetry"]["version"] = self.mpy_version
+                _pyproject["project"]["version"] = self.mpy_version
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
                 raise (e)
 
         # update the name , version and description of the package
-        _pyproject["tool"]["poetry"]["name"] = self.package_name
-        _pyproject["tool"]["poetry"]["description"] = self.description
+        # _pyproject["tool"]["poetry"]["name"] = self.package_name
+        # _pyproject["tool"]["poetry"]["description"] = self.description
+        _pyproject["project"]["name"] = self.package_name
+        _pyproject["project"]["description"] = self.description
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 
@@ -852,8 +874,9 @@ class StubPackage(PoetryBuilder):
                 # use if folder exists , else use GENERIC folder
                 if (CONFIG.stub_path / fw_path).exists():
                     updated_sources.append((stub_type, fw_path))
-                elif fw_path.with_name("GENERIC").exists():
+                elif (CONFIG.stub_path / fw_path).with_name("GENERIC").exists():
                     updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+
             elif stub_type == StubSource.MERGED:
                 # Use the default board folder instead of the GENERIC board folder (if it exists)
                 if self.board.upper() == GENERIC_U:
@@ -871,7 +894,7 @@ class StubPackage(PoetryBuilder):
 
     def update_distribution(self, production: bool) -> bool:
         """Update the package .pyi files, if all the sources are available"""
-        log.info(f"- Update {self.package_path.name}")
+        log.debug(f"- Update {self.package_path.name}")
         log.trace(f"{self.package_path.as_posix()}")
 
         # check if the sources exist
@@ -914,15 +937,15 @@ class StubPackage(PoetryBuilder):
         :param force: BUILD even if no changes
         :return: True if the package was built
         """
-        log.info(f"Build: {self.package_path.name}")
 
         ok = self.update_distribution(production)
         self.status["version"] = self.pkg_version
         if not ok:
-            log.info(f"{self.package_name}: skip - Could not build/update package")
+            log.debug(f"{self.package_name}: skip - Could not build/update package")
             if not self.status["error"]:
                 self.status["error"] = "Could not build/update package"
             return False
+        log.info(f"Build: {self.package_path.name}")
 
         # If there are changes to the package, then publish it
         if self.is_changed() or force:

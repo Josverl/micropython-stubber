@@ -12,9 +12,8 @@ from mpflash.logger import log
 
 import stubber.get_cpython as get_cpython
 import stubber.utils as utils
+from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
-
-from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")

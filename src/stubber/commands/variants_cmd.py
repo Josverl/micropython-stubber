@@ -4,11 +4,11 @@ from pathlib import Path
 
 import rich_click as click
 from mpflash.logger import log
+
+import stubber
+from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
 from stubber.variants import create_variants
-import stubber
-
-from .cli import stubber_cli
 
 
 @click.option(

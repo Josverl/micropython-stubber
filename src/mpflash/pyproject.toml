@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mpflash"
-version = "1.24.5"
+version = "1.24.6"
 description = "Flash and download tool for MicroPython firmwares"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -18,6 +18,7 @@ classifiers = [
 mpflash = "mpflash.cli_main:mpflash"
 
 [tool.poetry.dependencies]
+python = ">=3.9,<4.0"
 beautifulsoup4 = "^4.12.3"
 bincopy = "^20.0.0"
 blkinfo = "^0.2.0"
@@ -29,16 +30,16 @@ jsons = "^1.6.3"
 libusb = { version = "^1.0.27", platform = "win32" }
 loguru = "^0.7.2"
 mpremote = "^1.22.0"
-packaging = "23.2"
+packaging = "^24.2"
 platformdirs = "^4.2.0"
 psutil = "^5.9.8"
 pygithub = "^2.1.1"
-python = ">=3.8.1,<4.0"
 pyusb = "^1.2.1"
 requests = "^2.31.0"
 rich-click = "^1.8.1"
 tenacity = "8.2.3"
 cache-to-disk = "^2.0.0"
+poetry = "^2.0.1"
 
 
 [tool.poetry.group.dev]

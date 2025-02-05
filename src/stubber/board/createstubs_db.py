@@ -358,8 +358,10 @@ class Stubber:
 
                 if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
                     # known type: use actual value
-                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, item_repr, t)
-                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
+                    if item_name.upper() == item_name:  # ALL_CAPS --> Final
+                        s = "{0}{1}: Final[{3}] = {2}\n".format(indent, item_name, item_repr, t)
+                    else:
+                        s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
                 elif t in ("dict", "list", "tuple"):
                     # dict, list , tuple: use empty value
                     ev = {"dict": "{}", "list": "[]", "tuple": "()"}
@@ -618,19 +620,23 @@ def _info():  # type:() -> dict[str, str]
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
         # .mpy architecture
-        arch = [
-            None,
-            "x86",
-            "x64",
-            "armv6",
-            "armv6m",
-            "armv7m",
-            "armv7em",
-            "armv7emsp",
-            "armv7emdp",
-            "xtensa",
-            "xtensawin",
-        ][sys_mpy >> 10]
+        try:
+            arch = [
+                None,
+                "x86",
+                "x64",
+                "armv6",
+                "armv6m",
+                "armv7m",
+                "armv7em",
+                "armv7emsp",
+                "armv7emdp",
+                "xtensa",
+                "xtensawin",
+                "rv32imc",
+            ][sys_mpy >> 10]
+        except IndexError:
+            arch = "unknown"
         if arch:
             info["arch"] = arch
         # .mpy version.minor

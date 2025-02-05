@@ -2,10 +2,14 @@ import os
 from pathlib import Path
 
 import pytest
-
+from cache_to_disk import delete_old_disk_caches
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 pytestmark = [pytest.mark.stubber]
+
+
+# avoid test pollution from previous incorrect results
+delete_old_disk_caches()
 
 
 def test_toplevel_config():
@@ -91,3 +95,27 @@ def test_config_no_config(change_test_dir, tmp_path: Path):
     assert config.mpy_stubs_path == Path("./repos/micropython-stubs")
 
     assert config.publish_path == Path("./repos/micropython-stubs/publish")
+
+
+def test_config_versions():
+
+    # exists on top-level
+    from stubber.utils.config import CONFIG
+
+    assert CONFIG
+    assert CONFIG.stable_version
+    assert isinstance(CONFIG.stable_version, str)
+    assert CONFIG.all_versions
+    assert isinstance(CONFIG.all_versions, list)
+
+    # are we using fake versions due to errors ?
+    assert CONFIG.stable_version != "1.21.0", "We are using fake versions, due to errors"
+
+
+def test_get_preview_mp_version():
+    # exists on top-level
+    from stubber.utils.config import get_preview_mp_version
+
+    version = get_preview_mp_version(cache_it=False)
+    assert version
+    assert isinstance(version, str)

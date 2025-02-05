@@ -34,10 +34,10 @@ provides a way to browse it's data.
 
 from __future__ import annotations
 
-from pathlib import Path
 import json
 from dataclasses import dataclass, field
 from glob import glob
+from pathlib import Path
 
 
 @dataclass(order=True)
@@ -91,7 +91,7 @@ class Board:
     Files that explain how to deploy for this board:
     Example: ["../PYBV10/deploy.md"]
     """
-    port: Port | None= field(default=None, compare=False)
+    port: Port | None = field(default=None, compare=False)
 
     @staticmethod
     def factory(filename_json: Path) -> Board:
@@ -109,7 +109,7 @@ class Board:
             deploy=board_json["deploy"],
         )
         board.variants.extend(
-            sorted([Variant(*v, board) for v in board_json.get("variants", {}).items()])
+            sorted([Variant(*v, board) for v in board_json.get("variants", {}).items()])  # type: ignore
         )
         return board
 
@@ -166,9 +166,7 @@ class Database:
             if self.port_filter and self.port_filter != special_port_name:
                 continue
             path = Path(mpy_dir, "ports", special_port_name)
-            variant_names = [
-                var.name for var in path.glob("variants/*") if var.is_dir()
-            ]
+            variant_names = [var.name for var in path.glob("variants/*") if var.is_dir()]
             board = Board(
                 special_port_name,
                 [],

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Create, Process, and Maintain stubs ✏️  for MicroPython"""
+"""Create, Process, Merge and Maintain stubs ✏️  for MicroPython"""
 
 
 from stubber.commands.build_cmd import cli_build

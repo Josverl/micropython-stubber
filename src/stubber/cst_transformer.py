@@ -1,7 +1,7 @@
 """helper functions for stub transformations"""
 
 # sourcery skip: snake-case-functions
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import libcst as cst
@@ -9,14 +9,27 @@ import libcst as cst
 
 @dataclass
 class TypeInfo:
-    "contains the functiondefs and classdefs info read from the stubs source"
+    "contains the functionDefs and classDefs info read from the stubs source"
     name: str
     decorators: Sequence[cst.Decorator]
     params: Optional[cst.Parameters] = None
     returns: Optional[cst.Annotation] = None
     docstr_node: Optional[cst.SimpleStatementLine] = None
     def_node: Optional[Union[cst.FunctionDef, cst.ClassDef]] = None
-    def_type: str = "?"  # funcdef or classdef or module
+    def_type: str = "?"  # funcDef or classDef or module
+
+
+@dataclass
+class AnnoValue:
+    "The different values for the annotations"
+    docstring: Optional[str] = ""  # strings
+    "Module docstring or function/method docstring"
+    docstring_node: Optional[cst.SimpleStatementLine] = None
+    "the docstring node for a function method to reuse with overloads"
+    type_info: Optional[TypeInfo] = None  # simple type
+    "function/method or class definition read from the docstub source"
+    overloads: List[TypeInfo] = field(default_factory=list)
+    "function / method overloads read from the docstub source"
 
 
 class TransformError(Exception):
@@ -27,7 +40,7 @@ class TransformError(Exception):
 
 
 MODULE_KEY = ("__module",)
-MODDOC_KEY = ("__module_docstring",)
+MOD_DOCSTR_KEY = ("__module_docstring",)
 
 # debug helper
 _m = cst.parse_module("")
@@ -44,17 +57,18 @@ class StubTypingCollector(cst.CSTVisitor):
         # store the annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
-            Union[TypeInfo, str],
+            AnnoValue,  # The TypeInfo or list of TypeInfo
         ] = {}
-        self.comments :List[str] = []
+        self.comments: List[str] = []
 
     # ------------------------------------------------------------
     def visit_Module(self, node: cst.Module) -> bool:
         """Store the module docstring"""
         docstr = node.get_docstring()
         if docstr:
-            self.annotations[MODULE_KEY] = docstr
+            self.annotations[MODULE_KEY] = AnnoValue(docstring=docstr)
         return True
+
     def visit_Comment(self, node: cst.Comment) -> None:
         """
         connect comments from the source
@@ -82,7 +96,7 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="classdef",
             def_node=node,
         )
-        self.annotations[tuple(self.stack)] = ti
+        self.annotations[tuple(self.stack)] = AnnoValue(type_info=ti)
 
     def leave_ClassDef(self, original_node: cst.ClassDef) -> None:
         """remove the class name from the stack"""
@@ -105,7 +119,14 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="funcdef",
             def_node=node,
         )
-        self.annotations[tuple(self.stack)] = ti
+        key = tuple(self.stack)
+        if not key in self.annotations:
+            # store the first function/method signature
+            self.annotations[key] = AnnoValue(type_info=ti)
+
+        if any(dec.decorator.value == "overload" for dec in node.decorators):  # type: ignore
+            # and store the overloads
+            self.annotations[key].overloads.append(ti)
 
     def update_append_first_node(self, node):
         """Store the function/method docstring or function/method sig"""
@@ -123,17 +144,31 @@ class StubTypingCollector(cst.CSTVisitor):
 
 def update_def_docstr(
     dest_node: Union[cst.FunctionDef, cst.ClassDef],
-    src_comment: Optional[cst.SimpleStatementLine],
+    src_docstr: Optional[Union[cst.SimpleStatementLine, str]] = None,
     src_node=None,
 ) -> Any:
     """
     Update the docstring of a function/method or class
+    The supplied `src_docstr` can be a string or a SimpleStatementLine
 
-    for functiondefs ending in an ellipsis, the entire body needs to be replaced.
-    in this case the src_body is mandatory.
+    for function defs ending in an ellipsis, the entire body needs to be replaced.
+    in this case `src_node` is required.
     """
-    if not src_comment:
+    if not src_docstr:
         return dest_node
+    if isinstance(src_docstr, str):
+        if not src_docstr[0] in ('"', "'"):
+            src_docstr = f'"""{src_docstr}"""'
+        # convert the string to a SimpleStatementLine
+        src_docstr = cst.SimpleStatementLine(
+            body=[
+                cst.Expr(
+                    value=cst.SimpleString(
+                        value=src_docstr,
+                    ),
+                ),
+            ]
+        )
 
     # function def on a single line ending with an ellipsis (...)
     if isinstance(dest_node.body, cst.SimpleStatementSuite):
@@ -144,13 +179,13 @@ def update_def_docstr(
         raise TransformError("Expected Def with Indented body")
 
     # classdef of functiondef with an indented body
-    # need some funcky casting to avoid issues with changing the body
-    # note : indented body is nested : body.body
+    # need some funky casting to avoid issues with changing the body
+    # note : indented body is nested : IndentedBlock.body.body
     if dest_node.get_docstring() is None:
         # append the new docstring and append the function body
-        body = tuple([src_comment] + list(dest_node.body.body))
+        body = tuple([src_docstr] + list(dest_node.body.body))
     else:
-        body = tuple([src_comment] + list(dest_node.body.body[1:]))
+        body = tuple([src_docstr] + list(dest_node.body.body[1:]))
     body_2 = dest_node.body.with_changes(body=body)
 
     return dest_node.with_changes(body=body_2)

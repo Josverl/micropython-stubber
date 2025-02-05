@@ -4,15 +4,15 @@
 # stub
 ##########################################################################################
 
-from mpflash.logger import log
 from pathlib import Path
 from typing import Union
 
 import rich_click as click
+from mpflash.logger import log
+
+from stubber.commands.cli import stubber_cli
 from stubber.utils import generate_pyi_files
 from stubber.utils.post import do_post_processing
-
-from .cli import stubber_cli
 
 ##########################################################################################
 # log = logging.getLogger("stubber")

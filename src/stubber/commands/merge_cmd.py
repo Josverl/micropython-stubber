@@ -7,11 +7,10 @@ from typing import List, Union
 import rich_click as click
 from mpflash.logger import log
 
+from stubber.commands.cli import stubber_cli
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.package import GENERIC_L
 from stubber.utils.config import CONFIG
-
-from .cli import stubber_cli
 
 
 @stubber_cli.command(name="merge")
