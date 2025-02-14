@@ -167,7 +167,7 @@ class AddTypeVarsVisitor(ContextAwareTransformer):
     ]:
         """
         Split the module into 3 parts:
-        - before any TypeAlias or TypeVar statements
+        - before any TypeAlias, TypeVar or ParamSpec statements
         - the TypeAlias and TypeVar statements
         - the rest of the module after the TypeAlias and TypeVar statements
         """
@@ -191,11 +191,16 @@ class AddTypeVarsVisitor(ContextAwareTransformer):
                     ]
                 ),
             )
+            is_ps = m.matches(
+                statement,
+                m.SimpleStatementLine(body=[m.Assign(value=m.Call(func=m.Name(value="ParamSpec")))]),
+            )
+
             is_tv = m.matches(
                 statement,
                 m.SimpleStatementLine(body=[m.Assign(value=m.Call(func=m.Name(value="TypeVar")))]),
             )
-            if is_tv or is_ta:
+            if is_tv or is_ta or is_ps:
                 if first_tv_ta == -1:
                     first_tv_ta = i + start
                 last_tv_ta = i + start
