@@ -33,7 +33,7 @@ class GatherTypeVarsVisitor(ContextAwareVisitor):
         """
         # is this a TypeVar assignment?
         # needs to be more robust
-        if isinstance(node.value, libcst.Call) and node.value.func.value == "TypeVar":  # type: ignore
+        if isinstance(node.value, libcst.Call) and node.value.func.value in ["TypeVar", "ParamSpec"]:  # type: ignore
             self.all_typealias_or_vars.append(node)
 
     def visit_AnnAssign(self, node: libcst.AnnAssign) -> None:
@@ -49,7 +49,7 @@ class GatherTypeVarsVisitor(ContextAwareVisitor):
 
 
 def is_TypeAlias(statement) -> bool:
-    "Just the body of a simple statement" ""
+    "Annotated Assign -  Foo:TypeAlias = ..."
     return m.matches(
         statement,
         m.AnnAssign(annotation=m.Annotation(annotation=m.Name(value="TypeAlias"))),
@@ -57,12 +57,19 @@ def is_TypeAlias(statement) -> bool:
 
 
 def is_TypeVar(statement):
-    "Just the body of a simple statement" ""
+    "Assing - Foo = Typevar(...)"
     r = m.matches(
         statement,
         m.Assign(value=m.Call(func=m.Name(value="TypeVar"))),
     )
-    # m.SimpleStatementLine(body=[m.Assign(value=m.Call(func=m.Name(value="TypeVar")))]),
+    return r
+
+def is_ParamSpec(statement):
+    "Assign - Foo = ParamSpec(...)"
+    r = m.matches(
+        statement,
+        m.Assign(value=m.Call(func=m.Name(value="ParamSpec"))),
+    )
     return r
 
 
@@ -128,9 +135,12 @@ class AddTypeVarsVisitor(ContextAwareTransformer):
 
                 # same type and same targets?
                 if (
-                    is_TypeVar(new_tvta)
-                    and is_TypeVar(existing_tv)
-                    and new_tvta.targets[0].children[0].value == existing_tv.targets[0].children[0].value  # type: ignore
+(                    (is_TypeVar(new_tvta)
+                    and is_TypeVar(existing_tv))
+                    or
+                    (is_ParamSpec(new_tvta)
+                    and is_ParamSpec(existing_tv))
+)                    and new_tvta.targets[0].children[0].value == existing_tv.targets[0].children[0].value  # type: ignore
                 ):
                     existing = True
                     break
