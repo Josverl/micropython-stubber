@@ -116,7 +116,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             stub_tree.visit(import_collector)
             self.stub_imports = import_collector.symbol_mapping
             self.all_imports = import_collector.all_imports
-            # Get typevars
+            # Get typevars, type aliasses and ParamSpecs
             stub_tree.visit(typevar_collector)
             self.typevars = typevar_collector.all_typealias_or_vars
 
