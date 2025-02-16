@@ -13,8 +13,8 @@ import libcst as cst
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
 from libcst.helpers.module import insert_header_comments
-from mpflash.logger import log
 
+from mpflash.logger import log
 from stubber.cst_transformer import (
     MODULE_KEY,
     AnnoValue,
@@ -23,7 +23,7 @@ from stubber.cst_transformer import (
     update_module_docstr,
 )
 
-from .visitors.typevars import AddTypeVarsVisitor, GatherTypeVarsVisitor
+from .visitors.type_helpers import AddTypeHelpers, GatherTypeHelpers
 
 Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 """TypeVar for Module or ClassDef that both support overloads"""
@@ -95,7 +95,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
-        self.typevars = []
+        self.type_helpers = []
         # parse the doc-stub file
         if self.docstub_source:
             try:
@@ -107,7 +107,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # create the collectors
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)
-            typevar_collector = GatherTypeVarsVisitor(context)
+            typevar_collector = GatherTypeHelpers(context)
             # visit the source / doc-stub file with all collectors
             stub_tree.visit(typing_collector)
             self.annotations = typing_collector.annotations
@@ -118,7 +118,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             self.all_imports = import_collector.all_imports
             # Get typevars, type aliasses and ParamSpecs
             stub_tree.visit(typevar_collector)
-            self.typevars = typevar_collector.all_typealias_or_vars
+            self.type_helpers = typevar_collector.all_typehelpers
 
     # ------------------------------------------------------------------------
 
@@ -177,11 +177,11 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         )
         # --------------------------------------------------------------------
         # Add any typevars to the module
-        if self.typevars:
-            for tv in self.typevars:
-                AddTypeVarsVisitor.add_typevar(self.context, tv)  # type: ignore
+        if self.type_helpers:
+            for tv in self.type_helpers:
+                AddTypeHelpers.add_typevar(self.context, tv)  # type: ignore
 
-            atv = AddTypeVarsVisitor(self.context)
+            atv = AddTypeHelpers(self.context)
             updated_node = atv.transform_module(updated_node)
 
         # --------------------------------------------------------------------
