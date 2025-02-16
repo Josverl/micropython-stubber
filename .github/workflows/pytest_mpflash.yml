@@ -91,7 +91,7 @@ jobs:
             - name: Upload coverage-mpflash-*.xml to Codecov
               if: always() # ignore errors
               continue-on-error: true
-              uses: codecov/codecov-action@v4
+              uses: codecov/codecov-action@v5
               with:
                   file: results/coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}.xml
                   flags: stubber
