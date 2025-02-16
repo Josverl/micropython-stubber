@@ -2,7 +2,6 @@
 Gather all TypeVar and TypeAlias assignments in a module.
 """
 
-from functools import lru_cache
 from typing import List, Sequence, Tuple, Union
 
 import libcst
@@ -13,17 +12,16 @@ from libcst.codemod._visitor import ContextAwareTransformer, ContextAwareVisitor
 from libcst.codemod.visitors._add_imports import _skip_first
 from typing_extensions import TypeAlias
 
-# from mpflash.logger import log
+from mpflash.logger import log
 
 TypeHelper: TypeAlias = Union[libcst.Assign, libcst.AnnAssign]
 TypeHelpers: TypeAlias = List[TypeHelper]
 Statement: TypeAlias = Union[libcst.SimpleStatementLine, libcst.BaseCompoundStatement]
 
 _mod = libcst.parse_module("")  # Debugging aid : _mod.code_for_node(node)
-_code = _mod.code_for_node  # Debugging aid : _code(node)
+_code = _mod.code_for_node  #     Debugging aid : _code(node)
 
 
-@lru_cache(maxsize=None)
 def is_TypeAlias(statement) -> bool:
     "Annotated Assign -  Foo:TypeAlias = ..."
     if m.matches(statement, m.SimpleStatementLine()):
@@ -34,7 +32,6 @@ def is_TypeAlias(statement) -> bool:
     )
 
 
-@lru_cache(maxsize=None)
 def is_TypeVar(statement):
     "Assing - Foo = Typevar(...)"
     if m.matches(statement, m.SimpleStatementLine()):
@@ -45,7 +42,6 @@ def is_TypeVar(statement):
     )
 
 
-@lru_cache(maxsize=None)
 def is_ParamSpec(statement):
     "Assign - Foo = ParamSpec(...)"
     if m.matches(statement, m.SimpleStatementLine()):
@@ -56,7 +52,6 @@ def is_ParamSpec(statement):
     )
 
 
-@lru_cache(maxsize=None)
 def is_import(statement):
     "import - import foo"
     return m.matches(statement, m.SimpleStatementLine(body=[m.ImportFrom() | m.Import()]))
