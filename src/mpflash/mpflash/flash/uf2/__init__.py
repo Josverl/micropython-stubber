@@ -40,9 +40,8 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         return None
     if erase:
         if mcu.port == "rp2":
-            # rp2_erase = Path("./mpflash/vendor/pico-universal-flash-nuke/universal_flash_nuke.uf2")
             rp2_erase =Path(__file__).parent.joinpath("../../vendor/pico-universal-flash-nuke/universal_flash_nuke.uf2").resolve()
-            log.info(f"Erasing {mcu.port} with {rp2_erase}")
+            log.info(f"Erasing {mcu.port} with {rp2_erase.name}")
             # optimistic 
             destination = waitfor_uf2(board_id=mcu.port.upper())
             if not destination :
@@ -100,5 +99,6 @@ def copy_firmware_to_uf2(fw_file: Path, destination: Path):
     Copy the firmware file to the destination,
     Retry 3 times with 1s delay
     """
-    log.info(f"Copying {fw_file} to {destination}.")
+    log.trace(f"Firmware: {fw_file}")
+    log.info(f"Copying {fw_file.name} to {destination}.")
     return shutil.copy(fw_file, destination)

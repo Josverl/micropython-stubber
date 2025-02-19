@@ -16,7 +16,7 @@ import mpflash.basicgit as git
 from mpflash.logger import log
 from mpflash.mpboard_id import Board
 from mpflash.mpboard_id.store import write_boardinfo_json
-from mpflash.versions import micropython_versions
+from mpflash.versions import get_preview_mp_version, get_stable_mp_version, micropython_versions
 
 # look for all mpconfigboard.h files and extract the board name
 # from the #define MICROPY_HW_BOARD_NAME "PYBD_SF6"
@@ -47,6 +47,8 @@ def boards_from_repo(mpy_path: Path, version: str, family: Optional[str] = None)
     version = version or git.get_local_tag()  # type: ignore
     if not version:
         raise ValueError("No version provided and no local tag found.")
+    elif version in ["main", "master"]:
+        version = get_preview_mp_version()
 
     board_list: List[Board] = []
     # look in mpconfigboard.h files

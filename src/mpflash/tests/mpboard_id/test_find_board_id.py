@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from mpflash.errors import MPFlashError
 from mpflash.mpboard_id.board_id import (  # type: ignore
     _find_board_id_by_description,
@@ -69,6 +70,9 @@ HERE = Path(__file__).parent
         # Error cases
         ("error-1", "stable", "Board FOO", "FOO", None),
         ("error-2", "stable", "Board BAR", "BAR", None),
+        # Bugs #1
+        ("PICO2_W", "preview", "Raspberry Pi Pico 2 W with RP235", "Raspberry Pi Pico 2 W", "RPI_PICO2_W"),
+        ("PICO2_W", "preview", "Raspberry Pi Pico 2 W with RP235", "", "RPI_PICO2_W"),
     ],
 )
 def test_find_board_id_real(test_id, descr, short_descr, expected_result, version):
