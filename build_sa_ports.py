@@ -73,7 +73,7 @@ def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_di
 
 
 
-def build_sa_ports( boards:List[Tuple],versions:List[str], mpy_dir:Path, fw_path:Path):
+def build_sa_ports( builds:List[Tuple],versions:List[str], mpy_dir:Path, fw_path:Path):
     """Build all ports for the stand alone boards."""
     for version in versions:
         print("=" * 60)
@@ -98,11 +98,15 @@ def build_sa_ports( boards:List[Tuple],versions:List[str], mpy_dir:Path, fw_path
 
         print(f"Building {version} , build {build_nr}")
         print("=" * 60)
-        for bv in boards:
-            if len(bv) == 1:
-                board, variant = bv[0], None
+        for build in builds:
+            if len(build) == 1:
+                board, variant, extras = build[0], None, []
+            elif len(build) == 2:
+                board, variant, extras = build[0], build[1], []
             else:
-                board, variant = bv
+                board, variant, extras = build
+                if isinstance(extras, str):
+                    extras = extras.split(' ')
 
             if board not in db.boards.keys():
                 print(f"Board '{board}' not found for version '{version}'")
@@ -120,7 +124,7 @@ def build_sa_ports( boards:List[Tuple],versions:List[str], mpy_dir:Path, fw_path
                 variant = None
             try: 
                 mpb.clean_board(board = _board.name, variant = variant, mpy_dir = mpy_dir) # type: ignore
-                mpb.build_board( board = _board.name, variant = variant, mpy_dir = mpy_dir)
+                mpb.build_board( board = _board.name, variant = variant, mpy_dir = mpy_dir, extra_args= extras) 
                 # make_mpy_cross = False 
             except SystemExit as e:
                 print(f"Failed to build {board} {variant} {version}: {e}")
@@ -131,13 +135,13 @@ def main():
     mpy_dir = Path("/home/jos/micropython") 
     assert mpy_dir.exists()
     build_sa_ports(
-        boards = [
+        builds = [
             # ("windows", "standard"),
             # ("unix", "standard"),
-            # ("webassembly", "standard"),
-            # ("webassembly", "pyscript"),
-            ("WEACT_F411_BLACKPILL", "V20_FLASH_4M"),
-            ("RPI_PICO2_W",),
+            # ("webassembly", "standard", "-lnodefs.js"),
+            ("webassembly", "pyscript",  "-lnodefs.js"),
+            # ("WEACT_F411_BLACKPILL", "V20_FLASH_4M"),
+            # ("RPI_PICO2_W",),
             ],
         versions = [
             get_stable_mp_version(), 
