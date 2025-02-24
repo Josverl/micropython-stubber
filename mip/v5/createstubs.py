@@ -25,7 +25,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.24.0"
-ENOENT = 2
+ENOENT = 2 # on most ports
+ENOMESSAGE = 44 # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -72,7 +73,7 @@ logging.basicConfig(level=logging.INFO)
 class Stubber:
     "Generate stubs for modules in firmware"
 
-    def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
+    def __init__(self, path: str = "", firmware_id: str = ""):  # type: ignore
         try:
             if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
@@ -240,7 +241,7 @@ class Stubber:
             )
             fp.write(s)
             fp.write(
-                "from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n"
+                "from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n"
             )
             self.write_object_stub(fp, new_module, module_name, "")
 
@@ -366,12 +367,16 @@ class Stubber:
                     s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t in ("object", "set", "frozenset", "Pin", "generator"):  # "FileIO"
+                    if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        if t == "generator":
-                            t = "Generator"
                         s = "{0}{1}: {2} ## = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
+                    elif t == "generator":
+                        # either a normal or async Generator function
+                        t = "Generator"
+                        s = "{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
                             indent, item_name, t, item_type_txt, item_repr
                         )
                     else:
@@ -410,9 +415,9 @@ class Stubber:
             s = s.replace(c, "_")
         return s
 
-    def clean(self, path: str = None):  # type: ignore
+    def clean(self, path: str = ""):  # type: ignore
         "Remove all files from the stub folder"
-        if path is None:
+        if not path:
             path = self.path
         log.info("Clean/remove files in folder: {}".format(path))
         try:
@@ -495,7 +500,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] == ENOENT:
+                if e.args[0] in [ENOENT, ENOMESSAGE] :
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)
@@ -504,6 +509,7 @@ def ensure_folder(path: str):
                         raise e2
         # next level deep
         start = i + 1
+
 
 
 def _build(s):
@@ -727,11 +733,11 @@ def is_micropython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore # lgtm [py/unused-local-variable]
+        b = bytes("abc", encoding="utf8")  # type: ignore 
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore # lgtm [py/unused-local-variable]
+        c = is_micropython.__module__  # type: ignore 
         return False
     except (NotImplementedError, AttributeError):
         return True
@@ -749,36 +755,14 @@ def main():
     # modules to stub : 131
     stubber.modules = [
         "WM8960",
-        "_OTA",
         "_asyncio",
         "_boot_fat",
-        "_coap",
         "_espnow",
-        "_flash_control_OTA",
-        "_main_pybytes",
-        "_mqtt",
-        "_mqtt_core",
-        "_msg_handl",
         "_onewire",
-        "_periodical_pin",
-        "_pybytes",
-        "_pybytes_ca",
-        "_pybytes_config",
-        "_pybytes_config_reader",
-        "_pybytes_connection",
-        "_pybytes_constants",
-        "_pybytes_debug",
-        "_pybytes_library",
-        "_pybytes_machine_learning",
-        "_pybytes_main",
-        "_pybytes_protocol",
-        "_pybytes_pyconfig",
-        "_pybytes_pymesh_config",
         "_rp2",
-        "_terminal",
         "_thread",
         "_uasyncio",
-        "_urequest",
+        "abc",
         "adcfft",
         "aioble/__init__",
         "aioble/central",
@@ -801,6 +785,7 @@ def main():
         "asyncio/funcs",
         "asyncio/lock",
         "asyncio/stream",
+        "base64",
         "binascii",
         "bluetooth",
         "breakout_as7262",
@@ -830,9 +815,13 @@ def main():
         "cc3200",
         "cmath",
         "collections",
+        "collections/__init__",
+        "collections/defaultdict",
+        "copy",
         "crypto",
         "cryptolib",
         "curl",
+        "datetime",
         "deflate",
         "dht",
         "display",
@@ -848,6 +837,7 @@ def main():
         "espnow",
         "ffi",
         "flashbdev",
+        "fnmatch",
         "framebuf",
         "freesans20",
         "fs_driver",
@@ -856,20 +846,26 @@ def main():
         "gc",
         "gfx_pack",
         "gsm",
+        "gzip",
         "hashlib",
         "heapq",
+        "hmac",
+        "html/__init__",
         "hub75",
         "ili9341",
         "ili9XXX",
         "imagetools",
         "inisetup",
+        "inspect",
         "interstate75",
         "io",
+        "itertools",
         "jpegdec",
         "js",
         "jsffi",
         "json",
         "lcd160cr",
+        "locale",
         "lodepng",
         "logging",
         "lsm6dsox",
@@ -897,7 +893,11 @@ def main():
         "ntptime",
         "onewire",
         "openamp",
+        "operator",
         "os",
+        "os/__init__",
+        "os/path",
+        "pathlib",
         "pcf85063a",
         "pic16bit",
         "picoexplorer",
@@ -913,11 +913,12 @@ def main():
         "platform",
         "powerpc",
         "pyb",
-        "pycom",
         "pye",
+        "pyscript",
+        "pyscript/__init__",
+        "pyscript/fs",
         "qemu",
         "qrcode",
-        "queue",
         "random",
         "renesas",
         "renesas-ra",
@@ -932,14 +933,19 @@ def main():
         "ssd1306",
         "ssh",
         "ssl",
+        "stat",
         "stm",
         "stm32",
+        "string",
         "struct",
         "sys",
+        "tarfile/__init__",
+        "tarfile/write",
         "termios",
         "time",
         "tls",
         "tpcalib",
+        "types",
         "uarray",
         "uasyncio/__init__",
         "uasyncio/core",
@@ -951,7 +957,6 @@ def main():
         "ubinascii",
         "ubluetooth",
         "ucollections",
-        "ucrypto",
         "ucryptolib",
         "uctypes",
         "uerrno",
@@ -974,10 +979,10 @@ def main():
         "umqtt/__init__",
         "umqtt/robust",
         "umqtt/simple",
+        "unittest/__init__",
         "unix",
         "uos",
         "uplatform",
-        "uqueue",
         "urandom",
         "ure",
         "urequests",
@@ -996,6 +1001,7 @@ def main():
         "utelnetserver",
         "utime",
         "utimeq",
+        "uu",
         "uwebsocket",
         "uzlib",
         "version",
