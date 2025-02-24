@@ -367,12 +367,16 @@ class Stubber:
                     s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t in ("object", "set", "frozenset", "Pin", "generator"):  # "FileIO"
+                    if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        if t == "generator":
-                            t = "Generator"
                         s = "{0}{1}: {2} ## = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
+                    elif t == "generator":
+                        # either a normal or async Generator function
+                        t = "Generator"
+                        s = "{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
                             indent, item_name, t, item_type_txt, item_repr
                         )
                     else:
