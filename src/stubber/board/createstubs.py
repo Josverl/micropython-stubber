@@ -25,7 +25,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.24.0"
-ENOENT = 2
+ENOENT = 2 # on most ports
+ENOMESSAGE = 44 # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -495,7 +496,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] == ENOENT:
+                if e.args[0] in [ENOENT, ENOMESSAGE] :
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)
@@ -504,6 +505,7 @@ def ensure_folder(path: str):
                         raise e2
         # next level deep
         start = i + 1
+
 
 
 def _build(s):
