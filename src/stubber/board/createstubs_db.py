@@ -44,7 +44,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.24.0"
-ENOENT = 2
+ENOENT = 2  # on most ports
+ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -250,7 +251,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -369,12 +370,16 @@ class Stubber:
                     s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t in ("object", "set", "frozenset", "Pin", "generator"):  # "FileIO"
+                    if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        if t == "generator":
-                            t = "Generator"
                         s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                    elif t == "generator":
+                        # either a normal or async Generator function
+                        t = "Generator"
+                        s = "{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
@@ -492,7 +497,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] == ENOENT:
+                if e.args[0] in [ENOENT, ENOMESSAGE]:
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)

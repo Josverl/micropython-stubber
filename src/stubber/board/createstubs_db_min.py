@@ -53,8 +53,9 @@ try:from collections import OrderedDict as l
 except O:from ucollections import OrderedDict as l
 __version__='v1.24.0'
 A3=2
-A4=2
-A5=['lib','/lib','/sd/lib','/flash/lib',K]
+A4=44
+A5=2
+A6=['lib','/lib','/sd/lib','/flash/lib',K]
 class J:
 	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=P
 	@staticmethod
@@ -127,26 +128,26 @@ class Stubber:
 		try:N=__import__(C,E,E,'*');Q=F.mem_free();A.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,L,Q))
 		except O:return H
 		X(I)
-		with M(I,h)as P:R=c(J.info).replace('OrderedDict(',B).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,R,__version__);P.write(S);P.write('from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(P,N,C,B)
+		with M(I,h)as P:R=c(J.info).replace('OrderedDict(',B).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,R,__version__);P.write(S);P.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(P,N,C,B)
 		J.report_add(C,I)
 		if C not in{'os','sys','logging','gc'}:
 			try:del N
 			except(D,r):A.warning('could not del new_module')
 		F.collect();return T
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
-		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
+		Y=' at ...>';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
 		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
-		a,P=L.get_obj_attributes(M)
+		Z,P=L.get_obj_attributes(M)
 		if P:A.error(P)
-		for(C,H,I,b,d)in a:
+		for(C,H,I,a,c)in Z:
 			if C in['classmethod','staticmethod','BaseException',N]:continue
 			if C[0].isdigit():A.warning('NameError: invalid name {}'.format(C));continue
-			if I=="<class 'type'>"and R(E)<=A4*4:
+			if I=="<class 'type'>"and R(E)<=A5*4:
 				Q=B;S=C.endswith(N)or C.endswith('Error')or C in['KeyboardInterrupt','StopIteration','SystemExit']
 				if S:Q=N
 				D='\n{}class {}({}):\n'.format(E,C,Q)
 				if S:D+=E+'    ...\n';J.write(D);continue
-				J.write(D);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,C),E+'    ',O+1);D=E+'    def __init__(self, *argv, **kwargs) -> None:\n';D+=E+'        ...\n\n';J.write(D)
+				J.write(D);L.write_object_stub(J,a,'{0}.{1}'.format(obj_name,C),E+'    ',O+1);D=E+'    def __init__(self, *argv, **kwargs) -> None:\n';D+=E+'        ...\n\n';J.write(D)
 			elif any(A in I for A in[A0,z,'closure']):
 				T=V;U=B
 				if O>0:U='self, '
@@ -159,14 +160,13 @@ class Stubber:
 				if G in(x,v,w,y,'bytearray','bytes'):
 					if C.upper()==C:D='{0}{1}: Final[{3}] = {2}\n'.format(E,C,H,G)
 					else:D=X.format(E,C,H,G)
-				elif G in(g,f,e):c={g:'{}',f:'[]',e:'()'};D=X.format(E,C,c[G],G)
-				elif G in('object','set','frozenset','Pin',Y):
-					if G==Y:G='Generator'
-					D='{0}{1}: {2} ## = {4}\n'.format(E,C,G,I,H)
+				elif G in(g,f,e):b={g:'{}',f:'[]',e:'()'};D=X.format(E,C,b[G],G)
+				elif G in('object','set','frozenset','Pin'):D='{0}{1}: {2} ## = {4}\n'.format(E,C,G,I,H)
+				elif G=='generator':G='Generator';D='{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n'.format(E,C,G,I,H)
 				else:
 					G=V
-					if K in H:H=H.split(K)[0]+Z
-					if K in H:H=H.split(K)[0]+Z
+					if K in H:H=H.split(K)[0]+Y
+					if K in H:H=H.split(K)[0]+Y
 					D='{0}{1}: {2} ## {3} = {4}\n'.format(E,C,G,I,H)
 				J.write(D)
 			else:J.write("# all other, type = '{0}'\n".format(I));J.write(E+C+' # type: Incomplete\n')
@@ -211,7 +211,7 @@ def X(path):
 			C=path[0]if B==0 else path[:B]
 			try:I=os.stat(C)
 			except D as F:
-				if F.args[0]==A3:
+				if F.args[0]in[A3,A4]:
 					try:A.debug('Create folder {}'.format(C));os.mkdir(C)
 					except D as H:A.error('failed to create folder {}'.format(C));raise H
 		E=B+1
@@ -232,11 +232,11 @@ def _info():
 	if A[L].startswith('pyb'):A[L]='stm32'
 	elif A[L]==T:A[L]='windows'
 	elif A[L]=='linux':A[L]=V
-	try:A[C]=A6(sys.implementation.version)
+	try:A[C]=A7(sys.implementation.version)
 	except I:pass
 	try:K=sys.implementation._machine if'_machine'in N(sys.implementation)else os.uname().machine;A[U]=K;A[P]=K.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
 	except(I,Q):pass
-	A[U]=A7()
+	A[U]=A8()
 	try:
 		if'uname'in N(os):
 			A[D]=Y(os.uname()[3])
@@ -261,11 +261,11 @@ def _info():
 		A[F]='v{}.{}'.format(G&255,G>>8&3)
 	if A[D]and not A[C].endswith(W):A[C]=A[C]+W
 	A[M]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
-def A6(version):
+def A7(version):
 	A=version;B=K.join([c(A)for A in A[:3]])
 	if R(A)>3 and A[3]:B+=V+A[3]
 	return B
-def A7():
+def A8():
 	try:from boardname import BOARDNAME as C;A.info('Found BOARDNAME: {}'.format(C))
 	except O:A.warning('BOARDNAME not found');C=B
 	return C
@@ -295,8 +295,8 @@ def n():
 	try:A=bytes('abc',encoding='utf8');B=n.__module__;return H
 	except(o,I):return T
 a='modulelist.done'
-def A8(skip=0):
-	for E in A5:
+def A9(skip=0):
+	for E in A6:
 		B=E+'/modulelist.txt'
 		if not Z(B):continue
 		try:
@@ -311,9 +311,9 @@ def A8(skip=0):
 					yield A
 				break
 		except D:pass
-def A9(done):
+def AA(done):
 	with M(a,h)as A:A.write(c(done)+'\n')
-def AA():
+def AB():
 	A=0
 	try:
 		with M(a)as B:A=int(B.readline().strip())
@@ -325,11 +325,11 @@ def main():
 	else:A.info('Starting new run')
 	stubber=Stubber(path=read_path());B=0
 	if not C:stubber.clean();stubber.report_start(j)
-	else:B=AA();stubber._json_name=i.format(stubber.path,j)
-	for E in A8(B):
+	else:B=AB();stubber._json_name=i.format(stubber.path,j)
+	for E in A9(B):
 		try:stubber.create_one_stub(E)
 		except p:D.reset()
-		F.collect();B+=1;A9(B)
+		F.collect();B+=1;AA(B)
 	P('All modules have been processed, Finalizing report');stubber.report_end()
 if __name__=='__main__'or n():
 	if not Z('no_auto_stubber.txt'):

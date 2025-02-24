@@ -1,21 +1,20 @@
-A1='windows'
-A0='No report file'
-z='Failed to create the report.'
-y='{}/{}'
-x='logging'
-w='sys'
-v='method'
-u='function'
-t='bool'
-s='str'
-r='float'
-q='int'
-p='stubber'
-o=Exception
-n=KeyError
-m=sorted
-l=NotImplementedError
-h='pycom'
+A0='windows'
+z='No report file'
+y='Failed to create the report.'
+x='{}/{}'
+w='logging'
+v='sys'
+u='method'
+t='function'
+s='bool'
+r='str'
+q='float'
+p='int'
+o='stubber'
+n=Exception
+m=KeyError
+l=sorted
+k=NotImplementedError
 g='unix'
 f=',\n'
 e='dict'
@@ -50,10 +49,11 @@ try:from ujson import dumps
 except:from json import dumps
 try:from machine import reset
 except N:pass
-try:from collections import OrderedDict as i
-except N:from ucollections import OrderedDict as i
+try:from collections import OrderedDict as h
+except N:from ucollections import OrderedDict as h
 __version__='v1.24.0'
-A2=2
+A1=2
+A2=44
 A3=2
 A7=['lib','/lib','/sd/lib','/flash/lib',K]
 class J:
@@ -70,13 +70,13 @@ class J:
 		if A.level<=J.WARNING:A.prnt('WARN  :',msg)
 	def error(A,msg):
 		if A.level<=J.ERROR:A.prnt('ERROR :',msg)
-A=J.getLogger(p)
+A=J.getLogger(o)
 J.basicConfig(level=J.INFO)
 class Stubber:
 	def __init__(B,path=D,firmware_id=D):
 		C=firmware_id
 		try:
-			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise l('MicroPython 1.13.0 cannot be stubbed')
+			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise k('MicroPython 1.13.0 cannot be stubbed')
 		except I:pass
 		B.info=_info();A.info('Port: {}'.format(B.info[L]));A.info('Board: {}'.format(B.info[T]));F.collect()
 		if C:B._fwid=C.lower()
@@ -98,15 +98,15 @@ class Stubber:
 				D=getattr(H,A)
 				try:E=Z(type(D)).split("'")[1]
 				except O:E=B
-				if E in{q,r,s,t,c,d,e}:G=1
-				elif E in{u,v}:G=2
+				if E in{p,q,r,s,c,d,e}:G=1
+				elif E in{t,u}:G=2
 				elif E in'class':G=3
 				else:G=4
 				C.append((A,Z(D),Z(type(D)),D,G))
 			except I as J:K.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(A,H,J))
 			except MemoryError as J:Q('MemoryError: {}'.format(J));sleep(1);reset()
-		C=m([A for A in C if not A[0].startswith('__')],key=lambda x:x[4]);F.collect();return C,K
-	def add_modules(A,modules):A.modules=m(set(A.modules)|set(modules))
+		C=l([A for A in C if not A[0].startswith('__')],key=lambda x:x[4]);F.collect();return C,K
+	def add_modules(A,modules):A.modules=l(set(A.modules)|set(modules))
 	def create_all_stubs(B):
 		A.info('Start micropython-stubber {} on {}'.format(__version__,B._fwid));B.report_start();F.collect()
 		for C in B.modules:B.create_one_stub(C)
@@ -128,18 +128,18 @@ class Stubber:
 		try:M=__import__(C,D,D,'*');P=F.mem_free();A.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,L,P))
 		except N:return H
 		X(I)
-		with R(I,'w')as O:Q=str(J.info).replace('OrderedDict(',B).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,Q,__version__);O.write(S);O.write('from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(O,M,C,B)
+		with R(I,'w')as O:Q=str(J.info).replace('OrderedDict(',B).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,Q,__version__);O.write(S);O.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(O,M,C,B)
 		J.report_add(C,I)
-		if C not in{'os',w,x,'gc'}:
+		if C not in{'os',v,w,'gc'}:
 			try:del M
-			except(E,n):A.warning('could not del new_module')
+			except(E,m):A.warning('could not del new_module')
 		F.collect();return V
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
-		Z=' at ...>';Y='generator';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
+		Y=' at ...>';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
 		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
-		a,P=L.get_obj_attributes(M)
+		Z,P=L.get_obj_attributes(M)
 		if P:A.error(P)
-		for(C,H,I,b,g)in a:
+		for(C,H,I,a,f)in Z:
 			if C in['classmethod','staticmethod','BaseException',N]:continue
 			if C[0].isdigit():A.warning('NameError: invalid name {}'.format(C));continue
 			if I=="<class 'type'>"and S(E)<=A3*4:
@@ -147,8 +147,8 @@ class Stubber:
 				if R:Q=N
 				D='\n{}class {}({}):\n'.format(E,C,Q)
 				if R:D+=E+'    ...\n';J.write(D);continue
-				J.write(D);L.write_object_stub(J,b,'{0}.{1}'.format(obj_name,C),E+'    ',O+1);D=E+'    def __init__(self, *argv, **kwargs) -> None:\n';D+=E+'        ...\n\n';J.write(D)
-			elif any(A in I for A in[v,u,'closure']):
+				J.write(D);L.write_object_stub(J,a,'{0}.{1}'.format(obj_name,C),E+'    ',O+1);D=E+'    def __init__(self, *argv, **kwargs) -> None:\n';D+=E+'        ...\n\n';J.write(D)
+			elif any(A in I for A in[u,t,'closure']):
 				T=V;U=B
 				if O>0:U='self, '
 				if W in I or W in H:D='{}@classmethod\n'.format(E)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(E,C,T)
@@ -157,17 +157,16 @@ class Stubber:
 			elif I=="<class 'module'>":0
 			elif I.startswith("<class '"):
 				G=I[8:-2];D=B
-				if G in(s,q,r,t,'bytearray','bytes'):
+				if G in(r,p,q,s,'bytearray','bytes'):
 					if C.upper()==C:D='{0}{1}: Final[{3}] = {2}\n'.format(E,C,H,G)
 					else:D=X.format(E,C,H,G)
-				elif G in(e,d,c):f={e:'{}',d:'[]',c:'()'};D=X.format(E,C,f[G],G)
-				elif G in('object','set','frozenset','Pin',Y):
-					if G==Y:G='Generator'
-					D='{0}{1}: {2} ## = {4}\n'.format(E,C,G,I,H)
+				elif G in(e,d,c):b={e:'{}',d:'[]',c:'()'};D=X.format(E,C,b[G],G)
+				elif G in('object','set','frozenset','Pin'):D='{0}{1}: {2} ## = {4}\n'.format(E,C,G,I,H)
+				elif G=='generator':G='Generator';D='{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n'.format(E,C,G,I,H)
 				else:
 					G=V
-					if K in H:H=H.split(K)[0]+Z
-					if K in H:H=H.split(K)[0]+Z
+					if K in H:H=H.split(K)[0]+Y
+					if K in H:H=H.split(K)[0]+Y
 					D='{0}{1}: {2} ## {3} = {4}\n'.format(E,C,G,I,H)
 				J.write(D)
 			else:J.write("# all other, type = '{0}'\n".format(I));J.write(E+C+' # type: Incomplete\n')
@@ -182,26 +181,26 @@ class Stubber:
 		try:os.stat(path);F=os.listdir(path)
 		except(E,I):return
 		for G in F:
-			B=y.format(path,G)
+			B=x.format(path,G)
 			try:os.remove(B)
 			except E:
 				try:C.clean(B);os.rmdir(B)
 				except E:pass
 	def report_start(B,filename='modules.json'):
-		H='firmware';B._json_name=y.format(B.path,filename);B._json_first=V;X(B._json_name);A.info('Report file: {}'.format(B._json_name));F.collect()
+		H='firmware';B._json_name=x.format(B.path,filename);B._json_first=V;X(B._json_name);A.info('Report file: {}'.format(B._json_name));F.collect()
 		try:
-			with R(B._json_name,'w')as G:G.write('{');G.write(dumps({H:B.info})[1:-1]);G.write(f);G.write(dumps({p:{C:__version__},'stubtype':H})[1:-1]);G.write(f);G.write('"modules" :[\n')
-		except E as I:A.error(z);B._json_name=D;raise I
+			with R(B._json_name,'w')as G:G.write('{');G.write(dumps({H:B.info})[1:-1]);G.write(f);G.write(dumps({o:{C:__version__},'stubtype':H})[1:-1]);G.write(f);G.write('"modules" :[\n')
+		except E as I:A.error(y);B._json_name=D;raise I
 	def report_add(B,module_name,stub_file):
-		if not B._json_name:raise o(A0)
+		if not B._json_name:raise n(z)
 		try:
 			with R(B._json_name,'a')as C:
 				if not B._json_first:C.write(f)
 				else:B._json_first=H
 				D='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',G));C.write(D)
-		except E:A.error(z)
+		except E:A.error(y)
 	def report_end(B):
-		if not B._json_name:raise o(A0)
+		if not B._json_name:raise n(z)
 		with R(B._json_name,'a')as C:C.write('\n]}')
 		A.info('Path: {}'.format(B.path))
 def X(path):
@@ -212,7 +211,7 @@ def X(path):
 			C=path[0]if B==0 else path[:B]
 			try:I=os.stat(C)
 			except E as F:
-				if F.args[0]==A2:
+				if F.args[0]in[A1,A2]:
 					try:A.debug('Create folder {}'.format(C));os.mkdir(C)
 					except E as H:A.error('failed to create folder {}'.format(C));raise H
 		D=B+1
@@ -226,12 +225,12 @@ def Y(s):
 	if not W in s:return B
 	A=s.split(W)[1].split(K)[1];return A
 def _info():
-	X='ev3-pybricks';V='pycopy';U='win32';S='arch';R='cpu';Q='ver';F='mpy';E='build'
+	Z='ev3-pybricks';X='pycom';V='pycopy';U='win32';S='arch';R='cpu';Q='ver';F='mpy';E='build'
 	try:J=sys.implementation[0]
 	except a:J=sys.implementation.name
-	A=i({P:J,C:B,E:B,Q:B,L:sys.platform,T:'UNKNOWN',R:B,F:B,S:B})
+	A=h({P:J,C:B,E:B,Q:B,L:sys.platform,T:'UNKNOWN',R:B,F:B,S:B})
 	if A[L].startswith('pyb'):A[L]='stm32'
-	elif A[L]==U:A[L]=A1
+	elif A[L]==U:A[L]=A0
 	elif A[L]=='linux':A[L]=g
 	try:A[C]=A4(sys.implementation.version)
 	except I:pass
@@ -245,12 +244,12 @@ def _info():
 		elif C in M(sys):A[E]=Y(sys.version)
 	except(I,O,a):pass
 	if A[C]==B and sys.platform not in(g,U):
-		try:Z=os.uname();A[C]=Z.release
+		try:c=os.uname();A[C]=c.release
 		except(O,I,a):pass
-	for(c,d,e)in[(V,V,'const'),(h,h,'FAT'),(X,'pybricks.hubs','EV3Brick')]:
-		try:f=__import__(d,D,D,e);A[P]=c;del f;break
-		except(N,n):pass
-	if A[P]==X:A['release']='2.0.0'
+	for(d,e,f)in[(V,V,'const'),(X,X,'FAT'),(Z,'pybricks.hubs','EV3Brick')]:
+		try:i=__import__(e,D,D,f);A[P]=d;del i;break
+		except(N,m):pass
+	if A[P]==Z:A['release']='2.0.0'
 	if A[P]==b:
 		A[C]
 		if A[C]and A[C].endswith('.0')and A[C]>='1.10.0'and A[C]<='1.19.9':A[C]=A[C][:-2]
@@ -283,20 +282,20 @@ def A6(filename):
 		if os.stat(filename)[0]>>14:return V
 		return H
 	except E:return H
-def j():Q("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
+def i():Q("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
 def read_path():
 	path=B
 	if S(sys.argv)==3:
 		A=sys.argv[1].lower()
 		if A in('--path','-p'):path=sys.argv[2]
-		else:j()
-	elif S(sys.argv)==2:j()
+		else:i()
+	elif S(sys.argv)==2:i()
 	return path
-def k():
-	try:A=bytes('abc',encoding='utf8');B=k.__module__;return H
-	except(l,I):return V
-def main():stubber=Stubber(path=read_path());stubber.clean();stubber.modules=['WM8960','_OTA','_asyncio','_boot_fat','_coap','_espnow','_flash_control_OTA','_main_pybytes','_mqtt','_mqtt_core','_msg_handl','_onewire','_periodical_pin','_pybytes','_pybytes_ca','_pybytes_config','_pybytes_config_reader','_pybytes_connection','_pybytes_constants','_pybytes_debug','_pybytes_library','_pybytes_machine_learning','_pybytes_main','_pybytes_protocol','_pybytes_pyconfig','_pybytes_pymesh_config','_rp2','_terminal','_thread','_uasyncio','_urequest','adcfft','aioble/__init__','aioble/central','aioble/client','aioble/core','aioble/device','aioble/l2cap','aioble/peripheral','aioble/security','aioble/server','aioespnow','ak8963','apa102','apa106','argparse','array','asyncio/__init__','asyncio/core','asyncio/event','asyncio/funcs','asyncio/lock','asyncio/stream','binascii','bluetooth','breakout_as7262','breakout_bh1745','breakout_bme280','breakout_bme68x','breakout_bmp280','breakout_dotmatrix','breakout_encoder','breakout_icp10125','breakout_ioexpander','breakout_ltr559','breakout_matrix11x7','breakout_mics6814','breakout_msa301','breakout_paa5100','breakout_pmw3901','breakout_potentiometer','breakout_rgbmatrix5x5','breakout_rtc','breakout_scd41','breakout_sgp30','breakout_trackball','breakout_vl53l5cx','btree','builtins','cc3200','cmath','collections','crypto','cryptolib','curl','deflate','dht','display','display_driver_utils','ds18x20','embed','encoder','errno','esp','esp32','esp8266','espidf','espnow','ffi','flashbdev','framebuf','freesans20','fs_driver','functools','galactic','gc','gfx_pack','gsm','hashlib','heapq','hub75','ili9341','ili9XXX','imagetools','inisetup','interstate75','io','jpegdec','js','jsffi','json','lcd160cr','lodepng',x,'lsm6dsox','lv_colors','lv_utils','lvgl','lwip','machine','marshal','math','microWebSocket','microWebSrv','microWebTemplate',b,'mimxrt','mip','mip/__init__','mip/__main__','motor','mpu6500','mpu9250','neopixel','network','nrf','ntptime','onewire','openamp','os','pcf85063a','pic16bit','picoexplorer','picographics','picokeypad','picoscroll','picounicorn','picowireless','pimoroni','pimoroni_bus','pimoroni_i2c','plasma','platform','powerpc','pyb',h,'pye','qemu','qrcode','queue','random','renesas','renesas-ra','requests','requests/__init__','rp2','rtch','samd','select','servo','socket','ssd1306','ssh','ssl','stm','stm32','struct',w,'termios','time','tls','tpcalib','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','uasyncio/tasks','ubinascii','ubluetooth','ucollections','ucrypto','ucryptolib','uctypes','uerrno','uftpd','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/__init__','umqtt/robust','umqtt/simple',g,'uos','uplatform','uqueue','urandom','ure','urequests','urllib/urequest','usb/device','usb/device/cdc','usb/device/hid','usb/device/keyboard','usb/device/midi','usb/device/mouse','uselect','usocket','ussl','ustruct','usys','utelnetserver','utime','utimeq','uwebsocket','uzlib',C,'vfs','webassembly','websocket','websocket_helper',A1,'wipy','writer','xpt2046','ymodem','zephyr','zlib'];F.collect();stubber.create_all_stubs()
-if __name__=='__main__'or k():
+def j():
+	try:A=bytes('abc',encoding='utf8');B=j.__module__;return H
+	except(k,I):return V
+def main():stubber=Stubber(path=read_path());stubber.clean();stubber.modules=['WM8960','_asyncio','_boot_fat','_espnow','_onewire','_rp2','_thread','_uasyncio','abc','adcfft','aioble/__init__','aioble/central','aioble/client','aioble/core','aioble/device','aioble/l2cap','aioble/peripheral','aioble/security','aioble/server','aioespnow','ak8963','apa102','apa106','argparse','array','asyncio/__init__','asyncio/core','asyncio/event','asyncio/funcs','asyncio/lock','asyncio/stream','base64','binascii','bluetooth','breakout_as7262','breakout_bh1745','breakout_bme280','breakout_bme68x','breakout_bmp280','breakout_dotmatrix','breakout_encoder','breakout_icp10125','breakout_ioexpander','breakout_ltr559','breakout_matrix11x7','breakout_mics6814','breakout_msa301','breakout_paa5100','breakout_pmw3901','breakout_potentiometer','breakout_rgbmatrix5x5','breakout_rtc','breakout_scd41','breakout_sgp30','breakout_trackball','breakout_vl53l5cx','btree','builtins','cc3200','cmath','collections','collections/__init__','collections/defaultdict','copy','crypto','cryptolib','curl','datetime','deflate','dht','display','display_driver_utils','ds18x20','embed','encoder','errno','esp','esp32','esp8266','espidf','espnow','ffi','flashbdev','fnmatch','framebuf','freesans20','fs_driver','functools','galactic','gc','gfx_pack','gsm','gzip','hashlib','heapq','hmac','html/__init__','hub75','ili9341','ili9XXX','imagetools','inisetup','inspect','interstate75','io','itertools','jpegdec','js','jsffi','json','lcd160cr','locale','lodepng',w,'lsm6dsox','lv_colors','lv_utils','lvgl','lwip','machine','marshal','math','microWebSocket','microWebSrv','microWebTemplate',b,'mimxrt','mip','mip/__init__','mip/__main__','motor','mpu6500','mpu9250','neopixel','network','nrf','ntptime','onewire','openamp','operator','os','os/__init__','os/path','pathlib','pcf85063a','pic16bit','picoexplorer','picographics','picokeypad','picoscroll','picounicorn','picowireless','pimoroni','pimoroni_bus','pimoroni_i2c','plasma','platform','powerpc','pyb','pye','pyscript','pyscript/__init__','pyscript/fs','qemu','qrcode','random','renesas','renesas-ra','requests','requests/__init__','rp2','rtch','samd','select','servo','socket','ssd1306','ssh','ssl','stat','stm','stm32','string','struct',v,'tarfile/__init__','tarfile/write','termios','time','tls','tpcalib','types','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','uasyncio/tasks','ubinascii','ubluetooth','ucollections','ucryptolib','uctypes','uerrno','uftpd','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/__init__','umqtt/robust','umqtt/simple','unittest/__init__',g,'uos','uplatform','urandom','ure','urequests','urllib/urequest','usb/device','usb/device/cdc','usb/device/hid','usb/device/keyboard','usb/device/midi','usb/device/mouse','uselect','usocket','ussl','ustruct','usys','utelnetserver','utime','utimeq','uu','uwebsocket','uzlib',C,'vfs','webassembly','websocket','websocket_helper',A0,'wipy','writer','xpt2046','ymodem','zephyr','zlib'];F.collect();stubber.create_all_stubs()
+if __name__=='__main__'or j():
 	if not A6('no_auto_stubber.txt'):
 		Q(f"createstubs.py: {__version__}")
 		try:F.threshold(4096);F.enable()
