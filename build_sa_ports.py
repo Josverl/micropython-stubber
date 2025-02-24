@@ -35,6 +35,10 @@ def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_di
     # create the destination directory
     
     port_path = fw_path / board.port.name
+    if board.port.name == "webassembly":
+        # all webassembly binaries need to be in a single folder 
+        port_path = fw_path / f"{board.name}-{variant}-{version}"
+
     port_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -42,6 +46,9 @@ def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_di
         if file.suffix in {".map", ".dis"}:
             # skip these extensions
             continue
+        elif board.port.name == "webassembly":
+            # unchanged name, all in shared folder per version
+            dest_name = file.name
         elif len(file.suffix) > 1:
             dest_name = f"{board.name}-{variant}-{version}{file.suffix}"
         else:
