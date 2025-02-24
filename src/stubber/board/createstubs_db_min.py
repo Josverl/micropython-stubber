@@ -38,8 +38,8 @@ L='port'
 K='.'
 I=AttributeError
 H=False
-G='/'
-E=None
+G=None
+E='/'
 D=OSError
 C='version'
 B=''
@@ -73,7 +73,7 @@ class J:
 A=J.getLogger(t)
 J.basicConfig(level=J.INFO)
 class Stubber:
-	def __init__(B,path=E,firmware_id=E):
+	def __init__(B,path=B,firmware_id=B):
 		C=firmware_id
 		try:
 			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise o('MicroPython 1.13.0 cannot be stubbed')
@@ -84,12 +84,12 @@ class Stubber:
 		else:B._fwid='{family}-v{version}-{port}'.format(**B.info)
 		B._start_free=F.mem_free()
 		if path:
-			if path.endswith(G):path=path[:-1]
+			if path.endswith(E):path=path[:-1]
 		else:path=get_root()
-		B.path='{}/stubs/{}'.format(path,B.flat_fwid).replace('//',G)
-		try:X(path+G)
+		B.path='{}/stubs/{}'.format(path,B.flat_fwid).replace('//',E)
+		try:X(path+E)
 		except D:A.error('error creating stub folder {}'.format(path))
-		B.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];B.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];B.modules=[];B._json_name=E;B._json_first=H
+		B.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];B.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];B.modules=[];B._json_name=G;B._json_first=H
 	def get_obj_attributes(L,item_instance):
 		H=item_instance;C=[];K=[]
 		for A in N(H):
@@ -115,17 +115,17 @@ class Stubber:
 		B=module_name
 		if B in C.problematic:A.warning('Skip module: {:<25}        : Known problematic'.format(B));return H
 		if B in C.excluded:A.warning('Skip module: {:<25}        : Excluded'.format(B));return H
-		I='{}/{}.pyi'.format(C.path,B.replace(K,G));F.collect();E=H
-		try:E=C.create_module_stub(B,I)
+		I='{}/{}.pyi'.format(C.path,B.replace(K,E));F.collect();G=H
+		try:G=C.create_module_stub(B,I)
 		except D:return H
-		F.collect();return E
-	def create_module_stub(J,module_name,file_name=E):
+		F.collect();return G
+	def create_module_stub(J,module_name,file_name=G):
 		I=file_name;C=module_name
-		if I is E:L=C.replace(K,'_')+'.pyi';I=J.path+G+L
-		else:L=I.split(G)[-1]
-		if G in C:C=C.replace(G,K)
-		N=E
-		try:N=__import__(C,E,E,'*');Q=F.mem_free();A.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,L,Q))
+		if I is G:L=C.replace(K,'_')+'.pyi';I=J.path+E+L
+		else:L=I.split(E)[-1]
+		if E in C:C=C.replace(E,K)
+		N=G
+		try:N=__import__(C,G,G,'*');Q=F.mem_free();A.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,L,Q))
 		except O:return H
 		X(I)
 		with M(I,h)as P:R=c(J.info).replace('OrderedDict(',B).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,R,__version__);P.write(S);P.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(P,N,C,B)
@@ -175,13 +175,13 @@ class Stubber:
 		A=self._fwid;B=' .()/\\:$'
 		for C in B:A=A.replace(C,'_')
 		return A
-	def clean(C,path=E):
-		if path is E:path=C.path
+	def clean(C,path=B):
+		if not path:path=C.path
 		A.info('Clean/remove files in folder: {}'.format(path))
-		try:os.stat(path);F=os.listdir(path)
+		try:os.stat(path);E=os.listdir(path)
 		except(D,I):return
-		for G in F:
-			B=i.format(path,G)
+		for F in E:
+			B=i.format(path,F)
 			try:os.remove(B)
 			except D:
 				try:C.clean(B);os.rmdir(B)
@@ -189,32 +189,32 @@ class Stubber:
 	def report_start(B,filename=j):
 		H='firmware';B._json_name=i.format(B.path,filename);B._json_first=T;X(B._json_name);A.info('Report file: {}'.format(B._json_name));F.collect()
 		try:
-			with M(B._json_name,h)as G:G.write('{');G.write(dumps({H:B.info})[1:-1]);G.write(k);G.write(dumps({t:{C:__version__},'stubtype':H})[1:-1]);G.write(k);G.write('"modules" :[\n')
-		except D as I:A.error(A1);B._json_name=E;raise I
+			with M(B._json_name,h)as E:E.write('{');E.write(dumps({H:B.info})[1:-1]);E.write(k);E.write(dumps({t:{C:__version__},'stubtype':H})[1:-1]);E.write(k);E.write('"modules" :[\n')
+		except D as I:A.error(A1);B._json_name=G;raise I
 	def report_add(B,module_name,stub_file):
 		if not B._json_name:raise s(A2)
 		try:
 			with M(B._json_name,'a')as C:
 				if not B._json_first:C.write(k)
 				else:B._json_first=H
-				E='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',G));C.write(E)
+				F='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',E));C.write(F)
 		except D:A.error(A1)
 	def report_end(B):
 		if not B._json_name:raise s(A2)
 		with M(B._json_name,'a')as C:C.write('\n]}')
 		A.info('Path: {}'.format(B.path))
 def X(path):
-	B=E=0
+	B=F=0
 	while B!=-1:
-		B=path.find(G,E)
+		B=path.find(E,F)
 		if B!=-1:
 			C=path[0]if B==0 else path[:B]
 			try:I=os.stat(C)
-			except D as F:
-				if F.args[0]in[A3,A4]:
+			except D as G:
+				if G.args[0]in[A3,A4]:
 					try:A.debug('Create folder {}'.format(C));os.mkdir(C)
 					except D as H:A.error('failed to create folder {}'.format(C));raise H
-		E=B+1
+		F=B+1
 def Y(s):
 	C=' on '
 	if not s:return B
@@ -225,16 +225,16 @@ def Y(s):
 	if not W in s:return B
 	A=s.split(W)[1].split(K)[1];return A
 def _info():
-	a='ev3-pybricks';Z='pycom';X='pycopy';V='unix';T='win32';R='arch';P='cpu';M='ver';F='mpy';D='build'
+	a='ev3-pybricks';Z='pycom';X='pycopy';V='unix';T='win32';R='arch';P='cpu';M='ver';E='mpy';D='build'
 	try:J=sys.implementation[0]
 	except d:J=sys.implementation.name
-	A=l({S:J,C:B,D:B,M:B,L:sys.platform,U:'UNKNOWN',P:B,F:B,R:B})
+	A=l({S:J,C:B,D:B,M:B,L:sys.platform,U:'UNKNOWN',P:B,E:B,R:B})
 	if A[L].startswith('pyb'):A[L]='stm32'
 	elif A[L]==T:A[L]='windows'
 	elif A[L]=='linux':A[L]=V
 	try:A[C]=A7(sys.implementation.version)
 	except I:pass
-	try:K=sys.implementation._machine if'_machine'in N(sys.implementation)else os.uname().machine;A[U]=K;A[P]=K.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
+	try:K=sys.implementation._machine if'_machine'in N(sys.implementation)else os.uname().machine;A[U]=K;A[P]=K.split('with')[-1].strip();A[E]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if E in N(sys.implementation)else B
 	except(I,Q):pass
 	A[U]=A8()
 	try:
@@ -247,18 +247,18 @@ def _info():
 		try:b=os.uname();A[C]=b.release
 		except(Q,I,d):pass
 	for(c,e,f)in[(X,X,'const'),(Z,Z,'FAT'),(a,'pybricks.hubs','EV3Brick')]:
-		try:g=__import__(e,E,E,f);A[S]=c;del g;break
+		try:g=__import__(e,G,G,f);A[S]=c;del g;break
 		except(O,r):pass
 	if A[S]==a:A['release']='2.0.0'
 	if A[S]==u:
 		A[C]
 		if A[C]and A[C].endswith('.0')and A[C]>='1.10.0'and A[C]<='1.19.9':A[C]=A[C][:-2]
-	if F in A and A[F]:
-		G=int(A[F])
-		try:H=[E,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][G>>10]
+	if E in A and A[E]:
+		F=int(A[E])
+		try:H=[G,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][F>>10]
 		except Q:H='unknown'
 		if H:A[R]=H
-		A[F]='v{}.{}'.format(G&255,G>>8&3)
+		A[E]='v{}.{}'.format(F&255,F>>8&3)
 	if A[D]and not A[C].endswith(W):A[C]=A[C]+W
 	A[M]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
 def A7(version):
@@ -273,7 +273,7 @@ def get_root():
 	try:A=os.getcwd()
 	except(D,I):A=K
 	B=A
-	for B in['/remote','/sd','/flash',G,A,K]:
+	for B in['/remote','/sd','/flash',E,A,K]:
 		try:C=os.stat(B);break
 		except D:continue
 	return B
