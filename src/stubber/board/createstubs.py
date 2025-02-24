@@ -241,7 +241,7 @@ class Stubber:
             )
             fp.write(s)
             fp.write(
-                "from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n"
+                "from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n"
             )
             self.write_object_stub(fp, new_module, module_name, "")
 
