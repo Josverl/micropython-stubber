@@ -92,7 +92,7 @@ logging.basicConfig(level=logging.INFO)
 class Stubber:
     "Generate stubs for modules in firmware"
 
-    def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
+    def __init__(self, path: str = "", firmware_id: str = ""):  # type: ignore
         try:
             if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
@@ -414,9 +414,9 @@ class Stubber:
             s = s.replace(c, "_")
         return s
 
-    def clean(self, path: str = None):  # type: ignore
+    def clean(self, path: str = ""):  # type: ignore
         "Remove all files from the stub folder"
-        if path is None:
+        if not path:
             path = self.path
         log.info("Clean/remove files in folder: {}".format(path))
         try:
@@ -726,11 +726,11 @@ def is_micropython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore # lgtm [py/unused-local-variable]
+        b = bytes("abc", encoding="utf8")  # type: ignore
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore # lgtm [py/unused-local-variable]
+        c = is_micropython.__module__  # type: ignore
         return False
     except (NotImplementedError, AttributeError):
         return True
