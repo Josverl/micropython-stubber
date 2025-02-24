@@ -66,14 +66,14 @@
     "files.watcherExclude": {
         "**/repos/**": true
     },
-    "editor.formatOnType": false,
+    "editor.formatOnType": true,
     "editor.formatOnSave": true,
     "yaml.schemas": {
         "https://docs.sourcery.ai/resources/sourcery_yaml_schema.json": ".sourcery.yaml"
     },
-    "editor.formatOnSaveMode": "file",
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.insertSpaces": true,
         "editor.tabSize": 4,
         "editor.formatOnSave": true
@@ -81,5 +81,7 @@
     "todo-tree.tree.scanMode": "open files",
     "austin.mode": "Wall time",
     "austin.binaryMode": true,
-    "python.languageServer": "Pylance"
+    "python.languageServer": "Pylance",
+    "ruff.fixAll": false,
+    "ruff.lint.enable": false
 }

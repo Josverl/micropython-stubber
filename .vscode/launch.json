@@ -39,8 +39,8 @@
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
-                "-VV",
-                "build",
+                // "-VV",
+                "merge",
                 "--port",
                 "rp2",
                 "--board",
