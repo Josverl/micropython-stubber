@@ -648,8 +648,10 @@ class PoetryBuilder(Builder):
         try:
             with open(_toml, "rb") as f:
                 pyproject = tomllib.load(f)
-            # pyproject["tool"]["poetry"]["version"] = version
-            pyproject["project"]["version"] = version
+            if "project"  in pyproject:
+                pyproject["project"]["version"] = version
+            else:
+                pyproject["tool"]["poetry"]["version"] = version
             # update the version in the toml file
             with open(_toml, "wb") as output:
                 tomli_w.dump(pyproject, output)
@@ -759,10 +761,13 @@ class PoetryBuilder(Builder):
                 raise (e)
 
         # update the name , version and description of the package
-        # _pyproject["tool"]["poetry"]["name"] = self.package_name
-        # _pyproject["tool"]["poetry"]["description"] = self.description
-        _pyproject["project"]["name"] = self.package_name
-        _pyproject["project"]["description"] = self.description
+        if 'project' in _pyproject:
+            _pyproject["project"]["name"] = self.package_name
+            _pyproject["project"]["description"] = self.description
+        else: 
+            _pyproject["tool"]["poetry"]["name"] = self.package_name
+            _pyproject["tool"]["poetry"]["description"] = self.description
+
         # write out the pyproject.toml file
         self.pyproject = _pyproject
 

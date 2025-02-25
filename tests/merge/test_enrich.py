@@ -1,13 +1,10 @@
 from pathlib import Path
 
 import pytest
-from stubber.codemod.enrich import (
-    enrich_file,
-    enrich_folder,
-    package_from_path,
-    source_target_candidates,
-    upackage_equal,
-)
+
+from stubber.codemod.enrich import (enrich_file, enrich_folder,
+                                    package_from_path,
+                                    source_target_candidates, upackage_equal)
 
 
 def test_package_from_path(tmp_path):
@@ -30,12 +27,12 @@ def test_package_from_path(tmp_path):
         (20, "module1", "module2", False, 0),
         #
         (30, "_module", "module", True, 6),
-        (31, "_module", "_module", True, 6),
+        (31, "_module", "_module", True, 7),
         (32, "module", "_module", True, 6),
         #
         (40, "module.__init__", "module", True, 6),
-        (40, "module.__init__", "module.__init__", True, 6),
-        (40, "module.", "module.__init__", True, 6),
+        (41, "module.__init__", "module.__init__", True, 15),
+        (42, "module.", "module.__init__", True, 6),
         #
         (50, "module.FOO", "module", True, 6),
         (51, "module", "module.FOO", True, 6),
@@ -47,7 +44,7 @@ def test_package_from_path(tmp_path):
 def test_upackage_equal(id, src_pkg, dst_pkg, exp_match, exp_len):
     match, length = upackage_equal(src_pkg, dst_pkg)
     assert match == exp_match
-    assert length == exp_len
+    assert length == exp_len, f"Expected length {exp_len} but got {length}"
 
 
 # Source --> target
