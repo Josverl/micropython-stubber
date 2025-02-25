@@ -4,7 +4,6 @@
 # - test the minified createstubs on  multiple micropyton linux versions
 
 # - upload coverage stats to Codecov
-# - push coverage result to Testspace server
 # - upload artifacts from the results folder
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
@@ -65,11 +64,6 @@ jobs:
               with:
                   fetch-depth: 0
                   # Number of commits to fetch. 0 indicates all history for all branches and tags.
-
-            - uses: testspace-com/setup-testspace@v1
-              continue-on-error: true
-              with:
-                  domain: josverl
 
             #----------------------------------------------
             # poetry is not in the default image
@@ -132,11 +126,6 @@ jobs:
 
             #----------------------------------------------
 
-            - name: Push result to Testspace server
-              if: always() # ignore errors
-              continue-on-error: true
-              run: |
-                  testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
 
             - uses: actions/upload-artifact@v4
               if: always() # ignore errors

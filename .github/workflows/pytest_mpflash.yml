@@ -1,7 +1,6 @@
 # This workflow will :
 # - test mpflash
 # - upload coverage stats to Codecov
-# - push coverage result to Testspace server
 # - upload artifacts from the results folder
 
 name: pytest mpflash
@@ -42,12 +41,6 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-
-            - name: Install testspace client
-              continue-on-error: true
-              uses: testspace-com/setup-testspace@v1
-              with:
-                  domain: josverl
 
             #----------------------------------------------
             # poetry is not in the default image
@@ -105,8 +98,4 @@ jobs:
                   path: results
                   name: mpflash-coverage-mpflash-${{ matrix.python-version }}-${{ matrix.os }}
 
-            - name: Push coverage result to Testspace server
-              if: always() # ignore errors
-              continue-on-error: true
-              run: |
-                  testspace [tests/${{ matrix.os }}/Python_${{ matrix.python-version }}]results/*.xml --link codecov
+
