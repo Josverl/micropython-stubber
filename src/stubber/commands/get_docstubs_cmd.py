@@ -5,14 +5,14 @@ get-docstubs
 
 from pathlib import Path
 from typing import Optional
+
+import rich_click as click
 from packaging.version import Version
 
 import mpflash.basicgit as git
-import rich_click as click
-from mpflash.logger import log
-
-from stubber.codemod.enrich import enrich_folder
 import stubber.utils as utils
+from mpflash.logger import log
+from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG
@@ -65,7 +65,7 @@ from stubber.utils.repos import fetch_repos
     "--enrich",
     is_flag=True,
     default=False,
-    help="Enrich with type information from micropython-reference",
+    help="Enrich with type information from reference/micropython",
     show_default=True,
 )
 @click.pass_context
@@ -129,8 +129,7 @@ def cli_docstubs(
             log.warning(f"Enriching is not supported for version {version}")
         else:
             # !stubber enrich --params-only --source {reference} --dest {docstubs}
-            reference_path = CONFIG.stub_path.parent / "micropython-reference"
-            log.info(f"Enriching from {reference_path}")
+            reference_path = CONFIG.stub_path.parent / "reference/micropython"
             _ = enrich_folder(
                 reference_path,
                 dst_path,

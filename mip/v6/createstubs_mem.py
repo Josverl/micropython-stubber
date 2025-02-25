@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.24.0
+This variant was generated from createstubs.py by micropython-stubber v1.24.2
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -35,7 +35,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.24.0"
-ENOENT = 2
+ENOENT = 2  # on most ports
+ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -82,7 +83,7 @@ logging.basicConfig(level=logging.INFO)
 class Stubber:
     "Generate stubs for modules in firmware"
 
-    def __init__(self, path: str = None, firmware_id: str = None):  # type: ignore
+    def __init__(self, path: str = "", firmware_id: str = ""):  # type: ignore
         try:
             if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
                 raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
@@ -241,7 +242,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any, Generator\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -360,12 +361,16 @@ class Stubber:
                     s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
                 else:
                     # something else
-                    if t in ("object", "set", "frozenset", "Pin", "generator"):  # "FileIO"
+                    if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        if t == "generator":
-                            t = "Generator"
                         s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                    elif t == "generator":
+                        # either a normal or async Generator function
+                        t = "Generator"
+                        s = "{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
@@ -400,9 +405,9 @@ class Stubber:
             s = s.replace(c, "_")
         return s
 
-    def clean(self, path: str = None):  # type: ignore
+    def clean(self, path: str = ""):  # type: ignore
         "Remove all files from the stub folder"
-        if path is None:
+        if not path:
             path = self.path
         log.info("Clean/remove files in folder: {}".format(path))
         try:
@@ -483,7 +488,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] == ENOENT:
+                if e.args[0] in [ENOENT, ENOMESSAGE]:
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)
@@ -712,11 +717,11 @@ def is_micropython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore # lgtm [py/unused-local-variable]
+        b = bytes("abc", encoding="utf8")  # type: ignore
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore # lgtm [py/unused-local-variable]
+        c = is_micropython.__module__  # type: ignore
         return False
     except (NotImplementedError, AttributeError):
         return True
