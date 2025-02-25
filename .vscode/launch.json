@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "CLI: mpflash",
             "type": "debugpy",
@@ -39,8 +40,8 @@
             "module": "stubber.stubber",
             "cwd": "${workspaceFolder}",
             "args": [
-                "-VV",
-                "build",
+                // "-VV",
+                "merge",
                 "--port",
                 "rp2",
                 "--board",

@@ -1,0 +1,21 @@
+# pyscript itself not listed by help('modules')
+pyscript
+pyscript/__init__
+pyscript/fs
+#
+__main__          collections/defaultdict             io                re
+_asyncio          copy              itertools         select
+abc               datetime          js                stat
+array             deflate           jsffi             string
+asyncio/__init__  errno             json              struct
+asyncio/core      fnmatch           locale            sys
+asyncio/event     framebuf          logging           tarfile/__init__
+asyncio/funcs     functools         math              tarfile/write
+asyncio/lock      gc                micropython       time
+base64            gzip              operator          time
+binascii          hashlib           os                types
+binascii          heapq             os/__init__       uctypes
+builtins          hmac              os/path           unittest/__init__
+cmath             html/__init__     pathlib           uu
+collections       inspect           platform          vfs
+collections/__init__                io                random            zlib

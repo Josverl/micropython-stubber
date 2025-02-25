@@ -3,6 +3,7 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         // "pycom.pymakr",
-        "mhutchie.git-graph"
+        "mhutchie.git-graph",
+        "qwtel.sqlite-viewer"
     ]
 }

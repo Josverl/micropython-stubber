@@ -42,7 +42,7 @@ def test_downloaded_firmwares(mocker: MockerFixture, test_fw_path):
         # test for board_id = board.replace("_", "-")
     ],
 )
-@pytest.mark.parametrize("actual", [False, True])  #
+@pytest.mark.parametrize("actual", [False])  # Add True if you want to test agains the actual downloads
 @pytest.mark.parametrize("variants", [False, True])  #
 def test_find_downloaded_firmware(port, board_id, version, OK, test_fw_path, actual: bool, variants: bool):
     if actual:
@@ -92,7 +92,7 @@ def test_find_downloaded_firmware(port, board_id, version, OK, test_fw_path, act
         # test for board_id = board.replace("_", "-")
     ],
 )
-@pytest.mark.parametrize("actual", [False, True])  # , True still fails in CI
+@pytest.mark.parametrize("actual", [False])  # , True still fails in CI
 def test_filter_downloaded_fwlist(port, board_id, version, OK, test_fw_path, actual: bool):
     if actual:
         fw_path = config.firmware_folder

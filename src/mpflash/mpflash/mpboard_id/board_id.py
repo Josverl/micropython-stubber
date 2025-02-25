@@ -9,7 +9,7 @@ from typing import Optional
 from mpflash.errors import MPFlashError
 from mpflash.logger import log
 from mpflash.mpboard_id.store import read_known_boardinfo
-from mpflash.versions import clean_version, get_stable_mp_version
+from mpflash.versions import clean_version, get_preview_mp_version, get_stable_mp_version
 
 
 def find_board_id_by_description(
@@ -64,13 +64,15 @@ def _find_board_id_by_description(
         short_descr = descr.split(" with ")[0]
     if version:
         # filter for matching version
-        if version in ("preview", "stable"):
-            # match last stable
+        if version in ("stable"):
             version = get_stable_mp_version()
+        if version in ("preview", "master"):
+            version = get_preview_mp_version()
         known_versions = sorted({b.version for b in candidate_boards})
         if version not in known_versions:
-            log.trace(f"Version {version} not found in board info, using latest known version {known_versions[-1]}")
-            version = '.'.join(known_versions[-1].split('.')[:2]) # take only major.minor
+            log.trace(known_versions)
+            log.debug(f"Version {version} not found in board info, using latest stable version {get_stable_mp_version()}")
+            version = ".".join(get_stable_mp_version().split(".")[:2])  # take only major.minor
         if version_matches := [b for b in candidate_boards if b.version.startswith(version)]:
             candidate_boards = version_matches
         else:

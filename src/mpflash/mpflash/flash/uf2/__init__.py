@@ -5,6 +5,7 @@ Flash SAMD and RP2 via UF2
 import shutil
 import sys
 from pathlib import Path
+import time
 from typing import Optional
 
 import tenacity
@@ -38,7 +39,21 @@ def flash_uf2(mcu: MPRemoteBoard, fw_file: Path, erase: bool) -> Optional[MPRemo
         log.error(f"UF2 not supported on {mcu.board} on {mcu.serialport}")
         return None
     if erase:
-        log.warning("Erase not (yet) supported on .UF2, skipping erase.")
+        if mcu.port == "rp2":
+            rp2_erase =Path(__file__).parent.joinpath("../../vendor/pico-universal-flash-nuke/universal_flash_nuke.uf2").resolve()
+            log.info(f"Erasing {mcu.port} with {rp2_erase.name}")
+            # optimistic 
+            destination = waitfor_uf2(board_id=mcu.port.upper())
+            if not destination :
+                log.error("Board is not in bootloader mode")
+                return None
+            copy_firmware_to_uf2(rp2_erase, destination)
+            if sys.platform in ["linux"]:
+                dismount_uf2_linux()
+            # allow for MCU restart after erase
+            time.sleep(0.5)
+        else:
+            log.warning(f"Erase not (yet) supported on .UF2, for port {mcu.port}, skipping erase.")
 
     destination = waitfor_uf2(board_id=mcu.port.upper())
 
@@ -84,5 +99,6 @@ def copy_firmware_to_uf2(fw_file: Path, destination: Path):
     Copy the firmware file to the destination,
     Retry 3 times with 1s delay
     """
-    log.info(f"Copying {fw_file} to {destination}.")
+    log.trace(f"Firmware: {fw_file}")
+    log.info(f"Copying {fw_file.name} to {destination}.")
     return shutil.copy(fw_file, destination)

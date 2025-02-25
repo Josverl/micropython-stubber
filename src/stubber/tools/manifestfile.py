@@ -29,6 +29,7 @@ from __future__ import print_function
 import contextlib
 import os
 import sys
+import glob
 import tempfile
 from collections import namedtuple
 
@@ -400,7 +401,7 @@ class ManifestFile:
                 self._metadata.pop()
 
     def _require_from_path(self, library_path, name, version, extra_kwargs):
-        for root, dirnames, filenames in os.walk(library_path): # type: ignore
+        for root, dirnames, filenames in os.walk(library_path):
             if os.path.basename(root) == name and "manifest.py" in filenames:
                 self.include(root, is_require=True, **extra_kwargs)
                 return True
