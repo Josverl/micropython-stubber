@@ -16,7 +16,8 @@ import mpflash.basicgit as git
 from mpflash.logger import log
 from mpflash.mpboard_id import Board
 from mpflash.mpboard_id.store import write_boardinfo_json
-from mpflash.versions import get_preview_mp_version, get_stable_mp_version, micropython_versions
+from mpflash.versions import (get_preview_mp_version, get_stable_mp_version,
+                              micropython_versions)
 
 # look for all mpconfigboard.h files and extract the board name
 # from the #define MICROPY_HW_BOARD_NAME "PYBD_SF6"
@@ -233,7 +234,7 @@ def ask_mpy_path():
         inquirer.Text(
             "mpy_path",
             message="Enter the path to the MicroPython repository",
-            default=".\\repos\\micropython",
+            default="./repos/micropython",
         )
     ]
     if answers := inquirer.prompt(questions):
