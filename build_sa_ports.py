@@ -37,7 +37,7 @@ def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_di
     port_path = fw_path / board.port.name
     if board.port.name == "webassembly":
         # all webassembly binaries need to be in a single folder 
-        port_path = fw_path / f"{board.name}-{variant}-{version}"
+        port_path = fw_path / f"{board.port.name}/{board.name}-{variant}-{version}"
 
     port_path.mkdir(parents=True, exist_ok=True)
 
@@ -146,7 +146,7 @@ def main():
             # ("windows", "standard"),
             # ("unix", "standard"),
             # ("webassembly", "standard", "-lnodefs.js"),
-            ("webassembly", "pyscript",  "-lnodefs.js"),
+            ("webassembly", "pyscript"),
             # ("WEACT_F411_BLACKPILL", "V20_FLASH_4M"),
             # ("RPI_PICO2_W",),
             ],
