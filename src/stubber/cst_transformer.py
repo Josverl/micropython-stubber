@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import libcst as cst
+from libcst import matchers as m
 
 
 @dataclass
@@ -124,7 +125,7 @@ class StubTypingCollector(cst.CSTVisitor):
             # store the first function/method signature
             self.annotations[key] = AnnoValue(type_info=ti)
 
-        if any(dec.decorator.value == "overload" for dec in node.decorators):  # type: ignore
+        if any(m.matches(dec , m.Decorator(decorator=m.Name("overload"))) for dec in node.decorators):
             # and store the overloads
             self.annotations[key].overloads.append(ti)
 

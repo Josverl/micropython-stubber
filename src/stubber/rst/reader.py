@@ -69,19 +69,10 @@ from typing import List, Optional, Tuple
 
 from mpflash.logger import log
 from mpflash.versions import V_PREVIEW
-
-from stubber.rst import (
-    CHILD_PARENT_CLASS,
-    MODULE_GLUE,
-    PARAM_FIXES,
-    PARAM_RE_FIXES,
-    RST_DOC_FIXES,
-    TYPING_IMPORT,
-    ClassSourceDict,
-    FunctionSourceDict,
-    ModuleSourceDict,
-    return_type_from_context,
-)
+from stubber.rst import (CHILD_PARENT_CLASS, MODULE_GLUE, PARAM_FIXES,
+                         PARAM_RE_FIXES, RST_DOC_FIXES, TYPING_IMPORT,
+                         ClassSourceDict, FunctionSourceDict, ModuleSourceDict,
+                         return_type_from_context)
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
 
@@ -782,6 +773,10 @@ class RSTParser(RSTReader):
         self.line_no += counter - 1
         # clean up before returning
         names = [n.strip() for n in names if n.strip() != "etc."]  # remove etc.
+        # Ugly one-off hack 
+        # to remove the '(when DTLS support is enabled)' from the ssl constants
+        # names = [n.replace('(when DTLS support is enabled)', '') for n in names]  
+        
         return names
 
     def parse_data(self):

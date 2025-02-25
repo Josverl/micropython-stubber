@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Union
 
 import pytest
+
 from stubber.codemod.enrich import merge_candidates
 from stubber.publish.candidates import board_candidates
 
@@ -53,19 +54,19 @@ def test_board_candidates(family: str, versions: Union[str, List[str]]):
         # Flakey test
         # (
         #     23,
-        #     "repos/micropython-stubs/micropython-reference",
+        #     "repos/micropython-stubs/reference/micropython",
         #     "tests/data/stub_merge/micropython-v1_24_1-docstubs",
         #     100,
         # ),
         (
             24,
-            "repos/micropython-stubs/micropython-reference",
+            "repos/micropython-stubs/reference/micropython",
             "tests/data/stub_merge/micropython-v1_24_1-docstubs/machine",
             18,
         ),
         (
             25,
-            "repos/micropython-stubs/micropython-reference",
+            "repos/micropython-stubs/reference/micropython",
             "tests/data/stub_merge/micropython-v1_24_1-docstubs/machine/__init__.pyi",
             1,
         ),
@@ -76,3 +77,4 @@ def test_merge_candidates(id, source, target, count):
 
     result = merge_candidates(Path(source), Path(target))
     assert len(result) == count
+    
