@@ -11,15 +11,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
 
 from libcst import ParserSyntaxError
-from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
+from libcst.codemod import (CodemodContext, diff_code,
+                            exec_transform_with_prettyprint)
 from libcst.tool import _default_config  # type: ignore
 
 import stubber.codemod.merge_docstub as merge_docstub
 from mpflash.logger import log
-from stubber.merge_config import (
-    CP_REFERENCE_TO_DOCSTUB,
-    copy_type_modules,
-)
+from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
 
@@ -296,7 +294,7 @@ def enrich_folder(
     if not source_folder.exists():
         raise FileNotFoundError(f"Source {source_folder} does not exist")
     ext = ext or ".py*"
-    log.info(f"Enrich folder {target_folder}/**/*{ext}")
+    log.info(f"Enriching from {source_folder} to {target_folder}/**/*{ext}")
     count = 0
 
     candidates = source_target_candidates(source_folder, target_folder, ext)

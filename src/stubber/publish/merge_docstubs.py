@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from mpflash.logger import log
-
 from stubber.codemod.enrich import enrich_folder
 from stubber.merge_config import RM_MERGED, recreate_umodules, remove_modules
 from stubber.publish.candidates import board_candidates, filter_list
@@ -147,7 +146,7 @@ def refactor_rp2_module(dest_path: Path):
         rp2_file.rename(rp2_folder / "__init__.pyi")
     # copy the asm_pio.pyi file from the reference folder
     for submod in ["rp2/asm_pio.pyi"]:
-        file = CONFIG.mpy_stubs_path / "micropython-reference" / submod
+        file = CONFIG.mpy_stubs_path / "reference/micropython" / submod
         if file.exists():
             shutil.copy(file, rp2_folder / file.name)
             log.info(f" - add rp2/{ file.name}")

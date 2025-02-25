@@ -101,6 +101,9 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
         ".. method:: AIOESPNow._aiter__() / async AIOESPNow.__anext__()",
         ".. method:: AIOESPNow._aiter__()\n            async AIOESPNow.__anext__()",
     ),
+    # appended to in ssl.constant name  - ssl.PROTOCOL_DTLS_CLIENT(when DTLS support is enabled)
+    # Ugly hack to fix the documentation
+    ( '(when DTLS support is enabled)', " : Incomplete # (when DTLS support is enabled)")
 ]
 
 
