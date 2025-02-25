@@ -1,4 +1,12 @@
-"""Create a stub-only package for a specific version of micropython"""
+"""
+Create a stub-only package for a specific 
+- version 
+- port 
+- board 
+of micropython
+
+
+"""
 
 import hashlib
 import json
@@ -10,8 +18,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tenacity
-from mpflash.basicgit import get_git_describe
 
+from mpflash.basicgit import get_git_describe
 from stubber.publish.helpers import get_module_docstring
 
 if sys.version_info >= (3, 11):
@@ -22,10 +30,10 @@ else:
 from typing import NewType
 
 import tomli_w
-from mpflash.logger import log
-from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from packaging.version import Version, parse
 
+from mpflash.logger import log
+from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
@@ -35,10 +43,15 @@ from stubber.utils.config import CONFIG
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
 
-# indicates which stubs will be skipped when copying for these stub sources
+# indicates which stubs will not be copyied from the stub sources
 STUBS_COPY_FILTER = {
     StubSource.FROZEN: [
-        "espnow",  # merged stubs + documentation of the espnow module is better than the info in the forzen stubs
+        "espnow",  # merged stubs + documentation of the espnow module is better than the info in the frozen stubs
+        "collections",  # must be in stdlib
+        "types",  # must be in stdlib
+        "abc",  # must be in stdlib
+        "time",  # must be in stdlib
+        "io",  # must be in stdlib
     ],
     StubSource.FIRMWARE: [
         "builtins",
@@ -359,10 +372,14 @@ class Builder(VersionedPackage):
 
     def copy_folder(self, stub_type: StubSource, src_path: Path):
         Path(self.package_path).mkdir(parents=True, exist_ok=True)
-        for item in (CONFIG.stub_path / src_path).rglob("*"):
+        for item in (CONFIG.stub_path / src_path).rglob("*.pyi"):
             if item.is_file():
                 # filter the 'poorly' decorated files
-                if stub_type in STUBS_COPY_FILTER and item.stem in STUBS_COPY_FILTER[stub_type]:
+                if stub_type in STUBS_COPY_FILTER and (
+                        item.stem in STUBS_COPY_FILTER[stub_type] or 
+                        item.parent.name in STUBS_COPY_FILTER[stub_type]
+                    ):
+                    log.trace(f"Skipping {item.name}")
                     continue
 
                 target = Path(self.package_path) / item.relative_to(CONFIG.stub_path / src_path)
