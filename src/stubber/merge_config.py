@@ -40,6 +40,9 @@ RM_MERGED: Final = (
         "_rp2",  # Leave out for now , to avoid conflicts with the rp2 module
         "pycopy_imphook",  #  pycopy only: not needed in the merged stubs
         # "os",
+        "types", # defined in webassembly pyscript - shadows stdlib
+        "abc", # defined in webassembly pyscript - shadows stdlib
+        # "uos", # ???? problems with mypy & webassembly stubs 
     ]
     + STDLIB_MODULES
     + [f"u{mod}" for mod in U_MODULES]
