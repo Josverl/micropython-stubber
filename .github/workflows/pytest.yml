@@ -85,12 +85,12 @@ jobs:
                   poetry install --with test
                   # use the latest source version of mpflash
 
-            - name: update mpflash to beta for testing
-              if: ${{ matrix.mpflash-version == 'beta' }}
-              run: |
-                  # use poetry's environmnt
-                  poetry run pip uninstall mpflash -y
-                  poetry run pip install src/mpflash
+            # - name: update mpflash to beta for testing
+            #   if: ${{ matrix.mpflash-version == 'beta' }}
+            #   run: |
+            #       # use poetry's environmnt
+            #       poetry run pip uninstall mpflash -y
+            #       poetry run pip install src/mpflash
 
             #----------------------------------------------
             # stubber clone
