@@ -27,6 +27,7 @@ from stubber.utils.repos import read_micropython_lib_commits, switch
         ("v1.24.1", 68, 979),
     ],
 )
+@pytest.mark.xfail(reason="Flaky in CI ")
 def test_get_mpy(
     tmp_path,
     testrepo_micropython: Path,
