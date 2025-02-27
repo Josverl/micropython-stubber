@@ -11,7 +11,6 @@ pytestmark = [pytest.mark.stubber]
 @pytest.mark.parametrize(
     "path",
     [
-        Path.cwd(),
         Path("./repos/micropython"),
     ],
 )

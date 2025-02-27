@@ -1,0 +1,88 @@
+{
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    //////////////////////////////////////////////////////////////
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "peacock.color": "#9b5f28",
+    "peacock.remoteColor": "#e2b991",
+    "cSpell.words": [
+        "asname",
+        "classdef",
+        "functiondef",
+        "intellij",
+        "noblack",
+        "outputjson",
+        "pyrightconfig",
+        "pytestconfig",
+        "rootpath",
+        "stubfile",
+        "typehints",
+        "ufoo",
+        "upackage"
+    ],
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBorder": "#0bb45d",
+        "activityBar.activeBackground": "#c47832",
+        "activityBar.background": "#c47832",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#1a663e",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "commandCenter.border": "#e7e7e799",
+        "editorGroup.border": "#c47832",
+        "panel.border": "#c47832",
+        "sash.hoverBorder": "#c47832",
+        "statusBar.background": "#9b5f28",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#c47832",
+        "statusBarItem.remoteBackground": "#9b5f28",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "tab.activeBorder": "#c47832",
+        "titleBar.activeBackground": "#9b5f28",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#9b5f2899",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "todo-tree.filtering.ignoreGitSubmodules": true,
+    "todo-tree.filtering.excludeGlobs": [
+        "**/node_modules",
+        "**/.venv"
+    ],
+    "todo-tree.general.debug": true,
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "[ ]",
+        "[x]",
+        "DOC",
+        "PYRIGHT"
+    ],
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.terminal.clearBeforeReusing": true,
+    "files.watcherExclude": {
+        "**/repos/**": true
+    },
+    "editor.formatOnType": true,
+    "editor.formatOnSave": true,
+    "yaml.schemas": {
+        "https://docs.sourcery.ai/resources/sourcery_yaml_schema.json": ".sourcery.yaml"
+    },
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
+    "todo-tree.tree.scanMode": "open files",
+    "austin.mode": "Wall time",
+    "austin.binaryMode": true,
+    "python.languageServer": "Pylance",
+    "ruff.fixAll": false,
+    "ruff.lint.enable": false,
+    "python-envs.pythonProjects": []
+}
