@@ -7,7 +7,6 @@
   [![All Contributors](https://img.shields.io/badge/all_contributors-19-green.svg?style=flat-square)](#Contributions)
   <!-- break -->
   [![pytest stubber](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest.yml)
-  [![pytest mpflash](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest_mpflash.yml/badge.svg)](https://github.com/Josverl/micropython-stubber/actions/workflows/pytest_mpflash.yml)
   [![Documentation Status](https://readthedocs.org/projects/micropython-stubber/badge/?version=latest)](https://micropython-stubber.readthedocs.io/en/latest/?badge=latest "Document build status badge")
   <!-- break -->
   [![Open in VSCode](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc
@@ -63,11 +62,8 @@ For more details how to use the stubs please refer to [the documentation on RTD]
 1. The sister-repo [**MicroPython-stubs**][stubs-repo] contains [all stubs][all-stubs] I have collected with the help of others, and which can be used directly.
 That repo also contains examples configuration files that can be easily adopted to your setup.
 
-2. A second repo [micropy-stubs repo][stubs-repo2] maintained by BradenM, also contains stubs, but in a structure only used and distributed by the [micropy-cli](#using-micropy-cli) tool.
-You should use micropy-cli to consume stubs from that repo.
-
-The (stretch) goal is to create a VSCode add-in to simplify the configuration, and allow easy switching between different firmwares and versions.
-
+2. Micropython-stubber uses [MPFlash](https://github.com/Josverl/mpflash?tab=readme-ov-file) in some of its operations.
+   mpflash was formerly hosted in this repo, but has been moved to its own repo.
 
 ## Install and basic usage of the stubber tool
 
@@ -120,7 +116,7 @@ for more info see [**Renaming a branch**](https://docs.github.com/en/repositorie
 
 ## Licensing 
 
-Both `MicroPython-Stubber` and `mpflash` are licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
+`MicroPython-Stubber` is licensed under the MIT license, and all contributions should follow this [LICENSE](LICENSE).
 
 
 # Contributions
@@ -128,6 +124,7 @@ Both `MicroPython-Stubber` and `mpflash` are licensed under the MIT license, and
 <!-- 
 To add via the cli run the following command:
 npx all-contributors-cli add user things
+npx all-contributors-cli generate
 
  - bug
  - tool
@@ -147,7 +144,7 @@ npx all-contributors-cli add user things
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4?s=100" width="100px;" alt="Jos Verlinde"/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=josverl" title="Code">💻</a> <a href="#research-josverl" title="Research">🔬</a> <a href="#ideas-josverl" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-josverl" title="Content">🖋</a> <a href="#stubs-josverl" title="MicroPython stubs">🖍️</a> <a href="#test-josverl" title="Test">✅</a> <a href="#mpflash-josverl" title="mpflash">💥</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Josverl"><img src="https://avatars2.githubusercontent.com/u/981654?v=4?s=100" width="100px;" alt="Jos Verlinde"/><br /><sub><b>Jos Verlinde</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=josverl" title="Code">💻</a> <a href="#research-josverl" title="Research">🔬</a> <a href="#ideas-josverl" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-josverl" title="Content">🖋</a> <a href="#stubs-josverl" title="MicroPython stubs">🖍️</a> <a href="#test-josverl" title="Test">✅</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://thonny.org/"><img src="https://avatars1.githubusercontent.com/u/46202078?v=4?s=100" width="100px;" alt="Thonny, Python IDE for beginners"/><br /><sub><b>Thonny, Python IDE for beginners</b></sub></a><br /><a href="#ideas-thonny" title="Ideas, Planning, & Feedback">🤔</a> <a href="#research-thonny" title="Research">🔬</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://micropython.org/"><img src="https://avatars1.githubusercontent.com/u/6298560?v=4?s=100" width="100px;" alt="MicroPython"/><br /><sub><b>MicroPython</b></sub></a><br /><a href="#data-micropython" title="Data">🔣</a> <a href="#stubs-micropython" title="MicroPython stubs">🖍️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/microsoft/pyright"><img src="https://avatars.githubusercontent.com/u/6154722?v=4?s=100" width="100px;" alt="pyright"/><br /><sub><b>pyright</b></sub></a><br /><a href="#tool-pyright" title="Tools">🔧</a></td>
@@ -176,23 +173,6 @@ npx all-contributors-cli add user things
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yegorLitvinov"><img src="https://avatars.githubusercontent.com/u/20367310?v=4?s=100" width="100px;" alt="Egor Litvinov"/><br /><sub><b>Egor Litvinov</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/issues?q=author%3AyegorLitvinov" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/samskiter"><img src="https://avatars.githubusercontent.com/u/1271643?v=4?s=100" width="100px;" alt="Sam Duke"/><br /><sub><b>Sam Duke</b></sub></a><br /><a href="https://github.com/Josverl/micropython-stubber/commits?author=samskiter" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/shariltumin"><img src="https://avatars.githubusercontent.com/u/186120?v=4?s=100" width="100px;" alt="shariltumin"/><br /><sub><b>shariltumin</b></sub></a><br /><a href="#mpflash-shariltumin" title="mpflash">💥</a> <a href="#test-shariltumin" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mattytrentini"><img src="https://avatars.githubusercontent.com/u/194201?v=4?s=100" width="100px;" alt="Matt Trentini"/><br /><sub><b>Matt Trentini</b></sub></a><br /><a href="#mpflash-mattytrentini" title="mpflash">💥</a> <a href="#test-mattytrentini" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://scruss.com/blog/"><img src="https://avatars.githubusercontent.com/u/425706?v=4?s=100" width="100px;" alt="Stewart Russell"/><br /><sub><b>Stewart Russell</b></sub></a><br /><a href="#mpflash-scruss" title="mpflash">💥</a> <a href="#test-scruss" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://www.gitlab.com/alelec"><img src="https://avatars.githubusercontent.com/u/3318786?v=4?s=100" width="100px;" alt="Andrew Leech"/><br /><sub><b>Andrew Leech</b></sub></a><br /><a href="#mpflash-andrewleech" title="mpflash">💥</a> <a href="#test-andrewleech" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/wovo"><img src="https://avatars.githubusercontent.com/u/9039468?v=4?s=100" width="100px;" alt="Wouter van Ooijen"/><br /><sub><b>Wouter van Ooijen</b></sub></a><br /><a href="#mpflash-wovo" title="mpflash">💥</a> <a href="#test-wovo" title="Test">✅</a></td>
-    </tr>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/shaneapowell"><img src="https://avatars.githubusercontent.com/u/12113620?v=4?s=100" width="100px;" alt="Shane Powell"/><br /><sub><b>Shane Powell</b></sub></a><br /><a href="#mpflash-shaneapowell" title="mpflash">💥</a> <a href="#test-shaneapowell" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/robert-hh"><img src="https://avatars.githubusercontent.com/u/12476868?v=4?s=100" width="100px;" alt="Robert Hammelrath"/><br /><sub><b>Robert Hammelrath</b></sub></a><br /><a href="#mpflash-robert-hh" title="mpflash">💥</a> <a href="#test-robert-hh" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/beetlegigg"><img src="https://avatars.githubusercontent.com/u/34552737?v=4?s=100" width="100px;" alt="Bg"/><br /><sub><b>Bg</b></sub></a><br /><a href="#mpflash-beetlegigg" title="mpflash">💥</a> <a href="#test-beetlegigg" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/rkompass"><img src="https://avatars.githubusercontent.com/u/90282516?v=4?s=100" width="100px;" alt="Raul Kompaß"/><br /><sub><b>Raul Kompaß</b></sub></a><br /><a href="#mpflash-rkompass" title="mpflash">💥</a> <a href="#test-rkompass" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/garryp4"><img src="https://avatars.githubusercontent.com/u/96994876?v=4?s=100" width="100px;" alt="garryp4"/><br /><sub><b>garryp4</b></sub></a><br /><a href="#mpflash-garryp4" title="mpflash">💥</a> <a href="#test-garryp4" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/shanepowell-ast"><img src="https://avatars.githubusercontent.com/u/102747617?v=4?s=100" width="100px;" alt="Shane Powell"/><br /><sub><b>Shane Powell</b></sub></a><br /><a href="#mpflash-shanepowell-ast" title="mpflash">💥</a> <a href="#test-shanepowell-ast" title="Test">✅</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://andypiper.org/"><img src="https://avatars.githubusercontent.com/u/552452?v=4?s=100" width="100px;" alt="Andy Piper"/><br /><sub><b>Andy Piper</b></sub></a><br /><a href="#mpflash-andypiper" title="mpflash">💥</a> <a href="#test-andypiper" title="Test">✅</a></td>
-    </tr>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/DavesCodeMusings"><img src="https://avatars.githubusercontent.com/u/61114342?v=4?s=100" width="100px;" alt="David Horton"/><br /><sub><b>David Horton</b></sub></a><br /><a href="#mpflash-DavesCodeMusings" title="mpflash">💥</a> <a href="#test-DavesCodeMusings" title="Test">✅</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/hlovatt"><img src="https://avatars.githubusercontent.com/u/8424169?v=4?s=100" width="100px;" alt="Howard Lovatt"/><br /><sub><b>Howard Lovatt</b></sub></a><br /><a href="#stubs-hlovatt" title="MicroPython stubs">🖍️</a> <a href="#research-hlovatt" title="Research">🔬</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://virtualwolf.org/"><img src="https://avatars.githubusercontent.com/u/1644623?v=4?s=100" width="100px;" alt="VirtualWolf"/><br /><sub><b>VirtualWolf</b></sub></a><br /><a href="#test-VirtualWolf" title="Test">✅</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lukaskremla"><img src="https://avatars.githubusercontent.com/u/155779787?v=4?s=100" width="100px;" alt="Lukas Kremla"/><br /><sub><b>Lukas Kremla</b></sub></a><br /><a href="#test-lukaskremla" title="Test">✅</a></td>

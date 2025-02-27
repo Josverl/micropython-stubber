@@ -1,0 +1,283 @@
+{
+    "files": [
+        "readme.md"
+    ],
+    "imageSize": 100,
+    "commit": false,
+    "types": {
+        "stubs": {
+            "symbol": "🖍️",
+            "description": "MicroPython stubs"
+        },
+        "test": {
+            "symbol": "✅",
+            "description": "Test"
+        }
+    },
+    "contributors": [
+        {
+            "login": "josverl",
+            "name": "Jos Verlinde",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/981654?v=4",
+            "profile": "https://github.com/Josverl",
+            "contributions": [
+                "code",
+                "research",
+                "ideas",
+                "content",
+                "stubs",
+                "test"
+            ]
+        },
+        {
+            "login": "thonny",
+            "name": "Thonny, Python IDE for beginners",
+            "avatar_url": "https://avatars1.githubusercontent.com/u/46202078?v=4",
+            "profile": "https://thonny.org/",
+            "contributions": [
+                "ideas",
+                "research"
+            ]
+        },
+        {
+            "login": "micropython",
+            "name": "MicroPython",
+            "avatar_url": "https://avatars1.githubusercontent.com/u/6298560?v=4",
+            "profile": "https://micropython.org/",
+            "contributions": [
+                "data",
+                "stubs"
+            ]
+        },
+        {
+            "login": "pyright",
+            "name": "pyright",
+            "avatar_url": "https://avatars.githubusercontent.com/u/6154722?v=4",
+            "profile": "https://github.com/microsoft/pyright",
+            "contributions": [
+                "tool"
+            ]
+        },
+        {
+            "login": "loboris",
+            "name": "Boris Lovosevic",
+            "avatar_url": "https://avatars3.githubusercontent.com/u/6280349?v=4",
+            "profile": "https://github.com/loboris",
+            "contributions": [
+                "data",
+                "stubs"
+            ]
+        },
+        {
+            "login": "pfalcon",
+            "name": "Paul Sokolovsky",
+            "avatar_url": "https://avatars3.githubusercontent.com/u/500451?v=4",
+            "profile": "https://github.com/pfalcon",
+            "contributions": [
+                "data",
+                "stubs"
+            ]
+        },
+        {
+            "login": "pycopy",
+            "name": "pycopy",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/67273174?v=4",
+            "profile": "https://github.com/pycopy",
+            "contributions": [
+                "data",
+                "stubs"
+            ]
+        },
+        {
+            "login": "pycom",
+            "name": "Pycom",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/16415153?v=4",
+            "profile": "https://github.com/pycom",
+            "contributions": [
+                "infra"
+            ]
+        },
+        {
+            "login": "BradenM",
+            "name": "Braden Mars",
+            "avatar_url": "https://avatars1.githubusercontent.com/u/5913808?v=4",
+            "profile": "https://github.com/BradenM",
+            "contributions": [
+                "bug",
+                "code",
+                "stubs",
+                "platform"
+            ]
+        },
+        {
+            "login": "jmannau",
+            "name": "James Manners",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/175909?v=4",
+            "profile": "https://binary.com.au/",
+            "contributions": [
+                "code",
+                "bug"
+            ]
+        },
+        {
+            "login": "askpatrickw",
+            "name": "Patrick",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/4002194?v=4",
+            "profile": "http://patrickwalters.us/",
+            "contributions": [
+                "bug",
+                "code",
+                "stubs"
+            ]
+        },
+        {
+            "login": "pmp-p",
+            "name": "Paul m. p. P.",
+            "avatar_url": "https://avatars3.githubusercontent.com/u/16009100?v=4",
+            "profile": "https://opencollective.com/pythonseverywhere",
+            "contributions": [
+                "ideas",
+                "research"
+            ]
+        },
+        {
+            "login": "edreamleo",
+            "name": "Edward K. Ream",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/592928?v=4",
+            "profile": "https://github.com/edreamleo",
+            "contributions": [
+                "plugin"
+            ]
+        },
+        {
+            "login": "dastultz",
+            "name": "Daryl Stultz",
+            "avatar_url": "https://avatars3.githubusercontent.com/u/4334042?v=4",
+            "profile": "https://github.com/dastultz",
+            "contributions": [
+                "stubs"
+            ]
+        },
+        {
+            "login": "cabletie",
+            "name": "Keeping things together",
+            "avatar_url": "https://avatars1.githubusercontent.com/u/2356734?v=4",
+            "profile": "https://github.com/cabletie",
+            "contributions": [
+                "bug"
+            ]
+        },
+        {
+            "login": "vbolshakov",
+            "name": "vbolshakov",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/2453324?v=4",
+            "profile": "https://github.com/vbolshakov",
+            "contributions": [
+                "bug",
+                "stubs"
+            ]
+        },
+        {
+            "login": "lemariva",
+            "name": "Mauro Riva",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/15173329?v=4",
+            "profile": "https://lemariva.com/",
+            "contributions": [
+                "blog",
+                "bug"
+            ]
+        },
+        {
+            "login": "MathijsNL",
+            "name": "MathijsNL",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/1612886?v=4",
+            "profile": "https://github.com/MathijsNL",
+            "contributions": [
+                "bug"
+            ]
+        },
+        {
+            "login": "CallumJHays",
+            "name": "Callum Jacob Hays",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/13251689?v=4",
+            "profile": "http://comingsoon.tm/",
+            "contributions": [
+                "bug",
+                "test"
+            ]
+        },
+        {
+            "login": "v923z",
+            "name": "Zoltán Vörös",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/1310472?v=4",
+            "profile": "https://github.com/v923z",
+            "contributions": [
+                "data"
+            ]
+        },
+        {
+            "login": "vincent-l-j",
+            "name": "vincent-l-j",
+            "avatar_url": "https://avatars.githubusercontent.com/u/20021376?v=4",
+            "profile": "https://github.com/vincent-l-j",
+            "contributions": [
+                "doc"
+            ]
+        },
+        {
+            "login": "yegorLitvinov",
+            "name": "Egor Litvinov",
+            "avatar_url": "https://avatars.githubusercontent.com/u/20367310?v=4",
+            "profile": "https://github.com/yegorLitvinov",
+            "contributions": [
+                "bug"
+            ]
+        },
+        {
+            "login": "samskiter",
+            "name": "Sam Duke",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1271643?v=4",
+            "profile": "https://github.com/samskiter",
+            "contributions": [
+                "code"
+            ]
+        },
+        {
+            "login": "hlovatt",
+            "name": "Howard Lovatt",
+            "avatar_url": "https://avatars.githubusercontent.com/u/8424169?v=4",
+            "profile": "https://github.com/hlovatt",
+            "contributions": [
+                "stubs",
+                "research"
+            ]
+        },
+        {
+            "login": "VirtualWolf",
+            "name": "VirtualWolf",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1644623?v=4",
+            "profile": "https://virtualwolf.org/",
+            "contributions": [
+                "test"
+            ]
+        },
+        {
+            "login": "lukaskremla",
+            "name": "Lukas Kremla",
+            "avatar_url": "https://avatars.githubusercontent.com/u/155779787?v=4",
+            "profile": "https://github.com/lukaskremla",
+            "contributions": [
+                "test"
+            ]
+        }
+    ],
+    "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#11---contributions)",
+    "projectName": "micropython-stubber",
+    "projectOwner": "Josverl",
+    "repoType": "github",
+    "repoHost": "https://github.com",
+    "skipCi": true,
+    "commitConvention": "none",
+    "contributorsPerLine": 7,
+    "commitType": "docs"
+}

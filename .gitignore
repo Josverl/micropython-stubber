@@ -1,0 +1,77 @@
+# no python virtual environment
+.venv*
+
+# no compiled python or caches
+**/__pycache__
+**/.*_cache
+
+#ignore the scratchpad 
+scratch/*
+
+# ignore stubs 
+# stubs generated in testing
+board/stubs
+minified/stubs
+all-stubs
+stubs
+src/stubber/board/stubs
+firmware-stubs
+# Interim storage for bulkstubber
+
+
+# tempfolder used by get_core  
+build
+
+# ignore test coverage reports
+.coverage*
+**/coverage/*
+**/coverage*.xml
+
+# no  test results 
+junit/*
+results/
+
+# OS specific stuff
+desktop.ini
+
+
+# Do not check in the autodoc generated API documentaion files 
+docs/_build
+docs/api
+docs/~$*
+
+# no node_modules ( pyright ) 
+node_modules
+
+
+# ignore databases - status files
+scripts/bulk_stubber.json
+**/modulelist.db
+**/modulelist.done
+
+# no poetry packaging 
+dist/
+
+# code modding output saved for tests / comparison
+tests/codemods/codemod_test_cases/**/output.*
+
+# ignore the typings folders used in testing.
+snippets/*/typings
+**/typings_*
+typings_test
+typings
+.vscode/Pico-W-Stub
+empty
+**/*_lock.file
+
+tmp_minified.py
+src/stubber/board/board_info.json
+codecov.exe
+
+src/mpflash/coverag*
+Bugs to fix-MPFlash.md
+
+# no hypothesis patches
+**/.hypothesis
+
+firmware
