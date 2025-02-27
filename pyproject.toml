@@ -47,7 +47,7 @@ mpflash = "mpflash.cli_main:mpflash"
 mpremote = "mpremote.main:main"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.9.2,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.14" }
 requests = "^2.32.3"
 mypy = ">=1.10"
@@ -101,6 +101,7 @@ mock = "^4.0.3"
 distro = "^1.8.0"
 fasteners = "^0.19"
 jsons = "^1.6.3"
+pytest-cov = "^6.0.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -229,7 +230,6 @@ python_files = ["test_*.py", "*_test.py"]
 testpaths = [
     "tests",
     "src/stubber",
-    "src/mpflash",
     # "repos/micropython-stubs/tests",
 ]
 norecursedirs = [
@@ -249,7 +249,6 @@ addopts = "--verbose --capture=no -m 'not basicgit'"
 
 markers = [
     "stubber: marks tests of the stubber tool",
-    "mpflash: marks tests of the mpflash tool",
     "snippets: test snippets to check the stubs",
 
     "legacy: reeally old tests that need to be updated or removed",
@@ -283,7 +282,7 @@ markers = [
 [tool.coverage.run]
 parallel = false
 branch = true
-source = ["src/stubber", "src/mpflash"]
+source = ["src/stubber"]
 omit = [
     # helper files in board
     "*/boot.py",
@@ -296,7 +295,6 @@ omit = [
 
     # not my code 
     "*/src/stubber/tools/*.py",
-    "*/src/mpflash/mpflash/vendored/*.py",
 
     # partial files for variant generation
     "*/codemod/_partials/*.py",
