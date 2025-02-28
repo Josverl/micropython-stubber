@@ -6,12 +6,12 @@ get-docstubs
 from pathlib import Path
 from typing import Optional
 
+import mpflash.basicgit as git
 import rich_click as click
+from mpflash.logger import log
 from packaging.version import Version
 
-import mpflash.basicgit as git
 import stubber.utils as utils
-from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
 from stubber.stubs_from_docs import generate_from_rst
@@ -126,9 +126,8 @@ def cli_docstubs(
 
     if enrich:
         if Version(version) < Version("1.24"):
-            log.warning(f"Enriching is not supported for version {version}")
+            log.warning(f"Enriching is only supported for version v1.24+, not {version}")
         else:
-            # !stubber enrich --params-only --source {reference} --dest {docstubs}
             reference_path = CONFIG.stub_path.parent / "reference/micropython"
             _ = enrich_folder(
                 reference_path,
@@ -136,7 +135,7 @@ def cli_docstubs(
                 show_diff=False,
                 write_back=True,
                 require_docstub=False,
-                params_only=True,
+                copy_params=True,
             )
             log.info("::group:: start post processing of retrieved stubs")
             # do not run stubgen

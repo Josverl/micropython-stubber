@@ -14,9 +14,9 @@ from libcst import ParserSyntaxError
 from libcst.codemod import (CodemodContext, diff_code,
                             exec_transform_with_prettyprint)
 from libcst.tool import _default_config  # type: ignore
+from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
-from mpflash.logger import log
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.rst.lookup import U_MODULES
 from stubber.utils.post import run_black
@@ -163,7 +163,8 @@ def enrich_file(
     diff: bool = False,
     write_back: bool = False,
     # package_name="",  # not used
-    params_only: bool = False,
+    copy_params: bool = False,
+    copy_docstr: bool = False,
 ) -> Generator[str, None, None]:
     """
     Enrich a MCU stubs using the doc-stubs in another folder.
@@ -198,7 +199,7 @@ def enrich_file(
     old_code = current_code = target_path.read_text(encoding="utf-8")
     # read source file
     codemod_instance = merge_docstub.MergeCommand(
-        context, docstub_file=source_path, params_only=params_only
+        context, docstub_file=source_path, copy_params=copy_params, copy_docstr=copy_docstr,
     )
     if new_code := exec_transform_with_prettyprint(
         codemod_instance,
@@ -280,8 +281,9 @@ def enrich_folder(
     show_diff: bool = False,
     write_back: bool = False,
     require_docstub: bool = False,
-    params_only: bool = False,
+    copy_params: bool = False,
     ext: Optional[str] = None,
+    copy_docstr: bool = False,
     # package_name: str = "",
 ) -> int:
     """\
@@ -313,7 +315,8 @@ def enrich_folder(
                     diff=True,
                     write_back=write_back,
                     # package_name=mm.target_pkg,
-                    params_only=params_only,
+                    copy_params=copy_params,
+                    copy_docstr=copy_docstr,
                 )
             ):
                 count += len(diff)
@@ -335,7 +338,7 @@ def enrich_folder(
     run_black(target_folder)
     # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
 
-    if params_only:
+    if copy_params:
         copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
     return count
 

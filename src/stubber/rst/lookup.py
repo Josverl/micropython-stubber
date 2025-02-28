@@ -157,8 +157,8 @@ LOOKUP_LIST = {
     "uio.open": ("IO", 0.95),  #  Open a file.
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
-    # undocumented CPython class ssl.SSLSocket
-    # TODO: include  ssl.SSLSocket from stdlib / mpy_typeshed, currently Incomplete
+    # ssl.SSLSocket is defined in reference/micropython/ssl
+    
     "ssl.wrap_socket": ("SSLSocket", 0.95),
     "ussl.wrap_socket": ("SSLSocket", 0.95),
     #
@@ -370,7 +370,7 @@ MODULE_GLUE = {
     "ssl": [
         "from typing_extensions import TypeAlias",
         "from _mpy_shed import StrOrBytesPath",
-        "SSLSocket : TypeAlias = Incomplete",
+        # SSLSocket is part of the refence stubs
     ],
     "struct": ANY_BUF,
     "time": [

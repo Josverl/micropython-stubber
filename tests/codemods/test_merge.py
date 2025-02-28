@@ -8,10 +8,9 @@ from libcst._parser.entrypoints import parse_module
 from libcst._parser.types.config import PartialParserConfig
 from libcst.codemod import CodemodContext
 from libcst.codemod._runner import SkipFile
-from libcst.codemod._testing import (
-    CodemodTest,
-    _CodemodTest,  # type: ignore
-)
+from libcst.codemod._testing import _CodemodTest  # type: ignore
+from libcst.codemod._testing import CodemodTest
+
 from stubber.codemod.merge_docstub import MergeCommand
 
 from .codemodcollector import TestCase as MyTestCase
@@ -133,7 +132,7 @@ class TestMergeDocStubs(PytestCodemodTest):
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
             context_override=context,
-            # params_only =False,
+            copy_params=False,
         )
 
 
@@ -154,5 +153,6 @@ class TestMergeParams(PytestCodemodTest):
             test_case.expected,
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
-            params_only=True,
+            copy_params=True,
+            copy_docstr=False,
         )
