@@ -1,6 +1,6 @@
 """
 Merge configuration for the stubber.
-defines constants and util functions to copy, update or remove type modules
+util functions to copy, update or remove type modules
 """
 
 import shutil
@@ -8,46 +8,11 @@ from pathlib import Path
 from typing import Final, List
 
 from mpflash.logger import log
-from stubber.rst.lookup import U_MODULES
+
+from stubber.modcat import (CP_REFERENCE_TO_DOCSTUB, RM_MERGED,
+                            STDLIB_ONLY_MODULES, U_MODULES)
 
 EXT: Final = [".pyi", ".py", ""]
-CP_REFERENCE_TO_DOCSTUB: Final = [
-    "asyncio",
-    "rp2/PIOASMEmit.pyi",
-    "rp2/asm_pio.pyi",
-]
-"Modules to copy from reference modules to the docstubs"
-
-
-STDLIB_MODULES: Final = [
-    "collections",
-    "io",
-    "builtins",
-    "asyncio",
-    "sys",
-    # "os",  # TODO # Do not remove `os` to allow better typing by mypy for the `os` module
-    # "ssl",  # TODO
-]
-"""Modules that should be in /stdlib"""
-# and should not be in the individual packes as that causes duplication
-
-RM_MERGED: Final = (
-    [
-        "sys",  # use auto patched version from mpy_stdlib
-        "asyncio",  # use manually patched version from  mpy_stdlib
-        "_asyncio",  # ditto
-        "uasyncio",  # ditto
-        "_rp2",  # Leave out for now , to avoid conflicts with the rp2 module
-        "pycopy_imphook",  #  pycopy only: not needed in the merged stubs
-        # "os",
-        "types", # defined in webassembly pyscript - shadows stdlib
-        "abc", # defined in webassembly pyscript - shadows stdlib
-        # "uos", # ???? problems with mypy & webassembly stubs 
-    ]
-    + STDLIB_MODULES
-    + [f"u{mod}" for mod in U_MODULES]
-)
-"Modules to remove from merged stubs, U_MODULES will be recreated later"
 
 
 def copy_type_modules(source_folder: Path, target_folder: Path, CP_REFERENCE_MODULES: List[str]):
@@ -112,3 +77,4 @@ def remove_modules(target_folder: Path, RM_MODULES: List[str]):
                         target.unlink()
                 finally:
                     log.debug(f" - remove {target}")
+

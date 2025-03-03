@@ -18,7 +18,7 @@ from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
-from stubber.rst.lookup import U_MODULES
+from stubber.modcat import U_MODULES
 from stubber.utils.post import run_black
 
 

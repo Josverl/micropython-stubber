@@ -18,8 +18,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tenacity
-
 from mpflash.basicgit import get_git_describe
+
 from stubber.publish.helpers import get_module_docstring
 
 if sys.version_info >= (3, 11):
@@ -30,40 +30,19 @@ else:
 from typing import NewType
 
 import tomli_w
-from packaging.version import Version, parse
-
 from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
+from packaging.version import Version, parse
+
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
+from stubber.modcat import STDLIB_UMODULES, STUBS_COPY_FILTER
 
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
-
-# indicates which stubs will not be copyied from the stub sources
-STUBS_COPY_FILTER = {
-    StubSource.FROZEN: [
-        "espnow",  # merged stubs + documentation of the espnow module is better than the info in the frozen stubs
-        "collections",  # must be in stdlib
-        "types",  # must be in stdlib
-        "abc",  # must be in stdlib
-        "time",  # must be in stdlib
-        "io",  # must be in stdlib
-    ],
-    StubSource.FIRMWARE: [
-        "builtins",
-        "collections",  # collections must be in stdlib
-    ],
-    StubSource.MERGED: [
-        "collections",  # collections must be in stdlib
-    ],
-}
-
-# these modules will be replaced by a simple import statement to import from stdlib
-STDLIB_UMODULES = ["ucollections"]
 
 
 class VersionedPackage:

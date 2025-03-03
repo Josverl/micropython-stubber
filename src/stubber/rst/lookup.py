@@ -16,7 +16,6 @@ __all__ = [
     "MODULE_GLUE",
     "RST_DOC_FIXES",
     "DOCSTUB_SKIP",
-    "U_MODULES",
 ]
 
 # all possible Types needed for the stubs - excess types should be removed later , and otherwise won't do much harm
@@ -52,25 +51,6 @@ class Fix:
     "the from_ string is a regular expression"
 
 
-U_MODULES = [
-    "array",
-    "asyncio",
-    "binascii",
-    "io",
-    "json",
-    "machine",
-    "os",
-    "select",
-    "ssl",
-    "struct",
-    "socket",
-    "time",
-    "zlib",
-]
-"""
-List of modules that are documented with the base name only, 
-but can also be imported with a `u` prefix
-"""
 
 # This table is used to try to correct the errors in the documentation,
 #  or adapt the human readable documentation to machine readable.
