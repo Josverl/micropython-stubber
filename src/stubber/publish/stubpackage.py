@@ -266,8 +266,12 @@ class Builder(VersionedPackage):
         # make sure parent folder exists
         _toml = self.toml_path
         (_toml).parent.mkdir(parents=True, exist_ok=True)
-        with open(_toml, "wb") as output:
-            tomli_w.dump(pyproject, output)
+        try: 
+            with open(_toml, "wb") as output:
+                tomli_w.dump(pyproject, output)
+        except OSError as e:
+            log.error(e)
+            log.debug(repr(_toml))
 
     # -----------------------------------------------
     def create_update_pyproject_toml(self) -> None:
