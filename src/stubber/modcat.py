@@ -20,9 +20,12 @@ STDLIB_ONLY_MODULES = [
     "sys",
     "types",
     "ssl",
-    # time ( should be in stdlib - but has implementation differences per port)
+    "os", 
     # Experiment
-    "os",  # TODO # Do not remove `os` to allow better typing by mypy for the `os` module
+    "json",
+    "struct"
+    # "socket", # should be ins tdlib - but is only available on networked boards 
+    # time # should be in stdlib - but has implementation differences per port)
 ]
 """Modules that should only be in stdlib, and not in the individual packages"""
 # and should not be in the individual packes as that causes duplication
