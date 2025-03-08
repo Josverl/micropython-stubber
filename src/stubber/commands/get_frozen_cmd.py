@@ -109,6 +109,7 @@ def cli_get_frozen(
                 show_diff=False,
                 write_back=True,
                 require_docstub=False,
+                copy_docstr=True,
                 ext = ".pyi",
             ):
                 log.info(f" > Enriched {merged} frozen modules.")
