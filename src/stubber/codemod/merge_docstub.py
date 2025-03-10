@@ -1,6 +1,10 @@
 # sourcery skip: snake-case-functions
-"""Merge documentation and type information from from the docstubs into a board stub"""
-# Copyright (c) Meta Platforms, Inc. and affiliates.
+"""
+Merge documentation and type information 
+- from an doctring-rich and typed stub module
+- infor a less well documented and typed stub module 
+"""
+# Copyright Jos Verlinde
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -13,14 +17,11 @@ from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 import libcst as cst
 import libcst.matchers as m
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
-from libcst.codemod.visitors import (AddImportsVisitor, GatherImportsVisitor,
-                                     ImportItem)
+from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
 from libcst.helpers.module import insert_header_comments
-from mpflash.logger import log
 
-from stubber.cst_transformer import (MODULE_KEY, AnnoValue,
-                                     StubTypingCollector, update_def_docstr,
-                                     update_module_docstr)
+from mpflash.logger import log
+from stubber.typing_collector import MODULE_KEY, AnnoValue, StubTypingCollector, update_def_docstr, update_module_docstr
 
 from .visitors.type_helpers import AddTypeHelpers, GatherTypeHelpers
 
@@ -30,10 +31,11 @@ Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 # # log = logging.getLogger(__name__)
 #########################################################################################
 empty_module = cst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
+_code = empty_module.code_for_node
 
 
 def is_decorator(dec: cst.CSTNode, name: str) -> bool:
-    """shorthand to determin if something is a specifi decorator"""
+    """shorthand to determin if something is a specific decorator"""
     return m.matches(dec, m.Decorator(decorator=m.Name(value=name)))
 
 
@@ -109,7 +111,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
-        self.type_helpers = []
+        self.type_helpers = {}
         # parse the doc-stub file
         if self.docstub_source:
             try:
@@ -133,6 +135,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # Get typevars, type aliasses and ParamSpecs
             stub_tree.visit(typevar_collector)
             self.type_helpers = typevar_collector.all_typehelpers
+            pass
 
     # ------------------------------------------------------------------------
 
@@ -190,9 +193,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # --------------------------------------------------------------------
         # Add any typevars to the module
         if self.type_helpers:
-            for tv in self.type_helpers:
-                AddTypeHelpers.add_typevar(self.context, tv)  # type: ignore
-
+            AddTypeHelpers.add_helpers(self.context, self.type_helpers)
             atv = AddTypeHelpers(self.context)
             updated_node = atv.transform_module(updated_node)
 

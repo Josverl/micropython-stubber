@@ -16,7 +16,7 @@ from packaging.version import Version
 from stubber import __version__
 from stubber.codemod._partials import Partial
 from stubber.codemod.modify_list import ListChangeSet, ModifyListElements
-from stubber.cst_transformer import update_module_docstr
+from stubber.typing_collector import update_module_docstr
 
 # matches on `stubber = Stubber()`
 _STUBBER_MATCHER = m.Assign(

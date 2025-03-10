@@ -133,6 +133,7 @@ class TestMergeDocStubs(PytestCodemodTest):
             save_output=test_case.output,
             context_override=context,
             copy_params=False,
+            copy_docstr=True,
         )
 
 
