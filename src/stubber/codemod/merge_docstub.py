@@ -207,7 +207,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             src_docstr = original_node.get_docstring() or ""
             if src_docstr or docstub_docstr:
                 if self.copy_docstr and (docstub_docstr.strip() != src_docstr.strip()):
-                    if src_docstr:
+                    if src_docstr and self.copy_docstr:
                         log.trace(f"Append module docstrings. (new --- old) ")
                         new_docstr = '"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
                     else:

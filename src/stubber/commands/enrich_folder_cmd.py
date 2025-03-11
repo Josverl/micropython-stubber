@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Union
 
 import rich_click as click
-from mpflash.logger import log
 
+from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
@@ -47,25 +47,25 @@ from stubber.utils.config import CONFIG
     "--copy-params",
     "copy_params",
     default=False,
-    help="Copy only the parameters, not the docstrings (unless the docstring is missing)",
+    help="Copy the function/method parameters",
     show_default=True,
     is_flag=True,
 )
-# @click.option(
-#     "--package-name",
-#     "-p",
-#     "package_name",
-#     default="",
-#     help="Package name to be enriched (Optional)",
-#     show_default=True,
-# )
+@click.option(
+    "--copy-docstr",
+    "copy_docstr",
+    default=False,
+    help="Copy the docstrings",
+    show_default=False,
+    is_flag=True,
+)
 def cli_enrich_folder(
     dest_folder: Union[str, Path],
     source_folder: Union[str, Path],
     diff: bool = False,
     dry_run: bool = False,
     copy_params: bool = True,
-    # package_name: str = "",
+    copy_docstr: bool = False,
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
@@ -78,6 +78,6 @@ def cli_enrich_folder(
         show_diff=diff,
         write_back=write_back,
         require_docstub=False,
-        # package_name=package_name,
         copy_params=copy_params,
+        copy_docstr=copy_docstr,
     )
