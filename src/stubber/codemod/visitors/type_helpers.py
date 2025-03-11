@@ -85,6 +85,15 @@ def is_import(statement):
     "import - import foo"
     return m.matches(statement, m.SimpleStatementLine(body=[m.ImportFrom() | m.Import()]))
 
+def is_docstr(statement):
+    "single or triple quoted string"
+    if m.matches(statement, m.SimpleStatementLine()):
+        statement = statement.body[0]
+    return m.matches(
+        statement,
+        m.Expr(value=m.SimpleString()),
+        # | m.TripleQuotedString(),
+    )
 
 class GatherTypeHelpers(ContextAwareVisitor):
     """
@@ -180,7 +189,7 @@ class AddTypeHelpers(ContextAwareTransformer):
             statements_before,
             helper_statements,
             statements_after,
-        ) = self._split_module(body)
+        ) = self._split_body(body)
 
         # simpler to compare as text than to compare the nodes -
         existing_targets = [
@@ -234,12 +243,10 @@ class AddTypeHelpers(ContextAwareTransformer):
             )
         return updated_node.with_changes(body=new_body)
 
-
-    def _split_module(
+    def _split_body(
         self,
         body: Sequence[cst.BaseStatement],
     ) -> Tuple[Sequence[cst.BaseStatement], Sequence[cst.BaseStatement], Sequence[cst.BaseStatement]]:
-
         """
         Split the module into 3 parts:
         - before any TypeAlias, TypeVar or ParamSpec statements
@@ -261,6 +268,7 @@ class AddTypeHelpers(ContextAwareTransformer):
                 or is_ParamSpec(statement)
                 or is_CONSTANT(statement)
                 or is_AnnCONSTANT(statement)
+                or is_docstr(statement)
             ):
                 if first_typehelper == -1:
                     first_typehelper = i + start
@@ -271,7 +279,6 @@ class AddTypeHelpers(ContextAwareTransformer):
         #
         before = list(body[:insert_after])
         after = list(body[insert_after:])
-        helper_statements: Sequence[cst.SimpleStatementLine] = list(
-            body[first_typehelper : last_typehelper + 1]
-        )  # type: ignore
+        helper_statements: Sequence[cst.SimpleStatementLine] = list(body[first_typehelper : last_typehelper + 1])  # type: ignore
         return (before, helper_statements, after)
+
