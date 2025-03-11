@@ -11,12 +11,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
 
 from libcst import ParserSyntaxError
-from libcst.codemod import (CodemodContext, diff_code,
-                            exec_transform_with_prettyprint)
+from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
-from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
+from mpflash.logger import log
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.modcat import U_MODULES
 from stubber.utils.post import run_black
@@ -219,7 +218,7 @@ def enrich_file(
         log.trace(f"Write back enriched file {target_path}")
         target_path.write_text(current_code, encoding="utf-8")
     if diff:
-        yield diff_code(old_code, current_code, 5, filename=target_path.name)
+        yield diff_code(old_code, current_code, 2, filename=target_path.name)
 
 
 def merge_candidates(
@@ -338,8 +337,8 @@ def enrich_folder(
     run_black(target_folder)
     # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
 
-    if copy_params:
-        copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
+    # if copy_params:
+    #     copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
     return count
 
 
