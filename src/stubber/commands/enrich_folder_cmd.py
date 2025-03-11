@@ -44,19 +44,19 @@ from stubber.utils.config import CONFIG
     is_flag=True,
 )
 @click.option(
-    "--copy-params",
+    "--copy-params/--no-copy-params",
     "copy_params",
-    default=False,
+    default=True,
     help="Copy the function/method parameters",
     show_default=True,
     is_flag=True,
 )
 @click.option(
-    "--copy-docstr",
+    "--copy-docstr/--no-copy-docstr",
     "copy_docstr",
-    default=False,
+    default=True,
     help="Copy the docstrings",
-    show_default=False,
+    show_default=True,
     is_flag=True,
 )
 def cli_enrich_folder(

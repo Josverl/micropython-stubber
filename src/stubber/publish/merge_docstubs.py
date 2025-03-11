@@ -121,7 +121,13 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     recreate_umodules(dest_path)
 
     # 2 - Enrich the MCU stubs with the document stubs
-    result = enrich_folder(source_folder=docstub_path, target_folder=dest_path, write_back=True, copy_docstr=True)
+    result = enrich_folder(
+        source_folder=docstub_path,
+        target_folder=dest_path,
+        write_back=True,
+        copy_params=True,
+        copy_docstr=True,
+    )
 
     refactor_rp2_module(dest_path)
 
