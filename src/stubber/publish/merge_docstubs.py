@@ -20,8 +20,8 @@ def merge_all_docstubs(
     family: str = "micropython",
     ports: Optional[Union[List[str], str]] = None,
     boards: Optional[Union[List[str], str]] = None,
-    *,
-    mpy_path: Path = CONFIG.mpy_path,
+    # *,
+    # mpy_path: Path = CONFIG.mpy_path,
 ):
     """merge docstubs and MCU stubs to merged stubs"""
     if versions is None:
@@ -66,7 +66,19 @@ def merge_all_docstubs(
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         try:
+            # TODO : webassembly: Need to merge from reference/pyscript as well 
             result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
+            if candidate["port"] == "webassembly":
+                # TODO : webassembly: Need to merge from reference/pyscript as well 
+                # use enrich_folder to merge the docstubs
+                enrich_folder(
+                    source_folder=CONFIG.mpy_stubs_path / "reference/pyscript",
+                    target_folder=merged_path,
+                    write_back=True,
+                    copy_params=True,
+                    copy_docstr=True,
+                )
+                pass
         except Exception as e:
             log.error(f"Error parsing {candidate['version']} docstubs: {e}")
             continue

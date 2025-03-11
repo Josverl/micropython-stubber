@@ -5,8 +5,8 @@ enrich machinestubs with docstubs
 from typing import List, Union
 
 import rich_click as click
-from mpflash.logger import log
 
+from mpflash.logger import log
 from stubber.commands.cli import stubber_cli
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.package import GENERIC_L
@@ -60,6 +60,4 @@ def cli_merge_docstubs(
         versions = list(versions)
     # single version should be a string
     log.info(f"Merge docstubs for {family} {versions}")
-    _ = merge_all_docstubs(
-        versions=versions, family=family, boards=boards, ports=ports, mpy_path=CONFIG.mpy_path
-    )
+    _ = merge_all_docstubs(versions=versions, family=family, boards=boards, ports=ports)
