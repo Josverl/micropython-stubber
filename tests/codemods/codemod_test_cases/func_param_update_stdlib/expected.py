@@ -18,6 +18,6 @@ if sys.version_info < (3, 12):
         do_handshake: bool = True,
     ) -> SSLSocket:
         """
-        stdlib docs
-        """
+    reference stub
+    """
         ...

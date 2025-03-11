@@ -1,5 +1,6 @@
+# fmt: off
 """
-Overloaded functions
+Overloaded functions, retain existing docstrings
 """
 
 from typing import Literal, overload
