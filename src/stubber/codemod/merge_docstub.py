@@ -21,7 +21,17 @@ from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, Imp
 from libcst.helpers.module import insert_header_comments
 
 from mpflash.logger import log
-from stubber.typing_collector import MODULE_KEY, AnnoValue, StubTypingCollector, update_def_docstr, update_module_docstr
+from stubber.typing_collector import (
+    MODULE_KEY,
+    AnnoValue,
+    StubTypingCollector,
+    is_deleter,
+    is_getter,
+    is_property,
+    is_setter,
+    update_def_docstr,
+    update_module_docstr,
+)
 
 from .visitors.type_helpers import AddTypeHelpers, GatherTypeHelpers
 
@@ -349,13 +359,23 @@ class MergeCommand(VisitorBasedCodemodCommand):
         return updated_node
 
     # ------------------------------------------------------------------------
+
+    # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return True
 
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
-        stack_id = tuple(self.stack)
+        if is_getter(updated_node):
+            extra = ["getter"]
+        elif is_setter(updated_node):
+            extra = ["setter"]
+        elif is_deleter(updated_node):
+            extra = ["deleter"]
+        else:
+            extra = []
+        stack_id = tuple(self.stack + extra)
         self.stack.pop()
         if stack_id not in self.annotations:
             # no changes to the function in docstub
@@ -364,14 +384,25 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # do not overwrite existing @overload functions
             # ASSUME: they are OK as they are
             return updated_node
-
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
+        if isinstance(doc_stub.def_node, cst.FunctionDef):
+            # avoid mismatching property decorators
+            # if the updated node is a property, and the doc_stub node is not a property
+            # then we should not update the node
+            if is_property(updated_node) and not is_property(doc_stub.def_node):
+                return updated_node
+            if is_setter(updated_node) and not is_setter(doc_stub.def_node):
+                return updated_node
+            if is_getter(updated_node) and not is_getter(doc_stub.def_node):
+                return updated_node
+            if is_deleter(updated_node) and not is_deleter(doc_stub.def_node):
+                return updated_node
+
         # Check if it is an @overload decorator
-        # add_overload = any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1  # type: ignore
         add_overload = any(is_decorator(dec, "overload") for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1
 
-        # If there are overloads in the documentation , lets use the first one
+        # If there are overloads in the documentation, use the first one
         if add_overload:
             log.debug(f"Change to @overload :{updated_node.name.value}")
             # Use the new overload - but with the existing docstring
@@ -413,7 +444,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 # in the destination stub
                 overwrite_params = True
             else:
-                params_txt = empty_module.code_for_node(original_node.params)
+                params_txt = _code(original_node.params)
                 overwrite_params = params_txt in [
                     "",
                     "...",
@@ -441,10 +472,10 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 new_decorators.extend(doc_stub.decorators)
 
             for decorator in updated_node.decorators:
-                if decorator.decorator.value not in [n.decorator.value for n in new_decorators]:  # type: ignore
+                if _code(decorator) not in [_code(d) for d in new_decorators]:
                     new_decorators.append(decorator)
 
-            # if the metohd is both a static and a class method, we remove the @classmethod decorator to avoid inconsistencies
+            # if the method is both a static and a class method, we remove the @classmethod decorator to avoid inconsistencies
             if any(is_decorator(dec, "staticmethod") for dec in new_decorators) and any(
                 is_decorator(dec, "classmethod") for dec in new_decorators
             ):
