@@ -44,12 +44,33 @@ MODULE_KEY = ("__module",)
 MOD_DOCSTR_KEY = ("__module_docstring",)
 
 # debug helper
-_m = cst.parse_module("")
+_code = cst.parse_module("").code_for_node
+
+
+def is_property(node: cst.FunctionDef) -> bool:
+    """check if the function is a property"""
+    return any(m.matches(dec, m.Decorator(decorator=m.Name(value="property"))) for dec in node.decorators)
+
+
+# FIXME : this is a clumsy way - but I cant find a working matcher for this
+def is_setter(node: cst.FunctionDef) -> bool:
+    """check if the function is a setter"""
+    return any(d for d in _code(node).split("\n") if d.startswith("@") and d.endswith(".setter"))
+
+
+def is_getter(node: cst.FunctionDef) -> bool:
+    """check if the function is a getter"""
+    return any(d for d in _code(node).split("\n") if d.startswith("@") and d.endswith(".getter"))
+
+
+def is_deleter(node: cst.FunctionDef) -> bool:
+    """check if the function is a deleter"""
+    return any(d for d in _code(node).split("\n") if d.startswith("@") and d.endswith(".deleter"))
 
 
 class StubTypingCollector(cst.CSTVisitor):
     """
-    Collect the function/method and class definitions from the stubs source
+    Collect the function/method and class definitions from ta rich .py or .pyi source
     """
 
     def __init__(self):
@@ -120,10 +141,20 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="funcdef",
             def_node=node,
         )
-        key = tuple(self.stack)
+        if is_getter(node):
+            extra = ["getter"]
+        elif is_setter(node):
+            extra = ["setter"]
+        elif is_deleter(node):
+            extra = ["deleter"]
+        else:
+            extra = []
+        key = tuple(self.stack + extra)
+
         if not key in self.annotations:
             # store the first function/method signature
             self.annotations[key] = AnnoValue(type_info=ti)
+
 
         if any(m.matches(dec , m.Decorator(decorator=m.Name("overload"))) for dec in node.decorators):
             # and store the overloads
