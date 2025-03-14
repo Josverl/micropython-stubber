@@ -370,8 +370,8 @@ def cross_compile(
         # target must be a Path object
         _target = get_temp_file(suffix=".mpy")
     result = pipx_mpy_cross(version, source_file, _target)
-    if result.stderr and "No matching distribution found for mpy-cross==" in result.stderr:
-        log.warning(f"mpy-cross=={version} not found, using most current version.")
+    if result.stderr and "No matching distribution found for mpy-cross~=" in result.stderr:
+        log.warning(f"mpy-cross~={version} not found, using most current version.")
         result = pipx_mpy_cross(V_PREVIEW, source_file, _target)
 
     if result.returncode == 0:
@@ -395,7 +395,7 @@ def pipx_mpy_cross(version: str, source_file, _target):
     if version in SET_PREVIEW:
         version = ""
     if version:
-        version = "==" + version
+        version = "~=" + version.lstrip("v")
 
     cmd = ["pipx", "run", f"mpy-cross{version}"] if version else ["pipx", "run", "mpy-cross"]
     # Add params
