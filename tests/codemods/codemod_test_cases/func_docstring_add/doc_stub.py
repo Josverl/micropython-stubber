@@ -1,10 +1,10 @@
 """
-simple functions 
+Add docstring if not provided
 """
 
 
-def foo(pin: int, /, limit: int = 100) -> str:
+def foo(self, iterable) -> None:
     """
-    simple docstring
+    Append new elements as contained in *iterable* to the end of
+    array, growing it.
     """
-    ...

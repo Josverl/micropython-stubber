@@ -1,24 +1,34 @@
 # sourcery skip: snake-case-functions
-"""Merge documentation and type information from from the docstubs into a board stub"""
-# Copyright (c) Meta Platforms, Inc. and affiliates.
+"""
+Merge documentation and type information 
+- from an doctring-rich and typed stub module
+- infor a less well documented and typed stub module 
+"""
+# Copyright Jos Verlinde
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 #
+
 import argparse
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 import libcst as cst
+import libcst.matchers as m
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
 from libcst.helpers.module import insert_header_comments
 
 from mpflash.logger import log
-from stubber.cst_transformer import (
+from stubber.typing_collector import (
     MODULE_KEY,
     AnnoValue,
     StubTypingCollector,
+    is_deleter,
+    is_getter,
+    is_property,
+    is_setter,
     update_def_docstr,
     update_module_docstr,
 )
@@ -31,6 +41,12 @@ Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 # # log = logging.getLogger(__name__)
 #########################################################################################
 empty_module = cst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
+_code = empty_module.code_for_node
+
+
+def is_decorator(dec: cst.CSTNode, name: str) -> bool:
+    """shorthand to determin if something is a specific decorator"""
+    return m.matches(dec, m.Decorator(decorator=m.Name(value=name)))
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -48,6 +64,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
     """
 
     DESCRIPTION: str = "Merge the type-rich information from a doc-stub into a firmware stub"
+    copy_params: bool = True
+    copy_docstr: bool = True
 
     @staticmethod
     def add_args(arg_parser: argparse.ArgumentParser) -> None:
@@ -63,16 +81,23 @@ class MergeCommand(VisitorBasedCodemodCommand):
         )
 
         arg_parser.add_argument(
-            "--params-only",
-            dest="params_only",
+            "--copy-params",
+            dest="copy_params",
             default=False,
+        )
+
+        arg_parser.add_argument(
+            "--copy-docstr",
+            dest="copy_docstr",
+            default=True,
         )
 
     def __init__(
         self,
         context: CodemodContext,
         docstub_file: Union[Path, str],
-        params_only: bool = False,
+        copy_params: bool = False,
+        copy_docstr: bool = True,
     ) -> None:
         """initialize the base class with context, and save our args."""
         super().__init__(context)
@@ -91,11 +116,12 @@ class MergeCommand(VisitorBasedCodemodCommand):
         ] = {}
         self.comments: List[str] = []
 
-        self.params_only = params_only
+        self.copy_params = copy_params
+        self.copy_docstr = copy_docstr
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
-        self.type_helpers = []
+        self.type_helpers = {}
         # parse the doc-stub file
         if self.docstub_source:
             try:
@@ -119,6 +145,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # Get typevars, type aliasses and ParamSpecs
             stub_tree.visit(typevar_collector)
             self.type_helpers = typevar_collector.all_typehelpers
+            pass
 
     # ------------------------------------------------------------------------
 
@@ -142,9 +169,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
             if import_item.module_name == self.context.full_module_name:
                 # this is an import from the same module we should NOT add it
                 continue
-            if import_item.module_name.split(".")[
-                0
-            ] == self.context.full_module_name and not self.context.filename.endswith(
+            if import_item.module_name.split(".")[0] == self.context.full_module_name and not self.context.filename.endswith(
                 "__init__.pyi"
             ):
                 # this is an import from a module child module we should NOT add it
@@ -178,24 +203,21 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # --------------------------------------------------------------------
         # Add any typevars to the module
         if self.type_helpers:
-            for tv in self.type_helpers:
-                AddTypeHelpers.add_typevar(self.context, tv)  # type: ignore
-
+            AddTypeHelpers.add_helpers(self.context, self.type_helpers)
             atv = AddTypeHelpers(self.context)
             updated_node = atv.transform_module(updated_node)
 
         # --------------------------------------------------------------------
         # update the docstring.
         if MODULE_KEY in self.annotations:
-
             # update/replace  module docstrings
             # todo: or should we add / merge the docstrings?
             docstub_docstr = self.annotations[MODULE_KEY].docstring
             assert isinstance(docstub_docstr, str)
             src_docstr = original_node.get_docstring() or ""
             if src_docstr or docstub_docstr:
-                if not self.params_only and (docstub_docstr.strip() != src_docstr.strip()):
-                    if src_docstr:
+                if self.copy_docstr and (docstub_docstr.strip() != src_docstr.strip()):
+                    if src_docstr and self.copy_docstr:
                         log.trace(f"Append module docstrings. (new --- old) ")
                         new_docstr = '"""\n' + docstub_docstr + "\n\n---\n" + src_docstr + '\n"""'
                     else:
@@ -251,7 +273,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 matched, i = self.locate_function_by_name(overload, updated_body)
                 if matched:
                     log.trace(f"Add @overload for {overload.name.value}")
-                    if self.params_only:
+                    if self.copy_params:
                         docstring_node = self.annotations[key].docstring_node or ""
                         # Use the new overload - but with the existing docstring
                         overload = update_def_docstr(overload, docstring_node)
@@ -264,13 +286,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         if class_name not in new_classes:
                             new_classes.append(class_name)
                             # create a class for it, and then add all the overload methods to that class
-                            log.trace(
-                                f"Add New class  @overload for {overload.name.value} at the end of the module"
-                            )
+                            log.trace(f"Add New class  @overload for {overload.name.value} at the end of the module")
                             # create a list of all overloads for this class
-                            class_overloads = [
-                                overload for overload, k in missing_overloads if k[0] == class_name
-                            ]
+                            class_overloads = [overload for overload, k in missing_overloads if k[0] == class_name]
                             class_def = cst.ClassDef(
                                 name=cst.Name(value=class_name),
                                 body=cst.IndentedBlock(body=class_overloads),
@@ -280,9 +298,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                             # already processed this class method
                             pass
                     else:
-                        log.trace(
-                            f"Add @overload for {overload.name.value} at the end of the class"
-                        )
+                        log.trace(f"Add @overload for {overload.name.value} at the end of the class")
                         updated_body.append(overload)
 
             if isinstance(updated_node, cst.Module):
@@ -310,9 +326,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(
-        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
-    ) -> cst.ClassDef:
+    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         stack_id = tuple(self.stack)
         self.stack.pop()
         if stack_id not in self.annotations:
@@ -345,39 +359,57 @@ class MergeCommand(VisitorBasedCodemodCommand):
         return updated_node
 
     # ------------------------------------------------------------------------
+
+    # ------------------------------------------------------------------------
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(
-        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
-    ) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
         "Update the function Parameters and return type, decorators and docstring"
-        stack_id = tuple(self.stack)
+        if is_getter(updated_node):
+            extra = ["getter"]
+        elif is_setter(updated_node):
+            extra = ["setter"]
+        elif is_deleter(updated_node):
+            extra = ["deleter"]
+        else:
+            extra = []
+        stack_id = tuple(self.stack + extra)
         self.stack.pop()
         if stack_id not in self.annotations:
             # no changes to the function in docstub
             return updated_node
-        if updated_node.decorators and any(
-            dec.decorator.value == "overload" for dec in updated_node.decorators  # type: ignore
-        ):
+        if updated_node.decorators and any(is_decorator(dec, "overload") for dec in updated_node.decorators):
             # do not overwrite existing @overload functions
             # ASSUME: they are OK as they are
             return updated_node
-
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
-        # Check if it is an @overload decorator
-        add_overload = any(dec.decorator.value == "overload" for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1  # type: ignore
+        if isinstance(doc_stub.def_node, cst.FunctionDef):
+            # avoid mismatching property decorators
+            # if the updated node is a property, and the doc_stub node is not a property
+            # then we should not update the node
+            if is_property(updated_node) and not is_property(doc_stub.def_node):
+                return updated_node
+            if is_setter(updated_node) and not is_setter(doc_stub.def_node):
+                return updated_node
+            if is_getter(updated_node) and not is_getter(doc_stub.def_node):
+                return updated_node
+            if is_deleter(updated_node) and not is_deleter(doc_stub.def_node):
+                return updated_node
 
-        # If there are overloads in the documentation , lets use the first one
+        # Check if it is an @overload decorator
+        add_overload = any(is_decorator(dec, "overload") for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1
+
+        # If there are overloads in the documentation, use the first one
         if add_overload:
             log.debug(f"Change to @overload :{updated_node.name.value}")
             # Use the new overload - but with the existing docstring
             doc_stub = self.annotations[stack_id].overloads.pop(0)
             assert doc_stub.def_node
 
-            if not self.params_only:
+            if not self.copy_params:
                 # we have copied over the entire function definition, no further processing should be done on this node
                 doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)
                 updated_node = doc_stub.def_node
@@ -397,9 +429,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # assert isinstance(doc_stub, TypeInfo)
         # assert doc_stub
         # first update the docstring
-        no_docstring = updated_node.get_docstring() is None
-        if (not self.params_only) or no_docstring:
-            # DO Not overwrite existing docstring
+        has_no_docstring = updated_node.get_docstring() is None
+        if has_no_docstring or self.copy_docstr:
+            # overwrite existing docstring if there was none , or if it is asked
             updated_node = update_def_docstr(updated_node, doc_stub.docstr_node, doc_stub.def_node)
 
         # Sometimes the MCU stubs and the doc stubs have different types : FunctionDef / ClassDef
@@ -407,12 +439,12 @@ class MergeCommand(VisitorBasedCodemodCommand):
         if doc_stub.def_type == "funcdef":
             # Same type, we can copy over the annotations
             # params that should  not be overwritten by the doc-stub ?
-            if self.params_only:
+            if self.copy_params:
                 # we are copying rich type definitions, just assume they are better than what is currently
                 # in the destination stub
                 overwrite_params = True
             else:
-                params_txt = empty_module.code_for_node(original_node.params)
+                params_txt = _code(original_node.params)
                 overwrite_params = params_txt in [
                     "",
                     "...",
@@ -440,16 +472,14 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 new_decorators.extend(doc_stub.decorators)
 
             for decorator in updated_node.decorators:
-                if decorator.decorator.value not in [n.decorator.value for n in new_decorators]:  # type: ignore
+                if _code(decorator) not in [_code(d) for d in new_decorators]:
                     new_decorators.append(decorator)
 
-            # if there is both a static and a class method, we remove the class decorator to avoid inconsistencies
-            if any(dec.decorator.value == "staticmethod" for dec in doc_stub.decorators) and any(  # type: ignore
-                dec.decorator.value == "staticmethod" for dec in doc_stub.decorators  # type: ignore
+            # if the method is both a static and a class method, we remove the @classmethod decorator to avoid inconsistencies
+            if any(is_decorator(dec, "staticmethod") for dec in new_decorators) and any(
+                is_decorator(dec, "classmethod") for dec in new_decorators
             ):
-                new_decorators = [
-                    dec for dec in new_decorators if dec.decorator.value != "classmethod"
-                ]
+                new_decorators = [dec for dec in new_decorators if dec.decorator.value != "classmethod"]
 
             return updated_node.with_changes(
                 decorators=new_decorators,

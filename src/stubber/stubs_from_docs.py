@@ -10,7 +10,8 @@ from typing import List, Optional
 from mpflash.logger import log
 
 from stubber import utils
-from stubber.rst import DOCSTUB_SKIP, U_MODULES
+from stubber.rst import DOCSTUB_SKIP
+from stubber.modcat import  U_MODULES
 from stubber.rst.reader import RSTWriter
 
 

@@ -14,6 +14,8 @@ import stubber.utils as utils
 from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
+from stubber.merge_config import copy_type_modules
+from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos
@@ -68,6 +70,22 @@ from stubber.utils.repos import fetch_repos
     help="Enrich with type information from reference/micropython",
     show_default=True,
 )
+# @click.option(
+#     "--copy-params",
+#     "copy_params",
+#     default=False,
+#     help="Copy the function/method parameters",
+#     show_default=True,
+#     is_flag=True,
+# )
+# @click.option(
+#     "--copy-docstr",
+#     "copy_docstr",
+#     default=False,
+#     help="Copy the docstrings",
+#     show_default=False,
+#     is_flag=True,
+# )
 @click.pass_context
 def cli_docstubs(
     ctx: click.Context,
@@ -126,9 +144,8 @@ def cli_docstubs(
 
     if enrich:
         if Version(version) < Version("1.24"):
-            log.warning(f"Enriching is not supported for version {version}")
+            log.warning(f"Enriching is only supported for version v1.24+, not {version}")
         else:
-            # !stubber enrich --params-only --source {reference} --dest {docstubs}
             reference_path = CONFIG.stub_path.parent / "reference/micropython"
             _ = enrich_folder(
                 reference_path,
@@ -136,8 +153,10 @@ def cli_docstubs(
                 show_diff=False,
                 write_back=True,
                 require_docstub=False,
-                params_only=True,
+                copy_params=True,
+                copy_docstr=False,
             )
+            copy_type_modules(reference_path, dst_path, CP_REFERENCE_TO_DOCSTUB)
             log.info("::group:: start post processing of retrieved stubs")
             # do not run stubgen
             utils.do_post_processing([dst_path], stubgen=False, black=black, autoflake=autoflake)

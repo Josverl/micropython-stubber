@@ -16,6 +16,7 @@ class SPI:
     """
     LSB = 0  # type: int
     MSB = 1  # type: int
+    CONTROLLER: Any = ...
 
     def deinit(self) -> None:
         """

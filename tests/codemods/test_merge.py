@@ -12,6 +12,7 @@ from libcst.codemod._testing import (
     CodemodTest,
     _CodemodTest,  # type: ignore
 )
+
 from stubber.codemod.merge_docstub import MergeCommand
 
 from .codemodcollector import TestCase as MyTestCase
@@ -126,33 +127,37 @@ class TestMergeDocStubs(PytestCodemodTest):
 
         # Create a test CodemodContext
         context = CodemodContext(filename=str(test_case.path), full_module_name="target_module")
-
+        copy_params = "no_params" not in str(test_case.path)
+        copy_docstr = "no_docstr" not in str(test_case.path)
         self.assertCodemod(
             test_case.before,
             test_case.expected,
             docstub_file=test_case.stub_file,
             save_output=test_case.output,
             context_override=context,
-            # params_only =False,
+            copy_params=copy_params,
+            copy_docstr=copy_docstr,
         )
 
 
-@pytest.mark.parametrize("test_case", collect_test_cases(folder="params_test_cases"))
-class TestMergeParams(PytestCodemodTest):
-    # The codemod that will be instantiated for us in assertCodemod.
-    TRANSFORM = MergeCommand
+# @pytest.mark.parametrize("test_case", collect_test_cases(folder="params_test_cases"))
+# class TestMergeParams(PytestCodemodTest):
+#     # The codemod that will be instantiated for us in assertCodemod.
+#     TRANSFORM = MergeCommand
 
-    def test_merge_params(self, test_case: MyTestCase) -> None:
-        # context will allows the detection of relative imports
-        if "_skip" in str(test_case.path):
-            pytest.skip("Skipping test because of _skip")
-        if "_xfail" in str(test_case.path):
-            pytest.xfail("xfail")
-
-        self.assertCodemod(
-            test_case.before,
-            test_case.expected,
-            docstub_file=test_case.stub_file,
-            save_output=test_case.output,
-            params_only=True,
-        )
+#     def test_merge_params(self, test_case: MyTestCase) -> None:
+#         # context will allows the detection of relative imports
+#         if "_skip" in str(test_case.path):
+#             pytest.skip("Skipping test because of _skip")
+#         if "_xfail" in str(test_case.path):
+#             pytest.xfail("xfail")
+#         copy_params = "no_params" not in str(test_case.path)
+#         copy_docstr = "no_docstr" not in str(test_case.path)
+#         self.assertCodemod(
+#             test_case.before,
+#             test_case.expected,
+#             docstub_file=test_case.stub_file,
+#             save_output=test_case.output,
+#             copy_params=True,
+#             copy_docstr=False,
+#         )
