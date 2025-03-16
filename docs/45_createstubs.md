@@ -48,13 +48,14 @@ import createstubs_mem
 
 ## Optimisations 
 In order to run  this on low-memory devices two additional steps are recommended: 
-- Minifification, using python-minifier
+- Minification, using python-minifier
   to reduce overall size, and remove logging overhead.
   can be used on all devices
 
 - Cross compilation, using mpy-cross, 
   to avoid the compilation step on the micropython device.
   The cross-compiled version can only run on specific Micropython 1.12 or newer.
+
 
 ### Minification
 
@@ -64,5 +65,6 @@ this removes the requirement for the logging module on the MCU.
 Minifiacation helps reduce the seize of the script, and therefore of the memory usage. As a result the script becomes almost unreadable.
 
 ### Cross compilation 
+
 This is specially suited for low memory devices such as the esp8622 
 

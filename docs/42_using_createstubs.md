@@ -18,7 +18,7 @@ pip install mpremote
 Connect your board to your PC and run the following command:
 
 `mpremote mip install github:josverl/micropython-stubber`
-```log
+```
 Install github:josverl/micropython-stubber
 Installing github:josverl/micropython-stubber/package.json to /lib
 Installing: /lib/createstubs.py
@@ -46,7 +46,7 @@ If you have a low memory board, then you can install the cross-compiled variants
 | v1.19 and up        | 6            | `mpremote mip install github:josverl/micropython-stubber/mpy_v6.json` |
 | v1.12 - v1.18       | 5            | `mpremote mip install github:josverl/micropython-stubber/mpy_v5.json` |
 
-```log	
+```
 Install github:josverl/micropython-stubber/mpy_v6.json
 Installing github:josverl/micropython-stubber/mpy_v6.json to /lib
 Installing: /lib/createstubs_mpy.mpy
