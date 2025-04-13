@@ -240,7 +240,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # --------------------------------------------------------------------
         # make sure that any @overloads that not yet applied  are also added to the firmware stub
         updated_node = self.add_missed_overloads(updated_node, stack_id=())
-
+        # Add any missing @mp_available
+        updated_node = self.add_missed_mp_available(updated_node, stack_id=())
         return updated_node
 
     def add_missed_overloads(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
@@ -310,6 +311,73 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 # cst.IndentedBlock(body=tuple(updated_body)))  # type: ignore
         return updated_node
 
+    def add_missed_mp_available(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
+        """
+        Add any missing @mp_available to the updated_node
+
+        """
+        missing_decorated = []
+        scope_keys = [k for k in self.annotations.keys() if k[: (len(stack_id))] == stack_id]
+
+        for key in scope_keys:
+            for mpa in self.annotations[key].mp_available:
+                missing_decorated.append((mpa.def_node, key))
+            self.annotations[key].mp_available = []  # remove for list, assume  works
+
+        if missing_decorated:
+            if isinstance(updated_node, cst.Module):
+                module_level = True
+                updated_body = list(updated_node.body)  # type: ignore
+            elif isinstance(updated_node, cst.ClassDef):
+                module_level = False
+                updated_body = list(updated_node.body.body)  # type: ignore
+            else:
+                raise ValueError(f"Unsupported node type: {updated_node}")
+            # insert each decorated function/class just after a function with the same name
+
+            new_classes = []
+            for mpa, key in missing_decorated:
+                matched = False
+                matched, i = self.locate_function_by_name(mpa, updated_body)
+                if matched:
+                    log.trace(f"Add @mp_available for {mpa.name.value}")
+                    if self.copy_params:
+                        docstring_node = self.annotations[key].docstring_node or ""
+                        # Use the new overload - but with the existing docstring
+                        mpa = update_def_docstr(mpa, docstring_node)
+                    updated_body.insert(i + 1, mpa)
+                else:
+                    # add to the end of the module or  class
+                    if module_level and len(key) > 1:
+                        # this is a class level @mp_available, for which no class was found
+                        class_name = key[0]
+                        if class_name not in new_classes:
+                            new_classes.append(class_name)
+                            # create a class for it, and then add all the @mp_available methods to that class
+                            log.trace(f"Add New class @mp_available for {mpa.name.value} at the end of the module")
+                            # create a list of all overloads for this class
+                            class_mpas = [mpa for mpa, k in missing_decorated if k[0] == class_name]
+                            class_def = cst.ClassDef(
+                                name=cst.Name(value=class_name),
+                                body=cst.IndentedBlock(body=class_mpas),
+                            )
+                            updated_body.append(class_def)
+                        else:
+                            # already processed this class method
+                            pass
+                    else:
+                        log.trace(f"Add @mp_available for {mpa.name.value} at the end of the class")
+                        updated_body.append(mpa)
+
+            if isinstance(updated_node, cst.Module):
+                updated_node = updated_node.with_changes(body=tuple(updated_body))
+            elif isinstance(updated_node, cst.ClassDef):
+                b1 = updated_node.body.with_changes(body=tuple(updated_body))
+                updated_node = updated_node.with_changes(body=b1)
+
+                # cst.IndentedBlock(body=tuple(updated_body)))  # type: ignore
+        return updated_node
+
     def locate_function_by_name(self, overload, updated_body):
         """locate the (last) function by name"""
         matched = False
@@ -356,6 +424,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # for now just return the updated node
         # Add any missing methods overloads
         updated_node = self.add_missed_overloads(updated_node, stack_id)
+        # Add any missing @mp_available
+        updated_node = self.add_missed_mp_available(updated_node, stack_id)
         return updated_node
 
     # ------------------------------------------------------------------------
@@ -400,30 +470,23 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 return updated_node
 
         # Check if it is an @overload decorator
-        add_overload = any(is_decorator(dec, "overload") for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) > 1
+        add_overload = any(is_decorator(dec, "overload") for dec in doc_stub.decorators) and len(self.annotations[stack_id].overloads) >= 1
 
         # If there are overloads in the documentation, use the first one
         if add_overload:
             log.debug(f"Change to @overload :{updated_node.name.value}")
             # Use the new overload - but with the existing docstring
             doc_stub = self.annotations[stack_id].overloads.pop(0)
-            assert doc_stub.def_node
+            updated_node = self.merge_decorator(original_node, updated_node, stack_id, doc_stub)
+            return updated_node
 
-            if not self.copy_params:
-                # we have copied over the entire function definition, no further processing should be done on this node
-                doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)
-                updated_node = doc_stub.def_node
-
-            else:
-                # Save (first) existing docstring if any
-                existing_ds = None
-                if updated_node.get_docstring():
-                    # if there is one , then get it including the layout
-                    existing_ds = original_node.body.body[0]
-                    assert isinstance(existing_ds, cst.SimpleStatementLine)
-
-                self.annotations[stack_id].docstring_node = existing_ds
-                updated_node = update_def_docstr(doc_stub.def_node, existing_ds)
+        # If there are overloads in the documentation, use the first one
+        add_mpa_deco = any(is_decorator(dec, "mp_available") for dec in doc_stub.decorators) and len(self.annotations[stack_id].mp_available) >= 1
+        if add_mpa_deco:
+            log.debug(f"Change to @mp_available :{updated_node.name.value}")
+            # Use the new @mp_available - but with the existing docstring
+            doc_stub = self.annotations[stack_id].mp_available.pop(0)
+            updated_node = self.merge_decorator(original_node,updated_node ,stack_id, doc_stub)
             return updated_node
 
         # assert isinstance(doc_stub, TypeInfo)
@@ -497,3 +560,21 @@ class MergeCommand(VisitorBasedCodemodCommand):
         else:
             #  just return the updated node
             return updated_node
+
+    def merge_decorator(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef, stack_id, doc_stub):
+        if not self.copy_params:
+                # we have copied over the entire function definition, no further processing should be done on this node
+            doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)
+            updated_node = doc_stub.def_node
+
+        else:
+                # Save (first) existing docstring if any
+            existing_ds = None
+            if updated_node.get_docstring():
+                    # if there is one , then get it including the layout
+                existing_ds = original_node.body.body[0]
+                assert isinstance(existing_ds, cst.SimpleStatementLine)
+
+            self.annotations[stack_id].docstring_node = existing_ds
+            updated_node = update_def_docstr(doc_stub.def_node, existing_ds)
+        return updated_node

@@ -31,6 +31,8 @@ class AnnoValue:
     "function/method or class definition read from the docstub source"
     overloads: List[TypeInfo] = field(default_factory=list)
     "function / method overloads read from the docstub source"
+    mp_available: List[TypeInfo] = field(default_factory=list)
+    "function / method `overloads` read from the docstub source"
 
 
 class TransformError(Exception):
@@ -155,10 +157,12 @@ class StubTypingCollector(cst.CSTVisitor):
             # store the first function/method signature
             self.annotations[key] = AnnoValue(type_info=ti)
 
-
+        # save the overload decos
         if any(m.matches(dec , m.Decorator(decorator=m.Name("overload"))) for dec in node.decorators):
-            # and store the overloads
             self.annotations[key].overloads.append(ti)
+        # save the mp_available decos
+        if any(m.matches(dec , m.Decorator(decorator=m.Name("mp_available"))) for dec in node.decorators):
+            self.annotations[key].mp_available.append(ti)
 
     def update_append_first_node(self, node):
         """Store the function/method docstring or function/method sig"""
