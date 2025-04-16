@@ -75,4 +75,4 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
 
     log.info(f"{mpy_path} {git.get_local_tag(mpy_path)}")
     log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_lib_path)}")
-    # click.echo(f"{mpy_stubs_path} {git.get_tag(mpy_stubs_path)}")
+
