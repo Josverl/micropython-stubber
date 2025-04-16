@@ -3,16 +3,17 @@
 import csv
 import os
 import pkgutil
+import subprocess
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Tuple
-
-from mpflash.logger import log
-from packaging.version import Version
+from typing import Tuple, Union
 
 import mpflash.basicgit as git
+from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, get_stable_mp_version
+from packaging.version import Version
+
 from stubber.utils.config import CONFIG
 
 # # log = logging.getLogger(__name__)
@@ -55,7 +56,7 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     data = pkgutil.get_data("stubber", filename)
     if not data:
         raise FileNotFoundError(f"Resource {filename} not found")
-    version_commit = defaultdict()  # lgtm [py/multiple-definition]
+    version_commit = defaultdict()
     with tempfile.NamedTemporaryFile(prefix="tags", suffix=".csv", mode="w+t") as ntf:
         ntf.file.write(data.decode(encoding="utf8"))
         ntf.file.seek(0)
@@ -73,6 +74,41 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
     return version_commit
 
 
+def sync_submodules(repo: Union[Path, str]) -> bool:
+    """
+    make sure any submodules are in sync
+    """
+    cmds = [
+        ["git", "submodule", "sync", "--quiet"],
+        # ["git", "submodule", "update", "--quiet"],
+        ["git", "submodule", "update", "--init", "lib/micropython-lib"],
+    ]
+    for cmd in cmds:
+        if result := git._run_local_git(cmd, repo=repo, expect_stderr=True):
+            # actually a good result
+            log.debug(result.stderr)
+        else:
+            return False
+    checkout_arduino_lib(Path(repo))
+    return True
+
+
+def checkout_arduino_lib(mpy_path: Path):
+    """
+    Checkout the arduino-lib submodule repo if it exists
+
+    This is needed as some of the arduino boards freeze modules originationg from the arduino-lib
+    """
+    # arduino_lib_path = mpy_path / "lib/arduino-lib"
+    if (mpy_path / "lib/arduino-lib").exists():
+        cmd = ["git", "submodule", "update", "--init", "lib/arduino-lib"]
+        try:
+            result = subprocess.run(cmd, cwd=mpy_path, check=True)
+            log.info(f"checkout arduino-lib: {result.returncode}")
+        except subprocess.CalledProcessError as e:
+            log.warning("Could not check out arduino-lib, error: ", e)
+
+
 def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool:
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
@@ -84,7 +120,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
             log.error("Could not checkout micropython-lib @master")
             return False
 
-        return git.sync_submodules(mpy_path)
+        return sync_submodules(mpy_path)
     elif Version(version_tag) >= Version("v1.20.0"):
         # micropython-lib is now a submodule
         result = git.checkout_tag(version_tag, lib_path)
@@ -93,7 +129,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
             if not git.checkout_tag("master", lib_path):
                 log.error("Could not checkout micropython-lib @master")
                 return False
-        return git.sync_submodules(mpy_path)
+        return sync_submodules(mpy_path)
     else:
         log.info(
             f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
