@@ -27,5 +27,5 @@ def cli_stub(source: Union[str, Path]):
     log.info("Generate type hint files (pyi) in folder: {}".format(source))
     OK = generate_pyi_files(Path(source))
     # do not generate pyi files twice
-    do_post_processing([Path(source)], stubgen=False, black=True, autoflake=False)
+    do_post_processing([Path(source)], stubgen=False, format=True, autoflake=False)
     return 0 if OK else 1

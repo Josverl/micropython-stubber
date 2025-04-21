@@ -1,4 +1,4 @@
-""" 
+"""
 This script creates stubs on and for a connected micropython MCU board.
 """
 
@@ -9,16 +9,16 @@ import time
 from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import List, Optional, Tuple
-
-from rich.console import Console
-from rich.table import Table
-from tenacity import retry, stop_after_attempt, wait_fixed
+from typing import List, Optional, Tuple, Union
 
 from mpflash.connected import list_mcus
 from mpflash.list import show_mcus
 from mpflash.logger import log
 from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
+from rich.console import Console
+from rich.table import Table
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 from stubber import utils
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.pathnames import board_folder_name
@@ -60,12 +60,7 @@ def copy_createstubs_to_board(board: MPRemoteBoard, variant: Variant, form: Form
     origin = "./src/stubber/board"
 
     _py = [
-        "rm :lib/createstubs.mpy",
-        "rm :lib/createstubs_mem.mpy",
-        "rm :lib/createstubs_db.mpy",
-        "rm :lib/createstubs.py",
-        "rm :lib/createstubs_mem.py",
-        "rm :lib/createstubs_db.py",
+        "rm -r :lib",
         f"cp {origin}/createstubs.py :lib/createstubs.py",
         f"cp {origin}/createstubs_mem.py :lib/createstubs_mem.py",
         f"cp {origin}/createstubs_db.py :lib/createstubs_db.py",
@@ -79,9 +74,7 @@ def copy_createstubs_to_board(board: MPRemoteBoard, variant: Variant, form: Form
     ]
     # copy createstubs*_mpy.mpy to the destination folder
     _mpy = [
-        "rm :lib/createstubs.py",
-        "rm :lib/createstubs_mem.py",
-        "rm :lib/createstubs_db.py",
+        "rm -r :lib",
         f"cp {origin}/createstubs_mpy.mpy :lib/createstubs.mpy",
         f"cp {origin}/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
         f"cp {origin}/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
@@ -129,7 +122,12 @@ def hard_reset(board: MPRemoteBoard) -> bool:
 
 
 @retry(stop=stop_after_attempt(10), wait=wait_fixed(15))
-def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.db):
+def run_createstubs(
+    dest: Path,
+    mcu: MPRemoteBoard,
+    variant: Variant = Variant.db,
+    mount_vfs: bool = True,
+):
     """
     Run a createstubs[variant]  on the provided board.
     Retry running the command up to 10 times, with a 15 second timeout between retries.
@@ -148,7 +146,10 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
         time.sleep(2)
 
     log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
-    cmd = build_cmd(dest, variant)
+    if mount_vfs:
+        cmd = build_cmd(dest, variant)
+    else:
+        cmd = build_cmd(None, variant)
     log.info(f"Running : mpremote {' '.join(cmd)}")
     mcu.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
@@ -167,7 +168,7 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
     return rc, out
 
 
-def build_cmd(dest: Path, variant: Variant = Variant.db):
+def build_cmd(dest: Union[Path, None], variant: Variant = Variant.db) -> List[str]:
     """Build the import createstubs[_??] command to run on the board"""
     cmd = ["mount", str(dest)] if dest else []
     if variant == Variant.db:
@@ -184,7 +185,7 @@ def generate_board_stubs(
     mcu: MPRemoteBoard,
     variant: Variant = Variant.db,
     form: Form = Form.mpy,
-    host_mounted: bool = True,
+    mount_vfs: bool = True,
 ) -> Tuple[int, Optional[Path]]:
     """
     Generate the MCU stubs for this MCU board.
@@ -195,7 +196,9 @@ def generate_board_stubs(
     port : str
         The port the board is connected to
     """
-
+    if mcu.cpu.lower() == "esp8266":
+        # insuficcient memory on the board also mount a remote fs
+        mount_vfs = False
     # HOST -> MCU : copy createstubs to board
     ok = copy_scripts_to_board(mcu, variant, form)
     if not ok and not TESTING:
@@ -204,15 +207,17 @@ def generate_board_stubs(
 
     copy_boardname_to_board(mcu)
 
-    rc, out = run_createstubs(dest, mcu, variant)  # , host_mounted=host_mounted)
+    rc, out = run_createstubs(dest, mcu, variant, mount_vfs=mount_vfs)
 
     if rc != OK:
         log.warning("Error running createstubs: %s", out)
         return ERROR, None
 
-    if not host_mounted:
+    if not mount_vfs:
         # Waiting for MPRemote to support copying folder from board to host
-        raise NotImplementedError("TODO: Copy stubs from board to host")
+        cmd = f"cp -r :stubs {dest.as_posix()}"
+        log.info(f"Copy stubs from board to host: {cmd}")
+        rc, out = mcu.run_command(cmd, timeout=60)
 
     # Find the output starting with 'Path: '
     folder = get_stubfolder(out)
@@ -226,6 +231,7 @@ def generate_board_stubs(
         with open(stubs_path / "modules.json") as fp:
             modules_json = json.load(fp)
             mcu.firmware = modules_json["firmware"]
+        log.debug(f"Found modules.json: {modules_json}")
     except FileNotFoundError:
         log.warning("Could not load modules.json, Assuming error in createstubs")
         return ERROR, None
@@ -234,9 +240,10 @@ def generate_board_stubs(
     if len(list(stubs_path.glob("*.p*"))) < 10:
         log.warning("Error generating stubs, too few (<10)stubs were generated")
         return ERROR, None
+    log.debug(f"Found {len(list(stubs_path.glob('*.p*')))} stubs")
 
     stubgen_needed = any(stubs_path.glob("*.py"))
-    utils.do_post_processing([stubs_path], stubgen=stubgen_needed, black=True, autoflake=True)
+    utils.do_post_processing([stubs_path], stubgen=stubgen_needed, format=True, autoflake=True)
 
     return OK, stubs_path
 
@@ -393,7 +400,6 @@ def stub_connected_mcus(
                     family=board.firmware["family"],
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
-                    mpy_path=CONFIG.mpy_path,
                 )
                 if not merged:
                     log.error(f"Failed to merge stubs for {board.serialport}")

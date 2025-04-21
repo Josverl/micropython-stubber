@@ -11,13 +11,13 @@ from mpflash.logger import log
 from .stubmaker import generate_pyi_files
 
 
-def do_post_processing(stub_paths: List[Path], stubgen: bool, black: bool, autoflake: bool):
+def do_post_processing(stub_paths: List[Path], stubgen: bool, format: bool, autoflake: bool):
     "Common post processing"
     for path in stub_paths:
         if stubgen:
             log.debug("Generate type hint files (pyi) in folder: {}".format(path))
             generate_pyi_files(path)
-        if black:
+        if format:
             run_black(path)
         if autoflake:
             run_autoflake(path, process_pyi=True)
