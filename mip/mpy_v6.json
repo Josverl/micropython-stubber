@@ -2,19 +2,19 @@
   "urls": [
     [
       "createstubs.mpy",
-      "github:josverl/micropython-stubber/mip/v6/createstubs_mpy.mpy"
+      "github:josverl/micropython-stubber/src/stubber/board/createstubs_mpy.mpy"
     ],
     [
       "createstubs_mem.mpy",
-      "github:Josverl/micropython-stubber/mip/v6/createstubs_mem_mpy.mpy"
+      "github:Josverl/micropython-stubber/src/stubber/board/createstubs_mem_mpy.mpy"
     ],
     [
       "createstubs_db.mpy",
-      "github:Josverl/micropython-stubber/mip/v6/createstubs_db_mpy.mpy"
+      "github:Josverl/micropython-stubber/src/stubber/board/createstubs_db_mpy.mpy"
     ],
     [
       "modulelist.txt",
-      "github:Josverl/micropython-stubber/mip/v6/modulelist.txt"
+      "github:Josverl/micropython-stubber/src/stubber/board/modulelist.txt"
     ]
   ],
   "deps": [],
