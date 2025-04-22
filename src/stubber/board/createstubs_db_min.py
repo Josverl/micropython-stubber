@@ -306,7 +306,7 @@ def AB(skip=0):
 		B=E+'/modulelist.txt'
 		if not a(B):continue
 		try:
-			with O(B)as F:
+			with O(B,encoding='utf-8')as F:
 				C=0
 				while V:
 					A=F.readline().strip()

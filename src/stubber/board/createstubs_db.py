@@ -667,7 +667,7 @@ def version_str(version: tuple):  #  -> str:
     return v_str
 
 
-def get_boardname(info: dict) -> str:
+def get_boardname(info: dict) :
     "Read the board_id from the boardname.py file that may have been created upfront"
     try:
         from boardname import BOARD_ID  # type: ignore
@@ -754,7 +754,7 @@ def get_modules(skip=0):
         if not file_exists(fname):
             continue
         try:
-            with open(fname) as f:
+            with open(fname, encoding="utf-8") as f:
                 i = 0
                 while True:
                     line = f.readline().strip()
