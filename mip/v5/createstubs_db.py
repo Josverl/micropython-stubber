@@ -43,7 +43,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.24.0"
+__version__ = "v1.24.9"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -542,6 +542,8 @@ def _info():  # type:() -> dict[str, str]
             "ver": "",
             "port": sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "UNKNOWN",
+            "board_id": "",
+            "variant": "",
             "cpu": "",
             "mpy": "",
             "arch": "",
