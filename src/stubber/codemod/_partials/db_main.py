@@ -62,7 +62,7 @@ def get_modules(skip=0):
         if not file_exists(fname):
             continue
         try:
-            with open(fname) as f:
+            with open(fname, encoding="utf-8") as f:
                 i = 0
                 while True:
                     line = f.readline().strip()
