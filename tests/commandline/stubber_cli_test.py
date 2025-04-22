@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
 # module under test :
 import stubber.stubber as stubber
-from click.testing import CliRunner
-from pytest_mock import MockerFixture
 from stubber.commands.switch_cmd import VERSION_LIST
 
 # mark all tests
@@ -193,9 +193,7 @@ def test_cmd_stub(mocker: MockerFixture):
 
     m_generate.assert_called_once_with(Path("."))
     m_postprocessing.assert_called_once()
-    m_postprocessing.assert_called_once_with(
-        [Path(".")], stubgen=False, black=True, autoflake=False
-    )
+    m_postprocessing.assert_called_once_with([Path(".")], stubgen=False, format=True, autoflake=False)
     assert result.exit_code == 0
 
 
@@ -258,7 +256,7 @@ def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
     mock_post.assert_called_with(
         [tmp_path / "cpython_core-pycopy", tmp_path / "cpython_core-micropython"],
         stubgen=True,
-        black=True,
+        format=True,
         autoflake=True,
     )
 

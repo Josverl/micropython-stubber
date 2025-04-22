@@ -1,19 +1,18 @@
-A4='variant'
 A3='No report file'
 A2='Failed to create the report.'
 A1='method'
 A0='function'
-z='bool'
-y='str'
-x='float'
-w='int'
-v='micropython'
-u='stubber'
-t=Exception
-s=KeyError
-r=sorted
-q=MemoryError
-p=NotImplementedError
+z='str'
+y='float'
+x='int'
+w='micropython'
+v='stubber'
+u=Exception
+t=KeyError
+s=sorted
+r=MemoryError
+q=NotImplementedError
+m='variant'
 l=',\n'
 k='modules.json'
 j='{}/{}'
@@ -25,9 +24,9 @@ e=TypeError
 d=str
 c=repr
 X='-preview'
-W='board_id'
-V=True
-U='family'
+W=True
+V='family'
+U='board_id'
 T='board'
 S=len
 R=IndexError
@@ -51,13 +50,13 @@ try:from ujson import dumps
 except:from json import dumps
 try:from machine import reset
 except P:pass
-try:from collections import OrderedDict as m
-except P:from ucollections import OrderedDict as m
+try:from collections import OrderedDict as n
+except P:from ucollections import OrderedDict as n
 __version__='v1.24.9'
-A5=2
-A6=44
-A7=2
-A8=['lib','/lib','/sd/lib','/flash/lib',L]
+A4=2
+A5=44
+A6=2
+A7=['lib','/lib','/sd/lib','/flash/lib',L]
 class K:
 	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=Q
 	@staticmethod
@@ -72,17 +71,17 @@ class K:
 		if A.level<=K.WARNING:A.prnt('WARN  :',msg)
 	def error(A,msg):
 		if A.level<=K.ERROR:A.prnt('ERROR :',msg)
-A=K.getLogger(u)
+A=K.getLogger(v)
 K.basicConfig(level=K.INFO)
 class Stubber:
 	def __init__(B,path=B,firmware_id=B):
 		C=firmware_id
 		try:
-			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise p('MicroPython 1.13.0 cannot be stubbed')
+			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise q('MicroPython 1.13.0 cannot be stubbed')
 		except J:pass
-		B.info=_info();A.info('Port: {}'.format(B.info[M]));A.info('Board: {}'.format(B.info[T]));A.info('Board_ID: {}'.format(B.info[W]));F.collect()
+		B.info=_info();A.info('Port: {}'.format(B.info[M]));A.info('Board: {}'.format(B.info[T]));A.info('Board_ID: {}'.format(B.info[U]));F.collect()
 		if C:B._fwid=C.lower()
-		elif B.info[U]==v:B._fwid='{family}-v{version}-{port}-{board_id}'.format(**B.info).rstrip(E)
+		elif B.info[V]==w:B._fwid='{family}-v{version}-{port}-{board_id}'.format(**B.info).rstrip(E)
 		else:B._fwid='{family}-v{version}-{port}'.format(**B.info)
 		B._start_free=F.mem_free()
 		if path:
@@ -100,15 +99,15 @@ class Stubber:
 				D=getattr(H,A)
 				try:E=c(type(D)).split("'")[1]
 				except R:E=B
-				if E in{w,x,y,z,f,g,h}:G=1
+				if E in{x,y,z,'bool',f,g,h}:G=1
 				elif E in{A0,A1}:G=2
 				elif E in'class':G=3
 				else:G=4
 				C.append((A,c(D),c(type(D)),D,G))
 			except J as I:K.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(A,H,I))
-			except q as I:Q('MemoryError: {}'.format(I));sleep(1);reset()
-		C=r([A for A in C if not A[0].startswith('__')],key=lambda x:x[4]);F.collect();return C,K
-	def add_modules(A,modules):A.modules=r(set(A.modules)|set(modules))
+			except r as I:Q('MemoryError: {}'.format(I));sleep(1);reset()
+		C=s([A for A in C if not A[0].startswith('__')],key=lambda x:x[4]);F.collect();return C,K
+	def add_modules(A,modules):A.modules=s(set(A.modules)|set(modules))
 	def create_all_stubs(B):
 		A.info('Start micropython-stubber {} on {}'.format(__version__,B._fwid));B.report_start();F.collect()
 		for C in B.modules:B.create_one_stub(C)
@@ -134,8 +133,8 @@ class Stubber:
 		J.report_add(C,E)
 		if C not in{'os','sys','logging','gc'}:
 			try:del M
-			except(D,s):A.warning('could not del new_module')
-		F.collect();return V
+			except(D,t):A.warning('could not del new_module')
+		F.collect();return W
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
 		Y=' at ...>';X='{0}{1}: {3} = {2}\n';W='bound_method';V='Incomplete';O=in_class;N='Exception';M=object_expr;K=' at ';J=fp;E=indent;F.collect()
 		if M in L.problematic:A.warning('SKIPPING problematic module:{}'.format(M));return
@@ -144,7 +143,7 @@ class Stubber:
 		for(C,H,I,a,c)in Z:
 			if C in['classmethod','staticmethod','BaseException',N]:continue
 			if C[0].isdigit():A.warning('NameError: invalid name {}'.format(C));continue
-			if I=="<class 'type'>"and S(E)<=A7*4:
+			if I=="<class 'type'>"and S(E)<=A6*4:
 				Q=B;R=C.endswith(N)or C.endswith('Error')or C in['KeyboardInterrupt','StopIteration','SystemExit']
 				if R:Q=N
 				D='\n{}class {}({}):\n'.format(E,C,Q)
@@ -159,7 +158,7 @@ class Stubber:
 			elif I=="<class 'module'>":0
 			elif I.startswith("<class '"):
 				G=I[8:-2];D=B
-				if G in(y,w,x,z,'bytearray','bytes'):
+				if G in(z,x,y,'bool','bytearray','bytes'):
 					if C.upper()==C:D='{0}{1}: Final[{3}] = {2}\n'.format(E,C,H,G)
 					else:D=X.format(E,C,H,G)
 				elif G in(h,g,f):b={h:'{}',g:'[]',f:'()'};D=X.format(E,C,b[G],G)
@@ -189,12 +188,12 @@ class Stubber:
 				try:C.clean(B);os.rmdir(B)
 				except D:pass
 	def report_start(B,filename=k):
-		G='firmware';B._json_name=j.format(B.path,filename);B._json_first=V;Y(B._json_name);A.info('Report file: {}'.format(B._json_name));F.collect()
+		G='firmware';B._json_name=j.format(B.path,filename);B._json_first=W;Y(B._json_name);A.info('Report file: {}'.format(B._json_name));F.collect()
 		try:
-			with O(B._json_name,i)as E:E.write('{');E.write(dumps({G:B.info})[1:-1]);E.write(l);E.write(dumps({u:{C:__version__},'stubtype':G})[1:-1]);E.write(l);E.write('"modules" :[\n')
+			with O(B._json_name,i)as E:E.write('{');E.write(dumps({G:B.info})[1:-1]);E.write(l);E.write(dumps({v:{C:__version__},'stubtype':G})[1:-1]);E.write(l);E.write('"modules" :[\n')
 		except D as I:A.error(A2);B._json_name=H;raise I
 	def report_add(B,module_name,stub_file):
-		if not B._json_name:raise t(A3)
+		if not B._json_name:raise u(A3)
 		try:
 			with O(B._json_name,'a')as C:
 				if not B._json_first:C.write(l)
@@ -202,7 +201,7 @@ class Stubber:
 				E='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',G));C.write(E)
 		except D:A.error(A2)
 	def report_end(B):
-		if not B._json_name:raise t(A3)
+		if not B._json_name:raise u(A3)
 		with O(B._json_name,'a')as C:C.write('\n]}')
 		A.info('Path: {}'.format(B.path))
 def Y(path):
@@ -213,7 +212,7 @@ def Y(path):
 			C=path[0]if B==0 else path[:B]
 			try:I=os.stat(C)
 			except D as F:
-				if F.args[0]in[A5,A6]:
+				if F.args[0]in[A4,A5]:
 					try:A.debug('Create folder {}'.format(C));os.mkdir(C)
 					except D as H:A.error('failed to create folder {}'.format(C));raise H
 		E=B+1
@@ -227,21 +226,21 @@ def Z(s):
 	if not X in s:return B
 	A=s.split(X)[1].split(L)[1];return A
 def _info():
-	d='ev3-pybricks';c='pycom';b='pycopy';a='unix';Y='win32';V='arch';S='cpu';Q='ver';F='mpy';D='build'
+	d='ev3-pybricks';c='pycom';b='pycopy';a='unix';Y='win32';W='arch';S='cpu';Q='ver';F='mpy';D='build'
 	try:L=sys.implementation[0]
 	except e:L=sys.implementation.name
-	A=m({U:L,C:B,D:B,Q:B,M:sys.platform,T:'UNKNOWN',S:B,F:B,V:B})
+	A=n({V:L,C:B,D:B,Q:B,M:sys.platform,T:'UNKNOWN',U:B,m:B,S:B,F:B,W:B})
 	if A[M].startswith('pyb'):A[M]='stm32'
 	elif A[M]==Y:A[M]='windows'
 	elif A[M]=='linux':A[M]=a
-	try:A[C]=A9(sys.implementation.version)
+	try:A[C]=A8(sys.implementation.version)
 	except J:pass
 	try:
 		O=sys.implementation._machine if'_machine'in N(sys.implementation)else os.uname().machine;A[T]=O.strip();G=sys.implementation._build if'_build'in N(sys.implementation)else B
-		if G:A[T]=G.split(E)[0];A[A4]=G.split(E)[1]if E in G else B
-		A[W]=G;A[S]=O.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
+		if G:A[T]=G.split(E)[0];A[m]=G.split(E)[1]if E in G else B
+		A[U]=G;A[S]=O.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
 	except(J,R):pass
-	if not A[W]:AA(A)
+	if not A[U]:A9(A)
 	try:
 		if'uname'in N(os):
 			A[D]=Z(os.uname()[3])
@@ -252,29 +251,29 @@ def _info():
 		try:f=os.uname();A[C]=f.release
 		except(R,J,e):pass
 	for(g,h,i)in[(b,b,'const'),(c,c,'FAT'),(d,'pybricks.hubs','EV3Brick')]:
-		try:j=__import__(h,H,H,i);A[U]=g;del j;break
-		except(P,s):pass
-	if A[U]==d:A['release']='2.0.0'
-	if A[U]==v:
+		try:j=__import__(h,H,H,i);A[V]=g;del j;break
+		except(P,t):pass
+	if A[V]==d:A['release']='2.0.0'
+	if A[V]==w:
 		A[C]
 		if A[C]and A[C].endswith('.0')and A[C]>='1.10.0'and A[C]<='1.19.9':A[C]=A[C][:-2]
 	if F in A and A[F]:
 		I=int(A[F])
 		try:K=[H,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][I>>10]
 		except R:K='unknown'
-		if K:A[V]=K
+		if K:A[W]=K
 		A[F]='v{}.{}'.format(I&255,I>>8&3)
 	if A[D]and not A[C].endswith(X):A[C]=A[C]+X
 	A[Q]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
-def A9(version):
+def A8(version):
 	A=version;B=L.join([d(A)for A in A[:3]])
 	if S(A)>3 and A[3]:B+=E+A[3]
 	return B
-def AA(info):
+def A9(info):
 	D=info
 	try:from boardname import BOARD_ID as C;A.info('Found BOARD_ID: {}'.format(C))
 	except P:A.warning('BOARD_ID not found');C=B
-	D[W]=C;D[T]=C.split(E)[0]if E in C else C;D[A4]==C.split(E)[1]if E in C else B
+	D[U]=C;D[T]=C.split(E)[0]if E in C else C;D[m]==C.split(E)[1]if E in C else B
 def get_root():
 	try:A=os.getcwd()
 	except(D,J):A=L
@@ -285,30 +284,30 @@ def get_root():
 	return B
 def a(filename):
 	try:
-		if os.stat(filename)[0]>>14:return V
+		if os.stat(filename)[0]>>14:return W
 		return I
 	except D:return I
-def n():Q("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
+def o():Q("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
 def read_path():
 	path=B
 	if S(sys.argv)==3:
 		A=sys.argv[1].lower()
 		if A in('--path','-p'):path=sys.argv[2]
-		else:n()
-	elif S(sys.argv)==2:n()
+		else:o()
+	elif S(sys.argv)==2:o()
 	return path
-def o():
-	try:A=bytes('abc',encoding='utf8');B=o.__module__;return I
-	except(p,J):return V
+def p():
+	try:A=bytes('abc',encoding='utf8');B=p.__module__;return I
+	except(q,J):return W
 b='modulelist.done'
-def AB(skip=0):
-	for E in A8:
+def AA(skip=0):
+	for E in A7:
 		B=E+'/modulelist.txt'
 		if not a(B):continue
 		try:
 			with O(B,encoding='utf-8')as F:
 				C=0
-				while V:
+				while W:
 					A=F.readline().strip()
 					if not A:break
 					if S(A)>0 and A[0]=='#':continue
@@ -317,9 +316,9 @@ def AB(skip=0):
 					yield A
 				break
 		except D:pass
-def AC(done):
+def AB(done):
 	with O(b,i)as A:A.write(d(done)+'\n')
-def AD():
+def AC():
 	A=0
 	try:
 		with O(b)as B:A=int(B.readline().strip())
@@ -331,13 +330,13 @@ def main():
 	else:A.info('Starting new run')
 	stubber=Stubber(path=read_path());B=0
 	if not C:stubber.clean();stubber.report_start(k)
-	else:B=AD();stubber._json_name=j.format(stubber.path,k)
-	for E in AB(B):
+	else:B=AC();stubber._json_name=j.format(stubber.path,k)
+	for E in AA(B):
 		try:stubber.create_one_stub(E)
-		except q:D.reset()
-		F.collect();B+=1;AC(B)
+		except r:D.reset()
+		F.collect();B+=1;AB(B)
 	Q('All modules have been processed, Finalizing report');stubber.report_end()
-if __name__=='__main__'or o():
+if __name__=='__main__'or p():
 	if not a('no_auto_stubber.txt'):
 		Q(f"createstubs.py: {__version__}")
 		try:F.threshold(4096);F.enable()

@@ -546,6 +546,8 @@ def _info():  # type:() -> dict[str, str]
             "ver": "",
             "port": sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "UNKNOWN",
+            "board_id": "",
+            "variant": "",
             "cpu": "",
             "mpy": "",
             "arch": "",
