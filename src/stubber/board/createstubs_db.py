@@ -667,7 +667,7 @@ def version_str(version: tuple):  #  -> str:
     return v_str
 
 
-def get_boardname(info: dict) :
+def get_boardname(info: dict) -> str:
     "Read the board_id from the boardname.py file that may have been created upfront"
     try:
         from boardname import BOARD_ID  # type: ignore

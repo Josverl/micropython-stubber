@@ -1,24 +1,5 @@
 """
-Create stubs for (all) modules on a MicroPython board.
-
-    This variant of the createstubs.py script is optimized for use on very-low-memory devices.
-    Note: this version has undergone limited testing.
-    
-    1) reads the list of modules from a text file `modulelist.txt` that should be uploaded to the device.
-    2) stored the already processed modules in a text file `modulelist.done` 
-    3) process the modules in the database:
-        - stub the module
-        - update the modulelist.done file
-        - reboots the device if it runs out of memory
-    4) creates the modules.json
-
-    If that cannot be found then only a single module (micropython) is stubbed.
-    In order to run this on low-memory devices two additional steps are recommended: 
-    - minification, using python-minifierto reduce overall size, and remove logging overhead.
-    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
-
-
-This variant was generated from createstubs.py by micropython-stubber v1.24.4
+Create stubs for (all) modules on a MicroPython board
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -44,8 +25,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.24.0"
-ENOENT = 2  # on most ports
-ENOMESSAGE = 44  # on pyscript
+ENOENT = 2 # on most ports
+ENOMESSAGE = 44 # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -173,7 +154,11 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
+                _errors.append(
+                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
+                        name, item_instance, e
+                    )
+                )
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -239,7 +224,9 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
+            log.info(
+                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
+            )
 
         except ImportError:
             # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -250,9 +237,13 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
+                module_name, self._fwid, info_, __version__
+            )
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
+            fp.write(
+                "from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n"
+            )
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -267,7 +258,9 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
+    def write_object_stub(
+        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
+    ):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -343,9 +336,13 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(
+                        indent
+                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
+                        indent, item_name, first, ret
+                    )
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -374,7 +371,9 @@ class Stubber:
                     if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                     elif t == "generator":
                         # either a normal or async Generator function
                         t = "Generator"
@@ -388,7 +387,9 @@ class Stubber:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
                         if " at " in item_repr:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(
+                            indent, item_name, t, item_type_txt, item_repr
+                        )
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
@@ -471,7 +472,9 @@ class Stubber:
                     f.write(",\n")
                 else:
                     self._json_first = False
-                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
+                line = '{{"module": "{}", "file": "{}"}}'.format(
+                    module_name, stub_file.replace("\\", "/")
+                )
                 f.write(line)
 
         except OSError:
@@ -498,7 +501,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] in [ENOENT, ENOMESSAGE]:
+                if e.args[0] in [ENOENT, ENOMESSAGE] :
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)
@@ -507,6 +510,7 @@ def ensure_folder(path: str):
                         raise e2
         # next level deep
         start = i + 1
+
 
 
 def _build(s):
@@ -559,7 +563,9 @@ def _info():  # type:() -> dict[str, str]
     except AttributeError:
         pass
     try:
-        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
+        _machine = (
+            sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
+        )
         info["board"] = _machine.strip()
         si_build = sys.implementation._build if "_build" in dir(sys.implementation) else ""
         if si_build:
@@ -621,7 +627,8 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
+            and info["version"]
+            >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # versions from 1.10.0 to 1.24.0 do not have a micro .0
@@ -734,106 +741,294 @@ def is_micropython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore
+        b = bytes("abc", encoding="utf8")  # type: ignore 
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore
+        c = is_micropython.__module__  # type: ignore 
         return False
     except (NotImplementedError, AttributeError):
         return True
 
 
-SKIP_FILE = "modulelist.done"
-
-
-def get_modules(skip=0):
-    # new
-    for p in LIBS:
-        fname = p + "/modulelist.txt"
-        if not file_exists(fname):
-            continue
-        try:
-            with open(fname, encoding="utf-8") as f:
-                i = 0
-                while True:
-                    line = f.readline().strip()
-                    if not line:
-                        break
-                    if len(line) > 0 and line[0] == "#":
-                        continue
-                    i += 1
-                    if i < skip:
-                        continue
-                    yield line
-                break
-        except OSError:
-            pass
-
-
-def write_skip(done):
-    # write count of modules already processed to file
-    with open(SKIP_FILE, "w") as f:
-        f.write(str(done) + "\n")
-
-
-def read_skip():
-    # read count of modules already processed from file
-    done = 0
-    try:
-        with open(SKIP_FILE) as f:
-            done = int(f.readline().strip())
-    except OSError:
-        pass
-    return done
-
-
 def main():
-    import machine  # type: ignore
-
-    was_running = file_exists(SKIP_FILE)
-    if was_running:
-        log.info("Continue from last run")
-    else:
-        log.info("Starting new run")
-    # try:
-    #     f = open("modulelist.done", "r+b")
-    #     was_running = True
-    #     print("Continue from last run")
-    # except OSError:
-    #     f = open("modulelist.done", "w+b")
-    #     was_running = False
     stubber = Stubber(path=read_path())
+    # stubber = Stubber(path="/sd")
+    # Option: Specify a firmware name & version
+    # stubber = Stubber(firmware_id='HoverBot v1.2.1')
+    stubber.clean()
+    # there is no option to discover modules from micropython, need to hardcode
+    # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
+    # spell-checker: disable
+    # modules to stub : 131
+    stubber.modules = [
+        "WM8960",
+        "_asyncio",
+        "_boot_fat",
+        "_espnow",
+        "_onewire",
+        "_rp2",
+        "_thread",
+        "_uasyncio",
+        "abc",
+        "adcfft",
+        "aioble/__init__",
+        "aioble/central",
+        "aioble/client",
+        "aioble/core",
+        "aioble/device",
+        "aioble/l2cap",
+        "aioble/peripheral",
+        "aioble/security",
+        "aioble/server",
+        "aioespnow",
+        "ak8963",
+        "apa102",
+        "apa106",
+        "argparse",
+        "array",
+        "asyncio/__init__",
+        "asyncio/core",
+        "asyncio/event",
+        "asyncio/funcs",
+        "asyncio/lock",
+        "asyncio/stream",
+        "base64",
+        "binascii",
+        "bluetooth",
+        "breakout_as7262",
+        "breakout_bh1745",
+        "breakout_bme280",
+        "breakout_bme68x",
+        "breakout_bmp280",
+        "breakout_dotmatrix",
+        "breakout_encoder",
+        "breakout_icp10125",
+        "breakout_ioexpander",
+        "breakout_ltr559",
+        "breakout_matrix11x7",
+        "breakout_mics6814",
+        "breakout_msa301",
+        "breakout_paa5100",
+        "breakout_pmw3901",
+        "breakout_potentiometer",
+        "breakout_rgbmatrix5x5",
+        "breakout_rtc",
+        "breakout_scd41",
+        "breakout_sgp30",
+        "breakout_trackball",
+        "breakout_vl53l5cx",
+        "btree",
+        "builtins",
+        "cc3200",
+        "cmath",
+        "collections",
+        "collections/__init__",
+        "collections/defaultdict",
+        "copy",
+        "crypto",
+        "cryptolib",
+        "curl",
+        "datetime",
+        "deflate",
+        "dht",
+        "display",
+        "display_driver_utils",
+        "ds18x20",
+        "embed",
+        "encoder",
+        "errno",
+        "esp",
+        "esp32",
+        "esp8266",
+        "espidf",
+        "espnow",
+        "ffi",
+        "flashbdev",
+        "fnmatch",
+        "framebuf",
+        "freesans20",
+        "fs_driver",
+        "functools",
+        "galactic",
+        "gc",
+        "gfx_pack",
+        "gsm",
+        "gzip",
+        "hashlib",
+        "heapq",
+        "hmac",
+        "html/__init__",
+        "hub75",
+        "ili9341",
+        "ili9XXX",
+        "imagetools",
+        "inisetup",
+        "inspect",
+        "interstate75",
+        "io",
+        "itertools",
+        "jpegdec",
+        "js",
+        "jsffi",
+        "json",
+        "lcd160cr",
+        "locale",
+        "lodepng",
+        "logging",
+        "lsm6dsox",
+        "lv_colors",
+        "lv_utils",
+        "lvgl",
+        "lwip",
+        "machine",
+        "marshal",
+        "math",
+        "microWebSocket",
+        "microWebSrv",
+        "microWebTemplate",
+        "micropython",
+        "mimxrt",
+        "mip",
+        "mip/__init__",
+        "mip/__main__",
+        "motor",
+        "mpu6500",
+        "mpu9250",
+        "neopixel",
+        "network",
+        "nrf",
+        "ntptime",
+        "onewire",
+        "openamp",
+        "operator",
+        "os",
+        "os/__init__",
+        "os/path",
+        "pathlib",
+        "pcf85063a",
+        "pic16bit",
+        "picoexplorer",
+        "picographics",
+        "picokeypad",
+        "picoscroll",
+        "picounicorn",
+        "picowireless",
+        "pimoroni",
+        "pimoroni_bus",
+        "pimoroni_i2c",
+        "plasma",
+        "platform",
+        "powerpc",
+        "pyb",
+        "pye",
+        "pyscript",
+        "pyscript/__init__",
+        "pyscript/fs",
+        "qemu",
+        "qrcode",
+        "random",
+        "renesas",
+        "renesas-ra",
+        "requests",
+        "requests/__init__",
+        "rp2",
+        "rtch",
+        "samd",
+        "select",
+        "servo",
+        "socket",
+        "ssd1306",
+        "ssh",
+        "ssl",
+        "stat",
+        "stm",
+        "stm32",
+        "string",
+        "struct",
+        "sys",
+        "tarfile/__init__",
+        "tarfile/write",
+        "termios",
+        "time",
+        "tls",
+        "tpcalib",
+        "types",
+        "uarray",
+        "uasyncio/__init__",
+        "uasyncio/core",
+        "uasyncio/event",
+        "uasyncio/funcs",
+        "uasyncio/lock",
+        "uasyncio/stream",
+        "uasyncio/tasks",
+        "ubinascii",
+        "ubluetooth",
+        "ucollections",
+        "ucryptolib",
+        "uctypes",
+        "uerrno",
+        "uftpd",
+        "uhashlib",
+        "uheapq",
+        "uio",
+        "ujson",
+        "ulab",
+        "ulab/approx",
+        "ulab/compare",
+        "ulab/fft",
+        "ulab/filter",
+        "ulab/linalg",
+        "ulab/numerical",
+        "ulab/poly",
+        "ulab/user",
+        "ulab/vector",
+        "umachine",
+        "umqtt/__init__",
+        "umqtt/robust",
+        "umqtt/simple",
+        "unittest/__init__",
+        "unix",
+        "uos",
+        "uplatform",
+        "urandom",
+        "ure",
+        "urequests",
+        "urllib/urequest",
+        "usb/device",
+        "usb/device/cdc",
+        "usb/device/hid",
+        "usb/device/keyboard",
+        "usb/device/midi",
+        "usb/device/mouse",
+        "uselect",
+        "usocket",
+        "ussl",
+        "ustruct",
+        "usys",
+        "utelnetserver",
+        "utime",
+        "utimeq",
+        "uu",
+        "uwebsocket",
+        "uzlib",
+        "version",
+        "vfs",
+        "webassembly",
+        "websocket",
+        "websocket_helper",
+        "windows",
+        "wipy",
+        "writer",
+        "xpt2046",
+        "ymodem",
+        "zephyr",
+        "zlib",
+    ]  # spell-checker: enable
 
-    # f_name = "{}/{}".format(stubber.path, "modules.json")
-    skip = 0
-    if not was_running:
-        # Only clean folder if this is a first run
-        stubber.clean()
-        stubber.report_start("modules.json")
-    else:
-        skip = read_skip()
-        stubber._json_name = "{}/{}".format(stubber.path, "modules.json")
+    gc.collect()
 
-    for modulename in get_modules(skip):
-        # ------------------------------------
-        # do epic shit
-        # but sometimes things fail / run out of memory and reboot
-        try:
-            stubber.create_one_stub(modulename)
-        except MemoryError:
-            # RESET AND HOPE THAT IN THE NEXT CYCLE WE PROGRESS FURTHER
-            machine.reset()
-        # -------------------------------------
-        gc.collect()
-        # modules_done[modulename] = str(stubber._report[-1] if ok else "failed")
-        # with open("modulelist.done", "a") as f:
-        #     f.write("{}={}\n".format(modulename, "ok" if ok else "failed"))
-        skip += 1
-        write_skip(skip)
-
-    print("All modules have been processed, Finalizing report")
-    stubber.report_end()
+    stubber.create_all_stubs()
 
 
 if __name__ == "__main__" or is_micropython():
