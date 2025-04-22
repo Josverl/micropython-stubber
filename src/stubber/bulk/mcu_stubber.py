@@ -147,9 +147,9 @@ def generate_board_stubs(
     if not ok and not TESTING:
         log.warning("Error copying createstubs to board")
         return ERROR, None
-    if not mcu._board_id:
-        # the MCU board does not have a board id, so we need to set it
-        copy_boardname_to_board(mcu)
+    # the MCU board may not have a board id,so lets just provide it so
+    # createstubs can use it if needed.
+    copy_boardname_to_board(mcu)
 
     rc, out = run_createstubs(dest, mcu, variant, mount_vfs=mount_vfs)
 
@@ -208,7 +208,7 @@ def copy_boardname_to_board(mcu: MPRemoteBoard):
     if mcu.board_id:
         cmd = [
             "exec",
-            f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board_id}\"')",
+            f"with open('lib/boardname.py', 'w') as f: f.write('BOARD_ID=\"{mcu.board_id}\"')",
         ]
         log.info(f"Writing BOARD_ID='{mcu.board_id}' to boardname.py")
     else:
