@@ -49,7 +49,7 @@ try:from machine import reset
 except O:pass
 try:from collections import OrderedDict as h
 except O:from ucollections import OrderedDict as h
-__version__='v1.24.0'
+__version__='v1.24.9'
 A0=2
 A1=44
 A2=2

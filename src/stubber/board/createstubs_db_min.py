@@ -53,7 +53,7 @@ try:from machine import reset
 except P:pass
 try:from collections import OrderedDict as m
 except P:from ucollections import OrderedDict as m
-__version__='v1.24.0'
+__version__='v1.24.9'
 A5=2
 A6=44
 A7=2
