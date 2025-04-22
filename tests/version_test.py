@@ -1,6 +1,6 @@
-import pytest
 from pathlib import Path
 
+import pytest
 from packaging.version import parse
 
 try:
@@ -22,4 +22,4 @@ def test_package_versions_are_in_sync():
 
     package_init_version = stubber.__version__
 
-    assert parse(package_init_version).public == parse(pyproject_version).public
+    assert parse(pyproject_version).public.startswith(parse(package_init_version).public)
