@@ -52,7 +52,6 @@ class Form(str, Enum):
     mpy = "mpy"
 
 
-
 @retry(stop=stop_after_attempt(4), wait=wait_fixed(2))
 def hard_reset(board: MPRemoteBoard) -> bool:
     """Reset the board"""
@@ -142,6 +141,9 @@ def generate_board_stubs(
     if mcu.cpu.lower() == "esp8266":
         # insuficcient memory on the board also mount a remote fs
         mount_vfs = False
+    if not mount_vfs:
+        # remove prio stubs folder to avoid running out of flash space
+        mcu.run_command(["rm", "-rv", ":stubs"], log_errors=False)
     # HOST -> MCU : mip install createstubs to board
     ok = install_scripts_to_board(mcu, form)
     if not ok and not TESTING:
@@ -341,7 +343,7 @@ def stub_connected_mcus(
             log.error(f"Failed to generate stubs for {board.serialport}")
             continue
         if my_stubs:
-            log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
+            log.success(f"Stubs generated for {board.firmware['port']}-{board.firmware['board']}")
             if destination := copy_to_repo(my_stubs, board.firmware):
                 log.success(f"Stubs copied to {destination}")
                 # Also merge the stubs with the docstubs
