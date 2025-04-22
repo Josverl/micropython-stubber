@@ -6,12 +6,12 @@ get-docstubs
 from pathlib import Path
 from typing import Optional
 
+import mpflash.basicgit as git
 import rich_click as click
+from mpflash.logger import log
 from packaging.version import Version
 
-import mpflash.basicgit as git
 import stubber.utils as utils
-from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
 from stubber.merge_config import copy_type_modules
@@ -159,6 +159,6 @@ def cli_docstubs(
             copy_type_modules(reference_path, dst_path, CP_REFERENCE_TO_DOCSTUB)
             log.info("::group:: start post processing of retrieved stubs")
             # do not run stubgen
-            utils.do_post_processing([dst_path], stubgen=False, black=black, autoflake=autoflake)
+            utils.do_post_processing([dst_path], stubgen=False, format=black, autoflake=autoflake)
 
     log.info("::group:: Done")

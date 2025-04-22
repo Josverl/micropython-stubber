@@ -4,8 +4,8 @@ import re
 import sys
 from pathlib import Path
 
-import mypy.stubgen as stubgen
 from mpflash.logger import log
+import mypy.stubgen as stubgen
 from mypy.errors import CompileError
 
 # default stubgen options

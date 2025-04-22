@@ -1,0 +1,22 @@
+{
+    "urls": [
+        [
+            "createstubs.mpy",
+            "createstubs_mpy.mpy"
+        ],
+        [
+            "createstubs_mem.mpy",
+            "createstubs_mem_mpy.mpy"
+        ],
+        [
+            "createstubs_db.mpy",
+            "createstubs_db_mpy.mpy"
+        ],
+        [
+            "modulelist.txt",
+            "modulelist.txt"
+        ]
+    ],
+    "deps": [],
+    "version": "1.24.0"
+}

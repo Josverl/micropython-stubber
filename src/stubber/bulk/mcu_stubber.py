@@ -1,4 +1,4 @@
-""" 
+"""
 This script creates stubs on and for a connected micropython MCU board.
 """
 
@@ -9,16 +9,16 @@ import time
 from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import List, Optional, Tuple
-
-from rich.console import Console
-from rich.table import Table
-from tenacity import retry, stop_after_attempt, wait_fixed
+from typing import List, Optional, Tuple, Union
 
 from mpflash.connected import list_mcus
 from mpflash.list import show_mcus
 from mpflash.logger import log
 from mpflash.mpremoteboard import ERROR, OK, MPRemoteBoard
+from rich.console import Console
+from rich.table import Table
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 from stubber import utils
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.pathnames import board_folder_name
@@ -28,7 +28,6 @@ from stubber.utils.config import CONFIG
 HERE = Path(__file__).parent
 ###############################################################################################
 # TODO: promote to cmdline params
-LOCAL_FILES = False
 reset_before = True
 TESTING = False
 ###############################################################################################
@@ -53,72 +52,6 @@ class Form(str, Enum):
     mpy = "mpy"
 
 
-def copy_createstubs_to_board(board: MPRemoteBoard, variant: Variant, form: Form) -> bool:
-    # sourcery skip: assign-if-exp, boolean-if-exp-identity, remove-unnecessary-cast
-    """Copy createstubs to the board"""
-    # copy createstubs.py to the destination folder
-    origin = "./src/stubber/board"
-
-    _py = [
-        "rm :lib/createstubs.mpy",
-        "rm :lib/createstubs_mem.mpy",
-        "rm :lib/createstubs_db.mpy",
-        "rm :lib/createstubs.py",
-        "rm :lib/createstubs_mem.py",
-        "rm :lib/createstubs_db.py",
-        f"cp {origin}/createstubs.py :lib/createstubs.py",
-        f"cp {origin}/createstubs_mem.py :lib/createstubs_mem.py",
-        f"cp {origin}/createstubs_db.py :lib/createstubs_db.py",
-    ]
-
-    # copy createstubs*_min.py to the destination folder
-    _min = [
-        f"cp {origin}/createstubs_min.py :lib/createstubs.py",
-        f"cp {origin}/createstubs_mem_min.py :lib/createstubs_mem.py",
-        f"cp {origin}/createstubs_db_min.py :lib/createstubs_db.py",
-    ]
-    # copy createstubs*_mpy.mpy to the destination folder
-    _mpy = [
-        "rm :lib/createstubs.py",
-        "rm :lib/createstubs_mem.py",
-        "rm :lib/createstubs_db.py",
-        f"cp {origin}/createstubs_mpy.mpy :lib/createstubs.mpy",
-        f"cp {origin}/createstubs_mem_mpy.mpy :lib/createstubs_mem.mpy",
-        f"cp {origin}/createstubs_db_mpy.mpy :lib/createstubs_db.mpy",
-    ]
-
-    _lib = [
-        [
-            "exec",
-            "import os;os.mkdir('lib') if not ('lib' in os.listdir()) else print('folder lib already exists')",
-        ]
-    ]
-
-    _get_ready = [
-        "rm :modulelist.done",
-        "rm :no_auto_stubber.txt",
-        f"cp {origin}/modulelist.txt :lib/modulelist.txt",
-    ]
-    if form == Form.py:
-        do = _lib + _py + _get_ready
-    elif form == Form.min:
-        do = _lib + _min + _get_ready
-    else:
-        do = _lib + _mpy + _get_ready
-
-    # assume all ok, unless one is not ok
-    for cmd in do:
-        if isinstance(cmd, str) and cmd.startswith("rm "):
-            log_errors = False
-        else:
-            log_errors = True
-        rc, _ = board.run_command(cmd, log_errors=log_errors)
-        if rc != OK and "rm" not in cmd:
-            log.error(f"Error during copy createstubs running command: {cmd}")
-            return False
-    return True
-
-
 @retry(stop=stop_after_attempt(4), wait=wait_fixed(2))
 def hard_reset(board: MPRemoteBoard) -> bool:
     """Reset the board"""
@@ -129,7 +62,12 @@ def hard_reset(board: MPRemoteBoard) -> bool:
 
 
 @retry(stop=stop_after_attempt(10), wait=wait_fixed(15))
-def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.db):
+def run_createstubs(
+    dest: Path,
+    mcu: MPRemoteBoard,
+    variant: Variant = Variant.db,
+    mount_vfs: bool = True,
+):
     """
     Run a createstubs[variant]  on the provided board.
     Retry running the command up to 10 times, with a 15 second timeout between retries.
@@ -148,7 +86,11 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
         time.sleep(2)
 
     log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
-    cmd = build_cmd(dest, variant)
+    if mount_vfs:
+        cmd = build_cmd(dest, variant)
+    else:
+        mcu.run_command(["rm", ":modulelist.done"], log_errors=False)
+        cmd = build_cmd(None, variant)
     log.info(f"Running : mpremote {' '.join(cmd)}")
     mcu.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
@@ -167,7 +109,7 @@ def run_createstubs(dest: Path, mcu: MPRemoteBoard, variant: Variant = Variant.d
     return rc, out
 
 
-def build_cmd(dest: Path, variant: Variant = Variant.db):
+def build_cmd(dest: Union[Path, None], variant: Variant = Variant.db) -> List[str]:
     """Build the import createstubs[_??] command to run on the board"""
     cmd = ["mount", str(dest)] if dest else []
     if variant == Variant.db:
@@ -184,7 +126,7 @@ def generate_board_stubs(
     mcu: MPRemoteBoard,
     variant: Variant = Variant.db,
     form: Form = Form.mpy,
-    host_mounted: bool = True,
+    mount_vfs: bool = True,
 ) -> Tuple[int, Optional[Path]]:
     """
     Generate the MCU stubs for this MCU board.
@@ -195,27 +137,39 @@ def generate_board_stubs(
     port : str
         The port the board is connected to
     """
-
-    # HOST -> MCU : copy createstubs to board
-    ok = copy_scripts_to_board(mcu, variant, form)
+    # TODO: use remaining free memory to determine if we can afford to mount the vfs
+    if mcu.cpu.lower() == "esp8266":
+        # insuficcient memory on the board also mount a remote fs
+        mount_vfs = False
+    if not mount_vfs:
+        # remove prio stubs folder to avoid running out of flash space
+        mcu.run_command(["rm", "-rv", ":stubs"], log_errors=False)
+    # HOST -> MCU : mip install createstubs to board
+    ok = install_scripts_to_board(mcu, form)
     if not ok and not TESTING:
         log.warning("Error copying createstubs to board")
         return ERROR, None
-
+    # the MCU board may not have a board id,so lets just provide it so
+    # createstubs can use it if needed.
     copy_boardname_to_board(mcu)
 
-    rc, out = run_createstubs(dest, mcu, variant)  # , host_mounted=host_mounted)
+    rc, out = run_createstubs(dest, mcu, variant, mount_vfs=mount_vfs)
 
     if rc != OK:
         log.warning("Error running createstubs: %s", out)
         return ERROR, None
 
-    if not host_mounted:
+    if mount_vfs:
+        folder = get_stubfolder(out)
+    else:
         # Waiting for MPRemote to support copying folder from board to host
-        raise NotImplementedError("TODO: Copy stubs from board to host")
+        cmd = f"cp -r :stubs {dest.as_posix()}"
+        log.info(f"Copy stubs from board to host: {cmd}")
+        mcu.run_command(cmd, timeout=60)
+        # drop the first `/` from the pathto avoid absolute path
+        folder = get_stubfolder(out).lstrip("/")
 
     # Find the output starting with 'Path: '
-    folder = get_stubfolder(out)
     if not folder:
         return ERROR, None
 
@@ -223,9 +177,10 @@ def generate_board_stubs(
     mcu.path = stubs_path
     # read the modules.json file into a dict
     try:
-        with open(stubs_path / "modules.json") as fp:
+        with open(stubs_path / "modules.json", encoding="utf-8") as fp:
             modules_json = json.load(fp)
             mcu.firmware = modules_json["firmware"]
+        log.debug(f"Found modules.json: {modules_json}")
     except FileNotFoundError:
         log.warning("Could not load modules.json, Assuming error in createstubs")
         return ERROR, None
@@ -234,9 +189,10 @@ def generate_board_stubs(
     if len(list(stubs_path.glob("*.p*"))) < 10:
         log.warning("Error generating stubs, too few (<10)stubs were generated")
         return ERROR, None
+    log.debug(f"Found {len(list(stubs_path.glob('*.p*')))} stubs")
 
     stubgen_needed = any(stubs_path.glob("*.py"))
-    utils.do_post_processing([stubs_path], stubgen=stubgen_needed, black=True, autoflake=True)
+    utils.do_post_processing([stubs_path], stubgen=stubgen_needed, format=True, autoflake=True)
 
     return OK, stubs_path
 
@@ -251,12 +207,12 @@ def copy_boardname_to_board(mcu: MPRemoteBoard):
     Returns:
         None
     """
-    if mcu.board:
+    if mcu.board_id:
         cmd = [
             "exec",
-            f"with open('lib/boardname.py', 'w') as f: f.write('BOARDNAME=\"{mcu.board}\"')",
+            f"with open('lib/boardname.py', 'w') as f: f.write('BOARD_ID=\"{mcu.board_id}\"')",
         ]
-        log.info(f"Writing BOARDNAME='{mcu.board}' to boardname.py")
+        log.info(f"Writing BOARD_ID='{mcu.board_id}' to boardname.py")
     else:
         cmd = ["rm", "boardname.py"]
     rc, _ = mcu.run_command(cmd)
@@ -264,7 +220,7 @@ def copy_boardname_to_board(mcu: MPRemoteBoard):
         log.error(f"Error during copy createstubs running command: {cmd}")
 
 
-def copy_scripts_to_board(mcu: MPRemoteBoard, variant: Variant, form: Form):
+def install_scripts_to_board(mcu: MPRemoteBoard, form: Form):
     """
     Copy scripts to the board.
 
@@ -276,20 +232,25 @@ def copy_scripts_to_board(mcu: MPRemoteBoard, variant: Variant, form: Form):
     Returns:
         bool: True if the scripts are successfully copied, False otherwise.
     """
-    if LOCAL_FILES:
-        return copy_createstubs_to_board(mcu, variant, form)
-    if form == Form.min:
-        location = "github:josverl/micropython-stubber/mip/minified.json"
-    elif form == Form.mpy:
-        location = "github:josverl/micropython-stubber/mip/mpy_v6.json"
+    if form == Form.mpy:
+        location = "pkg_mpy.json"
+    elif form == Form.min:
+        location = "pkg_minified.json"
     else:
-        location = "github:josverl/micropython-stubber/mip/full.json"
-
+        location = "pkg_full.json"
+    location = f"{HERE.parent.absolute().as_posix()}/board/{location}"
+    log.info(f"Installing {location} to {mcu.serialport} {mcu.description}")
     return mcu.mip_install(location)
 
 
 def get_stubfolder(out: List[str]):
-    return lines[-1].split("/remote/")[-1].strip() if (lines := [l for l in out if l.startswith("INFO  : Path: ")]) else ""
+    line = lines[-1] if (lines := [l for l in out if l.startswith("INFO  : Path: ")]) else ""
+    if "/remote/" in line:
+        # the path is on a remote vfs, so we need to split it and return the last part
+        return line.split("/remote/")[-1].strip()
+    else:
+        # the path is on the local vfs, so just use the path
+        return line.split("Path:")[-1].strip()
 
 
 def set_loglevel(verbose: int) -> str:
@@ -382,7 +343,7 @@ def stub_connected_mcus(
             log.error(f"Failed to generate stubs for {board.serialport}")
             continue
         if my_stubs:
-            log.success(f'Stubs generated for {board.firmware["port"]}-{board.firmware["board"]}')
+            log.success(f"Stubs generated for {board.firmware['port']}-{board.firmware['board']}")
             if destination := copy_to_repo(my_stubs, board.firmware):
                 log.success(f"Stubs copied to {destination}")
                 # Also merge the stubs with the docstubs
@@ -393,7 +354,6 @@ def stub_connected_mcus(
                     family=board.firmware["family"],
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
-                    mpy_path=CONFIG.mpy_path,
                 )
                 if not merged:
                     log.error(f"Failed to merge stubs for {board.serialport}")

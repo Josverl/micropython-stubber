@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import List, Optional
 
 import rich_click as click
+from mpflash.logger import log
 
 import stubber.utils as utils
-from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
 from stubber.freeze.get_frozen import freeze_any
@@ -94,7 +94,7 @@ def cli_get_frozen(
     # Also enrich the frozen modules from the doc stubs if available
 
     # first create .pyi files so they can be enriched
-    utils.do_post_processing(stub_paths, stubgen=stubgen, black=False, autoflake=False)
+    utils.do_post_processing(stub_paths, stubgen=stubgen, format=False, autoflake=False)
 
     family = "micropython"
     _version = utils.clean_version(version, drop_v=False, flat=True)
@@ -117,5 +117,5 @@ def cli_get_frozen(
         log.info(f"No docstubs found at {docstubs_path}")
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, stubgen=False, black=black, autoflake=autoflake)
+    utils.do_post_processing(stub_paths, stubgen=False, format=black, autoflake=autoflake)
     log.info("::group:: Done")

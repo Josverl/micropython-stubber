@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.24.3
+This variant was generated from createstubs.py by micropython-stubber v1.24.4
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.24.0"
+__version__ = "v1.25.0"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -92,12 +92,13 @@ class Stubber:
         self.info = _info()
         log.info("Port: {}".format(self.info["port"]))
         log.info("Board: {}".format(self.info["board"]))
+        log.info("Board_ID: {}".format(self.info["board_id"]))
         gc.collect()
         if firmware_id:
             self._fwid = firmware_id.lower()
         else:
             if self.info["family"] == "micropython":
-                self._fwid = "{family}-v{version}-{port}-{board}".format(**self.info).rstrip("-")
+                self._fwid = "{family}-v{version}-{port}-{board_id}".format(**self.info).rstrip("-")
             else:
                 self._fwid = "{family}-v{version}-{port}".format(**self.info)
         self._start_free = gc.mem_free()  # type: ignore
@@ -532,6 +533,8 @@ def _info():  # type:() -> dict[str, str]
             "ver": "",
             "port": sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "UNKNOWN",
+            "board_id": "",
+            "variant": "",
             "cpu": "",
             "mpy": "",
             "arch": "",
@@ -550,8 +553,12 @@ def _info():  # type:() -> dict[str, str]
         pass
     try:
         _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
-        # info["board"] = "with".join(_machine.split("with")[:-1]).strip()
-        info["board"] = _machine
+        info["board"] = _machine.strip()
+        si_build = sys.implementation._build if "_build" in dir(sys.implementation) else ""
+        if si_build:
+            info["board"] = si_build.split("-")[0]
+            info["variant"] = si_build.split("-")[1] if "-" in si_build else ""
+        info["board_id"] = si_build
         info["cpu"] = _machine.split("with")[-1].strip()
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
@@ -560,7 +567,8 @@ def _info():  # type:() -> dict[str, str]
         )
     except (AttributeError, IndexError):
         pass
-    info["board"] = get_boardname()
+    if not info["board_id"]:
+        get_boardname(info)
 
     try:
         if "uname" in dir(os):  # old
@@ -652,16 +660,18 @@ def version_str(version: tuple):  #  -> str:
     return v_str
 
 
-def get_boardname() -> str:
-    "Read the board name from the boardname.py file that may have been created upfront"
+def get_boardname(info: dict) -> str:
+    "Read the board_id from the boardname.py file that may have been created upfront"
     try:
-        from boardname import BOARDNAME  # type: ignore
+        from boardname import BOARD_ID  # type: ignore
 
-        log.info("Found BOARDNAME: {}".format(BOARDNAME))
+        log.info("Found BOARD_ID: {}".format(BOARD_ID))
     except ImportError:
-        log.warning("BOARDNAME not found")
-        BOARDNAME = ""
-    return BOARDNAME
+        log.warning("BOARD_ID not found")
+        BOARD_ID = ""
+    info["board_id"] = BOARD_ID
+    info["board"] = BOARD_ID.split("-")[0] if "-" in BOARD_ID else BOARD_ID
+    info["variant"] == BOARD_ID.split("-")[1] if "-" in BOARD_ID else ""
 
 
 def get_root() -> str:  # sourcery skip: use-assigned-variable

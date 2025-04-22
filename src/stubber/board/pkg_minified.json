@@ -1,0 +1,22 @@
+{
+    "urls": [
+        [
+            "createstubs.py",
+            "createstubs_min.py"
+        ],
+        [
+            "createstubs_db.py",
+            "createstubs_db_min.py"
+        ],
+        [
+            "createstubs_mem.py",
+            "createstubs_mem_min.py"
+        ],
+        [
+            "modulelist.txt",
+            "modulelist.txt"
+        ]
+    ],
+    "deps": [],
+    "version": "1.24.0"
+}

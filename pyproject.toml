@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.24.4"
+version = "1.25.0"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -50,7 +50,6 @@ mpremote = "mpremote.main:main"
 python = ">=3.9.2,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.14" }
 requests = "^2.32.3"
-mypy = ">=1.10"
 mpflash = ">=1.24.7"
 mpremote = ">=1.24.1"
 # others
@@ -66,17 +65,19 @@ mypy-gitlab-code-quality = "^1.1.0"
 packaging = "^24.2"
 pipx = "^1.1.0"
 pygithub = "^2.1.1"
-pyright = ">=1.1.341"
 pyserial = ">=3.5"
 pypi-simple = "^1.0.0"
 rich-click = "^1.8.3"
-tenacity = "^8.2.2"
+tenacity = "9.0.0"
 tomli = { version = "^2.0.1", python = "<3.11" }
 tomli-w = "^1.0.0"
 typed-config = "^1.3.0"
 urllib3 = "^2.2.2"
 poetry = "^2.0.1"
 pydeps = "3.0.1"
+pyright = ">=1.1.341"
+mypy = ">=1.10"
+
 
 [tool.poetry.group.docs]
 optional = true

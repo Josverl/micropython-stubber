@@ -10,8 +10,8 @@ from typing import List, Optional
 from mpflash.logger import log
 
 from stubber import utils
+from stubber.modcat import U_MODULES
 from stubber.rst import DOCSTUB_SKIP
-from stubber.modcat import  U_MODULES
 from stubber.rst.reader import RSTWriter
 
 
@@ -43,7 +43,7 @@ def generate_from_rst(
 
     log.info("::group:: start post processing of retrieved stubs")
     # do not run stubgen
-    utils.do_post_processing([dst_path], stubgen=False, black=black, autoflake=autoflake)
+    utils.do_post_processing([dst_path], stubgen=False, format=black, autoflake=autoflake)
 
     # Generate a module manifest for the docstubs
     utils.make_manifest(
