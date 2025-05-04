@@ -393,7 +393,6 @@ def stub_connected_mcus(
                     family=board.firmware["family"],
                     boards=board.firmware["board"],
                     ports=board.firmware["port"],
-                    mpy_path=CONFIG.mpy_path,
                 )
                 if not merged:
                     log.error(f"Failed to merge stubs for {board.serialport}")
