@@ -47,13 +47,22 @@ def is_CONSTANT(statement):
     AnnAssign-  FOO:bool = ...
     """
 
-    if m.matches(statement, m.SimpleStatementLine()):
-        statement = statement.body[0]
-    if m.matches(statement, m.Assign()):
-        if len(statement.targets) != 1:
-            return False
-        if statement.targets[0].target.value.isupper():
-            return True
+    try:
+        if m.matches(statement, m.SimpleStatementLine()):
+            statement = statement.body[0]
+        if m.matches(statement, m.Assign()):
+            if len(statement.targets) != 1:
+                return False
+            if m.matches(statement.targets[0], m.Name()):
+                if statement.targets[0].target.value.isupper(): 
+                    return True
+            elif m.matches(statement.targets[0], m.AssignTarget()):
+                if m.matches(statement.targets[0].target, m.Name()):
+                    if statement.targets[0].children[0].value.isupper():
+                        return True
+    except Exception as e:
+        log.debug(f"Error in is_CONSTANT: {e}")
+        return False
     return False
 
 
