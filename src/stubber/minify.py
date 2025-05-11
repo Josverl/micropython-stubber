@@ -5,6 +5,7 @@ Minimizes and cross-compiles a MicroPyton file.
 
 import itertools
 import subprocess
+import sys
 import tempfile
 from contextlib import ExitStack
 from io import BytesIO, IOBase, StringIO, TextIOWrapper
@@ -18,6 +19,8 @@ except ImportError:
 
 from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW
+import shutil
+import os
 
 # Type Aliases for minify
 StubSource = Union[Path, str, StringIO, TextIOWrapper]
@@ -369,10 +372,10 @@ def cross_compile(
     else:
         # target must be a Path object
         _target = get_temp_file(suffix=".mpy")
-    result = pipx_mpy_cross(version, source_file, _target)
+    result = run_mpy_cross(version, source_file, _target)
     if result.stderr and "No matching distribution found for mpy-cross~=" in result.stderr:
         log.warning(f"mpy-cross~={version} not found, using most current version.")
-        result = pipx_mpy_cross(V_PREVIEW, source_file, _target)
+        result = run_mpy_cross(V_PREVIEW, source_file, _target)
 
     if result.returncode == 0:
         log.debug(f"mpy-cross compiled to    : {_target.name}")
@@ -388,18 +391,36 @@ def cross_compile(
     return result.returncode
 
 
-def pipx_mpy_cross(version: str, source_file, _target):
-    """Run mpy-cross using pipx"""
+def locate_mpy_cross():
+    """Locate the path of the mpy-cross commandline tool in the active environment"""
+    try:
+        # Check if it's available as a command in PATH
+        mpy_cross_path = shutil.which("mpy-cross")
+        if mpy_cross_path:
+            log.info(f"Found mpy-cross executable in PATH: {mpy_cross_path}")
+            return mpy_cross_path
+        
+        # Check in the Scripts/bin directory of the current Python environment
+        bin_dir = "Scripts" if sys.platform == "win32" else "bin"
+        env_path = os.path.join(os.path.dirname(sys.executable), bin_dir, "mpy-cross")
+        if os.path.exists(env_path):
+            log.info(f"Found mpy-cross executable in Python environment: {env_path}")
+            return env_path
+        raise FileNotFoundError("mpy-cross executable not found in PATH or Python environment")
+    except Exception as e:
+        log.debug(f"Error locating mpy-cross: {e}")
+        raise FileNotFoundError("mpy-cross executable not found in PATH or Python environment") from e
 
+def run_mpy_cross(version: str, source_file, _target):
+    """Run mpy-cross using --compat if needed"""
     log.info(f"Compiling with mpy-cross version: {version}")
     if version in SET_PREVIEW:
         version = ""
     if version:
-        version = "~=" + version.lstrip("v")
+        version = version.lstrip("v")
+    compat =  ["--compat", version] if version else []
 
-    cmd = ["pipx", "run", f"mpy-cross{version}"] if version else ["pipx", "run", "mpy-cross"]
-    # Add params
-    cmd += ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
+    cmd = [locate_mpy_cross() ] + compat + ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
     log.trace(" ".join(cmd))
     result = subprocess.run(
         cmd, capture_output=True, text=True, encoding="utf-8"

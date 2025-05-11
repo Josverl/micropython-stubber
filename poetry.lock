@@ -80,6 +80,7 @@ description = "Bash tab completion for argparse"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
+markers = "sys_platform != \"win32\""
 files = [
     {file = "argcomplete-3.5.3-py3-none-any.whl", hash = "sha256:2ab2c4a215c59fd6caaff41a869480a23e8f6a5f910b266c1808037f4e375b61"},
     {file = "argcomplete-3.5.3.tar.gz", hash = "sha256:c12bf50eded8aebb298c7b7da7a5ff3ee24dffd9f5281867dfe1424b58c55392"},
@@ -2137,6 +2138,23 @@ files = [
 pyserial = ">=3.3"
 
 [[package]]
+name = "mpy-cross"
+version = "1.25.0.post2"
+description = "micropython mpy-cross distribution"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-macosx_11_0_universal2.whl", hash = "sha256:42c9e570b414cf2bc011bf7ba0cce1fa58c288132886311d92e44ace0f4bc3ae"},
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-manylinux1_i686.whl", hash = "sha256:167c8d8e18cde654103e8b268c06e8e025e3d2ed51dfcf3a1517eda0a709a927"},
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:77235a2b63c3e96dba8681e3b7026418053688a46c57df5702b77c07d5b83c23"},
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-manylinux2014_aarch64.whl", hash = "sha256:0a9dbb7fb87f73af0282f233a66c79a6e408cbdfa86c94f0da532243614abbb0"},
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-manylinux2014_armv7l.whl", hash = "sha256:a8908a95f540e1a6c062b5affcd43018f9c1c7c1cf52ed0ce88080fec559e9da"},
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-win32.whl", hash = "sha256:e08b24a05ea04fcac28bb8788d5adbc0fa90863f094fb09b99409112d81ab712"},
+    {file = "mpy_cross-1.25.0.post2-py2.py3-none-win_amd64.whl", hash = "sha256:7a6ff4d7db33edf89b411dd676d19d089d572faaa1bb778e4fc6fd2cbd72d85b"},
+]
+
+[[package]]
 name = "msgpack"
 version = "1.1.0"
 description = "MessagePack serializer"
@@ -2415,26 +2433,6 @@ files = [
 
 [package.dependencies]
 ptyprocess = ">=0.5"
-
-[[package]]
-name = "pipx"
-version = "1.7.1"
-description = "Install and Run Python Applications in Isolated Environments"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "pipx-1.7.1-py3-none-any.whl", hash = "sha256:3933c43bb344e649cb28e10d357e0967ce8572f1c19caf90cf39ae95c2a0afaf"},
-    {file = "pipx-1.7.1.tar.gz", hash = "sha256:762de134e16a462be92645166d225ecef446afaef534917f5f70008d63584360"},
-]
-
-[package.dependencies]
-argcomplete = ">=1.9.4"
-colorama = {version = ">=0.4.4", markers = "sys_platform == \"win32\""}
-packaging = ">=20"
-platformdirs = ">=2.1"
-tomli = {version = "*", markers = "python_version < \"3.11\""}
-userpath = ">=1.6,<1.9 || >1.9"
 
 [[package]]
 name = "pkg-about"
@@ -4167,21 +4165,6 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
-name = "userpath"
-version = "1.9.2"
-description = "Cross-platform tool for adding locations to the user PATH"
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "userpath-1.9.2-py3-none-any.whl", hash = "sha256:2cbf01a23d655a1ff8fc166dfb78da1b641d1ceabf0fe5f970767d380b14e89d"},
-    {file = "userpath-1.9.2.tar.gz", hash = "sha256:6c52288dab069257cc831846d15d48133522455d4677ee69a9781f11dbefd815"},
-]
-
-[package.dependencies]
-click = "*"
-
-[[package]]
 name = "virtualenv"
 version = "20.29.2"
 description = "Virtual Python Environment builder"
@@ -4555,4 +4538,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9.2,<4.0"
-content-hash = "df559edf6684e1352d582385c23d0414aaf1899aa1331c024c76f730d1b03ff3"
+content-hash = "9be76cce745684d59ef881a34c197c7e105e4febb4ded5f6947817efebc4784b"

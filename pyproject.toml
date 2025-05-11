@@ -63,7 +63,6 @@ importlib-metadata = { version = ">=1,<9", python = "<3.8" }
 loguru = ">=0.6,<0.8"
 mypy-gitlab-code-quality = "^1.1.0"
 packaging = "^24.2"
-pipx = "^1.1.0"
 pygithub = "^2.1.1"
 pyserial = ">=3.5"
 pypi-simple = "^1.0.0"
@@ -77,6 +76,7 @@ poetry = "^2.0.1"
 pydeps = "3.0.1"
 pyright = ">=1.1.341"
 mypy = ">=1.10"
+mpy-cross = "^1.25.0.post2"
 
 
 [tool.poetry.group.docs]
