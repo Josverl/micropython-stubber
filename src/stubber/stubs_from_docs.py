@@ -78,23 +78,11 @@ def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
 def make_docstubs(
     dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path], clean_rst: bool
 ):
-    """Create the docstubs"""
+    """Create docstubs from the list of rst files"""
 
     for file in files:
-        reader = RSTWriter(v_tag)
-        reader.clean_rst = clean_rst
-        reader.source_release = release
-        log.debug(f"Reading: {file}")
-        reader.read_file(file)
-        reader.parse()
-        # Destination = "module.__init__.pyi"
-        if "." in file.stem:
-            target = dst_path / f"{(file.stem).replace('.', '/')}{suffix}"
-        else:
-            target = dst_path / file.stem / f"__init__{suffix}"
-        # fname = (dst_path / file.name).with_suffix(suffix)
-        reader.write_file(target)
-        del reader
+        make_docstub(file, dst_path, v_tag, release, suffix, clean_rst)
+
     for name in U_MODULES:
         # create a file "umodule.pyi" for each module
         # and add a line : from module import *
@@ -107,3 +95,28 @@ def make_docstubs(
             f.write("# Allow the use of micro-module notation \n\n")
             f.write(f"from {name} import *  # type: ignore\n")
             f.flush()
+
+
+def make_docstub(
+    file: Path,
+    dst_path: Path,
+    v_tag: str,
+    release: str,
+    suffix: str,
+    clean_rst: bool,
+):
+    """Create a docstub from a single rst file"""
+    reader = RSTWriter(v_tag)
+    reader.clean_rst = clean_rst
+    reader.source_release = release
+    log.debug(f"Reading: {file}")
+    reader.read_file(file)
+    reader.parse()
+
+    if "." in file.stem:
+        target = dst_path / f"{(file.stem).replace('.', '/')}{suffix}"
+    else:
+        target = dst_path / file.stem / f"__init__{suffix}"
+
+    reader.write_file(target)
+    del reader

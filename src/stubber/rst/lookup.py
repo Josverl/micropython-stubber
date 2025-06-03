@@ -445,6 +445,12 @@ PARAM_FIXES = [
         "(ip, subnet, gateway, dns):Optional[Any]=None",
         "configtuple: Optional[Tuple]",
     ),
+    # network.ipconfig
+    Fix(
+        "param=value",
+        "param:Optional[str]=None",
+        name="ipconfig",
+    ),
     # framebuffer
     # unresolvable parameter defaults # FrameBuffer: def __init__
     Fix(
