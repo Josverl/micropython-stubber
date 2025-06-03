@@ -69,10 +69,19 @@ from typing import List, Optional, Tuple
 
 from mpflash.logger import log
 from mpflash.versions import V_PREVIEW
-from stubber.rst import (CHILD_PARENT_CLASS, MODULE_GLUE, PARAM_FIXES,
-                         PARAM_RE_FIXES, RST_DOC_FIXES, TYPING_IMPORT,
-                         ClassSourceDict, FunctionSourceDict, ModuleSourceDict,
-                         return_type_from_context)
+
+from stubber.rst import (
+    CHILD_PARENT_CLASS,
+    MODULE_GLUE,
+    PARAM_FIXES,
+    PARAM_RE_FIXES,
+    RST_DOC_FIXES,
+    TYPING_IMPORT,
+    ClassSourceDict,
+    FunctionSourceDict,
+    ModuleSourceDict,
+    return_type_from_context,
+)
 from stubber.rst.lookup import Fix
 from stubber.utils.config import CONFIG
 
@@ -496,8 +505,8 @@ class RSTParser(RSTReader):
                 self.read_file(file_path)
                 self.parse()
         # reset this file to done
-        self.rst_text = []
-        self.line_no = 1
+        # self.rst_text = []
+        # self.line_no = 1
 
     def parse_module(self):
         "parse a module tag and set the module's docstring"

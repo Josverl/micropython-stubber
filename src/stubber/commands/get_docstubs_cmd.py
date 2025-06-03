@@ -58,7 +58,6 @@ from stubber.utils.repos import fetch_repos
 )
 @click.option(
     "--clean-rst/--no-clean-rst",
-    "-b/-nb",
     default=True,
     help="remove .rST constructs from the docstrings",
     show_default=True,

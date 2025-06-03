@@ -4,16 +4,17 @@ command line interface - main group
 
 import sys
 
-from mpflash.vendor.click_aliases import ClickAliasedGroup
 import rich_click as click
-from mpflash.logger import log, set_loglevel as mpf_set_loglevel
+from mpflash.logger import log
+from mpflash.logger import set_loglevel as mpf_set_loglevel
+from mpflash.vendor.click_aliases import ClickAliasedGroup
+
 from stubber import __version__
 
 
 @click.group(chain=True, cls=ClickAliasedGroup)
 @click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber✏️ ")
 @click.option(
-    "-V",
     "-V",
     "--verbose",
     count=True,
