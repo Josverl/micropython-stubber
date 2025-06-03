@@ -56,6 +56,15 @@ def get_package(
             version=version,
             json_data=package_info,
         )
+        # TODO @Josverl: Check or update stub_sources in len < 3
+        EXPECTED_STUBS = 3
+        if len(p_db.stub_sources) < EXPECTED_STUBS:
+            log.warning(f"Package {pkg_name} has less than 3 stub sources, updating...")
+            stub_sources = combo_sources(family, port, board, clean_version(p_db.mpy_version, flat=True))
+            if len(stub_sources) >= EXPECTED_STUBS:
+                p_db.stub_sources = stub_sources
+                p_db.update_sources()
+                log.info(f"Updated stub sources for {pkg_name} to {p_db.stub_sources}")
         return p_db
 
     log.debug(f"No package found for {pkg_name} in database, creating new package")
@@ -115,13 +124,13 @@ def create_package(
     create and initialize a package with the correct sources
     """
     ver_flat = clean_version(mpy_version, flat=True)
-    stubs: StubSources = []
+    stub_sources: StubSources = []
     # if pkg_type != COMBO_STUBS:
     #     raise ValueError("Not Supported")
 
     assert port != "", "port must be specified for combo stubs"
-    stubs = combo_sources(family, port, board, ver_flat)
-    return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stubs=stubs)
+    stub_sources = combo_sources(family, port, board, ver_flat)
+    return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stub_sources=stub_sources)
 
 
 def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSources:

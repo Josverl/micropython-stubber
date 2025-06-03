@@ -210,7 +210,7 @@ class Builder(VersionedPackage):
         board: str = GENERIC_U,
         variant: Optional[str] = None,
         description: str = "MicroPython stubs",
-        stubs: Optional[StubSources] = None,
+        stub_sources: Optional[StubSources] = None,
         # json_data: Optional[Dict[str, Any]] = None,
     ):  #  port: str, board: str
         super().__init__(package_name=package_name, mpy_version=mpy_version)
@@ -221,7 +221,7 @@ class Builder(VersionedPackage):
         self.board = board
         self.variant = variant or ""
         self.description = description
-        self.stub_sources = stubs or []
+        self.stub_sources = stub_sources or []
         self.hash = None  # intial hash
         """Hash of all the files in the package"""
         self.stub_hash = None  # intial hash
@@ -323,7 +323,7 @@ class Builder(VersionedPackage):
             for n in range(len(self.stub_sources)):
                 stub_type, src_path = self.stub_sources[n]
                 try:
-                    log.debug(f"Copying {stub_type} from {src_path}")
+                    log.debug(f"Copy {stub_type:<20} from {src_path}")
                     self.copy_folder(stub_type, src_path)
                 except OSError as e:
                     if stub_type != StubSource.FROZEN:
@@ -587,7 +587,7 @@ class PoetryBuilder(Builder):
         mpy_version: str = "0.0.1",
         board: str = GENERIC_U,
         description: str = "MicroPython stubs",
-        stubs: Optional[StubSources] = None,
+        stub_sources: Optional[StubSources] = None,
         json_data: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(
@@ -596,7 +596,7 @@ class PoetryBuilder(Builder):
             port=port,
             board=board,
             description=description,
-            stubs=stubs,
+            stub_sources=stub_sources,
         )
 
     # -----------------------------------------------
@@ -799,7 +799,7 @@ class StubPackage(PoetryBuilder):
         board: str = GENERIC_U,
         version: str = "0.0.1",
         description: str = "MicroPython stubs",
-        stubs: Optional[StubSources] = None,
+        stub_sources: Optional[StubSources] = None,
         json_data: Optional[Dict[str, Any]] = None,
     ):
         """
@@ -826,7 +826,7 @@ class StubPackage(PoetryBuilder):
             port=port,
             board=board,
             description=description,
-            stubs=stubs or [],
+            stub_sources=stub_sources or [],
         )
         self.port = port
         self.board = board
@@ -839,11 +839,6 @@ class StubPackage(PoetryBuilder):
             # self.mpy_version = clean_version(version, drop_v=True)  # Initial version
 
             self.create_update_pyproject_toml()
-
-            # self.stub_sources: StubSources = []
-            # # save the stub sources
-            # if stubs:
-            #     self.stub_sources = stubs
 
         self.status: Status = Status(
             {
