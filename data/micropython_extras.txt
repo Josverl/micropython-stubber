@@ -20,3 +20,7 @@ uctypes
 # The following libraries provide drivers for hardware components.
 # – Driver for the WM8960 codec
 WM8960 
+
+
+# https://github.com/micropython/micropython/pull/16615
+marshal
