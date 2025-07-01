@@ -1,2 +1,5 @@
 # https://github.com/micropython/micropython/pull/16615
 marshal
+
+# https://github.com/micropython/micropython/issues/17597
+zsensor 
