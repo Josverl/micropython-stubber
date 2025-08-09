@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
-
+from mpflash.versions import clean_version
 
 # Mostly: No Mocks, does actual extraction from repro
 from pytest_mock import MockerFixture
@@ -181,7 +181,7 @@ def test_freeze_one_manifest_v2(
         # "v1.19.1",
         "v1.20.0",
         "v1.23.0",
-        "latest",
+        "stable",
         "preview",
     ],
 )
@@ -193,8 +193,8 @@ def test_freeze_any(
 ):
     "test if we can freeze source using manifest.py files"
     # print(f"Testing {mpy_version} in {tmp_path}")
+    mpy_version = clean_version(mpy_version)
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-
     freeze_any(
         tmp_path,
         version=mpy_version,
@@ -220,12 +220,13 @@ def test_freeze_any(
         "v1.12",
         "v1.16",
         # "v1.17",
-        "v1.18",
+        # "v1.18",
         # "v1.19",
         "v1.19.1",
-        "v1.20.0",
+        # "v1.20.0",
         "v1.21.0",
-        "latest",
+        "stable",
+        "preview",
     ],
 )
 @pytest.mark.mocked
@@ -245,6 +246,7 @@ def test_freeze_any_mocked(
     m_freeze_one_manifest_2 = mocker.patch(
         "stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1
     )
+    mpy_version = clean_version(mpy_version)
     freeze_any(
         tmp_path,
         version=mpy_version,

@@ -1,6 +1,6 @@
 """
 Freeze manifest files for micropython 1.16 and later
-uses the manifest file to generate frozen stubs
+uses the manifestfile.py to generate frozen stubs
 
 """
 
@@ -55,6 +55,14 @@ def make_path_vars(
         # see micropython/ports/renesas-ra/boards/ARDUINO_PORTENTA_C33/mpconfigboard.mk
         vars["ARDUINO_LIB_DIR"] = (mpy_path / "lib/arduino-lib").absolute().as_posix()
 
+    if port == "alif":
+        # alif port uses MCU_CORE ?= M55_HP - see micropython/ports/alif/boards/manifest.py
+        log.warning(f"alif - Adding MCU_CORE='HP' to vars")
+        vars["MCU_CORE"] = "HP"
+    elif port == "zephyr":
+        # make sure the port/zephyr/modules folder exists
+        (mpy_path / "ports/zephyr/modules").mkdir(parents=True, exist_ok=True)
+
     return vars
 
 
@@ -75,7 +83,7 @@ def freeze_one_manifest_2(
     )
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
     try:
-        # assume manifestneeds to be run from the port's folder
+        # manifest needs to be run from the port's folder
         os.chdir(path_vars["PORT_DIR"])
         upy_manifest.execute(manifest.as_posix())
     except ManifestFileError as er:
