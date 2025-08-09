@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from mock import MagicMock
 from pytest_mock import MockerFixture
+
 from stubber.publish.stubpackage import StubPackage
 
 pytestmark = [pytest.mark.stubber]
@@ -100,11 +101,13 @@ def test_update_package(fake_package: StubPackage):
 
 
 @pytest.mark.integration
-def test_build_package(
-    mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage
-):
+def test_build_package(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage, monkeypatch):
     pkg = fake_package
-    # FIXME: dependency on online test.pypi.org
+
+    # Set Poetry to not create virtual environments during build
+    monkeypatch.setenv("POETRY_VIRTUALENVS_CREATE", "false")
+
+    # Call the actual build_distribution method
     result = pkg.build_distribution(production=False, force=False)
 
     assert result, "should be ok"
@@ -127,7 +130,10 @@ def test_publish_package(
     pytestconfig: pytest.Config,
     fake_package: StubPackage,
     test_db_conn: sqlite3.Connection,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    # Set Poetry to not create virtual environments during build
+    monkeypatch.setenv("POETRY_VIRTUALENVS_CREATE", "false")
     pkg = fake_package
 
     m_publish: MagicMock = mocker.patch(
