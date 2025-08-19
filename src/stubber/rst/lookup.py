@@ -83,7 +83,12 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
     ),
     # appended to in ssl.constant name  - ssl.PROTOCOL_DTLS_CLIENT(when DTLS support is enabled)
     # Ugly hack to fix the documentation
-    ( '(when DTLS support is enabled)', " : Incomplete # (when DTLS support is enabled)")
+    ("(when DTLS support is enabled)", " : Incomplete # (when DTLS support is enabled)"),
+    # pyb.DAC # unsupported escape characters in docstring
+    (
+        r"2\*\*``bits",
+        "2**``bits",
+    ),
 ]
 
 
@@ -506,6 +511,10 @@ PARAM_FIXES = [
     # machine.PWM
     #     # def __init__(self, dest, *, freq, duty_u16, duty_ns) -> None: ...
     #     def __init__(self, dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0) -> None: ...
+    Fix(
+        "dest, *, freq, duty_u16, duty_ns, invert=False",
+        "dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0, invert=False",
+    ),
     Fix(
         "dest, *, freq, duty_u16, duty_ns, invert",
         "dest, *, freq=0,duty=0, duty_u16=0, duty_ns=0, invert=False",

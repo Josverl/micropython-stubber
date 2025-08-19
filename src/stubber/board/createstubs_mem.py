@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross, 
       to avoid the compilation step on the micropython device 
 
-This variant was generated from createstubs.py by micropython-stubber v1.25.1
+This variant was generated from createstubs.py by micropython-stubber v1.26.0
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.25.1"
+__version__ = "v1.26.0"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
