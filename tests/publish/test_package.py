@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
+
 from stubber.publish.enums import StubSource
 from stubber.publish.package import create_package, package_name
 from stubber.publish.stubpackage import StubPackage
@@ -44,6 +45,7 @@ def test_package_name(family, port, board, expected):
     [
         ("v1.24.1", "rp2", "RPI_PICO"),
         ("v1.24.1", "rp2", "RPI_PICOW"),
+        ("v1.99.1", "rp2", "RPI_PICOW"),
         # ("esp32", "GENERIC"),
         # ("esp32", "GENERIC_S3"),
         # ("esp32", "UM_TINYPICO"),

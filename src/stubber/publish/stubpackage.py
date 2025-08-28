@@ -34,12 +34,12 @@ from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from packaging.version import Version, parse
 
+from stubber.modcat import STDLIB_UMODULES, STUBS_COPY_FILTER
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
-from stubber.modcat import STDLIB_UMODULES, STUBS_COPY_FILTER
 
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
@@ -719,17 +719,6 @@ class PoetryBuilder(Builder):
             assert _pyproject is not None
             # clear out the packages section
             _pyproject["tool"]["poetry"]["packages"] = []
-            # update the dependencies section by reading these from the template file
-            with open(CONFIG.template_path / "pyproject.toml", "rb") as f:
-                tpl = tomllib.load(f)
-
-            # copy new / poetry style dependencies
-            for section in ["dependencies"]:
-                for key in ["tool.poetry", "project"]:
-                    try:
-                        _pyproject[key][section] = tpl[key][section]
-                    except KeyError:
-                        pass
 
         else:
             # read the template pyproject.toml file from the template folder
@@ -742,6 +731,10 @@ class PoetryBuilder(Builder):
             except FileNotFoundError as e:
                 log.error(f"Could not find template pyproject.toml file {e}")
                 raise (e)
+
+        # update the dependencies section with stdlib-stubs for the same version
+        major_minor = ".".join(self.mpy_version.split(".")[:2])
+        _pyproject["project"]["dependencies"] = [f"micropython-stdlib-stubs  ~={major_minor}.0"]
 
         # update the name , version and description of the package
         if 'project' in _pyproject:
