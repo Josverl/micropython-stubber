@@ -78,10 +78,10 @@ mkdir all-stubs
 stubber clone --add-stubs
 stubber switch v1.22.2
 
-# get the document stubs for the current version ( v1.18 )
+# get the document stubs for the current version ( v1.22.2 )
 stubber get-docstubs
 
-# get the frozen stubs for the current version ( v1.18 )
+# get the frozen stubs for the current version ( v1.22.2 )
 stubber get-frozen
 
 # get the core CPython compatibility stubs from PyPi 
