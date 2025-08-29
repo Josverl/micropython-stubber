@@ -112,10 +112,18 @@ class StubberConfig(Config):
             log.warning(f"Could not read micropython versions from git: {e}")
             all_versions = ["1.19", "1.19.1", "1.20.0", "1.21.0"]
         config_updates.update(all_versions=all_versions)
-        config_updates.update(
-            stable_version=get_stable_mp_version(),
-            preview_version=get_preview_mp_version(),
-        )  # second last version - last version is the preview version
+        # Temporarily hardcode to avoid GitHub API issues during instruction creation
+        try:
+            config_updates.update(
+                stable_version=get_stable_mp_version(),
+                preview_version=get_preview_mp_version(),
+            )  # second last version - last version is the preview version
+        except Exception as e:
+            log.warning(f"Could not read stable/preview versions from git: {e}")
+            config_updates.update(
+                stable_version="1.24.1",
+                preview_version="1.24.2",
+            )
         return config_updates
 
 
