@@ -11,7 +11,7 @@ For official MicroPython releases, follow the standard workflow:
 ```bash
 pip install micropython-stubber
 stubber clone --add-stubs
-stubber switch v1.22.2
+stubber switch stable
 stubber get-docstubs
 stubber get-frozen
 ```
