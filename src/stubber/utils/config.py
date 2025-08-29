@@ -10,6 +10,14 @@ from typedconfig.source import EnvironmentConfigSource
 
 from .typed_config_toml import TomlConfigSource
 
+# Unified fallback version list used by both config.py and switch_cmd.py
+# This list is used when GitHub API access fails (403 Forbidden)
+FALLBACK_VERSIONS = [
+    "1.17", "1.18", "1.19", "1.19.1", "1.20.0", "1.20.1", 
+    "1.21.0", "1.22.0", "1.22.1", "1.22.2", "1.23.0", "1.24.0",
+    "1.25.0", "1.26.0"
+]
+
 
 @section("micropython-stubber")
 class StubberConfig(Config):
@@ -56,7 +64,7 @@ class StubberConfig(Config):
         key_name="all-versions",
         cast=list,
         required=False,
-        default=["1.17", "1.18", "1.19", "1.19.1", "1.20.0"],
+        default=FALLBACK_VERSIONS.copy(),
     )
     "list of recent versions"
 
@@ -110,7 +118,7 @@ class StubberConfig(Config):
             all_versions = micropython_versions(minver="v1.17")
         except Exception as e:
             log.warning(f"Could not read micropython versions from git: {e}")
-            all_versions = ["1.19", "1.19.1", "1.20.0", "1.21.0"]
+            all_versions = FALLBACK_VERSIONS.copy()
         config_updates.update(all_versions=all_versions)
         # Try to get stable and preview versions, but use fallbacks if GitHub API fails
         try:

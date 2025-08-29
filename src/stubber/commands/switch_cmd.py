@@ -9,7 +9,7 @@ import rich_click as click
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, micropython_versions
 
 from stubber.commands.cli import stubber_cli
-from stubber.utils.config import CONFIG
+from stubber.utils.config import CONFIG, FALLBACK_VERSIONS
 from stubber.utils.repos import fetch_repos, repo_paths
 
 ##########################################################################################
@@ -26,11 +26,9 @@ try:
         "stable",
     ]
 except Exception:
-    # offline fallback - include commonly used versions
-    VERSION_LIST = [
-        "v1.17", "v1.18", "v1.19", "v1.19.1", "v1.20.0", "v1.20.1", 
-        "v1.21.0", "v1.22.0", "v1.22.1", "v1.22.2", "v1.23.0", "v1.24.0",
-        "v1.25.0", "v1.26.0", V_PREVIEW, "latest", "stable"
+    # offline fallback - use unified fallback list with "v" prefix for git operations
+    VERSION_LIST = [f"v{version}" for version in FALLBACK_VERSIONS] + [
+        V_PREVIEW, "latest", "stable"
     ]
 
 
