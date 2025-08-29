@@ -30,7 +30,7 @@ except Exception:
     VERSION_LIST = [
         "v1.17", "v1.18", "v1.19", "v1.19.1", "v1.20.0", "v1.20.1", 
         "v1.21.0", "v1.22.0", "v1.22.1", "v1.22.2", "v1.23.0", "v1.24.0",
-        V_PREVIEW, "latest", "stable"
+        "v1.25.0", "v1.26.0", V_PREVIEW, "latest", "stable"
     ]
 
 
