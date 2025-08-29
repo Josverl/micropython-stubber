@@ -95,6 +95,10 @@ ls all-stubs
 dir all-stubs
 ```
 
+### Working with Custom MicroPython Builds
+
+If you're working with a fork, branch, or custom build of MicroPython (such as a custom RPi Pico W firmware), see the [Custom MicroPython Guide](docs/25_custom_micropython.md) for detailed instructions on how to generate stubs for your specific build.
+
 
 ## Developing & testing 
 
