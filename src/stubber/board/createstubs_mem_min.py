@@ -223,10 +223,10 @@ def Z(s):
 	if not X in s:return B
 	A=s.split(X)[1].split(L)[1];return A
 def _info():
-	f='ev3-pybricks';e='pycom';d='pycopy';a='unix';Y='win32';W='arch';S='cpu';R='ver';F='mpy';D='build'
+	f='ev3-pybricks';e='pycom';d='pycopy';a='unix';Y='win32';W='cpu';S='ver';K='arch';F='mpy';D='build'
 	try:L=sys.implementation[0]
 	except b:L=sys.implementation.name
-	A=i({V:L,C:B,D:B,R:B,M:sys.platform,T:'UNKNOWN',U:B,h:B,S:B,F:B,W:B})
+	A=i({V:L,C:B,D:B,S:B,M:sys.platform,T:'UNKNOWN',U:B,h:B,W:B,F:B,K:B})
 	if A[M].startswith('pyb'):A[M]='stm32'
 	elif A[M]==Y:A[M]='windows'
 	elif A[M]=='linux':A[M]=a
@@ -235,7 +235,7 @@ def _info():
 	try:
 		P=sys.implementation._machine if'_machine'in N(sys.implementation)else os.uname().machine;A[T]=P.strip();G=sys.implementation._build if'_build'in N(sys.implementation)else B
 		if G:A[T]=G.split(E)[0];A[h]=G.split(E)[1]if E in G else B
-		A[U]=G;A[S]=P.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
+		A[U]=G;A[W]=P.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
 	except(J,Q):pass
 	if not A[U]:A5(A)
 	try:
@@ -256,12 +256,13 @@ def _info():
 		if A[C]and A[C].endswith('.0')and A[C]>='1.10.0'and A[C]<='1.19.9':A[C]=A[C][:-2]
 	if F in A and A[F]:
 		I=int(A[F])
-		try:K=[H,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][I>>10]
-		except Q:K='unknown'
-		if K:A[W]=K
+		try:
+			R=[H,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][I>>10]
+			if R:A[K]=R
+		except Q:A[K]='unknown'
 		A[F]='v{}.{}'.format(I&255,I>>8&3)
 	if A[D]and not A[C].endswith(X):A[C]=A[C]+X
-	A[R]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
+	A[S]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
 def A4(version):
 	A=version;B=L.join([str(A)for A in A[:3]])
 	if S(A)>3 and A[3]:B+=E+A[3]

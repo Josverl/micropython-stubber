@@ -655,10 +655,10 @@ def _info():  # type:() -> dict[str, str]
                 "xtensawin",
                 "rv32imc",
             ][sys_mpy >> 10]
+            if arch:
+                info["arch"] = arch
         except IndexError:
-            arch = "unknown"
-        if arch:
-            info["arch"] = arch
+            info["arch"] = "unknown"
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
     if info["build"] and not info["version"].endswith("-preview"):
@@ -1026,6 +1026,7 @@ def main():
         "ymodem",
         "zephyr",
         "zlib",
+        "zsensor",
     ]  # spell-checker: enable
 
     gc.collect()
