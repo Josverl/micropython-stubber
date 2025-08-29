@@ -34,11 +34,29 @@ from stubber.utils.config import CONFIG
     is_flag=True,
     help="Also clone the micropython-stubs repo",
 )
-def cli_clone(path: Union[str, Path], stubs: bool = False):
+@click.option(
+    "--mpy-repo",
+    default="https://github.com/micropython/micropython.git",
+    help="URL for MicroPython repository (default: official repo)",
+)
+@click.option(
+    "--mpy-lib-repo", 
+    default="https://github.com/micropython/micropython-lib.git",
+    help="URL for MicroPython-lib repository (default: official repo)",
+)
+def cli_clone(
+    path: Union[str, Path], 
+    stubs: bool = False, 
+    mpy_repo: str = "https://github.com/micropython/micropython.git",
+    mpy_lib_repo: str = "https://github.com/micropython/micropython-lib.git"
+):
     """
     Clone/fetch the micropython repos locally.
 
     The local repos are used to generate frozen-stubs and doc-stubs.
+    
+    Use --mpy-repo to specify a custom MicroPython repository (e.g., your fork).
+    Use --mpy-lib-repo to specify a custom MicroPython-lib repository.
     """
     dest_path = Path(path)
     if not dest_path.exists():
@@ -55,8 +73,8 @@ def cli_clone(path: Union[str, Path], stubs: bool = False):
         mpy_stubs_path = dest_path / "micropython-stubs"
 
     repos: List[Tuple[Path, str, str]] = [
-        (mpy_path, "https://github.com/micropython/micropython.git", "master"),
-        (mpy_lib_path, "https://github.com/micropython/micropython-lib.git", "master"),
+        (mpy_path, mpy_repo, "master"),
+        (mpy_lib_path, mpy_lib_repo, "master"),
     ]
     if stubs:
         repos.append((mpy_stubs_path, "https://github.com/josverl/micropython-stubs.git", "main"))

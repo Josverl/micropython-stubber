@@ -33,7 +33,7 @@ except Exception:
 
 
 @stubber_cli.command(name="switch")
-@click.argument("tag", required=False, type=click.Choice(VERSION_LIST, case_sensitive=False))
+@click.argument("tag", required=False)
 @click.option(
     "--path",
     "-p",
@@ -44,11 +44,17 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
     """
     Switch to a specific version of the micropython repos.
 
+    TAG can be:
+    - A version tag (e.g., v1.22.0, v1.21.0)
+    - A branch name (e.g., master, develop)  
+    - A commit hash (e.g., abc123def456)
+    - Special values: preview, latest, stable
+
     The Micropython-lib repo will be checked out to a commit that corresponds
     in time to that version tag, in order to allow non-current versions to be
     stubbed correctly.
 
-    The repros must be cloned already
+    The repos must be cloned already
     """
 
     try:

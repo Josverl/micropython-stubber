@@ -138,7 +138,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
 
 
 def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
-    """Fetch updates, then switch to the provided tag"""
+    """Fetch updates, then switch to the provided tag/branch/commit"""
     log.info("fetch updates")
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
@@ -151,12 +151,30 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         tag = V_PREVIEW
 
     log.info(f"Switching to {tag}")
-    if tag == V_PREVIEW:
+    
+    # Handle special cases
+    if tag == V_PREVIEW or tag in SET_PREVIEW:
         git.switch_branch(repo=mpy_path, branch="master")
-    else:
-        if tag == "stable":
-            tag = get_stable_mp_version()
+    elif tag == "stable":
+        tag = get_stable_mp_version()
         git.switch_tag(tag, repo=mpy_path)
+    else:
+        # Try to determine if this is a tag, branch, or commit
+        # First try as a tag
+        try:
+            git.switch_tag(tag, repo=mpy_path)
+        except:
+            # If that fails, try as a branch
+            try:
+                git.switch_branch(repo=mpy_path, branch=tag)
+            except:
+                # If that fails, try as a commit hash
+                try:
+                    git.checkout_commit(tag, repo=mpy_path)
+                except:
+                    log.error(f"Could not switch to {tag} - not a valid tag, branch, or commit")
+                    return False
+    
     result = match_lib_with_mpy(version_tag=tag, mpy_path=mpy_path, lib_path=mpy_lib_path)
 
     log.info(f"{str(mpy_path):<40} {git.get_local_tag(mpy_path)}")

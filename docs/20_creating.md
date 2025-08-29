@@ -1,9 +1,24 @@
 # Using Micropython stubber 
 
-This section describes ho to use micropython-stubber to create and maintain stubs for a MicroPython firmware or project.
+This section describes how to use micropython-stubber to create and maintain stubs for a MicroPython firmware or project.
 
 If you just want to use the stubs, then you can skip this section and instead read the documentation in the sister-repo [micropython-stubs][] section [using-the-stubs][] 
 
+## Quick Start for Standard Releases
+
+For official MicroPython releases, follow the standard workflow:
+
+```bash
+pip install micropython-stubber
+stubber clone --add-stubs
+stubber switch v1.22.2
+stubber get-docstubs
+stubber get-frozen
+```
+
+## Custom MicroPython Builds
+
+If you're working with a fork, branch, pull request, or custom build of MicroPython, see the [Custom MicroPython Guide](25_custom_micropython.md) for detailed step-by-step instructions.
 
 ## Manual configuration
 
