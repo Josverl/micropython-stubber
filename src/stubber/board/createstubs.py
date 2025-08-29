@@ -25,8 +25,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.26.0"
-ENOENT = 2 # on most ports
-ENOMESSAGE = 44 # on pyscript
+ENOENT = 2  # on most ports
+ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -68,6 +68,47 @@ class logging:
 log = logging.getLogger("stubber")
 logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(level=logging.DEBUG)
+
+
+def _discover_base_classes(class_instance, item_name):
+    """Discover base classes using __bases__ attribute if available.
+
+    Returns a comma-separated string of base class names, excluding 'object'.
+    Falls back to Exception detection for known exception types.
+    """
+    base_classes = []
+
+    # Try to use __bases__ if available
+    try:
+        if hasattr(class_instance, "__bases__"):
+            bases = class_instance.__bases__
+            # Extract base class names, excluding 'object'
+            base_classes = [b.__name__ for b in bases if b.__name__ != "object"]
+    except (AttributeError, TypeError):
+        # If __bases__ is not available or fails, continue with fallback
+        pass
+
+    # If we found base classes using __bases__, use them
+    if base_classes:
+        return ", ".join(base_classes)
+
+    # Fallback to existing exception detection logic
+    is_exception = (
+        item_name.endswith("Exception")
+        or item_name.endswith("Error")
+        or item_name
+        in [
+            "KeyboardInterrupt",
+            "StopIteration",
+            "SystemExit",
+        ]
+    )
+    # Special case: BaseException should not inherit from Exception
+    if is_exception and item_name != "BaseException":
+        return "Exception"
+
+    # No base classes found
+    return ""
 
 
 class Stubber:
@@ -154,11 +195,7 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append(
-                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
-                        name, item_instance, e
-                    )
-                )
+                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -224,9 +261,7 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            log.info(
-                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
-            )
+            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
 
         except ImportError:
             # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -237,13 +272,9 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
-                module_name, self._fwid, info_, __version__
-            )
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write(
-                "from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n"
-            )
+            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -258,9 +289,7 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(
-        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
-    ):
+    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -289,19 +318,8 @@ class Stubber:
                 # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
             ):
                 # log.debug("{0}class {1}:".format(indent, item_name))
-                superclass = ""
-                is_exception = (
-                    item_name.endswith("Exception")
-                    or item_name.endswith("Error")
-                    or item_name
-                    in [
-                        "KeyboardInterrupt",
-                        "StopIteration",
-                        "SystemExit",
-                    ]
-                )
-                if is_exception:
-                    superclass = "Exception"
+                superclass = _discover_base_classes(item_instance, item_name)
+                is_exception = superclass == "Exception"
                 s = "\n{}class {}({}):\n".format(indent, item_name, superclass)
                 # s += indent + "    ''\n"
                 if is_exception:
@@ -336,13 +354,9 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(
-                        indent
-                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
-                        indent, item_name, first, ret
-                    )
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -371,9 +385,7 @@ class Stubber:
                     if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        s = "{0}{1}: {2} ## = {4}\n".format(
-                            indent, item_name, t, item_type_txt, item_repr
-                        )
+                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                     elif t == "generator":
                         # either a normal or async Generator function
                         t = "Generator"
@@ -387,9 +399,7 @@ class Stubber:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
                         if " at " in item_repr:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        s = "{0}{1}: {2} ## {3} = {4}\n".format(
-                            indent, item_name, t, item_type_txt, item_repr
-                        )
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
@@ -472,9 +482,7 @@ class Stubber:
                     f.write(",\n")
                 else:
                     self._json_first = False
-                line = '{{"module": "{}", "file": "{}"}}'.format(
-                    module_name, stub_file.replace("\\", "/")
-                )
+                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
                 f.write(line)
 
         except OSError:
@@ -501,7 +509,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] in [ENOENT, ENOMESSAGE] :
+                if e.args[0] in [ENOENT, ENOMESSAGE]:
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)
@@ -510,7 +518,6 @@ def ensure_folder(path: str):
                         raise e2
         # next level deep
         start = i + 1
-
 
 
 def _build(s):
@@ -565,9 +572,7 @@ def _info():  # type:() -> dict[str, str]
     except AttributeError:
         pass
     try:
-        _machine = (
-            sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
-        )
+        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
         info["board"] = _machine.strip()
         si_build = sys.implementation._build if "_build" in dir(sys.implementation) else ""
         if si_build:
@@ -629,8 +634,7 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"]
-            >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # versions from 1.10.0 to 1.24.0 do not have a micro .0
@@ -743,11 +747,11 @@ def is_micropython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore 
+        b = bytes("abc", encoding="utf8")  # type: ignore
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore 
+        c = is_micropython.__module__  # type: ignore
         return False
     except (NotImplementedError, AttributeError):
         return True
