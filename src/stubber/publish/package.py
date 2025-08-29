@@ -56,7 +56,7 @@ def get_package(
             version=version,
             json_data=package_info,
         )
-        # TODO @Josverl: Check or update stub_sources in len < 3
+        # TODO @Josverl: Check or update stub_sources if len < 3
         EXPECTED_STUBS = 3
         if len(p_db.stub_sources) < EXPECTED_STUBS:
             log.warning(f"Package {pkg_name} has less than 3 stub sources, updating...")

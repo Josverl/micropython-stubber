@@ -52,7 +52,7 @@ try:from machine import reset
 except P:pass
 try:from collections import OrderedDict as n
 except P:from ucollections import OrderedDict as n
-__version__='v1.25.1'
+__version__='v1.26.0'
 A4=2
 A5=44
 A6=2
@@ -226,10 +226,10 @@ def Z(s):
 	if not X in s:return B
 	A=s.split(X)[1].split(L)[1];return A
 def _info():
-	d='ev3-pybricks';c='pycom';b='pycopy';a='unix';Y='win32';W='arch';S='cpu';Q='ver';F='mpy';D='build'
+	d='ev3-pybricks';c='pycom';b='pycopy';a='unix';Y='win32';W='cpu';S='ver';K='arch';F='mpy';D='build'
 	try:L=sys.implementation[0]
 	except e:L=sys.implementation.name
-	A=n({V:L,C:B,D:B,Q:B,M:sys.platform,T:'UNKNOWN',U:B,m:B,S:B,F:B,W:B})
+	A=n({V:L,C:B,D:B,S:B,M:sys.platform,T:'UNKNOWN',U:B,m:B,W:B,F:B,K:B})
 	if A[M].startswith('pyb'):A[M]='stm32'
 	elif A[M]==Y:A[M]='windows'
 	elif A[M]=='linux':A[M]=a
@@ -238,7 +238,7 @@ def _info():
 	try:
 		O=sys.implementation._machine if'_machine'in N(sys.implementation)else os.uname().machine;A[T]=O.strip();G=sys.implementation._build if'_build'in N(sys.implementation)else B
 		if G:A[T]=G.split(E)[0];A[m]=G.split(E)[1]if E in G else B
-		A[U]=G;A[S]=O.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
+		A[U]=G;A[W]=O.split('with')[-1].strip();A[F]=sys.implementation._mpy if'_mpy'in N(sys.implementation)else sys.implementation.mpy if F in N(sys.implementation)else B
 	except(J,R):pass
 	if not A[U]:A9(A)
 	try:
@@ -259,12 +259,13 @@ def _info():
 		if A[C]and A[C].endswith('.0')and A[C]>='1.10.0'and A[C]<='1.19.9':A[C]=A[C][:-2]
 	if F in A and A[F]:
 		I=int(A[F])
-		try:K=[H,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][I>>10]
-		except R:K='unknown'
-		if K:A[W]=K
+		try:
+			Q=[H,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][I>>10]
+			if Q:A[K]=Q
+		except R:A[K]='unknown'
 		A[F]='v{}.{}'.format(I&255,I>>8&3)
 	if A[D]and not A[C].endswith(X):A[C]=A[C]+X
-	A[Q]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
+	A[S]=f"{A[C]}-{A[D]}"if A[D]else f"{A[C]}";return A
 def A8(version):
 	A=version;B=L.join([d(A)for A in A[:3]])
 	if S(A)>3 and A[3]:B+=E+A[3]
