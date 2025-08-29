@@ -33,6 +33,8 @@ class AnnoValue:
     "function / method overloads read from the docstub source"
     mp_available: List[TypeInfo] = field(default_factory=list)
     "function / method `overloads` read from the docstub source"
+    literal_docstrings: Dict[str, cst.SimpleStatementLine] = field(default_factory=dict)
+    "literal/constant name -> docstring node mappings for literal docstrings"
 
 
 class TransformError(Exception):
@@ -85,12 +87,58 @@ class StubTypingCollector(cst.CSTVisitor):
         ] = {}
         self.comments: List[str] = []
 
+    def _collect_literal_docstrings(self, body: Sequence[cst.BaseStatement]) -> Dict[str, cst.SimpleStatementLine]:
+        """
+        Collect literal docstrings from a sequence of statements.
+        Looks for patterns like:
+        CONSTANT = value
+        '''docstring for constant'''
+        """
+        literal_docstrings = {}
+        
+        for i, stmt in enumerate(body):
+            # Look for assignment statements  
+            if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
+                if isinstance(stmt.body[0], (cst.Assign, cst.AnnAssign)):
+                    # Get the literal name
+                    literal_name = None
+                    if isinstance(stmt.body[0], cst.Assign):
+                        # Handle regular assignment: CONST = value
+                        targets = stmt.body[0].targets
+                        if len(targets) == 1 and isinstance(targets[0].target, cst.Name):
+                            literal_name = targets[0].target.value
+                    elif isinstance(stmt.body[0], cst.AnnAssign):
+                        # Handle annotated assignment: CONST: int = value
+                        if isinstance(stmt.body[0].target, cst.Name):
+                            literal_name = stmt.body[0].target.value
+                    
+                    # Check if the next statement is a docstring
+                    if literal_name and i + 1 < len(body):
+                        next_stmt = body[i + 1]
+                        if (isinstance(next_stmt, cst.SimpleStatementLine) and 
+                            len(next_stmt.body) == 1 and 
+                            isinstance(next_stmt.body[0], cst.Expr) and
+                            isinstance(next_stmt.body[0].value, cst.SimpleString)):
+                            # Found a literal with a following docstring
+                            literal_docstrings[literal_name] = next_stmt
+                            
+        return literal_docstrings
+
     # ------------------------------------------------------------
     def visit_Module(self, node: cst.Module) -> bool:
-        """Store the module docstring"""
+        """Store the module docstring and collect literal docstrings"""
+        # Store module docstring
         docstr = node.get_docstring()
         if docstr:
             self.annotations[MODULE_KEY] = AnnoValue(docstring=docstr)
+        
+        # Collect module-level literal docstrings
+        literal_docstrings = self._collect_literal_docstrings(node.body)
+        if literal_docstrings:
+            if MODULE_KEY not in self.annotations:
+                self.annotations[MODULE_KEY] = AnnoValue()
+            self.annotations[MODULE_KEY].literal_docstrings.update(literal_docstrings)
+            
         return True
 
     def visit_Comment(self, node: cst.Comment) -> None:
@@ -108,6 +156,7 @@ class StubTypingCollector(cst.CSTVisitor):
         """
         collect info from a classdef:
         - name, decorators, docstring
+        - class-level literal docstrings
         """
         # "Store the class docstring
         docstr_node = self.update_append_first_node(node)
@@ -120,7 +169,17 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="classdef",
             def_node=node,
         )
-        self.annotations[tuple(self.stack)] = AnnoValue(type_info=ti)
+        
+        # Collect class-level literal docstrings
+        literal_docstrings = {}
+        if isinstance(node.body, cst.IndentedBlock):
+            literal_docstrings = self._collect_literal_docstrings(node.body.body)
+        
+        anno_value = AnnoValue(type_info=ti)
+        if literal_docstrings:
+            anno_value.literal_docstrings.update(literal_docstrings)
+            
+        self.annotations[tuple(self.stack)] = anno_value
 
     def leave_ClassDef(self, original_node: cst.ClassDef) -> None:
         """remove the class name from the stack"""
