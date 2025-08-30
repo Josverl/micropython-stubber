@@ -184,9 +184,11 @@ def repo_paths(dest_path: Path) -> Tuple[Path, Path]:
 
     # if no repos then error
     if not (mpy_path / ".git").exists():
-        log.error("micropython repo not found")
+        log.error(f"micropython repo not found at {mpy_path}")
+        log.error("Run 'stubber clone' first to clone the required repositories")
         raise LookupError
     if not (mpy_lib_path / ".git").exists():
-        log.error("micropython-lib repo not found")
+        log.error(f"micropython-lib repo not found at {mpy_lib_path}")
+        log.error("Run 'stubber clone' first to clone the required repositories")
         raise LookupError
     return mpy_path, mpy_lib_path
