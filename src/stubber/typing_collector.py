@@ -157,11 +157,24 @@ class StubTypingCollector(cst.CSTVisitor):
             # store the first function/method signature
             self.annotations[key] = AnnoValue(type_info=ti)
 
-        # save the overload decos
-        if any(m.matches(dec , m.Decorator(decorator=m.Name("overload"))) for dec in node.decorators):
+        # save the overload decos (simple name only)
+        if any(m.matches(dec, m.Decorator(decorator=m.Name("overload"))) for dec in node.decorators):
             self.annotations[key].overloads.append(ti)
-        # save the mp_available decos
-        if any(m.matches(dec , m.Decorator(decorator=m.Name("mp_available"))) for dec in node.decorators):
+        # save the mp_available decos in any of these forms: Name/Call/Attribute/Call(Attribute)
+        if any(
+            m.matches(
+                dec,
+                m.Decorator(
+                    decorator=m.OneOf(
+                        m.Name("mp_available"),
+                        m.Call(func=m.Name("mp_available")),
+                        m.Attribute(value=m.DoNotCare(), attr=m.Name("mp_available")),
+                        m.Call(func=m.Attribute(value=m.DoNotCare(), attr=m.Name("mp_available"))),
+                    )
+                ),
+            )
+            for dec in node.decorators
+        ):
             self.annotations[key].mp_available.append(ti)
 
     def update_append_first_node(self, node):

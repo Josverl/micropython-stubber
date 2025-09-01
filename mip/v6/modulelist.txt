@@ -261,3 +261,4 @@ xpt2046
 ymodem
 zephyr
 zlib
+zsensor

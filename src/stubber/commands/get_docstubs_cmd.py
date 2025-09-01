@@ -19,6 +19,7 @@ from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 from stubber.stubs_from_docs import generate_from_rst
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos
+from stubber.utils import do_post_processing
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -63,9 +64,8 @@ from stubber.utils.repos import fetch_repos
     show_default=True,
 )
 @click.option(
-    "--enrich",
-    is_flag=True,
-    default=False,
+    "--enrich/--no-enrich",
+    default=True,
     help="Enrich with type information from reference/micropython",
     show_default=True,
 )
@@ -158,6 +158,6 @@ def cli_docstubs(
             copy_type_modules(reference_path, dst_path, CP_REFERENCE_TO_DOCSTUB)
             log.info("::group:: start post processing of retrieved stubs")
             # do not run stubgen
-            utils.do_post_processing([dst_path], stubgen=False, format=black, autoflake=autoflake)
+            do_post_processing([dst_path], stubgen=False, format=black, autoflake=autoflake)
 
     log.info("::group:: Done")
