@@ -52,6 +52,12 @@ from stubber.utils.repos import fetch_repos
     help="Run black on the (new) frozen modules",
     show_default=True,
 )
+@click.option(
+    "--enrich/--no-enrich",
+    default=True,
+    help="Enrich with type information from reference/micropython",
+    show_default=True,
+)
 def cli_get_frozen(
     stub_folder: Optional[str] = None,
     # path: str = config.repo_path.as_posix(),
@@ -59,6 +65,7 @@ def cli_get_frozen(
     stubgen: bool = True,
     black: bool = True,
     autoflake: bool = True,
+    enrich: bool = True,
 ):
     """
     Get the frozen stubs for MicroPython.
@@ -99,7 +106,7 @@ def cli_get_frozen(
     family = "micropython"
     _version = utils.clean_version(version, drop_v=False, flat=True)
     docstubs_path = Path(CONFIG.stub_path) / f"{family}-{_version}-docstubs"
-    if docstubs_path.exists():
+    if docstubs_path.exists() and enrich:
         board_folders = [f.parent for f in list(stub_path.glob("**/modules.json"))]
         for folder in board_folders:
             log.info(f"Enriching {str(stub_path)} with {docstubs_path}")
