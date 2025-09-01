@@ -17,9 +17,9 @@ from stubber.commands.cli import stubber_cli
 from stubber.merge_config import copy_type_modules
 from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 from stubber.stubs_from_docs import generate_from_rst
+from stubber.utils import do_post_processing
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos
-from stubber.utils import do_post_processing
 
 ##########################################################################################
 # log = logging.getLogger("stubber")
@@ -50,7 +50,14 @@ from stubber.utils import do_post_processing
 @click.option(
     "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
 )
-@click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
+@click.option(
+    "--format/--no-format",
+    "--black/--no-black",
+    "-b/-nb",
+    default=True,
+    help="Run formatter (ruff)",
+    show_default=True,
+)
 @click.option(
     "--autoflake/--no-autoflake",
     default=True,
@@ -90,7 +97,7 @@ def cli_docstubs(
     ctx: click.Context,
     path: Optional[str] = None,
     target: Optional[str] = None,
-    black: bool = True,
+    format: bool = True,
     autoflake: bool = True,
     clean_rst: bool = True,
     basename: Optional[str] = None,
@@ -136,7 +143,7 @@ def cli_docstubs(
         version,
         release=release,
         suffix=".pyi",
-        black=black,
+        format=format,
         autoflake=autoflake,
         clean_rst=clean_rst,
     )
@@ -158,6 +165,6 @@ def cli_docstubs(
             copy_type_modules(reference_path, dst_path, CP_REFERENCE_TO_DOCSTUB)
             log.info("::group:: start post processing of retrieved stubs")
             # do not run stubgen
-            do_post_processing([dst_path], stubgen=False, format=black, autoflake=autoflake)
+            do_post_processing([dst_path], stubgen=False, format=format, autoflake=autoflake)
 
     log.info("::group:: Done")

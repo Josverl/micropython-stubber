@@ -35,16 +35,17 @@ from stubber.utils.config import CONFIG
     show_default=True,
 )
 @click.option(
+    "--format/--no-format",
     "--black/--no-black",
     default=True,
-    help="Run black on the (new) frozen modules",
+    help="Run formatter (ruff) on the (new) frozen modules",
     show_default=True,
 )
 def cli_get_core(
     stub_folder: str = "",
     # core_type: str = "pycopy",  # pycopy or Micropython CPython stubs
     stubgen: bool = True,
-    black: bool = True,
+    format: bool = True,
 ):
     """
     Download core CPython stubs from PyPi.
@@ -66,5 +67,5 @@ def cli_get_core(
         stub_paths.append(stub_path)
 
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, stubgen=stubgen, format=black, autoflake=True)
+    utils.do_post_processing(stub_paths, stubgen=stubgen, format=format, autoflake=True)
     log.info("::group:: Done")
