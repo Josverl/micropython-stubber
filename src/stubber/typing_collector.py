@@ -95,9 +95,9 @@ class StubTypingCollector(cst.CSTVisitor):
         '''docstring for constant'''
         """
         literal_docstrings = {}
-        
+
         for i, stmt in enumerate(body):
-            # Look for assignment statements  
+            # Look for assignment statements
             if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
                 if isinstance(stmt.body[0], (cst.Assign, cst.AnnAssign)):
                     # Get the literal name
@@ -111,17 +111,19 @@ class StubTypingCollector(cst.CSTVisitor):
                         # Handle annotated assignment: CONST: int = value
                         if isinstance(stmt.body[0].target, cst.Name):
                             literal_name = stmt.body[0].target.value
-                    
+
                     # Check if the next statement is a docstring
                     if literal_name and i + 1 < len(body):
                         next_stmt = body[i + 1]
-                        if (isinstance(next_stmt, cst.SimpleStatementLine) and 
-                            len(next_stmt.body) == 1 and 
-                            isinstance(next_stmt.body[0], cst.Expr) and
-                            isinstance(next_stmt.body[0].value, cst.SimpleString)):
+                        if (
+                            isinstance(next_stmt, cst.SimpleStatementLine)
+                            and len(next_stmt.body) == 1
+                            and isinstance(next_stmt.body[0], cst.Expr)
+                            and isinstance(next_stmt.body[0].value, cst.SimpleString)
+                        ):
                             # Found a literal with a following docstring
                             literal_docstrings[literal_name] = next_stmt
-                            
+
         return literal_docstrings
 
     # ------------------------------------------------------------
@@ -131,14 +133,14 @@ class StubTypingCollector(cst.CSTVisitor):
         docstr = node.get_docstring()
         if docstr:
             self.annotations[MODULE_KEY] = AnnoValue(docstring=docstr)
-        
+
         # Collect module-level literal docstrings
         literal_docstrings = self._collect_literal_docstrings(node.body)
         if literal_docstrings:
             if MODULE_KEY not in self.annotations:
                 self.annotations[MODULE_KEY] = AnnoValue()
             self.annotations[MODULE_KEY].literal_docstrings.update(literal_docstrings)
-            
+
         return True
 
     def visit_Comment(self, node: cst.Comment) -> None:
@@ -169,16 +171,16 @@ class StubTypingCollector(cst.CSTVisitor):
             def_type="classdef",
             def_node=node,
         )
-        
+
         # Collect class-level literal docstrings
         literal_docstrings = {}
         if isinstance(node.body, cst.IndentedBlock):
             literal_docstrings = self._collect_literal_docstrings(node.body.body)
-        
+
         anno_value = AnnoValue(type_info=ti)
         if literal_docstrings:
             anno_value.literal_docstrings.update(literal_docstrings)
-            
+
         self.annotations[tuple(self.stack)] = anno_value
 
     def leave_ClassDef(self, original_node: cst.ClassDef) -> None:

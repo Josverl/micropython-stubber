@@ -15,7 +15,9 @@ class SPI:
     See ``init`` for parameters of initialisation.
     """
     LSB = 0  # type: int
+    """set the first bit to be the least significant bit"""
     MSB = 1  # type: int
+    """set the first bit to be the most significant bit"""
     CONTROLLER: Any = ...
 
     def deinit(self) -> None:
