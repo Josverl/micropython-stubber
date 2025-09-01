@@ -370,7 +370,21 @@ target-version = "py39"
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
 quote-style = "double"
-exclude = [".*", "__*", "dist", "repos"]
+exclude = [
+    ".*", "__*", "dist", 
+    "minified",
+    "repos/micropython",
+    "repos/micropython-lib", 
+    "repos/micropython-stubs",
+    "tests/mocks",
+    "tests/data",
+    "tests/rst/data",
+    "tests/codemods/codemod_test_cases",
+    "typings",
+    "snippets/*/typings",
+    "scratch",
+    "src/stubber/codemod/_partials"
+]
 
 # Like Black, indent with spaces, rather than tabs.
 indent-style = "space"
@@ -382,7 +396,21 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.ruff.lint]
-exclude = [".*", "__*", "dist", "repos"]
+exclude = [
+    ".*", "__*", "dist",
+    "minified", 
+    "repos/micropython",
+    "repos/micropython-lib",
+    "repos/micropython-stubs", 
+    "tests/mocks",
+    "tests/data",
+    "tests/rst/data",
+    "tests/codemods/codemod_test_cases",
+    "typings",
+    "snippets/*/typings",
+    "scratch", 
+    "src/stubber/codemod/_partials"
+]
 # # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # # McCabe complexity (`C901`) by default.
