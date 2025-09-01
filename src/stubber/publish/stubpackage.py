@@ -734,8 +734,10 @@ class PoetryBuilder(Builder):
 
         # update the dependencies section with stdlib-stubs for the same version
         major_minor = ".".join(self.mpy_version.split(".")[:2])
-        _pyproject["project"]["dependencies"] = [f"micropython-stdlib-stubs  ~={major_minor}.0"]
-
+        try:
+            _pyproject["project"]["dependencies"] = [f"micropython-stdlib-stubs  ~={major_minor}.0"]
+        except KeyError:
+            log.warning("Old style project section in pyproject.toml, not updated")
         # update the name , version and description of the package
         if 'project' in _pyproject:
             _pyproject["project"]["name"] = self.package_name
