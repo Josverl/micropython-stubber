@@ -277,14 +277,39 @@ def test_cmd_get_docstubs(mocker: MockerFixture, tmp_path: Path):
     m_generate = mocker.patch("stubber.commands.get_docstubs_cmd.generate_from_rst", autospec=True)
 
     # fake run
-    result = runner.invoke(
-        stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix()]
-    )
+    result = runner.invoke(stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix(), "--no-enrich"])
     assert result.exit_code == 0
     # process is called
     assert m_generate.call_count == 1
     m_generate.assert_called_once()
     assert m_get_l_tag.call_count >= 1
+
+
+@pytest.mark.mocked
+def test_cmd_get_docstubs_enrich(mocker: MockerFixture, tmp_path: Path):
+    # check basic command line sanity check
+    runner = CliRunner()
+
+    m_get_l_tag = mocker.patch("mpflash.basicgit.get_local_tag", autospec=True, return_value="v1.42")
+
+    # from stubber.commands.get_docstubs import generate_from_rst
+    m_generate = mocker.patch("stubber.commands.get_docstubs_cmd.generate_from_rst", autospec=True)
+    # from stubber.codemod.enrich import enrich_folder
+    m_enrich = mocker.patch("stubber.commands.get_docstubs_cmd.enrich_folder", autospec=True)
+    # from stubber.merge_config import copy_type_modules
+    m_copy = mocker.patch("stubber.commands.get_docstubs_cmd.copy_type_modules", autospec=True)
+    # from stubber.utils import do_post_processing
+    m_post = mocker.patch("stubber.commands.get_docstubs_cmd.do_post_processing", autospec=True)
+
+    # fake run
+    result = runner.invoke(stubber.stubber_cli, ["get-docstubs", "--stub-folder", tmp_path.as_posix(), "--enrich"])
+    assert result.exit_code == 0
+    # process is called
+    assert m_generate.call_count == 1
+    assert m_get_l_tag.call_count >= 1
+    assert m_enrich.call_count == 1
+    assert m_copy.call_count == 1
+    assert m_post.call_count == 1
 
 
 ##########################################################################################
