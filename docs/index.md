@@ -8,6 +8,7 @@ intro.md
 10_approach.md
 15_cli.rst
 20_creating.md
+25_custom_micropython.md
 40_firmware_stubs.md
 42_using_createstubs.md
 45_createstubs.md
