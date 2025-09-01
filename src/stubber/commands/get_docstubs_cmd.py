@@ -63,9 +63,8 @@ from stubber.utils.repos import fetch_repos
     show_default=True,
 )
 @click.option(
-    "--enrich",
-    is_flag=True,
-    default=False,
+    "--enrich/--no-enrich",
+    default=True,
     help="Enrich with type information from reference/micropython",
     show_default=True,
 )
