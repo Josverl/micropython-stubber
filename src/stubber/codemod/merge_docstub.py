@@ -1,8 +1,8 @@
 # sourcery skip: snake-case-functions
 """
-Merge documentation and type information 
+Merge documentation and type information
 - from an doctring-rich and typed stub module
-- infor a less well documented and typed stub module 
+- infor a less well documented and typed stub module
 """
 # Copyright Jos Verlinde
 #
@@ -19,8 +19,8 @@ import libcst.matchers as m
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.codemod.visitors import AddImportsVisitor, GatherImportsVisitor, ImportItem
 from libcst.helpers.module import insert_header_comments
-
 from mpflash.logger import log
+
 from stubber.typing_collector import (
     MODULE_KEY,
     AnnoValue,
@@ -45,8 +45,40 @@ _code = empty_module.code_for_node
 
 
 def is_decorator(dec: cst.CSTNode, name: str) -> bool:
-    """shorthand to determin if something is a specific decorator"""
+    """shorthand to determin if something is a specific decorator (simple name only)"""
     return m.matches(dec, m.Decorator(decorator=m.Name(value=name)))
+
+
+def is_mp_available_decorator(dec: cst.CSTNode) -> bool:
+    """True if decorator is mp_available in any form: @mp_available, @mp_available(...), @_pkg.mp_available, @_pkg.mp_available(...)."""
+    return m.matches(
+        dec,
+        m.Decorator(
+            decorator=m.OneOf(
+                m.Name("mp_available"),
+                m.Call(func=m.Name("mp_available")),
+                m.Attribute(value=m.DoNotCare(), attr=m.Name("mp_available")),
+                m.Call(func=m.Attribute(value=m.DoNotCare(), attr=m.Name("mp_available"))),
+            )
+        ),
+    )
+
+
+def is_empty_mp_available_call(dec: cst.CSTNode) -> bool:
+    """True if decorator is exactly a zero-arg call to mp_available (qualified or not)."""
+    if not isinstance(dec, cst.Decorator):
+        return False
+    inner = dec.decorator
+    if not isinstance(inner, cst.Call):
+        return False
+    if len(inner.args) != 0:
+        return False
+    func = inner.func
+    if isinstance(func, cst.Name):
+        return func.value == "mp_available"
+    if isinstance(func, cst.Attribute) and isinstance(func.attr, cst.Name):
+        return func.attr.value == "mp_available"
+    return False
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -454,6 +486,18 @@ class MergeCommand(VisitorBasedCodemodCommand):
             # do not overwrite existing @overload functions
             # ASSUME: they are OK as they are
             return updated_node
+        # Force-merge when firmware stub marks with @mp_available() (no args)
+        if updated_node.decorators and any(is_empty_mp_available_call(dec) for dec in updated_node.decorators):
+            if self.annotations[stack_id].mp_available:
+                doc_stub = self.annotations[stack_id].mp_available.pop(0)
+                # Clear remaining to avoid later duplication via add_missed_mp_available
+                self.annotations[stack_id].mp_available = []
+            else:
+                doc_stub = self.annotations[stack_id].type_info
+            log.debug(f"Force merge via @mp_available() :{updated_node.name.value}")
+            updated_node = self.merge_decorator(original_node, updated_node, stack_id, doc_stub)
+            return updated_node
+
         # update the firmware_stub from the doc_stub information
         doc_stub = self.annotations[stack_id].type_info
         if isinstance(doc_stub.def_node, cst.FunctionDef):
@@ -480,13 +524,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
             updated_node = self.merge_decorator(original_node, updated_node, stack_id, doc_stub)
             return updated_node
 
-        # If there are overloads in the documentation, use the first one
-        add_mpa_deco = any(is_decorator(dec, "mp_available") for dec in doc_stub.decorators) and len(self.annotations[stack_id].mp_available) >= 1
+        # If there are mp_available decorators in the documentation, use the first one
+        add_mpa_deco = (
+            any(is_mp_available_decorator(dec) for dec in doc_stub.decorators) and len(self.annotations[stack_id].mp_available) >= 1
+        )
         if add_mpa_deco:
             log.debug(f"Change to @mp_available :{updated_node.name.value}")
             # Use the new @mp_available - but with the existing docstring
             doc_stub = self.annotations[stack_id].mp_available.pop(0)
-            updated_node = self.merge_decorator(original_node,updated_node ,stack_id, doc_stub)
+            updated_node = self.merge_decorator(original_node, updated_node, stack_id, doc_stub)
             return updated_node
 
         # assert isinstance(doc_stub, TypeInfo)
@@ -563,15 +609,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
     def merge_decorator(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef, stack_id, doc_stub):
         if not self.copy_params:
-                # we have copied over the entire function definition, no further processing should be done on this node
+            # we have copied over the entire function definition, no further processing should be done on this node
             doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)
             updated_node = doc_stub.def_node
 
         else:
-                # Save (first) existing docstring if any
+            # Save (first) existing docstring if any
             existing_ds = None
             if updated_node.get_docstring():
-                    # if there is one , then get it including the layout
+                # if there is one , then get it including the layout
                 existing_ds = original_node.body.body[0]
                 assert isinstance(existing_ds, cst.SimpleStatementLine)
 
