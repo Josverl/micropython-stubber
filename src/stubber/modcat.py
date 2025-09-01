@@ -39,16 +39,16 @@ STDLIB_ONLY_MODULES = [
 STUBS_COPY_FILTER = {
     StubSource.FROZEN: [
         "espnow",  # merged stubs + documentation of the espnow module is better than the info in the frozen stubs
-        # "collections",  # must be in stdlib
-        # "types",  # must be in stdlib
-        # "abc",  # must be in stdlib
         "time",  # used from merged ( should be in stdlib - but has implementation differences per port)
-        # "io",  # must be in stdlib
-    ] + STDLIB_ONLY_MODULES,
+        "machine",  #  esp32.frozen.machine.py is used to implement PCNT
+        # https://github.com/micropython/micropython/blob/master/ports/esp32/modules/machine.py
+    ]
+    + STDLIB_ONLY_MODULES,
     StubSource.FIRMWARE: [
         "builtins",
         # "collections",  # collections must be in stdlib
-    ] + STDLIB_ONLY_MODULES,
+    ]
+    + STDLIB_ONLY_MODULES,
     StubSource.MERGED: STDLIB_ONLY_MODULES,
 }
 

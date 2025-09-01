@@ -39,7 +39,7 @@ def get_manifests(mpy_path: Path) -> List[Path]:
     """
     Returns a list of all manifests.py files found in the ports folder of the MicroPython repo
     """
-    log.info(f"looking for manifests in  {mpy_path}")
+    log.info(f"looking for manifests in {mpy_path}")
     all_manifests = [
         m.absolute()
         for m in (mpy_path / "ports").rglob("manifest.py")
@@ -124,6 +124,7 @@ def freeze_any(
 
 
 def get_fsp(version: str, stub_folder: Optional[Path] = None) -> Path:
+    """get frozen stub path"""
     if not stub_folder:
         frozen_stub_path = (
             CONFIG.stub_path / f"{FAMILY}-{utils.clean_version(version, flat=True)}-frozen"
