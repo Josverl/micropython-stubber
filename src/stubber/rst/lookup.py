@@ -51,6 +51,7 @@ class Fix:
     "the from_ string is a regular expression"
 
 
+
 # This table is used to try to correct the errors in the documentation,
 #  or adapt the human readable documentation to machine readable.
 # it is applied to each .rst file after loading the contents.
@@ -142,6 +143,7 @@ LOOKUP_LIST = {
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
     # ssl.SSLSocket is defined in reference/micropython/ssl
+    
     "ssl.wrap_socket": ("SSLSocket", 0.95),
     "ussl.wrap_socket": ("SSLSocket", 0.95),
     #
@@ -628,9 +630,15 @@ PARAM_FIXES = [
 
 # and some param fixes that require a regex
 PARAM_RE_FIXES = [
-    Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
-    Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
-    Fix(r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True),  # fix: network - AbstractNIC.connect
+    Fix(
+        r"\[angle, time=0\]", "[angle], time=0", is_re=True
+    ),  # fix: method:: Servo.angle([angle, time=0])
+    Fix(
+        r"\[speed, time=0\]", "[speed], time=0", is_re=True
+    ),  # fix: .. method:: Servo.speed([speed, time=0])
+    Fix(
+        r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+    ),  # fix: network - AbstractNIC.connect
 ]
 # List of classes and their parent classes that should be added to the class definition
 CHILD_PARENT_CLASS = {

@@ -1,5 +1,4 @@
 """Add comment(s) to each file"""
-
 # sourcery skip: snake-case-functions
 
 import argparse

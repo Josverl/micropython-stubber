@@ -218,7 +218,9 @@ def compound_candidates(
         result["type"] = f"{type}[{sub}]" if sub else f"{type}"
         confidence = confidence * dist_rate(i)  # distance weighting
         result["confidence"] = confidence
-        log.trace(f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}")
+        log.trace(
+            f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}"
+        )
 
         candidates.append(result)
     return candidates
@@ -304,9 +306,13 @@ def distill_return(return_text: str) -> List[Dict]:
 
     candidates += compound_candidates("Generator", match_string, ["generator"], C_GENERATOR)
     candidates += compound_candidates("Iterator", match_string, ["iterator"], C_ITERATOR)
-    candidates += compound_candidates("List", match_string, ["a list of", "list of", "an array"], C_LIST)
+    candidates += compound_candidates(
+        "List", match_string, ["a list of", "list of", "an array"], C_LIST
+    )
 
-    candidates += simple_candidates("Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT)
+    candidates += simple_candidates(
+        "Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT
+    )
     candidates += simple_candidates(
         "Tuple",
         match_string,
@@ -327,7 +333,9 @@ def distill_return(return_text: str) -> List[Dict]:
         C_TUPLE,
     )
 
-    candidates += simple_candidates("int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT)
+    candidates += simple_candidates(
+        "int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
+    )
 
     candidates += simple_candidates(
         "int",
@@ -382,7 +390,9 @@ def distill_return(return_text: str) -> List[Dict]:
     # OK, better than just string
     candidates += simple_candidates("bytes", match_string, ["bytes", "byte string"], C_BYTES)
 
-    candidates += simple_candidates("bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL)
+    candidates += simple_candidates(
+        "bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL
+    )
     candidates += simple_candidates(
         "float",
         match_string,
@@ -400,7 +410,9 @@ def distill_return(return_text: str) -> List[Dict]:
         C_FLOAT,
     )
 
-    candidates += simple_candidates("str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR)
+    candidates += simple_candidates(
+        "str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR
+    )
 
     candidates += simple_candidates("str", match_string, ["name", "names"], C_STR_NAMES)
     ## "? contains 'None if there is no'  --> Union[Null, xxx]"
@@ -417,9 +429,15 @@ def distill_return(return_text: str) -> List[Dict]:
     return candidates
 
 
-def return_type_from_context(*, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False):
+def return_type_from_context(
+    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+):
     try:
-        return str(_type_from_context(module=module, signature=signature, docstring=docstring, literal=literal)["type"])
+        return str(
+            _type_from_context(
+                module=module, signature=signature, docstring=docstring, literal=literal
+            )["type"]
+        )
     except Exception:
         return "Incomplete"
 

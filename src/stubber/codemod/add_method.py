@@ -4,6 +4,7 @@ Used to add methods that are documented, but are not reported by the firmware,
 so they are also not present in the MCU stubs.
 """
 
+
 from typing import Optional
 import libcst as cst
 from libcst import matchers as m

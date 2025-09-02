@@ -449,8 +449,7 @@ class Builder(VersionedPackage):
         files = list((self.package_path).rglob("**/*.pyi"))
         if include_md:
             files += (
-                [self.package_path / "LICENSE.md"]
-                + [self.package_path / "README.md"]
+                [self.package_path / "LICENSE.md"] + [self.package_path / "README.md"]
                 # do not include [self.toml_file]
             )
         for file in sorted(files):
@@ -957,9 +956,7 @@ class StubPackage(PoetryBuilder):
         force=False,  # publish even if no changes
         dry_run=False,  # do not actually publish
         clean: bool = False,  # clean up afterwards
-    ) -> (
-        bool
-    ):  # sourcery skip: assign-if-exp, default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches, swap-if-expression
+    ) -> bool:  # sourcery skip: assign-if-exp, default-mutable-arg, extract-method, remove-unnecessary-else, require-parameter-annotation, swap-if-else-branches, swap-if-expression
         """
         Publish a package to PyPi
         look up the previous package version in the dabase, and only publish if there are changes to the package

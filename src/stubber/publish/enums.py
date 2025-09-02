@@ -1,5 +1,4 @@
 """Enumerations for the stubber package."""
-
 from enum import Enum
 
 
@@ -22,3 +21,4 @@ class StubSource(str, Enum):
     def __repr__(self):
         # Always force string values
         return self.value
+

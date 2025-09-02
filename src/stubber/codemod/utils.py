@@ -1,6 +1,6 @@
 from __future__ import annotations
 from libcst import matchers as m
-from libcst.matchers._visitors import _gather_constructed_leave_funcs, _gather_constructed_visit_funcs  # type: ignore
+from libcst.matchers._visitors import _gather_constructed_leave_funcs, _gather_constructed_visit_funcs # type: ignore
 from typing import Any, Optional
 from types import FunctionType
 import itertools

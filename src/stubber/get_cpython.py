@@ -23,7 +23,9 @@ from .utils.config import CONFIG
 # # log = logging.getLogger(__name__)
 
 
-def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"):
+def get_core(
+    requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"
+):
     "Download MicroPython compatibility modules"
     if not stub_path:
         stub_path = CONFIG.stub_path / "cpython-core"  # pragma: no cover
@@ -72,7 +74,9 @@ def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, fa
 
         except OSError as err:  # pragma: no cover
             log.error(
-                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err)
+                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(
+                    err
+                )
             )
 
         # copy *.py files in build folder to stub_path

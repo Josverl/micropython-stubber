@@ -207,7 +207,9 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
     elif isinstance(source_script, str):  # type: ignore
         source_content = source_script
     else:
-        raise TypeError(f"source_script must be str, Path, or file-like object, not {type(source_script)}")
+        raise TypeError(
+            f"source_script must be str, Path, or file-like object, not {type(source_script)}"
+        )
 
     if not source_content:
         raise ValueError("No source content")
@@ -397,7 +399,7 @@ def locate_mpy_cross():
         if mpy_cross_path:
             log.info(f"Found mpy-cross executable in PATH: {mpy_cross_path}")
             return mpy_cross_path
-
+        
         # Check in the Scripts/bin directory of the current Python environment
         bin_dir = "Scripts" if sys.platform == "win32" else "bin"
         env_path = os.path.join(os.path.dirname(sys.executable), bin_dir, "mpy-cross")
@@ -409,7 +411,6 @@ def locate_mpy_cross():
         log.debug(f"Error locating mpy-cross: {e}")
         raise FileNotFoundError("mpy-cross executable not found in PATH or Python environment") from e
 
-
 def run_mpy_cross(version: str, source_file, _target):
     """Run mpy-cross using --compat if needed"""
     log.info(f"Compiling with mpy-cross version: {version}")
@@ -417,11 +418,13 @@ def run_mpy_cross(version: str, source_file, _target):
         version = ""
     if version:
         version = version.lstrip("v")
-    compat = ["--compat", version] if version else []
+    compat =  ["--compat", version] if version else []
 
-    cmd = [locate_mpy_cross()] + compat + ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
+    cmd = [locate_mpy_cross() ] + compat + ["-O2", str(source_file), "-o", str(_target), "-s", "createstubs.py"]
     log.trace(" ".join(cmd))
-    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")  # Specify the encoding
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8"
+    )  # Specify the encoding
     return result
 
 

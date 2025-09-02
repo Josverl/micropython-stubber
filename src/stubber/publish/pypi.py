@@ -28,7 +28,11 @@ def get_pypi_versions(package_name: str, base: Optional[Version] = None, product
     if not package_info:
         return []
 
-    versions = [parse(pkg.version) for pkg in package_info.packages if pkg.package_type == "wheel" and pkg.version]
+    versions = [
+        parse(pkg.version)
+        for pkg in package_info.packages
+        if pkg.package_type == "wheel" and pkg.version
+    ]
     # print(versions)
 
     if base:
