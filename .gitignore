@@ -75,3 +75,4 @@ Bugs to fix-MPFlash.md
 **/.hypothesis
 
 firmware
+_build/
