@@ -48,9 +48,7 @@ def merge_all_docstubs(
     for candidate in candidates:
         # use the default board for the port
         if candidate["board"] in GENERIC:
-            candidate["board"] = default_board(
-                port=candidate["port"], version=candidate["version"]
-            )
+            candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
         # check if we have MCU stubs of this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
         # src and dest paths
@@ -66,10 +64,10 @@ def merge_all_docstubs(
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         try:
-            # TODO : webassembly: Need to merge from reference/pyscript as well 
+            # TODO : webassembly: Need to merge from reference/pyscript as well
             result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
             if candidate["port"] == "webassembly":
-                # TODO : webassembly: Need to merge from reference/pyscript as well 
+                # TODO : webassembly: Need to merge from reference/pyscript as well
                 # use enrich_folder to merge the docstubs
                 enrich_folder(
                     source_folder=CONFIG.mpy_stubs_path / "reference/pyscript",

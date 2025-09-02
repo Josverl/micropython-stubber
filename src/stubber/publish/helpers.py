@@ -26,4 +26,3 @@ def get_module_docstring(fname: Path) -> Union[str, Any]:
     except Exception as e:
         print(e)
         return None
-

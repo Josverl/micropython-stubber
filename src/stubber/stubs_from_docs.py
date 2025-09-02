@@ -75,9 +75,7 @@ def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
     return files
 
 
-def make_docstubs(
-    dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path], clean_rst: bool
-):
+def make_docstubs(dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path], clean_rst: bool):
     """Create docstubs from the list of rst files"""
 
     for file in files:

@@ -282,11 +282,7 @@ class ManifestFile:
                 raise ManifestFileError("Expected .py file")
             kind = KIND_COMPILE_AS_MPY
 
-        self._manifest_files.append(
-            ManifestOutput(
-                FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt
-            )
-        )
+        self._manifest_files.append(ManifestOutput(FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt))
 
     def _search(self, base_path, package_path, files, exts, kind, opt=None, strict=False):
         base_path = self._resolve_path(base_path)
@@ -435,11 +431,7 @@ class ManifestFile:
             # Search for {library_path}/**/{name}/manifest.py.
             if self._require_from_path(library_path, name, version, kwargs):
                 return
-            raise ValueError(
-                "Package '{}' not found in external library '{}' ({}).".format(
-                    name, library, library_path
-                )
-            )
+            raise ValueError("Package '{}' not found in external library '{}' ({}).".format(name, library, library_path))
 
         for lib_dir in self._library_dirs:
             # Search for {lib_dir}/**/{name}/manifest.py.
@@ -603,9 +595,7 @@ def main():
         default=os.path.join(os.path.dirname(__file__), "../lib/micropython-lib"),
         help="path to micropython-lib repo",
     )
-    cmd_parser.add_argument(
-        "--unix-ffi", action="store_true", help="prepend unix-ffi to the library path"
-    )
+    cmd_parser.add_argument("--unix-ffi", action="store_true", help="prepend unix-ffi to the library path")
     cmd_parser.add_argument("--port", default=None, help="path to port dir")
     cmd_parser.add_argument("--board", default=None, help="path to board dir")
     cmd_parser.add_argument(

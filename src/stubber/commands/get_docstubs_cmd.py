@@ -47,9 +47,7 @@ from stubber.utils import do_post_processing
     show_default=True,
 )
 #  @click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
-@click.option(
-    "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
-)
+@click.option("--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]")
 @click.option("--black/--no-black", "-b/-nb", default=True, help="Run black", show_default=True)
 @click.option(
     "--autoflake/--no-autoflake",

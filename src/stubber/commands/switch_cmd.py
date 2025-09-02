@@ -27,9 +27,7 @@ try:
     ]
 except Exception:
     # offline fallback - use unified fallback list with "v" prefix for git operations
-    VERSION_LIST = [f"v{version}" for version in FALLBACK_VERSIONS] + [
-        V_PREVIEW, "latest", "stable"
-    ]
+    VERSION_LIST = [f"v{version}" for version in FALLBACK_VERSIONS] + [V_PREVIEW, "latest", "stable"]
 
 
 @stubber_cli.command(name="switch")
@@ -46,7 +44,7 @@ def cli_switch(path: Union[str, Path], tag: Optional[str] = None):
 
     TAG can be:
     - A version tag (e.g., v1.22.0, v1.21.0)
-    - A branch name (e.g., master, develop)  
+    - A branch name (e.g., master, develop)
     - A commit hash (e.g., abc123def456)
     - Special values: preview, latest, stable
 

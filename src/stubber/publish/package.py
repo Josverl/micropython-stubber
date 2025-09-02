@@ -49,7 +49,7 @@ def get_package(
         mpy_version=version,
     ):
         # create package from the information retrieved from the database
-        p_db =  StubPackage(
+        p_db = StubPackage(
             pkg_name,
             port,
             board=board,

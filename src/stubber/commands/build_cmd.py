@@ -74,9 +74,7 @@ def cli_build(
     boards = list(boards)
 
     if len(versions) > 1:
-        raise NotImplementedError(
-            "Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487"
-        )
+        raise NotImplementedError("Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487")
 
     log.info(f"Build {family} {versions} {ports} {boards}")
 

@@ -94,9 +94,7 @@ def cli_get_frozen(
     version = utils.checkedout_version(CONFIG.mpy_path)
     log.info("MicroPython version : {}".format(version))
 
-    stub_path = freeze_any(
-        version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path
-    )
+    stub_path = freeze_any(version=version, mpy_path=CONFIG.mpy_path, mpy_lib_path=CONFIG.mpy_lib_path)
     stub_paths.append(stub_path)
     # Also enrich the frozen modules from the doc stubs if available
 
@@ -117,7 +115,7 @@ def cli_get_frozen(
                 write_back=True,
                 require_docstub=False,
                 copy_docstr=True,
-                ext = ".pyi",
+                ext=".pyi",
             ):
                 log.info(f" > Enriched {merged} frozen modules.")
     else:

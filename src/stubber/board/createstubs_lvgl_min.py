@@ -5,6 +5,7 @@ Note that the stubs can be very large, and it may be best to directly store them
 
 This variant was generated from createstubs.py by micropython-stubber v1.16.3
 """
+
 # Copyright (c) 2019-2023 Jos Verlinde
 
 import gc
@@ -528,9 +529,7 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
-            if "mpy" in dir(sys.implementation)
-            else ""
+            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""
         )
     except (AttributeError, IndexError):
         pass
