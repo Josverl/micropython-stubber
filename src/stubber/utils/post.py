@@ -33,7 +33,7 @@ def format_stubs(path: Path, capture_output: bool = False):
         "-m",
         "ruff",
         "format",
-        f"{path.as_posix()}/**/*.p*",
+        path.as_posix(),
         "--line-length",
         "140",
     ]
