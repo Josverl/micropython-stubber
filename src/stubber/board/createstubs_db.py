@@ -527,7 +527,8 @@ def _build(s):
     return b
 
 
-def _info():  # type:() -> dict[str, str]
+def _get_base_system_info() -> OrderedDict[str, str]:
+    """Get basic system implementation details."""
     try:
         fam = sys.implementation[0]  # type: ignore
     except TypeError:
@@ -549,17 +550,29 @@ def _info():  # type:() -> dict[str, str]
             "arch": "",
         }
     )
-    # change port names to be consistent with the repo
+    return info
+
+
+def _normalize_port_info(info: OrderedDict[str, str]) -> None:
+    """Normalize port names to be consistent with the repo."""
     if info["port"].startswith("pyb"):
         info["port"] = "stm32"
     elif info["port"] == "win32":
         info["port"] = "windows"
     elif info["port"] == "linux":
         info["port"] = "unix"
+
+
+def _extract_version_info(info: OrderedDict[str, str]) -> None:
+    """Extract version information from sys.implementation."""
     try:
         info["version"] = version_str(sys.implementation.version)  # type: ignore
     except AttributeError:
         pass
+
+
+def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
+    """Extract board, CPU, and machine details."""
     try:
         _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
         info["board"] = _machine.strip()
@@ -576,9 +589,13 @@ def _info():  # type:() -> dict[str, str]
         )
     except (AttributeError, IndexError):
         pass
+
     if not info["board_id"]:
         get_boardname(info)
 
+
+def _extract_build_info(info: OrderedDict[str, str]) -> None:
+    """Extract build information from various system sources."""
     try:
         if "uname" in dir(os):  # old
             # extract build from uname().version if available
@@ -591,17 +608,18 @@ def _info():  # type:() -> dict[str, str]
             info["build"] = _build(sys.version)
     except (AttributeError, IndexError, TypeError):
         pass
-    # avoid  build hashes
-    # if info["build"] and len(info["build"]) > 5:
-    #     info["build"] = ""
 
+    # Fallback version detection for specific platforms
     if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
             u = os.uname()  # type: ignore
             info["version"] = u.release
         except (IndexError, AttributeError, TypeError):
             pass
-    # detect families
+
+
+def _detect_firmware_family(info: OrderedDict[str, str]) -> None:
+    """Detect special firmware families (pycopy, pycom, ev3-pybricks)."""
     for fam_name, mod_name, mod_thing in [
         ("pycopy", "pycopy", "const"),
         ("pycom", "pycom", "FAT"),
@@ -618,8 +636,10 @@ def _info():  # type:() -> dict[str, str]
     if info["family"] == "ev3-pybricks":
         info["release"] = "2.0.0"
 
+
+def _process_micropython_version(info: OrderedDict[str, str]) -> None:
+    """Process MicroPython-specific version formatting."""
     if info["family"] == "micropython":
-        info["version"]
         if (
             info["version"]
             and info["version"].endswith(".0")
@@ -629,6 +649,9 @@ def _info():  # type:() -> dict[str, str]
             # versions from 1.10.0 to 1.24.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
+
+def _process_mpy_info(info: OrderedDict[str, str]) -> None:
+    """Process MPY architecture and version information."""
     # spell-checker: disable
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
@@ -654,10 +677,35 @@ def _info():  # type:() -> dict[str, str]
             info["arch"] = "unknown"
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+
+
+def _format_version_strings(info: OrderedDict[str, str]) -> None:
+    """Handle final version string formatting."""
     if info["build"] and not info["version"].endswith("-preview"):
         info["version"] = info["version"] + "-preview"
     # simple to use version[-build] string
     info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
+
+
+def _info():  # type:() -> dict[str, str]
+    """
+    Gather comprehensive system information for MicroPython stubbing.
+
+    Returns a dictionary containing family, version, port, board, and other
+    system details needed for stub generation.
+    """
+    # Get base system information
+    info = _get_base_system_info()
+
+    # Apply transformations and gather additional info
+    _normalize_port_info(info)
+    _extract_version_info(info)
+    _extract_hardware_info(info)
+    _extract_build_info(info)
+    _detect_firmware_family(info)
+    _process_micropython_version(info)
+    _process_mpy_info(info)
+    _format_version_strings(info)
 
     return info
 
