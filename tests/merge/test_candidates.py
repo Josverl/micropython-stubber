@@ -76,7 +76,6 @@ def test_board_candidates(family: str, versions: Union[str, List[str]]):
 def test_merge_candidates(id, source, target, count):
 
     result = merge_candidates(Path(source), Path(target))
-    if id >= 100: 
+    if id >= 100:
         pytest.mark.xfail(reason="Test with live data can go wrong")
     assert len(result) == count
-    

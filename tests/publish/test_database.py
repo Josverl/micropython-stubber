@@ -39,4 +39,3 @@ def test_get_package_info(pytestconfig, package_name, version, present):
             assert pkg_info == None
     finally:
         db_conn.close()
-            

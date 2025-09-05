@@ -51,7 +51,7 @@ def test_get_whitespace_context(content, index, expected):
     # Act
     if isinstance(expected, RaisesContext):
         # error expected
-        with expected :
+        with expected:
             result = list(get_whitespace_context(content, index))
         return
 

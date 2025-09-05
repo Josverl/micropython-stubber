@@ -23,9 +23,7 @@ def test_get_package_info(test_db_conn, pkg_name, mpy_version):
 
     pub_path = Path(tempfile.gettempdir())
 
-    package_info = get_package_info(
-        test_db_conn, pub_path, pkg_name=pkg_name, mpy_version=mpy_version
-    )
+    package_info = get_package_info(test_db_conn, pub_path, pkg_name=pkg_name, mpy_version=mpy_version)
     assert package_info is not None
     assert package_info["name"] == pkg_name
     assert package_info["mpy_version"] == mpy_version
@@ -44,9 +42,7 @@ def test_get_package_info_no_match(test_db_conn, tmp_path):
     pkg_name = "micropython-esp32-stubs"
     mpy_version = "1.13.1"
 
-    package_info = get_package_info(
-        test_db_conn, pub_path, pkg_name=pkg_name, mpy_version=mpy_version
-    )
+    package_info = get_package_info(test_db_conn, pub_path, pkg_name=pkg_name, mpy_version=mpy_version)
     assert package_info is None
 
     def test_get_package_info_invalid_version(test_db_conn):

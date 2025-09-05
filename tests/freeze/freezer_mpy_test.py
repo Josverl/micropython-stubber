@@ -239,13 +239,9 @@ def test_freeze_any_mocked(
 ):
     "mocked test if we can freeze source using manifest.py files"
 
-    m_freeze_folders = mocker.patch(
-        "stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1]
-    )
+    m_freeze_folders = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
     # m_freeze_one_manifest_1= mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_1", autospec=True, return_value=1)
-    m_freeze_one_manifest_2 = mocker.patch(
-        "stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1
-    )
+    m_freeze_one_manifest_2 = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
     mpy_version = clean_version(mpy_version)
     freeze_any(
         tmp_path,
@@ -273,12 +269,8 @@ def test_freeze_manifest2_error_mocked(
 ):
     "mocked test if we can freeze source using manifest.py files"
 
-    m_freeze_folders = mocker.patch(
-        "stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1]
-    )
-    m_freeze_one_manifest_2 = mocker.patch(
-        "stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1
-    )
+    m_freeze_folders = mocker.patch("stubber.freeze.get_frozen.freeze_folders", autospec=True, return_value=[1])
+    m_freeze_one_manifest_2 = mocker.patch("stubber.freeze.get_frozen.freeze_one_manifest_2", autospec=True, return_value=1)
     # get the correct version to test
     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
     test_path = freeze_any(

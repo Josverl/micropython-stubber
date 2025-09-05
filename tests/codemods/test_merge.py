@@ -82,11 +82,7 @@ class PytestCodemodTest(_CodemodTest):
         transform_instance = self.TRANSFORM(context, *args, **kwargs)
         input_tree = parse_module(
             CodemodTest.make_fixture_data(before),
-            config=(
-                PartialParserConfig(python_version=python_version)
-                if python_version is not None
-                else PartialParserConfig()
-            ),
+            config=(PartialParserConfig(python_version=python_version) if python_version is not None else PartialParserConfig()),
         )
         try:
             output_tree = transform_instance.transform_module(input_tree)

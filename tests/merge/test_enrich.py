@@ -2,9 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from stubber.codemod.enrich import (enrich_file, enrich_folder,
-                                    package_from_path,
-                                    source_target_candidates, upackage_equal)
+from stubber.codemod.enrich import enrich_file, enrich_folder, package_from_path, source_target_candidates, upackage_equal
 
 
 def test_package_from_path(tmp_path):
@@ -97,9 +95,7 @@ def test_upackage_equal(id, src_pkg, dst_pkg, exp_match, exp_len):
         (60, ["module1.pyi", "module2.pyi"], ["module2.pyi", "module3.pyi"], 1),
     ],
 )
-def test_target_source_candidates(
-    tmp_path, test_id, target_files, source_files, expected_matches: int
-):
+def test_target_source_candidates(tmp_path, test_id, target_files, source_files, expected_matches: int):
     source_dir = tmp_path / "source"
     source_dir.mkdir()
     for source_name in source_files:
@@ -113,9 +109,7 @@ def test_target_source_candidates(
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.touch()
     candidates = list(source_target_candidates(source_dir, target_dir))
-    assert (
-        len(candidates) == expected_matches
-    ), f"Expected {expected_matches} matches, got {len(candidates)}"
+    assert len(candidates) == expected_matches, f"Expected {expected_matches} matches, got {len(candidates)}"
 
 
 def test_enrich_file(tmp_path):

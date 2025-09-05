@@ -54,9 +54,7 @@ def test_package_name(family, port, board, expected):
     ],
 )
 # CORE_STUBS
-def test_create_package(
-    tmp_path, pytestconfig, version, port, board, mocker, monkeypatch: pytest.MonkeyPatch
-):
+def test_create_package(tmp_path, pytestconfig, version, port, board, mocker, monkeypatch: pytest.MonkeyPatch):
     """ "
     test Create a new package with the DOC_STUBS type
     - test the different methods to manipulate the package on disk
@@ -190,17 +188,13 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
     )
 
 
-def run_common_package_tests(
-    package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, test_build=True
-):
+def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, test_build=True):
     # sourcery skip: no-long-functions
     "a series of tests to re-use for all packages"
     assert isinstance(package, StubPackage)
     assert package.package_name == pkg_name
     # Package path
-    assert package.package_path.relative_to(
-        publish_path
-    ), "package path should be relative to publish path"
+    assert package.package_path.relative_to(publish_path), "package path should be relative to publish path"
     assert (package.package_path).exists()
     assert (package.package_path / "pyproject.toml").exists()
     # package path is all lowercase
@@ -238,16 +232,12 @@ def run_common_package_tests(
         return
 
     package.copy_stubs()
-    filelist = list((package.package_path).rglob("*.py")) + list(
-        (package.package_path).rglob("*.pyi")
-    )
+    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1
 
     # do it all at once
     package.update_package_files()
-    filelist = list((package.package_path).rglob("*.py")) + list(
-        (package.package_path).rglob("*.pyi")
-    )
+    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) >= 1
 
     package.update_pyproject_stubs()
@@ -267,13 +257,9 @@ def run_common_package_tests(
         built = package.poetry_build()
         assert built
         assert (package.package_path / "dist").exists(), "Distribution folder should exist"
-        filelist = list((package.package_path / "dist").glob("*.whl")) + list(
-            (package.package_path / "dist").glob("*.tar.gz")
-        )
+        filelist = list((package.package_path / "dist").glob("*.whl")) + list((package.package_path / "dist").glob("*.tar.gz"))
         assert len(filelist) >= 2
 
     package.clean()
-    filelist = list((package.package_path).rglob("*.py")) + list(
-        (package.package_path).rglob("*.pyi")
-    )
+    filelist = list((package.package_path).rglob("*.py")) + list((package.package_path).rglob("*.pyi"))
     assert len(filelist) == 0

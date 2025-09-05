@@ -11,6 +11,7 @@ import stubber.utils as utils
 
 pytestmark = [pytest.mark.stubber]
 
+
 # make stub file
 def test_make_stub_files_OK(tmp_path, pytestconfig):
     source = pytestconfig.rootpath / "tests/data/stubs-ok"

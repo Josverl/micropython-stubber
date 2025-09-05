@@ -80,9 +80,7 @@ def make_ids(val):
     return val
 
 
-@pytest.mark.parametrize(
-    "expected_type, module, signature, docstring", return_type_testcases(), ids=make_ids
-)
+@pytest.mark.parametrize("expected_type, module, signature, docstring", return_type_testcases(), ids=make_ids)
 def test_returns(module, signature, docstring, expected_type):
     # return type should be included in the signature
     # except for classes

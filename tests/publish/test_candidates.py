@@ -104,7 +104,6 @@ def test_frozen_candidates(pytestconfig, family, versions, ports, boards, count)
     assert len(l) == count, f"{len(l)} != {count}, {l}"
 
 
-
 @pytest.mark.parametrize(
     "family, versions, ports, boards, count",
     [
