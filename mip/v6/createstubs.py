@@ -25,8 +25,8 @@ except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
 __version__ = "v1.26.1"
-ENOENT = 2 # on most ports
-ENOMESSAGE = 44 # on pyscript
+ENOENT = 2  # on most ports
+ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
 LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
 
@@ -154,11 +154,7 @@ class Stubber:
                     order = 4
                 _result.append((name, repr(val), repr(type(val)), val, order))
             except AttributeError as e:
-                _errors.append(
-                    "Couldn't get attribute '{}' from object '{}', Err: {}".format(
-                        name, item_instance, e
-                    )
-                )
+                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
             except MemoryError as e:
                 print("MemoryError: {}".format(e))
                 sleep(1)
@@ -224,9 +220,7 @@ class Stubber:
         try:
             new_module = __import__(module_name, None, None, ("*"))
             m1 = gc.mem_free()  # type: ignore
-            log.info(
-                "Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1)
-            )
+            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
 
         except ImportError:
             # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
@@ -237,13 +231,9 @@ class Stubber:
         ensure_folder(file_name)
         with open(file_name, "w") as fp:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(
-                module_name, self._fwid, info_, __version__
-            )
+            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write(
-                "from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n"
-            )
+            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -258,9 +248,7 @@ class Stubber:
         gc.collect()
         return True
 
-    def write_object_stub(
-        self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0
-    ):
+    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
         gc.collect()
         if object_expr in self.problematic:
@@ -336,13 +324,9 @@ class Stubber:
                     first = "self, "
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(
-                        indent
-                    ) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(
-                        indent, item_name, first, ret
-                    )
+                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -371,9 +355,7 @@ class Stubber:
                     if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
                         # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
                         # use these types for the attribute
-                        s = "{0}{1}: {2} ## = {4}\n".format(
-                            indent, item_name, t, item_type_txt, item_repr
-                        )
+                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                     elif t == "generator":
                         # either a normal or async Generator function
                         t = "Generator"
@@ -387,9 +369,7 @@ class Stubber:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
                         if " at " in item_repr:
                             item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        s = "{0}{1}: {2} ## {3} = {4}\n".format(
-                            indent, item_name, t, item_type_txt, item_repr
-                        )
+                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                 fp.write(s)
                 # log.debug("\n" + s)
             else:
@@ -472,9 +452,7 @@ class Stubber:
                     f.write(",\n")
                 else:
                     self._json_first = False
-                line = '{{"module": "{}", "file": "{}"}}'.format(
-                    module_name, stub_file.replace("\\", "/")
-                )
+                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
                 f.write(line)
 
         except OSError:
@@ -501,7 +479,7 @@ def ensure_folder(path: str):
                 _ = os.stat(p)
             except OSError as e:
                 # folder does not exist
-                if e.args[0] in [ENOENT, ENOMESSAGE] :
+                if e.args[0] in [ENOENT, ENOMESSAGE]:
                     try:
                         log.debug("Create folder {}".format(p))
                         os.mkdir(p)
@@ -510,7 +488,6 @@ def ensure_folder(path: str):
                         raise e2
         # next level deep
         start = i + 1
-
 
 
 def _build(s):
@@ -531,7 +508,8 @@ def _build(s):
     return b
 
 
-def _info():  # type:() -> dict[str, str]
+def _get_base_system_info() -> OrderedDict[str, str]:
+    """Get basic system implementation details."""
     try:
         fam = sys.implementation[0]  # type: ignore
     except TypeError:
@@ -553,21 +531,31 @@ def _info():  # type:() -> dict[str, str]
             "arch": "",
         }
     )
-    # change port names to be consistent with the repo
+    return info
+
+
+def _normalize_port_info(info: OrderedDict[str, str]) -> None:
+    """Normalize port names to be consistent with the repo."""
     if info["port"].startswith("pyb"):
         info["port"] = "stm32"
     elif info["port"] == "win32":
         info["port"] = "windows"
     elif info["port"] == "linux":
         info["port"] = "unix"
+
+
+def _extract_version_info(info: OrderedDict[str, str]) -> None:
+    """Extract version information from sys.implementation."""
     try:
         info["version"] = version_str(sys.implementation.version)  # type: ignore
     except AttributeError:
         pass
+
+
+def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
+    """Extract board, CPU, and machine details."""
     try:
-        _machine = (
-            sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
-        )
+        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
         info["board"] = _machine.strip()
         si_build = sys.implementation._build if "_build" in dir(sys.implementation) else ""
         if si_build:
@@ -582,9 +570,13 @@ def _info():  # type:() -> dict[str, str]
         )
     except (AttributeError, IndexError):
         pass
+
     if not info["board_id"]:
         get_boardname(info)
 
+
+def _extract_build_info(info: OrderedDict[str, str]) -> None:
+    """Extract build information from various system sources."""
     try:
         if "uname" in dir(os):  # old
             # extract build from uname().version if available
@@ -597,17 +589,18 @@ def _info():  # type:() -> dict[str, str]
             info["build"] = _build(sys.version)
     except (AttributeError, IndexError, TypeError):
         pass
-    # avoid  build hashes
-    # if info["build"] and len(info["build"]) > 5:
-    #     info["build"] = ""
 
+    # Fallback version detection for specific platforms
     if info["version"] == "" and sys.platform not in ("unix", "win32"):
         try:
             u = os.uname()  # type: ignore
             info["version"] = u.release
         except (IndexError, AttributeError, TypeError):
             pass
-    # detect families
+
+
+def _detect_firmware_family(info: OrderedDict[str, str]) -> None:
+    """Detect special firmware families (pycopy, pycom, ev3-pybricks)."""
     for fam_name, mod_name, mod_thing in [
         ("pycopy", "pycopy", "const"),
         ("pycom", "pycom", "FAT"),
@@ -624,18 +617,22 @@ def _info():  # type:() -> dict[str, str]
     if info["family"] == "ev3-pybricks":
         info["release"] = "2.0.0"
 
+
+def _process_micropython_version(info: OrderedDict[str, str]) -> None:
+    """Process MicroPython-specific version formatting."""
     if info["family"] == "micropython":
-        info["version"]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"]
-            >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # versions from 1.10.0 to 1.24.0 do not have a micro .0
             info["version"] = info["version"][:-2]
 
+
+def _process_mpy_info(info: OrderedDict[str, str]) -> None:
+    """Process MPY architecture and version information."""
     # spell-checker: disable
     if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
@@ -661,10 +658,35 @@ def _info():  # type:() -> dict[str, str]
             info["arch"] = "unknown"
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+
+
+def _format_version_strings(info: OrderedDict[str, str]) -> None:
+    """Handle final version string formatting."""
     if info["build"] and not info["version"].endswith("-preview"):
         info["version"] = info["version"] + "-preview"
     # simple to use version[-build] string
     info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
+
+
+def _info():  # type:() -> dict[str, str]
+    """
+    Gather comprehensive system information for MicroPython stubbing.
+
+    Returns a dictionary containing family, version, port, board, and other
+    system details needed for stub generation.
+    """
+    # Get base system information
+    info = _get_base_system_info()
+
+    # Apply transformations and gather additional info
+    _normalize_port_info(info)
+    _extract_version_info(info)
+    _extract_hardware_info(info)
+    _extract_build_info(info)
+    _detect_firmware_family(info)
+    _process_micropython_version(info)
+    _process_mpy_info(info)
+    _format_version_strings(info)
 
     return info
 
@@ -743,11 +765,11 @@ def is_micropython() -> bool:
 
         # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
         # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore 
+        b = bytes("abc", encoding="utf8")  # type: ignore
 
         # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
         # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore 
+        c = is_micropython.__module__  # type: ignore
         return False
     except (NotImplementedError, AttributeError):
         return True
