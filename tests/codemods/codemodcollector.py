@@ -27,15 +27,9 @@ def collect_test_cases(folder: str) -> List[Tuple[Any, ...]]:
 
     test_cases: List = []
     for test_case_directory in root_test_cases_directory.iterdir():
-        before_files = list(test_case_directory.glob("before.py")) + list(
-            test_case_directory.glob("before.pyi")
-        )
-        after_files = list(test_case_directory.glob("expected.py")) + list(
-            test_case_directory.glob("expected.pyi")
-        )
-        doc_stubs = list(test_case_directory.glob("doc_stub.py")) + list(
-            test_case_directory.glob("doc_stub.pyi")
-        )
+        before_files = list(test_case_directory.glob("before.py")) + list(test_case_directory.glob("before.pyi"))
+        after_files = list(test_case_directory.glob("expected.py")) + list(test_case_directory.glob("expected.pyi"))
+        doc_stubs = list(test_case_directory.glob("doc_stub.py")) + list(test_case_directory.glob("doc_stub.pyi"))
         if len(before_files) != 1 or len(after_files) != 1 or len(doc_stubs) != 1:
             print("Incorrect test file layout in folder", test_case_directory)
             continue

@@ -78,21 +78,15 @@ def test_enrich_folder(
     expected_count: int,
     mocker: MockerFixture,
 ):
-    m_enrich_file = mocker.patch(
-        "stubber.codemod.enrich.enrich_file", return_value="OK", autospec=True
-    )
-    m_run_black = mocker.patch(
-        "stubber.codemod.enrich.run_black", return_value=None, autospec=True
-    )
+    m_enrich_file = mocker.patch("stubber.codemod.enrich.enrich_file", return_value="OK", autospec=True)
+    m_run_black = mocker.patch("stubber.codemod.enrich.run_black", return_value=None, autospec=True)
     count = enrich_folder(
         source_folder,
         target_folder,
         show_diff=False,
         write_back=False,
     )
-    assert (
-        count >= expected_count
-    ), f"Expected at least {expected_count} files to be enriched but found {count}"
+    assert count >= expected_count, f"Expected at least {expected_count} files to be enriched but found {count}"
     m_run_black.assert_called_once()
     m_enrich_file.call_count >= expected_count
     assert m_enrich_file.call_count >= expected_count

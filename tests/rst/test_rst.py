@@ -60,9 +60,7 @@ def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path)
 
 # TODO: Source version and tag
 @pytest.fixture(scope="module")
-def rst_stubs(
-    tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path
-):
+def rst_stubs(tmp_path_factory: pytest.TempPathFactory, micropython_repo, testrepo_micropython: Path):
     "Generate stubs from RST files - once for this module"
     v_tag = micropython_repo
     # setup our on folder for testing
@@ -315,9 +313,7 @@ def test_pyright_undefined_variable(pyright_results, capsys):
         )
     )
     for issue in issues:
-        print(
-            f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  "
-        )
+        print(f"{issue['file']}:{issue['range']['start']['line']}:{issue['range']['start']['character']} - {issue['message']}  ")
     assert len(issues) == 0, "there should be no `Undefined Variables`"
 
 
@@ -368,17 +364,14 @@ def test_doc_pyright_obscured_definitions(pyright_results, capsys):
     issues = list(filter(lambda diag: diag["severity"] == "error", issues))
     issues = list(
         filter(
-            lambda diag: diag["rule"] == "reportGeneralTypeIssues"
-            and "is obscured by a declaration" in diag["message"],
+            lambda diag: diag["rule"] == "reportGeneralTypeIssues" and "is obscured by a declaration" in diag["message"],
             issues,
         )
     )
     for issue in issues:
         print(f"{issue['message']} in {issue['file']} line {issue['range']['start']['line']}")
 
-    assert (
-        len(issues) == 0
-    ), f"There are {len(issues)} function or class defs that obscure earlier defs"
+    assert len(issues) == 0, f"There are {len(issues)} function or class defs that obscure earlier defs"
 
 
 @pytest.mark.docfix
@@ -388,9 +381,7 @@ def test_doc_deepsleep_stub(rst_stubs):
     content = read_stub(rst_stubs / "machine", "__init__.pyi")
     # return type omitted as this is tested separately
     found = any(line.startswith("def deepsleep(time_ms") for line in content)
-    assert (
-        found
-    ), "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
+    assert found, "machine.deepsleep should be stubbed as a function, not as a class - Upstream Docfix needed"
 
 
 # post version 1.16 documentation has been updated usocket.rst -->socket.rst
