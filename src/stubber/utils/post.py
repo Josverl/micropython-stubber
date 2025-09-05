@@ -17,21 +17,22 @@ def do_post_processing(stub_paths: List[Path], stubgen: bool, format: bool, auto
         if stubgen:
             log.debug("Generate type hint files (pyi) in folder: {}".format(path))
             generate_pyi_files(path)
-        if format:
-            run_black(path)
         if autoflake:
             run_autoflake(path, process_pyi=True)
+        if format:
+            format_stubs(path)
 
 
-def run_black(path: Path, capture_output: bool = False):
+def format_stubs(path: Path, capture_output: bool = False):
     """
-    run black to format the code / stubs
+    run ruff format to format the code / stubs
     """
-    log.debug("Running black on: {}".format(path))
+    log.debug("Running ruff format on: {}".format(path))
     cmd = [
         sys.executable,
         "-m",
-        "black",
+        "ruff",
+        "format",
         path.as_posix(),
         "--line-length",
         "140",
@@ -44,7 +45,7 @@ def run_black(path: Path, capture_output: bool = False):
 def run_autoflake(path: Path, capture_output: bool = False, process_pyi: bool = False):
     """
     run autoflake to remove unused imports
-    needs to be run BEFORE black otherwise it does not recognize long import from`s.
+    needs to be run BEFORE ruff format otherwise it does not recognize long import from`s.
     note: is run file-by-file to include processing .pyi files
     """
     if not path.exists():

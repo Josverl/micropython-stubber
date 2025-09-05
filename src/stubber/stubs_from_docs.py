@@ -22,7 +22,7 @@ def generate_from_rst(
     release: Optional[str] = None,
     pattern: str = "*.rst",
     suffix: str = ".pyi",
-    black: bool = True,
+    format: bool = True,
     autoflake: bool = True,
     clean_rst: bool = True,
 ) -> int:
@@ -43,7 +43,7 @@ def generate_from_rst(
 
     log.info("::group:: start post processing of retrieved stubs")
     # do not run stubgen
-    utils.do_post_processing([dst_path], stubgen=False, format=black, autoflake=autoflake)
+    utils.do_post_processing([dst_path], stubgen=False, format=format, autoflake=autoflake)
 
     # Generate a module manifest for the docstubs
     utils.make_manifest(
