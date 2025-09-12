@@ -14,9 +14,7 @@ pytestmark = [pytest.mark.stubber]
 
 @pytest.mark.mocked
 @pytest.mark.integration
-def test_hash(
-    mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage
-):
+def test_hash(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config, fake_package: StubPackage):
     pkg = fake_package
 
     pkg.update_package_files()
@@ -136,17 +134,13 @@ def test_publish_package(
     monkeypatch.setenv("POETRY_VIRTUALENVS_CREATE", "false")
     pkg = fake_package
 
-    m_publish: MagicMock = mocker.patch(
-        "stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True
-    )
+    m_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
 
     # allow the publishing logic to run during test
     pkg._publish = True  # type: ignore
 
     # FIXME : dependency to access to test.pypi.org
-    result = pkg.publish_distribution_ifchanged(
-        production=False, force=False, db_conn=test_db_conn
-    )
+    result = pkg.publish_distribution_ifchanged(production=False, force=False, db_conn=test_db_conn)
 
     assert result, "should be ok"
 

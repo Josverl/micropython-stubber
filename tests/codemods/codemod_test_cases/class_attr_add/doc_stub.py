@@ -15,7 +15,7 @@ class Foo:
     ignored  = 42  # available 
     """the important docstring"""
 
-    FINAL = Final(42)  # available
+    FINAL: Final = 42  # available
     """the important docstring"""
 
     IS_OK = const(32)  # available

@@ -160,7 +160,7 @@ ignore = [
 ]
 
 # section 1
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 pythonPlatform = "All"
 verboseOutput = false
 typeCheckingMode = "basic" # ["off", "basic", "strict"]: Specifies the default rule set to use
