@@ -418,19 +418,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """
         # Find literal docstrings for this scope
         literal_docstrings = {}
-        
+
         # For module level (empty stack_id), use MODULE_KEY
         if len(stack_id) == 0:
             lookup_key = MODULE_KEY
         else:
             lookup_key = stack_id
-            
+
         if lookup_key in self.annotations and self.annotations[lookup_key].literal_docstrings:
             literal_docstrings = self.annotations[lookup_key].literal_docstrings
-        
+
         if not literal_docstrings:
             return updated_node
-            
+
         # Get the body to modify
         if isinstance(updated_node, cst.Module):
             updated_body = list(updated_node.body)
@@ -438,18 +438,18 @@ class MergeCommand(VisitorBasedCodemodCommand):
             updated_body = list(updated_node.body.body)
         else:
             raise ValueError(f"Unsupported node type: {updated_node}")
-        
+
         # Find assignment statements and insert docstrings after them
         new_body = []
         i = 0
         while i < len(updated_body):
             stmt = updated_body[i]
             new_body.append(stmt)
-            
+
             # Check if this is an assignment statement for a literal that has a docstring
             if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
                 literal_name = None
-                
+
                 if isinstance(stmt.body[0], cst.Assign):
                     # Regular assignment: CONST = value
                     targets = stmt.body[0].targets
@@ -459,34 +459,38 @@ class MergeCommand(VisitorBasedCodemodCommand):
                     # Annotated assignment: CONST: int = value
                     if isinstance(stmt.body[0].target, cst.Name):
                         literal_name = stmt.body[0].target.value
-                
+
                 # If we found a literal with a docstring, check if docstring is missing
                 if literal_name and literal_name in literal_docstrings:
                     # Check if the next statement is already a docstring for this literal
                     has_existing_docstring = False
                     if i + 1 < len(updated_body):
                         next_stmt = updated_body[i + 1]
-                        if (isinstance(next_stmt, cst.SimpleStatementLine) and 
-                            len(next_stmt.body) == 1 and 
-                            isinstance(next_stmt.body[0], cst.Expr) and
-                            isinstance(next_stmt.body[0].value, cst.SimpleString)):
+                        if (
+                            isinstance(next_stmt, cst.SimpleStatementLine)
+                            and len(next_stmt.body) == 1
+                            and isinstance(next_stmt.body[0], cst.Expr)
+                            and isinstance(next_stmt.body[0].value, cst.SimpleString)
+                        ):
                             has_existing_docstring = True
-                    
+                            docstr_node = next_stmt
+                            i += 1  # skip the docstring node to avoid duplication
+
                     # If no existing docstring, add the one from doc_stub
-                    if not has_existing_docstring and self.copy_docstr:
+                    if not has_existing_docstring or self.copy_docstr:
                         docstr_node = literal_docstrings[literal_name]
-                        new_body.append(docstr_node)
                         log.trace(f"Added literal docstring for {literal_name}")
-            
+                    new_body.append(docstr_node)
+
             i += 1
-        
+
         # Update the node with the new body
         if isinstance(updated_node, cst.Module):
             updated_node = updated_node.with_changes(body=tuple(new_body))
         elif isinstance(updated_node, cst.ClassDef):
             new_indented_body = updated_node.body.with_changes(body=tuple(new_body))
             updated_node = updated_node.with_changes(body=new_indented_body)
-        
+
         return updated_node
 
     def locate_function_by_name(self, overload, updated_body):

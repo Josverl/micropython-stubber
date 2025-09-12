@@ -1,6 +1,6 @@
 # fmt: off
 """
-Test preserving existing literal docstrings
+Test overwrite existing literal docstrings
 """
 
 # Constant with existing docstring - should not be overwritten

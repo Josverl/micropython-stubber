@@ -1,5 +1,5 @@
-""" 
-Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking 
+"""
+Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking
 using a custom-built parser to read and process the micropython RST files
 """
 
@@ -36,7 +36,7 @@ def generate_from_rst(
     files = get_rst_sources(rst_path, pattern)
 
     # reduce files for test/debugging
-    # files = [f for f in files if "machine" in f.name]
+    # files = [f for f in files if "errno" in f.name]
 
     clean_destination(dst_path)
     make_docstubs(dst_path, v_tag, release, suffix, files, clean_rst=clean_rst)
@@ -76,7 +76,12 @@ def get_rst_sources(rst_path: Path, pattern: str) -> List[Path]:
 
 
 def make_docstubs(
-    dst_path: Path, v_tag: str, release: str, suffix: str, files: List[Path], clean_rst: bool
+    dst_path: Path,
+    v_tag: str,
+    release: str,
+    suffix: str,
+    files: List[Path],
+    clean_rst: bool,
 ):
     """Create docstubs from the list of rst files"""
 
