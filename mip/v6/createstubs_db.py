@@ -289,12 +289,7 @@ class Stubber:
                 log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
-            if (
-                item_type_txt == "<class 'type'>"
-                and len(indent) <= _MAX_CLASS_LEVEL * 4
-                # and not obj_name.endswith(".Pin")
-                # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
-            ):
+            if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
                 # log.debug("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (
@@ -566,7 +561,7 @@ def _normalize_port_info(info: OrderedDict[str, str]) -> None:
 def _extract_version_info(info: OrderedDict[str, str]) -> None:
     """Extract version information from sys.implementation."""
     try:
-        info["version"] = version_str(sys.implementation.version)  # type: ignore
+        info["version"] = _version_str(sys.implementation.version)
     except AttributeError:
         pass
 
@@ -710,14 +705,14 @@ def _info():  # type:() -> dict[str, str]
     return info
 
 
-def version_str(version: tuple):  #  -> str:
+def _version_str(version: tuple):  #  -> str:
     v_str = ".".join([str(n) for n in version[:3]])
     if len(version) > 3 and version[3]:
         v_str += "-" + version[3]
     return v_str
 
 
-def get_boardname(info: dict) -> str:
+def get_boardname(info: dict) -> None:
     "Read the board_id from the boardname.py file that may have been created upfront"
     try:
         from boardname import BOARD_ID  # type: ignore
