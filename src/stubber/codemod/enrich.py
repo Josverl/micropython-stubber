@@ -13,18 +13,14 @@ from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
 from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
+from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
-from mpflash.logger import log
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.modcat import U_MODULES
-from stubber.utils.post import run_black
+from stubber.utils.post import format_stubs
 
 
-##########################################################################################
-# # log = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
-#########################################################################################
 @dataclass
 class MergeMatch:
     """A match between a target and source file to merge docstrings and typehints"""
@@ -333,8 +329,8 @@ def enrich_folder(
             log.exception(e)
             continue
 
-    # run black on the target folder
-    run_black(target_folder)
+    # run ruff on the target folder
+    format_stubs(target_folder)
     # DO NOT run Autoflake as this removes some relevant (but unused) imports too early
 
     # if copy_params:

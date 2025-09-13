@@ -37,9 +37,7 @@ from .visitors.type_helpers import AddTypeHelpers, GatherTypeHelpers
 
 Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 """TypeVar for Module or ClassDef that both support overloads"""
-##########################################################################################
-# # log = logging.getLogger(__name__)
-#########################################################################################
+
 empty_module = cst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
 _code = empty_module.code_for_node
 
@@ -461,6 +459,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                         literal_name = stmt.body[0].target.value
 
                 # If we found a literal with a docstring, check if docstring is missing
+                docstr_node = None
                 if literal_name and literal_name in literal_docstrings:
                     # Check if the next statement is already a docstring for this literal
                     has_existing_docstring = False
@@ -480,7 +479,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
                     if not has_existing_docstring or self.copy_docstr:
                         docstr_node = literal_docstrings[literal_name]
                         log.trace(f"Added literal docstring for {literal_name}")
-                    new_body.append(docstr_node)
+                    if docstr_node:
+                        new_body.append(docstr_node)
 
             i += 1
 
@@ -496,6 +496,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
     def locate_function_by_name(self, overload, updated_body):
         """locate the (last) function by name"""
         matched = False
+        i = 0
         for i, node in reversed(list(enumerate(updated_body))):
             if isinstance(node, cst.FunctionDef) and node.name.value == overload.name.value:
                 matched = True

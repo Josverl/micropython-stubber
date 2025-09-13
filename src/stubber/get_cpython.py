@@ -15,12 +15,8 @@ from typing import Optional, Union
 
 from mpflash.logger import log
 
-from . import __version__
-
-from . import utils
+from . import __version__, utils
 from .utils.config import CONFIG
-
-# # log = logging.getLogger(__name__)
 
 
 def get_core(

@@ -48,7 +48,8 @@
     "todo-tree.filtering.ignoreGitSubmodules": true,
     "todo-tree.filtering.excludeGlobs": [
         "**/node_modules",
-        "**/.venv"
+        "**/.venv",
+        "**/repos/**"
     ],
     "todo-tree.general.debug": true,
     "todo-tree.general.tags": [
@@ -78,7 +79,7 @@
         "editor.tabSize": 4,
         "editor.formatOnSave": true
     },
-    "todo-tree.tree.scanMode": "open files",
+    "todo-tree.tree.scanMode": "workspace only",
     "austin.mode": "Wall time",
     "austin.binaryMode": true,
     "python.languageServer": "Pylance",

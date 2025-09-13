@@ -14,10 +14,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Union
 
-from mpflash.logger import log
-from packaging.version import parse
-
 import mpflash.basicgit as git
+from mpflash.logger import log
 from mpflash.versions import (
     OLDEST_VERSION,
     SET_PREVIEW,
@@ -25,6 +23,8 @@ from mpflash.versions import (
     clean_version,
     micropython_versions,
 )
+from packaging.version import parse
+
 from stubber import utils
 from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
 
@@ -134,13 +134,7 @@ def frozen_candidates(
                 # lookup the (frozen) micropython ports
                 ports = list_frozen_ports(family, version, path=path)
             else:
-                raise NotImplementedError(
-                    f"auto ports not implemented for family {family}"
-                )  # pragma: no cover
-            # elif family == "pycom":
-            #     ports = ["esp32"]
-            # elif family == "lobo":
-            #     ports = ["esp32"]
+                raise NotImplementedError(f"auto ports not implemented for family {family}")  # pragma: no cover
         # ---------------------------------------------------------------------------
         for port in ports:
             port_path = path / f"{family}-{version}-frozen" / port
@@ -152,12 +146,6 @@ def frozen_candidates(
                     "board": GENERIC_L,
                     # "pkg_type": COMBO_STUBS,
                 }
-            # if not auto_board:
-            #     for board in boards:
-            #         port_path = board_path/ "board" / board
-            #         if port_path.exists():
-            #             yield {"family": family, "version": version, "port": port, "board": board, "pkg_type": COMBO_STUBS}
-            # else: # auto board
             if auto_board:
                 if family == "micropython":
                     # lookup the (frozen) micropython ports
@@ -169,16 +157,12 @@ def frozen_candidates(
 
                 else:
                     # raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
-                    raise NotImplementedError(
-                        f"auto boards not implemented for family {family}"
-                    )  # pragma: no cover
-                # elif family == "pycom":
-                #     boards = ["wipy", "lopy", "gpy", "fipy"]
+                    raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
             # ---------------------------------------------------------------------------
             for board in boards:
                 assert isinstance(board, str)
                 # frozen stubs found, and not excluded, generic is already explicitly included, test builds excluded
-                # Micropython repo uses CAPS for board names, but micropython-stubs are lowercase
+                # MicroPython repo uses CAPS for board names, but micropython-stubs are lowercase
                 board_found = (path / f"{family}-{version}-frozen" / port / board.upper()).exists()
                 if board_found and board.upper() not in [
                     GENERIC_L.upper(),
@@ -254,7 +238,6 @@ def filter_list(
     worklist: List[Dict[str, str]],
     ports: Optional[Union[List[str], str]] = None,
     boards: Optional[Union[List[str], str]] = None,
-    # versions: Optional[Union[List[str], str]] = None,
 ):
     """
     filter a list of candidates down to the ones we want, based on the ports and boards specified (case insensitive)

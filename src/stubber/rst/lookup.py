@@ -419,22 +419,10 @@ PARAM_FIXES = [
         "(hostname, port, lambda)",
         "tuple[str,int,Callable]",
     ),
-    # # network
-    # # WLANWiPy.ifconfig(if_id=0, config=['dhcp' or configtuple])
-    # Fix(
-    #     "config=['dhcp' or configtuple]",
-    #     "config: Union[str,Tuple]='dhcp'"
-    # ),
     Fix(
         "config='dhcp' or configtuple: Optional[Any]=None",
         "config: Union[str,Tuple]='dhcp'",
     ),
-    # (
-    #     "='dhcp' or configtuple: Optional[Any]=None",
-    #     ": Union[str,Tuple]='dhcp'",
-    # ),
-    # network
-    # CC3K.patch_program('pgm')
     Fix(
         "'pgm')",
         "cmd:str ,/)",
@@ -473,13 +461,13 @@ PARAM_FIXES = [
         "trigger=(IRQ_FALLING | IRQ_RISING)",
         "trigger=IRQ_FALLING ",
     ),
-    ## fixes for machine.py class constants
-    # # BUG: This is not OK
+    # fixes for machine.py class constants
+    # BUG: This is not OK
     Fix(
         "pins=(SCK, MOSI, MISO)",
         "pins:Optional[Tuple]",
     ),  #
-    ## rp2.PIO.irq
+    # rp2.PIO.irq
     # Fix( No longer needed with py 3.10 notation
     #     "trigger=IRQ_SM0|IRQ_SM1|IRQ_SM2|IRQ_SM3",
     #     "trigger=IRQ_SM0",
@@ -603,10 +591,6 @@ PARAM_FIXES = [
         "block_num, buf, offset: Optional[int] = 0)",
         is_re=True,
     ),
-    # # This is a cleanup something that went wrong before
-    # Fix("**kwargs: Optional[Any]","**kwargs")
-    # os.mount - optional parameters
-    # fsobj, mount_point, *, readonly)
     Fix(
         "fsobj, mount_point, *, readonly)",
         "fsobj, mount_point, *, readonly=False)",

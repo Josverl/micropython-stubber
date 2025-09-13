@@ -23,7 +23,7 @@ log.add(sys.stderr, level="INFO", backtrace=True, diagnose=True)
 
 def package_name(*, port: str = "", board: str = "", family: str = "micropython", **kwargs) -> str:
     "generate a package name for the given package type"
-    # # {family}-{port}[-{board}[-{variant}]]-stubs
+    # {family}-{port}[-{board}[-{variant}]]-stubs
     name = f"{family}-{port}-{board}-stubs".lower()
     name = name.replace("-generic-stubs", "-stubs")
     # Use explicit generic_ names for the stubs
@@ -56,7 +56,7 @@ def get_package(
             version=version,
             json_data=package_info,
         )
-        # TODO @Josverl: Check or update stub_sources if len < 3
+        # @Josverl: Check or update stub_sources if len < 3
         EXPECTED_STUBS = 3
         if len(p_db.stub_sources) < EXPECTED_STUBS:
             log.warning(f"Package {pkg_name} has less than 3 stub sources, updating...")
@@ -163,7 +163,7 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
 
     # BOARD in source frozen path needs to be UPPERCASE
     frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()
-    # TODO : Add version to core stubs
+    # TODO : Add version to core stubs ?
     core_path = Path(f"{family}-core")
 
     return [

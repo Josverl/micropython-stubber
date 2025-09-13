@@ -54,11 +54,6 @@ __all__ = [
     "TYPING_IMPORT",
 ]
 
-
-# logging
-# # log = logging.getLogger(__name__)
-
-
 # --------------------------------------
 # Confidence levels
 # these heuristics are based a significant amout of manual testing,

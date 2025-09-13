@@ -1,13 +1,13 @@
 """Create stubs for (all) modules on a MicroPython board.
 
-    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file 
+    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file
     `modulelist.txt` in the root or `libs` folder that should be uploaded to the device.
     If that cannot be found then only a single module (micropython) is stubbed.
-    In order to run this on low-memory devices two additional steps are recommended: 
+    In order to run this on low-memory devices two additional steps are recommended:
     - minifification, using python-minifier
       to reduce overall size, and remove logging overhead.
-    - cross compilation, using mpy-cross, 
-      to avoid the compilation step on the micropython device 
+    - cross compilation, using mpy-cross,
+      to avoid the compilation step on the micropython device
 
 This variant was generated from createstubs.py by micropython-stubber v1.26.1
 """
@@ -571,7 +571,9 @@ def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""  # type: ignore
+            else sys.implementation.mpy
+            if "mpy" in dir(sys.implementation)
+            else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass

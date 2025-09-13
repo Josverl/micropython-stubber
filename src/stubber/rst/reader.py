@@ -1,16 +1,16 @@
-""" 
-Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking 
+"""
+Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking
 using a custom-built parser to read and process the micropython RST files
 - generates:
-    - modules 
+    - modules
         - docstrings
-    - function definitions 
+    - function definitions
         - function parameters based on documentation
         - docstrings
     - classes
         - docstrings
         - __init__ method
-        - parameters based on documentation for class 
+        - parameters based on documentation for class
         - methods
             - parameters based on documentation for the method
             - docstrings
@@ -21,27 +21,26 @@ using a custom-built parser to read and process the micropython RST files
     - Imperative verbs used in docstrings have a strong correlation to return -> None
     - recognizes documented Generators, Iterators, Callable
     - Coroutines are identified based tag "This is a Coroutine". Then if the return type was Foo, it will be transformed to : Coroutine[Foo]
-    - a static Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring. 
+    - a static Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring.
     - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
     - if no type can be detected the type `Any` or `Incomplete` is used
 
-The generated stub files are formatted using `black` and checked for validity using `pyright`
-Note: black on python 3.7 does not like some function defs 
-`def sizeof(struct, layout_type=NATIVE, /) -> int:` 
+The generated stub files are formatted using `ruff` and checked for validity using `pyright`
 
-- ordering of inter-dependent classes in the same module   
+
+- ordering of inter-dependent classes in the same module
 
 - Literals / constants
     - documentation contains repeated vars with the same indentation
     - Module level:
-    .. code-block:: 
+    .. code-block::
 
         .. data:: IPPROTO_UDP
                     IPPROTO_TCP
 
-    - class level: 
-    .. code-block:: 
-    
+    - class level:
+    .. code-block::
+
         .. data:: Pin.IRQ_FALLING
                 Pin.IRQ_RISING
                 Pin.IRQ_LOW_LEVEL
@@ -49,9 +48,9 @@ Note: black on python 3.7 does not like some function defs
 
                 Selects the IRQ trigger type.
 
-    - literals documented using a wildcard are added as comments only 
+    - literals documented using a wildcard are added as comments only
 
-- Add GLUE imports to allow specific modules to import specific others. 
+- Add GLUE imports to allow specific modules to import specific others.
 
 - Repeats of definitions in the rst file for similar functions or literals
     - CONSTANTS ( module and Class level )
@@ -121,10 +120,10 @@ class FileReadWriter:
         self.filename = filename.as_posix()  # use fwd slashes in origin
         self.max_line = len(self.rst_text) - 1
 
-    def write_file(self, filename: Path) -> bool:
+    def write_file(self, target: Path) -> bool:
         try:
-            log.info(f" - Writing to: {filename}")
-            with open(filename, mode="w", encoding="utf8") as file:
+            log.info(f" - Writing to: {target}")
+            with open(target, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
         except OSError as e:
             log.error(e)
@@ -415,7 +414,7 @@ class RSTParser(RSTReader):
         for fix in PARAM_RE_FIXES:
             params = self.apply_fix(fix, params, name)
 
-        # ###########################################################################################################
+        ###########################################################################################################
         # does not look cool, but works really well
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
@@ -428,14 +427,14 @@ class RSTParser(RSTReader):
         params = re.sub(r": Optional\[Any\]=None\s*=", r": Optional[Any]=", params)
         # Optional step 3: fix ...
         params = re.sub(r"\.\.\.: Optional\[Any\]=None", r"...", params)
-        # ###########################################################################################################
+        ############################################################################################################
 
         for fix in PARAM_FIXES:
             if fix.module == self.current_module or not fix.module:
                 params = self.apply_fix(fix, params, name)
 
-        # # formatting
-        # # fixme: ... not allowed in .py
+        # formatting
+        # fixme: ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args, **kwargs")
             params = params.replace("...", "*args, **kwargs")

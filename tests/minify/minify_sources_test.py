@@ -97,7 +97,4 @@ def check_results(content: List[str]):
     for line in content:
         assert line.find("._log") == -1, "Not all references to ._log have been removed"
         assert line.find(".log") == -1, "Not all references to .log have been removed"
-    # # not sure why this was/is needed
-    # check if there is a line with 'import gc'
-    # assert any(line.find("import gc") != -1 for line in content), "failed: gc is still imported"
-    # assert any(line.find("from ujson import dumps") != -1 for line in content), "failed: dumps is still imported"
+

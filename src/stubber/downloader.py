@@ -8,9 +8,6 @@ import os
 import requests
 from mpflash.logger import log
 
-# # log = logging.getLogger(__name__)
-# log.setLevel(level=logging.INFO)
-
 
 def download_file(url: str, module: str, folder: str = "./"):
     "dowload a file from a public github repo"

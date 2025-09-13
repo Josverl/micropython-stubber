@@ -71,12 +71,7 @@ def test_create_package(tmp_path, pytestconfig, version, port, board, mocker, mo
         template_path=template_path,
     )
 
-    # # setup mock to configure the config
-    # monkeypatch.setenv("MICROPYTHON-STUBBER_PUBLISH_PATH", publish_path.as_posix())
-    # monkeypatch.setenv("MICROPYTHON-STUBBER_TEMPLATE_PATH", template_path.as_posix())
-    # # resd config
-    # TEST_CONFIG = readconfig(pytestconfig.rootpath / "tests/publish/data/config.yaml")
-    # insert test config
+    # setup mock to configure the config
     mocker.patch("stubber.publish.stubpackage.CONFIG", config)
 
     family = "micropython"

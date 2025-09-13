@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.stubber]
     "tool_name, tool_version",
     [
         ("autoflake", "2.2.1"),
-        ("black", "22.12.0"),
+        ("ruff", "0.12.11"),
         ("pyright", "1.1"),
     ],
 )
