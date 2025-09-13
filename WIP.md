@@ -1,46 +1,6 @@
 
 ## MUST FIX 
 
-- [ ] uv publish stdlib to 
-        - [x] pypi-test
-        - [ ] pypi 
-- [x] Test v1.23.0 stubs with new stdib ( avoid regressions )
-        - [x] do the same for v1.24.1 stubs
-        - [?] If needed publish update to v1.23.0 stubs to only allow stdlib v1.23.x
-    
-- [x] some decorators are added multiple times - need to check for existing decorator 
-- [x] docstubs : should automagically `--enrich` the docstubs on v1.24.1 and newer ( + CI) 
-    - [ ] publish stubber
-
-
-
-- [x] `__call__` needs addational overloads in machine and pyb modules 
-- [x] stdlib/udate.py should allow configuration of version  
-- [ ] stdlib/udate.py should use same config as stubber 
-    - [x] uses config / pyproject.toml
-    - [ ] uses merge_config 
-
-
-- [ ] Update install example in stubs readme for v1.24.*     
-- [ ] Update the documentation for this.
-        - MyPy change
-        - how to install  
-- [ ] release notes 
-    - [ ] important new features
-          - type hinting for parameters and return values, building on hlovatts work 
-          - improved support for stdlib ( initially  benefiting pyright & pylance, mypy will follow )
-            - resolved  most errors with asyncio 
-          - addedd _mpy_shed module to share complex types used between modules 
-          - added reference stubs to simplify updates and additions by the community as the vast majority of udates 
-            can be done simply by editing the reference stubs. 
-            - Currently the docstrings are still sourced from the MicroPython library, 
-            - Modules , methods and classes that are undocumented in the MicroPython library can be documented in the reference stubs  
-          - For this the merge process implemented in micropython-stubber has been improved to allow for more 
-            complex merges and to allow for more control over the merge process
-    - [x] known issues ( based on typ-ignores in QA tests )
-    - [ ] How to contribute ( to reference-stubs )
-
-
 # Longer term things to fix 
  - [ ] generate badges for the stubs 
         https://github.com/python/typing/discussions/1391
@@ -54,11 +14,12 @@
           "list[tuple[str, int]]" is not assignable to "Mapping[_KT@OrderedDict, _VT@OrderedDict]"
 ## MYPY 
  - [ ] allow overriding stdlib  https://github.com/Josverl/micropython-stubs/issues/781 
-    - [ ] needs extras optional install to avaoid regressions 
+    - [ ] needs extras optional install to avoid regressions 
     - [ ] preferably configurable via a config file rather than cmdline param 
 
 # Reference stubs  
 - [ ] create docpages for reference stubs (using  AutoDoc201 approach  )
+
 ## Merge 
 
 - [ ] network : should proably not add 

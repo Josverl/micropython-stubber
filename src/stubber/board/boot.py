@@ -26,7 +26,7 @@ if MOUNT_SD:
         # machine.Pin(2,mode=machine.Pin.IN, pull=machine.Pin.PULL_UP)
         # os.mount(machine.SDCard(slot=1, width=4), "/sd")  # SD mode 4 bit
         if esp:
-            # # SPI 1 bit M5Stack Core
+            # SPI 1 bit M5Stack Core
             os.mount(machine.SDCard(slot=2, width=1, sck=18, miso=19, mosi=23, cs=4), "/sd")  # type: ignore # SPI 1 bit M5Stack Core
             print("SD Card mounted")
     except OSError as e:

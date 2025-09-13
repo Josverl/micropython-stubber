@@ -16,8 +16,6 @@ from packaging.version import Version
 
 from stubber.utils.config import CONFIG
 
-# # log = logging.getLogger(__name__)
-
 
 def switch(tag: str, *, mpy_path: Path, mpy_lib_path: Path):
     """

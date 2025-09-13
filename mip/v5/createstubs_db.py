@@ -289,15 +289,11 @@ class Stubber:
                 log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
-<<<<<<< HEAD
-            if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
-=======
             if (
                 item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4
                 # and not obj_name.endswith(".Pin")
                 # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
             ):
->>>>>>> 8d9197da (Update mip packages)
                 # log.debug("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (

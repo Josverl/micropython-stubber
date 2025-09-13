@@ -5,11 +5,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from .. import __version__
 from mpflash.versions import clean_version
 
-# # log = logging.getLogger(__name__)
-# # logging.basicConfig(level=logging.INFO)
+from .. import __version__
 
 
 def manifest(

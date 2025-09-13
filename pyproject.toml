@@ -163,7 +163,7 @@ ignore = [
 pythonVersion = "3.9"
 pythonPlatform = "All"
 verboseOutput = false
-typeCheckingMode = "basic" # ["off", "basic", "strict"]: Specifies the default rule set to use
+typeCheckingMode = "standard" # ["off", "basic", "strict"]: Specifies the default rule set to use
 # section 2
 reportMissingImports = "error"
 reportGeneralTypeIssues = "error"                 # interesting
@@ -411,12 +411,3 @@ exclude = [
     "scratch", 
     "src/stubber/codemod/_partials"
 ]
-# # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-# # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# # McCabe complexity (`C901`) by default.
-# select = ["E4", "E7", "E9", "F", "U"]
-# ignore = ["E402", "E741", "F821", "F403", "UP015" ]    # , "U032", "U035"]
-# # Allow fix for all enabled rules (when `--fix`) is provided.
-# fixable = ["ALL"]
-# unfixable = []
-

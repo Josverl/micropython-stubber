@@ -90,43 +90,6 @@ def test_freeze_folders(
     assert scripts is not None, "can freeze scripts from manifest"
     assert len(scripts) > 10, "expect at least 10 files, only found {}".format(len(scripts))
 
-    # TODO: add seperate tests for generate_pyi_files
-    # result = utils.generate_pyi_files(tmp_path)
-    # assert result == True
-
-
-#######################################################################################################################
-# manifest v1 , micropython v1.12 - v1.19
-#######################################################################################################################
-# @pytest.mark.skipif(os.getenv("CI", "local") != "local", reason="cant test in CI/CD")
-# # @pytest.mark.slow
-# @pytest.mark.parametrize(
-#     "mpy_version",
-#     [
-#         "v1.12",
-#         "v1.16",
-#         "v1.18",
-#         "v1.19",
-#     ],
-# )
-# # @pytest.mark.slow
-# def test_freeze_one_manifest_v1(
-#     mpy_version: str,
-#     testrepo_micropython: Path,
-#     testrepo_micropython_lib: Path,
-#     tmp_path: Path,
-# ):
-#     "test if task.py is included with the uasyncio frozen module"
-#     mpy_folder = testrepo_micropython.absolute()
-#     lib_folder = testrepo_micropython_lib.absolute()
-#     stub_folder = tmp_path.absolute()
-
-#     switch(mpy_version, mpy_path=testrepo_micropython, mpy_lib_path=testrepo_micropython_lib)
-
-#     manifest = mpy_folder / "ports/esp32/boards/manifest.py"
-#     freeze_one_manifest_1(manifest, stub_folder, mpy_folder, lib_folder, mpy_version)
-#     # todo : add more checks
-
 
 #######################################################################################################################
 # manifest v2 ,

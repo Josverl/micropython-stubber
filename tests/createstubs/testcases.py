@@ -2,10 +2,10 @@
 # test the fwid naming on the different platforms
 #################################################
 
-import pytest
-
 from collections import namedtuple
 from typing import Any, Optional, Tuple
+
+import pytest
 
 pytestmark = [pytest.mark.stubber]
 
@@ -248,16 +248,6 @@ fwid_test_cases = [
         ),
         ["pybricks", "pybricks.hubs"],
     ),
-    # ev3_pybricks_2_0_0
-    # TODO: Mock import from package
-    # ModuleNotFoundError: No module named 'pybricks.hubs'; 'pybricks' is not a package
-    # (
-    #     "ev3-pybricks-v2.0.0-linux",
-    #     "",
-    #     "linux",
-    #     UName(machine="ev3", nodename="ev3", release=None, sysname="ev3", version=None),
-    #     ["pybricks", "hubs" "pybricks.hubs"],
-    # ),
     # pycopy
     (
         "pycopy-v1.2.3-stm32",

@@ -81,7 +81,6 @@ def create_variants(
 
             # format file with ruff
             format_stubs(variant_path, capture_output=True)
-            # TODO: check with pyright if it is valid python
 
         # Minify file with pyminifier
         log.info(f"Minifying to {minified_path.name}")

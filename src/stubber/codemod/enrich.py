@@ -21,10 +21,6 @@ from stubber.modcat import U_MODULES
 from stubber.utils.post import format_stubs
 
 
-##########################################################################################
-# # log = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
-#########################################################################################
 @dataclass
 class MergeMatch:
     """A match between a target and source file to merge docstrings and typehints"""

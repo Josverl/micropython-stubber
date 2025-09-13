@@ -120,13 +120,6 @@ def test_cmd_switch(mocker: MockerFixture, params: List[str]):
 
     assert m_switch_branch.call_count + m_switch_tag.call_count == 1
 
-    # if "latest" in params or "preview" in params:
-    #     m_switch_branch.assert_called_once()
-    #     m_switch_tag.assert_not_called()
-    # else:
-    #     m_switch_branch.assert_not_called()
-    #     m_switch_tag.assert_called_once()
-
 
 @pytest.mark.parametrize("version", VERSION_LIST)
 @pytest.mark.mocked
@@ -199,23 +192,10 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
     # fake run - need to ensure that there is a destination folder
     result = runner.invoke(stubber.stubber_cli, ["get-frozen", "--stub-folder", tmp_path.as_posix()])
     assert result.exit_code == 0
-    # FIXME : test fails in CI
     m_freeze_any.assert_called_once()
     m_get_local_tag.assert_called_once()
 
     assert m_post.call_count == 2
-    # m_post.assert_any_call(
-    #     [tmp_path / "micropython-v1_42-frozen"],
-    #     stubgen=True,
-    #     black=False,
-    #     autoflake=False,
-    # )
-    # m_post.assert_any_call(
-    #     [tmp_path / "micropython-v1_42-frozen"],
-    #     stubgen=False,
-    #     black=True,
-    #     autoflake=True,
-    # )
 
 
 ##########################################################################################

@@ -120,10 +120,10 @@ class FileReadWriter:
         self.filename = filename.as_posix()  # use fwd slashes in origin
         self.max_line = len(self.rst_text) - 1
 
-    def write_file(self, filename: Path) -> bool:
+    def write_file(self, target: Path) -> bool:
         try:
-            log.info(f" - Writing to: {filename}")
-            with open(filename, mode="w", encoding="utf8") as file:
+            log.info(f" - Writing to: {target}")
+            with open(target, mode="w", encoding="utf8") as file:
                 file.writelines(self.output)
         except OSError as e:
             log.error(e)
@@ -414,7 +414,7 @@ class RSTParser(RSTReader):
         for fix in PARAM_RE_FIXES:
             params = self.apply_fix(fix, params, name)
 
-        # ###########################################################################################################
+        ###########################################################################################################
         # does not look cool, but works really well
         # change [x] --> x:Optional[Any]
         params = params.replace("[", "")
@@ -427,14 +427,14 @@ class RSTParser(RSTReader):
         params = re.sub(r": Optional\[Any\]=None\s*=", r": Optional[Any]=", params)
         # Optional step 3: fix ...
         params = re.sub(r"\.\.\.: Optional\[Any\]=None", r"...", params)
-        # ###########################################################################################################
+        ############################################################################################################
 
         for fix in PARAM_FIXES:
             if fix.module == self.current_module or not fix.module:
                 params = self.apply_fix(fix, params, name)
 
-        # # formatting
-        # # fixme: ... not allowed in .py
+        # formatting
+        # fixme: ... not allowed in .py
         if self.target == ".py":
             params = params.replace("*, ...", "*args, **kwargs")
             params = params.replace("...", "*args, **kwargs")

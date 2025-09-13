@@ -831,46 +831,71 @@ class StubPackage(PoetryBuilder):
             }
         )
 
+    def _handle_firmware_source(self, fw_path: Path) -> Path:
+        """Handle FIRMWARE source: prefer -merged stubs over bare MCU stubs."""
+        if fw_path.name.endswith("-merged"):
+            merged_path = fw_path
+        else:
+            merged_path = fw_path.with_name(f"{fw_path.name}-merged")
+
+        if (CONFIG.stub_path / merged_path).exists():
+            return merged_path
+        return fw_path
+
+    def _handle_frozen_source(self, fw_path: Path) -> Optional[Path]:
+        """Handle FROZEN source: fallback to GENERIC folder if board specific doesn't exist."""
+        if (CONFIG.stub_path / fw_path).exists():
+            return fw_path
+
+        generic_path = fw_path.with_name("GENERIC")
+        if (CONFIG.stub_path / generic_path).exists():
+            return generic_path
+
+        return None  # No frozen stubs available
+
+    def _handle_merged_source(self, fw_path: Path) -> Path:
+        """Handle MERGED source: use default board folder instead of GENERIC if available."""
+        if self.board.upper() != GENERIC_U:
+            return fw_path
+
+        # For GENERIC board, try to find default board folder
+        family = fw_path.name.split("-")[0]
+        default_path = Path(
+            f"{family}-{clean_version(self.mpy_version, flat=True)}-{self.port}-{default_board(self.port, self.mpy_version)}-merged"
+        )
+
+        if (CONFIG.stub_path / default_path).exists():
+            return default_path
+        return fw_path
+
+    def _handle_default_source(self, fw_path: Path) -> Path:
+        """Handle default source types: return path as-is."""
+        return fw_path
+
     def update_sources(self) -> StubSources:
         """
-        Update the stub sources to:
+        Update the stub sources with optimized paths:
         - FIRMWARE: prefer -merged stubs over bare MCU stubs
-        - FROZEN: fallback to use the GENERIC folder for the frozen sources if no board specific folder exists
+        - FROZEN: fallback to GENERIC folder if board specific folder doesn't exist
+        - MERGED: use default board folder instead of GENERIC if available
         """
-        updated_sources = []
-        # TODO: find a way to simplify this code as this is a bit magic (and hard to understand)
-        for stub_type, fw_path in self.stub_sources:
-            # prefer -merged stubs over bare MCU stubs
-            if stub_type == StubSource.FIRMWARE:
-                # Check if -merged folder exists and use that instead
-                if fw_path.name.endswith("-merged"):
-                    merged_path = fw_path
-                else:
-                    merged_path = fw_path.with_name(f"{fw_path.name}-merged")
-                if (CONFIG.stub_path / merged_path).exists():
-                    updated_sources.append((stub_type, merged_path))
-                else:
-                    updated_sources.append((stub_type, fw_path))
-            elif stub_type == StubSource.FROZEN:
-                # use if folder exists , else use GENERIC folder
-                if (CONFIG.stub_path / fw_path).exists():
-                    updated_sources.append((stub_type, fw_path))
-                elif (CONFIG.stub_path / fw_path).with_name("GENERIC").exists():
-                    updated_sources.append((stub_type, fw_path.with_name("GENERIC")))
+        # Handler registry for different stub source types
+        handlers = {
+            StubSource.FIRMWARE: self._handle_firmware_source,
+            StubSource.FROZEN: self._handle_frozen_source,
+            StubSource.MERGED: self._handle_merged_source,
+        }
 
-            elif stub_type == StubSource.MERGED:
-                # Use the default board folder instead of the GENERIC board folder (if it exists)
-                if self.board.upper() == GENERIC_U:
-                    family = fw_path.name.split("-")[0]
-                    default_path = Path(
-                        f"{family}-{clean_version(self.mpy_version, flat=True)}-{self.port}-{default_board(self.port, self.mpy_version)}-merged"
-                    )
-                    if (CONFIG.stub_path / default_path).exists():
-                        fw_path = default_path
-                updated_sources.append((stub_type, fw_path))
-                # ---------
-            else:
-                updated_sources.append((stub_type, fw_path))
+        updated_sources = []
+
+        for stub_type, fw_path in self.stub_sources:
+            handler = handlers.get(stub_type, self._handle_default_source)
+            updated_path = handler(fw_path)
+
+            # Only add sources that have a valid path (FROZEN can return None)
+            if updated_path is not None:
+                updated_sources.append((stub_type, updated_path))
+
         return updated_sources
 
     def update_distribution(self, production: bool) -> bool:
@@ -1057,7 +1082,7 @@ class StubPackage(PoetryBuilder):
                 ),
             )
 
-            # # get the package state and add it to the database
+            # get the package state and add it to the database
             # db_conn.add(self.to_dict())
             db_conn.commit()
         return True

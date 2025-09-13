@@ -59,18 +59,6 @@ def apply_frozen_module_fixes(freeze_path: Path, mpy_path: Path):
         with open(freeze_path / "umqtt" / "__init__.py", "a") as f:
             f.write("")
 
-    # # NOTE: FIX 2 compensate for expicitly omited task.py from freeze manifest
-    # # this is normally implemented as a C module, let's use the .py version to generate a stub for this
-    # if (freeze_path / "asyncio").exists() and not (freeze_path / "asyncio" / "task.py").exists():
-    #     # copy task.py from micropython\extmod\asyncio\task.py to stub_folder
-    #     log.debug("add missing : asyncio/task.py")
-    #     task_py = mpy_path / "extmod" / "asyncio" / "task.py"
-    #     try:
-    #         shutil.copy(str(task_py), str(freeze_path / "asyncio"))
-    #     except OSError as er:
-    #         log.warning(f"error copying {task_py} : {er}")
-    #         # try to continue
-
     RM_FREEZE = ["asyncio", "uasyncio.py", "rp2.py"]
     removed = []
     for mod in RM_FREEZE:

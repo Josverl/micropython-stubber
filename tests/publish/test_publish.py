@@ -62,7 +62,7 @@ def test_update_package(fake_package: StubPackage):
 
     changed_after_update = pkg.is_changed()
     assert changed_after_update, "should be changed initially"
-    # FIXME± this has a dpendency on a connection to PyPI.org
+    # FIXME : this has a dependency on a connection to PyPI.org
     ok = pkg.update_distribution(production=True)
     assert ok, "should be ok"
 
