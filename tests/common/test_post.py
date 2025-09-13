@@ -10,10 +10,10 @@ def test_run_black(tmp_path, capsys):
     test_file = tmp_path / "test_file.py"
     test_file.write_text("def foo():\n    print('Hello, World!' )\n")
 
-    # Run the black formatting
+    # Run the ruff formatting (function name kept as run_black for compatibility)
     return_code = run_black(test_file)
 
-    # Check if black ran successfully
+    # Check if ruff format ran successfully
     assert return_code == 0
 
     # Check if the file content has been formatted
@@ -29,10 +29,10 @@ def test_run_black_capture_output(tmp_path, capsys):
     test_file = tmp_path / "test_file.py"
     test_file.write_text("def foo():\n    print('Hello, World!')\n")
 
-    # Run the black formatting with capture_output enabled
+    # Run the ruff formatting with capture_output enabled (function name kept as run_black for compatibility)
     return_code = run_black(test_file, capture_output=True)
 
-    # Check if black ran successfully
+    # Check if ruff format ran successfully
     assert return_code == 0
 
     # Check if the file content has been formatted
