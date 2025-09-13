@@ -3,9 +3,9 @@ Create stubs for (all) modules on a MicroPython board.
 
     This variant of the createstubs.py script is optimized for use on very-low-memory devices.
     Note: this version has undergone limited testing.
-    
+
     1) reads the list of modules from a text file `modulelist.txt` that should be uploaded to the device.
-    2) stored the already processed modules in a text file `modulelist.done` 
+    2) stored the already processed modules in a text file `modulelist.done`
     3) process the modules in the database:
         - stub the module
         - update the modulelist.done file
@@ -13,9 +13,9 @@ Create stubs for (all) modules on a MicroPython board.
     4) creates the modules.json
 
     If that cannot be found then only a single module (micropython) is stubbed.
-    In order to run this on low-memory devices two additional steps are recommended: 
+    In order to run this on low-memory devices two additional steps are recommended:
     - minification, using python-minifierto reduce overall size, and remove logging overhead.
-    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device 
+    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device
 
 
 This variant was generated from createstubs.py by micropython-stubber v1.26.1
@@ -289,7 +289,15 @@ class Stubber:
                 log.warning("NameError: invalid name {}".format(item_name))
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
+<<<<<<< HEAD
             if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
+=======
+            if (
+                item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4
+                # and not obj_name.endswith(".Pin")
+                # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
+            ):
+>>>>>>> 8d9197da (Update mip packages)
                 # log.debug("{0}class {1}:".format(indent, item_name))
                 superclass = ""
                 is_exception = (
@@ -569,7 +577,9 @@ def _extract_version_info(info: OrderedDict[str, str]) -> None:
 def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
     """Extract board, CPU, and machine details."""
     try:
-        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
+        _machine = (
+            sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
+        )
         info["board"] = _machine.strip()
         si_build = sys.implementation._build if "_build" in dir(sys.implementation) else ""
         if si_build:
@@ -580,7 +590,9 @@ def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""  # type: ignore
+            else sys.implementation.mpy
+            if "mpy" in dir(sys.implementation)
+            else ""  # type: ignore
         )
     except (AttributeError, IndexError):
         pass
