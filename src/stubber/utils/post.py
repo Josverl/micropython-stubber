@@ -17,13 +17,13 @@ def do_post_processing(stub_paths: List[Path], stubgen: bool, format: bool, auto
         if stubgen:
             log.debug("Generate type hint files (pyi) in folder: {}".format(path))
             generate_pyi_files(path)
-        if format:
-            run_black(path)
         if autoflake:
             run_autoflake(path, process_pyi=True)
+        if format:
+            format_stubs(path)
 
 
-def run_black(path: Path, capture_output: bool = False):
+def format_stubs(path: Path, capture_output: bool = False):
     """
     run ruff format to format the code / stubs
     """
@@ -33,7 +33,7 @@ def run_black(path: Path, capture_output: bool = False):
         "-m",
         "ruff",
         "format",
-        path.as_posix(),
+        f"{path.as_posix()}/**/*.p*",
         "--line-length",
         "140",
     ]

@@ -16,7 +16,7 @@ from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet  # type: ignore
 from stubber.minify import cross_compile, minify
 from stubber.update_module_list import update_module_list
-from stubber.utils.post import run_black
+from stubber.utils.post import format_stubs
 
 ALL_VARIANTS = list(CreateStubsVariant)
 
@@ -79,8 +79,8 @@ def create_variants(
             with open(variant_path, "w") as f:
                 f.write(variant.code)
 
-            # format file with black
-            run_black(variant_path, capture_output=True)
+            # format file with ruff
+            format_stubs(variant_path, capture_output=True)
             # TODO: check with pyright if it is valid python
 
         # Minify file with pyminifier

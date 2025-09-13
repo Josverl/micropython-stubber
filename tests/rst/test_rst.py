@@ -4,10 +4,9 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List
 
+import mpflash.basicgit as git
 import pytest
 from helpers import read_stub
-
-import mpflash.basicgit as git
 
 pytestmark = [pytest.mark.stubber, pytest.mark.doc_stubs]
 
@@ -84,7 +83,7 @@ def test_rst_all(tmp_path, micropython_repo, testrepo_micropython: Path):
 
     rst_folder = Path(testrepo_micropython.as_posix()) / "docs/library"
     dst_folder = tmp_path / "noblack"
-    x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, black=False)
+    x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, format=False)
     assert type(x) == int, "returns a number"
     assert x > 0, "should generate at least 1 file"
 

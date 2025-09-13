@@ -1,16 +1,16 @@
-""" 
-Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking 
+"""
+Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking
 using a custom-built parser to read and process the micropython RST files
 - generates:
-    - modules 
+    - modules
         - docstrings
-    - function definitions 
+    - function definitions
         - function parameters based on documentation
         - docstrings
     - classes
         - docstrings
         - __init__ method
-        - parameters based on documentation for class 
+        - parameters based on documentation for class
         - methods
             - parameters based on documentation for the method
             - docstrings
@@ -21,27 +21,26 @@ using a custom-built parser to read and process the micropython RST files
     - Imperative verbs used in docstrings have a strong correlation to return -> None
     - recognizes documented Generators, Iterators, Callable
     - Coroutines are identified based tag "This is a Coroutine". Then if the return type was Foo, it will be transformed to : Coroutine[Foo]
-    - a static Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring. 
+    - a static Lookup list is used for a few methods/functions for which the return type cannot be determined from the docstring.
     - add NoReturn to a few functions that never return ( stop / deepsleep / reset )
     - if no type can be detected the type `Any` or `Incomplete` is used
 
-The generated stub files are formatted using `black` and checked for validity using `pyright`
-Note: black on python 3.7 does not like some function defs 
-`def sizeof(struct, layout_type=NATIVE, /) -> int:` 
+The generated stub files are formatted using `ruff` and checked for validity using `pyright`
 
-- ordering of inter-dependent classes in the same module   
+
+- ordering of inter-dependent classes in the same module
 
 - Literals / constants
     - documentation contains repeated vars with the same indentation
     - Module level:
-    .. code-block:: 
+    .. code-block::
 
         .. data:: IPPROTO_UDP
                     IPPROTO_TCP
 
-    - class level: 
-    .. code-block:: 
-    
+    - class level:
+    .. code-block::
+
         .. data:: Pin.IRQ_FALLING
                 Pin.IRQ_RISING
                 Pin.IRQ_LOW_LEVEL
@@ -49,9 +48,9 @@ Note: black on python 3.7 does not like some function defs
 
                 Selects the IRQ trigger type.
 
-    - literals documented using a wildcard are added as comments only 
+    - literals documented using a wildcard are added as comments only
 
-- Add GLUE imports to allow specific modules to import specific others. 
+- Add GLUE imports to allow specific modules to import specific others.
 
 - Repeats of definitions in the rst file for similar functions or literals
     - CONSTANTS ( module and Class level )
