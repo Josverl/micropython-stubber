@@ -1,13 +1,12 @@
-### manual build 
-
+### Manual Build
 
 - `poetry install --with docs`
 - `poetry env activate`
   - source .venv/bin/activate
-  - .venv/Scrips/activate.ps1
+  - .venv/Scripts/activate.ps1
 - `cd docs`
 - `make html`
 
-### to clean the build 
+### To Clean the Build
 - `make clean`
   

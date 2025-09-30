@@ -1,13 +1,13 @@
 #  Approach to collecting stub information
 
-The stubs are used by 3 components.
+The {ref}`stubs <stub-files>` are used by 3 components.
 
-  1. the VSCode Pylance Language Server
-  2. the VSCode Python add-in
-  3. a linter such as pylint
+  1. the VS Code {ref}`Pylance <pylance>` Language Server
+  2. the VS Code Python add-in
+  3. a linter such as {ref}`pylint <pylint>`
 
 These 3 tools work together to provide code completion/prediction, type checking and all the other good things.
-For this the order in which these tools use, the stub folders is significant, and best results are when all use the same order. 
+For this the order in which these tools use the stub folders is significant, and best results are achieved when all use the same order. 
 
 In most cases the best results are achieved by the below setup:  
 
@@ -16,19 +16,19 @@ In most cases the best results are achieved by the below setup:
  1. **Your own source files**, including any libraries you add to your project.
  This can be a single libs folder or multiple directories.
  There is no need to run stubber on your source or libraries.
- 2. **The CPython common stubs**. These stubs are handcrafted to allow MicroPython script to run on a CPython system.
- There are only a limited number of these stubs and while they are not intended to be used to provide type hints, they do provide valuable information. 
+ 2. **The {ref}`CPython <cpython>` common stubs**. These {ref}`stubs <stub-files>` are handcrafted to allow MicroPython script to run on a {ref}`CPython <cpython>` system.
+ There are only a limited number of these stubs and while they are not intended to be used to provide {ref}`type hints <type-hints>`, they do provide valuable information. 
 Note that for some modules (such as the  `gc`, `time`  and `sys` modules) this approach does not work. 
- 3. **Frozen stubs**. Most micropython firmwares include a number of python modules that have been included in the firmware as frozen modules in order to take up less memory.
+ 3. **{ref}`Frozen stubs <frozen-stubs>`**. Most MicroPython {ref}`firmwares <firmware>` include a number of Python modules that have been included in the firmware as {ref}`frozen modules <frozen-modules>` in order to take up less memory.
  These modules have been extracted from the source code. 
- 4. **MCU Stubs**. For all other modules that are included on the board, [micropython-stubber] has been used to extract as much information as available, and provide that as stubs. While there is a lot of relevant and useful information for code completion, it does unfortunately not provide all details regarding parameters that the above options may provide.
+ 4. **{ref}`MCU Stubs <mcu-stubs>`**. For all other modules that are included on the {ref}`board <board>`, [micropython-stubber] has been used to extract as much information as available, and provide that as {ref}`stubs <stub-files>`. While there is a lot of relevant and useful information for code completion, it does unfortunately not provide all details regarding parameters that the above options may provide.
 
 ##  Stub collection process 
 
 * The **CPython common stubs** are periodically collected from the [micropython-lib][] or the [pycopy-lib][].
-* The **Frozen stubs** are collected from the repos of [micropython][] + [micropython-lib][] and from the [loboris][] repo
-  the methods to gather these differs per firmware family , and there are differences between versions how these are stored , and retrieved.
-  where possible this is done per port and board,  or if not possible the common configuration for has been included.
+* The **Frozen stubs** are collected from the repos of [micropython][] + [micropython-lib][] and from the [loboris][] repo.
+  The methods to gather these differs per firmware family, and there are differences between versions how these are stored, and retrieved.
+  Where possible this is done per port and board, or if not possible the common configuration has been included.
 * the **MCU stubs** are generated directly on a MCU running MicroPython.
 
 

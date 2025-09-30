@@ -1,16 +1,16 @@
-# CPython and Frozen modules 
+# CPython and Frozen Modules 
 
 ## Frozen Modules 
 
-It is common for Firmwares to include a few (or many) python modules as 'frozen' modules. 
-'Freezing' modules is a way to pre-process .py modules so they're 'baked-in' to MicroPython' s firmware and use less memory. Once the code is frozen it can be quickly loaded and interpreted by MicroPython without as much memory and processing time.
+It is common for {ref}`firmwares <firmware>` to include a few (or many) Python modules as '{ref}`frozen modules <frozen-modules>`'. 
+'Freezing' modules is a way to pre-process .py modules so they're 'baked-in' to MicroPython's {ref}`firmware <firmware>` and use less memory. Once the code is frozen it can be quickly loaded and interpreted by MicroPython without as much memory and processing time.
 
 Most OSS firmwares store these frozen modules as part of their repository, which allows us to: 
 
-1. Download the *.py from the (github) repo using `git clone` or a direct download 
+1. Download the *.py from the (GitHub) repo using `git clone` or a direct download.
 
-2. Extract and store the 'unfrozen' modules (ie the *.py files) in a <Firmware>_Frozen folder.
-   if there are different port / boards or releases defined , there may be multiple folders such as: 
+2. Extract and store the 'unfrozen' modules (i.e. the *.py files) in a <Firmware>_Frozen folder.
+   If there are different port / boards or releases defined, there may be multiple folders such as: 
 
    * stubs/micropython_1_12_frozen
 
@@ -57,7 +57,7 @@ If you want to run this manually
 - link repos using all_stubs symlink
 - checkout tag / version in the micropython folder  
   (for most accurate results should checkout micropython-lib for the same date)
-- run `get-frozen`
+- run `frozen-stubs`
 - run `update_stub`
 
 - create a PR for changes to the stubs repo 

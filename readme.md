@@ -12,21 +12,21 @@
   [![Open in VSCode](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc
 )](https://open.vscode.dev/josverl/micropython-stubber)
   
-The intellisense and code linting that is so prevalent in modern editors, does not work out-of-the-gate for MicroPython projects.
-While the language is Python, the modules used are different from CPython , and also different ports have different modules and classes , or the same class with different parameters.
+The IntelliSense and code linting that is so prevalent in modern editors, does not work out-of-the-gate for MicroPython projects.
+While the language is Python, the modules used are different from CPython, and also different ports have different modules and classes, or the same class with different parameters.
 
-Writing MicroPython code in a modern editor should not need to involve keeping a browser open to check for the exact parameters to read a sensor, light-up a led or send a network request.
+Writing MicroPython code in a modern editor should not need to involve keeping a browser open to check for the exact parameters to read a sensor, light-up a LED or send a network request.
 
-Fortunately with some additional configuration and data, it is possible to make the editors understand your flavor of MicroPython, wether you use one of the pre-compiled firmwares, but also if you run a one-off custom firmware version.
+Fortunately with some additional configuration and data, it is possible to make the editors understand your flavor of MicroPython, whether you use one of the pre-compiled firmwares, but also if you run a one-off custom firmware version.
 
 
 ![demo][]]
 
 In order to achieve this a few things are needed:
 1) Stub files for the native / enabled modules in the firmware using PEP 484 Type Hints
-2) Specific configuration of the VSCode Python extensions 
+2) Specific configuration of the VS Code Python extensions 
 3) Specific configuration of Pylint [ Optional ]
-4) Suppression of warnings that collide with the MicroPython principals or code optimization.
+4) Suppression of warnings that collide with the MicroPython principles or code optimization.
 
 Please review the documentation on [https://micropython-stubber.readthedocs.io]  
 
@@ -78,11 +78,11 @@ mkdir all-stubs
 stubber clone --add-stubs
 stubber switch v1.22.2
 
-# get the document stubs for the current version ( v1.22.2 )
-stubber get-docstubs
+# get the document stubs for the current version ( v1.22.2 )  
+stubber docs-stubs
 
 # get the frozen stubs for the current version ( v1.22.2 )
-stubber get-frozen
+stubber frozen-stubs
 
 # get the core CPython compatibility stubs from PyPi 
 stubber get-core

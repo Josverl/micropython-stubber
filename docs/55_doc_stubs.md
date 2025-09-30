@@ -7,7 +7,7 @@ This includes function and method parameters and descriptions, the module and cl
   
 
 ## How docstubs are generated
-The documentation stubs are generated using the `stubber get-docstubs` command.
+The {ref}`documentation stubs <doc-stubs>` are generated using the `stubber docs-stubs` command (aliases: `docstubs`, `docs`, `get-docstubs`).
 
 1) Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking
 using a custom-built parser to read and process the micropython RST files
@@ -17,7 +17,7 @@ using a custom-built parser to read and process the micropython RST files
 
     - Function definitions 
         - Function parameters and types based on documentation
-          As the parameter documentaion is sometimes rather abigious or imprecise, the parameters definities are cleaned up based on a hand tuned algoritm
+          As the parameter documentation is sometimes rather ambiguous or imprecise, the parameters definitions are cleaned up based on a hand tuned algorithm
         - The function docstring is based on the function description in the .rst file
         - The return type of a function is based on phrases used in the documentation, with an override table for functions with insufficient documented information to determine the return type. 
 
@@ -25,11 +25,11 @@ using a custom-built parser to read and process the micropython RST files
         - The class docstring is based on the Class description in the .rst file
         - __init__ method
             - The init parameters are based on the documentation for the class 
-              As the parameter documentaion is sometimes rather abigious or imprecise, the parameters definities are cleaned up based on a hand tuned algoritm
+              As the parameter documentation is sometimes rather ambiguous or imprecise, the parameters definitions are cleaned up based on a hand tuned algorithm
             - __init__ docstring is based on the Class description in the .rst file
         - Methods
             - Method parameters and types based are based on the documentation in the .rst file
-              As the parameter documentaion is sometimes rather abigious or imprecise, the parameters definities are cleaned up based on a hand tuned algoritm
+              As the parameter documentation is sometimes rather ambiguous or imprecise, the parameters definitions are cleaned up based on a hand tuned algorithm
             - The method docstring is based on the method description in the .rst file
             - The return type of a method is based on phrases used in the documentation, with an override table for functions with insufficient documented information to determine the return type.         
             - Method decorators @classmethod and  @staticmethod are generated based on the use of `py:staticmethod` or `py:classmethod` in the documentation.
@@ -48,7 +48,7 @@ using a custom-built parser to read and process the micropython RST files
     - if no type can be detected the type `Any` is used
 
 ### Lookup tables : 
- - [src/stubber/rst/lookup.py](src/stubber/rst/lookup.py)
+ - `src/stubber/rst/lookup.py`
      - LOOKUP_LIST
         - contains return types for functions and methods 
         - "module.[class.].function" : ( "type", probability)
@@ -75,8 +75,8 @@ Note: black on python 3.7 does not like some function defs, this is not treated 
 Classes are frequently documented in a different order than thery need to be declared in a source file.
 To accomodate for this the source code is re-ordered to avoid forward references in the code.
 The code for this is located in :
-- [src/stubber/rst/classsort.py](src/stubber/rst/classsort.py)
-- [src/stubber/rst/output_dict.py](src/stubber/rst/output_dict.py)
+- `src/stubber/rst/classsort.py`
+- `src/stubber/rst/output_dict.py`
 
 
 ### Add GLUE imports to allow specific modules to import specific others. 
