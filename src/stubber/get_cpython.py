@@ -33,6 +33,7 @@ def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, fa
         This function is deprecated and will be removed in a future version.
         It is a remnant from earlier methods to collate stubs.
     """
+
     if not stub_path:
         stub_path = CONFIG.stub_path / "cpython-core"  # pragma: no cover
     stub_path = Path(stub_path)
@@ -113,4 +114,7 @@ def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, fa
 if __name__ == "__main__":
     # just run a quick test
     # logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_core(requirements="requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")
+    get_core(
+        requirements="requirements-core-pycopy.txt",
+        stub_path="./scratch/cpython_common",
+    )

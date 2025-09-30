@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Optional, Tuple, Union
 
 
-def get_version_info_from_git(path: Optional[Path] = None) -> Tuple[Union[str, None], Union[str, None]]:
+def get_version_info_from_git(
+    path: Optional[Path] = None,
+) -> Tuple[Union[str, None], Union[str, None]]:
     """return the version info from the git repository specified.
     returns: a 2-tuple containing git_tag, short_hash
 
@@ -43,9 +45,15 @@ def get_version_info_from_git(path: Optional[Path] = None) -> Tuple[Union[str, N
 
     try:
         # Check if there are any modified files.
-        subprocess.check_call(["git", "diff", "--no-ext-diff", "--quiet", "--exit-code"], stderr=subprocess.STDOUT)
+        subprocess.check_call(
+            ["git", "diff", "--no-ext-diff", "--quiet", "--exit-code"],
+            stderr=subprocess.STDOUT,
+        )
         # Check if there are any staged files.
-        subprocess.check_call(["git", "diff-index", "--cached", "--quiet", "HEAD", "--"], stderr=subprocess.STDOUT)  # pragma: no cover
+        subprocess.check_call(
+            ["git", "diff-index", "--cached", "--quiet", "HEAD", "--"],
+            stderr=subprocess.STDOUT,
+        )  # pragma: no cover
     except subprocess.CalledProcessError:
         git_hash += "-dirty"
     except OSError:

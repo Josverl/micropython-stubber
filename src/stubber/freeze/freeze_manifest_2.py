@@ -12,7 +12,12 @@ from typing import List, Optional
 from mpflash.logger import log
 
 from stubber import utils
-from stubber.tools.manifestfile import MODE_FREEZE, ManifestFile, ManifestFileError, ManifestOutput
+from stubber.tools.manifestfile import (
+    MODE_FREEZE,
+    ManifestFile,
+    ManifestFileError,
+    ManifestOutput,
+)
 from stubber.utils.config import CONFIG
 
 from .common import apply_frozen_module_fixes, get_freeze_path, get_portboard
@@ -67,7 +72,11 @@ def make_path_vars(
 
 
 def freeze_one_manifest_2(
-    manifest: Path, frozen_stub_path: Path, mpy_path: Path, mpy_lib_path: Path, version: str
+    manifest: Path,
+    frozen_stub_path: Path,
+    mpy_path: Path,
+    mpy_lib_path: Path,
+    version: str,
 ):
     # apparently there can be multiple manifest files to a board ?
     # save cwd for 'misbehaving' older esp8266 manifest files
@@ -78,9 +87,7 @@ def freeze_one_manifest_2(
 
     log.info("port-board: {}".format((port + "-" + board).rstrip("-")))
 
-    path_vars = make_path_vars(
-        port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path
-    )
+    path_vars = make_path_vars(port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
     try:
         # manifest needs to be run from the port's folder
@@ -94,9 +101,7 @@ def freeze_one_manifest_2(
     # restore working directory
     os.chdir(cwd)
     # save the frozen files to the stubs
-    copy_frozen_to_stubs(
-        frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path
-    )
+    copy_frozen_to_stubs(frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path)
 
 
 def copy_frozen_to_stubs(
@@ -136,6 +141,4 @@ def copy_frozen_to_stubs(
 
     # make a module manifest
     FAMILY = "micropython"
-    utils.make_manifest(
-        freeze_path, FAMILY, port=port, board=board, version=version, stubtype="frozen"
-    )
+    utils.make_manifest(freeze_path, FAMILY, port=port, board=board, version=version, stubtype="frozen")

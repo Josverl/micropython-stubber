@@ -5,15 +5,18 @@ enrich machinestubs with docstubs
 from typing import List, Union
 
 import rich_click as click
-
 from mpflash.logger import log
+
 from stubber.commands.cli import stubber_cli
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.package import GENERIC_L
 from stubber.utils.config import CONFIG
 
 
-@stubber_cli.command(name="merge")
+@stubber_cli.command(
+    name="merge",
+    aliases=["merge-stubs"],
+)
 @click.option("--family", default="micropython", type=str, show_default=True)
 @click.option(
     "--version",

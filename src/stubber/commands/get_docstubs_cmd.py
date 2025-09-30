@@ -27,8 +27,8 @@ from stubber.utils.repos import fetch_repos
 
 
 @stubber_cli.command(
-    name="get-docstubs",
-    aliases=["get-doc-stubs", "docstubs"],
+    name="docs-stubs",
+    aliases=["get-docstubs", "get-doc-stubs", "docstubs", "docs"],
 )
 @click.option(
     "--path",
@@ -48,7 +48,11 @@ from stubber.utils.repos import fetch_repos
 )
 #  @click.option("--family", "-f", "basename", default="micropython", help="Micropython family.", show_default=True)
 @click.option(
-    "--version", "--tag", default="", type=str, help="Version number to use. [default: Git tag]"
+    "--version",
+    "--tag",
+    default="",
+    type=str,
+    help="Version number to use. [default: Git tag]",
 )
 @click.option(
     "--format/--no-format",

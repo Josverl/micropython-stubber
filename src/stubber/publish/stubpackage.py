@@ -671,7 +671,10 @@ class PoetryBuilder(Builder):
                 encoding="utf-8",
             )
             log.trace(f"poetry {parameters} completed")
-        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover # InvalidVersion
+        except (
+            NotADirectoryError,
+            FileNotFoundError,
+        ) as e:  # pragma: no cover # InvalidVersion
             log.error("Exception on process, {}".format(e))
             return False
         except subprocess.CalledProcessError as e:  # pragma: no cover

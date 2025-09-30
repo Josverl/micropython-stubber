@@ -3,7 +3,6 @@
 
 """Create, Process, Merge and Maintain stubs ✏️  for MicroPython"""
 
-
 from stubber.commands.build_cmd import cli_build
 from stubber.commands.cli import stubber_cli
 from stubber.commands.clone_cmd import cli_clone

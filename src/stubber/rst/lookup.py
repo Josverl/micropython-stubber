@@ -51,7 +51,6 @@ class Fix:
     "the from_ string is a regular expression"
 
 
-
 # This table is used to try to correct the errors in the documentation,
 #  or adapt the human readable documentation to machine readable.
 # it is applied to each .rst file after loading the contents.
@@ -83,7 +82,10 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
     ),
     # appended to in ssl.constant name  - ssl.PROTOCOL_DTLS_CLIENT(when DTLS support is enabled)
     # Ugly hack to fix the documentation
-    ("(when DTLS support is enabled)", " : Incomplete # (when DTLS support is enabled)"),
+    (
+        "(when DTLS support is enabled)",
+        " : Incomplete # (when DTLS support is enabled)",
+    ),
     # pyb.DAC # unsupported escape characters in docstring
     (
         r"2\*\*``bits",
@@ -143,7 +145,6 @@ LOOKUP_LIST = {
     "uos.listdir": ("List[Incomplete]", 0.95),
     "os.uname": ("uname_result", 0.95),
     # ssl.SSLSocket is defined in reference/micropython/ssl
-    
     "ssl.wrap_socket": ("SSLSocket", 0.95),
     "ussl.wrap_socket": ("SSLSocket", 0.95),
     #
@@ -164,7 +165,10 @@ LOOKUP_LIST = {
     "_onewire.writebit": ("None", 0.95),
     "_onewire.crc8": ("int", 0.95),
     # espnow
-    "espnow.ESPNow.recv": ("Union[List, Tuple[None,None]]", 0.95),  # list / ? tuple of bytestrings
+    "espnow.ESPNow.recv": (
+        "Union[List, Tuple[None,None]]",
+        0.95,
+    ),  # list / ? tuple of bytestrings
     # esp32
     "esp32.Partition.readblocks": ("None", 0.95),
     "esp32.Partition.writeblocks": ("None", 0.95),
@@ -614,14 +618,12 @@ PARAM_FIXES = [
 
 # and some param fixes that require a regex
 PARAM_RE_FIXES = [
+    Fix(r"\[angle, time=0\]", "[angle], time=0", is_re=True),  # fix: method:: Servo.angle([angle, time=0])
+    Fix(r"\[speed, time=0\]", "[speed], time=0", is_re=True),  # fix: .. method:: Servo.speed([speed, time=0])
     Fix(
-        r"\[angle, time=0\]", "[angle], time=0", is_re=True
-    ),  # fix: method:: Servo.angle([angle, time=0])
-    Fix(
-        r"\[speed, time=0\]", "[speed], time=0", is_re=True
-    ),  # fix: .. method:: Servo.speed([speed, time=0])
-    Fix(
-        r"\[service_id, key=None, \*, \.\.\.\]", "[service_id], [key], *, ...", is_re=True
+        r"\[service_id, key=None, \*, \.\.\.\]",
+        "[service_id], [key], *, ...",
+        is_re=True,
     ),  # fix: network - AbstractNIC.connect
 ]
 # List of classes and their parent classes that should be added to the class definition

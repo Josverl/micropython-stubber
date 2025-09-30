@@ -28,7 +28,7 @@ from stubber.variants import create_variants
     help="Target folder for the createstubs*.py/.mpy files",
     show_default=True,
 )
-@stubber_cli.command(name="make-variants")
+@stubber_cli.command(name="variants", aliases=["make-variants"])
 @click.pass_context
 def cli_variants(
     ctx: click.Context,

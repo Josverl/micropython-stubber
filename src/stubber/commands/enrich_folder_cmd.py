@@ -13,7 +13,7 @@ from stubber.commands.cli import stubber_cli
 from stubber.utils.config import CONFIG
 
 
-@stubber_cli.command(name="enrich")
+@stubber_cli.command(name="enrich", aliases=["enrich-stubs"])
 @click.option(
     "--dest",
     "--destination",

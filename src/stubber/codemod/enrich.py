@@ -194,7 +194,10 @@ def enrich_file(
     old_code = current_code = target_path.read_text(encoding="utf-8")
     # read source file
     codemod_instance = merge_docstub.MergeCommand(
-        context, docstub_file=source_path, copy_params=copy_params, copy_docstr=copy_docstr,
+        context,
+        docstub_file=source_path,
+        copy_params=copy_params,
+        copy_docstr=copy_docstr,
     )
     if new_code := exec_transform_with_prettyprint(
         codemod_instance,
@@ -240,25 +243,16 @@ def merge_candidates(
     # then get the best matching from the d
     multiple_candidates = {k: v for k, v in target_dict.items() if len(v) > 1}
     for target in multiple_candidates.keys():
-
         # if simple module --> complex module : select the best matching or first source
         perfect = next(
-            (
-                match
-                for match in multiple_candidates[target]
-                if match.target_pkg == match.source_pkg
-            ),
+            (match for match in multiple_candidates[target] if match.target_pkg == match.source_pkg),
             None,
         )
 
         if perfect:
             candidates.append(perfect)
         else:
-            close_enough = [
-                match
-                for match in multiple_candidates[target]
-                if match.source_pkg.startswith(f"{match.target_pkg}.")
-            ]
+            close_enough = [match for match in multiple_candidates[target] if match.source_pkg.startswith(f"{match.target_pkg}.")]
             if close_enough:
                 candidates.extend(close_enough)
             # else:
@@ -321,9 +315,7 @@ def enrich_folder(
         except FileNotFoundError as e:
             # no docstub to enrich with
             if require_docstub:
-                raise (
-                    FileNotFoundError(f"No doc-stub or source  file found for {mm.target}")
-                ) from e
+                raise (FileNotFoundError(f"No doc-stub or source  file found for {mm.target}")) from e
         except (Exception, ParserSyntaxError) as e:
             log.error(f"Error parsing {mm.target}")
             log.exception(e)

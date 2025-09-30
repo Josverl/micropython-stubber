@@ -1,4 +1,4 @@
-"""" 
+""" "
 Codemods to create the different variants of createstubs.py
 """
 
@@ -149,7 +149,9 @@ class ModuleDocCodemod(codemod.Codemod):
     def __init__(self, context: codemod.CodemodContext, module_doc: str):
         super().__init__(context)
         if module_doc.endswith('"""\n'):
-            generated = f'\nThis variant was generated from createstubs.py by micropython-stubber v{Version(__version__).base_version}\n"""\n'
+            generated = (
+                f'\nThis variant was generated from createstubs.py by micropython-stubber v{Version(__version__).base_version}\n"""\n'
+            )
             module_doc = module_doc[:-4] + generated
         self.module_doc = module_doc
 

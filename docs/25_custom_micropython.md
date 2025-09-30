@@ -32,14 +32,17 @@ The following CLI commands have been enhanced to support custom builds:
 ### `stubber clone` - Enhanced for Custom Repositories
 
 ```bash
-# Clone your fork of MicroPython
+# Clone your fork of MicroPython (uses default micropython-lib)
 stubber clone --mpy-repo https://github.com/YOUR_USERNAME/micropython.git
 
-# Clone both custom MicroPython and custom lib
+# Clone both custom MicroPython and custom micropython-lib
 stubber clone \
   --mpy-repo https://github.com/YOUR_USERNAME/micropython.git \
   --mpy-lib-repo https://github.com/YOUR_USERNAME/micropython-lib.git \
   --add-stubs
+
+# Clone with just custom micropython-lib (uses default MicroPython)
+stubber clone --mpy-lib-repo https://github.com/YOUR_USERNAME/micropython-lib.git
 ```
 
 ### `stubber switch` - Enhanced for Any Git Reference
@@ -108,13 +111,13 @@ Now you can use the stubber commands with your custom setup:
 
 ```bash
 # Generate documentation stubs from your custom MicroPython
-stubber get-docstubs --version=custom
+stubber docs-stubs --version=custom
 
 # Generate frozen module stubs
-stubber get-frozen --version=custom
+stubber frozen-stubs --version=custom
 
 # If you have a connected board with your custom firmware:
-stubber get-mcu --version=custom
+stubber mcu-stubs --version=custom
 ```
 
 ## Scenario 2: Working with a Pull Request
@@ -140,8 +143,8 @@ stubber switch pr-12345
 ### Step 2: Generate Stubs
 
 ```bash
-stubber get-docstubs --version=pr-12345
-stubber get-frozen --version=pr-12345
+stubber docs-stubs --version=pr-12345
+stubber frozen-stubs --version=pr-12345
 ```
 
 ## Scenario 3: Working with Local Modifications
@@ -173,8 +176,8 @@ cd ../..
 stubber switch my-custom-build
 
 # Or if you want to use the current working directory state
-stubber get-docstubs --version=my-custom-build
-stubber get-frozen --version=my-custom-build
+stubber docs-stubs --version=my-custom-build
+stubber frozen-stubs --version=my-custom-build
 ```
 
 ## Scenario 4: Complete Workflow for Custom Firmware
@@ -217,7 +220,7 @@ Flash your custom firmware to the device, then:
 
 ```bash
 # Generate stubs directly from the device
-stubber get-mcu --version=custom-pico-w
+stubber mcu-stubs --version=custom-pico-w
 ```
 
 This will:
@@ -230,10 +233,10 @@ This will:
 
 ```bash
 # Generate stubs from documentation
-stubber get-docstubs --version=custom-pico-w
+stubber docs-stubs --version=custom-pico-w
 
 # Generate frozen module stubs
-stubber get-frozen --version=custom-pico-w
+stubber frozen-stubs --version=custom-pico-w
 ```
 
 ### Step 5: Merge and Build Final Stubs
@@ -252,9 +255,9 @@ If you prefer to work with the current checkout without specifying versions:
 
 ```bash
 # This uses whatever is currently checked out
-stubber get-docstubs
-stubber get-frozen
-stubber get-mcu
+stubber docs-stubs
+stubber frozen-stubs
+stubber mcu-stubs
 ```
 
 The stubs will be generated with `latest` as the version identifier.

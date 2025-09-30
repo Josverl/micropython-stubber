@@ -40,21 +40,21 @@ from stubber.utils.config import CONFIG
     help="URL for MicroPython repository (default: official repo)",
 )
 @click.option(
-    "--mpy-lib-repo", 
+    "--mpy-lib-repo",
     default="https://github.com/micropython/micropython-lib.git",
     help="URL for MicroPython-lib repository (default: official repo)",
 )
 def cli_clone(
-    path: Union[str, Path], 
-    stubs: bool = False, 
+    path: Union[str, Path],
+    stubs: bool = False,
     mpy_repo: str = "https://github.com/micropython/micropython.git",
-    mpy_lib_repo: str = "https://github.com/micropython/micropython-lib.git"
+    mpy_lib_repo: str = "https://github.com/micropython/micropython-lib.git",
 ):
     """
     Clone/fetch the micropython repos locally.
 
     The local repos are used to generate frozen-stubs and doc-stubs.
-    
+
     Use --mpy-repo to specify a custom MicroPython repository (e.g., your fork).
     Use --mpy-lib-repo to specify a custom MicroPython-lib repository.
     """
@@ -93,4 +93,3 @@ def cli_clone(
 
     log.info(f"{mpy_path} {git.get_local_tag(mpy_path)}")
     log.info(f"{mpy_lib_path} {git.get_local_tag(mpy_lib_path)}")
-

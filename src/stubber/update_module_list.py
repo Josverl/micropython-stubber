@@ -1,7 +1,7 @@
 # pragma: no cover
 """
 generate the list of modules that should be attempted to stub
-for this : 
+for this :
 - combine the modules from the different texts files
 - split the lines into individual module names
 - combine them in one set
@@ -9,7 +9,7 @@ for this :
 - remove test modules, ending in `_test`
 - write updates to:
     - board/modulelist.txt
-    - board/createstubs.py 
+    - board/createstubs.py
 """
 
 from pathlib import Path

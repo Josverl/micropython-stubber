@@ -20,6 +20,7 @@ intro.md
 70_stub_overview.md
 80_references.md
 90_documentation.md
+95_glossary.md
 ```
 
 ```{toctree}

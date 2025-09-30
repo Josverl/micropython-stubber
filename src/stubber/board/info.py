@@ -24,9 +24,7 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32"
-            if sys.platform.startswith("pyb")
-            else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": ("stm32" if sys.platform.startswith("pyb") else sys.platform),  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
@@ -38,11 +36,7 @@ def _info():  # type:() -> dict[str, str]
     except AttributeError:
         pass
     try:
-        machine = (
-            sys.implementation._machine
-            if "_machine" in dir(sys.implementation)
-            else os.uname().machine
-        )
+        machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine
         info["board"] = machine.strip()
         info["cpu"] = machine.split("with")[1].strip()
         info["mpy"] = (
@@ -113,8 +107,7 @@ def _info():  # type:() -> dict[str, str]
         if (
             info["version"]
             and info["version"].endswith(".0")
-            and info["version"]
-            >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
             and info["version"] <= "1.19.9"
         ):
             # drop the .0 for newer releases

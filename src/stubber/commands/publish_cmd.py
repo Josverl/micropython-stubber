@@ -15,7 +15,10 @@ from stubber.publish.publish import publish_multiple
 from stubber.utils.config import CONFIG
 
 
-@stubber_cli.command(name="publish")
+@stubber_cli.command(
+    name="publish-stubs",
+    aliases=["publish"],
+)
 @click.option("--family", default="micropython", type=str, show_default=True)
 @click.option(
     "--version",
@@ -97,9 +100,7 @@ def cli_publish(
     boards = list(boards)
 
     if len(versions) > 1:
-        raise NotImplementedError(
-            "Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487"
-        )
+        raise NotImplementedError("Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487")
 
     destination = "pypi" if production else "test-pypi"
     log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")

@@ -3,6 +3,7 @@ This file contains the `def main()` funcion for the lvgl variant of createstubs.
 - type_check_only is used to avoid circular imports
 The partial is enclosed in ###PARTIAL### and ###PARTIALEND### markers
 """
+
 from typing import TYPE_CHECKING, List, type_check_only
 
 if TYPE_CHECKING:
@@ -15,29 +16,22 @@ if TYPE_CHECKING:
         _report: List[str]
         modules = []
 
-        def __init__(self, path: str = "", firmware_id: str = "") -> None:
-            ...
+        def __init__(self, path: str = "", firmware_id: str = "") -> None: ...
 
-        def clean(self) -> None:
-            ...
+        def clean(self) -> None: ...
 
-        def create_one_stub(self, modulename: str) -> bool:
-            ...
+        def create_one_stub(self, modulename: str) -> bool: ...
 
-        def report(self, filename: str = "modules.json"):
-            ...
+        def report(self, filename: str = "modules.json"): ...
 
-        def create_all_stubs(self):
-            ...
+        def create_all_stubs(self): ...
 
     @type_check_only
-    def read_path() -> str:
-        ...
+    def read_path() -> str: ...
 
     @type_check_only
     class _gc:
-        def collect(self) -> None:
-            ...
+        def collect(self) -> None: ...
 
     gc: _gc
     _log = logging.getLogger("stubber")
@@ -63,12 +57,12 @@ def main():
     except Exception:
         fw_id = "lvgl-{0}_{1}_{2}_{3}-{4}".format(8, 1, 0, "dev", sys.platform)
     finally:
-        stubber = Stubber(firmware_id=fw_id) # type: ignore
+        stubber = Stubber(firmware_id=fw_id)  # type: ignore
     stubber.clean()
     # modules to stub : only lvgl specifics
     stubber.modules = ["io", "lodepng", "rtch", "lvgl"]  # spell-checker: enable
 
-    gc.collect() # type: ignore
+    gc.collect()  # type: ignore
 
     stubber.create_all_stubs()
     stubber.report()

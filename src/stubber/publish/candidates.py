@@ -114,9 +114,7 @@ def frozen_candidates(
     auto_port = is_auto(ports)
     auto_board = is_auto(boards)
     if is_auto(versions):
-        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [
-            V_PREVIEW
-        ]
+        versions = list(version_candidates(suffix="frozen", prefix=family, path=path)) + [V_PREVIEW]
     else:
         versions = [versions] if isinstance(versions, str) else versions
 
@@ -211,9 +209,7 @@ def board_candidates(
         else:
             r = git.checkout_tag(repo=mpy_path, tag=version)
         if not r:
-            log.warning(
-                f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?"
-            )
+            log.warning(f"Incorrect version: {version} or did you forget to run `stubber clone` to get the micropython repo?")
             return []
         ports = list_micropython_ports(family=family, mpy_path=mpy_path)
         for port in ports:
@@ -249,10 +245,5 @@ def filter_list(
         worklist = [i for i in worklist if i["port"].lower() in ports_]
     if boards and not is_auto(boards):
         boards_ = [i.lower() for i in boards]
-        worklist = [
-            i
-            for i in worklist
-            if i["board"].lower() in boards_
-            or i["board"].lower().replace("generic_", "") in boards_
-        ]
+        worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_", "") in boards_]
     return worklist

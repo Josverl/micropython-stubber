@@ -4,17 +4,17 @@ Work in Progress
 
 Tries to determine the return type by parsing the docstring and the function signature
  - if the signature contains a return type --> <something> then that is returned
- - check a lookup dictionary of type overrides, 
+ - check a lookup dictionary of type overrides,
     if the functionnae is listed, then use the override
  - use re to find phrases such as:
     - 'Returns ..... '
     - 'Gets  ..... '
  - docstring is joined without newlines to simplify parsing
  - then parses the docstring to find references to known types and give then a rating though a hand coded model ()
- - builds a list return type candidates 
- - selects the highest ranking candidate 
+ - builds a list return type candidates
+ - selects the highest ranking candidate
  - the default Type is 'Any'
- 
+
 
 to do:
 
@@ -28,9 +28,9 @@ to do:
         - 'Get or set' --> indicates overloaded/optional return Union[None|...]
         - add regex for 'Query' ` Otherwise, query current state if no argument is provided. `
 
-    - try if an Azure Machine Learning works as well 
+    - try if an Azure Machine Learning works as well
         https://docs.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources
-    - 
+    -
 """
 
 # ref: https://regex101.com/codegen?language=python
@@ -213,9 +213,7 @@ def compound_candidates(
         result["type"] = f"{type}[{sub}]" if sub else f"{type}"
         confidence = confidence * dist_rate(i)  # distance weighting
         result["confidence"] = confidence
-        log.trace(
-            f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}"
-        )
+        log.trace(f" - found '{kw}' at position {i} with confidence {confidence} rating {dist_rate(i)}")
 
         candidates.append(result)
     return candidates
@@ -301,13 +299,9 @@ def distill_return(return_text: str) -> List[Dict]:
 
     candidates += compound_candidates("Generator", match_string, ["generator"], C_GENERATOR)
     candidates += compound_candidates("Iterator", match_string, ["iterator"], C_ITERATOR)
-    candidates += compound_candidates(
-        "List", match_string, ["a list of", "list of", "an array"], C_LIST
-    )
+    candidates += compound_candidates("List", match_string, ["a list of", "list of", "an array"], C_LIST)
 
-    candidates += simple_candidates(
-        "Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT
-    )
+    candidates += simple_candidates("Dict", match_string, ["a dictionary", "dict", "Dictionary"], C_DICT)
     candidates += simple_candidates(
         "Tuple",
         match_string,
@@ -328,9 +322,7 @@ def distill_return(return_text: str) -> List[Dict]:
         C_TUPLE,
     )
 
-    candidates += simple_candidates(
-        "int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT
-    )
+    candidates += simple_candidates("int", match_string, ["unsigned integer", "unsigned int", "unsigned"], C_UINT)
 
     candidates += simple_candidates(
         "int",
@@ -385,9 +377,7 @@ def distill_return(return_text: str) -> List[Dict]:
     # OK, better than just string
     candidates += simple_candidates("bytes", match_string, ["bytes", "byte string"], C_BYTES)
 
-    candidates += simple_candidates(
-        "bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL
-    )
+    candidates += simple_candidates("bool", match_string, ["boolean", "bool", "True", "False"], C_BOOL)
     candidates += simple_candidates(
         "float",
         match_string,
@@ -405,9 +395,7 @@ def distill_return(return_text: str) -> List[Dict]:
         C_FLOAT,
     )
 
-    candidates += simple_candidates(
-        "str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR
-    )
+    candidates += simple_candidates("str", match_string, ["string", "(sub)string", "sub-string", "substring"], C_STR)
 
     candidates += simple_candidates("str", match_string, ["name", "names"], C_STR_NAMES)
     ## "? contains 'None if there is no'  --> Union[Null, xxx]"
@@ -425,20 +413,24 @@ def distill_return(return_text: str) -> List[Dict]:
 
 
 def return_type_from_context(
-    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+    *,
+    docstring: Union[str, List[str]],
+    signature: str,
+    module: str,
+    literal: bool = False,
 ):
     try:
-        return str(
-            _type_from_context(
-                module=module, signature=signature, docstring=docstring, literal=literal
-            )["type"]
-        )
+        return str(_type_from_context(module=module, signature=signature, docstring=docstring, literal=literal)["type"])
     except Exception:
         return "Incomplete"
 
 
 def _type_from_context(
-    *, docstring: Union[str, List[str]], signature: str, module: str, literal: bool = False
+    *,
+    docstring: Union[str, List[str]],
+    signature: str,
+    module: str,
+    literal: bool = False,
 ):  # -> Dict[str , Union[str,float]]:
     """Determine the return type of a function or method based on:
      - the function signature

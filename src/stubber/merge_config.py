@@ -9,8 +9,12 @@ from typing import Final, List
 
 from mpflash.logger import log
 
-from stubber.modcat import (CP_REFERENCE_TO_DOCSTUB, RM_MERGED,
-                            STDLIB_ONLY_MODULES, U_MODULES)
+from stubber.modcat import (
+    CP_REFERENCE_TO_DOCSTUB,
+    RM_MERGED,
+    STDLIB_ONLY_MODULES,
+    U_MODULES,
+)
 
 EXT: Final = [".pyi", ".py", ""]
 
@@ -77,4 +81,3 @@ def remove_modules(target_folder: Path, RM_MODULES: List[str]):
                         target.unlink()
                 finally:
                     log.debug(f" - remove {target}")
-
