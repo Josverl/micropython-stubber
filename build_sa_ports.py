@@ -5,17 +5,14 @@ from pathlib import Path
 
 import jsonlines
 import mpbuild.build as mpb
-from mpbuild import board_database
 from mpbuild.board_database import Board, Database
-from typing_extensions import List, Tuple
+from typing_extensions import Tuple
 
 import mpflash.basicgit as git
-from mpflash.common import FWInfo
-from mpflash.versions import (clean_version, get_preview_mp_version,
-                              get_stable_mp_version, micropython_versions)
+from mpflash.versions import get_preview_mp_version, get_stable_mp_version
 
 
-def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_dir:Path, fw_path:Path ):
+def copy_firmware(board: Board, variant: str | None, version: str, build: str, mpy_dir: Path, fw_path: Path):
     """Copy the built firmware to the destination directory."""
     # find the build directory
     if board.physical_board:
@@ -27,20 +24,17 @@ def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_di
     else:
         build_dir = mpy_dir / f"ports/{board.port.name}/build-{variant}"
     # what is the resulting name of the firmware files?
-    fw_name = {
-        "webassembly": "micropython.*",
-        "unix": "micropython",
-        "windows": "micropython.exe"
-    }.get(board.port.name, "firmware.*")
+    fw_name = {"webassembly": "micropython.*", "unix": "micropython", "windows": "micropython.exe"}.get(
+        board.port.name, "firmware.*"
+    )
     # create the destination directory
-    
+
     port_path = fw_path / board.port.name
     if board.port.name == "webassembly":
-        # all webassembly binaries need to be in a single folder 
+        # all webassembly binaries need to be in a single folder
         port_path = fw_path / f"{board.port.name}/{board.name}-{variant}-{version}"
 
     port_path.mkdir(parents=True, exist_ok=True)
-
 
     for file in build_dir.glob(fw_name):
         if file.suffix in {".map", ".dis"}:
@@ -53,111 +47,118 @@ def copy_firmware(board:Board, variant:str|None, version:str, build: str, mpy_di
             dest_name = f"{board.name}-{variant}-{version}{file.suffix}"
         else:
             dest_name = f"{board.name}-{variant}-{version}"
-        # normalize the names 
+        # normalize the names
         dest_name = dest_name.replace("-standard", "")
         dest_file = port_path / dest_name
         dest_file.write_bytes(file.read_bytes())
 
-        fw = FWInfo(
-            port=board.port.name,
-            board=board.name,
-            variant=variant or "",
-            version=version,
-            preview="-preview" in version,
-            build=build,
-            ext=file.suffix,
-            custom=False,
-            description="Built using mpbuild",
-            filename=str(dest_file.relative_to(port_path)),
-        )
+        # FIXME: should use mpflash.db to add to the database instead of this ad-hoc method
+        fw = {
+            "port": board.port.name,
+            "board": board.name,
+            "variant": variant or "",
+            "version": version,
+            "preview": "-preview" in version,
+            "build": build,
+            "ext": file.suffix,
+            "custom": False,
+            "description": "Built using mpbuild",
+            "filename": str(dest_file.relative_to(port_path)),
+        }
         # add to inventory
         with jsonlines.open(fw_path / "firmware.jsonl", "a") as writer:
-            print(f"Adding {fw.port} {fw.board}")
-            print(f"    to {fw.filename}")
-            writer.write(fw.to_dict())
+            print(f"Adding {fw['port']} {fw['board']}")
+            print(f"    to {fw['filename']}")
+            writer.write(fw)
 
 
+def build_sa_port(build: Tuple, version: str, mpy_dir: Path, fw_path: Path):
+    """Build a single port for a stand alone board."""
+    print("=" * 60)
+    build_nr = ""
+    if "preview" in version:
+        ok = git.checkout_tag("master", mpy_dir)
+        if describe := git.get_git_describe(mpy_dir):
+            parts = describe.split("-", 3)
+            if len(parts) >= 3:
+                build_nr = parts[2]
+    else:
+        ok = git.checkout_tag(version, mpy_dir)
+    if not ok:
+        print(f"Failed to checkout {version} in {mpy_dir}")
+        return False
 
+    print(git.get_git_describe(mpy_dir))
+    # un-cached database
+    db = Database(mpy_dir)
+    print(f"boards found {len(db.boards.keys())}")
 
+    print(f"Building {version}, build {build_nr}")
+    print("=" * 60)
 
-def build_sa_ports( builds:List[Tuple],versions:List[str], mpy_dir:Path, fw_path:Path):
-    """Build all ports for the stand alone boards."""
-    for version in versions:
-        print("=" * 60)
-        build_nr = ""
-        if "preview" in version:
-            ok = git.checkout_tag("master", mpy_dir)
-            if describe := git.get_git_describe(mpy_dir):
-                parts = describe.split("-", 3)
-                if len( parts) >=3:
-                    build_nr = parts[2]
-        else:
-            ok = git.checkout_tag(version, mpy_dir)
-        if not ok:
-            print(f"Failed to checkout {version} in {mpy_dir}")
-            continue
-        
-        print( git.get_git_describe(mpy_dir))
-        # un-cached database 
-        db = Database(mpy_dir)
-        print (f"boards found {len(db.boards.keys())}")
+    if len(build) == 1:
+        board, variant, extras = build[0], None, []
+    elif len(build) == 2:
+        board, variant, extras = build[0], build[1], []
+    else:
+        board, variant, extras = build
+        if isinstance(extras, str):
+            extras = extras.split(" ")
 
+    if board not in db.boards.keys():
+        print(f"Board '{board}' not found for version '{version}'")
+        return False
 
-        print(f"Building {version} , build {build_nr}")
-        print("=" * 60)
-        for build in builds:
-            if len(build) == 1:
-                board, variant, extras = build[0], None, []
-            elif len(build) == 2:
-                board, variant, extras = build[0], build[1], []
-            else:
-                board, variant, extras = build
-                if isinstance(extras, str):
-                    extras = extras.split(' ')
+    # resolve boardname
+    _board = db.boards[board]
 
-            if board not in db.boards.keys():
-                print(f"Board '{board}' not found for version '{version}'")
-                continue
+    if variant == "":
+        variant = None
 
-            # resolve boardname
-            _board = db.boards[board]
+    try:
+        mpb.clean_board(board=_board.name, variant=variant, mpy_dir=str(mpy_dir))
+        mpb.build_board(board=_board.name, variant=variant, mpy_dir=mpy_dir, extra_args=extras)
+    except SystemExit as e:
+        print(f"Failed to build {board} {variant} {version}: {e}")
+        return False
 
-            # if variant is not None:
-            #     _variant = _board.find_variant(variant)
-            #     if _variant is None:
-            #         print(f"Invalid variant '{variant}'")
-            #         raise SystemExit()
-            if variant == "":
-                variant = None
-            try: 
-                mpb.clean_board(board = _board.name, variant = variant, mpy_dir = mpy_dir) # type: ignore
-                mpb.build_board( board = _board.name, variant = variant, mpy_dir = mpy_dir, extra_args= extras) 
-                # make_mpy_cross = False 
-            except SystemExit as e:
-                print(f"Failed to build {board} {variant} {version}: {e}")
-                continue
-            copy_firmware( fw_path= fw_path, board=_board, variant=variant, version=version, build=build_nr, mpy_dir=mpy_dir)
+    copy_firmware(fw_path=fw_path, board=_board, variant=variant, version=version, build=build_nr, mpy_dir=mpy_dir)
+    return True
+
 
 def main():
-    mpy_dir = Path("/home/jos/micropython") 
+    mpy_dir = Path("./repos/micropython").resolve().absolute()
     assert mpy_dir.exists()
-    build_sa_ports(
-        builds = [
-            # ("windows", "standard"),
-            # ("unix", "standard"),
-            # ("webassembly", "standard", "-lnodefs.js"),
-            ("webassembly", "pyscript"),
-            # ("WEACT_F411_BLACKPILL", "V20_FLASH_4M"),
-            # ("RPI_PICO2_W",),
-            ],
-        versions = [
-            get_stable_mp_version(), 
-            get_preview_mp_version(), 
-            # "preview",
-                    ],
-        mpy_dir = mpy_dir,
-        fw_path = Path(f"./firmware")
-        )
 
+    builds = [
+        # ( port , [variant], [extra args])
+        # ("unix", "standard"),
+        # ("windows", "standard"),
+        ("webassembly", "pyscript"),
+        ("webassembly", "standard", "-lnodefs.js"),
+    ]
+
+    versions = [
+        # "v1.25.0",
+        # "v1.26.0",
+        get_stable_mp_version(),
+        get_preview_mp_version(),
+    ]
+    # TODO: Use the same path as mpflash
+    fw_path = Path("./firmware")
+
+    for version in versions:
+        for build in builds:
+            success = build_sa_port(
+                build=build,
+                version=version,
+                mpy_dir=mpy_dir,
+                fw_path=fw_path,
+            )
+            if not success:
+                print(f"Build failed for {build} {version}")
+
+# requires MPBuild PR70 to build webassemby and windows versions using mpbuild
+# https://github.com/mattytrentini/mpbuild/pull/70
 if __name__ == "__main__":
     main()
