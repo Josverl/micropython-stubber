@@ -20,8 +20,8 @@ from stubber.utils.repos import fetch_repos
 
 
 @stubber_cli.command(
-    name="get-frozen",
-    aliases=["get-frozen-stubs", "frozen"],
+    name="frozen-stubs",
+    aliases=["get-frozen", "get-frozen-stubs", "frozen"],
 )
 @click.option(
     "--stub-folder",

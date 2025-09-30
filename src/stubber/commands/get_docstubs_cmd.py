@@ -27,8 +27,8 @@ from stubber.utils.repos import fetch_repos
 
 
 @stubber_cli.command(
-    name="get-docstubs",
-    aliases=["get-doc-stubs", "docstubs"],
+    name="docs-stubs",
+    aliases=["get-docstubs", "get-doc-stubs", "docstubs", "docs"],
 )
 @click.option(
     "--path",

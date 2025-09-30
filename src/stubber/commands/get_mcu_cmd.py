@@ -21,7 +21,7 @@ from stubber.utils.config import CONFIG
 
 @stubber_cli.command(
     name="mcu-stubs",
-    aliases=["get-mcu-stubs", "mcu-stubs", "mcu"],
+    aliases=["mcu-stubs", "get-mcu-stubs", "mcu-stubs", "mcu"],
 )
 @click.option(
     "--variant",

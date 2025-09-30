@@ -15,7 +15,10 @@ from stubber.publish.publish import publish_multiple
 from stubber.utils.config import CONFIG
 
 
-@stubber_cli.command(name="publish")
+@stubber_cli.command(
+    name="publish-stubs",
+    aliases=["publish"],
+)
 @click.option("--family", default="micropython", type=str, show_default=True)
 @click.option(
     "--version",
