@@ -20,7 +20,9 @@ from .utils.config import CONFIG
 
 
 def get_core(
-    requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"
+    requirements: str,
+    stub_path: Optional[Union[str, Path]] = None,
+    family: str = "core",
 ):
     "Download MicroPython compatibility modules"
     if not stub_path:
@@ -70,9 +72,7 @@ def get_core(
 
         except OSError as err:  # pragma: no cover
             log.error(
-                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(
-                    err
-                )
+                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err)
             )
 
         # copy *.py files in build folder to stub_path
@@ -105,4 +105,7 @@ def get_core(
 if __name__ == "__main__":
     # just run a quick test
     # logging.basicConfig(format="%(levelname)-8s:%(message)s", level=logging.INFO)
-    get_core(requirements="requirements-core-pycopy.txt", stub_path="./scratch/cpython_common")
+    get_core(
+        requirements="requirements-core-pycopy.txt",
+        stub_path="./scratch/cpython_common",
+    )

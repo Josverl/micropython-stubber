@@ -161,7 +161,12 @@ class ManifestPackageMetadata:
 
     def __str__(self):
         return "version={} description={} license={} author={} pypi={} pypi_publish={}".format(
-            self.version, self.description, self.license, self.author, self.pypi, self.pypi_publish
+            self.version,
+            self.description,
+            self.license,
+            self.author,
+            self.pypi,
+            self.pypi_publish,
         )
 
 
@@ -284,7 +289,13 @@ class ManifestFile:
 
         self._manifest_files.append(
             ManifestOutput(
-                FILE_TYPE_LOCAL, full_path, target_path, timestamp, kind, self._metadata[-1], opt
+                FILE_TYPE_LOCAL,
+                full_path,
+                target_path,
+                timestamp,
+                kind,
+                self._metadata[-1],
+                opt,
             )
         )
 
@@ -435,11 +446,7 @@ class ManifestFile:
             # Search for {library_path}/**/{name}/manifest.py.
             if self._require_from_path(library_path, name, version, kwargs):
                 return
-            raise ValueError(
-                "Package '{}' not found in external library '{}' ({}).".format(
-                    name, library, library_path
-                )
-            )
+            raise ValueError("Package '{}' not found in external library '{}' ({}).".format(name, library, library_path))
 
         for lib_dir in self._library_dirs:
             # Search for {lib_dir}/**/{name}/manifest.py.
@@ -603,9 +610,7 @@ def main():
         default=os.path.join(os.path.dirname(__file__), "../lib/micropython-lib"),
         help="path to micropython-lib repo",
     )
-    cmd_parser.add_argument(
-        "--unix-ffi", action="store_true", help="prepend unix-ffi to the library path"
-    )
+    cmd_parser.add_argument("--unix-ffi", action="store_true", help="prepend unix-ffi to the library path")
     cmd_parser.add_argument("--port", default=None, help="path to port dir")
     cmd_parser.add_argument("--board", default=None, help="path to board dir")
     cmd_parser.add_argument(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from libcst import matchers as m
-from libcst.matchers._visitors import _gather_constructed_leave_funcs, _gather_constructed_visit_funcs # type: ignore
+from libcst.matchers._visitors import _gather_constructed_leave_funcs, _gather_constructed_visit_funcs  # type: ignore
 from typing import Any, Optional
 from types import FunctionType
 import itertools
@@ -42,7 +42,10 @@ class ScopeableMatcherTransformer(m.MatcherDecoratableTransformer):
         """Construct a copy of this matcher with visitors scoped to `scope_matcher.`"""
         constructed_meths = list(
             itertools.chain.from_iterable(
-                [*_gather_constructed_leave_funcs(self).values(), *_gather_constructed_visit_funcs(self).values()]
+                [
+                    *_gather_constructed_leave_funcs(self).values(),
+                    *_gather_constructed_visit_funcs(self).values(),
+                ]
             )
         )
         scoped_meths = {f.__name__: self._build_scoped_meth(f.__name__, scope_matcher) for f in constructed_meths}

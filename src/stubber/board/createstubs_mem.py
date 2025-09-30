@@ -154,7 +154,15 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in {"int", "float", "str", "bool", "tuple", "list", "dict"}:
+                if type_text in {
+                    "int",
+                    "float",
+                    "str",
+                    "bool",
+                    "tuple",
+                    "list",
+                    "dict",
+                }:
                     order = 1
                 elif type_text in {"function", "method"}:
                     order = 2
@@ -273,7 +281,12 @@ class Stubber:
 
         for item_name, item_repr, item_type_txt, item_instance, _ in items:
             # name_, repr_(value), type as text, item_instance, order
-            if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
+            if item_name in [
+                "classmethod",
+                "staticmethod",
+                "BaseException",
+                "Exception",
+            ]:
                 # do not create stubs for these primitives
                 continue
             if item_name[0].isdigit():
@@ -571,9 +584,7 @@ def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
         info["mpy"] = (
             sys.implementation._mpy  # type: ignore
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy
-            if "mpy" in dir(sys.implementation)
-            else ""  # type: ignore
+            else (sys.implementation.mpy if "mpy" in dir(sys.implementation) else "")  # type: ignore
         )
     except (AttributeError, IndexError):
         pass

@@ -61,9 +61,7 @@ def cli_get_core(
         req_filename = f"requirements-core-{core_type}.txt"
         stub_path = Path(stub_folder) / f"cpython_core-{core_type}"
 
-        get_cpython.get_core(
-            stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type
-        )
+        get_cpython.get_core(stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type)
         stub_paths.append(stub_path)
 
     log.info("::group:: start post processing of retrieved stubs")

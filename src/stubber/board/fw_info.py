@@ -36,7 +36,7 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "build": "",
             "ver": "",
-            "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "port": ("stm32" if sys.platform.startswith("pyb") else sys.platform),  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "cpu": "",
             "mpy": "",
@@ -54,7 +54,9 @@ def _info():  # type:() -> dict[str, str]
         info["mpy"] = (
             sys.implementation._mpy
             if "_mpy" in dir(sys.implementation)
-            else sys.implementation.mpy if "mpy" in dir(sys.implementation) else ""
+            else sys.implementation.mpy
+            if "mpy" in dir(sys.implementation)
+            else ""
         )
     except (AttributeError, IndexError):
         pass

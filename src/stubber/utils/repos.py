@@ -1,4 +1,4 @@
-""" utility functions to handle to cloned repos needed for stubbing."""
+"""utility functions to handle to cloned repos needed for stubbing."""
 
 import csv
 import os
@@ -62,11 +62,7 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
         reader = csv.DictReader(ntf.file, skipinitialspace=True)  # dialect="excel",
         rows = list(reader)
         # create a dict version --> commit_hash
-        version_commit = {
-            row["version"].split("/")[-1]: row["lib_commit_hash"]
-            for row in rows
-            if row["version"].startswith("refs/tags/")
-        }
+        version_commit = {row["version"].split("/")[-1]: row["lib_commit_hash"] for row in rows if row["version"].startswith("refs/tags/")}
     # add default
     version_commit = defaultdict(lambda: "master", version_commit)
     return version_commit
@@ -129,9 +125,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
                 return False
         return sync_submodules(mpy_path)
     else:
-        log.info(
-            f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}"
-        )
+        log.info(f"Matching repo's:  Micropython {version_tag} needs micropython-lib:{micropython_lib_commits[version_tag]}")
         return git.checkout_commit(micropython_lib_commits[version_tag], lib_path)
 
 
@@ -149,7 +143,7 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
         tag = V_PREVIEW
 
     log.info(f"Switching to {tag}")
-    
+
     # Handle special cases
     if tag == V_PREVIEW or tag in SET_PREVIEW:
         git.switch_branch(repo=mpy_path, branch="master")
@@ -172,7 +166,7 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
                 except:
                     log.error(f"Could not switch to {tag} - not a valid tag, branch, or commit")
                     return False
-    
+
     result = match_lib_with_mpy(version_tag=tag, mpy_path=mpy_path, lib_path=mpy_lib_path)
 
     log.info(f"{str(mpy_path):<40} {git.get_local_tag(mpy_path)}")

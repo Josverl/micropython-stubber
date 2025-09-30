@@ -11,6 +11,7 @@ from libcst import matchers as m
 @dataclass
 class TypeInfo:
     "contains the functionDefs and classDefs info read from the stubs source"
+
     name: str
     decorators: Sequence[cst.Decorator]
     params: Optional[cst.Parameters] = None
@@ -23,6 +24,7 @@ class TypeInfo:
 @dataclass
 class AnnoValue:
     "The different values for the annotations"
+
     docstring: Optional[str] = ""  # strings
     "Module docstring or function/method docstring"
     docstring_node: Optional[cst.SimpleStatementLine] = None

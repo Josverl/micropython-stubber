@@ -1,8 +1,9 @@
 """
-Used to define where stub modules should and should not be copied to, or merged to 
+Used to define where stub modules should and should not be copied to, or merged to
 
 This is shared between stubber, and external build scripts.
 """
+
 from __future__ import annotations
 
 from typing import Final
@@ -20,11 +21,11 @@ STDLIB_ONLY_MODULES = [
     "sys",
     "types",
     "ssl",
-    "os", 
+    "os",
     # Experiment
     "json",
-    "struct"
-    # "socket", # should be ins tdlib - but is only available on networked boards 
+    "struct",
+    # "socket", # should be ins tdlib - but is only available on networked boards
     # time # should be in stdlib - but has implementation differences per port)
 ]
 """Modules that should only be in stdlib, and not in the individual packages"""
@@ -88,14 +89,12 @@ but can also be imported with a `u` prefix
 ########################################################
 
 CP_REFERENCE_TO_DOCSTUB: Final = [
-    "asyncio", # just for documentation 
+    "asyncio",  # just for documentation
     # stdlib stubs are using the version from stdlib/asyncio
     "rp2/PIOASMEmit.pyi",
     "rp2/asm_pio.pyi",
 ]
 "Modules to copy from reference modules to the docstubs"
-
-
 
 
 RM_MERGED = (
@@ -107,12 +106,11 @@ RM_MERGED = (
         "_rp2",  # Leave out for now , to avoid conflicts with the rp2 module
         "pycopy_imphook",  #  pycopy only: not needed in the merged stubs
         # "os",
-        "types", # defined in webassembly pyscript - shadows stdlib
-        "abc", # defined in webassembly pyscript - shadows stdlib
-        # "uos", # ???? problems with mypy & webassembly stubs 
+        "types",  # defined in webassembly pyscript - shadows stdlib
+        "abc",  # defined in webassembly pyscript - shadows stdlib
+        # "uos", # ???? problems with mypy & webassembly stubs
     ]
     + STDLIB_ONLY_MODULES
     + [f"u{mod}" for mod in U_MODULES]
 )
 "Modules to remove from merged stubs, U_MODULES will be recreated later"
-

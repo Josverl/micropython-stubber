@@ -41,6 +41,7 @@ def is_TypeVar(statement):
         m.Assign(value=m.Call(func=m.Name(value="TypeVar"))),
     )
 
+
 def is_CONSTANT(statement):
     """
     Assign   -  FOO = ...
@@ -54,7 +55,7 @@ def is_CONSTANT(statement):
             if len(statement.targets) != 1:
                 return False
             if m.matches(statement.targets[0], m.Name()):
-                if statement.targets[0].target.value.isupper(): 
+                if statement.targets[0].target.value.isupper():
                     return True
             elif m.matches(statement.targets[0], m.AssignTarget()):
                 if m.matches(statement.targets[0].target, m.Name()):
@@ -94,6 +95,7 @@ def is_import(statement):
     "import - import foo"
     return m.matches(statement, m.SimpleStatementLine(body=[m.ImportFrom() | m.Import()]))
 
+
 def is_docstr(statement):
     "single or triple quoted string"
     if m.matches(statement, m.SimpleStatementLine()):
@@ -103,6 +105,7 @@ def is_docstr(statement):
         m.Expr(value=m.SimpleString()),
         # | m.TripleQuotedString(),
     )
+
 
 class GatherTypeHelpers(ContextAwareVisitor):
     """
@@ -193,7 +196,7 @@ class AddTypeHelpers(ContextAwareTransformer):
         body = self.update_body(updated_node.body, stack_id)
         return updated_node.with_changes(body=body)
 
-    def update_body(self, body:Sequence[cst.BaseStatement], stack_id):
+    def update_body(self, body: Sequence[cst.BaseStatement], stack_id):
         (
             statements_before,
             helper_statements,
@@ -255,7 +258,11 @@ class AddTypeHelpers(ContextAwareTransformer):
     def _split_body(
         self,
         body: Sequence[cst.BaseStatement],
-    ) -> Tuple[Sequence[cst.BaseStatement], Sequence[cst.BaseStatement], Sequence[cst.BaseStatement]]:
+    ) -> Tuple[
+        Sequence[cst.BaseStatement],
+        Sequence[cst.BaseStatement],
+        Sequence[cst.BaseStatement],
+    ]:
         """
         Split the module into 3 parts:
         - before any TypeAlias, TypeVar or ParamSpec statements
@@ -290,4 +297,3 @@ class AddTypeHelpers(ContextAwareTransformer):
         after = list(body[insert_after:])
         helper_statements: Sequence[cst.SimpleStatementLine] = list(body[first_typehelper : last_typehelper + 1])  # type: ignore
         return (before, helper_statements, after)
-

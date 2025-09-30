@@ -154,11 +154,7 @@ class FileReadWriter:
         """
         append = 0
         newline = self.rst_text[self.line_no]
-        while (
-            not self.is_balanced(newline)
-            and self.line_no >= 0
-            and (self.line_no + append + 1) <= self.max_line
-        ):
+        while not self.is_balanced(newline) and self.line_no >= 0 and (self.line_no + append + 1) <= self.max_line:
             append += 1
             # concat the lines
             newline += self.rst_text[self.line_no + append]
@@ -230,9 +226,7 @@ class RSTReader(FileReadWriter):
         "stop at heading"
         u_line = self.rst_text[min(self.line_no + 1, self.max_line - 1)].rstrip()
         # Heading  ---, ==, ~~~
-        underlined = (
-            u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
-        )
+        underlined = u_line.startswith("---") or u_line.startswith("===") or u_line.startswith("~~~")
         if underlined and self.line_no > 0:
             # check if previous line is a heading
             line = self.rst_text[self.line_no].strip()
@@ -445,9 +439,7 @@ class RSTParser(RSTReader):
     def apply_fix(fix: Fix, params: str, name: str = ""):
         if fix.name and fix.name != name:
             return params
-        return (
-            re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
-        )
+        return re.sub(fix.from_, fix.to, params) if fix.is_re else params.replace(fix.from_, fix.to)
 
     def create_update_class(self, name: str, params: str, docstr: List[str]):
         # a bit of a hack: assume no classes in classes  or functions in function
@@ -457,9 +449,7 @@ class RSTParser(RSTReader):
             class_def = self.output_dict[full_name]
         else:
             parent = CHILD_PARENT_CLASS[name] if name in CHILD_PARENT_CLASS.keys() else ""
-            if parent == "" and (
-                name.endswith("Error") or name.endswith("Exception") or name in {"GeneratorExit"}
-            ):
+            if parent == "" and (name.endswith("Error") or name.endswith("Exception") or name in {"GeneratorExit"}):
                 parent = "Exception"
             class_def = ClassSourceDict(
                 f"class {name}({parent}):",
@@ -527,9 +517,7 @@ class RSTParser(RSTReader):
                 # documentation is not available for patch versions, so use only the major.minor.0
                 version = ".".join(version.split(".")[:2]) + ".0"
                 # TODO Use clean_version(self.source_tag)
-            docstr[0] = (
-                f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
-            )
+            docstr[0] = f"{docstr[0]}.\n\nMicroPython module: https://docs.micropython.org/en/{version}/library/{module_name}.html"
 
         self.output_dict.name = module_name
         self.output_dict.add_comment(f"# source version: {self.source_tag}")
@@ -565,9 +553,7 @@ class RSTParser(RSTReader):
 
         for this_function in function_names:
             # Parse return type from docstring
-            ret_type = return_type_from_context(
-                docstring=docstr, signature=this_function, module=self.current_module
-            )
+            ret_type = return_type_from_context(docstring=docstr, signature=this_function, module=self.current_module)
 
             # defaults
             name = params = ""
@@ -674,7 +660,9 @@ class RSTParser(RSTReader):
 
             # parse return type from docstring
             ret_type = return_type_from_context(
-                docstring=docstr, signature=f"{class_name}.{name}", module=self.current_module
+                docstring=docstr,
+                signature=f"{class_name}.{name}",
+                module=self.current_module,
             )
             # methods have 4 flavours
             #   - __init__              (self,  <params>) -> None:
@@ -781,10 +769,10 @@ class RSTParser(RSTReader):
         self.line_no += counter - 1
         # clean up before returning
         names = [n.strip() for n in names if n.strip() != "etc."]  # remove etc.
-        # Ugly one-off hack 
+        # Ugly one-off hack
         # to remove the '(when DTLS support is enabled)' from the ssl constants
-        # names = [n.replace('(when DTLS support is enabled)', '') for n in names]  
-        
+        # names = [n.replace('(when DTLS support is enabled)', '') for n in names]
+
         return names
 
     def parse_data(self):
@@ -801,7 +789,10 @@ class RSTParser(RSTReader):
         # deal with documentation wildcards
         for name in names:
             r_type = return_type_from_context(
-                docstring=docstr, signature=name, module=self.current_module, literal=True
+                docstring=docstr,
+                signature=name,
+                module=self.current_module,
+                literal=True,
             )
             if r_type in ["None"]:  # None does not make sense
                 r_type = "Incomplete"  # Default to Incomplete/ Unknown / int

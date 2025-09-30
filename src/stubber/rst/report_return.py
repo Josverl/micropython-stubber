@@ -1,14 +1,13 @@
 # type: ignore
-""" Work in Progress  
+"""Work in Progress
 
-build test and  % report 
+build test and  % report
 Will need to be updated after new_output has been implemented.
 
 """
 
 # ref: https://regex101.com/codegen?language=python
 # https://regex101.com/r/D5ddB2/1
-
 
 import json
 from pathlib import Path
@@ -34,9 +33,7 @@ def process(folder: Path, pattern: str):
                     signature = str(item[3]).split("::")[-1].strip()
                     docstring = item[4]
 
-                    r = utils._type_from_context(
-                        docstring=docstring, signature=signature, module=module_name
-                    )
+                    r = utils._type_from_context(docstring=docstring, signature=signature, module=module_name)
                     report.append(
                         {
                             "signature": signature,
@@ -51,17 +48,11 @@ def process(folder: Path, pattern: str):
                         }
                     )
                     # isGood = r["confidence"] >= 0.5 and r["confidence"] <= 0.8 and item[2] != ""
-                    isBad = (
-                        float(r["confidence"]) <= 0.5
-                        and float(r["confidence"]) <= 0.8
-                        and item[2] != ""
-                    )
+                    isBad = float(r["confidence"]) <= 0.5 and float(r["confidence"]) <= 0.8 and item[2] != ""
                     if isBad:
                         context = item[3] + ".".join((item[0], item[1], item[2]))
                         try:
-                            log.debug(
-                                f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}"
-                            )
+                            log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} {r['match'].groups('return')}")
                         except Exception:
                             log.debug(f"{context:40} {r['type']:<15} - {r['confidence']} ")
 

@@ -693,7 +693,13 @@ class MergeCommand(VisitorBasedCodemodCommand):
             #  just return the updated node
             return updated_node
 
-    def merge_decorator(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef, stack_id, doc_stub):
+    def merge_decorator(
+        self,
+        original_node: cst.FunctionDef,
+        updated_node: cst.FunctionDef,
+        stack_id,
+        doc_stub,
+    ):
         if not self.copy_params:
             # we have copied over the entire function definition, no further processing should be done on this node
             doc_stub.def_node = cast(cst.FunctionDef, doc_stub.def_node)

@@ -1,6 +1,6 @@
 """
 Create all variants of createstubs.py
-- and minify them 
+- and minify them
 - and cross compile them
 """
 

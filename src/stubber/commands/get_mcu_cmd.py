@@ -4,7 +4,6 @@
 # stub
 ##########################################################################################
 
-
 from typing import List
 
 import rich_click as click
@@ -85,9 +84,7 @@ def cli_create_mcu_stubs(
 
     for repo in CONFIG.repos:
         if not repo.exists():
-            log.error(
-                f"Repo {repo} not found, use 'stubber clone --add-stubs' to clone the repos."
-            )
+            log.error(f"Repo {repo} not found, use 'stubber clone --add-stubs' to clone the repos.")
             exit(1)
 
     exit(

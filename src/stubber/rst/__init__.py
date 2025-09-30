@@ -1,4 +1,5 @@
 """.rst processing"""
+
 # sourcery skip: no-wildcard-imports
 from .classsort import *
 from .lookup import *

@@ -27,7 +27,9 @@ def _read_partial(path: Path) -> Iterator[str]:
                 break
         except IndexError:
             # or avoid erroring out if the file does not have the markers
-            raise ValueError(f"Partial {path} does not have ###PARTIAL### and ###PARTIALEND### markers")
+            raise ValueError(
+                f"Partial {path} does not have ###PARTIAL### and ###PARTIALEND### markers"
+            )
 
     yield from lines
 

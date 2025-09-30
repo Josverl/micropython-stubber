@@ -1,35 +1,36 @@
 """
-ModuleSourceDict represents a source file with the following components 
+ModuleSourceDict represents a source file with the following components
     - docstr
     - version
     - comment
     - typing
     - Optional: list of constants
-    - optional: ClassSourcedicts 
-    - optional: FunctionSourcedicts 
-    - optional: individual lines of code 
+    - optional: ClassSourcedicts
+    - optional: FunctionSourcedicts
+    - optional: individual lines of code
 
-ClassSourceDict represents a source file with the following components 
+ClassSourceDict represents a source file with the following components
     - comment
     - class
     - docstr
     - Optional: list of constants
-    - __init__ : class signature 
-    - optional: FunctionSourcedicts 
-    - optional: individual lines of code 
+    - __init__ : class signature
+    - optional: FunctionSourcedicts
+    - optional: individual lines of code
 
-FunctionSourceDict represents a source file with the following components 
+FunctionSourceDict represents a source file with the following components
     - # comments - todo
     - optional: decorator
-    - def - function definition 
+    - def - function definition
     - docstr
     - constants
     - body - ...
-    - optional: individual lines of code 
+    - optional: individual lines of code
 
-SourceDict is the 'base class' 
+SourceDict is the 'base class'
 
 """
+
 from __future__ import annotations
 
 from typing import List, Optional, OrderedDict, Union
@@ -228,13 +229,13 @@ class SourceDict(OrderedDict):
 
 class ModuleSourceDict(SourceDict):
     def __init__(self, name: str, indent=0, lf: str = "\n"):
-        """The ModuleSourceDict class is used to represent a Python module as a dictionary of its components, 
-        such as its docstring, version, comments, imports, constants, classes, and functions. 
-        The class has several methods,  
-            sort() which sorts the components of the module in the correct order for a module definition to allow adding class variables, 
-            find() which finds a class node based on its name, 
-            classes() which returns a list of the class names in parent-child order, 
-            add_import() which adds a list of imports to the module. 
+        """The ModuleSourceDict class is used to represent a Python module as a dictionary of its components,
+        such as its docstring, version, comments, imports, constants, classes, and functions.
+        The class has several methods,
+            sort() which sorts the components of the module in the correct order for a module definition to allow adding class variables,
+            find() which finds a class node based on its name,
+            classes() which returns a list of the class names in parent-child order,
+            add_import() which adds a list of imports to the module.
         The __str__() method is also defined to return a string representation of the module.
         """
         super().__init__(

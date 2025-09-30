@@ -2,7 +2,7 @@
 Sort list of classess in parent-child order
 note that this does not take multiple inheritance into account
 ref : https://stackoverflow.com/questions/34964878/python-generate-a-dictionarytree-from-a-list-of-tuples/35049729#35049729
-with modification 
+with modification
 """
 
 import re

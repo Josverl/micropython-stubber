@@ -60,8 +60,6 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     pass
 
 
-
-
 def freeze_any(
     stub_folder: Optional[Path] = None,
     version: str = V_PREVIEW,
@@ -87,7 +85,10 @@ def freeze_any(
         log.debug("MicroPython v1.11, older or other")
         # others
         modules = freeze_folders(
-            frozen_stub_path.as_posix(), mpy_path.as_posix(), mpy_lib_path.as_posix(), version
+            frozen_stub_path.as_posix(),
+            mpy_path.as_posix(),
+            mpy_lib_path.as_posix(),
+            version,
         )
         count = len(modules)
     else:
@@ -126,9 +127,7 @@ def freeze_any(
 def get_fsp(version: str, stub_folder: Optional[Path] = None) -> Path:
     """get frozen stub path"""
     if not stub_folder:
-        frozen_stub_path = (
-            CONFIG.stub_path / f"{FAMILY}-{utils.clean_version(version, flat=True)}-frozen"
-        )
+        frozen_stub_path = CONFIG.stub_path / f"{FAMILY}-{utils.clean_version(version, flat=True)}-frozen"
         frozen_stub_path = frozen_stub_path.absolute()
     else:
         frozen_stub_path: Path = Path(stub_folder).absolute()

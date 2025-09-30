@@ -5,6 +5,7 @@ Note that the stubs can be very large, and it may be best to directly store them
 
 This variant was generated from createstubs.py by micropython-stubber v1.16.3
 """
+
 # Copyright (c) 2019-2023 Jos Verlinde
 
 import gc
@@ -156,7 +157,15 @@ class Stubber:
                     type_text = repr(type(val)).split("'")[1]
                 except IndexError:
                     type_text = ""
-                if type_text in {"int", "float", "str", "bool", "tuple", "list", "dict"}:
+                if type_text in {
+                    "int",
+                    "float",
+                    "str",
+                    "bool",
+                    "tuple",
+                    "list",
+                    "dict",
+                }:
                     order = 1
                 elif type_text in {"function", "method"}:
                     order = 2
@@ -277,7 +286,12 @@ class Stubber:
 
         for item_name, item_repr, item_type_txt, item_instance, _ in items:
             # name_, repr_(value), type as text, item_instance, order
-            if item_name in ["classmethod", "staticmethod", "BaseException", "Exception"]:
+            if item_name in [
+                "classmethod",
+                "staticmethod",
+                "BaseException",
+                "Exception",
+            ]:
                 # do not create stubs for these primitives
                 continue
             if item_name[0].isdigit():
@@ -285,8 +299,7 @@ class Stubber:
                 continue
             # Class expansion only on first 3 levels (bit of a hack)
             if (
-                item_type_txt == "<class 'type'>"
-                and len(indent) <= _MAX_CLASS_LEVEL * 4
+                item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4
                 # and not obj_name.endswith(".Pin")
                 # avoid expansion of Pin.cpu / Pin.board to avoid crashes on most platforms
             ):
