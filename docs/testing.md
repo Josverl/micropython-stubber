@@ -10,6 +10,7 @@ A significant number of tests have been created in pytest.
 
 - the `tests\mocks` folder contains mock-modules that allow the micropython code to be run in CPython. This is used by the unit tests that verify `createstubs.py` and it minified version.
 
+<!-- TODO: DEPRECATED - The cpython_core mock modules below are related to the deprecated get-core command -->
 - in order to load / debug the test the python path needs to include the cpython_core modules (Q&D) 
 - mocking cpython_core/os is missing the implementation attribute so that has been added (Q&D)  
 

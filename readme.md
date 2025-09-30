@@ -84,8 +84,8 @@ stubber get-docstubs
 # get the frozen stubs for the current version ( v1.22.2 )
 stubber get-frozen
 
-# get the core CPython compatibility stubs from PyPi 
-stubber get-core
+# [DEPRECATED] get the core CPython compatibility stubs from PyPi 
+# stubber get-core
 
 # Update the fallback stubs
 stubber update-fallback

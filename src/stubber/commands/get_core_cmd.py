@@ -20,7 +20,7 @@ from stubber.utils.config import CONFIG
 #########################################################################################
 
 
-@stubber_cli.command(name="get-core")
+@stubber_cli.command(name="get-core", deprecated=True, hidden=True)
 @click.option(
     "--stub-folder",
     "-stubs",
@@ -48,10 +48,19 @@ def cli_get_core(
     format: bool = True,
 ):
     """
-    Download core CPython stubs from PyPi.
+    [DEPRECATED] Download core CPython stubs from PyPi.
+
+    This command is deprecated and will be removed in a future version.
+    It is a remnant from earlier methods to collate stubs.
 
     Get the core (CPython compat) modules for both MicroPython and Pycopy.
     """
+    # Warning message
+    log.warning("=" * 80)
+    log.warning("WARNING: The 'get-core' command is DEPRECATED and will be removed in a future version.")
+    log.warning("This is a remnant from earlier methods to collate stubs.")
+    log.warning("=" * 80)
+
     # default parameter values
     stub_folder = stub_folder or CONFIG.stub_path.as_posix()
 
@@ -61,9 +70,7 @@ def cli_get_core(
         req_filename = f"requirements-core-{core_type}.txt"
         stub_path = Path(stub_folder) / f"cpython_core-{core_type}"
 
-        get_cpython.get_core(
-            stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type
-        )
+        get_cpython.get_core(stub_path=stub_path.as_posix(), requirements=req_filename, family=core_type)
         stub_paths.append(stub_path)
 
     log.info("::group:: start post processing of retrieved stubs")

@@ -47,7 +47,11 @@ def fx_add_minified_path(pytestconfig: Config):
 
 @pytest.fixture()
 def mock_pycopy_path(pytestconfig: Config):
-    "Add pycopy-CPython, and machine to path  temporarily"
+    """Add pycopy-CPython, and machine to path  temporarily
+
+    TODO: DEPRECATED - This fixture uses mock cpython_core modules which are related
+          to the deprecated get-core command. Consider removing when get-core is removed.
+    """
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "pycopy-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
     if not source_path in sys.path:
@@ -60,7 +64,11 @@ def mock_pycopy_path(pytestconfig: Config):
 
 @pytest.fixture()
 def mock_micropython_path(pytestconfig: Config):
-    "Add micropython-CPython and machine to path  temporarily"
+    """Add micropython-CPython and machine to path  temporarily
+
+    TODO: DEPRECATED - This fixture uses mock cpython_core modules which are related
+          to the deprecated get-core command. Consider removing when get-core is removed.
+    """
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "micropython-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
     if not source_path in sys.path:

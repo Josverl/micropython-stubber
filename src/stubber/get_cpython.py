@@ -1,6 +1,13 @@
 """
 Download or update the MicroPython compatibility modules from pycopy and stores them in the all_stubs folder
 The all_stubs folder should be mapped/symlinked to the micropython_stubs/stubs repo/folder
+
+TODO: DEPRECATED - This module is a remnant from earlier methods to collate stubs.
+      The get-core command and this module are deprecated and will be removed in a future version.
+      Related artifacts to consider for removal:
+      - requirements-core-micropython.txt
+      - requirements-core-pycopy.txt
+      - cpython_core-* stub folders
 """
 
 # pragma: no cover
@@ -19,10 +26,13 @@ from . import __version__, utils
 from .utils.config import CONFIG
 
 
-def get_core(
-    requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"
-):
-    "Download MicroPython compatibility modules"
+def get_core(requirements: str, stub_path: Optional[Union[str, Path]] = None, family: str = "core"):
+    """Download MicroPython compatibility modules
+
+    .. deprecated::
+        This function is deprecated and will be removed in a future version.
+        It is a remnant from earlier methods to collate stubs.
+    """
     if not stub_path:
         stub_path = CONFIG.stub_path / "cpython-core"  # pragma: no cover
     stub_path = Path(stub_path)
@@ -70,9 +80,7 @@ def get_core(
 
         except OSError as err:  # pragma: no cover
             log.error(
-                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(
-                    err
-                )
+                "An error occurred while trying to run pip to download the MicroPython compatibility modules from PyPi: {}".format(err)
             )
 
         # copy *.py files in build folder to stub_path

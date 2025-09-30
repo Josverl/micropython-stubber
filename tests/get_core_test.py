@@ -1,3 +1,10 @@
+"""
+Tests for get_cpython module
+
+TODO: DEPRECATED - These tests are for the deprecated get-core command.
+      Consider removing when the get-core command is removed.
+"""
+
 from pathlib import Path
 import pytest
 from mock import MagicMock

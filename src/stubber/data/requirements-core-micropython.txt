@@ -1,3 +1,7 @@
+# TODO: DEPRECATED - This file will be removed in a future version.
+#       It is used by the deprecated 'get-core' command which is a remnant 
+#       from earlier methods to collate stubs.
+#
 # list of modules to mimic micropython on CPython
 # micropython generally has more and more complete stubs
 

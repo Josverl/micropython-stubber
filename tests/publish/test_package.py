@@ -1,5 +1,5 @@
 # sourcery skip: require-parameter-annotation, require-return-annotation
-""" Test the package creation and manipulation"""
+"""Test the package creation and manipulation"""
 
 from pathlib import Path
 
@@ -103,6 +103,9 @@ def test_create_package(tmp_path, pytestconfig, version, port, board, mocker, mo
         assert len(updated_sources) == 3, "new package must still have 3 stub sources"
 
 
+# TODO: DEPRECATED - The test data below includes references to "cpython_core-pycopy"
+#       which is related to the deprecated get-core command.
+#       Consider updating or removing when get-core is removed.
 read_db_data = [
     {
         "name": "foo-bar-stubs",
