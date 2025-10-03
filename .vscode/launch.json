@@ -156,9 +156,7 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "stopOnEntry": false,
-            // false : Avoid debugpy trying to debug micropython
-            // but may cause issue with pytest-cov coverage reporting 
-            "subProcess": false,
+            "type": "msedge",
         },
     ],
     "inputs": [

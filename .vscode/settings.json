@@ -85,5 +85,6 @@
     "python.languageServer": "Pylance",
     "ruff.fixAll": false,
     "ruff.lint.enable": false,
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+    "esbonio.server.enabled": false
 }
