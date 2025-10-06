@@ -1,0 +1,5 @@
+# https://playwright.dev/python/docs/intro
+pytest-playwright
+
+# note: also needs 
+# playwright install 
