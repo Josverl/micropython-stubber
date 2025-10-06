@@ -1,4 +1,0 @@
-packages = [
-    "github:josverl/micropython-stubs/mip/typing.json",
-    "github:josverl/micropython-stubber/src/stubber/board/createstubs.py",
-]

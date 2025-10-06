@@ -7,28 +7,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- MicroPython V1.24.1 -->
-    <!-- 
+<!-- 
     <script type="module" src="https://pyscript.net/releases/2025.3.1/core.js"></script>
     <link rel="stylesheet" href="https://pyscript.net/releases/2025.3.1/core.css"> 
 -->
 
-
     <!-- MicroPython V1.25.0 -->
+<!-- 
 
     <script type="module" src="https://pyscript.net/releases/2025.5.1/core.js"></script>
     <link rel="stylesheet" href="https://pyscript.net/releases/2025.5.1/core.css">
+-->
 
 
     <!-- MicroPython V1.26-preview -->
-    <!-- 
     <script type="module" src="https://pyscript.net/releases/2025.7.3/core.js"></script>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2025.3.2/core.css">
- -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.7.3/core.css">
 
 </head>
 
 <body>
-    <script type="mpy" src="./mount_createstubs.py" config="./createstubs-req.toml" terminal></script>
+    <h1>Hosted Pyscript stubber</h1>
+    <p>Creating type-stubs for MicroPython webassembly (wasm) and PyScript</p>
+    
+    <!-- Dynamically load the script with timestamp to prevent browser caching -->
+    <script>
+            document.write('<script type="mpy" src="./mount_createstubs.py?t=' + Date.now() + '" config="./createstubs-req.toml?t=' + Date.now() + '" terminal><\/script>');
+    </script>
 
     <blockquote>
         <p>This example shows how to create and download the MicroPython firmware-stubs for webassembly-pyscript.
@@ -44,7 +49,6 @@
         <p>Note: The stubs are generated using the <a href="https://github.com/josverl/micropython-stubber">
                 micropython-stubber </a> for the <a href="https://github.com/josverl/micropython-stubs"> MicroPython
                 stubs</a> project.</p>
-        MicroPython stubs</a> project.</p>
 </body>
 
 </html>

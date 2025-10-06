@@ -21,7 +21,7 @@ print("cwd:", os.getcwd())
 # create_stubbies()
 create_stubs()
 # ------------------------------------
-# synchronize the changes to the local file system
+print("synchronize the changes to the local file system")
 print("Please wait 🕧🕐🕜🕑🕝🕒🕛")
 await fs.sync("/stubs")
 
@@ -29,6 +29,7 @@ print("✅✅✅✅✅✅✅✅ Synced /stubs")
 
 # await fs.unmount("/stubs")
 # print("Unmounted /stubs")
+import asyncio
 
 while True:
     await asyncio.sleep(1)

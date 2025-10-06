@@ -1,0 +1,15 @@
+packages = [
+    "github:josverl/micropython-stubs/mip/typing.json",
+    "github:josverl/micropython-stubber/src/stubber/board/createstubs.py",
+]
+
+
+# interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@1.27.0-preview-282/micropython.mjs"
+
+# Local pyscript variant
+interpreter = "./build-pyscript/micropython.mjs"
+
+# Standard webassembly variant - will fail due to missing modules:
+# no module named 'pathlib'
+# no module named 'pyscript'
+# interpreter = "./build-standard/micropython.mjs"
