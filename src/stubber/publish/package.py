@@ -139,7 +139,7 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     """
     # Use lower case for paths to avoid case sensitive issues
     port = port.lower()
-    # BOARD in the micropython repo is always uppercase by convention (GENERIC)
+    # BOARD in the micropython repo is always uppercase by convention (PYBV11, RPI_PICO)
     # but MUST  be used in lowercase in the stubs repo
     board_l = board.lower() if board else GENERIC_L
     board_u = board_l.upper()
@@ -151,15 +151,19 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     # is it possible to prefer micropython-nrf-microbit-stubs over micropython-nrf-stubs
     # that would also require the port - board - variant to be discoverable runtime
 
+    # Stand alone ports do not have a board, ( just a port and a variant) eg webassembly
+    # resulting in parts with a double dash -- in the path
+    # micropython-webassembly--generic-merged
+    # Workaround for this is to replace -- with - in the path
     if board_l in GENERIC:
-        merged_path = Path(f"{family}-{ver_flat}-{port}-merged")
+        merged_path = Path(f"{family}-{ver_flat}-{port}-merged".replace("--", "-"))
         if not merged_path.exists():
             board = default_board(port, ver_flat)
             board_l = board.lower()
             board_u = board
-            merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged")
+            merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged".replace("--", "-"))
     else:
-        merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged")
+        merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged".replace("--", "-"))
 
     # BOARD in source frozen path needs to be UPPERCASE
     frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()

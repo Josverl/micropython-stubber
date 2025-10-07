@@ -39,7 +39,7 @@ from stubber.utils.config import CONFIG
     "-b",
     "boards",
     multiple=True,
-    default=[GENERIC_U],  # or "all" ?
+    default=[GENERIC_U],  # or "all" ? # FIXME: use "" / or "<default>" or None as default - GENERIC is only for ESP ports
     show_default=True,
     help="multiple: ",
 )

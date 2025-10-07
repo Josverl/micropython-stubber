@@ -154,7 +154,6 @@ def frozen_candidates(
                     #
 
                 else:
-                    # raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
                     raise NotImplementedError(f"auto boards not implemented for family {family}")  # pragma: no cover
             # ---------------------------------------------------------------------------
             for board in boards:
@@ -218,7 +217,7 @@ def board_candidates(
                 "family": family,
                 "version": version,
                 "port": port,
-                "board": GENERIC_U,
+                "board": GENERIC_U,  # FIXME: Only ESP ports should use GENERIC - use "" or "<default>"
             }
             for board in list_micropython_port_boards(family=family, mpy_path=mpy_path, port=port):
                 if board not in GENERIC:
