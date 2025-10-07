@@ -5,9 +5,14 @@ packages = [
 
 
 # interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@1.27.0-preview-282/micropython.mjs"
+# interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@1.26.0/micropython.mjs"
 
-# Local pyscript variant
-interpreter = "./build-pyscript/micropython.mjs"
+# Local pyscript variant - Note that not all released version work with pyscript
+# interpreter = "./webassembly/webassembly-pyscript-v1.24.1/micropython.mjs"  # OK 
+# interpreter = "./webassembly/webassembly-pyscript-v1.25.0/micropython.mjs"  # OK 
+# interpreter = "./webassembly/webassembly-pyscript-v1.26.0/micropython.mjs"  # <-- Does not load 
+# interpreter = "./webassembly/webassembly-pyscript-v1.26.1/micropython.mjs"  # <-- Does not load 
+# interpreter = "./webassembly/webassembly-pyscript-v1.27.0-preview/micropython.mjs"
 
 # Standard webassembly variant - will fail due to missing modules:
 # no module named 'pathlib'
