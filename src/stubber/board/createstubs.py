@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.26.2"
+__version__ = "v1.26.3"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -799,6 +799,7 @@ def main():
         "_boot_fat",
         "_espnow",
         "_onewire",
+        "_pyscript",
         "_rp2",
         "_thread",
         "_uasyncio",
