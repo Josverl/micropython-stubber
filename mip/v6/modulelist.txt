@@ -4,6 +4,7 @@ _asyncio
 _boot_fat
 _espnow
 _onewire
+_pyscript
 _rp2
 _thread
 _uasyncio
