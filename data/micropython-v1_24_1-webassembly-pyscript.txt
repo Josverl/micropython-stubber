@@ -1,4 +1,5 @@
 # pyscript itself not listed by help('modules')
+_pyscript
 pyscript
 pyscript/__init__
 pyscript/fs
