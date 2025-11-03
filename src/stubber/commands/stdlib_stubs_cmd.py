@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
+import mpflash.basicgit as git
 import rich_click as click
 from mpflash.logger import log
 from mpflash.versions import clean_version, get_stable_mp_version
@@ -325,7 +326,7 @@ def update_typing_pyi(rootpath: Path, dist_stdlib_path: Path) -> None:
     # Placeholder for typing.pyi specific patches if needed
 
 
-@stubber_cli.command(name="stdlib-stubs")
+@stubber_cli.command(name="stdlib")
 @click.option(
     "--clone/--no-clone",
     "-c",
@@ -407,16 +408,30 @@ def cli_stdlib_stubs(
         raise click.ClickException(f"Root path {rootpath} does not exist")
 
     if clone:
-        log.warning("Clone functionality not yet implemented")
-        log.info("To manually clone typeshed:")
-        log.info("  cd repos && git clone https://github.com/python/typeshed.git")
+        # Clone typeshed repository
+        repos_path = rootpath / "repos"
+        repos_path.mkdir(parents=True, exist_ok=True)
+
+        typeshed_repo = "https://github.com/python/typeshed.git"
+        typeshed_branch = "main"
+
+        log.info(f"Cloning {typeshed_repo} branch {typeshed_branch} to {typeshed_path}")
+        if not (typeshed_path / ".git").exists():
+            log.debug("Cloning typeshed...")
+            git.clone(remote_repo=typeshed_repo, path=typeshed_path)
+        else:
+            log.debug("typeshed already exists, fetching...")
+            git.fetch(typeshed_path)
+            git.pull(typeshed_path, branch=typeshed_branch)
+
+        log.info(f"typeshed cloned/updated at {typeshed_path}")
 
     # Create dist_stdlib_path if it doesn't exist
     dist_stdlib_path.mkdir(parents=True, exist_ok=True)
 
     if typeshed:
         if not typeshed_path.exists():
-            raise click.ClickException(f"Typeshed path {typeshed_path} does not exist. Please clone it first or use --clone option.")
+            raise click.ClickException(f"Typeshed path {typeshed_path} does not exist. Please clone it first using --clone option.")
         update_stdlib_from_typeshed(dist_stdlib_path, typeshed_path)
 
     # Always update _mpy_shed and asyncio
