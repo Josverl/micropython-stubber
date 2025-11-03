@@ -343,8 +343,8 @@ def update_typing_pyi(rootpath: Path, dist_stdlib_path: Path) -> None:
     show_default=True,
 )
 @click.option(
-    "--typeshed/--no-typeshed",
-    "-t",
+    "--update/--no-update",
+    "-u",
     help="Update stdlib from the typeshed repo.",
     default=False,
     show_default=True,
@@ -372,7 +372,7 @@ def update_typing_pyi(rootpath: Path, dist_stdlib_path: Path) -> None:
 def cli_stdlib_stubs(
     version: Optional[str] = None,
     clone: bool = False,
-    typeshed: bool = False,
+    update: bool = False,
     merge: bool = True,
     build: bool = True,
     publish: bool = False,
@@ -429,7 +429,7 @@ def cli_stdlib_stubs(
     # Create dist_stdlib_path if it doesn't exist
     dist_stdlib_path.mkdir(parents=True, exist_ok=True)
 
-    if typeshed:
+    if update:
         if not typeshed_path.exists():
             raise click.ClickException(f"Typeshed path {typeshed_path} does not exist. Please clone it first using --clone option.")
         update_stdlib_from_typeshed(dist_stdlib_path, typeshed_path)

@@ -65,7 +65,7 @@ def test_cmd_stdlib_stubs_no_build(mocker: MockerFixture, tmp_path: Path):
     # Run command without building
     result = runner.invoke(
         stubber.stubber_cli,
-        ["stdlib", "--no-build", "--no-merge", "--no-typeshed"],
+        ["stdlib", "--no-build", "--no-merge", "--no-update"],
     )
 
     # Command should succeed
@@ -126,7 +126,7 @@ def test_cmd_stdlib_stubs_with_merge(mocker: MockerFixture, tmp_path: Path):
     # Run with merge
     result = runner.invoke(
         stubber.stubber_cli,
-        ["stdlib", "--no-build", "--merge", "--no-typeshed"],
+        ["stdlib", "--no-build", "--merge", "--no-update"],
     )
 
     # Should succeed
@@ -137,8 +137,8 @@ def test_cmd_stdlib_stubs_with_merge(mocker: MockerFixture, tmp_path: Path):
 
 
 @pytest.mark.mocked
-def test_cmd_stdlib_stubs_with_typeshed(mocker: MockerFixture, tmp_path: Path):
-    """Test stdlib command with typeshed update."""
+def test_cmd_stdlib_stubs_with_update(mocker: MockerFixture, tmp_path: Path):
+    """Test stdlib command with update option."""
     runner = CliRunner()
 
     # Mock version
@@ -147,7 +147,7 @@ def test_cmd_stdlib_stubs_with_typeshed(mocker: MockerFixture, tmp_path: Path):
         return_value="1.24.0",
     )
 
-    # Mock typeshed update
+    # Mock update function
     m_update_typeshed = mocker.patch("stubber.commands.stdlib_stubs_cmd.update_stdlib_from_typeshed")
 
     # Mock other functions
@@ -178,16 +178,16 @@ def test_cmd_stdlib_stubs_with_typeshed(mocker: MockerFixture, tmp_path: Path):
     pyproject.parent.mkdir(parents=True, exist_ok=True)
     pyproject.write_text("[tool.poetry]\nname='test'\n")
 
-    # Run with typeshed update
+    # Run with update option
     result = runner.invoke(
         stubber.stubber_cli,
-        ["stdlib", "--no-build", "--no-merge", "--typeshed"],
+        ["stdlib", "--no-build", "--no-merge", "--update"],
     )
 
     # Should succeed
     assert result.exit_code == 0
 
-    # Verify typeshed update was called
+    # Verify update was called
     assert m_update_typeshed.call_count == 1
 
 
@@ -230,7 +230,7 @@ def test_cmd_stdlib_stubs_version_option(mocker: MockerFixture, tmp_path: Path):
     # Run with explicit version
     result = runner.invoke(
         stubber.stubber_cli,
-        ["stdlib", "--no-build", "--no-merge", "--no-typeshed", "-v", "1.23.0"],
+        ["stdlib", "--no-build", "--no-merge", "--no-update", "-v", "1.23.0"],
     )
 
     # Should succeed without calling get_stable_mp_version
@@ -282,7 +282,7 @@ def test_cmd_stdlib_clone(mocker: MockerFixture, tmp_path: Path):
     # Run with clone (typeshed doesn't exist yet)
     result = runner.invoke(
         stubber.stubber_cli,
-        ["stdlib", "--no-build", "--no-merge", "--no-typeshed", "--clone"],
+        ["stdlib", "--no-build", "--no-merge", "--no-update", "--clone"],
     )
 
     # Should succeed
