@@ -10,7 +10,6 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-import mpflash.basicgit as git
 import rich_click as click
 from mpflash.logger import log
 from mpflash.versions import clean_version, get_stable_mp_version
@@ -328,13 +327,6 @@ def update_typing_pyi(rootpath: Path, dist_stdlib_path: Path) -> None:
 
 @stubber_cli.command(name="stdlib")
 @click.option(
-    "--clone/--no-clone",
-    "-c",
-    help="Clone the typeshed repo.",
-    default=False,
-    show_default=True,
-)
-@click.option(
     "--version",
     "-v",
     type=str,
@@ -371,7 +363,6 @@ def update_typing_pyi(rootpath: Path, dist_stdlib_path: Path) -> None:
 )
 def cli_stdlib_stubs(
     version: Optional[str] = None,
-    clone: bool = False,
     update: bool = False,
     merge: bool = True,
     build: bool = True,
@@ -400,38 +391,21 @@ def cli_stdlib_stubs(
     dist_stdlib_path = rootpath / "publish/micropython-stdlib-stubs"
     docstubs_path = rootpath / f"stubs/micropython-{flat_version}-docstubs"
     boardstub_path = rootpath / f"stubs/micropython-{flat_version}-esp32-ESP32_GENERIC"
-    typeshed_path = rootpath / "repos/typeshed"
+    typeshed_path = CONFIG.repo_path / CONFIG.typeshed_path
     reference_path = rootpath / "reference"
 
     # Validate required paths
     if not rootpath.exists():
         raise click.ClickException(f"Root path {rootpath} does not exist")
 
-    if clone:
-        # Clone typeshed repository
-        repos_path = rootpath / "repos"
-        repos_path.mkdir(parents=True, exist_ok=True)
-
-        typeshed_repo = "https://github.com/python/typeshed.git"
-        typeshed_branch = "main"
-
-        log.info(f"Cloning {typeshed_repo} branch {typeshed_branch} to {typeshed_path}")
-        if not (typeshed_path / ".git").exists():
-            log.debug("Cloning typeshed...")
-            git.clone(remote_repo=typeshed_repo, path=typeshed_path)
-        else:
-            log.debug("typeshed already exists, fetching...")
-            git.fetch(typeshed_path)
-            git.pull(typeshed_path, branch=typeshed_branch)
-
-        log.info(f"typeshed cloned/updated at {typeshed_path}")
-
     # Create dist_stdlib_path if it doesn't exist
     dist_stdlib_path.mkdir(parents=True, exist_ok=True)
 
     if update:
         if not typeshed_path.exists():
-            raise click.ClickException(f"Typeshed path {typeshed_path} does not exist. Please clone it first using --clone option.")
+            raise click.ClickException(
+                f"Typeshed path {typeshed_path} does not exist. Please clone it first using: stubber clone --typeshed"
+            )
         update_stdlib_from_typeshed(dist_stdlib_path, typeshed_path)
 
     # Always update _mpy_shed and asyncio

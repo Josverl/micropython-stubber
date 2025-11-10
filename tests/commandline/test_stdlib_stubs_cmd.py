@@ -49,6 +49,8 @@ def test_cmd_stdlib_stubs_no_build(mocker: MockerFixture, tmp_path: Path):
     # Mock CONFIG by creating a fake config object
     fake_config = mocker.MagicMock()
     fake_config.stub_path = tmp_path / "stubs"
+    fake_config.repo_path = tmp_path / "repos"
+    fake_config.typeshed_path = Path("typeshed")
     mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
 
     # Create necessary directory structure
@@ -107,6 +109,8 @@ def test_cmd_stdlib_stubs_with_merge(mocker: MockerFixture, tmp_path: Path):
     # Mock CONFIG
     fake_config = mocker.MagicMock()
     fake_config.stub_path = tmp_path / "stubs"
+    fake_config.repo_path = tmp_path / "repos"
+    fake_config.typeshed_path = Path("typeshed")
     mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
 
     # Create necessary directories
@@ -162,6 +166,8 @@ def test_cmd_stdlib_stubs_with_update(mocker: MockerFixture, tmp_path: Path):
     # Mock CONFIG
     fake_config = mocker.MagicMock()
     fake_config.stub_path = tmp_path / "stubs"
+    fake_config.repo_path = tmp_path / "repos"
+    fake_config.typeshed_path = Path("typeshed")
     mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
 
     # Create necessary directories
@@ -214,6 +220,8 @@ def test_cmd_stdlib_stubs_version_option(mocker: MockerFixture, tmp_path: Path):
     # Mock CONFIG
     fake_config = mocker.MagicMock()
     fake_config.stub_path = tmp_path / "stubs"
+    fake_config.repo_path = tmp_path / "repos"
+    fake_config.typeshed_path = Path("typeshed")
     mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
 
     # Create necessary directories
@@ -236,62 +244,6 @@ def test_cmd_stdlib_stubs_version_option(mocker: MockerFixture, tmp_path: Path):
     # Should succeed without calling get_stable_mp_version
     assert result.exit_code == 0
     assert m_version.call_count == 0
-
-
-@pytest.mark.mocked
-def test_cmd_stdlib_clone(mocker: MockerFixture, tmp_path: Path):
-    """Test stdlib command with clone option."""
-    runner = CliRunner()
-
-    # Mock version
-    mocker.patch(
-        "stubber.commands.stdlib_stubs_cmd.get_stable_mp_version",
-        return_value="1.24.0",
-    )
-
-    # Mock git operations
-    m_git_clone = mocker.patch("stubber.commands.stdlib_stubs_cmd.git.clone")
-    m_git_fetch = mocker.patch("stubber.commands.stdlib_stubs_cmd.git.fetch")
-    m_git_pull = mocker.patch("stubber.commands.stdlib_stubs_cmd.git.pull")
-
-    # Mock other functions
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.update_mpy_shed")
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.update_asyncio_manual")
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.do_post_processing")
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.add_type_ignore")
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.comment_out_lines")
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.change_lines")
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.update_typing_pyi")
-
-    # Mock CONFIG
-    fake_config = mocker.MagicMock()
-    fake_config.stub_path = tmp_path / "stubs"
-    mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
-
-    # Create necessary directories
-    reference_path = tmp_path / "reference"
-    reference_path.mkdir(parents=True)
-
-    stdlib_path = tmp_path / "publish" / "micropython-stdlib-stubs" / "stdlib"
-    stdlib_path.mkdir(parents=True, exist_ok=True)
-
-    pyproject = tmp_path / "publish" / "micropython-stdlib-stubs" / "pyproject.toml"
-    pyproject.parent.mkdir(parents=True, exist_ok=True)
-    pyproject.write_text("[tool.poetry]\nname='test'\n")
-
-    # Run with clone (typeshed doesn't exist yet)
-    result = runner.invoke(
-        stubber.stubber_cli,
-        ["stdlib", "--no-build", "--no-merge", "--no-update", "--clone"],
-    )
-
-    # Should succeed
-    assert result.exit_code == 0
-
-    # Verify git.clone was called
-    assert m_git_clone.call_count == 1
-    assert m_git_fetch.call_count == 0
-    assert m_git_pull.call_count == 0
 
 
 ##########################################################################################
@@ -531,6 +483,8 @@ def test_cmd_stdlib_build_error(mocker: MockerFixture, tmp_path: Path):
     # Mock CONFIG
     fake_config = mocker.MagicMock()
     fake_config.stub_path = tmp_path / "stubs"
+    fake_config.repo_path = tmp_path / "repos"
+    fake_config.typeshed_path = Path("typeshed")
     mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
 
     # Create necessary directories
@@ -578,6 +532,8 @@ def test_cmd_stdlib_missing_pyproject(mocker: MockerFixture, tmp_path: Path):
     # Mock CONFIG
     fake_config = mocker.MagicMock()
     fake_config.stub_path = tmp_path / "stubs"
+    fake_config.repo_path = tmp_path / "repos"
+    fake_config.typeshed_path = Path("typeshed")
     mocker.patch("stubber.commands.stdlib_stubs_cmd.CONFIG", fake_config)
 
     # Create necessary directories but NOT pyproject.toml
