@@ -140,6 +140,16 @@ class Stubber:
             "example_sub_led.py",
             "example_pub_button.py",
         ]
+        # Load additional exclusions from modulelist_exclude.txt if it exists
+        try:
+            with open("modulelist_exclude.txt", "r") as f:
+                for line in f:
+                    module = line.strip()
+                    if module and module not in self.excluded:
+                        self.excluded.append(module)
+                        log.info("Added {} to excluded modules from modulelist_exclude.txt".format(module))
+        except OSError:
+            pass  # File doesn't exist, that's OK
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []  # type: list[str]
         self._json_name = None
