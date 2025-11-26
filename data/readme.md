@@ -9,6 +9,5 @@ place a comment `#` before all lines that do not not contain module names.
 
 After adding or changing any file update the list of modules using from the root of the repository.
 ```
-stubber update-module-list
 stubber make-variants
 ``` 
