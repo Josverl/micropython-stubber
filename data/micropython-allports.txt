@@ -2,6 +2,7 @@
 # ref : https://github.com/micropython/micropython/pull/16381
 # Lets assume there may be a module named for the port
 
+alif
 cc3200
 embed
 esp32
