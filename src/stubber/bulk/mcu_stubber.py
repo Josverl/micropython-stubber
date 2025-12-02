@@ -127,7 +127,7 @@ def generate_board_stubs(
     variant: Variant = Variant.db,
     form: Form = Form.mpy,
     mount_vfs: bool = True,
-    exclude: List[str] | None = None,
+    exclude: Union[List[str], None] = None,
 ) -> Tuple[int, Optional[Path]]:
     """
     Generate the MCU stubs for this MCU board.
@@ -316,7 +316,7 @@ def stub_connected_mcus(
     serial: List[str],
     ignore: List[str],
     bluetooth: bool,
-    exclude: List[str] | None = None,
+    exclude: Union[List[str], None] = None,
 ) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
