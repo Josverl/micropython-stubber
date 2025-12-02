@@ -51,7 +51,7 @@ try:from machine import reset
 except R:pass
 try:from collections import OrderedDict as l
 except R:from ucollections import OrderedDict as l
-__version__='v1.26.3'
+__version__='v1.26.4'
 A2=2
 A3=44
 A4=2
@@ -321,7 +321,7 @@ def o():
 	try:A=bytes('abc',encoding='utf8');B=o.__module__;return I
 	except(p,J):return Y
 def main():
-	stubber=Stubber(path=read_path());stubber.clean();stubber.load_exlusions()
+	stubber=Stubber(path=read_path());stubber.clean()
 	def A(stubber):
 		F.collect();stubber.modules=[]
 		for C in A5:

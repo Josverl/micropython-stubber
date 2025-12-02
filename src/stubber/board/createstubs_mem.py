@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross,
       to avoid the compilation step on the micropython device
 
-This variant was generated from createstubs.py by micropython-stubber v1.26.3
+This variant was generated from createstubs.py by micropython-stubber v1.26.4
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -34,7 +34,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.26.3"
+__version__ = "v1.26.4"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -812,7 +812,6 @@ def main():
     # Option: Specify a firmware name & version
     # stubber = Stubber(firmware_id='HoverBot v1.2.1')
     stubber.clean()
-    stubber.load_exlusions()  # should be done already in __init__
 
     # Read stubs from modulelist in the current folder or in /libs
     # fall back to default modules
