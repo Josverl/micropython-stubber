@@ -73,13 +73,6 @@ def run_createstubs(
     Retry running the command up to 10 times, with a 15 second timeout between retries.
     this should allow for the boards with little memory to complete even if they run out of memory.
     """
-    # add the lib folder to the path
-    cmd_path = [
-        "exec",
-        'import sys;sys.path.append("/lib") if "/lib" not in sys.path else "/lib already in path"',
-    ]
-    mcu.run_command(cmd_path, timeout=5)
-
     if reset_before:
         log.info(f"Resetting {mcu.serialport} {mcu.description}")
         mcu.run_command("reset", timeout=5)
@@ -121,6 +114,29 @@ def build_cmd(dest: Union[Path, None], variant: Variant = Variant.db) -> List[st
     return cmd
 
 
+def ensure_lib_directory(mcu: MPRemoteBoard):
+    """
+    Create lib directory and add to sys.path for mip_install.
+
+    mpremote mip requires a lib path in sys.path but does not create the
+    directory itself. This must be called before mip_install.
+    """
+    cmd = [
+        "exec",
+        """
+import sys, os
+lib_path = os.getcwd() + '/lib'
+if lib_path not in sys.path:
+    sys.path.append(lib_path)
+try:
+    os.mkdir('lib')
+except OSError:
+    pass
+""".strip(),
+    ]
+    mcu.run_command(cmd, timeout=5)
+
+
 def generate_board_stubs(
     dest: Path,
     mcu: MPRemoteBoard,
@@ -146,6 +162,10 @@ def generate_board_stubs(
     if not mount_vfs:
         # remove prio stubs folder to avoid running out of flash space
         mcu.run_command(["rm", "-rv", ":stubs"], log_errors=False)
+
+    # Ensure lib directory exists and is in sys.path before mip_install
+    ensure_lib_directory(mcu)
+
     # HOST -> MCU : mip install createstubs to board
     ok = install_scripts_to_board(mcu, form)
     if not ok and not TESTING:
