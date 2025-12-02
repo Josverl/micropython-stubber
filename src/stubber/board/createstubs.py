@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.26.3"
+__version__ = "v1.26.4"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -121,10 +121,23 @@ class Stubber:
             "example_sub_led.py",
             "example_pub_button.py",
         ]
+        self.load_exlusions()
         # there is no option to discover modules from micropython, list is read from an external file.
         self.modules = []  # type: list[str]
         self._json_name = None
         self._json_first = False
+
+    def load_exlusions(self):
+        # Load additional exclusions from modulelist_exclude.txt if it exists
+        try:
+            with open("modulelist_exclude.txt", "r") as f:
+                for line in f:
+                    module = line.strip()
+                    if module and module not in self.excluded:
+                        self.excluded.append(module)
+                        log.info("Added {} to excluded modules from modulelist_exclude.txt".format(module))
+        except OSError:
+            pass  # File doesn't exist, that's OK
 
     def get_obj_attributes(self, item_instance: object):
         "extract information of the objects members and attributes"

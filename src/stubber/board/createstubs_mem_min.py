@@ -26,10 +26,10 @@ X='family'
 W='board_id'
 V='board'
 U=len
-T=open
-S=IndexError
-R=print
-Q=ImportError
+T=IndexError
+S=print
+R=ImportError
+Q=open
 P='mpy'
 O=dir
 N='build'
@@ -48,16 +48,16 @@ from time import sleep
 try:from ujson import dumps
 except:from json import dumps
 try:from machine import reset
-except Q:pass
+except R:pass
 try:from collections import OrderedDict as l
-except Q:from ucollections import OrderedDict as l
-__version__='v1.26.3'
+except R:from ucollections import OrderedDict as l
+__version__='v1.26.4'
 A2=2
 A3=44
 A4=2
 A5=['lib','/lib','/sd/lib','/flash/lib',L]
 class K:
-	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=R
+	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=S
 	@staticmethod
 	def getLogger(name):return K()
 	@classmethod
@@ -89,7 +89,14 @@ class Stubber:
 		A.path='{}/stubs/{}'.format(path,A.flat_fwid).replace('//',G)
 		try:a(path+G)
 		except D:B.error('error creating stub folder {}'.format(path))
-		A.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.modules=[];A._json_name=H;A._json_first=I
+		A.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.load_exlusions();A.modules=[];A._json_name=H;A._json_first=I
+	def load_exlusions(C):
+		try:
+			with Q('modulelist_exclude.txt','r')as E:
+				for F in E:
+					A=F.strip()
+					if A and A not in C.excluded:C.excluded.append(A);B.info('Added {} to excluded modules from modulelist_exclude.txt'.format(A))
+		except D:pass
 	def get_obj_attributes(L,item_instance):
 		H=item_instance;C=[];K=[]
 		for B in O(H):
@@ -97,14 +104,14 @@ class Stubber:
 			try:
 				D=getattr(H,B)
 				try:E=c(type(D)).split("'")[1]
-				except S:E=A
+				except T:E=A
 				if E in{u,v,w,x,f,g,h}:G=1
 				elif E in{y,z}:G=2
 				elif E in'class':G=3
 				else:G=4
 				C.append((B,c(D),c(type(D)),D,G))
 			except J as I:K.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(B,H,I))
-			except MemoryError as I:R('MemoryError: {}'.format(I));sleep(1);reset()
+			except MemoryError as I:S('MemoryError: {}'.format(I));sleep(1);reset()
 		C=q([A for A in C if not A[0].startswith('__')],key=lambda x:x[4]);F.collect();return C,K
 	def add_modules(A,modules):A.modules=q(set(A.modules)|set(modules))
 	def create_all_stubs(A):
@@ -126,9 +133,9 @@ class Stubber:
 		if G in C:C=C.replace(G,L)
 		M=H
 		try:M=__import__(C,H,H,'*');O=F.mem_free();B.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,K,O))
-		except Q:return I
+		except R:return I
 		a(E)
-		with T(E,'w')as N:P=str(J.info).replace('OrderedDict(',A).replace('})','}');R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,P,__version__);N.write(R);N.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(N,M,C,A)
+		with Q(E,'w')as N:P=str(J.info).replace('OrderedDict(',A).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,P,__version__);N.write(S);N.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(N,M,C,A)
 		J.report_add(C,E)
 		if C not in{'os','sys','logging','gc'}:
 			try:del M
@@ -189,19 +196,19 @@ class Stubber:
 	def report_start(A,filename='modules.json'):
 		G='firmware';A._json_name='{}/{}'.format(A.path,filename);A._json_first=Y;a(A._json_name);B.info('Report file: {}'.format(A._json_name));F.collect()
 		try:
-			with T(A._json_name,'w')as E:E.write('{');E.write(dumps({G:A.info})[1:-1]);E.write(i);E.write(dumps({t:{C:__version__},'stubtype':G})[1:-1]);E.write(i);E.write('"modules" :[\n')
+			with Q(A._json_name,'w')as E:E.write('{');E.write(dumps({G:A.info})[1:-1]);E.write(i);E.write(dumps({t:{C:__version__},'stubtype':G})[1:-1]);E.write(i);E.write('"modules" :[\n')
 		except D as I:B.error(A0);A._json_name=H;raise I
 	def report_add(A,module_name,stub_file):
 		if not A._json_name:raise s(A1)
 		try:
-			with T(A._json_name,'a')as C:
+			with Q(A._json_name,'a')as C:
 				if not A._json_first:C.write(i)
 				else:A._json_first=I
 				E='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',G));C.write(E)
 		except D:B.error(A0)
 	def report_end(A):
 		if not A._json_name:raise s(A1)
-		with T(A._json_name,'a')as C:C.write('\n]}')
+		with Q(A._json_name,'a')as C:C.write('\n]}')
 		B.info('Path: {}'.format(A.path))
 def a(path):
 	A=E=0
@@ -242,7 +249,7 @@ def A9(info):
 		D=sys.implementation._machine if'_machine'in O(sys.implementation)else os.uname().machine;B[V]=D.strip();C=sys.implementation._build if'_build'in O(sys.implementation)else A
 		if C:B[V]=C.split(E)[0];B[j]=C.split(E)[1]if E in C else A
 		B[W]=C;B['cpu']=D.split('with')[-1].strip();B[P]=sys.implementation._mpy if'_mpy'in O(sys.implementation)else sys.implementation.mpy if P in O(sys.implementation)else A
-	except(J,S):pass
+	except(J,T):pass
 	if not B[W]:AG(B)
 def AA(info):
 	B=info
@@ -251,15 +258,15 @@ def AA(info):
 			B[N]=b(os.uname()[3])
 			if not B[N]:B[N]=b(os.uname()[2])
 		elif C in O(sys):B[N]=b(sys.version)
-	except(J,S,d):pass
+	except(J,T,d):pass
 	if B[C]==A and sys.platform not in('unix','win32'):
 		try:D=os.uname();B[C]=D.release
-		except(S,J,d):pass
+		except(T,J,d):pass
 def AB(info):
 	D='ev3-pybricks';C='pycom';B='pycopy';A=info
 	for(E,F,G)in[(B,B,'const'),(C,C,'FAT'),(D,'pybricks.hubs','EV3Brick')]:
 		try:I=__import__(F,H,H,G);A[X]=E;del I;break
-		except(Q,r):pass
+		except(R,r):pass
 	if A[X]==D:A['release']='2.0.0'
 def AC(info):
 	A=info
@@ -272,7 +279,7 @@ def AD(info):
 		try:
 			C=[H,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][B>>10]
 			if C:A[k]=C
-		except S:A[k]='unknown'
+		except T:A[k]='unknown'
 		A[P]='v{}.{}'.format(B&255,B>>8&3)
 def AE(info):
 	A=info
@@ -286,7 +293,7 @@ def AF(version):
 def AG(info):
 	D=info
 	try:from boardname import BOARD_ID as C;B.info('Found BOARD_ID: {}'.format(C))
-	except Q:B.warning('BOARD_ID not found');C=A
+	except R:B.warning('BOARD_ID not found');C=A
 	D[W]=C;D[V]=C.split(E)[0]if E in C else C;D[j]==C.split(E)[1]if E in C else A
 def get_root():
 	try:A=os.getcwd()
@@ -301,7 +308,7 @@ def m(filename):
 		if os.stat(filename)[0]>>14:return Y
 		return I
 	except D:return I
-def n():R("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
+def n():S("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
 def read_path():
 	path=A
 	if U(sys.argv)==3:
@@ -320,18 +327,18 @@ def main():
 		for C in A5:
 			B=C+'/modulelist.txt'
 			if not m(B):continue
-			with T(B)as D:
+			with Q(B)as D:
 				while Y:
 					A=D.readline().strip()
 					if not A:break
 					if U(A)>0 and A[0]!='#':stubber.modules.append(A)
-				F.collect();R('BREAK');break
+				F.collect();S('BREAK');break
 		if not stubber.modules:stubber.modules=[e]
 		F.collect()
 	stubber.modules=[];A(stubber);F.collect();stubber.create_all_stubs()
 if __name__=='__main__'or o():
 	if not m('no_auto_stubber.txt'):
-		R(f"createstubs.py: {__version__}")
+		S(f"createstubs.py: {__version__}")
 		try:F.threshold(4096);F.enable()
 		except BaseException:pass
 		main()
