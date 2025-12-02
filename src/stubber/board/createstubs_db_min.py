@@ -31,11 +31,11 @@ T=IndexError
 S=print
 R=ImportError
 Q='mpy'
-P=open
-O=dir
-N='build'
-M='port'
-L='.'
+P=dir
+O='build'
+N='port'
+M='.'
+L=open
 J=AttributeError
 I=False
 H=None
@@ -56,7 +56,7 @@ __version__='v1.26.3'
 A4=2
 A5=44
 A6=2
-A7=['lib','/lib','/sd/lib','/flash/lib',L]
+A7=['lib','/lib','/sd/lib','/flash/lib',M]
 class K:
 	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=S
 	@staticmethod
@@ -79,7 +79,7 @@ class Stubber:
 		try:
 			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise t('MicroPython 1.13.0 cannot be stubbed')
 		except J:pass
-		A.info=_info();B.info('Port: {}'.format(A.info[M]));B.info('Board: {}'.format(A.info[V]));B.info('Board_ID: {}'.format(A.info[W]));F.collect()
+		A.info=_info();B.info('Port: {}'.format(A.info[N]));B.info('Board: {}'.format(A.info[V]));B.info('Board_ID: {}'.format(A.info[W]));F.collect()
 		if C:A._fwid=C.lower()
 		elif A.info[X]==z:A._fwid='{family}-v{version}-{port}-{board_id}'.format(**A.info).rstrip(E)
 		else:A._fwid='{family}-v{version}-{port}'.format(**A.info)
@@ -90,10 +90,17 @@ class Stubber:
 		A.path='{}/stubs/{}'.format(path,A.flat_fwid).replace('//',G)
 		try:a(path+G)
 		except D:B.error('error creating stub folder {}'.format(path))
-		A.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.modules=[];A._json_name=H;A._json_first=I
+		A.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.load_exlusions();A.modules=[];A._json_name=H;A._json_first=I
+	def load_exlusions(C):
+		try:
+			with L('modulelist_exclude.txt','r')as E:
+				for F in E:
+					A=F.strip()
+					if A and A not in C.excluded:C.excluded.append(A);B.info('Added {} to excluded modules from modulelist_exclude.txt'.format(A))
+		except D:pass
 	def get_obj_attributes(L,item_instance):
 		H=item_instance;C=[];K=[]
-		for B in O(H):
+		for B in P(H):
 			if B.startswith('__')and not B in L.modules:continue
 			try:
 				D=getattr(H,B)
@@ -116,23 +123,23 @@ class Stubber:
 		A=module_name
 		if A in C.problematic:B.warning('Skip module: {:<25}        : Known problematic'.format(A));return I
 		if A in C.excluded:B.warning('Skip module: {:<25}        : Excluded'.format(A));return I
-		H='{}/{}.pyi'.format(C.path,A.replace(L,G));F.collect();E=I
+		H='{}/{}.pyi'.format(C.path,A.replace(M,G));F.collect();E=I
 		try:E=C.create_module_stub(A,H)
 		except D:return I
 		F.collect();return E
 	def create_module_stub(J,module_name,file_name=H):
 		E=file_name;C=module_name
-		if E is H:K=C.replace(L,'_')+'.pyi';E=J.path+G+K
+		if E is H:K=C.replace(M,'_')+'.pyi';E=J.path+G+K
 		else:K=E.split(G)[-1]
-		if G in C:C=C.replace(G,L)
-		M=H
-		try:M=__import__(C,H,H,'*');O=F.mem_free();B.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,K,O))
+		if G in C:C=C.replace(G,M)
+		N=H
+		try:N=__import__(C,H,H,'*');P=F.mem_free();B.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(C,K,P))
 		except R:return I
 		a(E)
-		with P(E,k)as N:Q=f(J.info).replace('OrderedDict(',A).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,Q,__version__);N.write(S);N.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(N,M,C,A)
+		with L(E,k)as O:Q=f(J.info).replace('OrderedDict(',A).replace('})','}');S='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(C,J._fwid,Q,__version__);O.write(S);O.write('from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n');J.write_object_stub(O,N,C,A)
 		J.report_add(C,E)
 		if C not in{'os','sys','logging','gc'}:
-			try:del M
+			try:del N
 			except(D,w):B.warning('could not del new_module')
 		F.collect();return Y
 	def write_object_stub(L,fp,object_expr,obj_name,indent,in_class=0):
@@ -190,19 +197,19 @@ class Stubber:
 	def report_start(A,filename=m):
 		G='firmware';A._json_name=l.format(A.path,filename);A._json_first=Y;a(A._json_name);B.info('Report file: {}'.format(A._json_name));F.collect()
 		try:
-			with P(A._json_name,k)as E:E.write('{');E.write(dumps({G:A.info})[1:-1]);E.write(n);E.write(dumps({y:{C:__version__},'stubtype':G})[1:-1]);E.write(n);E.write('"modules" :[\n')
+			with L(A._json_name,k)as E:E.write('{');E.write(dumps({G:A.info})[1:-1]);E.write(n);E.write(dumps({y:{C:__version__},'stubtype':G})[1:-1]);E.write(n);E.write('"modules" :[\n')
 		except D as I:B.error(A2);A._json_name=H;raise I
 	def report_add(A,module_name,stub_file):
 		if not A._json_name:raise x(A3)
 		try:
-			with P(A._json_name,'a')as C:
+			with L(A._json_name,'a')as C:
 				if not A._json_first:C.write(n)
 				else:A._json_first=I
 				E='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',G));C.write(E)
 		except D:B.error(A2)
 	def report_end(A):
 		if not A._json_name:raise x(A3)
-		with P(A._json_name,'a')as C:C.write('\n]}')
+		with L(A._json_name,'a')as C:C.write('\n]}')
 		B.info('Path: {}'.format(A.path))
 def a(path):
 	A=E=0
@@ -224,34 +231,34 @@ def b(s):
 		if not E in s:return A
 		B=s.split(E)[1];return B
 	if not Z in s:return A
-	B=s.split(Z)[1].split(L)[1];return B
+	B=s.split(Z)[1].split(M)[1];return B
 def A8():
 	try:B=sys.implementation[0]
 	except g:B=sys.implementation.name
-	D=q({X:B,C:A,N:A,'ver':A,M:sys.platform,V:'UNKNOWN',W:A,o:A,'cpu':A,Q:A,p:A});return D
+	D=q({X:B,C:A,O:A,'ver':A,N:sys.platform,V:'UNKNOWN',W:A,o:A,'cpu':A,Q:A,p:A});return D
 def A9(info):
 	A=info
-	if A[M].startswith('pyb'):A[M]='stm32'
-	elif A[M]=='win32':A[M]='windows'
-	elif A[M]=='linux':A[M]='unix'
+	if A[N].startswith('pyb'):A[N]='stm32'
+	elif A[N]=='win32':A[N]='windows'
+	elif A[N]=='linux':A[N]='unix'
 def AA(info):
 	try:info[C]=AH(sys.implementation.version)
 	except J:pass
 def AB(info):
 	B=info
 	try:
-		D=sys.implementation._machine if'_machine'in O(sys.implementation)else os.uname().machine;B[V]=D.strip();C=sys.implementation._build if'_build'in O(sys.implementation)else A
+		D=sys.implementation._machine if'_machine'in P(sys.implementation)else os.uname().machine;B[V]=D.strip();C=sys.implementation._build if'_build'in P(sys.implementation)else A
 		if C:B[V]=C.split(E)[0];B[o]=C.split(E)[1]if E in C else A
-		B[W]=C;B['cpu']=D.split('with')[-1].strip();B[Q]=sys.implementation._mpy if'_mpy'in O(sys.implementation)else sys.implementation.mpy if Q in O(sys.implementation)else A
+		B[W]=C;B['cpu']=D.split('with')[-1].strip();B[Q]=sys.implementation._mpy if'_mpy'in P(sys.implementation)else sys.implementation.mpy if Q in P(sys.implementation)else A
 	except(J,T):pass
 	if not B[W]:AI(B)
 def AC(info):
 	B=info
 	try:
-		if'uname'in O(os):
-			B[N]=b(os.uname()[3])
-			if not B[N]:B[N]=b(os.uname()[2])
-		elif C in O(sys):B[N]=b(sys.version)
+		if'uname'in P(os):
+			B[O]=b(os.uname()[3])
+			if not B[O]:B[O]=b(os.uname()[2])
+		elif C in P(sys):B[O]=b(sys.version)
 	except(J,T,g):pass
 	if B[C]==A and sys.platform not in('unix','win32'):
 		try:D=os.uname();B[C]=D.release
@@ -277,11 +284,11 @@ def AF(info):
 		A[Q]='v{}.{}'.format(B&255,B>>8&3)
 def AG(info):
 	A=info
-	if A[N]and not A[C].endswith(Z):A[C]=A[C]+Z
-	A['ver']=f"{A[C]}-{A[N]}"if A[N]else f"{A[C]}"
+	if A[O]and not A[C].endswith(Z):A[C]=A[C]+Z
+	A['ver']=f"{A[C]}-{A[O]}"if A[O]else f"{A[C]}"
 def _info():A=A8();A9(A);AA(A);AB(A);AC(A);AD(A);AE(A);AF(A);AG(A);return A
 def AH(version):
-	A=version;B=L.join([f(A)for A in A[:3]])
+	A=version;B=M.join([f(A)for A in A[:3]])
 	if U(A)>3 and A[3]:B+=E+A[3]
 	return B
 def AI(info):
@@ -291,9 +298,9 @@ def AI(info):
 	D[W]=C;D[V]=C.split(E)[0]if E in C else C;D[o]==C.split(E)[1]if E in C else A
 def get_root():
 	try:A=os.getcwd()
-	except(D,J):A=L
+	except(D,J):A=M
 	B=A
-	for B in['/remote','/sd','/flash',G,A,L]:
+	for B in['/remote','/sd','/flash',G,A,M]:
 		try:C=os.stat(B);break
 		except D:continue
 	return B
@@ -320,7 +327,7 @@ def AJ(skip=0):
 		B=E+'/modulelist.txt'
 		if not c(B):continue
 		try:
-			with P(B,encoding='utf-8')as F:
+			with L(B,encoding='utf-8')as F:
 				C=0
 				while Y:
 					A=F.readline().strip()
@@ -332,11 +339,11 @@ def AJ(skip=0):
 				break
 		except D:pass
 def AK(done):
-	with P(d,k)as A:A.write(f(done)+'\n')
+	with L(d,k)as A:A.write(f(done)+'\n')
 def AL():
 	A=0
 	try:
-		with P(d)as B:A=int(B.readline().strip())
+		with L(d)as B:A=int(B.readline().strip())
 	except D:pass
 	return A
 def main():
