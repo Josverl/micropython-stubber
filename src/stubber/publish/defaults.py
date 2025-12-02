@@ -15,6 +15,7 @@ DEFAULT_BOARDS: Dict[str, List[str]] = {
     "esp8266": ["ESP8266_GENERIC", "GENERIC", ""],
     "rp2": ["RPI_PICO", "PICO", ""],
     "samd": ["SEEED_WIO_TERMINAL", ""],
+    "mimxrt": ["SEEED_ARCH_MIX", ""],
     "unix": ["standard", ""],
     "windows": ["standard", ""],
     "webassembly": ["pyscript", "standard", ""],
