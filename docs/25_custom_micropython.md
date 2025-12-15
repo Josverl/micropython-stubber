@@ -111,10 +111,10 @@ Now you can use the stubber commands with your custom setup:
 
 ```bash
 # Generate documentation stubs from your custom MicroPython
-stubber docs-stubs --version=custom
+stubber docstubs --version=custom
 
 # Generate frozen module stubs
-stubber frozen-stubs --version=custom
+stubber frozen --version=custom
 
 # If you have a connected board with your custom firmware:
 stubber mcu-stubs --version=custom
@@ -143,8 +143,8 @@ stubber switch pr-12345
 ### Step 2: Generate Stubs
 
 ```bash
-stubber docs-stubs --version=pr-12345
-stubber frozen-stubs --version=pr-12345
+stubber docstubs --version=pr-12345
+stubber frozen --version=pr-12345
 ```
 
 ## Scenario 3: Working with Local Modifications
@@ -176,8 +176,8 @@ cd ../..
 stubber switch my-custom-build
 
 # Or if you want to use the current working directory state
-stubber docs-stubs --version=my-custom-build
-stubber frozen-stubs --version=my-custom-build
+stubber docstubs --version=my-custom-build
+stubber frozen --version=my-custom-build
 ```
 
 ## Scenario 4: Complete Workflow for Custom Firmware
@@ -233,10 +233,10 @@ This will:
 
 ```bash
 # Generate stubs from documentation
-stubber docs-stubs --version=custom-pico-w
+stubber docstubs --version=custom-pico-w
 
 # Generate frozen module stubs
-stubber frozen-stubs --version=custom-pico-w
+stubber frozen --version=custom-pico-w
 ```
 
 ### Step 5: Merge and Build Final Stubs
@@ -255,8 +255,8 @@ If you prefer to work with the current checkout without specifying versions:
 
 ```bash
 # This uses whatever is currently checked out
-stubber docs-stubs
-stubber frozen-stubs
+stubber docstubs
+stubber frozen
 stubber mcu-stubs
 ```
 

@@ -36,7 +36,7 @@ Note that the above is not limited to VSCode and pylint, but it happens to be th
 
 A lot of subs have already been generated and are shared on PyPi, github or pre-installed by a tool, so it is quite likely that you can just grab a copy be be productive in a few minutes.
 
-## To install the stubs from PyPI
+## To install pre-built stubs from PyPI
 This section describes how to install the stubs from PyPI, and how to use them in your project.
 If you want to create or maintain stub - please see the next section.
 
@@ -65,35 +65,47 @@ That repo also contains examples configuration files that can be easily adopted 
 2. Micropython-stubber uses [MPFlash](https://github.com/Josverl/mpflash?tab=readme-ov-file) in some of its operations.
    mpflash was formerly hosted in this repo, but has been moved to its own repo.
 
-## Install and basic usage of the stubber tool
+## Quick start to build stubs
 
-``` bash
+```bash
 pip install micropython-stubber
 
-# go to your working folder 
-cd my_stub_folder
+cd my_stub_workspace
 mkdir all-stubs
 
-# clone the micropython repo's and switch to a specific version 
-stubber clone --add-stubs
-stubber switch v1.22.2
+# pick a firmware version (tag, stable, preview)
+stubber switch stable
 
-# get the document stubs for the current version ( v1.22.2 )  
-stubber docs-stubs
+# generate doc-based stdlib stubs for the selected version
+stubber docstubs --enrich
 
-# get the frozen stubs for the current version ( v1.22.2 )
-stubber frozen-stubs
+# capture frozen modules from reference firmware downloads
+stubber frozen --version stable --enrich
 
-# get the core CPython compatibility stubs from PyPi 
-stubber get-core
+# merge the pieces for one or more targets
+stubber merge --port esp32 --board ESP32_GENERIC --version stable
+stubber merge --port rp2 --board RPI_PICO_W --version stable
 
-# Update the fallback stubs
-stubber update-fallback
-
-#
-ls all-stubs
-dir all-stubs
+# build final wheel-style outputs in all-stubs/<port>/<board>
+stubber build --port esp32 --board ESP32_GENERIC --version stable
 ```
+
+- `switch` locks the workspace to a MicroPython release before running other commands.
+- `docstubs` pulls documentation-based stubs; `frozen` adds board-specific frozen modules.
+- `merge` and `build` combine everything into installable stubs under `all-stubs/`.
+
+## Common commands
+
+- List available firmware tags: `stubber switch --list`
+- Create merged stubs for every board of a port: `stubber merge --port esp32 --board all --version stable`
+- Rebuild already downloaded artifacts: `stubber build --port esp32 --board ESP32_GENERIC --version stable`
+- Enrich an existing stub set with docstrings/parameter hints: `stubber docstubs --enrich`
+
+## Outputs and where to use them
+
+- Generated wheels and folders end up under `all-stubs/<port>/<board>/<version>`.
+- Point your editor type checker (Pyright/Pylance/Mypy) to the `all-stubs` path or install the produced wheels into your project virtual environment.
+- For a full worked example, see the notebook [Manual stub build chain.ipynb](Manual%20stub%20build%20chain.ipynb) which mirrors the CLI workflow used above.
 
 ### Working with Custom MicroPython Builds
 

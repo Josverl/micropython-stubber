@@ -7,7 +7,7 @@ This includes function and method parameters and descriptions, the module and cl
   
 
 ## How docstubs are generated
-The {ref}`documentation stubs <doc-stubs>` are generated using the `stubber docs-stubs` command (aliases: `docstubs`, `docs`, `get-docstubs`).
+The {ref}`documentation stubs <doc-stubs>` are generated using the `stubber docstubs` command (alias: `docs-stubs`, plus `docs` and `get-docstubs`).
 
 1) Read the Micropython library documentation files and use them to build stubs that can be used for static typechecking
 using a custom-built parser to read and process the micropython RST files

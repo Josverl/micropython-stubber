@@ -45,22 +45,18 @@ ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-module
 
 ## Collect Frozen Stubs (micropython) 
 
-This is run daily though the github action workflow : get-all-frozen in the micropython-stubs repo.
+`stubber frozen` (alias: `frozen-stubs`) pulls frozen modules from the selected MicroPython version and turns them into stubs. This is the same path used in the manual build notebook.
 
-If you want to run this manually 
-- Check out repos side-by-side:
-    - micropython-stubs
-    - micropython-stubber
-    - micropython
-    - micropython-lib
+Typical local workflow:
 
-- link repos using all_stubs symlink
-- checkout tag / version in the micropython folder  
-  (for most accurate results should checkout micropython-lib for the same date)
-- run `frozen-stubs`
-- run `update_stub`
+1. Ensure the repos folder exists (use `stubber clone --add-stubs` if you need fresh checkouts).
+2. Select the firmware version/tag to work against: `stubber switch stable` (or `v1.22.2`, `preview`, custom tag).
+3. Generate frozen stubs: `stubber frozen --version stable --enrich`.
+4. Combine with doc-based stubs and build wheels as needed:
+   - `stubber merge --port esp32 --board ESP32_GENERIC --version stable`
+   - `stubber build --port esp32 --board ESP32_GENERIC --version stable`
 
-- create a PR for changes to the stubs repo 
+CI in micropython-stubs automates a similar flow via the `get-all-frozen` workflow.
 
 ## Postprocessing 
 
