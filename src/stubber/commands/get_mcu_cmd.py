@@ -19,8 +19,8 @@ from stubber.utils.config import CONFIG
 
 
 @stubber_cli.command(
-    name="mcu-stubs",
-    aliases=["mcu-stubs", "get-mcu-stubs", "mcu-stubs", "mcu"],
+    name="firmware-stubs",
+    aliases=["firmware-stubs", "firmware", "mcu-stubs", "get-mcu-stubs", "mcu"],
 )
 @click.option(
     "--variant",
@@ -87,7 +87,7 @@ def cli_create_mcu_stubs(
     bluetooth: bool,
     exclude: List[str],
 ) -> int:
-    """Run createstubs on one or more MCUs, and add the stubs to the micropython-stub repo."""
+    """Run createstubs on one or more MCUs to collect firmware stubs (formerly MCU stubs)."""
     # check if all repos have been cloned
     serial = list(serial)
     ignore = list(ignore)

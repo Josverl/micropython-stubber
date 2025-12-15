@@ -1,15 +1,15 @@
-# Create MCU Stubs
+# Create Firmware Stubs (formerly MCU stubs)
 
-It is possible to create MicroPython stubs using the `stubber mcu-stubs` command.
+It is possible to create MicroPython firmware stubs using the `stubber firmware-stubs` command (the `mcu-stubs` alias is still accepted for backward compatibility).
 
 ## Quick Examples
 
 ```bash
 # Generate stubs for all connected MCUs
-stubber mcu-stubs
+stubber firmware-stubs
 
 # Generate stubs for specific serial port
-stubber mcu-stubs --serial COM3
+stubber firmware-stubs --serial COM3
 ```
 
 This command will do the following:
@@ -119,4 +119,4 @@ The {ref}`excluded category <excluded-modules>` provides no relevant stub inform
 `createstubs.py` will not process a module in either category.
 
 Note that some of these modules are also included in the {ref}`frozen modules <frozen-modules>` that are gathered for those {ref}`ports <port>` or {ref}`boards <board>`.
-For those modules it makes sense to use/prioritize the {ref}`.pyi stubs <pyi-files>` for the frozen modules over the {ref}`MCU stubs <mcu-stubs>`.
+For those modules it makes sense to use/prioritize the {ref}`.pyi stubs <pyi-files>` for the frozen modules over the {ref}`firmware stubs <mcu-stubs>`.

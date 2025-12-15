@@ -4,8 +4,9 @@ from enum import Enum
 
 
 class StubSource(str, Enum):
+    # NOTE: The literal values are persisted (e.g., databases/manifests). "MCU stubs" must remain unchanged.
     FIRMWARE = "MCU stubs"
-    "stubs built by combining the firmware, frozen and core stubs"
+    "stubs built by combining firmware-derived stubs (also referred to as firmware stubs), frozen, and core stubs"
     FROZEN = "Frozen stubs"
     "stubs of python modules that are frozen as part of the firmware image"
     CORE = "Core stubs"
@@ -13,7 +14,7 @@ class StubSource(str, Enum):
     DOC = "Doc stubs"
     "stubs built by parsing the micropython RST documentation files"
     MERGED = "Merged stubs"
-    "stubs built by merging the information from doc-stubs and MCU stubs"
+    "stubs built by merging the information from doc-stubs and firmware stubs"
 
     def __str__(self):
         # Always force string values

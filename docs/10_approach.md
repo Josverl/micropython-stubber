@@ -21,7 +21,7 @@ In most cases the best results are achieved by the below setup:
 Note that for some modules (such as the  `gc`, `time`  and `sys` modules) this approach does not work. 
  3. **{ref}`Frozen stubs <frozen-stubs>`**. Most MicroPython {ref}`firmwares <firmware>` include a number of Python modules that have been included in the firmware as {ref}`frozen modules <frozen-modules>` in order to take up less memory.
  These modules have been extracted from the source code. 
- 4. **{ref}`MCU Stubs <mcu-stubs>`**. For all other modules that are included on the {ref}`board <board>`, [micropython-stubber] has been used to extract as much information as available, and provide that as {ref}`stubs <stub-files>`. While there is a lot of relevant and useful information for code completion, it does unfortunately not provide all details regarding parameters that the above options may provide.
+ 4. **{ref}`Firmware stubs <mcu-stubs>`** (formerly called MCU stubs; the persisted stub source string remains "MCU stubs" for compatibility). For all other modules that are included on the {ref}`board <board>`, [micropython-stubber] has been used to extract as much information as available, and provide that as {ref}`stubs <stub-files>`. While there is a lot of relevant and useful information for code completion, it does unfortunately not provide all details regarding parameters that the above options may provide.
 
 ##  Stub collection process 
 
@@ -29,11 +29,11 @@ Note that for some modules (such as the  `gc`, `time`  and `sys` modules) this a
 * The **Frozen stubs** are collected from the repos of [micropython][] + [micropython-lib][] and from the [loboris][] repo.
   The methods to gather these differs per firmware family, and there are differences between versions how these are stored, and retrieved.
   Where possible this is done per port and board, or if not possible the common configuration has been included.
-* the **MCU stubs** are generated directly on a MCU running MicroPython.
+* the **firmware stubs** are generated directly on a MCU running MicroPython.
 
 
 
-##  MCU Stubs format and limitations 
+##  Firmware stubs (formerly MCU stubs) format and limitations 
 
 1. No function parameters are generated 
 2. No return types are generated 

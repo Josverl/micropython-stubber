@@ -59,8 +59,8 @@ This glossary defines common terms used throughout the MicroPython Stubber docum
 : Stub files generated from the source code of frozen modules found in MicroPython firmware repositories.
 
 (mcu-stubs)=
-**MCU Stubs**
-: Stub files generated directly on a MicroPython device by introspecting available modules and their attributes. These have limited parameter information due to memory constraints.
+**Firmware Stubs**
+: Stub files generated directly on a MicroPython device by introspecting available modules and their attributes (previously called MCU stubs; the `mcu-stubs` CLI alias remains available). These have limited parameter information due to memory constraints. The stored stub source name remains "MCU stubs" for database and manifest compatibility.
 
 (minified-stubs)=
 **Minified Stubs**

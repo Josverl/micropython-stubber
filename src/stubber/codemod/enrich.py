@@ -1,5 +1,5 @@
 """
-Enrich MCU stubs by copying docstrings and parameter information from doc-stubs or python source code.
+Enrich firmware stubs by copying docstrings and parameter information from doc-stubs or python source code.
 Both (.py or .pyi) files are supported.
 """
 
@@ -162,7 +162,7 @@ def enrich_file(
     copy_docstr: bool = False,
 ) -> Generator[str, None, None]:
     """
-    Enrich a MCU stubs using the doc-stubs in another folder.
+    Enrich firmware stubs using the doc-stubs in another folder.
     Both (.py or .pyi) files are supported.
     Both source an target files must exist, and are assumed to match.
     Any matching of source and target files should be done before calling this function.
@@ -276,7 +276,7 @@ def enrich_folder(
     # package_name: str = "",
 ) -> int:
     """\
-        Enrich a folder with containing MCU stubs using the doc-stubs in another folder.
+        Enrich a folder containing firmware stubs using the doc-stubs in another folder.
         
         Returns the number of files enriched.
     """

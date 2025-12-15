@@ -146,7 +146,7 @@ def generate_board_stubs(
     exclude: Union[List[str], None] = None,
 ) -> Tuple[int, Optional[Path]]:
     """
-    Generate the MCU stubs for this MCU board.
+    Generate the firmware stubs (formerly MCU stubs) for this MCU board.
     Parameters
     ----------
     dest : Path

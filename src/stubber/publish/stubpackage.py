@@ -300,7 +300,7 @@ class Builder(VersionedPackage):
         Copy files from all listed stub folders to the package folder
         the order of the stub folders is relevant as "last copy wins"
 
-         - 1 - Copy all MCU stubs/merged to the package folder
+         - 1 - Copy all firmware stubs (or merged) to the package folder
          - 2 - copy the remaining stubs to the package folder
          - 3 - remove *.py files from the package folder
         """
@@ -835,7 +835,7 @@ class StubPackage(PoetryBuilder):
         )
 
     def _handle_firmware_source(self, fw_path: Path) -> Path:
-        """Handle FIRMWARE source: prefer -merged stubs over bare MCU stubs."""
+        """Handle FIRMWARE source: prefer -merged stubs over bare firmware stubs."""
         if fw_path.name.endswith("-merged"):
             merged_path = fw_path
         else:
@@ -878,7 +878,7 @@ class StubPackage(PoetryBuilder):
     def update_sources(self) -> StubSources:
         """
         Update the stub sources with optimized paths:
-        - FIRMWARE: prefer -merged stubs over bare MCU stubs
+        - FIRMWARE: prefer -merged stubs over bare firmware stubs
         - FROZEN: fallback to GENERIC folder if board specific folder doesn't exist
         - MERGED: use default board folder instead of GENERIC if available
         """

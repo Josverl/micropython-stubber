@@ -651,7 +651,7 @@ CHILD_PARENT_CLASS = {
     # "WIZNET5K": "AbstractNIC",
     # -------------------------------------------------------------------------------------
     # uhashlib
-    #  "md5": "hash",   # BUG: hash is not defined in the MCU stubs
+    #  "md5": "hash",   # BUG: hash is not defined in the firmware stubs
     # "sha1": "hash",
     # "sha256": "hash",
     # collections

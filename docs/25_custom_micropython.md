@@ -117,7 +117,7 @@ stubber docstubs --version=custom
 stubber frozen --version=custom
 
 # If you have a connected board with your custom firmware:
-stubber mcu-stubs --version=custom
+stubber firmware-stubs --version=custom  # alias mcu-stubs still works
 ```
 
 ## Scenario 2: Working with a Pull Request
@@ -220,7 +220,7 @@ Flash your custom firmware to the device, then:
 
 ```bash
 # Generate stubs directly from the device
-stubber mcu-stubs --version=custom-pico-w
+stubber firmware-stubs --version=custom-pico-w
 ```
 
 This will:
@@ -257,7 +257,7 @@ If you prefer to work with the current checkout without specifying versions:
 # This uses whatever is currently checked out
 stubber docstubs
 stubber frozen
-stubber mcu-stubs
+stubber firmware-stubs
 ```
 
 The stubs will be generated with `latest` as the version identifier.
