@@ -389,7 +389,7 @@ def stub_connected_mcus(
                     log.error(f"Failed to merge stubs for {board.serialport}")
                     continue
                 # Then Build the package
-                log.info(f"Building package for {board.firmware}")
+                log.info(f"Building publication package for {board.firmware}")
                 built = build_multiple(
                     versions=board.firmware["version"],
                     family=board.firmware["family"],
@@ -398,17 +398,11 @@ def stub_connected_mcus(
                 )
                 all_built.extend(built)
 
+    # Print summary of stub locations
+    if stub_locations:
+        print_stub_locations_table(stub_locations)
     if all_built:
-        print_result_table(all_built)
-
-        # Print summary of stub locations
-        if stub_locations:
-            log.info("")
-            log.info("Stub locations:")
-            for loc in stub_locations:
-                log.info(f"  {loc['board']}:")
-                log.info(f"    Raw stubs:    {loc['raw']}")
-                log.info(f"    Merged stubs: {loc['merged']}")
+        print_publish_table(all_built)
 
         log.success("Done")
         return OK
@@ -416,11 +410,11 @@ def stub_connected_mcus(
     return ERROR
 
 
-def print_result_table(all_built: List, console: Optional[Console] = None):
+def print_publish_table(all_built: List, console: Optional[Console] = None):
     if not console:
         console = Console()
     # create a rich table of the results and print it'
-    table = Table(title="Results")
+    table = Table(title="Publication stub packages")
 
     table.add_column("Result", style="cyan")
     table.add_column("Name/Path", style="cyan")
@@ -433,5 +427,24 @@ def print_result_table(all_built: List, console: Optional[Console] = None):
             (result["name"] + "\n" + result["path"]).strip(),
             result["version"],
             result["error"],
+        )
+    console.print(table)
+
+
+def print_stub_locations_table(stub_locations: List, console: Optional[Console] = None):
+    """Print a table of stub locations for generated stubs."""
+    if not console:
+        console = Console()
+
+    table = Table(title="Stub locations")
+    table.add_column("Board", style="cyan")
+    table.add_column("Raw Stubs", style="green")
+    table.add_column("Merged Stubs", style="green")
+
+    for loc in stub_locations:
+        table.add_row(
+            loc["board"],
+            str(loc["raw"]),
+            str(loc["merged"]),
         )
     console.print(table)
