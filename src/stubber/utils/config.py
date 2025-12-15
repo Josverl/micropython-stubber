@@ -138,6 +138,10 @@ class StubberConfig(Config):
             config_updates.update(mpy_stubs_path=self.mpy_stubs_path)
         else:
             config_updates.update(mpy_stubs_path=self.repo_path / self.mpy_stubs_path)
+        if self.typeshed_path.is_absolute():
+            config_updates.update(typeshed_path=self.typeshed_path)
+        else:
+            config_updates.update(typeshed_path=self.repo_path / self.typeshed_path)
         # read the versions from the git tags
         all_versions = []
         try:

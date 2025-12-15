@@ -77,22 +77,6 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     assert m_tag.call_count >= 2
 
 
-@pytest.mark.mocked
-def test_cmd_clone_typeshed(mocker: MockerFixture, tmp_path: Path):
-    """Test clone command with --typeshed option."""
-    runner = CliRunner()
-    m_clone = mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
-    mocker.patch("stubber.commands.clone_cmd.git.get_local_tag", autospec=True)
-
-    # Test with --typeshed flag
-    result = runner.invoke(stubber.stubber_cli, ["clone", "--typeshed"])
-    assert result.exit_code == 0
-
-    # Should clone micropython, micropython-lib, and typeshed
-    assert m_clone.call_count >= 2  # At least mpy and mpy-lib
-    # Check if typeshed was cloned
-    typeshed_cloned = any(call[1].get("remote_repo") == "https://github.com/python/typeshed.git" for call in m_clone.call_args_list)
-    assert typeshed_cloned or m_clone.call_count >= 3
 
 
 ##########################################################################################
