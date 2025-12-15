@@ -68,6 +68,15 @@ from stubber.utils.config import CONFIG
     show_default=True,
     help="""Include bluetooth ports in the list""",
 )
+@click.option(
+    "--exclude",
+    "-e",
+    "exclude",
+    multiple=True,
+    default=[],
+    help="Module name(s) to exclude from stub generation (e.g., modules that cause board to hang).",
+    metavar="MODULE",
+)
 @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
 def cli_create_mcu_stubs(
     variant: str,
@@ -76,11 +85,13 @@ def cli_create_mcu_stubs(
     serial: List[str],
     ignore: List[str],
     bluetooth: bool,
+    exclude: List[str],
 ) -> int:
     """Run createstubs on one or more MCUs, and add the stubs to the micropython-stub repo."""
     # check if all repos have been cloned
     serial = list(serial)
     ignore = list(ignore)
+    exclude = list(exclude)
 
     for repo in CONFIG.repos:
         if not repo.exists():
@@ -95,5 +106,6 @@ def cli_create_mcu_stubs(
             serial=serial,
             ignore=ignore,
             bluetooth=bluetooth,
+            exclude=exclude,
         )
     )

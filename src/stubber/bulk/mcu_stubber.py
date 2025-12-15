@@ -127,6 +127,7 @@ def generate_board_stubs(
     variant: Variant = Variant.db,
     form: Form = Form.mpy,
     mount_vfs: bool = True,
+    exclude: Union[List[str], None] = None,
 ) -> Tuple[int, Optional[Path]]:
     """
     Generate the MCU stubs for this MCU board.
@@ -137,6 +138,7 @@ def generate_board_stubs(
     port : str
         The port the board is connected to
     """
+    exclude = exclude or []
     # TODO: use remaining free memory to determine if we can afford to mount the vfs
     if mcu.cpu.lower() == "esp8266":
         # insuficcient memory on the board also mount a remote fs
@@ -152,6 +154,13 @@ def generate_board_stubs(
     # the MCU board may not have a board id,so lets just provide it so
     # createstubs can use it if needed.
     copy_boardname_to_board(mcu)
+
+    # Copy exclude list to board if provided
+    if exclude:
+        exclude_file = dest / "modulelist_exclude.txt"
+        exclude_file.write_text("\n".join(exclude) + "\n")
+        log.info(f"Uploading exclude list with {len(exclude)} module(s): {', '.join(exclude)}")
+        mcu.run_command(["cp", str(exclude_file), ":modulelist_exclude.txt"])
 
     rc, out = run_createstubs(dest, mcu, variant, mount_vfs=mount_vfs)
 
@@ -222,7 +231,10 @@ def copy_boardname_to_board(mcu: MPRemoteBoard):
 
 def install_scripts_to_board(mcu: MPRemoteBoard, form: Form):
     """
-    Copy scripts to the board.
+    Copy the createstubs script(s) to the board.
+    The scripts are sourced from the 'board' folder that is included
+     - in the micropython-stubber package.
+     - or in de repo during development
 
     Args:
         mcu (str): The microcontroller unit.
@@ -304,6 +316,7 @@ def stub_connected_mcus(
     serial: List[str],
     ignore: List[str],
     bluetooth: bool,
+    exclude: Union[List[str], None] = None,
 ) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
@@ -316,7 +329,7 @@ def stub_connected_mcus(
     Returns:
         None
     """
-
+    exclude = exclude or []
     if debug:
         set_loglevel(1)
     else:
@@ -345,7 +358,7 @@ def stub_connected_mcus(
         # remove the modulelist.done file before starting createstubs on each board
         (temp_path / "modulelist.done").unlink(missing_ok=True)
 
-        rc, my_stubs = generate_board_stubs(temp_path, board, variant, form)
+        rc, my_stubs = generate_board_stubs(temp_path, board, variant, form, exclude=exclude)
         if rc != OK:
             log.error(f"Failed to generate stubs for {board.serialport}")
             continue
@@ -379,7 +392,7 @@ def stub_connected_mcus(
         print_result_table(all_built)
         log.success("Done")
         return OK
-    log.error(f"Failed to generate stubs for {board.serialport}")
+    # log.error(f"Failed to generate stubs for {board.serialport}")
     return ERROR
 
 

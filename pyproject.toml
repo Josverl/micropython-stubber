@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.26.3"
+version = "1.26.4"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -50,7 +50,7 @@ mpremote = "mpremote.main:main"
 python = ">=3.9.2,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.14" }
 requests = "^2.32.3"
-mpflash = "^1.26.4"
+mpflash = "^1.26.7"
 mpremote = ">=1.25.0"
 # others
 autoflake = ">=1.7,<3.0"
@@ -119,7 +119,9 @@ bincopy = "^20.0.0"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-# Init with : uv tool install poetry --with poetry-bumpversion 
+# Init with : 
+# uv tool install poetry --with poetry-bumpversion 
+# poetry self add poetry-bumpversion
 
 [tool.poetry_bumpversion.file."src/stubber/__init__.py"]
 [tool.poetry_bumpversion.file."src/stubber/board/createstubs.py"]
