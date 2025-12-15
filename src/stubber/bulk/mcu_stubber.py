@@ -21,7 +21,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
 from stubber.publish.merge_docstubs import merge_all_docstubs
-from stubber.publish.pathnames import board_folder_name
+from stubber.publish.pathnames import board_folder_name, get_merged_path
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
@@ -352,6 +352,9 @@ def stub_connected_mcus(
 
     show_mcus(connected_mcus, refresh=False)
 
+    # Track stub locations for final summary
+    stub_locations = []
+
     # scan boards and generate stubs
     for board in connected_mcus:
         log.info(f"Connecting using {board.serialport} to {board.port} {board.board} {board.version}: {board.description}")
@@ -366,6 +369,13 @@ def stub_connected_mcus(
             log.success(f"Stubs generated for {board.firmware['port']}-{board.firmware['board']}")
             if destination := copy_to_repo(my_stubs, board.firmware):
                 log.success(f"Stubs copied to {destination}")
+                # Track location for final summary
+                merged_path = get_merged_path(board.firmware)
+                stub_locations.append({
+                    'raw': destination,
+                    'merged': merged_path,
+                    'board': f"{board.firmware['port']}-{board.firmware['board']}"
+                })
                 # Also merge the stubs with the docstubs
                 log.info(f"Merging stubs with docstubs : {board.firmware}")
 
@@ -390,6 +400,16 @@ def stub_connected_mcus(
 
     if all_built:
         print_result_table(all_built)
+
+        # Print summary of stub locations
+        if stub_locations:
+            log.info("")
+            log.info("Stub locations:")
+            for loc in stub_locations:
+                log.info(f"  {loc['board']}:")
+                log.info(f"    Raw stubs:    {loc['raw']}")
+                log.info(f"    Merged stubs: {loc['merged']}")
+
         log.success("Done")
         return OK
     # log.error(f"Failed to generate stubs for {board.serialport}")
