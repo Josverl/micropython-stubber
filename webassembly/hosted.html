@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Hosted Pyscript stubber</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- MicroPython V1.24.1 -->
+    <!-- 
+    <script type="module" src="https://pyscript.net/releases/2025.3.1/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.3.1/core.css"> 
+-->
+
+
+    <!-- MicroPython V1.25.0 -->
+    <!-- 
+
+    <script type="module" src="https://pyscript.net/releases/2025.5.1/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.5.1/core.css">
+-->
+
+
+    <!-- MicroPython V1.26-preview -->
+    <script type="module" src="https://pyscript.net/releases/2025.7.3/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.3.2/core.css">
+
+</head>
+
+<body>
+    <script type="mpy" src="./createstubs_w.py" config="./requirements.toml" terminal></script>
+
+    <blockquote>
+        <p>This example shows how to create and download the MicroPython firmware-stubs for webassembly-pyscript.
+        </p>
+        <p>The generated stubs will be available in the <code>/stubs</code> folder in the virtual file system,
+            and synchronised to the local filesystem.
+            Please use the pyscript Persisten filesystem dialog to select a folder on your local filesystem
+            where the stubs will be saved.</p>
+        Note that the stubs will be saved in a subfolder <code>stubs</code> of the selected folder.
+        Do not select a folder that already contains many files, as this will slow down, or completely block the
+        synchronisation
+        .
+        <p>Note: The stubs are generated using the <a href="https://github.com/josverl/micropython-stubber">
+                micropython-stubber </a> for the <a href="https://github.com/josverl/micropython-stubs"> MicroPython
+                stubs</a> project.</p>
+        MicroPython stubs</a> project.</p>
+</body>
+
+</html>
