@@ -5,11 +5,10 @@ from pathlib import Path
 
 import jsonlines
 import mpbuild.build as mpb
-from mpbuild.board_database import Board, Database
-from typing_extensions import Tuple
-
 import mpflash.basicgit as git
+from mpbuild.board_database import Board, Database
 from mpflash.versions import get_preview_mp_version, get_stable_mp_version
+from typing_extensions import Tuple
 
 
 def copy_firmware(board: Board, variant: str | None, version: str, build: str, mpy_dir: Path, fw_path: Path):
@@ -132,10 +131,10 @@ def main():
 
     builds = [
         # ( port , [variant], [extra args])
-        # ("unix", "standard"),
-        # ("windows", "standard"),
-        ("webassembly", "pyscript"),
-        ("webassembly", "standard", "-lnodefs.js"),
+        ("unix", "standard"),
+        ("windows", "standard"),
+        # ("webassembly", "pyscript"),
+        # ("webassembly", "standard", "-lnodefs.js"),
     ]
 
     versions = [
