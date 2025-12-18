@@ -446,7 +446,7 @@ def cli_stdlib_stubs(
         try:
             log.info("Building stdlib-stubs package...")
             subprocess.check_call(
-                ["uv", "build", "--index-strategy", "unsafe-best-match", "--wheel"],
+                ["uv", "build", "--index-strategy", "unsafe-best-match"],
                 cwd=dist_stdlib_path,
             )
             log.info("Build completed successfully")
