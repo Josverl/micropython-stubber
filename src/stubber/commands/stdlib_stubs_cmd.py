@@ -391,7 +391,7 @@ def cli_stdlib_stubs(
     dist_stdlib_path = rootpath / "publish/micropython-stdlib-stubs"
     docstubs_path = rootpath / f"stubs/micropython-{flat_version}-docstubs"
     boardstub_path = rootpath / f"stubs/micropython-{flat_version}-esp32-ESP32_GENERIC"
-    typeshed_path = CONFIG.repo_path / CONFIG.typeshed_path
+    typeshed_path = CONFIG.typeshed_path
     reference_path = rootpath / "reference"
 
     # Validate required paths
