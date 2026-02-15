@@ -1,7 +1,7 @@
 """stubber configuration"""
 
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from mpflash.logger import log
 from mpflash.versions import (
@@ -72,6 +72,14 @@ class StubberConfig(Config):
     )
     "a Path to the micropython-stubs folder in the repos directory (or current directory)"
 
+    typeshed_path: Path = key(
+        key_name="typeshed-path",
+        cast=Path,
+        required=False,
+        default=Path("typeshed"),
+    )
+    "a Path to the typeshed folder in the repos directory"
+
     stable_version: str = key(key_name="stable-version", cast=str, required=False, default="1.20.0")
     "last published stable"
 
@@ -92,7 +100,7 @@ class StubberConfig(Config):
     @property
     def repos(self) -> List[Path]:
         "return the repo paths"
-        return [self.mpy_path, self.mpy_lib_path, self.mpy_stubs_path]
+        return [self.mpy_path, self.mpy_lib_path, self.mpy_stubs_path, self.typeshed_path]
 
     @property
     def stub_path(self) -> Path:
@@ -130,6 +138,10 @@ class StubberConfig(Config):
             config_updates.update(mpy_stubs_path=self.mpy_stubs_path)
         else:
             config_updates.update(mpy_stubs_path=self.repo_path / self.mpy_stubs_path)
+        if self.typeshed_path.is_absolute():
+            config_updates.update(typeshed_path=self.typeshed_path)
+        else:
+            config_updates.update(typeshed_path=self.repo_path / self.typeshed_path)
         # read the versions from the git tags
         all_versions = []
         try:
