@@ -24,7 +24,7 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-__version__ = "v1.26.4"
+__version__ = "v1.26.5"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -829,6 +829,7 @@ def main():
         "aioble/server",
         "aioespnow",
         "ak8963",
+        "alif",
         "apa102",
         "apa106",
         "argparse",
