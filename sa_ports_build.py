@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-import time
 from pathlib import Path
 
-import jsonlines
 import mpbuild.build as mpb  # type: ignore
 import mpflash.basicgit as git
 from mpbuild.board_database import Board, Database  # type: ignore
+from mpflash.config import config as mpflash_config
+from mpflash.custom import add_custom_firmware
 from mpflash.versions import get_preview_mp_version, get_stable_mp_version
 from typing_extensions import Tuple
 
+# Save the firmwares in the windows /downloads/firmware folder
+mpflash_config.firmware_folder = Path("/mnt/c/Users/josverl/Downloads/firmware")
 
 def copy_firmware(board: Board, variant: str | None, version: str, build: str, mpy_dir: Path, fw_path: Path):
     """Copy the built firmware to the destination directory."""
@@ -23,50 +25,38 @@ def copy_firmware(board: Board, variant: str | None, version: str, build: str, m
     else:
         build_dir = mpy_dir / f"ports/{board.port.name}/build-{variant}"
     # what is the resulting name of the firmware files?
-    fw_name = {"webassembly": "micropython.*", "unix": "micropython", "windows": "micropython.exe"}.get(board.port.name, "firmware.*")
+    fw_name = {
+        "webassembly": "micropython.*",
+        "unix": "micropython",
+        "windows": "micropython.exe",
+    }.get(board.port.name, "firmware.*")
     # create the destination directory
-
-    port_path = fw_path / board.port.name
-    if board.port.name == "webassembly":
+    if board.port.name in {"unix", "windows"}:
+        # just a single file
+        add_custom_firmware(
+            fw_path=build_dir / fw_name,
+            force=True,
+            description="Stand Alone build using mpbuild",
+            custom=True,
+        )
+    elif board.port.name == "webassembly":
         # all webassembly binaries need to be in a single folder
-        port_path = fw_path / f"{board.port.name}/{board.name}-{variant}-{version}"
+        # Create a zip file with the firmware files
+        zip_name = f"{board.name}-{variant}-{version}"
+        zip_path = build_dir / zip_name
+        # Create a zip file with only the micropython.mjs and micropython.wasm files
+        import zipfile
 
-    port_path.mkdir(parents=True, exist_ok=True)
-
-    for file in build_dir.glob(fw_name):
-        if file.suffix in {".map", ".dis"}:
-            # skip these extensions
-            continue
-        elif board.port.name == "webassembly":
-            # unchanged name, all in shared folder per version
-            dest_name = file.name
-        elif len(file.suffix) > 1:
-            dest_name = f"{board.name}-{variant}-{version}{file.suffix}"
-        else:
-            dest_name = f"{board.name}-{variant}-{version}"
-        # normalize the names
-        dest_name = dest_name.replace("-standard", "")
-        dest_file = port_path / dest_name
-        dest_file.write_bytes(file.read_bytes())
-
-        # FIXME: should use mpflash.db to add to the database instead of this ad-hoc method
-        fw = {
-            "port": board.port.name,
-            "board": board.name,
-            "variant": variant or "",
-            "version": version,
-            "preview": "-preview" in version,
-            "build": build,
-            "ext": file.suffix,
-            "custom": False,
-            "description": "Built using mpbuild",
-            "filename": str(dest_file.relative_to(port_path)),
-        }
-        # add to inventory
-        with jsonlines.open(fw_path / "firmware.jsonl", "a") as writer:
-            print(f"Adding {fw['port']} {fw['board']}")
-            print(f"    to {fw['filename']}")
-            writer.write(fw)
+        with zipfile.ZipFile(zip_path.with_suffix(".zip"), "w") as zf:
+            for pattern in ["micropython.mjs", "micropython.wasm"]:
+                for file in build_dir.glob(pattern):
+                    zf.write(file, arcname=file.name)
+        add_custom_firmware(
+            fw_path=zip_path.with_suffix(".zip"),
+            force=True,
+            description="Built using mpbuild",
+            custom=True,
+        )
 
 
 def build_sa_port(build: Tuple, version: str, mpy_dir: Path, fw_path: Path):
@@ -129,18 +119,23 @@ def main():
 
     builds = [
         # ( port , [variant], [extra args])
-        ("unix", "standard"),
-        ("windows", "standard"),
-        ("webassembly", "standard"),
-        ("webassembly", "pyscript"),
+        # ("unix", "standard"),
+        # ("windows", "standard"),
+        ("windows", "dev"),
+        # ("webassembly", "standard"),
+        # ("webassembly", "pyscript"),
         # ("webassembly", "pyscript", 'JSFLAGS+="-s NODERAWFS=1"'),
     ]
 
     versions = [
+        # "v1.23.0",
+        # "v1.24.0",
+        # "v1.24.1",
         # "v1.25.0",
         # "v1.26.0",
+        # "v1.26.1",
         get_stable_mp_version(),
-        # get_preview_mp_version(),
+        get_preview_mp_version(),
     ]
     # TODO: Use the same path as mpflash
     fw_path = Path("./firmware")
