@@ -21,6 +21,7 @@ aioble/security
 aioble/server
 aioespnow
 ak8963
+alif
 apa102
 apa106
 argparse
