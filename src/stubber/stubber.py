@@ -13,6 +13,7 @@ from stubber.commands.get_docstubs_cmd import cli_docstubs
 from stubber.commands.get_frozen_cmd import cli_get_frozen
 from stubber.commands.merge_cmd import cli_merge_docstubs
 from stubber.commands.publish_cmd import cli_publish
+from stubber.commands.stdlib_stubs_cmd import cli_stdlib_stubs
 from stubber.commands.stub_cmd import cli_stub
 from stubber.commands.switch_cmd import cli_switch
 from stubber.commands.variants_cmd import cli_variants
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     stubber_cli.add_command(cli_enrich_folder)
     stubber_cli.add_command(cli_publish)
     stubber_cli.add_command(cli_merge_docstubs)
+    stubber_cli.add_command(cli_stdlib_stubs)
     stubber_cli.add_command(cli_variants)
     stubber_cli.add_command(cli_create_mcu_stubs)
     stubber_cli()

@@ -26,6 +26,7 @@ def cli_config():
     log.info(f"CONFIG.stub_path           {CONFIG.stub_path}")
     log.info(f"CONFIG.publish_path        {CONFIG.publish_path}")
     log.info(f"CONFIG.template_path       {CONFIG.template_path}")
+    log.info(f"CONFIG.typeshed_path       {CONFIG.typeshed_path}")
     log.info(f"CONFIG.all_versions        {CONFIG.all_versions}")
     log.info(f"CONFIG.stable_version      {CONFIG.stable_version}")
     log.info(f"CONFIG.preview_version     {CONFIG.preview_version}")
