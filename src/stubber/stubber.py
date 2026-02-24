@@ -17,6 +17,7 @@ from stubber.commands.stub_cmd import cli_stub
 from stubber.commands.switch_cmd import cli_switch
 from stubber.commands.variants_cmd import cli_variants
 from stubber.commands.get_mcu_cmd import cli_create_mcu_stubs
+from stubber.commands.get_typeshed_cmd import cli_get_typeshed
 
 ##########################################################################################
 if __name__ == "__main__":
@@ -34,4 +35,5 @@ if __name__ == "__main__":
     stubber_cli.add_command(cli_merge_docstubs)
     stubber_cli.add_command(cli_variants)
     stubber_cli.add_command(cli_create_mcu_stubs)
+    stubber_cli.add_command(cli_get_typeshed)
     stubber_cli()
