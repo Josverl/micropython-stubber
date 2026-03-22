@@ -118,7 +118,20 @@ stubber build --port esp32 --board ESP32_GENERIC --version stable
 
 The resulting stub package is placed under `repos/micropython-stubs/publish/`.
 
-## Step 9 – Contribute your stubs
+## Step 9 – Verify the stubs locally
+
+Before opening a pull request, install the built stub package locally to confirm it works in your editor.
+Replace the folder name below with the actual name produced by `stubber build`:
+
+```bash
+# From your working directory (e.g. ~/my-stubs)
+pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target .typings
+```
+
+The `.typings` folder is the conventional location for MicroPython stubs in VS Code projects.
+Point your editor's Python extension at this folder to get code-completion and type-checking for your board.
+
+## Step 10 – Contribute your stubs
 
 Open a pull request against [micropython-stubs][stubs-repo] so the new board stubs become available to everyone:
 
@@ -150,6 +163,9 @@ stubber firmware-stubs
 
 stubber merge --port esp32 --board ESP32_GENERIC --version stable
 stubber build --port esp32 --board ESP32_GENERIC --version stable
+
+# Verify locally before submitting a PR
+pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target .typings
 
 # Contribute: open a PR to micropython-stubs
 cd repos/micropython-stubs
