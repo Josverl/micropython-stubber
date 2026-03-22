@@ -1,7 +1,7 @@
 (quick-start)=
-# Quick Start
+# Quick Start – Contributing stubs for a new board
 
-This page walks you through generating a complete set of MicroPython stubs for a specific board in about 10 minutes.
+This guide walks you through generating and contributing a complete set of MicroPython stubs for a new port or board to the [micropython-stubs][stubs-repo] project.
 No prior knowledge of the project internals is needed.
 
 ## What are stubs, and why do I need them?
@@ -11,16 +11,17 @@ Without them, the editor has no way to offer code-completion or type-checking fo
 
 Three complementary stub types are combined to give the best coverage:
 
-| Stub type | Source | Command |
-|-----------|--------|---------|
-| {ref}`Doc stubs <doc-stubs>` | MicroPython documentation | `stubber docstubs` |
-| {ref}`Frozen stubs <frozen-stubs>` | Modules frozen into firmware source | `stubber frozen` |
-| {ref}`Firmware stubs <mcu-stubs>` | Connected board (optional) | `stubber firmware-stubs` |
+| Stub type | Source | Command | Required |
+|-----------|--------|---------|---------|
+| {ref}`Firmware stubs <mcu-stubs>` | Connected board | `stubber firmware-stubs` | ✅ Yes |
+| {ref}`Doc stubs <doc-stubs>` | MicroPython documentation | `stubber docstubs` | Optional |
+| {ref}`Frozen stubs <frozen-stubs>` | Modules frozen into firmware source | `stubber frozen` | Optional |
 
 ## Prerequisites
 
 * Python 3.9 or newer installed on your PC.
 * Git installed (needed to clone the MicroPython source tree).
+* A MicroPython board connected to your PC, flashed with a recent **stable** or **preview** release.
 * A working directory — for example `~/my-stubs`.
 
 ## Step 1 – Install micropython-stubber
@@ -46,7 +47,8 @@ All subsequent commands should be run from inside this directory.
 
 ## Step 3 – Clone the required repositories
 
-This downloads the MicroPython source tree and the stub storage repository:
+This downloads the MicroPython source tree and the stub storage repository.
+The cloned `micropython-stubs` repo already contains stubs for many boards, so steps 5 and 6 are optional.
 
 ```bash
 stubber clone --add-stubs
@@ -71,43 +73,64 @@ stubber switch stable
 
 You can also pin to a specific version, for example `stubber switch v1.22.2`, or use `preview` for the latest nightly build.
 
-## Step 5 – Generate doc stubs
+## Step 5 (optional) – Generate doc stubs
 
-Doc stubs are generated from the MicroPython documentation.
-They contain full parameter names and descriptions:
+Doc stubs are generated from the MicroPython documentation and contain full parameter names and descriptions.
+Skip this step if you only need firmware stubs for a new board — the cloned repo already contains up-to-date doc stubs.
 
 ```bash
 stubber docstubs --enrich
 ```
 
-## Step 6 – Generate frozen stubs
+## Step 6 (optional) – Generate frozen stubs
 
-Frozen stubs cover the Python modules that are compiled directly into the firmware:
+Frozen stubs cover Python modules compiled directly into the firmware.
+Skip this step if the board's frozen modules are already covered in the cloned repo.
 
 ```bash
 stubber frozen --version stable --enrich
 ```
 
-## Step 7 (optional) – Generate firmware stubs from a connected device
+```{note}
+Generating frozen stubs requires checking out the MicroPython source tree and can take **10–20 minutes** depending on your internet connection and machine speed.
+```
 
-If you have a board connected to your PC you can generate stubs directly from it.
-This captures any board-specific modules that are not documented elsewhere:
+## Step 7 – Generate firmware stubs from a connected device
+
+Connect your board (flashed with a stable or preview MicroPython release) and run:
 
 ```bash
 stubber firmware-stubs
 ```
 
+This captures the board-specific modules that may not be documented or frozen elsewhere.
+The port, board name, and version are detected automatically and used to name the output folder.
+
 ## Step 8 – Merge and build the stub package
 
-Combine all stub types for your target port and board into a single package:
+Combine all stub types for your board into a single distributable package.
+Replace `esp32` / `ESP32_GENERIC` with the values reported by the previous step:
 
 ```bash
-# Replace esp32 / ESP32_GENERIC with your own port and board
 stubber merge --port esp32 --board ESP32_GENERIC --version stable
 stubber build --port esp32 --board ESP32_GENERIC --version stable
 ```
 
 The resulting stub package is placed under `repos/micropython-stubs/publish/`.
+
+## Step 9 – Contribute your stubs
+
+Open a pull request against [micropython-stubs][stubs-repo] so the new board stubs become available to everyone:
+
+```bash
+cd repos/micropython-stubs
+git checkout -b add-stubs-esp32-esp32_generic-stable
+git add .
+git commit -m "Add stubs for esp32 ESP32_GENERIC stable"
+git push origin add-stubs-esp32-esp32_generic-stable
+```
+
+Then open a pull request on GitHub at <https://github.com/Josverl/micropython-stubs/compare>.
 
 ## Full workflow at a glance
 
@@ -117,13 +140,22 @@ mkdir ~/my-stubs && cd ~/my-stubs
 
 stubber clone --add-stubs
 stubber switch stable
-stubber docstubs --enrich
-stubber frozen --version stable --enrich
+
+# Optional: regenerate doc and frozen stubs (takes 10-20 min)
+# stubber docstubs --enrich
+# stubber frozen --version stable --enrich
+
+# Required: board must be connected with stable/preview firmware
+stubber firmware-stubs
+
 stubber merge --port esp32 --board ESP32_GENERIC --version stable
 stubber build --port esp32 --board ESP32_GENERIC --version stable
 
-# Optional: capture stubs from a connected device
-# stubber firmware-stubs
+# Contribute: open a PR to micropython-stubs
+cd repos/micropython-stubs
+git checkout -b add-stubs-esp32-esp32_generic-stable
+git add . && git commit -m "Add stubs for esp32 ESP32_GENERIC stable"
+git push origin add-stubs-esp32-esp32_generic-stable
 ```
 
 ## Next steps
