@@ -16,12 +16,14 @@ In order to achieve this a few things are needed:
 3) Specific configuration of {ref}`Pylint <pylint>`
 4) Suppression of warnings that collide with the MicroPython principles or code optimization.
 
-With that in place, VS Code will understand MicroPython for the most part, and help you to write code, and catch more errors before deploying it to your board. 
+With that in place, VS Code will understand MicroPython for the most part, and help you to write code, and catch more errors before deploying it to your board.
+
+**Ready to get started?** Jump straight to the [Quick Start](05_quick_start.md) guide for a 10-minute walkthrough.
 
 
 Note that the above is not limited to VS Code and pylint, but it happens to be the combination that I use.
 
-A lot of stubs have already been generated and are shared on GitHub or other means, so it is quite likely that you can just grab a copy to be productive in a few minutes.For now you will need to configure this by hand, or use the `micropy cli` tool
+A lot of stubs have already been generated and are shared on GitHub or other means, so it is quite likely that you can just grab a copy to be productive in a few minutes. For now you will need to configure this by hand, or use the `micropy cli` tool
 
 1. The sister-repo [**MicroPython-stubs**][stubs-repo] contains [all stubs][all-stubs] I have collected with the help of others, and which can be used directly.
 That repo also contains examples configuration files that can be easily adopted to your setup.

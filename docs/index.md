@@ -5,6 +5,7 @@
 :maxdepth: 2
 
 intro.md
+05_quick_start.md
 10_approach.md
 15_cli.rst
 20_creating.md
