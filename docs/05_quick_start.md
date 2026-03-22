@@ -24,6 +24,11 @@ Three complementary stub types are combined to give the best coverage:
 * A MicroPython board connected to your PC, flashed with a recent **stable** or **preview** release.
 * A working directory — for example `~/my-stubs`.
 
+```{note}
+**Platform support:** `stubber` has been tested on both Windows and Unix (Linux / macOS).
+Running `stubber` inside **WSL2** is also supported, but can occasionally encounter errors caused by extra timing delays that occur after a device resets — if you see connection timeouts, try running from a native Windows terminal instead.
+```
+
 ## Step 1 – Install micropython-stubber
 
 ```bash
@@ -57,10 +62,12 @@ stubber clone --add-stubs
 The command creates a `repos/` subdirectory containing:
 
 ```
-repos/
-├── micropython/        ← MicroPython source (for doc & frozen stubs)
-├── micropython-lib/    ← MicroPython library source
-└── micropython-stubs/  ← Where generated stubs are stored
+~/my-stubs/
+├── repos/
+│   ├── micropython/        ← MicroPython source (for doc & frozen stubs)
+│   ├── micropython-lib/    ← MicroPython library source
+│   └── micropython-stubs/  ← Where generated stubs are stored
+└── .typings/               ← Local stub install target (created in step 9)
 ```
 
 ## Step 4 – Select the firmware version
