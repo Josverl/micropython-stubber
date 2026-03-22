@@ -8,22 +8,11 @@ This guide explains how to generate stubs for custom MicroPython builds, includi
 
 **New in v1.26.0+**: The `stubber clone` and `stubber switch` commands have been enhanced to work with custom repositories and arbitrary git references (branches, commits, tags).
 
-## Overview
-
-When working with custom MicroPython firmware, the standard workflow needs to be adapted to work with your specific repository and commit. This guide provides step-by-step instructions for different scenarios.
+If you just want to contribute stubs for a standard board running an official release, see the [Quick Start](05_quick_start.md) guide instead.
 
 ## Prerequisites
 
-1. Install micropython-stubber:
-   ```bash
-   pip install micropython-stubber
-   ```
-
-2. Create a working directory:
-   ```bash
-   mkdir my-custom-stubs
-   cd my-custom-stubs
-   ```
+Install micropython-stubber and set up a working directory as described in the [Quick Start – Prerequisites and Steps 1–2](05_quick_start.md).
 
 ## Enhanced CLI Commands
 
@@ -182,7 +171,7 @@ stubber frozen --version=my-custom-build
 
 ## Scenario 4: Complete Workflow for Custom Firmware
 
-This is a complete example for generating stubs for a custom RPi Pico W build:
+This is a complete example for generating stubs for a custom RPi Pico W build.
 
 ### Step 1: Setup Custom Repository
 
@@ -214,38 +203,13 @@ make BOARD=RPI_PICO_W
 cd ../../..
 ```
 
-### Step 3: Flash Custom Firmware and Generate Device Stubs
+### Step 3: Generate and publish stubs
 
-Flash your custom firmware to the device, then:
+Flash your custom firmware to the device and then follow [Quick Start steps 7–9](05_quick_start.md#step-7-generate-firmware-stubs-from-a-connected-device) (firmware stubs, merge, build, and PR), passing `--version=custom-pico-w` to each command:
 
 ```bash
-# Generate stubs directly from the device
 stubber firmware-stubs --version=custom-pico-w
-```
-
-This will:
-1. Connect to your device
-2. Run the stub generation script
-3. Download the generated stubs
-4. Save them with your custom version name
-
-### Step 4: Generate Documentation and Frozen Stubs
-
-```bash
-# Generate stubs from documentation
-stubber docstubs --version=custom-pico-w
-
-# Generate frozen module stubs
-stubber frozen --version=custom-pico-w
-```
-
-### Step 5: Merge and Build Final Stubs
-
-```bash
-# Merge all stub types together
 stubber merge --version=custom-pico-w --port=rp2 --board=RPI_PICO_W
-
-# Build final stub packages
 stubber build --version=custom-pico-w --port=rp2 --board=RPI_PICO_W
 ```
 
