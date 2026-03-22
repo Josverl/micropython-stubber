@@ -21,7 +21,9 @@ If you just want to use the stubs, then you can skip this section and instead re
 
 ## Quick Start
 
-For official MicroPython releases, follow the standard workflow:
+For a beginner-friendly, step-by-step walkthrough see the [Quick Start](05_quick_start.md) guide.
+
+For official MicroPython releases, the condensed workflow is:
 
 ```bash
 pip install micropython-stubber

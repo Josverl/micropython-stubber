@@ -29,8 +29,8 @@ Most OSS firmwares store these frozen modules as part of their repository, which
 3. Generate typeshed stubs of these files.
    _const pre-processing:_
    As the mypy.stubgen tool is not able to incur the correct types from the MicroPython `foo = const(1)` syntax, 
-   the 'to be frozen' modules are pre-processed usig a regular expression to replace the `foo = const(1)` with `foo = 1`.
-   If the `.py` files contain any docstrings, they are preserved. Howecer this is uncommon as most micropython-lib modules have not docstrings to save space.
+   the 'to be frozen' modules are pre-processed using a regular expression to replace the `foo = const(1)` with `foo = 1`.
+   If the `.py` files contain any docstrings, they are preserved. However this is uncommon as most micropython-lib modules have no docstrings to save space.
 
     _Addition of docstrings:_
     Then the docstring to modules, classes and methods are added by merging the docstrings based on the docstubs generated from the MicroPython documentation.
@@ -43,9 +43,10 @@ Most OSS firmwares store these frozen modules as part of their repository, which
 
 ref: https://learn.adafruit.com/micropython-basics-loading-modules/frozen-modules
 
-## Collect Frozen Stubs (micropython) 
+## Collect Frozen Stubs (micropython)
 
-`stubber frozen` (alias: `frozen-stubs`) pulls frozen modules from the selected MicroPython version and turns them into stubs. This is the same path used in the manual build notebook.
+`stubber frozen` (alias: `frozen-stubs`) pulls frozen modules from the selected MicroPython version and turns them into stubs.
+For a complete end-to-end walkthrough see the [Quick Start](05_quick_start.md) guide.
 
 Typical local workflow:
 

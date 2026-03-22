@@ -30,7 +30,7 @@ Done
 
 ## run createstubs
 A simple way to run createstubs is to use the `mpremote mount` command to allow the MCU board to directly access the PC's file system.
-Then you can run the createstubs.py script directly from the MCU board with outh the need to copy the created files back to the PC.
+Then you can run the createstubs.py script directly from the MCU board without the need to copy the created files back to the PC.
 
 Navigate to the folder where you want to create the stubs and run the following command:
 `mpremote mount . exec "import createstubs"` or 
@@ -39,7 +39,7 @@ Navigate to the folder where you want to create the stubs and run the following 
 
 ## low memory devices 
 
-If you have a low memory board, then you can install the cross-compiled variants to reduce the memory footprint durign compilation on the board:
+If you have a low memory board, then you can install the cross-compiled variants to reduce the memory footprint during compilation on the board:
 
 | MicroPython release | .mpy version | command |
 |---------------------|--------------|---------|

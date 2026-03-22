@@ -30,7 +30,7 @@ Options:
 
 ## board/createstubs.py
 
-This is the core version of the script, and is fully self contained, but includes logging with requires the logging module to be avaialble on your device 
+This is the core version of the script, and is fully self contained, but includes logging which requires the logging module to be available on your device.
 If your firmware does not include the `logging` module, you will need to upload this to your board, or use the minified version.
 
 ``` python
@@ -62,7 +62,7 @@ In order to run  this on low-memory devices two additional steps are recommended
 Minified versions, which requires less memory and only very basic logging. 
 this removes the requirement for the logging module on the MCU.
 
-Minifiacation helps reduce the seize of the script, and therefore of the memory usage. As a result the script becomes almost unreadable.
+Minification helps reduce the size of the script, and therefore the memory usage. As a result the script becomes almost unreadable.
 
 ### Cross compilation 
 

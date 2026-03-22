@@ -2,6 +2,8 @@
 
 It is possible to create MicroPython firmware stubs using the `stubber firmware-stubs` command (the `mcu-stubs` alias is still accepted for backward compatibility).
 
+For a complete end-to-end example that includes firmware stubs alongside doc stubs and frozen stubs, see the [Quick Start](05_quick_start.md) guide.
+
 ## Quick Examples
 
 ```bash
