@@ -11,7 +11,6 @@ intro.md
 20_creating.md
 25_custom_micropython.md
 40_firmware_stubs.md
-42_using_createstubs.md
 45_createstubs.md
 50_frozen_stubs.md
 55_doc_stubs.md

@@ -33,7 +33,10 @@ This command will do the following:
 
 Due to the module naming convention in MicroPython some modules will be duplicated, i.e. `uos` and `os` will both be included.
 
-## Running the script
+## Manual script usage (legacy / advanced)
+
+> **Recommended:** Use `stubber firmware-stubs` — it automates all of the steps below (install, run, download, post-process).  
+> The manual approach below is only needed for highly constrained boards or custom workflows where the automated command cannot be used.
 
 The `createstubs.py` script can either be run as a script or imported as a module depending on your preferences.
 
