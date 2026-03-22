@@ -11,11 +11,11 @@ Without them, the editor has no way to offer code-completion or type-checking fo
 
 Three complementary stub types are combined to give the best coverage:
 
-| Stub type | Source | Command | Required |
-|-----------|--------|---------|---------|
-| {ref}`Firmware stubs <mcu-stubs>` | Connected board | `stubber firmware-stubs` | ✅ Yes |
-| {ref}`Doc stubs <doc-stubs>` | MicroPython documentation | `stubber docstubs` | Optional |
-| {ref}`Frozen stubs <frozen-stubs>` | Modules frozen into firmware source | `stubber frozen` | Optional |
+| Stub type | Source | Command |
+|-----------|--------|---------|
+| {ref}`Firmware stubs <mcu-stubs>` | Connected board | `stubber firmware-stubs` |
+| {ref}`Doc stubs <doc-stubs>` | MicroPython documentation | `stubber docstubs` |
+| {ref}`Frozen stubs <frozen-stubs>` | Modules frozen into firmware source | `stubber frozen` |
 
 ## Prerequisites
 
