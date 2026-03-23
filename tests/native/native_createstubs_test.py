@@ -35,6 +35,11 @@ elif os_distro_version in ["linux-ubuntu-18.04"]:
         "ubuntu_18_04/micropython_1_13",
         "ubuntu_18_04/pycopy_3_3_2-25",
     ]
+elif os_distro_version in ["linux-ubuntu-24.04", "linux-ubuntu-22.04"]:
+    # 22.04 (jammy) / 24.04 (noble) - binaries built from source
+    fw_list = [
+        "ubuntu_24_04/micropython_v1_24_1",
+    ]
 # distro does not cover windows... but no problem as long as it is not 16 bit it will run.
 elif sys.platform == "win32":
     fw_list = [
@@ -72,7 +77,7 @@ def test_createstubs(firmware: str, variant: str, suffix: str, tmp_path: Path, p
     script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
     script_name = variant + suffix + ".py"
     # other tests may / will change the CWD to a different folder
-    fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()  # .as_posix()
+    fw_filename = (pytestconfig.rootpath / "tests" / "tools" / firmware).absolute()
     cmd = [fw_filename.as_posix(), script_name, "--path", str(tmp_path)]
 
     # check if the script exists
