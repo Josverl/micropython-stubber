@@ -161,6 +161,46 @@ def test_signature_with_variadic_params(stubber_instance, tmp_path):
     assert "variadic(a, *args, **kwargs)" in content
 
 
+def test_signature_with_keyword_only_params(stubber_instance, tmp_path):
+    """Keyword-only parameters (after bare *) should be emitted with the '*' separator."""
+
+    def kw_only(a, *, b, c=0):
+        pass
+
+    mock = _make_mock_module(kw_only=kw_only)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    assert "kw_only(a, *, b, c" in content, "keyword-only params need '* ' separator"
+
+
+def test_class_method_no_double_self(stubber_instance, tmp_path):
+    """Class methods must not have 'self' duplicated.
+
+    On MicroPython, inspect.signature() uses dummy parameter names (x0, x1, ...),
+    so the first parameter is 'x0' rather than 'self'.  The stub generator must
+    still strip that first parameter and add exactly one 'self' back.
+    This test verifies the resulting stub has no doubled self on CPython, and
+    also directly exercises the name-agnostic stripping logic.
+    """
+
+    class MyClass:
+        def my_method(self, x, y):
+            pass
+
+        def no_extra_params(self):
+            pass
+
+    mock = _make_mock_module(MyClass=MyClass)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    # Verify self is not doubled (e.g. "self, self, x, y")
+    assert "self, self" not in content, "self must not be duplicated in class methods"
+    # The correct stub should have exactly (self, x, y)
+    assert "def my_method(self, x, y)" in content
+    # A method with only self should produce just "self" without trailing comma issues
+    assert "def no_extra_params(self)" in content
+
+
 def test_method_in_class_has_self(stubber_instance, tmp_path):
     """Methods in classes should have 'self' as first parameter."""
 
