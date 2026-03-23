@@ -12,7 +12,7 @@ from mpflash.logger import log
 import stubber.utils as utils
 from stubber.codemod.enrich import enrich_folder
 from stubber.commands.cli import stubber_cli
-from stubber.freeze.get_frozen import freeze_any
+from stubber.freeze.get_frozen import add_comment_to_path, freeze_any
 from stubber.utils.config import CONFIG
 from stubber.utils.repos import fetch_repos
 
@@ -121,6 +121,9 @@ def cli_get_frozen(
     else:
         log.info(f"No docstubs found at {docstubs_path}")
 
+    # Add version comments to .pyi files after they're generated
+    for stub_path in stub_paths:
+        add_comment_to_path(stub_path, f"# Micropython {version} frozen stubs")
     log.info("::group:: start post processing of retrieved stubs")
     utils.do_post_processing(stub_paths, stubgen=False, format=black, autoflake=autoflake)
     log.info("::group:: Done")
