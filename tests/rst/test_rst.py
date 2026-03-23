@@ -207,6 +207,8 @@ def test_rst_parse_class_10(line: str):
             "USBDevice.active(self, value: Optional[Any]=None ,/)",
         ),
         # USBDevice.active(self, [value] /)
+        # machine.CAN - **kwargs should be preserved (not converted to *kwargs)
+        ("(id, *args, **kwargs)", "(id, *args, **kwargs)"),
     ],
 )
 def test_fix_param(param_in, expected):

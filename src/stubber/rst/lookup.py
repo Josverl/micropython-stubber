@@ -389,7 +389,7 @@ PARAM_FIXES = [
     Fix("\\*", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"\**", "*"),  # change weirdly written wildcards \* --> *
     Fix(r"/*", "*"),  # change weirdly written wildcards /* --> *
-    Fix(r"**", "*"),  # change weirdly written wildcards ** --> *
+    Fix(r"\*\*(?!\w)", "*", is_re=True),  # change ** not followed by a word char → * (but preserve **kwargs)
     # do not remove / , this indicates positional only notation before the ,/
     # RE to insert missing , before /
     Fix(from_=r"(\w+.*?[^,])\s*/", to=r"\1 ,/", is_re=True),
