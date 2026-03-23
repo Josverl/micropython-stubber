@@ -38,7 +38,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ubuntu-latest, windows-latest, macos-13]
+                os: [ubuntu-latest, windows-latest, macos-latest]
                 python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13"]
                 # mpflash-version: ["beta"]
                 include: # for testing
@@ -46,7 +46,7 @@ jobs:
                       python-version: "3.11"
                     - os: ubuntu-latest
                       python-version: "3.11"
-                    - os: macos-13
+                    - os: macos-latest
                       python-version: "3.11"
 
                     # - os: flyci-macos-large-latest-m2 # fails on pipx
