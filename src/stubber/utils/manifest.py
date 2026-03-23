@@ -21,6 +21,7 @@ def manifest(
     version: Optional[str] = None,
     release: Optional[str] = None,
     firmware: Optional[str] = None,
+    board: Optional[str] = None,
 ) -> dict:
     "create a new empty manifest dict"
 
@@ -32,24 +33,31 @@ def manifest(
     nodename = nodename or sysname or ""
     release = release or version or ""
     if firmware is None:
-        firmware = "{}-{}-{}".format(family, port, clean_version(version, flat=True))
+        if board:
+            firmware = "{}-{}-{}-{}".format(family, port, board, clean_version(version, flat=True))
+        else:
+            firmware = "{}-{}-{}".format(family, port, clean_version(version, flat=True))
         # remove double dashes x2
         firmware = firmware.replace("--", "-")
         firmware = firmware.replace("--", "-")
 
+    firmware_info: dict = {
+        "family": family,
+        "port": port,
+        "platform": platform,
+        "machine": machine,
+        "firmware": firmware,
+        "nodename": nodename,
+        "version": version,
+        "release": release,
+        "sysname": sysname,
+    }
+    if board:
+        firmware_info["board"] = board
+
     return {
         "$schema": "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/data/schema/stubber-v1_4_0.json",
-        "firmware": {
-            "family": family,
-            "port": port,
-            "platform": platform,
-            "machine": machine,
-            "firmware": firmware,
-            "nodename": nodename,
-            "version": version,
-            "release": release,
-            "sysname": sysname,
-        },
+        "firmware": firmware_info,
         "stubber": {
             "version": __version__,
             "stubtype": stubtype,
@@ -72,6 +80,7 @@ def make_manifest(
         family=family,
         port=port,
         machine=board,
+        board=board,
         sysname=family,
         version=version,
         release=release,

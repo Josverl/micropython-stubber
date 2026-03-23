@@ -58,11 +58,12 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
     for dest_path in targets:
         # make a module manifest
         port = dest_path.split("/")[-2]
-        # todo: add board / variant into manifest files ?
+        board = dest_path.split("/")[-1]
         utils.make_manifest(
             Path(dest_path),
             family=FAMILY,
             port=port,
+            board=board,
             version=version,
             stubtype="frozen",
         )
