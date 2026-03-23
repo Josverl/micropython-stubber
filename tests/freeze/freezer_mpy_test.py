@@ -14,7 +14,7 @@ from stubber.freeze.freeze_folder import freeze_folders
 from stubber.freeze.freeze_manifest_2 import freeze_one_manifest_2
 
 # Module Under Test
-from stubber.freeze.get_frozen import freeze_any, get_manifests
+from stubber.freeze.get_frozen import add_comment_to_path, freeze_any, get_manifests
 from stubber.publish.defaults import GENERIC_U
 from stubber.utils.repos import switch
 
@@ -264,3 +264,40 @@ def test_get_manifests(
     for m in manifests:
         assert isinstance(m, Path), "expect Path object"
         assert m.name == "manifest.py", "expect manifest.py"
+
+
+##########################################################################
+
+
+def test_add_comment_to_path(tmp_path: Path):
+    """Test that a version comment is added to the top of each .py file in a path."""
+    comment = "# MicroPython v1.19 frozen stubs"
+
+    # Create some test .py files in flat and nested directories
+    files = [
+        tmp_path / "module1.py",
+        tmp_path / "subdir" / "module2.py",
+    ]
+    for f in files:
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text("x = 1\n", encoding="utf-8")
+
+    add_comment_to_path(tmp_path, comment)
+
+    for f in files:
+        content = f.read_text(encoding="utf-8")
+        assert content.startswith(comment), f"Expected comment at top of {f}, got: {content[:50]!r}"
+
+
+def test_add_comment_to_path_no_duplicates(tmp_path: Path):
+    """Test that running add_comment_to_path twice does not duplicate the comment."""
+    comment = "# MicroPython v1.19 frozen stubs"
+
+    stub_file = tmp_path / "module.py"
+    stub_file.write_text("x = 1\n", encoding="utf-8")
+
+    add_comment_to_path(tmp_path, comment)
+    add_comment_to_path(tmp_path, comment)
+
+    content = stub_file.read_text(encoding="utf-8")
+    assert content.count(comment) == 1, "Comment should appear exactly once"
