@@ -24,6 +24,13 @@ try:
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
+try:
+    import inspect as _inspect
+
+    _has_inspect = True
+except ImportError:
+    _has_inspect = False
+
 __version__ = "v1.26.4"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
@@ -254,7 +261,7 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator\nfrom _typeshed import Incomplete\n\n")
+            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator, AsyncGenerator\nfrom _typeshed import Incomplete\n\n")
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -343,11 +350,94 @@ class Stubber:
                 # Self parameter only on class methods/functions
                 if in_class > 0:
                     first = "self, "
+                # Use inspect to detect async/coroutine, async generator and generator functions
+                is_async = False
+                is_async_gen = False
+                is_gen = False
+                if _has_inspect:
+                    try:
+                        is_async = _inspect.iscoroutinefunction(item_instance)
+                    except Exception:
+                        pass
+                    if not is_async:
+                        try:
+                            is_async_gen = getattr(_inspect, "isasyncgenfunction", lambda _: False)(item_instance)
+                        except Exception:
+                            pass
+                    if not is_async and not is_async_gen:
+                        try:
+                            is_gen = _inspect.isgeneratorfunction(item_instance)
+                        except Exception:
+                            pass
+                # Try to get parameter signature using inspect
+                params = None
+                if _has_inspect:
+                    try:
+                        sig = _inspect.signature(item_instance)
+                        param_parts = []
+                        saw_positional_only = False
+                        saw_var_positional = False
+                        for pname, param in sig.parameters.items():
+                            # Handle CPython Parameter objects (have .kind) and MicroPython strings
+                            kind = getattr(param, "kind", None)
+                            if kind == 0:  # POSITIONAL_ONLY
+                                saw_positional_only = True
+                                param_parts.append(pname)
+                            elif kind == 1:  # POSITIONAL_OR_KEYWORD
+                                if saw_positional_only:
+                                    param_parts.append("/")
+                                    saw_positional_only = False
+                                param_parts.append(pname)
+                            elif kind == 2:  # VAR_POSITIONAL (*args)
+                                if saw_positional_only:
+                                    param_parts.append("/")
+                                    saw_positional_only = False
+                                saw_var_positional = True
+                                param_parts.append("*" + pname)
+                            elif kind == 3:  # KEYWORD_ONLY
+                                if saw_positional_only:
+                                    param_parts.append("/")
+                                    saw_positional_only = False
+                                if not saw_var_positional:
+                                    param_parts.append("*")
+                                    saw_var_positional = True
+                                param_parts.append(pname)
+                            elif kind == 4:  # VAR_KEYWORD (**kwargs)
+                                if saw_positional_only:
+                                    param_parts.append("/")
+                                    saw_positional_only = False
+                                param_parts.append("**" + pname)
+                            else:
+                                # MicroPython: param is a string (dummy name), no .kind attribute
+                                param_parts.append(pname)
+                        if saw_positional_only:
+                            param_parts.append("/")
+                        # Strip the leading self/cls parameter in class context.
+                        # On CPython the first param is named 'self'/'cls'; on MicroPython
+                        # it uses a dummy name (e.g. 'x0'). In both cases the first positional
+                        # parameter of an instance method represents self and must be dropped
+                        # before we add it back explicitly below.
+                        if in_class > 0 and param_parts and param_parts[0] not in ("*", "/"):
+                            param_parts = param_parts[1:]
+                        if in_class > 0:
+                            params = "self, " + ", ".join(param_parts) if param_parts else "self"
+                        else:
+                            params = ", ".join(param_parts)
+                    except Exception:
+                        pass
+                if params is None:
+                    params = "{}*args, **kwargs".format(first)
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
                     s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                elif is_async:
+                    s = "{}async def {}({}) -> {}:\n".format(indent, item_name, params, ret)
+                elif is_async_gen:
+                    s = "{}async def {}({}) -> AsyncGenerator:\n".format(indent, item_name, params)
+                elif is_gen:
+                    s = "{}def {}({}) -> Generator:\n".format(indent, item_name, params)
                 else:
-                    s = "{}def {}({}*args, **kwargs) -> {}:\n".format(indent, item_name, first, ret)
+                    s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -378,11 +468,74 @@ class Stubber:
                         # use these types for the attribute
                         s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
                     elif t == "generator":
-                        # either a normal or async Generator function
-                        t = "Generator"
-                        s = "{0}def {1}(*args, **kwargs) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
-                            indent, item_name, t, item_type_txt, item_repr
-                        )
+                        # On MicroPython, async functions and generator functions both have
+                        # type 'generator'. Use inspect (when available) to extract the
+                        # parameter count and detect coroutines.
+                        gen_first = "self, " if in_class > 0 else ""
+                        gen_params = None
+                        gen_is_async = False
+                        if _has_inspect:
+                            try:
+                                gen_is_async = _inspect.iscoroutinefunction(item_instance)
+                            except Exception:
+                                pass
+                            try:
+                                sig = _inspect.signature(item_instance)
+                                param_parts = []
+                                saw_positional_only = False
+                                saw_var_positional = False
+                                for pname, param in sig.parameters.items():
+                                    kind = getattr(param, "kind", None)
+                                    if kind == 0:  # POSITIONAL_ONLY
+                                        saw_positional_only = True
+                                        param_parts.append(pname)
+                                    elif kind == 1:  # POSITIONAL_OR_KEYWORD
+                                        if saw_positional_only:
+                                            param_parts.append("/")
+                                            saw_positional_only = False
+                                        param_parts.append(pname)
+                                    elif kind == 2:  # VAR_POSITIONAL
+                                        if saw_positional_only:
+                                            param_parts.append("/")
+                                            saw_positional_only = False
+                                        saw_var_positional = True
+                                        param_parts.append("*" + pname)
+                                    elif kind == 3:  # KEYWORD_ONLY
+                                        if saw_positional_only:
+                                            param_parts.append("/")
+                                            saw_positional_only = False
+                                        if not saw_var_positional:
+                                            param_parts.append("*")
+                                            saw_var_positional = True
+                                        param_parts.append(pname)
+                                    elif kind == 4:  # VAR_KEYWORD
+                                        if saw_positional_only:
+                                            param_parts.append("/")
+                                            saw_positional_only = False
+                                        param_parts.append("**" + pname)
+                                    else:
+                                        param_parts.append(pname)
+                                if saw_positional_only:
+                                    param_parts.append("/")
+                                # Strip leading self/cls in class context (by name or by position)
+                                if in_class > 0 and param_parts and param_parts[0] not in ("*", "/"):
+                                    param_parts = param_parts[1:]
+                                if in_class > 0:
+                                    gen_params = "self, " + ", ".join(param_parts) if param_parts else "self"
+                                else:
+                                    gen_params = ", ".join(param_parts)
+                            except Exception:
+                                pass
+                        if gen_params is None:
+                            gen_params = "{}*args, **kwargs".format(gen_first)
+                        if gen_is_async:
+                            s = "{0}async def {1}({2}) -> Incomplete:\n{0}    ...\n\n".format(
+                                indent, item_name, gen_params
+                            )
+                        else:
+                            s = "{0}def {1}({2}) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
+                                indent, item_name, gen_params, t, item_repr
+                            )
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
@@ -829,6 +982,7 @@ def main():
         "aioble/server",
         "aioespnow",
         "ak8963",
+        "alif",
         "apa102",
         "apa106",
         "argparse",
