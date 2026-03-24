@@ -623,7 +623,7 @@ def _info():  # type:() -> dict[str, str]
     if info["build"] and not info["version"].endswith("-preview"):
         info["version"] = info["version"] + "-preview"
     # simple to use version[-build] string
-    info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
+    info["ver"] = info["version"] + "-" + info["build"] if info["build"] else info["version"]
 
     return info
 
