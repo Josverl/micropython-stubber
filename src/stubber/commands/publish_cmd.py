@@ -85,7 +85,7 @@ from stubber.utils.config import CONFIG
     "--package-type",
     "package_type",
     type=click.Choice([t.value for t in PackageType], case_sensitive=False),
-    default=PackageType.POETRY.value,
+    default=CONFIG.package_type.value,
     show_default=True,
     help="Package build tool to use (poetry or hatch)",
 )
@@ -99,7 +99,7 @@ def cli_publish(
     force: bool = False,
     dry_run: bool = False,
     clean: bool = False,
-    package_type: str = PackageType.POETRY.value,
+    package_type: str = CONFIG.package_type.value,
 ):
     """
     Commandline interface to publish stubs.
