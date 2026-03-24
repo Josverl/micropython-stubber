@@ -338,6 +338,15 @@ class Stubber:
                     continue
                 # write classdef
                 fp.write(s)
+                # write class docstring if available
+                try:
+                    _doc = item_instance.__doc__
+                    if _doc and isinstance(_doc, str):
+                        _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
+                        if _doc:
+                            fp.write(indent + '    """{0}"""\n'.format(_doc))
+                except Exception:
+                    pass
                 # first write the class literals and methods
                 # log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
@@ -450,6 +459,15 @@ class Stubber:
                     s = "{}def {}({}) -> Generator:\n".format(indent, item_name, params)
                 else:
                     s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
+                # add docstring if available
+                try:
+                    _doc = item_instance.__doc__
+                    if _doc and isinstance(_doc, str):
+                        _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
+                        if _doc:
+                            s += indent + '    """{0}"""\n'.format(_doc)
+                except Exception:
+                    pass
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)

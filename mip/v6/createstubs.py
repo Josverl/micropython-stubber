@@ -261,7 +261,9 @@ class Stubber:
             info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
             s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
             fp.write(s)
-            fp.write("from __future__ import annotations\nfrom typing import Any, Final, Generator, AsyncGenerator\nfrom _typeshed import Incomplete\n\n")
+            fp.write(
+                "from __future__ import annotations\nfrom typing import Any, Final, Generator, AsyncGenerator\nfrom _typeshed import Incomplete\n\n"
+            )
             self.write_object_stub(fp, new_module, module_name, "")
 
         self.report_add(module_name, file_name)
@@ -326,6 +328,15 @@ class Stubber:
                     continue
                 # write classdef
                 fp.write(s)
+                # write class docstring if available
+                try:
+                    _doc = item_instance.__doc__
+                    if _doc and isinstance(_doc, str):
+                        _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
+                        if _doc:
+                            fp.write(indent + '    """{0}"""\n'.format(_doc))
+                except Exception:
+                    pass
                 # first write the class literals and methods
                 # log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
@@ -438,6 +449,15 @@ class Stubber:
                     s = "{}def {}({}) -> Generator:\n".format(indent, item_name, params)
                 else:
                     s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
+                # add docstring if available
+                try:
+                    _doc = item_instance.__doc__
+                    if _doc and isinstance(_doc, str):
+                        _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
+                        if _doc:
+                            s += indent + '    """{0}"""\n'.format(_doc)
+                except Exception:
+                    pass
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -529,9 +549,7 @@ class Stubber:
                         if gen_params is None:
                             gen_params = "{}*args, **kwargs".format(gen_first)
                         if gen_is_async:
-                            s = "{0}async def {1}({2}) -> Incomplete:\n{0}    ...\n\n".format(
-                                indent, item_name, gen_params
-                            )
+                            s = "{0}async def {1}({2}) -> Incomplete:\n{0}    ...\n\n".format(indent, item_name, gen_params)
                         else:
                             s = "{0}def {1}({2}) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
                                 indent, item_name, gen_params, t, item_repr
