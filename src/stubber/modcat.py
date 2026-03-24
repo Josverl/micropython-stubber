@@ -6,7 +6,7 @@ This is shared between stubber, and external build scripts.
 
 from __future__ import annotations
 
-from typing import Final
+from typing import Dict, Final, List
 
 from stubber.publish.enums import StubSource
 
@@ -41,7 +41,10 @@ STUBS_COPY_FILTER = {
     StubSource.FROZEN: [
         "espnow",  # merged stubs + documentation of the espnow module is better than the info in the frozen stubs
         "time",  # used from merged ( should be in stdlib - but has implementation differences per port)
-        "machine",  #  esp32.frozen.machine.py is used to implement PCNT
+        "machine",  # esp32.frozen.machine.py extends the C machine module (adds PCNT etc.)
+        # Complementary frozen modules are handled by COMPLEMENTARY_FROZEN_MODULES below:
+        # unique new definitions from these frozen stubs are appended to the merged stub
+        # instead of being skipped or overwriting the merged stub.
         # https://github.com/micropython/micropython/blob/master/ports/esp32/modules/machine.py
     ]
     + STDLIB_ONLY_MODULES,
@@ -52,6 +55,22 @@ STUBS_COPY_FILTER = {
     + STDLIB_ONLY_MODULES,
     StubSource.MERGED: STDLIB_ONLY_MODULES,
 }
+
+COMPLEMENTARY_FROZEN_MODULES: Final[Dict[str, List[str]]] = {
+    "esp32": ["machine"],
+    # Add more port -> module mappings here as they are discovered
+}
+"""
+Port-specific frozen modules that are partial/complementary implementations extending C-modules.
+
+These frozen modules do NOT replace the full C-module stub; instead, they add new
+port-specific classes/functions that are not part of the standard C implementation.
+Their unique definitions are appended to the merged stub rather than being skipped entirely.
+
+Example: ports/esp32/modules/machine.py adds the PCNT (Pulse Counter) class to the
+standard machine module for ESP32.
+See: https://github.com/micropython/micropython/blob/master/ports/esp32/modules/machine.py
+"""
 
 # these modules will be replaced by a simple import statement to import from stdlib
 STDLIB_UMODULES = ["ucollections"]

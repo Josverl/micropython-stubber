@@ -8,6 +8,7 @@ of micropython
 
 """
 
+import ast
 import hashlib
 import json
 import shutil
@@ -15,7 +16,7 @@ import sqlite3
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import tenacity
 from mpflash.basicgit import get_git_describe
@@ -34,7 +35,7 @@ from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from packaging.version import Version, parse
 
-from stubber.modcat import STDLIB_UMODULES, STUBS_COPY_FILTER
+from stubber.modcat import COMPLEMENTARY_FROZEN_MODULES, STDLIB_UMODULES, STUBS_COPY_FILTER
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import StubSource
@@ -43,6 +44,85 @@ from stubber.utils.config import CONFIG
 
 Status = NewType("Status", Dict[str, Union[str, None]])
 StubSources = List[Tuple[StubSource, Path]]
+
+
+def get_top_level_names(source: str) -> Set[str]:
+    """
+    Get names of top-level class/function/variable definitions from Python or stub source.
+    Used to detect which definitions are already present in a stub file.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return set()
+    names: Set[str] = set()
+    for node in tree.body:
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            names.add(node.name)
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            names.add(node.target.id)
+    return names
+
+
+def append_new_definitions(target_path: Path, complement_path: Path) -> bool:
+    """
+    Append definitions from *complement_path* that do not yet exist in *target_path*.
+
+    This is used for complementary frozen modules that extend a C-module.  Only new
+    top-level class/function/variable definitions are added; existing definitions in
+    the target are never modified or duplicated.
+
+    Returns ``True`` if any definitions were appended, ``False`` otherwise.
+    """
+    try:
+        target_source = target_path.read_text(encoding="utf-8")
+        complement_source = complement_path.read_text(encoding="utf-8")
+    except OSError as e:
+        log.warning(f"Could not read stub file for complementary merge: {e}")
+        return False
+
+    target_names = get_top_level_names(target_source)
+
+    try:
+        tree = ast.parse(complement_source)
+    except SyntaxError:
+        log.warning(f"Could not parse complementary frozen stub {complement_path}")
+        return False
+
+    complement_lines = complement_source.splitlines(keepends=True)
+    new_def_lines: List[str] = []
+
+    for node in tree.body:
+        name: Optional[str] = None
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            name = node.name
+        elif isinstance(node, ast.Assign):
+            for t in node.targets:
+                if isinstance(t, ast.Name):
+                    name = t.id
+                    break
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            name = node.target.id
+
+        # Skip dunder names and anything already defined in the target
+        if name and not name.startswith("__") and name not in target_names:
+            start = node.lineno - 1
+            # end_lineno is guaranteed for all AST statement nodes in Python 3.8+
+            # (project requires Python 3.9+), so the type-ignore is safe.
+            end = node.end_lineno  # type: ignore[attr-defined]
+            new_def_lines.extend(complement_lines[start:end])
+            new_def_lines.append("\n")
+
+    if new_def_lines:
+        with open(target_path, "a", encoding="utf-8") as f:
+            f.write("\n# Definitions below are from the frozen complementary module\n")
+            f.writelines(new_def_lines)
+        return True
+    return False
 
 
 class VersionedPackage:
@@ -351,6 +431,24 @@ class Builder(VersionedPackage):
                 if stub_type in STUBS_COPY_FILTER and (
                     item.stem in STUBS_COPY_FILTER[stub_type] or item.parent.name in STUBS_COPY_FILTER[stub_type]
                 ):
+                    # Check if this is a complementary frozen module that extends a C-module.
+                    # If so, append its unique definitions to the existing stub rather than skipping.
+                    if stub_type == StubSource.FROZEN:
+                        # The frozen path structure is: {family}-{ver}-frozen/{port}/{board}/
+                        # so parts[-2] is the port name (e.g. "esp32").
+                        port = src_path.parts[-2] if len(src_path.parts) >= 2 else ""
+                        if port in COMPLEMENTARY_FROZEN_MODULES and item.stem in COMPLEMENTARY_FROZEN_MODULES[port]:
+                            target = Path(self.package_path) / item.relative_to(CONFIG.stub_path / src_path)
+                            if target.exists():
+                                log.debug(f"Merging complementary frozen stub {item.name} into {target.name}")
+                                if append_new_definitions(target, item):
+                                    log.info(f"Appended new definitions from frozen {item.name} (port: {port})")
+                            else:
+                                # Target doesn't exist yet; copy frozen stub as-is
+                                target.parent.mkdir(parents=True, exist_ok=True)
+                                target.write_bytes(item.read_bytes())
+                                log.trace(f"Copied complementary frozen stub {item} to {target}")
+                            continue
                     log.trace(f"Skipping {item.name}")
                     continue
 
