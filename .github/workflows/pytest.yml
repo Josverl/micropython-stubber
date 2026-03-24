@@ -21,6 +21,9 @@ on:
             - "**/pyproject.toml"
             - "**/poetry.lock"
 
+permissions:
+    contents: read
+
 env:
     PYTHONIOENCODING: utf-8
     # fix:  DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
