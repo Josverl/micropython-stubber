@@ -37,7 +37,7 @@ from packaging.version import Version, parse
 from stubber.modcat import STDLIB_UMODULES, STUBS_COPY_FILTER
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
-from stubber.publish.enums import StubSource
+from stubber.publish.enums import PackageType, StubSource
 from stubber.publish.pypi import Version, get_pypi_versions
 from stubber.utils.config import CONFIG
 
@@ -751,6 +751,179 @@ class PoetryBuilder(Builder):
         return len(_pyproject["tool"]["poetry"]["packages"])
 
 
+class HatchBuilder(Builder):
+    """
+    Build a package using Hatchling (modern PEP 517 build backend).
+
+    This builder uses ``hatch build`` / ``hatch publish`` to create and distribute
+    stub-only packages.  The generated ``pyproject.toml`` uses ``hatchling`` as the
+    build-system backend and stores the list of included ``.pyi`` files in
+    ``[tool.hatch.build.targets.wheel] include``.
+    """
+
+    def __init__(
+        self,
+        package_name: str,
+        *,
+        port: str,
+        mpy_version: str = "0.0.1",
+        board: str = GENERIC_U,
+        description: str = "MicroPython stubs",
+        stub_sources: Optional[StubSources] = None,
+        json_data: Optional[Dict[str, Any]] = None,
+    ):
+        super().__init__(
+            package_name=package_name,
+            mpy_version=mpy_version,
+            port=port,
+            board=board,
+            description=description,
+            stub_sources=stub_sources,
+        )
+
+    # -----------------------------------------------
+    # get and set the version of the package directly from the toml file
+    @property
+    def pkg_version(self) -> str:
+        "return the version of the package"
+        _toml = self.toml_path
+        if not _toml.exists():
+            return self.mpy_version
+        with open(_toml, "rb") as f:
+            pyproject = tomllib.load(f)
+        try:
+            ver = pyproject["project"]["version"]
+        except KeyError:
+            ver = self.mpy_version
+        return str(parse(ver)) if ver not in SET_PREVIEW else ver
+
+    @pkg_version.setter
+    def pkg_version(self, version: str) -> None:
+        "set the version of the package"
+        if not isinstance(version, str):  # type: ignore
+            version = str(version)
+        _toml = self.toml_path
+        try:
+            with open(_toml, "rb") as f:
+                pyproject = tomllib.load(f)
+            pyproject["project"]["version"] = version
+            with open(_toml, "wb") as output:
+                tomli_w.dump(pyproject, output)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"pyproject.toml file not found at {_toml}") from e
+
+    # -----------------------------------------------
+
+    def hatch_build(self) -> bool:
+        """Build the package by running ``hatch build``."""
+        return self.run_hatch(["build"])
+
+    def hatch_publish(self, production: bool = False) -> bool:
+        """Publish the package to PyPI or Test-PyPI using ``hatch publish``."""
+        if not self._publish:
+            log.warning(f"Publishing is disabled for {self.package_name}")
+            return False
+        self.write_package_json()
+        if production:
+            log.debug("Publishing to PRODUCTION https://pypi.org")
+            params = ["publish"]
+        else:
+            log.debug("Publishing to TEST-PyPI https://test.pypi.org")
+            params = ["publish", "-r", "test"]
+        r = self.run_hatch(params)
+        print("")  # add a newline after the output
+        return r
+
+    def run_hatch(self, parameters: List[str]) -> bool:
+        """Run a hatch command-line in the package folder."""
+        if not (self.package_path / "pyproject.toml").exists():  # pragma: no cover
+            log.error(f"No pyproject.toml file found in {self.package_path}")
+            return False
+        try:
+            log.debug(f"hatch {parameters} starting")
+            subprocess.run(
+                ["hatch"] + parameters,
+                cwd=self.package_path,
+                check=True,
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+                encoding="utf-8",
+            )
+            log.trace(f"hatch {parameters} completed")
+        except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
+            log.error("Exception on process, {}".format(e))
+            return False
+        except subprocess.CalledProcessError as e:  # pragma: no cover
+            print()
+            errors = [l for l in e.stdout.splitlines()[1:7] if "Error" in l]
+            for err in errors:
+                log.error(err)
+            return False
+        return True
+
+    def check(self) -> bool:
+        """Check the package; hatchling has no explicit check command – returns True."""
+        return (self.package_path / "pyproject.toml").exists()
+
+    def create_update_pyproject_toml(self) -> None:
+        """
+        Create or update a ``pyproject.toml`` file for a hatchling-based package.
+
+        When the file already exists it is updated in-place (version/name/description
+        and the wheel include list are preserved).  When it does not yet exist a fresh
+        copy is created from ``CONFIG.template_path / "pyproject_hatch.toml"``.
+        """
+        if (self.toml_path).exists():
+            _pyproject = self.pyproject
+            assert _pyproject is not None
+            # clear the include list so update_pyproject_stubs can repopulate it
+            try:
+                _pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"] = []
+            except KeyError:
+                pass
+        else:
+            try:
+                with open(CONFIG.template_path / "pyproject_hatch.toml", "rb") as f:
+                    _pyproject = tomllib.load(f)
+                _pyproject["project"]["version"] = self.mpy_version
+            except FileNotFoundError as e:
+                log.error(f"Could not find hatch template pyproject.toml file {e}")
+                raise e
+
+        # update the dependencies section with stdlib-stubs for the same version
+        major_minor = ".".join(self.mpy_version.split(".")[:2])
+        try:
+            _pyproject["project"]["dependencies"] = [f"micropython-stdlib-stubs  ~={major_minor}.0"]
+        except KeyError:
+            log.warning("Old style project section in pyproject.toml, not updated")
+
+        # update the name, version and description
+        if "project" in _pyproject:
+            _pyproject["project"]["name"] = self.package_name
+            _pyproject["project"]["description"] = self.description
+
+        self.pyproject = _pyproject
+
+    def update_pyproject_stubs(self) -> int:
+        """Add the stub files to the ``[tool.hatch.build.targets.wheel] include`` list."""
+        _pyproject = self.pyproject
+        assert _pyproject is not None, "No pyproject.toml file found"
+
+        pyi_files = sorted(self.package_path.rglob("*.pyi"))
+        include_patterns = [p.relative_to(self.package_path).as_posix() for p in pyi_files]
+
+        # Ensure the nested key hierarchy exists
+        _pyproject.setdefault("tool", {})
+        _pyproject["tool"].setdefault("hatch", {})
+        _pyproject["tool"]["hatch"].setdefault("build", {})
+        _pyproject["tool"]["hatch"]["build"].setdefault("targets", {})
+        _pyproject["tool"]["hatch"]["build"]["targets"].setdefault("wheel", {})
+        _pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"] = include_patterns
+
+        self.pyproject = _pyproject
+        return len(include_patterns)
+
+
 class StubPackage(PoetryBuilder):
     """
     Create a stub-only package for a specific version , port and board of micropython
@@ -785,6 +958,7 @@ class StubPackage(PoetryBuilder):
         description: str = "MicroPython stubs",
         stub_sources: Optional[StubSources] = None,
         json_data: Optional[Dict[str, Any]] = None,
+        package_type: Union[PackageType, str] = PackageType.POETRY,
     ):
         """
         Create a stub-only package for a specific version of micropython
@@ -814,6 +988,7 @@ class StubPackage(PoetryBuilder):
         )
         self.port = port
         self.board = board
+        self.package_type: PackageType = PackageType(package_type) if isinstance(package_type, str) else package_type
         if json_data is not None:
             self.from_dict(json_data)
         else:
@@ -901,6 +1076,25 @@ class StubPackage(PoetryBuilder):
 
         return updated_sources
 
+    # -----------------------------------------------
+    # Package-type dispatchers – route to the right builder based on self.package_type
+    # -----------------------------------------------
+
+    def create_update_pyproject_toml(self) -> None:
+        """Create or update ``pyproject.toml``, dispatching to the correct builder."""
+        if self.package_type == PackageType.HATCH:
+            HatchBuilder.create_update_pyproject_toml(self)  # type: ignore[arg-type]
+        else:
+            PoetryBuilder.create_update_pyproject_toml(self)
+
+    def update_pyproject_stubs(self) -> int:
+        """Add stub files to ``pyproject.toml``, dispatching to the correct builder."""
+        if self.package_type == PackageType.HATCH:
+            return HatchBuilder.update_pyproject_stubs(self)  # type: ignore[arg-type]
+        return PoetryBuilder.update_pyproject_stubs(self)
+
+    # -----------------------------------------------
+
     def update_distribution(self, production: bool) -> bool:
         """Update the package .pyi files, if all the sources are available"""
         log.debug(f"- Update {self.package_path.name}")
@@ -967,11 +1161,17 @@ class StubPackage(PoetryBuilder):
             log.debug(f"{self.package_name}: bump version for {old_ver} to {self.pkg_version} {'production' if production else 'test'}")
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
-            if self.poetry_build():
+            if self.package_type == PackageType.HATCH:
+                build_ok = HatchBuilder.hatch_build(self)  # type: ignore[arg-type]
+                build_tool = "Hatch"
+            else:
+                build_ok = self.poetry_build()
+                build_tool = "Poetry"
+            if build_ok:
                 self.status["result"] = "Build OK"
             else:
                 log.warning(f"{self.package_name}: skipping as build failed")
-                self.status["error"] = "Poetry build failed"
+                self.status["error"] = f"{build_tool} build failed"
                 return False
         return True
 
@@ -1047,7 +1247,10 @@ class StubPackage(PoetryBuilder):
         """
         self.update_hashes()  # resets is_changed to False
         if not dry_run:
-            pub_ok = self.poetry_publish(production=production)
+            if self.package_type == PackageType.HATCH:
+                pub_ok = HatchBuilder.hatch_publish(self, production=production)  # type: ignore[arg-type]
+            else:
+                pub_ok = self.poetry_publish(production=production)
         else:
             log.warning(f"{self.package_name}: Dry run, not publishing to {'' if production else 'Test-'}PyPi")
             pub_ok = True
