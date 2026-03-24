@@ -8,7 +8,6 @@ of micropython
 
 """
 
-import ast
 import hashlib
 import json
 import shutil
@@ -18,7 +17,9 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+import libcst as cst
 import tenacity
+from libcst import ParserSyntaxError
 from mpflash.basicgit import get_git_describe
 
 from stubber.publish.helpers import get_module_docstring
@@ -49,22 +50,27 @@ StubSources = List[Tuple[StubSource, Path]]
 def get_top_level_names(source: str) -> Set[str]:
     """
     Get names of top-level class/function/variable definitions from Python or stub source.
-    Used to detect which definitions are already present in a stub file.
+    Uses libcst so that comments, decorators and whitespace are preserved for callers that
+    need to round-trip the code.
     """
     try:
-        tree = ast.parse(source)
-    except SyntaxError:
+        module = cst.parse_module(source)
+    except ParserSyntaxError:
         return set()
     names: Set[str] = set()
-    for node in tree.body:
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            names.add(node.name)
-        elif isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    names.add(target.id)
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            names.add(node.target.id)
+    for stmt in module.body:
+        # In libcst, async functions are cst.FunctionDef with .asynchronous set,
+        # not a separate AsyncFunctionDef — so one isinstance check covers both.
+        if isinstance(stmt, (cst.ClassDef, cst.FunctionDef)):
+            names.add(stmt.name.value)
+        elif isinstance(stmt, cst.SimpleStatementLine):
+            for small in stmt.body:
+                if isinstance(small, cst.Assign):
+                    for target in small.targets:
+                        if isinstance(target.target, cst.Name):
+                            names.add(target.target.value)
+                elif isinstance(small, cst.AnnAssign) and isinstance(small.target, cst.Name):
+                    names.add(small.target.value)
     return names
 
 
@@ -75,6 +81,9 @@ def append_new_definitions(target_path: Path, complement_path: Path) -> bool:
     This is used for complementary frozen modules that extend a C-module.  Only new
     top-level class/function/variable definitions are added; existing definitions in
     the target are never modified or duplicated.
+
+    Uses libcst for parsing so that all formatting, comments and decorators are fully
+    preserved when extracting code fragments.
 
     Returns ``True`` if any definitions were appended, ``False`` otherwise.
     """
@@ -88,39 +97,40 @@ def append_new_definitions(target_path: Path, complement_path: Path) -> bool:
     target_names = get_top_level_names(target_source)
 
     try:
-        tree = ast.parse(complement_source)
-    except SyntaxError:
-        log.warning(f"Could not parse complementary frozen stub {complement_path}")
+        module = cst.parse_module(complement_source)
+    except ParserSyntaxError as e:
+        log.warning(f"Could not parse complementary frozen stub {complement_path}: {e}")
         return False
 
-    complement_lines = complement_source.splitlines(keepends=True)
-    new_def_lines: List[str] = []
-
-    for node in tree.body:
+    new_defs: List[str] = []
+    for stmt in module.body:
         name: Optional[str] = None
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            name = node.name
-        elif isinstance(node, ast.Assign):
-            for t in node.targets:
-                if isinstance(t, ast.Name):
-                    name = t.id
+        # In libcst, async functions are cst.FunctionDef with .asynchronous set,
+        # not a separate AsyncFunctionDef — so one isinstance check covers both.
+        if isinstance(stmt, (cst.ClassDef, cst.FunctionDef)):
+            name = stmt.name.value
+        elif isinstance(stmt, cst.SimpleStatementLine):
+            for small in stmt.body:
+                if isinstance(small, cst.Assign):
+                    for t in small.targets:
+                        if isinstance(t.target, cst.Name):
+                            name = t.target.value
+                            break
+                elif isinstance(small, cst.AnnAssign) and isinstance(small.target, cst.Name):
+                    name = small.target.value
+                if name:
                     break
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            name = node.target.id
 
         # Skip dunder names and anything already defined in the target
         if name and not name.startswith("__") and name not in target_names:
-            start = node.lineno - 1
-            # end_lineno is guaranteed for all AST statement nodes in Python 3.8+
-            # (project requires Python 3.9+), so the type-ignore is safe.
-            end = node.end_lineno  # type: ignore[attr-defined]
-            new_def_lines.extend(complement_lines[start:end])
-            new_def_lines.append("\n")
+            # code_for_node preserves all formatting, decorators and inline comments
+            new_defs.append(module.code_for_node(stmt))
 
-    if new_def_lines:
+    if new_defs:
         with open(target_path, "a", encoding="utf-8") as f:
             f.write("\n# Definitions below are from the frozen complementary module\n")
-            f.writelines(new_def_lines)
+            for def_code in new_defs:
+                f.write(def_code.rstrip("\n") + "\n\n")
         return True
     return False
 
