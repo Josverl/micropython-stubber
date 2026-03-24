@@ -14,7 +14,8 @@ from mpflash.logger import log
 
 from stubber.codemod.board import CreateStubsCodemod, CreateStubsVariant
 from stubber.codemod.modify_list import ListChangeSet  # type: ignore
-from stubber.minify import cross_compile, minify
+from stubber.minify import cross_compile
+from stubber.minify import minify as minify_fn
 from stubber.update_module_list import update_module_list
 from stubber.utils.post import format_stubs
 
@@ -28,6 +29,7 @@ def create_variants(
     version: str = "",
     make_variants: List[CreateStubsVariant] = ALL_VARIANTS[:3],
     update_modules: bool = True,
+    minify: bool = True,
 ):
     """
     Create variants of createstubs.py and optionally minify and cross compile them.
@@ -40,6 +42,10 @@ def create_variants(
         Path to write the variants to, by default None
     version : str, optional
         Version of mpy-cross to use, by default uses the latest published version
+    minify : bool, optional
+        Whether to minify the createstubs*.py files, by default True.
+        Set to False when targeting mpy-cross versions <= 1.18 that cannot parse
+        minified output without spaces around keywords.
 
     """
     if target_path is None:
@@ -82,14 +88,16 @@ def create_variants(
             # format file with ruff
             format_stubs(variant_path, capture_output=True)
 
-        # Minify file with pyminifier
-        log.info(f"Minifying to {minified_path.name}")
-        minify(variant_path, minified_path, keep_report=False, diff=False)
+        # Minify file with pyminifier (skip if minify is disabled)
+        if minify:
+            log.info(f"Minifying to {minified_path.name}")
+            minify_fn(variant_path, minified_path, keep_report=False, diff=False)
+            compile_source = minified_path.read_text(encoding="utf-8")
+        else:
+            log.info("Skipping minification (--no-minify)")
+            compile_source = variant_path.read_text(encoding="utf-8")
 
-        # str -> path
-        # read minified file
-        minified_txt = minified_path.read_text(encoding="utf-8")
-        cross_compile(minified_txt, mpy_path, version=version)
+        cross_compile(compile_source, mpy_path, version=version)
 
 
 if __name__ == "__main__":
