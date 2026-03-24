@@ -4,7 +4,6 @@ Minimizes and cross-compiles a MicroPyton file.
 """
 
 import itertools
-import re
 import subprocess
 import sys
 import tempfile
@@ -183,23 +182,6 @@ def edit_lines(content: str, edits: LineEdits, diff: bool = False):
     return stripped
 
 
-def fix_ternary_spacing(source: str) -> str:
-    """Add spaces around keywords for mpy-cross compatibility.
-
-    The python_minifier may remove spaces between keywords (if, else, in, not)
-    and adjacent string literals or non-word characters. While valid Python,
-    older mpy-cross parsers require spaces around these keywords.
-
-    Example:
-        ``f"ver-{b}"if b else f"ver"``  →  ``f"ver-{b}" if b else f"ver"``
-    """
-    # Add space before keywords when preceded by a non-whitespace character
-    source = re.sub(r"(?<=\S)\b(if|else|in|not)\b", r" \1", source)
-    # Add space after keywords when followed by a non-whitespace character (but not ':' for block statements)
-    source = re.sub(r"\b(if|else|in|not)\b(?![\s:])", r"\1 ", source)
-    return source
-
-
 def minify_script(source_script: StubSource, keep_report: bool = True, diff: bool = False) -> str:
     """
     Minifies createstubs.py and variants
@@ -265,8 +247,6 @@ def minify_script(source_script: StubSource, keep_report: bool = True, diff: boo
             # remove_pass=True,  # no dead code
             # convert_posargs_to_args=True, # Does not save any space
         )
-        # Fix spacing around keywords for mpy-cross compatibility
-        min_source = fix_ternary_spacing(min_source)
     len_3 = len(min_source)
     # if 1:
     #     # write to temp file for debugging
