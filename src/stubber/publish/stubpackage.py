@@ -406,6 +406,7 @@ class Builder(VersionedPackage):
             "port": self.port,
             "board": self.board,
             "variant": "",  # TODO: get the variant
+            "package_type": str(self.package_type),
         }
 
     def from_dict(self, json_data: Dict) -> None:
@@ -420,6 +421,18 @@ class Builder(VersionedPackage):
         self.port = json_data["port"]
         self.board = json_data["board"]
         self.variant = json_data["variant"]
+        # Restore the build backend that was used when this package was originally
+        # built/published.  Old DB rows won't have the key; fall back to
+        # inferring from the on-disk pyproject.toml so the wrong builder is
+        # never applied to an existing file.
+        try:
+            stored_type = json_data["package_type"]
+        except (KeyError, IndexError):
+            stored_type = None
+        if stored_type:
+            self.package_type = PackageType(stored_type)
+        else:
+            self.package_type = self._infer_package_type()
 
         # create folder
         if not self.package_path.exists():
@@ -1269,8 +1282,8 @@ class StubPackage(PoetryBuilder):
 
             cursor.execute(
                 """
-                INSERT INTO packages (name, description, mpy_version, pkg_version, publish, stub_sources, path, hash, stub_hash, port, board, variant)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO packages (name, description, mpy_version, pkg_version, publish, stub_sources, path, hash, stub_hash, port, board, variant, package_type)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     d["name"],
@@ -1285,6 +1298,7 @@ class StubPackage(PoetryBuilder):
                     d["port"],
                     d["board"],
                     d["variant"],
+                    d["package_type"],
                 ),
             )
 
@@ -1314,3 +1328,25 @@ class StubPackage(PoetryBuilder):
             log.debug(msg)
             ok = False
         return ok
+
+    def _infer_package_type(self) -> PackageType:
+        """
+        Infer the build backend from the on-disk ``pyproject.toml``.
+
+        This is used as a fallback when loading packages that were created before
+        the ``package_type`` column was added to the database.  The heuristic is:
+
+        * ``hatchling.build``  → :attr:`PackageType.HATCH`
+        * anything else        → :attr:`PackageType.POETRY` (safe default)
+        """
+        if not self.toml_path.exists():
+            return self.package_type  # keep whatever was set in __init__
+        try:
+            with open(self.toml_path, "rb") as f:
+                _pyproject = tomllib.load(f)
+            backend = _pyproject.get("build-system", {}).get("build-backend", "")
+            if "hatchling" in backend:
+                return PackageType.HATCH
+        except Exception:
+            pass
+        return PackageType.POETRY
