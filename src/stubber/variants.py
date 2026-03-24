@@ -94,7 +94,7 @@ def create_variants(
             minify_fn(variant_path, minified_path, keep_report=False, diff=False)
             compile_source = minified_path.read_text(encoding="utf-8")
         else:
-            log.info("Skipping minification (--no-minify)")
+            log.info("Skipping minification")
             compile_source = variant_path.read_text(encoding="utf-8")
 
         cross_compile(compile_source, mpy_path, version=version)

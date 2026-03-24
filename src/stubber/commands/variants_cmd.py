@@ -12,14 +12,14 @@ from stubber.utils.config import CONFIG
 from stubber.variants import create_variants
 
 
-def _version_requires_no_minify(version: str) -> bool:
-    """Return True if the mpy-cross version is too old to handle minified output (<=1.18)."""
+def _version_supports_minify(version: str) -> bool:
+    """Return True if the mpy-cross version supports minified output (> 1.18)."""
     if not version or version in ("master", "preview", "latest"):
-        return False
+        return True
     try:
-        return Version(version.lstrip("v")) <= Version("1.18")
+        return Version(version.lstrip("v")) > Version("1.18")
     except InvalidVersion:
-        return False
+        return True
 
 
 @click.option(
@@ -40,11 +40,10 @@ def _version_requires_no_minify(version: str) -> bool:
     help="The version of mpy-cross to use",
 )
 @click.option(
-    "--no-minify",
-    "no_minify",
-    is_flag=True,
-    default=False,
-    help="Skip minification of createstubs*.py (automatically enabled for mpy-cross <= v1.18)",
+    "--minify/--no-minify",
+    "minify",
+    default=True,
+    help="Minify createstubs*.py before compiling (automatically disabled for mpy-cross <= v1.18)",
 )
 @stubber_cli.command(name="variants", aliases=["make-variants"])
 @click.pass_context
@@ -52,7 +51,7 @@ def cli_variants(
     ctx: click.Context,
     target_folder: str = "",
     version: str = CONFIG.stable_version,
-    no_minify: bool = False,
+    minify: bool = True,
 ) -> int:
     """Update all variants of createstubs*.py."""
     board_path = Path(stubber.__file__).parent / "board"
@@ -62,11 +61,11 @@ def cli_variants(
     else:
         target_path = board_path
 
-    if not no_minify and _version_requires_no_minify(version):
+    if minify and not _version_supports_minify(version):
         log.info(f"mpy-cross version {version} <= 1.18: minification disabled to avoid SyntaxError")
-        no_minify = True
+        minify = False
 
-    create_variants(board_path, target_path=target_path, version=version, minify=not no_minify)
+    create_variants(board_path, target_path=target_path, version=version, minify=minify)
 
     log.info("Done!")
     return 0
