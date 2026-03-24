@@ -135,7 +135,7 @@ def _info():  # type:() -> dict[str, str]
         # .mpy version.minor
         info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
     # simple to use version[-build] string
-    info["ver"] = f"v{info['version']}-{info['build']}" if info["build"] else f"v{info['version']}"
+    info["ver"] = "v" + info["version"] + "-" + info["build"] if info["build"] else "v" + info["version"]
 
     return info
 
