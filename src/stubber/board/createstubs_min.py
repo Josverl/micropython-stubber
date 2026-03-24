@@ -56,7 +56,7 @@ try:from collections import OrderedDict as r
 except S:from ucollections import OrderedDict as r
 try:import inspect as Y;a=O
 except S:a=B
-__version__='v1.26.4'
+__version__='v1.26.5a0'
 A6=2
 A7=44
 A8=2

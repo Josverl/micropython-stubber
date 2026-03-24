@@ -31,7 +31,7 @@ try:
 except ImportError:
     _has_inspect = False
 
-__version__ = "v1.26.4"
+__version__ = "v1.26.5a0"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
