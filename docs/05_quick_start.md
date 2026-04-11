@@ -67,7 +67,7 @@ The command creates a `repos/` subdirectory containing:
 │   ├── micropython/        ← MicroPython source (for doc & frozen stubs)
 │   ├── micropython-lib/    ← MicroPython library source
 │   └── micropython-stubs/  ← Where generated stubs are stored
-└── .typings/               ← Local stub install target (created in step 9)
+└── typings/               ← Local stub install target (created in step 9)
 ```
 
 ## Step 4 – Select the firmware version
@@ -114,6 +114,9 @@ This captures the board-specific modules that may not be documented or frozen el
 The port, board name, and version are detected automatically and used to name the output folder.
 
 ## Step 8 – Merge and build the stub package
+The `stubber firmware-stubs` command already runs the below steps,
+but in some cases you may want to re-run them after making manual edits 
+to the generated stubs, or after regenerating doc/frozen stubs in steps 5 and 6.
 
 Combine all stub types for your board into a single distributable package.
 Replace `esp32` / `ESP32_GENERIC` with the values reported by the previous step:
@@ -132,10 +135,10 @@ Replace the folder name below with the actual name produced by `stubber build`:
 
 ```bash
 # From your working directory (e.g. ~/my-stubs)
-pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target .typings
+pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target typings
 ```
 
-The `.typings` folder is the conventional location for MicroPython stubs in VS Code projects.
+The `typings` folder is the conventional location for MicroPython stubs in VS Code projects.
 Point your editor's Python extension at this folder to get code-completion and type-checking for your board.
 
 ## Step 10 – Contribute your stubs
@@ -172,7 +175,7 @@ stubber merge --port esp32 --board ESP32_GENERIC --version stable
 stubber build --port esp32 --board ESP32_GENERIC --version stable
 
 # Verify locally before submitting a PR
-pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target .typings
+pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target typings
 
 # Contribute: open a PR to micropython-stubs
 cd repos/micropython-stubs
