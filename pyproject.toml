@@ -8,7 +8,7 @@ repo-path = "./repos"
 
 [tool.poetry]
 name = "micropython-stubber"
-version = "1.26.5a0"
+version = "1.28.0"
 description = "Tooling to create and maintain stubs for MicroPython"
 authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
 license = "MIT"
@@ -47,10 +47,10 @@ mpflash = "mpflash.cli_main:mpflash"
 mpremote = "mpremote.main:main"
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<4.0"
+python = ">=3.10,<4.0"
 python-minifier = { version = "^2.7.0", python = "<3.14" }
 requests = "^2.32.3"
-mpflash = "^1.26.7"
+mpflash = "^1.28.0"
 greenlet = ">=3.2.4,<3.2.5"  # Constrain to version with pre-built wheels
 mpremote = ">=1.25.0"
 # others
@@ -103,7 +103,7 @@ mock = "^4.0.3"
 distro = "^1.8.0"
 fasteners = "^0.19"
 jsons = "^1.6.3"
-pytest-cov = "^6.0.0"
+pytest-cov = ">=6.0.0"
 
 [tool.poetry.group.dev]
 optional = true
