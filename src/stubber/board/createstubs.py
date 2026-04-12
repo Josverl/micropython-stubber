@@ -37,7 +37,7 @@ if not _is_low_mem_port:
     except ImportError:
         _has_inspect = False
 
-__version__ = "v1.28.0"
+__version__ = "v1.28.1"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting

@@ -9,7 +9,7 @@
     - cross compilation, using mpy-cross,
       to avoid the compilation step on the micropython device
 
-This variant was generated from createstubs.py by micropython-stubber v1.28.0
+This variant was generated from createstubs.py by micropython-stubber v1.28.1
 """
 
 # Copyright (c) 2019-2024 Jos Verlinde
@@ -49,7 +49,7 @@ if not _is_low_mem_port:
     except ImportError:
         _has_inspect = False
 
-__version__ = "v1.28.0"
+__version__ = "v1.28.1"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
