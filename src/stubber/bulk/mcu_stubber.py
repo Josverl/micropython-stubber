@@ -82,14 +82,15 @@ def run_createstubs(
     if mount_vfs:
         cmd = build_cmd(dest, variant)
     else:
-        mcu.run_command(["rm", ":modulelist.done"], log_errors=False)
+        # Note: do NOT delete modulelist.done here - it is removed once before the
+        # first attempt (in generate_board_stubs) so that retries can resume progress.
         cmd = build_cmd(None, variant)
     log.info(f"Running : mpremote {' '.join(cmd)}")
     mcu.run_command.retry.wait = wait_fixed(15)
     # some boards need 2-3 minutes to run createstubs - so increase the default timeout
     # esp32s3 > 240 seconds with mounted fs
-    #  but slows down esp8266 restarts so keep that to 90 seconds
-    timeout = 90 if mcu.port == "esp8266" else 6 * 60  # type: ignore
+    # esp8266 has very little memory and may need many resume cycles; allow 3 minutes per cycle
+    timeout = 3 * 60 if mcu.port == "esp8266" else 6 * 60  # type: ignore
     rc, out = mcu.run_command(cmd, timeout=timeout)
     # check last line for exception or error and raise that if found
     if rc != OK and out and ":" in out[-1] and not out[-1].startswith("INFO") and not out[-1].startswith("WARN"):
@@ -160,8 +161,11 @@ def generate_board_stubs(
         # insuficcient memory on the board also mount a remote fs
         mount_vfs = False
     if not mount_vfs:
-        # remove prio stubs folder to avoid running out of flash space
+        # remove prior stubs folder to avoid running out of flash space
         mcu.run_command(["rm", "-rv", ":stubs"], log_errors=False)
+        # Clear any prior resume-point so this board starts fresh;
+        # run_createstubs must NOT delete this file on retries so progress is kept.
+        mcu.run_command(["rm", ":modulelist.done"], log_errors=False)
 
     # Ensure lib directory exists and is in sys.path before mip_install
     ensure_lib_directory(mcu)

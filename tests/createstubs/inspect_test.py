@@ -229,3 +229,21 @@ def test_stub_header_has_asyncgenerator_import(createstubs, tmp_path):
 
     content = Path(stub_path).read_text()
     assert "AsyncGenerator" in content, "stub file should import AsyncGenerator"
+
+
+def test_low_mem_mode_skips_inspect_and_docstrings(stubber_instance, tmp_path):
+    """Low-memory mode should avoid inspect-based signatures and docstring expansion."""
+
+    def fn_with_doc(alpha, beta):
+        """A detailed function docstring that should be omitted in low-memory mode."""
+        return alpha + beta
+
+    stubber_instance._is_low_mem_port = True
+    stubber_instance._capture_docstrings = False
+    stubber_instance._use_inspect = False
+
+    mock = _make_mock_module(fn_with_doc=fn_with_doc)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    assert "def fn_with_doc(*args, **kwargs)" in content
+    assert "A detailed function docstring" not in content
