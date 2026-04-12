@@ -337,6 +337,7 @@ def stub_connected_mcus(
     ignore: List[str],
     bluetooth: bool,
     exclude: Union[List[str], None] = None,
+    mount_vfs: bool = True,
 ) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
@@ -381,7 +382,7 @@ def stub_connected_mcus(
         # remove the modulelist.done file before starting createstubs on each board
         (temp_path / "modulelist.done").unlink(missing_ok=True)
 
-        rc, my_stubs = generate_board_stubs(temp_path, board, variant, form, exclude=exclude)
+        rc, my_stubs = generate_board_stubs(temp_path, board, variant, form, mount_vfs=mount_vfs, exclude=exclude)
         if rc != OK:
             log.error(f"Failed to generate stubs for {board.serialport}")
             continue
