@@ -6,10 +6,10 @@ Publishing is done using poetry
 
 reqs: 
  - poetry installed and on path
-   `pip install poetry` 
+   `uv tool install poetry --with poetry-bumpversion` 
 
    - poetry config 
-    - `poetry config repositories.test-pypi https://test.pypi.org/legacy/`
+    - poetry config repositories.test-pypi https://test.pypi.org/legacy/
     - poetry config repositories.pypi https://upload.pypi.org/legacy/
 
 
