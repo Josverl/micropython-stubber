@@ -353,8 +353,18 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         for key in scope_keys:
             for mpa in self.annotations[key].mp_available:
+                # Skip self-referencing: a class's own @mp_available entry should not be
+                # added inside itself. It will be consumed at the parent (module) level.
+                if key == stack_id and mpa.def_type == "classdef":
+                    log.trace(f"Deferring @mp_available classdef to parent scope: key={key} name={mpa.name}")
+                    continue
+                log.trace(f"Collecting @mp_available: key={key} name={mpa.name} def_type={mpa.def_type}")
                 missing_decorated.append((mpa.def_node, key))
-            self.annotations[key].mp_available = []  # remove for list, assume  works
+            # Only clear if we consumed all items; keep classdef self-refs for parent scope
+            remaining = [mpa for mpa in self.annotations[key].mp_available if key == stack_id and mpa.def_type == "classdef"]
+            self.annotations[key].mp_available = remaining
+
+        log.trace(f"add_missed_mp_available: stack_id={stack_id} missing_decorated={len(missing_decorated)} node_type={type(updated_node).__name__}")
 
         if missing_decorated:
             if isinstance(updated_node, cst.Module):
@@ -372,15 +382,23 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 matched = False
                 matched, i = self.locate_function_by_name(mpa, updated_body)
                 if matched:
+                    if isinstance(mpa, cst.ClassDef):
+                        # Class already exists in target - skip to avoid duplication
+                        log.trace(f"Skip @mp_available class {mpa.name.value} - already exists in target")
+                        continue
                     log.trace(f"Add @mp_available for {mpa.name.value}")
-                    if self.copy_params:
+                    if self.copy_params and isinstance(mpa, cst.FunctionDef):
                         docstring_node = self.annotations[key].docstring_node or ""
                         # Use the new overload - but with the existing docstring
                         mpa = update_def_docstr(mpa, docstring_node)
                     updated_body.insert(i + 1, mpa)
                 else:
                     # add to the end of the module or  class
-                    if module_level and len(key) > 1:
+                    if isinstance(mpa, cst.ClassDef):
+                        # This is a full class definition with @mp_available - add it directly
+                        log.trace(f"Add @mp_available class {mpa.name.value} at the end of the module/class")
+                        updated_body.append(mpa)
+                    elif module_level and len(key) > 1:
                         # this is a class level @mp_available, for which no class was found
                         class_name = key[0]
                         if class_name not in new_classes:
@@ -494,11 +512,11 @@ class MergeCommand(VisitorBasedCodemodCommand):
         return updated_node
 
     def locate_function_by_name(self, overload, updated_body):
-        """locate the (last) function by name"""
+        """locate the (last) function or class by name"""
         matched = False
         i = 0
         for i, node in reversed(list(enumerate(updated_body))):
-            if isinstance(node, cst.FunctionDef) and node.name.value == overload.name.value:
+            if isinstance(node, (cst.FunctionDef, cst.ClassDef)) and node.name.value == overload.name.value:
                 matched = True
                 break
         return matched, i
@@ -524,12 +542,16 @@ class MergeCommand(VisitorBasedCodemodCommand):
         # we need to be careful not to copy over all the annotations if the types are different
         if doc_stub.def_type == "classdef":
             # Same type, we can copy over all the annotations
-            # combine the decorators from the doc-stub and the firmware stub
+            # combine the decorators from the doc-stub and the firmware stub, deduplicating @mp_available
             new_decorators = []
             if doc_stub.decorators:
                 new_decorators.extend(doc_stub.decorators)
             if updated_node.decorators:
-                new_decorators.extend(updated_node.decorators)
+                for dec in updated_node.decorators:
+                    # Skip @mp_available decorators already present from the doc-stub
+                    if is_mp_available_decorator(dec) and any(is_mp_available_decorator(d) for d in new_decorators):
+                        continue
+                    new_decorators.append(dec)
 
             updated_node = updated_node.with_changes(
                 decorators=new_decorators,

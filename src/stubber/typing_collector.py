@@ -183,7 +183,25 @@ class StubTypingCollector(cst.CSTVisitor):
         if literal_docstrings:
             anno_value.literal_docstrings.update(literal_docstrings)
 
-        self.annotations[tuple(self.stack)] = anno_value
+        key = tuple(self.stack)
+        self.annotations[key] = anno_value
+
+        # save the mp_available decos for classes (same as for FunctionDef)
+        if any(
+            m.matches(
+                dec,
+                m.Decorator(
+                    decorator=m.OneOf(
+                        m.Name("mp_available"),
+                        m.Call(func=m.Name("mp_available")),
+                        m.Attribute(value=m.DoNotCare(), attr=m.Name("mp_available")),
+                        m.Call(func=m.Attribute(value=m.DoNotCare(), attr=m.Name("mp_available"))),
+                    )
+                ),
+            )
+            for dec in node.decorators
+        ):
+            self.annotations[key].mp_available.append(ti)
 
     def leave_ClassDef(self, original_node: cst.ClassDef) -> None:
         """remove the class name from the stack"""

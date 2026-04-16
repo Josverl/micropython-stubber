@@ -26,7 +26,7 @@ from mpflash.versions import (
 from packaging.version import parse
 
 from stubber import utils
-from stubber.publish.defaults import GENERIC, GENERIC_L, GENERIC_U
+from stubber.publish.defaults import DEFAULT_L, GENERIC, GENERIC_L, GENERIC_U
 
 # from stubber.publish.enums import COMBO_STUBS
 from stubber.utils.config import CONFIG
@@ -244,5 +244,7 @@ def filter_list(
         worklist = [i for i in worklist if i["port"].lower() in ports_]
     if boards and not is_auto(boards):
         boards_ = [i.lower() for i in boards]
+        # Treat DEFAULT as an alias for GENERIC when selecting per-port default board candidates.
+        boards_ = [GENERIC_L if b == DEFAULT_L else b for b in boards_]
         worklist = [i for i in worklist if i["board"].lower() in boards_ or i["board"].lower().replace("generic_", "") in boards_]
     return worklist

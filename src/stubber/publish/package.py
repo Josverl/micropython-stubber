@@ -11,7 +11,7 @@ from typing import Dict, Union
 from mpflash.logger import log
 from mpflash.versions import clean_version
 
-from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
+from stubber.publish.defaults import DEFAULT, GENERIC, GENERIC_L, default_board
 from stubber.publish.enums import StubSource
 from stubber.publish.stubpackage import StubPackage, StubSources
 from stubber.utils.config import CONFIG
@@ -137,6 +137,7 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     """
     Build a source set for combo stubs
     """
+    requested_board = board
     # Use lower case for paths to avoid case sensitive issues
     port = port.lower()
     # BOARD in the micropython repo is always uppercase by convention (PYBV11, RPI_PICO)
@@ -155,20 +156,40 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     # resulting in parts with a double dash -- in the path
     # micropython-webassembly--generic-merged
     # Workaround for this is to replace -- with - in the path
-    if board_l in GENERIC:
+    if board_l in GENERIC or board_l in DEFAULT:
+        alias_name = "DEFAULT" if board_l in DEFAULT else "GENERIC"
         merged_path = Path(f"{family}-{ver_flat}-{port}-merged".replace("--", "-"))
-        if not merged_path.exists():
+        merged_source_path = CONFIG.stub_path / merged_path
+        log.debug(
+            f"Effective board selector '{requested_board}' ({alias_name} alias; GENERIC/DEFAULT share this selector) "
+            f"maps to shared port path '{merged_path}', "
+            f"exists={merged_source_path.exists()} ({merged_source_path})"
+        )
+        if not merged_source_path.exists():
             board = default_board(port, ver_flat)
             board_l = board.lower()
             board_u = board
             merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged".replace("--", "-"))
+            merged_source_path = CONFIG.stub_path / merged_path
+            log.info(
+                f"Shared port merged path not found, resolved default board='{board}' "
+                f"and using default-board merged path '{merged_path}', "
+                f"exists={merged_source_path.exists()} ({merged_source_path})"
+            )
     else:
         merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged".replace("--", "-"))
+        merged_source_path = CONFIG.stub_path / merged_path
+        log.info(
+            f"Requested explicit board '{requested_board}', using merged path '{merged_path}', "
+            f"exists={merged_source_path.exists()} ({merged_source_path})"
+        )
 
     # BOARD in source frozen path needs to be UPPERCASE
     frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()
     # TODO : Add version to core stubs ?
     core_path = Path(f"{family}-core")
+
+    log.info(f"Selected combo sources: merged='{merged_path}', frozen='{frozen_path}', core='{core_path}'")
 
     return [
         (StubSource.MERGED, merged_path),

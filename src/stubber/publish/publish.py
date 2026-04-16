@@ -11,7 +11,7 @@ from mpflash.versions import V_PREVIEW
 
 from stubber.publish.candidates import board_candidates, filter_list
 from stubber.publish.database import get_database
-from stubber.publish.defaults import GENERIC_U
+from stubber.publish.defaults import DEFAULT_L, GENERIC_L, GENERIC_U
 from stubber.publish.package import get_package
 from stubber.utils.config import CONFIG
 
@@ -115,6 +115,7 @@ def build_worklist(
     for b in boards:
         if b in ["auto", "all", "*"]:
             continue
-        if not any(i for i in worklist if i["board"].lower() == b.lower()):
+        board_check = GENERIC_L if b.lower() == DEFAULT_L else b.lower()
+        if not any(i for i in worklist if i["board"].lower() == board_check):
             log.warning(f"Could not find any package candidate for board {b}")
     return worklist

@@ -8,6 +8,7 @@ import pytest
 pytestmark = [pytest.mark.stubber]
 from stubber.publish.candidates import (  # DOC_STUBS,; docstub_candidates,
     # COMBO_STUBS,
+    filter_list,
     frozen_candidates,
     subfolder_names,
     version_candidates,
@@ -161,3 +162,14 @@ def test_worklist(family: str, versions: Union[List[str], str], ports: str, boar
     # no exact match meeted , +- .05 or +- 2 is good enough
     assert len(wl) == pytest.approx(count, rel=0.05), f"expected {count}, found {len(wl)} {msg}."
     assert len(wl) == pytest.approx(count, abs=2), f"expected {count}, found {len(wl)} {msg}."
+
+
+def test_filter_list_default_alias_matches_generic_candidate():
+    worklist = [
+        {"family": "micropython", "version": "v1.28.0", "port": "rp2", "board": "GENERIC"},
+        {"family": "micropython", "version": "v1.28.0", "port": "rp2", "board": "RPI_PICO_W"},
+    ]
+
+    filtered = filter_list(worklist, ports=["rp2"], boards=["DEFAULT"])
+    assert len(filtered) == 1
+    assert filtered[0]["board"] == "GENERIC"
