@@ -25,7 +25,14 @@ jobs:
     # You can define any steps you want, and they will run before the agent starts.
     # If you do not check out your code, Copilot will do this for you.
     steps:
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "latest"
+      #----------------------------------------------
+      # install uv and uvx
+      #----------------------------------------------
+      - name: Install uv and uvx
+        uses: astral-sh/setup-uv@v8.1.0
+
+      #----------------------------------------------
+      # poetry is not in the default image
+      #----------------------------------------------
+      - name: Install poetry
+        run: pipx install poetry==2.1          
