@@ -12,7 +12,7 @@ from mpflash.logger import log
 from mpflash.versions import clean_version
 
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
-from stubber.publish.enums import StubSource
+from stubber.publish.enums import PackageType, StubSource
 from stubber.publish.stubpackage import StubPackage, StubSources
 from stubber.utils.config import CONFIG
 
@@ -38,6 +38,7 @@ def get_package(
     port: str,
     board: str = GENERIC_L,
     family: str = "micropython",
+    package_type: Union[PackageType, str] = CONFIG.package_type,
 ) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
     pkg_name = package_name(port=port, board=board, family=family)
@@ -55,6 +56,7 @@ def get_package(
             board=board,
             version=version,
             json_data=package_info,
+            package_type=package_type,
         )
         # @Josverl: Check or update stub_sources if len < 3
         EXPECTED_STUBS = 3
@@ -74,6 +76,7 @@ def get_package(
         port=port,
         board=board,
         family=family,
+        package_type=package_type,
     )
 
 
@@ -118,6 +121,7 @@ def create_package(
     port: str,
     board: str = "",
     family: str = "micropython",
+    package_type: Union[PackageType, str] = CONFIG.package_type,
     # pkg_type: str = COMBO_STUBS,
 ) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
@@ -130,7 +134,7 @@ def create_package(
 
     assert port != "", "port must be specified for combo stubs"
     stub_sources = combo_sources(family, port, board, ver_flat)
-    return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stub_sources=stub_sources)
+    return StubPackage(pkg_name, port=port, board=board, version=mpy_version, stub_sources=stub_sources, package_type=package_type)
 
 
 def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSources:
