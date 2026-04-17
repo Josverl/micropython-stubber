@@ -60,7 +60,7 @@ from stubber.utils.config import CONFIG
     "--package-type",
     "package_type",
     type=click.Choice([t.value for t in PackageType], case_sensitive=False),
-    default=PackageType.POETRY.value,
+    default=CONFIG.package_type.value,
     show_default=True,
     help="Package build tool to use (poetry or hatch)",
 )
