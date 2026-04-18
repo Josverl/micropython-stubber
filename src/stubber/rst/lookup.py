@@ -364,10 +364,7 @@ MODULE_GLUE = {
     "struct": ANY_BUF,
     "time": [
         "from typing_extensions import TypeAlias, TypeVar",
-        "_TicksMs: TypeAlias = int",
-        "_TicksUs: TypeAlias = int",
-        "_TicksCPU: TypeAlias = int",
-        '_Ticks = TypeVar("_Ticks", _TicksMs, _TicksUs, _TicksCPU, int)',
+        "from _mpy_shed import _Ticks, _TicksMs, _TicksUs, _TicksCPU",
     ],
     "uctypes": ANY_BUF
     + [
