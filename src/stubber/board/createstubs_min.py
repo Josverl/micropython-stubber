@@ -1,1295 +1,451 @@
-"""
-Create stubs for (all) modules on a MicroPython board
-"""
-
-# Copyright (c) 2019-2024 Jos Verlinde
-
-import gc
-import os
-import sys
+'\nCreate stubs for (all) modules on a MicroPython board\n'
+AA='windows'
+A9='No report file'
+A8='Failed to create the report.'
+A7='logging'
+A6='builtins'
+A5='method'
+A4='function'
+A3='stubber'
+A2='esp8266'
+A1=isinstance
+A0=KeyError
+z=MemoryError
+y=NotImplementedError
+t='unix'
+s='arch'
+r='variant'
+q=',\n'
+p='dict'
+o='list'
+n='tuple'
+m='__'
+l='micropython'
+k=TypeError
+j=repr
+b='-preview'
+e=len
+d=str
+c=getattr
+Z='family'
+Y='board_id'
+W='board'
+V=IndexError
+U=open
+T=print
+S=ImportError
+Q='mpy'
+X='*'
+O='build'
+N='.'
+M=dir
+I='port'
+H=AttributeError
+R=Exception
+G='-'
+P=True
+E=OSError
+J=None
+A='version'
+F='/'
+C=''
+B=False
+import gc as K,os,sys
 from time import sleep
-
-try:
-    from ujson import dumps
-except:
-    from json import dumps
-
-try:
-    from machine import reset  # type: ignore
-except ImportError:
-    def reset():
-        print("Reset called - exiting")
-        sys.exit(0)
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ucollections import OrderedDict  # type: ignore
-
-_LOW_MEM_PORTS = ("esp8266",)
-_is_low_mem_port = sys.platform in _LOW_MEM_PORTS
-_has_inspect = False
-if not _is_low_mem_port:
-    try:
-        import inspect as _inspect
-
-        _has_inspect = True
-    except ImportError:
-        _has_inspect = False
-
-__version__ = "v1.28.2a0"
-ENOENT = 2  # on most ports
-ENOMESSAGE = 44  # on pyscript
-_MAX_CLASS_LEVEL = 2  # Max class nesting
-LIBS = ["lib", "/lib", "/sd/lib", "/flash/lib", "."]
-
-
-# our own logging module to avoid dependency on and interfering with logging module
-class logging:
-    DEBUG = 10
-    INFO = 20
-    WARNING = 30
-    ERROR = 40
-    level = INFO
-    prnt = print
-
-    @staticmethod
-    def getLogger(name):
-        return logging()
-
-    @classmethod
-    def basicConfig(cls, level):
-        cls.level = level
-
-    def debug(self, msg):
-        if self.level <= logging.DEBUG:
-            self.prnt("DEBUG :", msg)
-
-    def info(self, msg):
-        if self.level <= logging.INFO:
-            self.prnt("INFO  :", msg)
-
-    def warning(self, msg):
-        if self.level <= logging.WARNING:
-            self.prnt("WARN  :", msg)
-
-    def error(self, msg):
-        if self.level <= logging.ERROR:
-            self.prnt("ERROR :", msg)
-
-
-log = logging.getLogger("stubber")
-logging.basicConfig(level=logging.INFO)
-# logging.basicConfig(level=logging.DEBUG)
-
-
+try:from ujson import dumps
+except:from json import dumps
+try:from machine import reset as f
+except S:
+	def f():T('Reset called - exiting');sys.exit(0)
+try:from collections import OrderedDict as u
+except S:from ucollections import OrderedDict as u
+v=A2,
+AB=sys.platform in v
+g=B
+if not AB:
+	try:import inspect as a;g=P
+	except S:g=B
+__version__='v1.28.2'
+AC=2
+AD=44
+AE=2
+AR=['lib','/lib','/sd/lib','/flash/lib',N]
+class L:
+	DEBUG=10;INFO=20;WARNING=30;ERROR=40;level=INFO;prnt=T
+	@staticmethod
+	def getLogger(name):return L()
+	@classmethod
+	def basicConfig(A,level):A.level=level
+	def debug(A,msg):
+		if A.level<=L.DEBUG:A.prnt('DEBUG :',msg)
+	def info(A,msg):
+		if A.level<=L.INFO:A.prnt('INFO  :',msg)
+	def warning(A,msg):
+		if A.level<=L.WARNING:A.prnt('WARN  :',msg)
+	def error(A,msg):
+		if A.level<=L.ERROR:A.prnt('ERROR :',msg)
+D=L.getLogger(A3)
+L.basicConfig(level=L.INFO)
 class Stubber:
-    "Generate stubs for modules in firmware"
-
-    def __init__(self, path: str = "", firmware_id: str = ""):  # type: ignore
-        try:
-            if os.uname().release == "1.13.0" and os.uname().version < "v1.13-103":  # type: ignore
-                raise NotImplementedError("MicroPython 1.13.0 cannot be stubbed")
-        except AttributeError:
-            pass  # Allow testing on CPython 3.11
-        self.info = _info()
-        log.info("Port: {}".format(self.info["port"]))
-        log.info("Board: {}".format(self.info["board"]))
-        log.info("Board_ID: {}".format(self.info["board_id"]))
-        self._is_low_mem_port = self.info["port"] in _LOW_MEM_PORTS
-        self._capture_docstrings = not self._is_low_mem_port
-        self._use_inspect = _has_inspect and not self._is_low_mem_port
-        if self._is_low_mem_port:
-            log.info("Low-memory mode: disabling inspect and docstrings")
-        gc.collect()
-        if firmware_id:
-            self._fwid = firmware_id.lower()
-        else:
-            if self.info["family"] == "micropython":
-                self._fwid = "{family}-v{version}-{port}-{board_id}".format(**self.info).rstrip("-")
-            else:
-                self._fwid = "{family}-v{version}-{port}".format(**self.info)
-        self._start_free = gc.mem_free()  # type: ignore
-
-        if path:
-            if path.endswith("/"):
-                path = path[:-1]
-        else:
-            path = get_root()
-
-        self.path = "{}/stubs/{}".format(path, self.flat_fwid).replace("//", "/")
-        # log.debug(self.path)
-        try:
-            ensure_folder(path + "/")
-        except OSError:
-            log.error("error creating stub folder {}".format(path))
-        self.problematic = [
-            "upip",
-            "upysh",
-            "webrepl_setup",
-            "http_client",
-            "http_client_ssl",
-            "http_server",
-            "http_server_ssl",
-        ]
-        self.excluded = [
-            "webrepl",
-            "_webrepl",
-            "port_diag",
-            "example_sub_led.py",
-            "example_pub_button.py",
-        ]
-        self.load_exlusions()
-        # there is no option to discover modules from micropython, list is read from an external file.
-        self.modules = []  # type: list[str]
-        self._json_name = None
-        self._json_first = False
-
-    def load_exlusions(self):
-        # Load additional exclusions from modulelist_exclude.txt if it exists
-        try:
-            with open("modulelist_exclude.txt", "r") as f:
-                for line in f:
-                    module = line.strip()
-                    if module and module not in self.excluded:
-                        self.excluded.append(module)
-                        log.info("Added {} to excluded modules from modulelist_exclude.txt".format(module))
-        except OSError:
-            pass  # File doesn't exist, that's OK
-
-    def get_obj_attributes(self, item_instance: object):
-        "extract information of the objects members and attributes"
-        # name_, repr_(value), type as text, item_instance
-        _result = []
-        _errors = []
-        # log.debug("get attributes {} {}".format(repr(item_instance), item_instance))
-        for name in dir(item_instance):
-            if name.startswith("__") and not name in self.modules:
-                continue
-            # log.debug("get attribute {}".format(name))
-            try:
-                val = getattr(item_instance, name)
-                # name , item_repr(value) , type as text, item_instance, order
-                # log.debug("attribute {}:{}".format(name, val))
-                try:
-                    type_text = repr(type(val)).split("'")[1]
-                except IndexError:
-                    type_text = ""
-                if type_text in {
-                    "int",
-                    "float",
-                    "str",
-                    "bool",
-                    "tuple",
-                    "list",
-                    "dict",
-                }:
-                    order = 1
-                elif type_text in {"function", "method"}:
-                    order = 2
-                elif type_text in ("class"):
-                    order = 3
-                else:
-                    order = 4
-                _result.append((name, repr(val), repr(type(val)), val, order))
-            except AttributeError as e:
-                _errors.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(name, item_instance, e))
-            except MemoryError as e:
-                print("MemoryError: {}".format(e))
-                sleep(1)
-                reset()
-
-        # remove internal __
-        # _result = sorted([i for i in _result if not (i[0].startswith("_"))], key=lambda x: x[4])
-        _result = sorted([i for i in _result if not (i[0].startswith("__"))], key=lambda x: x[4])
-        gc.collect()
-        return _result, _errors
-
-    def add_modules(self, modules):
-        "Add additional modules to be exported"
-        self.modules = sorted(set(self.modules) | set(modules))
-
-    def create_all_stubs(self):
-        "Create stubs for all configured modules"
-        log.info("Start micropython-stubber {} on {}".format(__version__, self._fwid))
-        self.report_start()
-        gc.collect()
-        for module_name in self.modules:
-            self.create_one_stub(module_name)
-        self.report_end()
-        log.info("Finally done")
-
-    def create_one_stub(self, module_name: str):
-        if module_name in self.problematic:
-            log.warning("Skip module: {:<25}        : Known problematic".format(module_name))
-            return False
-        if module_name in self.excluded:
-            log.warning("Skip module: {:<25}        : Excluded".format(module_name))
-            return False
-
-        file_name = "{}/{}.pyi".format(self.path, module_name.replace(".", "/"))
-        gc.collect()
-        result = False
-        try:
-            result = self.create_module_stub(module_name, file_name)
-        except OSError:
-            return False
-        gc.collect()
-        return result
-
-    def create_module_stub(self, module_name: str, file_name: str = None) -> bool:  # type: ignore
-        """Create a Stub of a single python module
-
-        Args:
-        - module_name (str): name of the module to document. This module will be imported.
-        - file_name (Optional[str]): the 'path/filename.pyi' to write to. If omitted will be created based on the module name.
-        """
-        if file_name is None:
-            fname = module_name.replace(".", "_") + ".pyi"
-            file_name = self.path + "/" + fname
-        else:
-            fname = file_name.split("/")[-1]
-
-        if "/" in module_name:
-            # for nested modules
-            module_name = module_name.replace("/", ".")
-
-        # import the module (as new_module) to examine it
-        new_module = None
-        try:
-            new_module = __import__(module_name, None, None, ("*"))
-            m1 = gc.mem_free()  # type: ignore
-            log.info("Stub module: {:<25} to file: {:<70} mem:{:>5}".format(module_name, fname, m1))
-
-        except ImportError:
-            # log.debug("Skip module: {:<25} {:<79}".format(module_name, "Module not found."))
-            return False
-
-        # Start a new file
-        # log.debug("Create file: {}".format(file_name))
-        ensure_folder(file_name)
-        with open(file_name, "w") as fp:
-            info_ = str(self.info).replace("OrderedDict(", "").replace("})", "}")
-            s = '"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(module_name, self._fwid, info_, __version__)
-            fp.write(s)
-            fp.write(
-                "from __future__ import annotations\nfrom typing import Any, Final, Generator, AsyncGenerator\nfrom _typeshed import Incomplete\n\n"
-            )
-            if self._is_low_mem_port and module_name in {"builtins", "uasyncio.__init__"}:
-                log.warning("Low-memory mode: using shallow stub strategy.")
-                self.write_shallow_stub(fp, new_module)
-            else:
-                try:
-                    self.write_object_stub(fp, new_module, module_name, "")
-                except MemoryError:
-                    if not self._is_low_mem_port:
-                        raise
-                    gc.collect()
-                    log.warning("Low-memory mode: MemoryError while stubbing {}, resetting".format(module_name))
-                    reset()
-
-        self.report_add(module_name, file_name)
-
-        if module_name not in {"os", "sys", "logging", "gc"}:
-            # try to unload the module unless we use it
-            try:
-                del new_module
-            except (OSError, KeyError):  # lgtm [py/unreachable-statement]
-                log.warning("could not del new_module")
-            # do not try to delete from sys.modules - most times it does not work anyway
-        gc.collect()
-        return True
-
-    def write_shallow_stub(self, fp, module_obj: object):
-        # Write a low-memory shallow module stub using names only.
-        fp.write("# Low-memory mode: shallow stub with names only\n")
-        for item_name in dir(module_obj):
-            if item_name.startswith("__") and not item_name in self.modules:
-                continue
-            if not item_name or item_name[0].isdigit():
-                continue
-            fp.write("{}: Incomplete\n".format(item_name))
-
-    def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
-        "Write a module/object stub to an open file. Can be called recursive."
-        gc.collect()
-        if object_expr in self.problematic:
-            log.warning("SKIPPING problematic module:{}".format(object_expr))
-            return
-
-        # # log.debug("DUMP    : {}".format(object_expr))
-        items, errors = self.get_obj_attributes(object_expr)
-
-        if errors:
-            log.error(errors)
-
-        for item_name, item_repr, item_type_txt, item_instance, _ in items:
-            # name_, repr_(value), type as text, item_instance, order
-            if item_name in [
-                "classmethod",
-                "staticmethod",
-                "BaseException",
-                "Exception",
-            ]:
-                # do not create stubs for these primitives
-                continue
-            if item_name[0].isdigit():
-                log.warning("NameError: invalid name {}".format(item_name))
-                continue
-            # Class expansion only on first 3 levels (bit of a hack)
-            if item_type_txt == "<class 'type'>" and len(indent) <= _MAX_CLASS_LEVEL * 4:
-                # log.debug("{0}class {1}:".format(indent, item_name))
-                superclass = ""
-                is_exception = (
-                    item_name.endswith("Exception")
-                    or item_name.endswith("Error")
-                    or item_name
-                    in [
-                        "KeyboardInterrupt",
-                        "StopIteration",
-                        "SystemExit",
-                    ]
-                )
-                if is_exception:
-                    superclass = "Exception"
-                s = "\n{}class {}({}):\n".format(indent, item_name, superclass)
-                # s += indent + "    ''\n"
-                if is_exception:
-                    s += indent + "    ...\n"
-                    fp.write(s)
-                    continue
-                # write classdef
-                fp.write(s)
-                # write class docstring if available
-                if self._capture_docstrings:
-                    try:
-                        _doc = item_instance.__doc__
-                        if _doc and isinstance(_doc, str):
-                            _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
-                            if _doc:
-                                fp.write(indent + '    """{0}"""\n'.format(_doc))
-                    except Exception:
-                        pass
-                # first write the class literals and methods
-                # log.debug("# recursion over class {0}".format(item_name))
-                self.write_object_stub(
-                    fp,
-                    item_instance,
-                    "{0}.{1}".format(obj_name, item_name),
-                    indent + "    ",
-                    in_class + 1,
-                )
-                # end with the __init__ method to make sure that the literals are defined
-                # Add __init__
-                s = indent + "    def __init__(self, *argv, **kwargs) -> None:\n"
-                s += indent + "        ...\n\n"
-                fp.write(s)
-            elif any(word in item_type_txt for word in ["method", "function", "closure"]):
-                # log.debug("# def {1} function/method/closure, type = '{0}'".format(item_type_txt, item_name))
-                # module Function or class method
-                # will accept any number of params
-                # return type Any/Incomplete
-                ret = "Incomplete"
-                first = ""
-                # Self parameter only on class methods/functions
-                if in_class > 0:
-                    first = "self, "
-                # Use inspect to detect async/coroutine, async generator and generator functions
-                is_async = False
-                is_async_gen = False
-                is_gen = False
-                if self._use_inspect:
-                    try:
-                        is_async = _inspect.iscoroutinefunction(item_instance)
-                    except Exception:
-                        pass
-                    if not is_async:
-                        try:
-                            is_async_gen = getattr(_inspect, "isasyncgenfunction", lambda _: False)(item_instance)
-                        except Exception:
-                            pass
-                    if not is_async and not is_async_gen:
-                        try:
-                            is_gen = _inspect.isgeneratorfunction(item_instance)
-                        except Exception:
-                            pass
-                # Try to get parameter signature using inspect
-                params = None
-                if self._use_inspect:
-                    try:
-                        sig = _inspect.signature(item_instance)
-                        param_parts = []
-                        saw_positional_only = False
-                        saw_var_positional = False
-                        for pname, param in sig.parameters.items():
-                            # Handle CPython Parameter objects (have .kind) and MicroPython strings
-                            kind = getattr(param, "kind", None)
-                            if kind == 0:  # POSITIONAL_ONLY
-                                saw_positional_only = True
-                                param_parts.append(pname)
-                            elif kind == 1:  # POSITIONAL_OR_KEYWORD
-                                if saw_positional_only:
-                                    param_parts.append("/")
-                                    saw_positional_only = False
-                                param_parts.append(pname)
-                            elif kind == 2:  # VAR_POSITIONAL (*args)
-                                if saw_positional_only:
-                                    param_parts.append("/")
-                                    saw_positional_only = False
-                                saw_var_positional = True
-                                param_parts.append("*" + pname)
-                            elif kind == 3:  # KEYWORD_ONLY
-                                if saw_positional_only:
-                                    param_parts.append("/")
-                                    saw_positional_only = False
-                                if not saw_var_positional:
-                                    param_parts.append("*")
-                                    saw_var_positional = True
-                                param_parts.append(pname)
-                            elif kind == 4:  # VAR_KEYWORD (**kwargs)
-                                if saw_positional_only:
-                                    param_parts.append("/")
-                                    saw_positional_only = False
-                                param_parts.append("**" + pname)
-                            else:
-                                # MicroPython: param is a string (dummy name), no .kind attribute
-                                param_parts.append(pname)
-                        if saw_positional_only:
-                            param_parts.append("/")
-                        # Strip the leading self/cls parameter in class context.
-                        # On CPython the first param is named 'self'/'cls'; on MicroPython
-                        # it uses a dummy name (e.g. 'x0'). In both cases the first positional
-                        # parameter of an instance method represents self and must be dropped
-                        # before we add it back explicitly below.
-                        if in_class > 0 and param_parts and param_parts[0] not in ("*", "/"):
-                            param_parts = param_parts[1:]
-                        if in_class > 0:
-                            params = "self, " + ", ".join(param_parts) if param_parts else "self"
-                        else:
-                            params = ", ".join(param_parts)
-                    except Exception:
-                        pass
-                if params is None:
-                    params = "{}*args, **kwargs".format(first)
-                # class method - add function decoration
-                if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
-                elif is_async:
-                    s = "{}async def {}({}) -> {}:\n".format(indent, item_name, params, ret)
-                elif is_async_gen:
-                    s = "{}async def {}({}) -> AsyncGenerator:\n".format(indent, item_name, params)
-                elif is_gen:
-                    s = "{}def {}({}) -> Generator:\n".format(indent, item_name, params)
-                else:
-                    s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
-                # add docstring if available
-                if self._capture_docstrings:
-                    try:
-                        _doc = item_instance.__doc__
-                        if _doc and isinstance(_doc, str):
-                            _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
-                            if _doc:
-                                s += indent + '    """{0}"""\n'.format(_doc)
-                    except Exception:
-                        pass
-                s += indent + "    ...\n\n"
-                fp.write(s)
-                # log.debug("\n" + s)
-            elif item_type_txt == "<class 'module'>":
-                # Skip imported modules
-                # fp.write("# import {}\n".format(item_name))
-                pass
-
-            elif item_type_txt.startswith("<class '"):
-                t = item_type_txt[8:-2]
-                s = ""
-
-                if t in ("str", "int", "float", "bool", "bytearray", "bytes"):
-                    # known type: use actual value
-                    if item_name.upper() == item_name:  # ALL_CAPS --> Final
-                        s = "{0}{1}: Final[{3}] = {2}\n".format(indent, item_name, item_repr, t)
-                    else:
-                        s = "{0}{1}: {3} = {2}\n".format(indent, item_name, item_repr, t)
-                elif t in ("dict", "list", "tuple"):
-                    # dict, list , tuple: use empty value
-                    ev = {"dict": "{}", "list": "[]", "tuple": "()"}
-                    # s = "{0}{1} = {2} # type: {3}\n".format(indent, item_name, ev[t], t)
-                    s = "{0}{1}: {3} = {2}\n".format(indent, item_name, ev[t], t)
-                else:
-                    # something else
-                    if t in ("object", "set", "frozenset", "Pin"):  # "FileIO"
-                        # https://docs.python.org/3/tutorial/classes.html#item_instance-objects
-                        # use these types for the attribute
-                        s = "{0}{1}: {2} ## = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
-                    elif t == "generator":
-                        # On MicroPython, async functions and generator functions both have
-                        # type 'generator'. Use inspect (when available) to extract the
-                        # parameter count and detect coroutines.
-                        gen_first = "self, " if in_class > 0 else ""
-                        gen_params = None
-                        gen_is_async = False
-                        if self._use_inspect:
-                            try:
-                                gen_is_async = _inspect.iscoroutinefunction(item_instance)
-                            except Exception:
-                                pass
-                            try:
-                                sig = _inspect.signature(item_instance)
-                                param_parts = []
-                                saw_positional_only = False
-                                saw_var_positional = False
-                                for pname, param in sig.parameters.items():
-                                    kind = getattr(param, "kind", None)
-                                    if kind == 0:  # POSITIONAL_ONLY
-                                        saw_positional_only = True
-                                        param_parts.append(pname)
-                                    elif kind == 1:  # POSITIONAL_OR_KEYWORD
-                                        if saw_positional_only:
-                                            param_parts.append("/")
-                                            saw_positional_only = False
-                                        param_parts.append(pname)
-                                    elif kind == 2:  # VAR_POSITIONAL
-                                        if saw_positional_only:
-                                            param_parts.append("/")
-                                            saw_positional_only = False
-                                        saw_var_positional = True
-                                        param_parts.append("*" + pname)
-                                    elif kind == 3:  # KEYWORD_ONLY
-                                        if saw_positional_only:
-                                            param_parts.append("/")
-                                            saw_positional_only = False
-                                        if not saw_var_positional:
-                                            param_parts.append("*")
-                                            saw_var_positional = True
-                                        param_parts.append(pname)
-                                    elif kind == 4:  # VAR_KEYWORD
-                                        if saw_positional_only:
-                                            param_parts.append("/")
-                                            saw_positional_only = False
-                                        param_parts.append("**" + pname)
-                                    else:
-                                        param_parts.append(pname)
-                                if saw_positional_only:
-                                    param_parts.append("/")
-                                # Strip leading self/cls in class context (by name or by position)
-                                if in_class > 0 and param_parts and param_parts[0] not in ("*", "/"):
-                                    param_parts = param_parts[1:]
-                                if in_class > 0:
-                                    gen_params = "self, " + ", ".join(param_parts) if param_parts else "self"
-                                else:
-                                    gen_params = ", ".join(param_parts)
-                            except Exception:
-                                pass
-                        if gen_params is None:
-                            gen_params = "{}*args, **kwargs".format(gen_first)
-                        if gen_is_async:
-                            s = "{0}async def {1}({2}) -> Incomplete:\n{0}    ...\n\n".format(indent, item_name, gen_params)
-                        else:
-                            s = "{0}def {1}({2}) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
-                                indent, item_name, gen_params, t, item_repr
-                            )
-                    else:
-                        # Requires Python 3.6 syntax, which is OK for the stubs/pyi
-                        t = "Incomplete"
-                        if " at " in item_repr:
-                            item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        if " at " in item_repr:
-                            item_repr = item_repr.split(" at ")[0] + " at ...>"
-                        s = "{0}{1}: {2} ## {3} = {4}\n".format(indent, item_name, t, item_type_txt, item_repr)
-                fp.write(s)
-                # log.debug("\n" + s)
-            else:
-                # keep only the name
-                # log.debug("# all other, type = '{0}'".format(item_type_txt))
-                fp.write("# all other, type = '{0}'\n".format(item_type_txt))
-
-                fp.write(indent + item_name + " # type: Incomplete\n")
-
-        # del items
-        # del errors
-        # try:
-        #     del item_name, item_repr, item_type_txt, item_instance  # type: ignore
-        # except (OSError, KeyError, NameError):
-        #     pass
-
-    @property
-    def flat_fwid(self):
-        "Turn _fwid from 'v1.2.3' into '1_2_3' to be used in filename"
-        s = self._fwid
-        # path name restrictions
-        chars = " .()/\\:$"
-        for c in chars:
-            s = s.replace(c, "_")
-        return s
-
-    def clean(self, path: str = ""):  # type: ignore
-        "Remove all files from the stub folder"
-        if not path:
-            path = self.path
-        log.info("Clean/remove files in folder: {}".format(path))
-        try:
-            os.stat(path)  # TEMP workaround mpremote listdir bug -
-            items = os.listdir(path)
-        except (OSError, AttributeError):
-            # os.listdir fails on unix
-            return
-        for fn in items:
-            item = "{}/{}".format(path, fn)
-            try:
-                os.remove(item)
-            except OSError:
-                try:  # folder
-                    self.clean(item)
-                    os.rmdir(item)
-                except OSError:
-                    pass
-
-    def report_start(self, filename: str = "modules.json"):
-        """Start a report of the modules that have been stubbed
-        "create json with list of exported modules"""
-        self._json_name = "{}/{}".format(self.path, filename)
-        self._json_first = True
-        ensure_folder(self._json_name)
-        log.info("Report file: {}".format(self._json_name))
-        gc.collect()
-        try:
-            # write json by node to reduce memory requirements
-            with open(self._json_name, "w") as f:
-                f.write("{")
-                f.write(dumps({"firmware": self.info})[1:-1])
-                f.write(",\n")
-                f.write(dumps({"stubber": {"version": __version__}, "stubtype": "firmware"})[1:-1])
-                f.write(",\n")
-                f.write('"modules" :[\n')
-
-        except OSError as e:
-            log.error("Failed to create the report.")
-            self._json_name = None
-            raise e
-
-    def report_add(self, module_name: str, stub_file: str):
-        "Add a module to the report"
-        # write json by node to reduce memory requirements
-        if not self._json_name:
-            raise Exception("No report file")
-        try:
-            with open(self._json_name, "a") as f:
-                if not self._json_first:
-                    f.write(",\n")
-                else:
-                    self._json_first = False
-                line = '{{"module": "{}", "file": "{}"}}'.format(module_name, stub_file.replace("\\", "/"))
-                f.write(line)
-
-        except OSError:
-            log.error("Failed to create the report.")
-
-    def report_end(self):
-        if not self._json_name:
-            raise Exception("No report file")
-        with open(self._json_name, "a") as f:
-            f.write("\n]}")
-        # is used as sucess indicator
-        log.info("Path: {}".format(self.path))
-
-
-def ensure_folder(path: str):
-    "Create nested folders if needed"
-    i = start = 0
-    while i != -1:
-        i = path.find("/", start)
-        if i != -1:
-            p = path[0] if i == 0 else path[:i]
-            # p = partial folder
-            try:
-                _ = os.stat(p)
-            except OSError as e:
-                # folder does not exist
-                if e.args[0] in [ENOENT, ENOMESSAGE]:
-                    try:
-                        log.debug("Create folder {}".format(p))
-                        os.mkdir(p)
-                    except OSError as e2:
-                        log.error("failed to create folder {}".format(p))
-                        raise e2
-        # next level deep
-        start = i + 1
-
-
-def _build(s):
-    # extract build from sys.version or os.uname().version if available
-    # sys.version: 'MicroPython v1.24.0-preview.6.g3d0b6276f'
-    # sys.implementation.version: 'v1.13-103-gb137d064e'
-    if not s:
-        return ""
-    s = s.split(" on ", 1)[0] if " on " in s else s
-    if s.startswith("v"):
-        if not "-" in s:
-            return ""
-        b = s.split("-")[1]
-        return b
-    if not "-preview" in s:
-        return ""
-    b = s.split("-preview")[1].split(".")[1]
-    return b
-
-
-def _get_base_system_info() -> OrderedDict[str, str]:
-    """Get basic system implementation details."""
-    try:
-        fam = sys.implementation[0]  # type: ignore
-    except TypeError:
-        # testing on CPython 3.11
-        fam = sys.implementation.name
-
-    info = OrderedDict(
-        {
-            "family": fam,
-            "version": "",
-            "build": "",
-            "ver": "",
-            "port": sys.platform,  # port: esp32 / win32 / linux / stm32
-            "board": "UNKNOWN",
-            "board_id": "",
-            "variant": "",
-            "cpu": "",
-            "mpy": "",
-            "arch": "",
-        }
-    )
-    return info
-
-
-def _normalize_port_info(info: OrderedDict[str, str]) -> None:
-    """Normalize port names to be consistent with the repo."""
-    if info["port"].startswith("pyb"):
-        info["port"] = "stm32"
-    elif info["port"] == "win32":
-        info["port"] = "windows"
-    elif info["port"] == "linux":
-        info["port"] = "unix"
-
-
-def _extract_version_info(info: OrderedDict[str, str]) -> None:
-    """Extract version information from sys.implementation."""
-    try:
-        info["version"] = _version_str(sys.implementation.version)
-    except AttributeError:
-        pass
-
-
-def _extract_hardware_info(info: OrderedDict[str, str]) -> None:
-    """Extract board, CPU, and machine details."""
-    try:
-        _machine = sys.implementation._machine if "_machine" in dir(sys.implementation) else os.uname().machine  # type: ignore
-        info["board"] = _machine.strip()
-        si_build = sys.implementation._build if "_build" in dir(sys.implementation) else ""
-        if si_build:
-            info["board"] = si_build.split("-")[0]
-            info["variant"] = si_build.split("-")[1] if "-" in si_build else ""
-        info["board_id"] = si_build
-        info["cpu"] = _machine.split("with")[-1].strip()
-        info["mpy"] = (
-            sys.implementation._mpy  # type: ignore
-            if "_mpy" in dir(sys.implementation)
-            else (sys.implementation.mpy if "mpy" in dir(sys.implementation) else "")  # type: ignore
-        )
-    except (AttributeError, IndexError):
-        pass
-
-    if not info["board_id"]:
-        get_boardname(info)
-
-
-def _extract_build_info(info: OrderedDict[str, str]) -> None:
-    """Extract build information from various system sources."""
-    try:
-        if "uname" in dir(os):  # old
-            # extract build from uname().version if available
-            info["build"] = _build(os.uname()[3])  # type: ignore
-            if not info["build"]:
-                # extract build from uname().release if available
-                info["build"] = _build(os.uname()[2])  # type: ignore
-        elif "version" in dir(sys):  # new
-            # extract build from sys.version if available
-            info["build"] = _build(sys.version)
-    except (AttributeError, IndexError, TypeError):
-        pass
-
-    # Fallback version detection for specific platforms
-    if info["version"] == "" and sys.platform not in ("unix", "win32"):
-        try:
-            u = os.uname()  # type: ignore
-            info["version"] = u.release
-        except (IndexError, AttributeError, TypeError):
-            pass
-
-
-def _detect_firmware_family(info: OrderedDict[str, str]) -> None:
-    """Detect special firmware families (pycopy, pycom, ev3-pybricks)."""
-    for fam_name, mod_name, mod_thing in [
-        ("pycopy", "pycopy", "const"),
-        ("pycom", "pycom", "FAT"),
-        ("ev3-pybricks", "pybricks.hubs", "EV3Brick"),
-    ]:
-        try:
-            _t = __import__(mod_name, None, None, (mod_thing))
-            info["family"] = fam_name
-            del _t
-            break
-        except (ImportError, KeyError):
-            pass
-
-    if info["family"] == "ev3-pybricks":
-        info["release"] = "2.0.0"
-
-
-def _process_micropython_version(info: OrderedDict[str, str]) -> None:
-    """Process MicroPython-specific version formatting."""
-    if info["family"] == "micropython":
-        if (
-            info["version"]
-            and info["version"].endswith(".0")
-            and info["version"] >= "1.10.0"  # versions from 1.10.0 to 1.24.0 do not have a micro .0
-            and info["version"] <= "1.19.9"
-        ):
-            # versions from 1.10.0 to 1.24.0 do not have a micro .0
-            info["version"] = info["version"][:-2]
-
-
-def _process_mpy_info(info: OrderedDict[str, str]) -> None:
-    """Process MPY architecture and version information."""
-    # spell-checker: disable
-    if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
-        sys_mpy = int(info["mpy"])
-        # .mpy architecture
-        try:
-            arch = [
-                None,
-                "x86",
-                "x64",
-                "armv6",
-                "armv6m",
-                "armv7m",
-                "armv7em",
-                "armv7emsp",
-                "armv7emdp",
-                "xtensa",
-                "xtensawin",
-                "rv32imc",
-            ][sys_mpy >> 10]
-            if arch:
-                info["arch"] = arch
-        except IndexError:
-            info["arch"] = "unknown"
-        # .mpy version.minor
-        info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
-
-
-def _format_version_strings(info: OrderedDict[str, str]) -> None:
-    """Handle final version string formatting."""
-    if info["build"] and not info["version"].endswith("-preview"):
-        info["version"] = info["version"] + "-preview"
-    # simple to use version[-build] string
-    info["ver"] = f"{info['version']}-{info['build']}" if info["build"] else f"{info['version']}"
-
-
-def _info():  # type:() -> dict[str, str]
-    """
-    Gather comprehensive system information for MicroPython stubbing.
-
-    Returns a dictionary containing family, version, port, board, and other
-    system details needed for stub generation.
-    """
-    # Get base system information
-    info = _get_base_system_info()
-
-    # Apply transformations and gather additional info
-    _normalize_port_info(info)
-    _extract_version_info(info)
-    _extract_hardware_info(info)
-    _extract_build_info(info)
-    _detect_firmware_family(info)
-    _process_micropython_version(info)
-    _process_mpy_info(info)
-    _format_version_strings(info)
-
-    return info
-
-
-def _version_str(version: tuple):  #  -> str:
-    v_str = ".".join([str(n) for n in version[:3]])
-    if len(version) > 3 and version[3]:
-        v_str += "-" + version[3]
-    return v_str
-
-
-def get_boardname(info: dict) -> None:
-    "Read the board_id from the boardname.py file that may have been created upfront"
-    try:
-        from boardname import BOARD_ID  # type: ignore
-
-        log.info("Found BOARD_ID: {}".format(BOARD_ID))
-    except ImportError:
-        log.warning("BOARD_ID not found")
-        BOARD_ID = ""
-    info["board_id"] = BOARD_ID
-    info["board"] = BOARD_ID.split("-")[0] if "-" in BOARD_ID else BOARD_ID
-    info["variant"] == BOARD_ID.split("-")[1] if "-" in BOARD_ID else ""
-
-
-def get_root() -> str:  # sourcery skip: use-assigned-variable
-    "Determine the root folder of the device"
-    try:
-        c = os.getcwd()
-    except (OSError, AttributeError):
-        # unix port
-        c = "."
-    r = c
-    for r in ["/remote", "/sd", "/flash", "/", c, "."]:
-        try:
-            _ = os.stat(r)
-            break
-        except OSError:
-            continue
-    return r
-
-
-def file_exists(filename: str):
-    try:
-        if os.stat(filename)[0] >> 14:
-            return True
-        return False
-    except OSError:
-        return False
-
-
-def show_help():
-    print("-p, --path   path to store the stubs in, defaults to '.'")
-    sys.exit(1)
-
-
-def read_path() -> str:
-    "get --path from cmdline. [unix/win]"
-    path = ""
-    if len(sys.argv) == 3:
-        cmd = (sys.argv[1]).lower()
-        if cmd in ("--path", "-p"):
-            path = sys.argv[2]
-        else:
-            show_help()
-    elif len(sys.argv) == 2:
-        show_help()
-    return path
-
-
-def is_micropython() -> bool:
-    "runtime test to determine full or micropython"
-    # pylint: disable=unused-variable,eval-used
-    try:
-        # either test should fail on micropython
-
-        # b) https://docs.micropython.org/en/latest/genrst/builtin_types.html#bytes-with-keywords-not-implemented
-        # Micropython: NotImplementedError
-        b = bytes("abc", encoding="utf8")  # type: ignore
-
-        # c) https://docs.micropython.org/en/latest/genrst/core_language.html#function-objects-do-not-have-the-module-attribute
-        # Micropython: AttributeError
-        c = is_micropython.__module__  # type: ignore
-        return False
-    except (NotImplementedError, AttributeError):
-        return True
-
-
-def main():
-    stubber = Stubber(path=read_path())
-    # stubber = Stubber(path="/sd")
-    # Option: Specify a firmware name & version
-    # stubber = Stubber(firmware_id='HoverBot v1.2.1')
-    stubber.clean()
-    # there is no option to discover modules from micropython, need to hardcode
-    # below contains combined modules from  Micropython ESP8622, ESP32, Loboris, Pycom and ulab , lvgl
-    # spell-checker: disable
-    # modules to stub : 131
-    stubber.modules = [
-        "WM8960",
-        "_asyncio",
-        "_boot_fat",
-        "_espnow",
-        "_onewire",
-        "_pyscript",
-        "_rp2",
-        "_thread",
-        "_uasyncio",
-        "abc",
-        "adcfft",
-        "aioble/__init__",
-        "aioble/central",
-        "aioble/client",
-        "aioble/core",
-        "aioble/device",
-        "aioble/l2cap",
-        "aioble/peripheral",
-        "aioble/security",
-        "aioble/server",
-        "aioespnow",
-        "ak8963",
-        "alif",
-        "apa102",
-        "apa106",
-        "argparse",
-        "array",
-        "asyncio/__init__",
-        "asyncio/core",
-        "asyncio/event",
-        "asyncio/funcs",
-        "asyncio/lock",
-        "asyncio/stream",
-        "base64",
-        "binascii",
-        "bluetooth",
-        "breakout_as7262",
-        "breakout_bh1745",
-        "breakout_bme280",
-        "breakout_bme68x",
-        "breakout_bmp280",
-        "breakout_dotmatrix",
-        "breakout_encoder",
-        "breakout_icp10125",
-        "breakout_ioexpander",
-        "breakout_ltr559",
-        "breakout_matrix11x7",
-        "breakout_mics6814",
-        "breakout_msa301",
-        "breakout_paa5100",
-        "breakout_pmw3901",
-        "breakout_potentiometer",
-        "breakout_rgbmatrix5x5",
-        "breakout_rtc",
-        "breakout_scd41",
-        "breakout_sgp30",
-        "breakout_trackball",
-        "breakout_vl53l5cx",
-        "btree",
-        "builtins",
-        "cc3200",
-        "cmath",
-        "collections",
-        "collections/__init__",
-        "collections/defaultdict",
-        "copy",
-        "crypto",
-        "cryptolib",
-        "curl",
-        "datetime",
-        "deflate",
-        "dht",
-        "display",
-        "display_driver_utils",
-        "ds18x20",
-        "embed",
-        "encoder",
-        "errno",
-        "esp",
-        "esp32",
-        "esp8266",
-        "espidf",
-        "espnow",
-        "ffi",
-        "flashbdev",
-        "fnmatch",
-        "framebuf",
-        "freesans20",
-        "fs_driver",
-        "functools",
-        "galactic",
-        "gc",
-        "gfx_pack",
-        "gsm",
-        "gzip",
-        "hashlib",
-        "heapq",
-        "hmac",
-        "html/__init__",
-        "hub75",
-        "ili9341",
-        "ili9XXX",
-        "imagetools",
-        "inisetup",
-        "inspect",
-        "interstate75",
-        "io",
-        "itertools",
-        "jpegdec",
-        "js",
-        "jsffi",
-        "json",
-        "lcd160cr",
-        "locale",
-        "lodepng",
-        "logging",
-        "lsm6dsox",
-        "lv_colors",
-        "lv_utils",
-        "lvgl",
-        "lwip",
-        "machine",
-        "marshal",
-        "math",
-        "microWebSocket",
-        "microWebSrv",
-        "microWebTemplate",
-        "micropython",
-        "mimxrt",
-        "mip",
-        "mip/__init__",
-        "mip/__main__",
-        "motor",
-        "mpu6500",
-        "mpu9250",
-        "neopixel",
-        "network",
-        "nrf",
-        "ntptime",
-        "onewire",
-        "openamp",
-        "operator",
-        "os",
-        "os/__init__",
-        "os/path",
-        "pathlib",
-        "pcf85063a",
-        "pic16bit",
-        "picoexplorer",
-        "picographics",
-        "picokeypad",
-        "picoscroll",
-        "picounicorn",
-        "picowireless",
-        "pimoroni",
-        "pimoroni_bus",
-        "pimoroni_i2c",
-        "plasma",
-        "platform",
-        "powerpc",
-        "pyb",
-        "pye",
-        "pyscript",
-        "pyscript/__init__",
-        "pyscript/fs",
-        "qemu",
-        "qrcode",
-        "random",
-        "renesas",
-        "renesas-ra",
-        "requests",
-        "requests/__init__",
-        "rp2",
-        "rtch",
-        "samd",
-        "select",
-        "servo",
-        "socket",
-        "ssd1306",
-        "ssh",
-        "ssl",
-        "stat",
-        "stm",
-        "stm32",
-        "string",
-        "struct",
-        "sys",
-        "tarfile/__init__",
-        "tarfile/write",
-        "termios",
-        "time",
-        "tls",
-        "tpcalib",
-        "types",
-        "uarray",
-        "uasyncio/__init__",
-        "uasyncio/core",
-        "uasyncio/event",
-        "uasyncio/funcs",
-        "uasyncio/lock",
-        "uasyncio/stream",
-        "uasyncio/tasks",
-        "ubinascii",
-        "ubluetooth",
-        "ucollections",
-        "ucryptolib",
-        "uctypes",
-        "uerrno",
-        "uftpd",
-        "uhashlib",
-        "uheapq",
-        "uio",
-        "ujson",
-        "ulab",
-        "ulab/approx",
-        "ulab/compare",
-        "ulab/fft",
-        "ulab/filter",
-        "ulab/linalg",
-        "ulab/numerical",
-        "ulab/poly",
-        "ulab/user",
-        "ulab/vector",
-        "umachine",
-        "umqtt/__init__",
-        "umqtt/robust",
-        "umqtt/simple",
-        "unittest/__init__",
-        "unix",
-        "uos",
-        "uplatform",
-        "urandom",
-        "ure",
-        "urequests",
-        "urllib/urequest",
-        "usb/device",
-        "usb/device/cdc",
-        "usb/device/hid",
-        "usb/device/keyboard",
-        "usb/device/midi",
-        "usb/device/mouse",
-        "uselect",
-        "usocket",
-        "ussl",
-        "ustruct",
-        "usys",
-        "utelnetserver",
-        "utime",
-        "utimeq",
-        "uu",
-        "uwebsocket",
-        "uzlib",
-        "version",
-        "vfs",
-        "webassembly",
-        "websocket",
-        "websocket_helper",
-        "windows",
-        "wipy",
-        "writer",
-        "xpt2046",
-        "ymodem",
-        "zephyr",
-        "zlib",
-        "zsensor",
-    ]  # spell-checker: enable
-
-    gc.collect()
-
-    stubber.create_all_stubs()
-
-
-if __name__ == "__main__" or is_micropython():
-    if not file_exists("no_auto_stubber.txt"):
-        print(f"createstubs.py: {__version__}")
-        try:
-            gc.threshold(4 * 1024)  # type: ignore
-            gc.enable()
-        except BaseException:
-            pass
-        main()
+	'Generate stubs for modules in firmware'
+	def __init__(A,path=C,firmware_id=C):
+		C=firmware_id
+		try:
+			if os.uname().release=='1.13.0'and os.uname().version<'v1.13-103':raise y('MicroPython 1.13.0 cannot be stubbed')
+		except H:pass
+		A.info=_info();D.info('Port: {}'.format(A.info[I]));D.info('Board: {}'.format(A.info[W]));D.info('Board_ID: {}'.format(A.info[Y]));A._is_low_mem_port=A.info[I]in v;A._capture_docstrings=not A._is_low_mem_port;A._use_inspect=g and not A._is_low_mem_port
+		if A._is_low_mem_port:D.info('Low-memory mode: disabling inspect and docstrings')
+		K.collect()
+		if C:A._fwid=C.lower()
+		elif A.info[Z]==l:A._fwid='{family}-v{version}-{port}-{board_id}'.format(**A.info).rstrip(G)
+		else:A._fwid='{family}-v{version}-{port}'.format(**A.info)
+		A._start_free=K.mem_free()
+		if path:
+			if path.endswith(F):path=path[:-1]
+		else:path=get_root()
+		A.path='{}/stubs/{}'.format(path,A.flat_fwid).replace('//',F)
+		try:h(path+F)
+		except E:D.error('error creating stub folder {}'.format(path))
+		A.problematic=['upip','upysh','webrepl_setup','http_client','http_client_ssl','http_server','http_server_ssl'];A.excluded=['webrepl','_webrepl','port_diag','example_sub_led.py','example_pub_button.py'];A.load_exlusions();A.modules=[];A._json_name=J;A._json_first=B
+	def load_exlusions(B):
+		try:
+			with U('modulelist_exclude.txt','r')as C:
+				for F in C:
+					A=F.strip()
+					if A and A not in B.excluded:B.excluded.append(A);D.info('Added {} to excluded modules from modulelist_exclude.txt'.format(A))
+		except E:pass
+	def get_obj_attributes(L,item_instance):
+		'extract information of the objects members and attributes';G=item_instance;B=[];J=[]
+		for A in M(G):
+			if A.startswith(m)and not A in L.modules:continue
+			try:
+				D=c(G,A)
+				try:E=j(type(D)).split("'")[1]
+				except V:E=C
+				if E in{'int','float','str','bool',n,o,p}:F=1
+				elif E in{A4,A5}:F=2
+				elif E in'class':F=3
+				else:F=4
+				B.append((A,j(D),j(type(D)),D,F))
+			except H as I:J.append("Couldn't get attribute '{}' from object '{}', Err: {}".format(A,G,I))
+			except z as I:T('MemoryError: {}'.format(I));sleep(1);f()
+		B=sorted([A for A in B if not A[0].startswith(m)],key=lambda x:x[4]);K.collect();return B,J
+	def add_modules(A,modules):'Add additional modules to be exported';A.modules=sorted(set(A.modules)|set(modules))
+	def create_all_stubs(A):
+		'Create stubs for all configured modules';D.info('Start micropython-stubber {} on {}'.format(__version__,A._fwid));A.report_start();K.collect()
+		for B in A.modules:A.create_one_stub(B)
+		A.report_end();D.info('Finally done')
+	def create_one_stub(C,module_name):
+		A=module_name
+		if A in C.problematic:D.warning('Skip module: {:<25}        : Known problematic'.format(A));return B
+		if A in C.excluded:D.warning('Skip module: {:<25}        : Excluded'.format(A));return B
+		H='{}/{}.pyi'.format(C.path,A.replace(N,F));K.collect();G=B
+		try:G=C.create_module_stub(A,H)
+		except E:return B
+		K.collect();return G
+	def create_module_stub(G,module_name,file_name=J):
+		"Create a Stub of a single python module\n\n        Args:\n        - module_name (str): name of the module to document. This module will be imported.\n        - file_name (Optional[str]): the 'path/filename.pyi' to write to. If omitted will be created based on the module name.\n        ";H=file_name;A=module_name
+		if H is J:M=A.replace(N,'_')+'.pyi';H=G.path+F+M
+		else:M=H.split(F)[-1]
+		if F in A:A=A.replace(F,N)
+		I=J
+		try:I=__import__(A,J,J,X);O=K.mem_free();D.info('Stub module: {:<25} to file: {:<70} mem:{:>5}'.format(A,M,O))
+		except S:return B
+		h(H)
+		with U(H,'w')as L:
+			Q=d(G.info).replace('OrderedDict(',C).replace('})','}');R='"""\nModule: \'{0}\' on {1}\n"""\n# MCU: {2}\n# Stubber: {3}\n'.format(A,G._fwid,Q,__version__);L.write(R);L.write('from __future__ import annotations\nfrom typing import Any, Final, Generator, AsyncGenerator\nfrom _typeshed import Incomplete\n\n')
+			if G._is_low_mem_port and A in{A6,'uasyncio.__init__'}:D.warning('Low-memory mode: using shallow stub strategy.');G.write_shallow_stub(L,I)
+			else:
+				try:G.write_object_stub(L,I,A,C)
+				except z:
+					if not G._is_low_mem_port:raise
+					K.collect();D.warning('Low-memory mode: MemoryError while stubbing {}, resetting'.format(A));f()
+		G.report_add(A,H)
+		if A not in{'os','sys',A7,'gc'}:
+			try:del I
+			except(E,A0):D.warning('could not del new_module')
+		K.collect();return P
+	def write_shallow_stub(B,fp,module_obj):
+		fp.write('# Low-memory mode: shallow stub with names only\n')
+		for A in M(module_obj):
+			if A.startswith(m)and not A in B.modules:continue
+			if not A or A[0].isdigit():continue
+			fp.write('{}: Incomplete\n'.format(A))
+	def write_object_stub(V,fp,object_expr,obj_name,indent,in_class=0):
+		'Write a module/object stub to an open file. Can be called recursive.';A9=' at ...>';A8='{0}{1}: {3} = {2}\n';A7='bound_method';A6='{}*args, **kwargs';A3='Incomplete';A2='    """{0}"""\n';A0='\\"\\"\\"';t='    ';s='Exception';k=object_expr;j=' at ';i=', ';h='self, ';g='\n';Y=in_class;S=fp;E=indent;K.collect()
+		if k in V.problematic:D.warning('SKIPPING problematic module:{}'.format(k));return
+		AA,u=V.get_obj_attributes(k)
+		if u:D.error(u)
+		for(G,N,T,U,_)in AA:
+			if G in['classmethod','staticmethod','BaseException',s]:continue
+			if G[0].isdigit():D.warning('NameError: invalid name {}'.format(G));continue
+			if T=="<class 'type'>"and e(E)<=AE*4:
+				v=C;w=G.endswith(s)or G.endswith('Error')or G in['KeyboardInterrupt','StopIteration','SystemExit']
+				if w:v=s
+				H='\n{}class {}({}):\n'.format(E,G,v)
+				if w:H+=E+'    ...\n';S.write(H);continue
+				S.write(H)
+				if V._capture_docstrings:
+					try:
+						L=U.__doc__
+						if L and A1(L,d):
+							L=L.strip().replace('"""',A0).replace(g,g+E+t)
+							if L:S.write(E+A2.format(L))
+					except R:pass
+				V.write_object_stub(S,U,'{0}.{1}'.format(obj_name,G),E+t,Y+1);H=E+'    def __init__(self, *argv, **kwargs) -> None:\n';H+=E+'        ...\n\n';S.write(H)
+			elif any(A in T for A in[A5,A4,'closure']):
+				l=A3;x=C
+				if Y>0:x=h
+				f=B;m=B;y=B
+				if V._use_inspect:
+					try:f=a.iscoroutinefunction(U)
+					except R:pass
+					if not f:
+						try:m=c(a,'isasyncgenfunction',lambda _:B)(U)
+						except R:pass
+					if not f and not m:
+						try:y=a.isgeneratorfunction(U)
+						except R:pass
+				W=J
+				if V._use_inspect:
+					try:
+						q=a.signature(U);A=[];I=B;Z=B
+						for(M,r)in q.parameters.items():
+							Q=c(r,'kind',J)
+							if Q==0:I=P;A.append(M)
+							elif Q==1:
+								if I:A.append(F);I=B
+								A.append(M)
+							elif Q==2:
+								if I:A.append(F);I=B
+								Z=P;A.append(X+M)
+							elif Q==3:
+								if I:A.append(F);I=B
+								if not Z:A.append(X);Z=P
+								A.append(M)
+							elif Q==4:
+								if I:A.append(F);I=B
+								A.append('**'+M)
+							else:A.append(M)
+						if I:A.append(F)
+						if Y>0 and A and A[0]not in(X,F):A=A[1:]
+						if Y>0:W=h+i.join(A)if A else'self'
+						else:W=i.join(A)
+					except R:pass
+				if W is J:W=A6.format(x)
+				if A7 in T or A7 in N:H='{}@classmethod\n'.format(E)+'{}def {}(cls, *args, **kwargs) -> {}:\n'.format(E,G,l)
+				elif f:H='{}async def {}({}) -> {}:\n'.format(E,G,W,l)
+				elif m:H='{}async def {}({}) -> AsyncGenerator:\n'.format(E,G,W)
+				elif y:H='{}def {}({}) -> Generator:\n'.format(E,G,W)
+				else:H='{}def {}({}) -> {}:\n'.format(E,G,W,l)
+				if V._capture_docstrings:
+					try:
+						L=U.__doc__
+						if L and A1(L,d):
+							L=L.strip().replace('"""',A0).replace(g,g+E+t)
+							if L:H+=E+A2.format(L)
+					except R:pass
+				H+=E+'    ...\n\n';S.write(H)
+			elif T=="<class 'module'>":0
+			elif T.startswith("<class '"):
+				O=T[8:-2];H=C
+				if O in('str','int','float','bool','bytearray','bytes'):
+					if G.upper()==G:H='{0}{1}: Final[{3}] = {2}\n'.format(E,G,N,O)
+					else:H=A8.format(E,G,N,O)
+				elif O in(p,o,n):AB={p:'{}',o:'[]',n:'()'};H=A8.format(E,G,AB[O],O)
+				elif O in('object','set','frozenset','Pin'):H='{0}{1}: {2} ## = {4}\n'.format(E,G,O,T,N)
+				elif O=='generator':
+					AC=h if Y>0 else C;b=J;z=B
+					if V._use_inspect:
+						try:z=a.iscoroutinefunction(U)
+						except R:pass
+						try:
+							q=a.signature(U);A=[];I=B;Z=B
+							for(M,r)in q.parameters.items():
+								Q=c(r,'kind',J)
+								if Q==0:I=P;A.append(M)
+								elif Q==1:
+									if I:A.append(F);I=B
+									A.append(M)
+								elif Q==2:
+									if I:A.append(F);I=B
+									Z=P;A.append(X+M)
+								elif Q==3:
+									if I:A.append(F);I=B
+									if not Z:A.append(X);Z=P
+									A.append(M)
+								elif Q==4:
+									if I:A.append(F);I=B
+									A.append('**'+M)
+								else:A.append(M)
+							if I:A.append(F)
+							if Y>0 and A and A[0]not in(X,F):A=A[1:]
+							if Y>0:b=h+i.join(A)if A else'self'
+							else:b=i.join(A)
+						except R:pass
+					if b is J:b=A6.format(AC)
+					if z:H='{0}async def {1}({2}) -> Incomplete:\n{0}    ...\n\n'.format(E,G,b)
+					else:H='{0}def {1}({2}) -> Generator:  ## = {4}\n{0}    ...\n\n'.format(E,G,b,O,N)
+				else:
+					O=A3
+					if j in N:N=N.split(j)[0]+A9
+					if j in N:N=N.split(j)[0]+A9
+					H='{0}{1}: {2} ## {3} = {4}\n'.format(E,G,O,T,N)
+				S.write(H)
+			else:S.write("# all other, type = '{0}'\n".format(T));S.write(E+G+' # type: Incomplete\n')
+	@property
+	def flat_fwid(self):
+		"Turn _fwid from 'v1.2.3' into '1_2_3' to be used in filename";A=self._fwid;B=' .()/\\:$'
+		for C in B:A=A.replace(C,'_')
+		return A
+	def clean(B,path=C):
+		'Remove all files from the stub folder'
+		if not path:path=B.path
+		D.info('Clean/remove files in folder: {}'.format(path))
+		try:os.stat(path);C=os.listdir(path)
+		except(E,H):return
+		for F in C:
+			A='{}/{}'.format(path,F)
+			try:os.remove(A)
+			except E:
+				try:B.clean(A);os.rmdir(A)
+				except E:pass
+	def report_start(B,filename='modules.json'):
+		'Start a report of the modules that have been stubbed\n        "create json with list of exported modules';F='firmware';B._json_name='{}/{}'.format(B.path,filename);B._json_first=P;h(B._json_name);D.info('Report file: {}'.format(B._json_name));K.collect()
+		try:
+			with U(B._json_name,'w')as C:C.write('{');C.write(dumps({F:B.info})[1:-1]);C.write(q);C.write(dumps({A3:{A:__version__},'stubtype':F})[1:-1]);C.write(q);C.write('"modules" :[\n')
+		except E as G:D.error(A8);B._json_name=J;raise G
+	def report_add(A,module_name,stub_file):
+		'Add a module to the report'
+		if not A._json_name:raise R(A9)
+		try:
+			with U(A._json_name,'a')as C:
+				if not A._json_first:C.write(q)
+				else:A._json_first=B
+				G='{{"module": "{}", "file": "{}"}}'.format(module_name,stub_file.replace('\\',F));C.write(G)
+		except E:D.error(A8)
+	def report_end(A):
+		if not A._json_name:raise R(A9)
+		with U(A._json_name,'a')as B:B.write('\n]}')
+		D.info('Path: {}'.format(A.path))
+def h(path):
+	'Create nested folders if needed';A=C=0
+	while A!=-1:
+		A=path.find(F,C)
+		if A!=-1:
+			B=path[0]if A==0 else path[:A]
+			try:I=os.stat(B)
+			except E as G:
+				if G.args[0]in[AC,AD]:
+					try:D.debug('Create folder {}'.format(B));os.mkdir(B)
+					except E as H:D.error('failed to create folder {}'.format(B));raise H
+		C=A+1
+def i(s):
+	B=' on '
+	if not s:return C
+	s=s.split(B,1)[0]if B in s else s
+	if s.startswith('v'):
+		if not G in s:return C
+		A=s.split(G)[1];return A
+	if not b in s:return C
+	A=s.split(b)[1].split(N)[1];return A
+def AF():
+	'Get basic system implementation details.'
+	try:B=sys.implementation[0]
+	except k:B=sys.implementation.name
+	D=u({Z:B,A:C,O:C,'ver':C,I:sys.platform,W:'UNKNOWN',Y:C,r:C,'cpu':C,Q:C,s:C});return D
+def AG(info):
+	'Normalize port names to be consistent with the repo.';A=info
+	if A[I].startswith('pyb'):A[I]='stm32'
+	elif A[I]=='win32':A[I]=AA
+	elif A[I]=='linux':A[I]=t
+def AH(info):
+	'Extract version information from sys.implementation.'
+	try:info[A]=AO(sys.implementation.version)
+	except H:pass
+def AI(info):
+	'Extract board, CPU, and machine details.';A=info
+	try:
+		D=sys.implementation._machine if'_machine'in M(sys.implementation)else os.uname().machine;A[W]=D.strip();B=sys.implementation._build if'_build'in M(sys.implementation)else C
+		if B:A[W]=B.split(G)[0];A[r]=B.split(G)[1]if G in B else C
+		A[Y]=B;A['cpu']=D.split('with')[-1].strip();A[Q]=sys.implementation._mpy if'_mpy'in M(sys.implementation)else sys.implementation.mpy if Q in M(sys.implementation)else C
+	except(H,V):pass
+	if not A[Y]:AP(A)
+def AJ(info):
+	'Extract build information from various system sources.';B=info
+	try:
+		if'uname'in M(os):
+			B[O]=i(os.uname()[3])
+			if not B[O]:B[O]=i(os.uname()[2])
+		elif A in M(sys):B[O]=i(sys.version)
+	except(H,V,k):pass
+	if B[A]==C and sys.platform not in(t,'win32'):
+		try:D=os.uname();B[A]=D.release
+		except(V,H,k):pass
+def AK(info):
+	'Detect special firmware families (pycopy, pycom, ev3-pybricks).';D='ev3-pybricks';C='pycom';B='pycopy';A=info
+	for(E,F,G)in[(B,B,'const'),(C,C,'FAT'),(D,'pybricks.hubs','EV3Brick')]:
+		try:H=__import__(F,J,J,G);A[Z]=E;del H;break
+		except(S,A0):pass
+	if A[Z]==D:A['release']='2.0.0'
+def AL(info):
+	'Process MicroPython-specific version formatting.';B=info
+	if B[Z]==l:
+		if B[A]and B[A].endswith('.0')and B[A]>='1.10.0'and B[A]<='1.19.9':B[A]=B[A][:-2]
+def AM(info):
+	'Process MPY architecture and version information.';A=info
+	if Q in A and A[Q]:
+		B=int(A[Q])
+		try:
+			C=[J,'x86','x64','armv6','armv6m','armv7m','armv7em','armv7emsp','armv7emdp','xtensa','xtensawin','rv32imc'][B>>10]
+			if C:A[s]=C
+		except V:A[s]='unknown'
+		A[Q]='v{}.{}'.format(B&255,B>>8&3)
+def AN(info):
+	'Handle final version string formatting.';B=info
+	if B[O]and not B[A].endswith(b):B[A]=B[A]+b
+	B['ver']=f"{B[A]}-{B[O]}"if B[O]else f"{B[A]}"
+def _info():'\n    Gather comprehensive system information for MicroPython stubbing.\n\n    Returns a dictionary containing family, version, port, board, and other\n    system details needed for stub generation.\n    ';A=AF();AG(A);AH(A);AI(A);AJ(A);AK(A);AL(A);AM(A);AN(A);return A
+def AO(version):
+	A=version;B=N.join([d(A)for A in A[:3]])
+	if e(A)>3 and A[3]:B+=G+A[3]
+	return B
+def AP(info):
+	'Read the board_id from the boardname.py file that may have been created upfront';B=info
+	try:from boardname import BOARD_ID as A;D.info('Found BOARD_ID: {}'.format(A))
+	except S:D.warning('BOARD_ID not found');A=C
+	B[Y]=A;B[W]=A.split(G)[0]if G in A else A;B[r]==A.split(G)[1]if G in A else C
+def get_root():
+	'Determine the root folder of the device'
+	try:A=os.getcwd()
+	except(E,H):A=N
+	B=A
+	for B in['/remote','/sd','/flash',F,A,N]:
+		try:C=os.stat(B);break
+		except E:continue
+	return B
+def AQ(filename):
+	try:
+		if os.stat(filename)[0]>>14:return P
+		return B
+	except E:return B
+def w():T("-p, --path   path to store the stubs in, defaults to '.'");sys.exit(1)
+def read_path():
+	'get --path from cmdline. [unix/win]';path=C
+	if e(sys.argv)==3:
+		A=sys.argv[1].lower()
+		if A in('--path','-p'):path=sys.argv[2]
+		else:w()
+	elif e(sys.argv)==2:w()
+	return path
+def x():
+	'runtime test to determine full or micropython'
+	try:A=bytes('abc',encoding='utf8');C=x.__module__;return B
+	except(y,H):return P
+def main():stubber=Stubber(path=read_path());stubber.clean();stubber.modules=['WM8960','_asyncio','_boot_fat','_espnow','_onewire','_pyscript','_rp2','_thread','_uasyncio','abc','adcfft','aioble/__init__','aioble/central','aioble/client','aioble/core','aioble/device','aioble/l2cap','aioble/peripheral','aioble/security','aioble/server','aioespnow','ak8963','alif','apa102','apa106','argparse','array','asyncio/__init__','asyncio/core','asyncio/event','asyncio/funcs','asyncio/lock','asyncio/stream','base64','binascii','bluetooth','breakout_as7262','breakout_bh1745','breakout_bme280','breakout_bme68x','breakout_bmp280','breakout_dotmatrix','breakout_encoder','breakout_icp10125','breakout_ioexpander','breakout_ltr559','breakout_matrix11x7','breakout_mics6814','breakout_msa301','breakout_paa5100','breakout_pmw3901','breakout_potentiometer','breakout_rgbmatrix5x5','breakout_rtc','breakout_scd41','breakout_sgp30','breakout_trackball','breakout_vl53l5cx','btree',A6,'cc3200','cmath','collections','collections/__init__','collections/defaultdict','copy','crypto','cryptolib','curl','datetime','deflate','dht','display','display_driver_utils','ds18x20','embed','encoder','errno','esp','esp32',A2,'espidf','espnow','ffi','flashbdev','fnmatch','framebuf','freesans20','fs_driver','functools','galactic','gc','gfx_pack','gsm','gzip','hashlib','heapq','hmac','html/__init__','hub75','ili9341','ili9XXX','imagetools','inisetup','inspect','interstate75','io','itertools','jpegdec','js','jsffi','json','lcd160cr','locale','lodepng',A7,'lsm6dsox','lv_colors','lv_utils','lvgl','lwip','machine','marshal','math','microWebSocket','microWebSrv','microWebTemplate',l,'mimxrt','mip','mip/__init__','mip/__main__','motor','mpu6500','mpu9250','neopixel','network','nrf','ntptime','onewire','openamp','operator','os','os/__init__','os/path','pathlib','pcf85063a','pic16bit','picoexplorer','picographics','picokeypad','picoscroll','picounicorn','picowireless','pimoroni','pimoroni_bus','pimoroni_i2c','plasma','platform','powerpc','pyb','pye','pyscript','pyscript/__init__','pyscript/fs','qemu','qrcode','random','renesas','renesas-ra','requests','requests/__init__','rp2','rtch','samd','select','servo','socket','ssd1306','ssh','ssl','stat','stm','stm32','string','struct','sys','tarfile/__init__','tarfile/write','termios','time','tls','tpcalib','types','uarray','uasyncio/__init__','uasyncio/core','uasyncio/event','uasyncio/funcs','uasyncio/lock','uasyncio/stream','uasyncio/tasks','ubinascii','ubluetooth','ucollections','ucryptolib','uctypes','uerrno','uftpd','uhashlib','uheapq','uio','ujson','ulab','ulab/approx','ulab/compare','ulab/fft','ulab/filter','ulab/linalg','ulab/numerical','ulab/poly','ulab/user','ulab/vector','umachine','umqtt/__init__','umqtt/robust','umqtt/simple','unittest/__init__',t,'uos','uplatform','urandom','ure','urequests','urllib/urequest','usb/device','usb/device/cdc','usb/device/hid','usb/device/keyboard','usb/device/midi','usb/device/mouse','uselect','usocket','ussl','ustruct','usys','utelnetserver','utime','utimeq','uu','uwebsocket','uzlib',A,'vfs','webassembly','websocket','websocket_helper',AA,'wipy','writer','xpt2046','ymodem','zephyr','zlib','zsensor'];K.collect();stubber.create_all_stubs()
+if __name__=='__main__'or x():
+	if not AQ('no_auto_stubber.txt'):
+		T(f"createstubs.py: {__version__}")
+		try:K.threshold(4096);K.enable()
+		except BaseException:pass
+		main()
