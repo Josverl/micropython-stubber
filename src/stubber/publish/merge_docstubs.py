@@ -20,12 +20,13 @@ def merge_all_docstubs(
     family: str = "micropython",
     ports: Optional[Union[List[str], str]] = None,
     boards: Optional[Union[List[str], str]] = None,
-    # *,
-    # mpy_path: Path = CONFIG.mpy_path,
+    clean: bool = True,
 ):
     """Merge docstubs and firmware stubs into merged stubs."""
     if versions is None:
         versions = [CONFIG.stable_version]
+    if "stable" in versions:
+        versions = [CONFIG.stable_version if v == "stable" else v for v in versions]
     if ports is None:
         ports = ["all"]
     if boards is None:
@@ -65,7 +66,7 @@ def merge_all_docstubs(
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
         try:
             # TODO : webassembly: Need to merge from reference/pyscript as well
-            result = copy_and_merge_docstubs(board_path, merged_path, doc_path)
+            result = copy_and_merge_docstubs(board_path, merged_path, doc_path, clean=clean)
             if candidate["port"] == "webassembly":
                 # TODO : webassembly: Need to merge from reference/pyscript as well
                 # use enrich_folder to merge the docstubs
@@ -86,7 +87,7 @@ def merge_all_docstubs(
     return merged
 
 
-def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
+def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path, clean: bool = True):
     """
     Parameters:
         fw_path: Path to the source firmware stubs (absolute path)
@@ -100,7 +101,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path):
     - 2 - Enrich the firmware stubs with the document stubs
 
     """
-    if dest_path.exists():
+    if clean and dest_path.exists():
         # delete all files and folders from the destination
         shutil.rmtree(dest_path, ignore_errors=True)
     dest_path.mkdir(parents=True, exist_ok=True)

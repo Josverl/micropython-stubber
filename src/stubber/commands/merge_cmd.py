@@ -23,10 +23,10 @@ from stubber.utils.config import CONFIG
     "-v",
     "versions",
     multiple=True,
-    default=["all"],
+    default=["stable"],
     # type=click.Choice(ALL_VERSIONS),
     show_default=True,
-    help="'latest', 'auto', or one or more versions",
+    help="'stable', 'latest', 'all', or one or more versions",
 )
 @click.option(
     "--port",
@@ -46,11 +46,18 @@ from stubber.utils.config import CONFIG
     show_default=True,
     help="multiple: ",
 )
+@click.option(
+    "--clean/--no-clean",
+    default=True,
+    show_default=True,
+    help="Clean target folders before merging.",
+)
 def cli_merge_docstubs(
     versions: Union[str, List[str]],
     boards: Union[str, List[str]],
     ports: Union[str, List[str]],
     family: str,
+    clean: bool,
 ):
     """
     Enrich the stubs in stub_folder with the docstubs in docstubs_folder.
@@ -63,4 +70,4 @@ def cli_merge_docstubs(
         versions = list(versions)
     # single version should be a string
     log.info(f"Merge docstubs for {family} {versions}")
-    _ = merge_all_docstubs(versions=versions, family=family, boards=boards, ports=ports)
+    _ = merge_all_docstubs(versions=versions, family=family, boards=boards, ports=ports, clean=clean)
