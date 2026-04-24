@@ -160,6 +160,7 @@ def enrich_file(
     # package_name="",  # not used
     copy_params: bool = False,
     copy_docstr: bool = False,
+    copy_returns: bool = False,
 ) -> Generator[str, None, None]:
     """
     Enrich firmware stubs using the doc-stubs in another folder.
@@ -198,6 +199,7 @@ def enrich_file(
         docstub_file=source_path,
         copy_params=copy_params,
         copy_docstr=copy_docstr,
+        copy_returns=copy_returns,
     )
     if new_code := exec_transform_with_prettyprint(
         codemod_instance,
@@ -273,6 +275,7 @@ def enrich_folder(
     copy_params: bool = False,
     ext: Optional[str] = None,
     copy_docstr: bool = False,
+    copy_returns: bool = False,
     # package_name: str = "",
 ) -> int:
     """\
@@ -306,6 +309,7 @@ def enrich_folder(
                     # package_name=mm.target_pkg,
                     copy_params=copy_params,
                     copy_docstr=copy_docstr,
+                    copy_returns=copy_returns,
                 )
             ):
                 count += len(diff)

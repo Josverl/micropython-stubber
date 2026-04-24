@@ -56,38 +56,38 @@ def add_comment_to_path(path: Path, comment: str) -> None:
     """
     count = 0
     failed_files = []
-    
+
     # Ensure comment starts with # and ends with newline
     if not comment.startswith("#"):
         comment = f"# {comment}"
     if not comment.endswith("\n"):
         comment = f"{comment}\n"
-    
+
     # Process both .py and .pyi files
     for pattern in ("*.py", "*.pyi"):
         for stub_file in sorted(path.rglob(pattern)):
             rel_path = stub_file.relative_to(path)
             try:
                 content = stub_file.read_text(encoding="utf-8")
-                
+
                 # Skip if comment already exists (idempotent check)
                 # Check first non-empty line to handle whitespace variations
-                lines = content.split('\n', 5)  # Only check first few lines for efficiency
-                first_non_empty = next((line for line in lines if line.strip()), '')
+                lines = content.split("\n", 5)  # Only check first few lines for efficiency
+                first_non_empty = next((line for line in lines if line.strip()), "")
                 if first_non_empty.strip() == comment.strip():
                     log.trace(f"  - Comment already in {rel_path}")
                     continue
-                
+
                 # Simple prepend - fast and reliable
                 new_content = comment + content
                 stub_file.write_text(new_content, encoding="utf-8")
                 count += 1
                 log.debug(f"  ✓ Added comment to {rel_path}")
-                
+
             except (OSError, UnicodeDecodeError) as e:
                 log.warning(f"Could not add comment to {rel_path}: {type(e).__name__}: {e}")
                 failed_files.append((stub_file, f"{type(e).__name__}"))
-    
+
     log.info(f"Successfully added comment to {count} file(s) in {path}")
     if failed_files:
         log.warning(f"Failed to process {len(failed_files)} file(s):")

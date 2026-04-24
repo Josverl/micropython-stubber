@@ -96,6 +96,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
     DESCRIPTION: str = "Merge the type-rich information from a doc-stub into a firmware stub"
     copy_params: bool = True
     copy_docstr: bool = True
+    copy_returns: bool = False
 
     @staticmethod
     def add_args(arg_parser: argparse.ArgumentParser) -> None:
@@ -122,12 +123,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
             default=True,
         )
 
+        arg_parser.add_argument(
+            "--copy-returns",
+            dest="copy_returns",
+            default=False,
+        )
+
     def __init__(
         self,
         context: CodemodContext,
         docstub_file: Union[Path, str],
         copy_params: bool = False,
         copy_docstr: bool = True,
+        copy_returns: bool = False,
     ) -> None:
         """initialize the base class with context, and save our args."""
         super().__init__(context)
@@ -148,6 +156,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
 
         self.copy_params = copy_params
         self.copy_docstr = copy_docstr
+        self.copy_returns = copy_returns
 
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
@@ -364,7 +373,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
             remaining = [mpa for mpa in self.annotations[key].mp_available if key == stack_id and mpa.def_type == "classdef"]
             self.annotations[key].mp_available = remaining
 
-        log.trace(f"add_missed_mp_available: stack_id={stack_id} missing_decorated={len(missing_decorated)} node_type={type(updated_node).__name__}")
+        log.trace(
+            f"add_missed_mp_available: stack_id={stack_id} missing_decorated={len(missing_decorated)} node_type={type(updated_node).__name__}"
+        )
 
         if missing_decorated:
             if isinstance(updated_node, cst.Module):
@@ -673,16 +684,19 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 ]
 
             # return that should not be overwritten by the doc-stub ?
-            overwrite_return = True
-            if original_node.returns:
-                try:
-                    overwrite_return = original_node.returns.annotation.value in [  # type: ignore
-                        "Incomplete",
-                        "Any",
-                        "...",
-                    ]
-                except AttributeError:
-                    pass
+            # copy_returns=True explicitly prefers source return annotations.
+            overwrite_return = self.copy_returns
+            if not overwrite_return:
+                overwrite_return = True
+                if original_node.returns:
+                    try:
+                        overwrite_return = original_node.returns.annotation.value in [  # type: ignore
+                            "Incomplete",
+                            "Any",
+                            "...",
+                        ]
+                    except AttributeError:
+                        pass
             # combine the decorators from the doc-stub and the firmware stub
             new_decorators = []
             if doc_stub.decorators:

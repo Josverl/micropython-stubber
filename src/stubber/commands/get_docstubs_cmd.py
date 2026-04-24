@@ -165,6 +165,7 @@ def cli_docstubs(
                 require_docstub=False,
                 copy_params=True,
                 copy_docstr=False,
+                copy_returns=True,
             )
             copy_type_modules(reference_path, dst_path, CP_REFERENCE_TO_DOCSTUB)
             log.info("::group:: start post processing of retrieved stubs")

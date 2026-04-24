@@ -396,11 +396,9 @@ def stub_connected_mcus(
                 log.success(f"Stubs copied to {destination}")
                 # Track location for final summary
                 merged_path = get_merged_path(board.firmware)
-                stub_locations.append({
-                    'raw': destination,
-                    'merged': merged_path,
-                    'board': f"{board.firmware['port']}-{board.firmware['board']}"
-                })
+                stub_locations.append(
+                    {"raw": destination, "merged": merged_path, "board": f"{board.firmware['port']}-{board.firmware['board']}"}
+                )
                 # Also merge the stubs with the docstubs
                 log.info(f"Merging stubs with docstubs : {board.firmware}")
 
