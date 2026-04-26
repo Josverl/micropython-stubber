@@ -17,21 +17,27 @@ except:
 try:
     from machine import reset  # type: ignore
 except ImportError:
-    pass
+    def reset():
+        print("Reset called - exiting")
+        sys.exit(0)
 
 try:
     from collections import OrderedDict
 except ImportError:
     from ucollections import OrderedDict  # type: ignore
 
-try:
-    import inspect as _inspect
+_LOW_MEM_PORTS = ("esp8266",)
+_is_low_mem_port = sys.platform in _LOW_MEM_PORTS
+_has_inspect = False
+if not _is_low_mem_port:
+    try:
+        import inspect as _inspect
 
-    _has_inspect = True
-except ImportError:
-    _has_inspect = False
+        _has_inspect = True
+    except ImportError:
+        _has_inspect = False
 
-__version__ = "v1.28.0"
+__version__ = "v1.28.3"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -90,6 +96,11 @@ class Stubber:
         log.info("Port: {}".format(self.info["port"]))
         log.info("Board: {}".format(self.info["board"]))
         log.info("Board_ID: {}".format(self.info["board_id"]))
+        self._is_low_mem_port = self.info["port"] in _LOW_MEM_PORTS
+        self._capture_docstrings = not self._is_low_mem_port
+        self._use_inspect = _has_inspect and not self._is_low_mem_port
+        if self._is_low_mem_port:
+            log.info("Low-memory mode: disabling inspect and docstrings")
         gc.collect()
         if firmware_id:
             self._fwid = firmware_id.lower()
@@ -264,7 +275,18 @@ class Stubber:
             fp.write(
                 "from __future__ import annotations\nfrom typing import Any, Final, Generator, AsyncGenerator\nfrom _typeshed import Incomplete\n\n"
             )
-            self.write_object_stub(fp, new_module, module_name, "")
+            if self._is_low_mem_port and module_name in {"builtins", "uasyncio.__init__"}:
+                log.warning("Low-memory mode: using shallow stub strategy.")
+                self.write_shallow_stub(fp, new_module)
+            else:
+                try:
+                    self.write_object_stub(fp, new_module, module_name, "")
+                except MemoryError:
+                    if not self._is_low_mem_port:
+                        raise
+                    gc.collect()
+                    log.warning("Low-memory mode: MemoryError while stubbing {}, resetting".format(module_name))
+                    reset()
 
         self.report_add(module_name, file_name)
 
@@ -277,6 +299,16 @@ class Stubber:
             # do not try to delete from sys.modules - most times it does not work anyway
         gc.collect()
         return True
+
+    def write_shallow_stub(self, fp, module_obj: object):
+        # Write a low-memory shallow module stub using names only.
+        fp.write("# Low-memory mode: shallow stub with names only\n")
+        for item_name in dir(module_obj):
+            if item_name.startswith("__") and not item_name in self.modules:
+                continue
+            if not item_name or item_name[0].isdigit():
+                continue
+            fp.write("{}: Incomplete\n".format(item_name))
 
     def write_object_stub(self, fp, object_expr: object, obj_name: str, indent: str, in_class: int = 0):
         "Write a module/object stub to an open file. Can be called recursive."
@@ -329,14 +361,15 @@ class Stubber:
                 # write classdef
                 fp.write(s)
                 # write class docstring if available
-                try:
-                    _doc = item_instance.__doc__
-                    if _doc and isinstance(_doc, str):
-                        _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
-                        if _doc:
-                            fp.write(indent + '    """{0}"""\n'.format(_doc))
-                except Exception:
-                    pass
+                if self._capture_docstrings:
+                    try:
+                        _doc = item_instance.__doc__
+                        if _doc and isinstance(_doc, str):
+                            _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
+                            if _doc:
+                                fp.write(indent + '    """{0}"""\n'.format(_doc))
+                    except Exception:
+                        pass
                 # first write the class literals and methods
                 # log.debug("# recursion over class {0}".format(item_name))
                 self.write_object_stub(
@@ -365,7 +398,7 @@ class Stubber:
                 is_async = False
                 is_async_gen = False
                 is_gen = False
-                if _has_inspect:
+                if self._use_inspect:
                     try:
                         is_async = _inspect.iscoroutinefunction(item_instance)
                     except Exception:
@@ -382,7 +415,7 @@ class Stubber:
                             pass
                 # Try to get parameter signature using inspect
                 params = None
-                if _has_inspect:
+                if self._use_inspect:
                     try:
                         sig = _inspect.signature(item_instance)
                         param_parts = []
@@ -450,14 +483,15 @@ class Stubber:
                 else:
                     s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
                 # add docstring if available
-                try:
-                    _doc = item_instance.__doc__
-                    if _doc and isinstance(_doc, str):
-                        _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
-                        if _doc:
-                            s += indent + '    """{0}"""\n'.format(_doc)
-                except Exception:
-                    pass
+                if self._capture_docstrings:
+                    try:
+                        _doc = item_instance.__doc__
+                        if _doc and isinstance(_doc, str):
+                            _doc = _doc.strip().replace('"""', '\\"\\"\\"').replace("\n", "\n" + indent + "    ")
+                            if _doc:
+                                s += indent + '    """{0}"""\n'.format(_doc)
+                    except Exception:
+                        pass
                 s += indent + "    ...\n\n"
                 fp.write(s)
                 # log.debug("\n" + s)
@@ -494,7 +528,7 @@ class Stubber:
                         gen_first = "self, " if in_class > 0 else ""
                         gen_params = None
                         gen_is_async = False
-                        if _has_inspect:
+                        if self._use_inspect:
                             try:
                                 gen_is_async = _inspect.iscoroutinefunction(item_instance)
                             except Exception:

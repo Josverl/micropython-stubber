@@ -39,22 +39,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
-                python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13"]
-                # mpflash-version: ["beta"]
-                include: # for testing
-                    - os: windows-latest
-                      python-version: "3.11"
-                    - os: ubuntu-latest
-                      python-version: "3.11"
-                    - os: macos-latest
-                      python-version: "3.11"
-
-                    # - os: flyci-macos-large-latest-m2 # fails on pipx
-                    #   python-version: "3.11"
-                    # - os: macos-latest-large    # Paid
-                    #   python-version: "3.11"
-                    # - os: macos-13-xlarge       # Paid
-                    #   python-version: "3.11"
+                python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
         steps:
             - name: Checkout repository

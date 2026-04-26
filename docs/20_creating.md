@@ -7,7 +7,7 @@ If you just want to use the stubs, then you can skip this section and instead re
 
 | Task | Primary Command | Aliases | Description |
 |------|-----------------|---------|-------------|
-| Clone repositories | `stubber clone --add-stubs` | - | Clone MicroPython repos locally |
+| Initialize workspace | `stubber init` | - | Clone `micropython-stubs`, clone required repos, and switch to stable |
 | Switch version | `stubber switch v1.22.2` | - | Switch to specific version/branch/commit |
 | Generate doc stubs | `stubber docstubs` | `docs-stubs`, `docs`, `get-docstubs` | Create {ref}`doc stubs <doc-stubs>` from documentation |
 | Generate frozen stubs | `stubber frozen` | `frozen-stubs`, `get-frozen`, `get-frozen-stubs` | Create {ref}`frozen stubs <frozen-stubs>` from frozen modules |
@@ -27,7 +27,13 @@ For official MicroPython releases, the condensed workflow is:
 
 ```bash
 pip install micropython-stubber
-stubber switch stable
+mkdir ~/my-stubs && cd ~/my-stubs
+stubber init
+cd ~/my-stubs/micropython-stubs
+
+# Optional if you want a different version than stable
+# stubber switch v1.22.2
+
 stubber docstubs --enrich
 stubber frozen --version stable --enrich
 stubber merge --port esp32 --board ESP32_GENERIC --version stable
@@ -40,7 +46,7 @@ stubber build --port esp32 --board ESP32_GENERIC --version stable
 For a worked end-to-end walkthrough that mirrors these commands, see the notebook [Manual stub build chain.ipynb](../Manual%20stub%20build%20chain.ipynb).
 
 The `stubber firmware-stubs` command will create the {ref}`stubs <stub-files>` on the {ref}`MCU <mcu>`, copy them to the pc and {ref}`merge <merge>` them with the other stubs,
-and create a type-stub package in the `micropython-stubs/publish` folder.
+and create a type-stub package in the `publish` folder.
 
 You can specify the version of the stubs using the `--version` parameter on the various commands, for example `--version=1.22.2`, `--version=preview`, or omit it after `stubber switch` to reuse the selected version.
 

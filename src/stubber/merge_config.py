@@ -24,15 +24,15 @@ def copy_type_modules(source_folder: Path, target_folder: Path, CP_REFERENCE_MOD
     for addition in CP_REFERENCE_MODULES:
         src = source_folder / addition
         if src.exists():
+            target = target_folder / addition
+            log.info(f" - add {target}")
             if src.is_dir():
-                target = target_folder / addition
-                log.debug(f" - add {target}")
                 shutil.copytree(src, target, dirs_exist_ok=True)
             else:
-                target = target_folder / addition
-                log.debug(f" - add {target}")
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, target)
+        else:
+            log.error(f" - missing {src}")
 
 
 def recreate_umodules(target_folder: Path):
