@@ -134,10 +134,14 @@ def fetch_repos(tag: str, mpy_path: Path, mpy_lib_path: Path):
     log.info("fetch updates")
     git.fetch(mpy_path)
     git.fetch(mpy_lib_path)
-    try:
-        git.fetch(CONFIG.mpy_stubs_path)
-    except Exception:
-        log.trace("no stubs repo found : {CONFIG.mpy_stubs_path}")
+    stubs_repo = CONFIG.mpy_stubs_path
+    if (stubs_repo / ".git").exists():
+        try:
+            git.fetch(stubs_repo)
+        except Exception:
+            log.trace(f"could not fetch optional stubs repo: {stubs_repo}")
+    else:
+        log.trace(f"no optional stubs repo found at: {stubs_repo}")
 
     if not tag:
         tag = V_PREVIEW
