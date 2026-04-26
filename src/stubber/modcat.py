@@ -116,8 +116,11 @@ but can also be imported with a `u` prefix
 CP_REFERENCE_TO_DOCSTUB: Final = [
     "asyncio",  # just for documentation
     # stdlib stubs are using the version from stdlib/asyncio
+    # Handcoded stubs for the rp2 PIO assembler
     "rp2/PIOASMEmit.pyi",
     "rp2/asm_pio.pyi",
+    "rp2/asm_pio_rp2040.pyi",
+    "rp2/asm_pio_rp2350.pyi",
 ]
 "Modules to copy from reference modules to the docstubs"
 
