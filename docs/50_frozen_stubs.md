@@ -50,10 +50,11 @@ For a complete end-to-end walkthrough see the [Quick Start](05_quick_start.md) g
 
 Typical local workflow:
 
-1. Ensure the repos folder exists (use `stubber clone --add-stubs` if you need fresh checkouts).
-2. Select the firmware version/tag to work against: `stubber switch stable` (or `v1.22.2`, `preview`, custom tag).
-3. Generate frozen stubs: `stubber frozen --version stable --enrich`.
-4. Combine with doc-based stubs and build wheels as needed:
+1. Initialize your workspace (from an empty working directory): `stubber init`.
+2. Enter the workspace created by init: `cd micropython-stubs`.
+3. Optional: switch to a different version/tag: `stubber switch v1.22.2` (or `preview`, custom tag).
+4. Generate frozen stubs: `stubber frozen --version stable --enrich`.
+5. Combine with doc-based stubs and build wheels as needed:
    - `stubber merge --port esp32 --board ESP32_GENERIC --version stable`
    - `stubber build --port esp32 --board ESP32_GENERIC --version stable`
 

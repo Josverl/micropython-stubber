@@ -32,7 +32,7 @@ Running `stubber` inside **WSL2** is also supported, but can occasionally encoun
 ## Step 1 – Install micropython-stubber
 
 ```bash
-pip install micropython-stubber
+uv tool install micropython-stubber
 ```
 
 Verify the installation:
@@ -48,39 +48,38 @@ mkdir ~/my-stubs
 cd ~/my-stubs
 ```
 
-All subsequent commands should be run from inside this directory.
+All subsequent commands should be run from inside this directory unless noted otherwise.
 
-## Step 3 – Clone the required repositories
+## Step 3 – Initialize the workspace
 
-This downloads the MicroPython source tree and the stub storage repository.
-The cloned `micropython-stubs` repo already contains stubs for many boards, so steps 5 and 6 are optional.
+Use one command to:
+
+* clone `micropython-stubs` into `./micropython-stubs`
+* clone `micropython` + `micropython-lib` into `./micropython-stubs/repos`
+* switch those repos to the latest stable MicroPython version
 
 ```bash
-stubber clone --add-stubs
+stubber init
 ```
 
-The command creates a `repos/` subdirectory containing:
+At the end, `stubber init` prints a `cd` command with the full path. Run it before continuing:
+
+```bash
+cd ~/my-stubs/micropython-stubs
+```
+
+After initialization, your workspace looks like this:
 
 ```
 ~/my-stubs/
-├── repos/
-│   ├── micropython/        ← MicroPython source (for doc & frozen stubs)
-│   ├── micropython-lib/    ← MicroPython library source
-│   └── micropython-stubs/  ← Where generated stubs are stored
-└── typings/               ← Local stub install target (created in step 9)
+└── micropython-stubs/
+	├── repos/
+	│   ├── micropython/      ← MicroPython source (for doc & frozen stubs)
+	│   └── micropython-lib/  ← MicroPython library source
+	└── publish/              ← Built stub packages
 ```
 
-## Step 4 – Select the firmware version
-
-Switch to the latest stable release:
-
-```bash
-stubber switch stable
-```
-
-You can also pin to a specific version, for example `stubber switch v1.22.2`, or use `preview` for the latest nightly build.
-
-## Step 5 (optional) – Generate doc stubs
+## Step 4 (optional) – Generate doc stubs
 
 Doc stubs are generated from the MicroPython documentation and contain full parameter names and descriptions.
 Skip this step if you only need firmware stubs for a new board — the cloned repo already contains up-to-date doc stubs.
@@ -89,7 +88,7 @@ Skip this step if you only need firmware stubs for a new board — the cloned re
 stubber docstubs --enrich
 ```
 
-## Step 6 (optional) – Generate frozen stubs
+## Step 5 (optional) – Generate frozen stubs
 
 Frozen stubs cover Python modules compiled directly into the firmware.
 Skip this step if the board's frozen modules are already covered in the cloned repo.
@@ -102,7 +101,7 @@ stubber frozen --version stable --enrich
 Generating frozen stubs requires checking out the MicroPython source tree and can take **10–20 minutes** depending on your internet connection and machine speed.
 ```
 
-## Step 7 – Generate firmware stubs from a connected device
+## Step 6 – Generate firmware stubs from a connected device
 
 Connect your board (flashed with a stable or preview MicroPython release) and run:
 
@@ -113,7 +112,7 @@ stubber firmware-stubs
 This captures the board-specific modules that may not be documented or frozen elsewhere.
 The port, board name, and version are detected automatically and used to name the output folder.
 
-## Step 8 – Merge and build the stub package
+## Step 7 – Merge and build the stub package
 The `stubber firmware-stubs` command already runs the below steps,
 but in some cases you may want to re-run them after making manual edits 
 to the generated stubs, or after regenerating doc/frozen stubs in steps 5 and 6.
@@ -126,27 +125,26 @@ stubber merge --port esp32 --board ESP32_GENERIC --version stable
 stubber build --port esp32 --board ESP32_GENERIC --version stable
 ```
 
-The resulting stub package is placed under `repos/micropython-stubs/publish/`.
+The resulting stub package is placed under `publish/`.
 
-## Step 9 – Verify the stubs locally
+## Step 8 – Verify the stubs locally
 
 Before opening a pull request, install the built stub package locally to confirm it works in your editor.
 Replace the folder name below with the actual name produced by `stubber build`:
 
 ```bash
-# From your working directory (e.g. ~/my-stubs)
-pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target typings
+# From inside ~/my-stubs/micropython-stubs
+pip install ./publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target ../typings
 ```
 
 The `typings` folder is the conventional location for MicroPython stubs in VS Code projects.
 Point your editor's Python extension at this folder to get code-completion and type-checking for your board.
 
-## Step 10 – Contribute your stubs
+## Step 9 – Contribute your stubs
 
 Open a pull request against [micropython-stubs][stubs-repo] so the new board stubs become available to everyone:
 
 ```bash
-cd repos/micropython-stubs
 git checkout -b add-stubs-esp32-esp32_generic-stable
 git add .
 git commit -m "Add stubs for esp32 ESP32_GENERIC stable"
@@ -161,8 +159,8 @@ Then open a pull request on GitHub at <https://github.com/Josverl/micropython-st
 pip install micropython-stubber
 mkdir ~/my-stubs && cd ~/my-stubs
 
-stubber clone --add-stubs
-stubber switch stable
+stubber init
+cd ~/my-stubs/micropython-stubs
 
 # Optional: regenerate doc and frozen stubs (takes 10-20 min)
 # stubber docstubs --enrich
@@ -175,10 +173,9 @@ stubber merge --port esp32 --board ESP32_GENERIC --version stable
 stubber build --port esp32 --board ESP32_GENERIC --version stable
 
 # Verify locally before submitting a PR
-pip install ./repos/micropython-stubs/publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target typings
+pip install ./publish/micropython-v1_27_0-esp32-esp32_generic_c3-stubs/ --target ../typings
 
 # Contribute: open a PR to micropython-stubs
-cd repos/micropython-stubs
 git checkout -b add-stubs-esp32-esp32_generic-stable
 git add . && git commit -m "Add stubs for esp32 ESP32_GENERIC stable"
 git push origin add-stubs-esp32-esp32_generic-stable
