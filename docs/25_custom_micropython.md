@@ -116,9 +116,9 @@ To generate stubs for a specific Pull Request:
 ### Step 1: Clone and Checkout PR
 
 ```bash
-# Clone official repo
-stubber clone --add-stubs
-cd repos/micropython
+# Create standard workspace
+stubber init
+cd micropython-stubs/repos/micropython
 
 # Fetch the PR (replace 12345 with PR number)
 git fetch origin pull/12345/head:pr-12345
@@ -143,9 +143,9 @@ If you have local modifications to MicroPython:
 ### Step 1: Prepare Your Modified Repository
 
 ```bash
-# Clone the official repo first
-stubber clone --add-stubs
-cd repos/micropython
+# Create standard workspace first
+stubber init
+cd micropython-stubs/repos/micropython
 
 # Apply your modifications
 # ... make your changes ...
@@ -272,7 +272,7 @@ When working with older commits:
 
 If you get an error about missing repositories:
 ```
-Repo micropython not found, use 'stubber clone --add-stubs' to clone the repos.
+Repo micropython not found, run 'stubber init' (or use 'stubber clone' for custom repo setup) to clone the repos.
 ```
 
 Make sure your directory structure is correct:
