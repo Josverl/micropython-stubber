@@ -9,6 +9,7 @@ from rich.table import Table
 
 from stubber.commands.cli import stubber_cli
 from stubber.publish.defaults import GENERIC_U
+from stubber.publish.enums import PackageType
 from stubber.publish.publish import build_multiple
 from stubber.utils.config import CONFIG
 
@@ -55,6 +56,14 @@ from stubber.utils.config import CONFIG
     default=False,
     help="build package even if no changes detected",
 )
+@click.option(
+    "--package-type",
+    "package_type",
+    type=click.Choice([t.value for t in PackageType], case_sensitive=False),
+    default=CONFIG.package_type.value,
+    show_default=True,
+    help="Package build tool to use (poetry or hatch)",
+)
 def cli_build(
     family: str,
     versions: Union[str, List[str]],
@@ -62,7 +71,7 @@ def cli_build(
     boards: Union[str, List[str]],
     clean: bool,
     force: bool,
-    # stub_type: str,
+    package_type: str,
 ):
     """
     Commandline interface to publish stubs.
@@ -76,7 +85,7 @@ def cli_build(
     if len(versions) > 1:
         raise NotImplementedError("Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487")
 
-    log.info(f"Build {family} {versions} {ports} {boards}")
+    log.info(f"Build {family} {versions} {ports} {boards} using {package_type}")
 
     results = build_multiple(
         family=family,
@@ -86,6 +95,7 @@ def cli_build(
         production=True,  # use production database during build
         force=force,
         clean=clean,
+        package_type=PackageType(package_type),
     )
     # log the number of results with no error
     log.info(f"Built {len([r for r in results if not r['error']])} stub packages")
