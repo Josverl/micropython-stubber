@@ -13,6 +13,7 @@ from typedconfig.config import Config, key, section
 from typedconfig.source import EnvironmentConfigSource
 
 from .typed_config_toml import TomlConfigSource
+from stubber.publish.enums import PackageType
 
 # Unified fallback version list used by both config.py and switch_cmd.py
 # This list is used when GitHub API access fails (403 Forbidden)
@@ -85,6 +86,14 @@ class StubberConfig(Config):
         default=FALLBACK_VERSIONS.copy(),
     )
     "list of recent versions"
+
+    package_type: PackageType = key(
+        key_name="package-type",
+        cast=PackageType,
+        required=False,
+        default=PackageType.POETRY,
+    )
+    "default package build tool to use when building/publishing stubs (poetry or hatch)"
 
     BLOCKED_PORTS = ["minimal", "bare-arm"]
     "ports that should be ignored as a source of stubs"

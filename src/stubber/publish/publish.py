@@ -25,7 +25,7 @@ def build_multiple(
     production: bool = False,
     clean: bool = False,
     force: bool = False,
-    package_type: Union[PackageType, str] = PackageType.POETRY,
+    package_type: Union[PackageType, str] = CONFIG.package_type,
 ) -> List[Dict[str, Any]]:  # sourcery skip: default-mutable-arg
     """
     Build a bunch of stub packages
@@ -62,7 +62,7 @@ def publish_multiple(
     build: bool = False,
     force: bool = False,
     dry_run: bool = False,
-    package_type: Union[PackageType, str] = PackageType.POETRY,
+    package_type: Union[PackageType, str] = CONFIG.package_type,
 ) -> List[Dict[str, Any]]:  # sourcery skip: default-mutable-arg
     """
     Publish a bunch of stub packages
