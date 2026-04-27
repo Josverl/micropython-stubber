@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
+from stubber.publish.database import _migrate_add_package_type
 from stubber.publish.package import create_package
 
 from .fakeconfig import FakeConfig
@@ -52,6 +53,7 @@ def test_db_conn(
 
     db_conn = sqlite3.connect(db_path)
     db_conn.row_factory = sqlite3.Row  # return rows as dicts
+    _migrate_add_package_type(db_conn)  # ensure schema is up to date
     yield db_conn
     try:
         db_conn.close()
