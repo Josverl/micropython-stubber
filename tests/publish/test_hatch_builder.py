@@ -262,3 +262,116 @@ def test_stub_package_uses_config_default(tmp_path, pytestconfig, mocker):
     # config.package_type is PackageType.POETRY (the FakeConfig default)
     pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32")
     assert pkg.package_type == config.package_type
+
+
+# -------------------------------------------------------------------------
+# Database: package_type stored and restored
+# -------------------------------------------------------------------------
+
+
+def test_to_dict_includes_package_type(tmp_path, pytestconfig, mocker):
+    """to_dict() must include the package_type key."""
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+
+    pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32", package_type=PackageType.HATCH)
+    d = pkg.to_dict()
+    assert "package_type" in d
+    assert d["package_type"] == "hatch"
+
+
+def test_from_dict_restores_package_type(tmp_path, pytestconfig, mocker):
+    """from_dict() must restore package_type from the stored value."""
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+
+    json_data = {
+        "name": "micropython-esp32-stubs",
+        "port": "esp32",
+        "board": "GENERIC",
+        "variant": "",
+        "mpy_version": "1.24.1",
+        "publish": True,
+        "pkg_version": "1.24.1.post1",
+        "path": "micropython-v1_24_1-esp32-stubs",
+        "stub_sources": "[]",
+        "description": "test",
+        "hash": "",
+        "stub_hash": "",
+        "package_type": "hatch",
+    }
+    pkg = StubPackage("micropython-esp32-stubs", "esp32", version="1.24.1", json_data=json_data)
+    assert pkg.package_type == PackageType.HATCH
+
+
+def test_from_dict_missing_package_type_infers_from_toml(tmp_path, pytestconfig, mocker):
+    """When package_type is absent from DB row, infer from the on-disk pyproject.toml."""
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+
+    # First create a hatch package so a hatch-style pyproject.toml is on disk
+    hatch_pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32", package_type=PackageType.HATCH)
+    assert (hatch_pkg.package_path / "pyproject.toml").exists()
+
+    # Now load from a "legacy" DB row (no package_type key) — should infer HATCH
+    json_data = {
+        "name": "micropython-esp32-stubs",
+        "port": "esp32",
+        "board": "GENERIC",
+        "variant": "",
+        "mpy_version": "1.24.1",
+        "publish": True,
+        "pkg_version": "1.24.1.post1",
+        "path": hatch_pkg.package_path.name,
+        "stub_sources": "[]",
+        "description": "test",
+        "hash": "",
+        "stub_hash": "",
+        # package_type intentionally absent
+    }
+    pkg2 = StubPackage("micropython-esp32-stubs", "esp32", version="1.24.1", json_data=json_data)
+    assert pkg2.package_type == PackageType.HATCH
+
+
+def test_database_migration_adds_column(tmp_path):
+    """Opening an old DB (no package_type column) should add the column automatically."""
+    import sqlite3
+    from stubber.publish.database import create_database, _migrate_add_package_type
+
+    # Create an old-style database without the package_type column
+    old_db_path = tmp_path / "data" / "all_packages_test.db"
+    old_db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(old_db_path)
+    conn.execute(
+        """
+        CREATE TABLE "packages" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT, description TEXT, mpy_version TEXT, pkg_version TEXT,
+            publish BOOLEAN, stub_sources TEXT, path TEXT, hash TEXT,
+            stub_hash TEXT, port TEXT DEFAULT "", board TEXT DEFAULT "",
+            variant TEXT DEFAULT ""
+        )
+        """
+    )
+    conn.commit()
+
+    # Migration should add the column
+    _migrate_add_package_type(conn)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(packages)")
+    columns = {row[1] for row in cursor.fetchall()}
+    assert "package_type" in columns
+    conn.close()
