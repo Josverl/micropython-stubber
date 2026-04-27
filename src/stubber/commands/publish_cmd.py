@@ -11,6 +11,7 @@ from rich.table import Table
 
 from stubber.commands.cli import stubber_cli
 from stubber.publish.defaults import GENERIC_U
+from stubber.publish.enums import PackageType
 from stubber.publish.publish import publish_multiple
 from stubber.utils.config import CONFIG
 
@@ -80,6 +81,14 @@ from stubber.utils.config import CONFIG
     default=False,
     help="clean folders after processing and publishing",
 )
+@click.option(
+    "--package-type",
+    "package_type",
+    type=click.Choice([t.value for t in PackageType], case_sensitive=False),
+    default=PackageType.POETRY.value,
+    show_default=True,
+    help="Package build tool to use (poetry or hatch)",
+)
 def cli_publish(
     family: str,
     versions: Union[str, List[str]],
@@ -90,6 +99,7 @@ def cli_publish(
     force: bool = False,
     dry_run: bool = False,
     clean: bool = False,
+    package_type: str = PackageType.POETRY.value,
 ):
     """
     Commandline interface to publish stubs.
@@ -103,7 +113,7 @@ def cli_publish(
         raise NotImplementedError("Multiple versions are not supported yet\n See https://github.com/Josverl/micropython-stubber/issues/487")
 
     destination = "pypi" if production else "test-pypi"
-    log.info(f"Publish {family} {versions} {ports} {boards} to {destination}")
+    log.info(f"Publish {family} {versions} {ports} {boards} to {destination} using {package_type}")
 
     results = publish_multiple(
         family=family,
@@ -115,6 +125,7 @@ def cli_publish(
         force=force,
         dry_run=dry_run,
         clean=clean,
+        package_type=PackageType(package_type),
     )
     console = Console()
 
