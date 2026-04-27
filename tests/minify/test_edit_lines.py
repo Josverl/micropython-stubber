@@ -1,5 +1,5 @@
 import pytest
-from _pytest.python_api import RaisesContext
+from contextlib import AbstractContextManager
 
 from stubber.minify import edit_lines
 
@@ -97,7 +97,7 @@ def test_edit_lines(content, edits, expected):
     # Arrange
     diff = True
     # Act
-    if isinstance(expected, RaisesContext):
+    if isinstance(expected, AbstractContextManager):
         with expected:
             result = edit_lines(content, edits, diff)
     else:
