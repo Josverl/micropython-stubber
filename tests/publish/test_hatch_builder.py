@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 from stubber.publish.enums import PackageType, StubSource
 from stubber.publish.package import create_package
 from stubber.publish.stubpackage import HatchBuilder, PoetryBuilder, StubPackage
+from stubber.utils.config import CONFIG
 
 from .fakeconfig import FakeConfig
 
@@ -232,3 +233,32 @@ def test_hatch_check(tmp_path, pytestconfig, mocker):
     pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32", package_type=PackageType.HATCH)
     assert (pkg.package_path / "pyproject.toml").exists()
     assert HatchBuilder.check(pkg) is True  # type: ignore[arg-type]
+
+
+# -------------------------------------------------------------------------
+# CONFIG.package_type drives the default
+# -------------------------------------------------------------------------
+
+
+def test_config_package_type_is_default():
+    """CONFIG.package_type should be the canonical default (poetry by default)."""
+    assert isinstance(CONFIG.package_type, PackageType)
+    # The default shipped in config is PackageType.POETRY
+    assert CONFIG.package_type == PackageType.POETRY
+
+
+def test_stub_package_uses_config_default(tmp_path, pytestconfig, mocker):
+    """When no package_type is supplied, StubPackage uses CONFIG.package_type."""
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    # Override the config used by StubPackage AND the one used as the default
+    # argument value (CONFIG.package_type in the function signature).
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+    mocker.patch("stubber.publish.package.CONFIG", config)
+
+    # config.package_type is PackageType.POETRY (the FakeConfig default)
+    pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32")
+    assert pkg.package_type == config.package_type

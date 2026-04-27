@@ -1066,7 +1066,7 @@ class StubPackage(PoetryBuilder):
         description: str = "MicroPython stubs",
         stub_sources: Optional[StubSources] = None,
         json_data: Optional[Dict[str, Any]] = None,
-        package_type: Union[PackageType, str] = PackageType.POETRY,
+        package_type: Union[PackageType, str] = CONFIG.package_type,
     ):
         """
         Create a stub-only package for a specific version of micropython

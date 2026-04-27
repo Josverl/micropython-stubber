@@ -38,7 +38,7 @@ def get_package(
     port: str,
     board: str = GENERIC_L,
     family: str = "micropython",
-    package_type: Union[PackageType, str] = PackageType.POETRY,
+    package_type: Union[PackageType, str] = CONFIG.package_type,
 ) -> StubPackage:
     """Get the package from the database or create a new one if it does not exist."""
     pkg_name = package_name(port=port, board=board, family=family)
@@ -121,7 +121,7 @@ def create_package(
     port: str,
     board: str = "",
     family: str = "micropython",
-    package_type: Union[PackageType, str] = PackageType.POETRY,
+    package_type: Union[PackageType, str] = CONFIG.package_type,
     # pkg_type: str = COMBO_STUBS,
 ) -> StubPackage:  # sourcery skip: merge-duplicate-blocks, remove-redundant-if
     """
