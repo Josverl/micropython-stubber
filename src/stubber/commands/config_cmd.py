@@ -29,3 +29,4 @@ def cli_config():
     log.info(f"CONFIG.all_versions        {CONFIG.all_versions}")
     log.info(f"CONFIG.stable_version      {CONFIG.stable_version}")
     log.info(f"CONFIG.preview_version     {CONFIG.preview_version}")
+    log.info(f"CONFIG.package_type        {CONFIG.package_type}")
