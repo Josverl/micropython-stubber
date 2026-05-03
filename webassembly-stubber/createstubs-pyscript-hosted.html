@@ -8,16 +8,17 @@
 
     <!-- Resolve selected versions from URL params and bootstrap PyScript + mpy-config -->
     <script>
-        var _params     = new URLSearchParams(window.location.search);
-        var _mode       = _params.get('mode') || '';          // 'mpy' | 'ps'
-        var _mpyVersion = _params.get('version') || '';
-        var _psVersion  = _params.get('psversion') || '2025.7.3';
+        var _params        = new URLSearchParams(window.location.search);
+        var _mode          = _params.get('mode') || '';         // 'mpy' | 'ps' | 'local'
+        var _mpyVersion    = _params.get('version') || '';
+        var _psVersion     = _params.get('psversion') || '2025.7.3';
+        var _localFirmware = _params.get('localfirmware') || '';
 
         // Always load PyScript core (version depends on psversion param)
         document.write('<link rel="stylesheet" href="https://pyscript.net/releases/' + _psVersion + '/core.css">');
         document.write('<scr' + 'ipt type="module" src="https://pyscript.net/releases/' + _psVersion + '/core.js"><\/scr' + 'ipt>');
 
-        // Inject mpy-config with packages; add interpreter only in mpy mode
+        // Inject mpy-config with packages; add interpreter only in mpy / local mode
         if (_mode) {
             var _configBody =
                 'packages = [\n' +
@@ -28,6 +29,10 @@
                 _configBody +=
                     'interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@'
                     + _mpyVersion + '/micropython.mjs"\n';
+            } else if (_mode === 'local' && _localFirmware) {
+                _configBody +=
+                    'interpreter = "http://127.0.0.1:8000/firmware/webassembly/'
+                    + _localFirmware + '/micropython.mjs"\n';
             }
             document.write('<mpy-config>\n' + _configBody + '<\/mpy-config>');
         }
@@ -91,7 +96,7 @@
     <p>Create type-stubs for MicroPython webassembly (wasm) and PyScript</p>
 
     <div class="version-panel">
-        <!-- Option A: specific MicroPython WASM version -->
+        <!-- Option A: specific MicroPython WASM version from CDN -->
         <div class="version-option" id="panel-mpy">
             <label>
                 <input type="radio" name="vmode" value="mpy" id="radio-mpy">
@@ -111,16 +116,27 @@
                 <option value="">Loading…</option>
             </select>
         </div>
+        <!-- Option C: local build served from firmware/webassembly/ -->
+        <div class="version-option" id="panel-local">
+            <label>
+                <input type="radio" name="vmode" value="local" id="radio-local">
+                Local build
+            </label>
+            <select id="local-version">
+                <option value="">Loading…</option>
+            </select>
+            <small id="local-hint" style="display:none; color:#666; margin-top:0.3rem; display:block;">
+                Requires <code>serve.py</code> (not plain <code>http.server</code>)
+            </small>
+        </div>
     </div>
     <button id="btn-generate" onclick="generateStubs()">Generate stubs</button>
+    <button onclick="resetFolderLocation()">Reset local folder location</button>
 
     <ol style="margin-top:1.25rem;">
-        <li>Select <strong>either</strong> a MicroPython version <strong>or</strong> a PyScript release above,
-            then click <em>Generate stubs</em>.</li>
+        <li>Select <strong>one</strong> of the options above, then click <em>Generate stubs</em>.</li>
         <li>The first time you load this page you will be asked to select a temp folder to sync the stubs into.<br>
-            Do not select the entire micropython-stubs folder (too many files).<br>
-            Optionally: <button onclick="resetFolderLocation()">Reset folder location</button> to select a different
-            target location.</li>
+            Do not select the entire micropython-stubs folder (too many files).</li>
         <li>Wait for the stubs to be generated and synced to the local filesystem.</li>
         <li>Copy them to your project and run <code>stubber merge</code> &amp;
             <code>stubber build</code> to generate the final stubs.</li>
@@ -129,6 +145,7 @@
     <script>
         const MPY_PACKAGE       = "@micropython/micropython-webassembly-pyscript";
         const PYSCRIPT_RELEASES = "https://api.github.com/repos/pyscript/pyscript/releases?per_page=50";
+        const LOCAL_FIRMWARE    = "http://127.0.0.1:8000/firmware/webassembly/?format=json";
 
         // Fallbacks used when network requests fail or time out
         const MPY_FALLBACK = [
@@ -143,24 +160,25 @@
         ];
 
         // Current values from URL (vars declared in <head> script)
-        var _mpyCurrent = _mpyVersion;
-        var _psCurrent  = _psVersion;
+        var _mpyCurrent   = _mpyVersion;
+        var _psCurrent    = _psVersion;
+        var _localCurrent = _localFirmware;
 
         // --- Visual state ---
         function setMode(mode) {
-            var panelMpy = document.getElementById('panel-mpy');
-            var panelPs  = document.getElementById('panel-ps');
-            if (mode === 'mpy') {
-                panelMpy.className = 'version-option active';
-                panelPs.className  = 'version-option dimmed';
-                document.getElementById('radio-mpy').checked = true;
-            } else if (mode === 'ps') {
-                panelMpy.className = 'version-option dimmed';
-                panelPs.className  = 'version-option active';
-                document.getElementById('radio-ps').checked = true;
-            } else {
-                panelMpy.className = 'version-option neutral';
-                panelPs.className  = 'version-option neutral';
+            var panelMpy   = document.getElementById('panel-mpy');
+            var panelPs    = document.getElementById('panel-ps');
+            var panelLocal = document.getElementById('panel-local');
+            var panels = [panelMpy, panelPs, panelLocal];
+            var active = {mpy: panelMpy, ps: panelPs, local: panelLocal}[mode];
+            panels.forEach(function(p) {
+                p.className = (p === active) ? 'version-option active' : 'version-option dimmed';
+            });
+            if (mode === 'mpy')   document.getElementById('radio-mpy').checked   = true;
+            if (mode === 'ps')    document.getElementById('radio-ps').checked    = true;
+            if (mode === 'local') document.getElementById('radio-local').checked = true;
+            if (!mode) {
+                panels.forEach(function(p) { p.className = 'version-option neutral'; });
             }
         }
 
@@ -209,9 +227,10 @@
             var tags = PS_FALLBACK;
             try {
                 var releases = await (await fetchWithTimeout(PYSCRIPT_RELEASES, 5000)).json();
-                // Guard against 403/error responses which return an object, not an array
                 if (Array.isArray(releases)) {
-                    var fetched = releases.filter(function(r) { return !r.draft && !r.prerelease; }).map(function(r) { return r.tag_name; });
+                    var fetched = releases
+                        .filter(function(r) { return !r.draft && !r.prerelease; })
+                        .map(function(r) { return r.tag_name; });
                     if (fetched.length) tags = fetched;
                 }
             } catch(e) {
@@ -221,10 +240,26 @@
             if (!tags.includes(_psCurrent) && tags.length) select.value = tags[0];
         }
 
+        async function fetchLocalVersions() {
+            var select = document.getElementById('local-version');
+            try {
+                var names = await (await fetchWithTimeout(LOCAL_FIRMWARE, 3000)).json();
+                if (Array.isArray(names) && names.length) {
+                    select.innerHTML = buildOptions(names, _localCurrent);
+                    if (!_localCurrent) select.value = names[0];
+                    document.getElementById('local-hint').style.display = 'block';
+                    return;
+                }
+            } catch(e) {
+                // serve.py not running or no zips found
+            }
+            select.innerHTML = '<option value="">No local builds found — run serve.py<\/option>';
+        }
+
         // --- Generate stubs ---
         function generateStubs() {
             var mode = document.querySelector('input[name="vmode"]:checked');
-            if (!mode) { alert('Please select a MicroPython version or PyScript release first.'); return; }
+            if (!mode) { alert('Please select an option first.'); return; }
             var url = new URL(window.location.href);
             url.searchParams.set('mode', mode.value);
             if (mode.value === 'mpy') {
@@ -232,11 +267,19 @@
                 if (!v) { alert('Please select a MicroPython version.'); return; }
                 url.searchParams.set('version', v);
                 url.searchParams.delete('psversion');
-            } else {
+                url.searchParams.delete('localfirmware');
+            } else if (mode.value === 'ps') {
                 var v = document.getElementById('ps-version').value;
                 if (!v) { alert('Please select a PyScript release.'); return; }
                 url.searchParams.set('psversion', v);
                 url.searchParams.delete('version');
+                url.searchParams.delete('localfirmware');
+            } else if (mode.value === 'local') {
+                var v = document.getElementById('local-version').value;
+                if (!v) { alert('No local firmware selected. Make sure serve.py is running and firmware/webassembly/ contains zip files.'); return; }
+                url.searchParams.set('localfirmware', v);
+                url.searchParams.delete('version');
+                url.searchParams.delete('psversion');
             }
             window.location.href = url.toString();
         }
@@ -253,6 +296,7 @@
         setMode(_mode);
         fetchMpyVersions();
         fetchPsVersions();
+        fetchLocalVersions();
     </script>
 
     <!-- Load the stub generator only after a mode has been committed via URL.
@@ -267,7 +311,6 @@
     </script>
 
     <blockquote>
-        <p>This example shows how to create and download the MicroPython firmware-stubs for webassembly-pyscript.</p>
         <p>The generated stubs will be available in the <code>/stubs</code> folder in the virtual file system,
             and synchronised to the local filesystem.
             Please use the PyScript Persistent filesystem dialog to select a folder on your local filesystem
@@ -275,6 +318,10 @@
         <p>Note that the stubs will be saved in a subfolder <code>stubs</code> of the selected folder.
             Do not select a folder that already contains many files, as this will slow down, or completely block the
             synchronisation.</p>
+        <p><strong>Local build</strong>: place <code>micropython-webassembly-pyscript-{name}.zip</code> files
+            (each containing <code>micropython.mjs</code> and <code>micropython.wasm</code>) in
+            <code>firmware/webassembly/</code> and run <code>python serve.py</code> instead of
+            <code>python -m http.server</code>.</p>
         <p>Note: The stubs are generated using the <a href="https://github.com/josverl/micropython-stubber">
                 micropython-stubber</a> for the <a href="https://github.com/josverl/micropython-stubs">MicroPython
                 stubs</a> project.</p>
