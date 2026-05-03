@@ -31,7 +31,7 @@ def test_tool_installed(tool_name, tool_version):
         # avoid issues with non-standard versions and 'latest'
         assert version.parse(ver) >= version.parse(tool_version)
 
-
+@pytest.mark.skip("Only needed to debug venv installation issues")
 def test_mpy_cross_bytecode_version():
     "Check if mpy-cross can be installed and run"
     cmd = ["uvx", "mpy-cross", "--version"]
