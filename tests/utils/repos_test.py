@@ -228,6 +228,9 @@ def test_sync_submodules_success(mocker):
         assert result is True
         assert mock_run.call_count == 2  # Two git commands
         mock_checkout.assert_called_once()
+        # Verify the general submodule update (not just micropython-lib) is used
+        # to revert any changes made through building firmwares
+        mock_run.assert_any_call(["git", "submodule", "update", "--init"], repo=repo_path, expect_stderr=True)
 
 
 def test_sync_submodules_failure(mocker):
