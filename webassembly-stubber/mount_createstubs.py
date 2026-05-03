@@ -14,7 +14,15 @@ def create_stubs():
 # May ask for permission from the user, and select the local target.
 path = "/stubs"
 
-await fs.mount(path)
+try:
+    await fs.mount(path)
+except AttributeError:
+    # PyScript 2026.x: stale IDB entry (from an older PyScript session) causes
+    # _check_permission() to fail with 'JsProxy has no attribute handler'.
+    # Revoke the stored handle so the next mount() starts fresh.
+    print("Stale filesystem handle detected — revoking and re-mounting...")
+    await fs.revoke(path)
+    await fs.mount(path)
 
 # recreate the ID / cookies prompt
 
