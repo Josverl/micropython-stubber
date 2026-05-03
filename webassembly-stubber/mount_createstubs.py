@@ -23,7 +23,6 @@ async def _revoke_mount(path):
         # deleteDatabase is blocked because PyScript keeps the connection open,
         # so we open the DB ourselves and delete only the /stubs key instead.
         import js
-
         await js.eval(f"""
             new Promise((resolve, reject) => {{
                 const req = indexedDB.open('IDBMap/@pyscript.fs', 1);
