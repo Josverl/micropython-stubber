@@ -92,8 +92,9 @@ class ZipAwareHandler(SimpleHTTPRequestHandler):
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
     server = HTTPServer(("127.0.0.1", port), ZipAwareHandler)
-    print(f"Serving on http://127.0.0.1:{port}/")
     print(f"Local WASM zips from: {os.path.abspath(WEBASSEMBLY_DIR)}")
+
+    print(f"\nServing on http://127.0.0.1:{port}/createstubs-pyscript-hosted.html\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
