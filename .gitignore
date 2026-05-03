@@ -80,3 +80,7 @@ _build/
 # ignore micropython images located in the webassembly-stubber
 webassembly-stubber/**/micropython.wasm
 webassembly-stubber/**/micropython.mjs
+
+# stub repos and build artifacts
+repos/
+

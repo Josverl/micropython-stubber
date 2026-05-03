@@ -22,40 +22,102 @@ pytestmark = [pytest.mark.stubber]
 
 
 @pytest.mark.parametrize(
-    "path, port, board",
+    "path, port, board, variant",
     [
         (
             "C:\\develop\\MyPython\\repos\\micropython\\ports\\esp32\\modules\\_boot.py",
             "esp32",
+            "",
             "",
         ),
         (
             "/develop/MyPython/repos/micropython/ports/esp32/modules/_boot.py",
             "esp32",
             "",
+            "",
         ),
-        ("./repos/micropython/ports/esp32/modules/_boot.py", "esp32", ""),
+        ("./repos/micropython/ports/esp32/modules/_boot.py", "esp32", "", ""),
         (
             "C:\\develop\\MyPython\\repos\\micropython\\ports\\stm32\\boards\\PYBV11\\modules\\_boot.py",
             "stm32",
             "PYBV11",
+            "",
         ),
         (
             "/develop/MyPython/repos/micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
             "stm32",
             "PYBV11",
+            "",
         ),
         (
             "./repos/micropython/ports/stm32/boards/PYBV11/modules/_boot.py",
             "stm32",
             "PYBV11",
+            "",
+        ),
+        # Stand-alone ports: variant subfolder
+        (
+            "/develop/MyPython/repos/micropython/ports/webassembly/variants/pyscript/manifest.py",
+            "webassembly",
+            "",
+            "pyscript",
+        ),
+        (
+            "C:\\develop\\MyPython\\repos\\micropython\\ports\\webassembly\\variants\\pyscript\\manifest.py",
+            "webassembly",
+            "",
+            "pyscript",
+        ),
+        (
+            "./repos/micropython/ports/unix/variants/standard/manifest.py",
+            "unix",
+            "",
+            "standard",
+        ),
+        (
+            "./repos/micropython/ports/unix/variants/minimal/manifest.py",
+            "unix",
+            "",
+            "minimal",
+        ),
+        # Stand-alone port with no variant subfolder (port-level manifest)
+        (
+            "./repos/micropython/ports/webassembly/manifest.py",
+            "webassembly",
+            "",
+            "",
         ),
     ],
 )
-def test_get_portboard(path: str, port: str, board: str):
-    _port, _board = get_portboard(Path(path))
+def test_get_portboard(path: str, port: str, board: str, variant: str):
+    _port, _board, _variant = get_portboard(Path(path))
     assert _board == board
     assert _port == port
+    assert _variant == variant
+
+
+@pytest.mark.parametrize(
+    "port, board, variant, expected_folder",
+    [
+        # Boards: behavior unchanged
+        ("stm32", "PYBV11", "", "stm32/PYBV11"),
+        # Non-stand-alone port with no board falls back to GENERIC
+        ("esp32", "", "", "esp32/" + GENERIC_U),
+        # Stand-alone port + variant => use variant as folder name
+        ("webassembly", "", "pyscript", "webassembly/PYSCRIPT"),
+        ("unix", "", "minimal", "unix/MINIMAL"),
+        # Stand-alone port with no board nor variant => default to "standard"
+        # (NOT the legacy GENERIC folder)
+        ("webassembly", "", "", "webassembly/STANDARD"),
+        ("unix", "", "", "unix/STANDARD"),
+        ("windows", "", "", "windows/STANDARD"),
+    ],
+)
+def test_get_freeze_path(port: str, board: str, variant: str, expected_folder: str, tmp_path: Path):
+    from stubber.freeze.common import get_freeze_path
+
+    freeze_path, _ = get_freeze_path(tmp_path, port, board, variant)
+    assert freeze_path == (tmp_path / expected_folder).absolute()
 
 
 #######################################################################################################################
