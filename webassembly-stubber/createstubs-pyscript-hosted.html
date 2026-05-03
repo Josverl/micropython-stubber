@@ -8,15 +8,36 @@
 
     <script type="module" src="https://pyscript.net/releases/2025.7.3/core.js"></script>
     <link rel="stylesheet" href="https://pyscript.net/releases/2025.7.3/core.css">
-
-
 </head>
 
 <body>
     <h1>Hosted Pyscript stubber</h1>
-    <p>Creating type-stubs for MicroPython webassembly (wasm) and PyScript</p>
-MicroPython version can be set in the <code>createstubs-req.toml</code> file.
+    <p>Create type-stubs for MicroPython webassembly (wasm) and PyScript</p>
     
+    
+    <ol>
+        <li> Set the desired MicroPython version in the <code>createstubs-req.toml</code> file.</li>
+        <li> The first time you load this page you will be asked to select a temp folder to sync the stubs into.</li>
+        do not select the entire micropython-stubs folder ( too many files )</p>
+        Optionally: <button onclick="resetFolderLocation()">Reset folder location</button> to select a different target
+        location for the stubs.
+    
+        <li> Wait for the stubs to be generated and synced to the local filesystem.</li>
+        <li> Copy them to your project and run <code>stubber merge</code> &amp;
+            <code>stubber build</code> to generate the final stubs for your project.
+        </li>
+    </ol>
+
+<script>
+        function resetFolderLocation() {
+            const dbName = "IDBMap/@pyscript.fs";
+            const req = indexedDB.deleteDatabase(dbName);
+            req.onsuccess = () => alert('"' + dbName + '" has been deleted. Please reload the page.');
+            req.onerror = (e) => alert('Failed to delete "' + dbName + '": ' + e.target.error);
+            req.onblocked = () => alert('Delete blocked. Please close other tabs using this page and try again.');
+        }
+    </script>
+
     <!-- Dynamically load the script with timestamp to prevent browser caching -->
     <script>
             document.write('<script type="mpy" src="./mount_createstubs.py?t=' + Date.now() + '" config="./createstubs-req.toml?t=' + Date.now() + '" terminal><\/script>');
