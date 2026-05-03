@@ -89,7 +89,7 @@ def freeze_one_manifest_2(
     log.debug(f"input_manifest: {manifest}")
     port, board, variant = get_portboard(manifest)
 
-    log.info("port-board-variant: {}".format("-".join(p for p in (port, board, variant) if p)))
+    log.info(f"port-board-variant: {'-'.join(p for p in (port, board, variant) if p)}")
 
     path_vars = make_path_vars(
         port=port, board=board, variant=variant, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path
