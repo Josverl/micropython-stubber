@@ -129,18 +129,35 @@ def build_sa_port(
     return True
 
 
+# Default variant per port — webassembly uses 'pyscript', everything else 'standard'
+_PORT_DEFAULT_VARIANT: dict[str, str] = {
+    "webassembly": "pyscript",
+}
+
+
 @click.command()
 @click.argument("port")
-@click.option("--variant", "-v", default="standard", show_default=True, help="Build variant.")
+@click.option(
+    "--variant",
+    "-v",
+    default=None,
+    show_default=True,
+    help="Build variant (default: 'pyscript' for webassembly, 'standard' for all other ports).",
+)
 @click.option("--version", default=None, help="MicroPython version tag (default: stable).")
 @click.option("--extra", "-e", default="", show_default=True, help="Extra build arguments.")
 @click.option("--fw-path", default="./firmware", show_default=True, type=click.Path(), help="Destination folder for firmware files.")
 @click.option("--register/--no-register", default=True, show_default=True, help="Register the firmware with mpflash after building.")
-def main(port: str, variant: str, version: str | None, extra: str, fw_path: str, register: bool):
+def main(port: str, variant: str | None, version: str | None, extra: str, fw_path: str, register: bool):
     """Build a stand-alone MicroPython binary for PORT and register it with mpflash."""
     # mpflash resolves firmware_folder from MPFLASH_FIRMWARE env var or platform default.
     # Set MPFLASH_FIRMWARE in your shell to override (e.g. on WSL pointing to Windows Downloads).
     print(f"Firmware folder: {mpflash_config.firmware_folder}")
+
+    # Apply per-port variant default when the user didn't specify one
+    if variant is None:
+        variant = _PORT_DEFAULT_VARIANT.get(port, "standard")
+    print(f"Using variant: {variant}")
 
     if version is None or version == "stable":
         version = get_stable_mp_version()
