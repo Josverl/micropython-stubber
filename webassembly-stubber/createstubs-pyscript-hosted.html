@@ -6,57 +6,146 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <script type="module" src="https://pyscript.net/releases/2025.7.3/core.js"></script>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2025.7.3/core.css">
+    <!-- Resolve selected versions from URL params and bootstrap PyScript + mpy-config -->
+    <script>
+        var _params = new URLSearchParams(window.location.search);
+        var _mpyVersion = _params.get('version');
+        var _psVersion  = _params.get('psversion') || '2025.7.3';
+
+        // Load PyScript core for the selected (or default) PyScript release
+        document.write('<link rel="stylesheet" href="https://pyscript.net/releases/' + _psVersion + '/core.css">');
+        document.write('<scr' + 'ipt type="module" src="https://pyscript.net/releases/' + _psVersion + '/core.js"><\/scr' + 'ipt>');
+
+        // Inject mpy-config with packages + interpreter before PyScript initialises
+        if (_mpyVersion) {
+            var interpreterUrl =
+                'https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@'
+                + _mpyVersion + '/micropython.mjs';
+            document.write(
+                '<mpy-config>\n' +
+                'packages = [\n' +
+                '  "github:josverl/micropython-stubs/mip/typing.json",\n' +
+                '  "github:josverl/micropython-stubber/src/stubber/board/createstubs.py"\n' +
+                ']\n' +
+                'interpreter = "' + interpreterUrl + '"\n' +
+                '<\/mpy-config>'
+            );
+        }
+    </script>
 </head>
 
 <body>
     <h1>Hosted Pyscript stubber</h1>
     <p>Create type-stubs for MicroPython webassembly (wasm) and PyScript</p>
-    
-    
+
     <ol>
-        <li> Set the desired MicroPython version in the <code>createstubs-req.toml</code> file.</li>
-        <li> The first time you load this page you will be asked to select a temp folder to sync the stubs into.</li>
-        do not select the entire micropython-stubs folder ( too many files )</p>
-        Optionally: <button onclick="resetFolderLocation()">Reset folder location</button> to select a different target
-        location for the stubs.
-    
-        <li> Wait for the stubs to be generated and synced to the local filesystem.</li>
-        <li> Copy them to your project and run <code>stubber merge</code> &amp;
-            <code>stubber build</code> to generate the final stubs for your project.
-        </li>
+        <li>Select a MicroPython version (reloads immediately).
+            Optionally change the PyScript release (reloads immediately).</li>
+        <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:flex-end; margin-bottom:1rem;">
+            <div>
+                <label for="mpy-version"><strong>MicroPython version:</strong></label><br>
+                <select id="mpy-version" style="min-width:16rem;" onchange="applyParam('version', this.value)">
+                    <option value="">Loading…</option>
+                </select>
+            </div>
+            <div>
+                <label for="ps-version"><strong>PyScript release:</strong></label><br>
+                <select id="ps-version" style="min-width:12rem;" onchange="applyParam('psversion', this.value)">
+                    <option value="">Loading…</option>
+                </select>
+            </div>
+        </div>
+        <li>The first time you load this page you will be asked to select a temp folder to sync the stubs into.<br>
+            Do not select the entire micropython-stubs folder (too many files).<br>
+            Optionally: <button onclick="resetFolderLocation()">Reset folder location</button> to select a different
+            target location for the stubs.</li>
+        <li>Wait for the stubs to be generated and synced to the local filesystem.</li>
+        <li>Copy them to your project and run <code>stubber merge</code> &amp;
+            <code>stubber build</code> to generate the final stubs for your project.</li>
     </ol>
 
-<script>
+    <script>
+        const MPY_PACKAGE = "@micropython/micropython-webassembly-pyscript";
+        const PYSCRIPT_RELEASES_API = "https://api.github.com/repos/pyscript/pyscript/releases?per_page=50";
+
+        const _currentMpyVersion = new URLSearchParams(window.location.search).get('version') || '';
+        const _currentPsVersion  = new URLSearchParams(window.location.search).get('psversion') || '2025.7.3';
+
+        async function fetchMpyVersions() {
+            const select = document.getElementById('mpy-version');
+            try {
+                const resp = await fetch(
+                    'https://data.jsdelivr.com/v1/package/npm/' + encodeURIComponent(MPY_PACKAGE)
+                );
+                const data = await resp.json();
+                const versions = data.versions || [];
+                select.innerHTML = versions
+                    .map(v => '<option value="' + v + '"' + (v === _currentMpyVersion ? ' selected' : '') + '>' + v + '<\/option>')
+                    .join('');
+                if (!_currentMpyVersion && versions.length) select.value = versions[0];
+            } catch {
+                select.innerHTML = '<option value="">Failed to load<\/option>';
+            }
+        }
+
+        async function fetchPsVersions() {
+            const select = document.getElementById('ps-version');
+            try {
+                const resp = await fetch(PYSCRIPT_RELEASES_API);
+                const releases = await resp.json();
+                const tags = releases
+                    .filter(r => !r.draft && !r.prerelease)
+                    .map(r => r.tag_name);
+                select.innerHTML = tags
+                    .map(t => '<option value="' + t + '"' + (t === _currentPsVersion ? ' selected' : '') + '>' + t + '<\/option>')
+                    .join('');
+                if (!tags.includes(_currentPsVersion) && tags.length) select.value = tags[0];
+            } catch {
+                select.innerHTML = '<option value="' + _currentPsVersion + '" selected>' + _currentPsVersion + ' (offline)<\/option>';
+            }
+        }
+
+        function applyParam(key, value) {
+            if (!value) return;
+            const url = new URL(window.location.href);
+            url.searchParams.set(key, value);
+            window.location.href = url.toString();
+        }
+
         function resetFolderLocation() {
             const dbName = "IDBMap/@pyscript.fs";
             const req = indexedDB.deleteDatabase(dbName);
-            req.onsuccess = () => alert('"' + dbName + '" has been deleted. Please reload the page.');
-            req.onerror = (e) => alert('Failed to delete "' + dbName + '": ' + e.target.error);
-            req.onblocked = () => alert('Delete blocked. Please close other tabs using this page and try again.');
+            req.onsuccess  = () => alert('"' + dbName + '" has been deleted. Please reload the page.');
+            req.onerror    = (e) => alert('Failed to delete "' + dbName + '": ' + e.target.error);
+            req.onblocked  = () => alert('Delete blocked. Please close other tabs using this page and try again.');
         }
+
+        fetchMpyVersions();
+        fetchPsVersions();
     </script>
 
-    <!-- Dynamically load the script with timestamp to prevent browser caching -->
+    <!-- Only load the PyScript stub generator when a version is selected via URL param -->
     <script>
-            document.write('<script type="mpy" src="./mount_createstubs.py?t=' + Date.now() + '" config="./createstubs-req.toml?t=' + Date.now() + '" terminal><\/script>');
+            if (new URLSearchParams(window.location.search).get('version')) {
+                document.write(
+                    '<scr' + 'ipt type="mpy" src="./mount_createstubs.py?t=' + Date.now() + '" terminal><\/scr' + 'ipt>'
+                );
+            }
     </script>
 
     <blockquote>
-        <p>This example shows how to create and download the MicroPython firmware-stubs for webassembly-pyscript.
-        </p>
+        <p>This example shows how to create and download the MicroPython firmware-stubs for webassembly-pyscript.</p>
         <p>The generated stubs will be available in the <code>/stubs</code> folder in the virtual file system,
             and synchronised to the local filesystem.
-            Please use the pyscript Persisten filesystem dialog to select a folder on your local filesystem
+            Please use the pyscript Persistent filesystem dialog to select a folder on your local filesystem
             where the stubs will be saved.</p>
-        Note that the stubs will be saved in a subfolder <code>stubs</code> of the selected folder.
-        Do not select a folder that already contains many files, as this will slow down, or completely block the
-        synchronisation
-        .
+        <p>Note that the stubs will be saved in a subfolder <code>stubs</code> of the selected folder.
+            Do not select a folder that already contains many files, as this will slow down, or completely block the
+            synchronisation.</p>
         <p>Note: The stubs are generated using the <a href="https://github.com/josverl/micropython-stubber">
-                micropython-stubber </a> for the <a href="https://github.com/josverl/micropython-stubs"> MicroPython
+                micropython-stubber</a> for the <a href="https://github.com/josverl/micropython-stubs">MicroPython
                 stubs</a> project.</p>
+    </blockquote>
 </body>
 
 </html>
