@@ -220,6 +220,50 @@ def test_method_in_class_has_self(stubber_instance, tmp_path):
     assert "async def my_async_method(self, z)" in content
 
 
+def test_classmethod_uses_inspect_for_signature(stubber_instance, tmp_path):
+    """Classmethods should use inspect to extract the actual parameter signature."""
+
+    class MyClass:
+        @classmethod
+        def my_classmethod(cls, x, y):
+            pass
+
+        @classmethod
+        def no_extra_params(cls):
+            pass
+
+    mock = _make_mock_module(MyClass=MyClass)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    # Should have @classmethod decorator
+    assert "@classmethod" in content
+    # Should use actual parameter names, not *args, **kwargs
+    assert "def my_classmethod(cls, x, y)" in content, "classmethod should have actual params from inspect"
+    # A classmethod with only cls should produce just 'cls'
+    assert "def no_extra_params(cls)" in content
+    # cls must not be doubled
+    assert "cls, cls" not in content
+
+
+def test_classmethod_fallback_without_inspect(stubber_instance, tmp_path):
+    """Without inspect, classmethods should fall back to cls, *args, **kwargs."""
+
+    class MyClass:
+        @classmethod
+        def my_classmethod(cls, x, y):
+            pass
+
+    stubber_instance._use_inspect = False
+
+    mock = _make_mock_module(MyClass=MyClass)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    # Should still have @classmethod decorator
+    assert "@classmethod" in content
+    # Without inspect, should fall back to *args, **kwargs
+    assert "def my_classmethod(cls, *args, **kwargs)" in content
+
+
 def test_stub_header_has_asyncgenerator_import(createstubs, tmp_path):
     """Generated stub files should import AsyncGenerator from typing."""
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id="test-fw")
