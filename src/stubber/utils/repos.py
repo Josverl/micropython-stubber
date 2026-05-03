@@ -74,8 +74,7 @@ def sync_submodules(repo: Union[Path, str]) -> bool:
     """
     cmds = [
         ["git", "submodule", "sync", "--quiet"],
-        # ["git", "submodule", "update", "--quiet"],
-        ["git", "submodule", "update", "--init", "lib/micropython-lib"],
+        ["git", "submodule", "update", "--init"],  # revert any changes made through building firmwares
     ]
     for cmd in cmds:
         if result := git._run_local_git(cmd, repo=repo, expect_stderr=True):
