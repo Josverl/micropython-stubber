@@ -5,7 +5,7 @@ from pyscript import fs  # type: ignore
 
 
 def create_stubs():
-    import createstubs
+    import createstubs  # type: ignore
 
     # Just importing runs the stub creation
     return
@@ -26,10 +26,10 @@ print("cwd:", os.getcwd())
 create_stubs()
 # ------------------------------------
 print("synchronize the changes to the local file system")
-print("Please wait 🕧🕐🕜🕑🕝🕒🕛")
+print("Please wait...🕧🕐🕜🕑🕝🕒🕛")
 await fs.sync("/stubs")
+print("Synced /stubs ✅✅✅✅✅✅✅")
 
-print("✅✅✅✅✅✅✅✅ Synced /stubs")
 
 # await fs.unmount("/stubs")
 # print("Unmounted /stubs")
