@@ -10,8 +10,6 @@
 
 from __future__ import annotations
 
-import platform
-import subprocess
 from pathlib import Path
 
 import click
@@ -56,16 +54,23 @@ def copy_firmware(board: Board, variant: str | None, version: str, build: str, m
     elif board.port.name == "webassembly":
         # all webassembly binaries need to be in a single folder
         # Create a zip file with the firmware files
+        import shutil
+        import zipfile
+
         zip_name = f"{board.name}-{variant}-{version}"
         zip_path = build_dir / zip_name
         # Create a zip file with only the micropython.mjs and micropython.wasm files
-        import zipfile
-
         with zipfile.ZipFile(zip_path.with_suffix(".zip"), "w") as zf:
             for pattern in ["micropython.mjs", "micropython.wasm"]:
                 for file in build_dir.glob(pattern):
                     zf.write(file, arcname=file.name)
-        # add to mpflash list of custom firmwares
+        # copy the zip to the destination fw_path
+        fw_path.mkdir(parents=True, exist_ok=True)
+        dest_zip = fw_path / zip_path.with_suffix(".zip").name
+        shutil.copy2(zip_path.with_suffix(".zip"), dest_zip)
+        # add to mpflash list of custom firmwares using the build-dir path so
+        # port_and_boardid_from_path can extract port/board_id via the
+        # "/ports/{port}/build-{board_id}/" pattern in the path
         if register:
             add_custom_firmware(
                 fw_path=zip_path.with_suffix(".zip"),
