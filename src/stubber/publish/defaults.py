@@ -22,6 +22,17 @@ DEFAULT_BOARDS: Dict[str, List[str]] = {
     "webassembly": ["pyscript", "standard", ""],
 }
 
+# Stand-alone ports do not have a `boards/<board>/` folder in the MicroPython
+# source tree; instead they may have one or more `variants/<variant>/` folders
+# (e.g. `ports/webassembly/variants/pyscript/`). The "standard" variant is the
+# implicit default when no variant subfolder is used (the port-level
+# manifest.py).
+STAND_ALONE_PORTS = {"unix", "windows", "webassembly"}
+"Ports that have no `boards/` subfolder, only `variants/` (or a port-level manifest)"
+
+STANDARD_VARIANT = "standard"
+"Default variant name for stand-alone ports (replaces the legacy GENERIC folder)"
+
 GENERIC_L = "generic"
 "generic lowercase"
 GENERIC_U = "GENERIC"

@@ -29,16 +29,20 @@ def make_path_vars(
     mpy_lib_path: Path = CONFIG.mpy_lib_path,  # ? if <= 1.19.1
     port: Optional[str] = None,
     board: Optional[str] = None,
+    variant: Optional[str] = None,
 ):
     if port is None or port == "":  # pragma: no cover
         port_path = mpy_path
     else:
         port_path = mpy_path / "ports" / port
 
-    if board is None or board == "":  # pragma: no cover
-        board_path = port_path
-    else:
+    if board:
         board_path = port_path / "boards" / board
+    elif variant:
+        # Stand-alone ports use `variants/<variant>/` instead of `boards/<board>/`
+        board_path = port_path / "variants" / variant
+    else:  # pragma: no cover
+        board_path = port_path
 
     log.trace(f"port_path : {port_path}")
     log.trace(f"board_path: {board_path}")
@@ -83,11 +87,13 @@ def freeze_one_manifest_2(
     cwd = Path.cwd()
     # so we need to get the port and board from the path
     log.debug(f"input_manifest: {manifest}")
-    port, board = get_portboard(manifest)
+    port, board, variant = get_portboard(manifest)
 
-    log.info("port-board: {}".format((port + "-" + board).rstrip("-")))
+    log.info(f"port-board-variant: {'-'.join(p for p in (port, board, variant) if p)}")
 
-    path_vars = make_path_vars(port=port, board=board, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
+    path_vars = make_path_vars(
+        port=port, board=board, variant=variant, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path
+    )
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
     try:
         # manifest needs to be run from the port's folder
@@ -101,7 +107,9 @@ def freeze_one_manifest_2(
     # restore working directory
     os.chdir(cwd)
     # save the frozen files to the stubs
-    copy_frozen_to_stubs(frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path)
+    copy_frozen_to_stubs(
+        frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path, variant=variant
+    )
 
 
 def copy_frozen_to_stubs(
@@ -111,13 +119,14 @@ def copy_frozen_to_stubs(
     files: List[ManifestOutput],
     version: str,
     mpy_path: Path,
+    variant: str = "",
 ):
     """
     copy the frozen files from the manifest to the stubs folder
 
     stubpath = the destination : # stubs/{family}-{version}-frozen
     """
-    freeze_path, board = get_freeze_path(stub_path, port, board)
+    freeze_path, board = get_freeze_path(stub_path, port, board, variant)
 
     log.debug(f"copy frozen: {port}-{board} to {freeze_path}")
     freeze_path.mkdir(parents=True, exist_ok=True)
