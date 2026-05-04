@@ -39,6 +39,7 @@ class _Class:
 
 
 _Instance = _Class()
+_bound_method_type = type(_Instance.meth)
 
 
 def ismethod(obj):
@@ -138,6 +139,31 @@ def signature(f):
             A |= (z & 0x4) << n
             K |= ((z & 0x08) >> 3) << n
         num_args = A + K - num_closed_over
+    elif t is _bound_method_type:
+        # A bound method (classmethod on MicroPython).  Extract the underlying
+        # bytecode function from the bound_method structure (fun is at offset 1).
+        # Safety-check that the inner function is bytecode (not a native/C function)
+        # by comparing its type pointer with that of a known bytecode function.
+        bm = uctypes.struct(id(f), (uctypes.ARRAY | 0, uctypes.LONG | 3))
+        fun_ptr = bm[1]
+        _bytecode_type_id = id(type(signature))
+        fun_type_ptr = uctypes.struct(fun_ptr, (uctypes.ARRAY | 0, uctypes.LONG | 1))[0]
+        if fun_type_ptr != _bytecode_type_id:
+            raise NotImplementedError("bound_method wraps a non-bytecode function")
+        fun_obj = uctypes.struct(fun_ptr, (uctypes.ARRAY | 0, uctypes.LONG | 4))
+        bytecode = uctypes.bytearray_at(fun_obj[3], 8)
+        i = 0
+        z = bytecode[i]
+        i += 1
+        A = z & 0x3
+        K = 0
+        n = 0
+        while z & 0x80:
+            z = bytecode[i]
+            i += 1
+            A |= (z & 0x4) << n
+            K |= ((z & 0x08) >> 3) << n
+        num_args = A + K
     else:
         raise NotImplementedError("unsupported function type")
 

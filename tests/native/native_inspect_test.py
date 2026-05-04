@@ -171,6 +171,60 @@ def test_class_method_no_double_self(tmp_path: Path, pytestconfig):
 
 @_skip_no_mpy
 @_skip_no_inspect
+def test_classmethod_params_use_inspect(tmp_path: Path, pytestconfig):
+    """inspect.signature() must work for bound_method (classmethod) on MicroPython.
+
+    mpy_inspect.py now supports bound_method by extracting the underlying
+    bytecode function.  This test verifies that inspect.signature() returns
+    the correct parameter count (including cls) for a pure-Python classmethod.
+    The createstubs.py fix then strips cls and re-prepends it as 'cls'.
+    """
+    # Write a small Python module that has a classmethod.
+    mod_dir = tmp_path / "lib"
+    mod_dir.mkdir()
+    (mod_dir / "mymod.py").write_text(
+        "class MyWorker:\n"
+        "    @classmethod\n"
+        "    def create(cls, x, y):\n"
+        "        pass\n"
+    )
+
+    # Driver: test inspect.signature directly on the classmethod (not via createstubs,
+    # which runs main() on import on MicroPython).
+    shutil.copy(_MPY_INSPECT, tmp_path / "inspect.py")
+    driver = tmp_path / "run_inspect_check.py"
+    driver.write_text(
+        "import sys\n"
+        "sys.path.insert(0, '{lib}')\n"
+        "import inspect\n"
+        "from mymod import MyWorker\n"
+        "item = MyWorker.create\n"
+        "print('type:', type(item).__name__)\n"
+        "sig = inspect.signature(item)\n"
+        "params = list(sig.parameters.keys())\n"
+        "print('params:', params)\n"
+        "assert len(params) == 3, 'expected 3 params (cls, x, y), got ' + str(params)\n"
+        "print('OK')\n".format(lib=str(mod_dir))
+    )
+
+    result = subprocess.run(
+        [_MICROPYTHON, str(driver)],
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        pytest.fail(
+            "inspect check failed:\n" + result.stderr + result.stdout
+        )
+    assert "OK" in result.stdout, (
+        "inspect check did not print OK:\n" + result.stdout + result.stderr
+    )
+
+
+@_skip_no_mpy
+@_skip_no_inspect
 def test_async_functions_emit_async_def(tmp_path: Path, pytestconfig):
     """Coroutine functions (type 'generator' on MicroPython) should produce
     'async def' stubs when inspect is available.
