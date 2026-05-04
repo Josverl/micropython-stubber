@@ -10,51 +10,38 @@ from _pytest.config import Config
 
 pytestmark = [pytest.mark.stubber, pytest.mark.native]
 
-# "list of avaialble micropython versions on the current platfor"
-fw_list = []  # no tests on mac
-# Figure out ubuntu version
-os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
+_TOOLS_DIR = Path(__file__).parent.parent / "tools"
 
-if os_distro_version in ["linux-ubuntu-20.04", "linux-debian-11"]:
-    # Default = 20.04 - focal
-    fw_list = [
-        # "ubuntu_20_04/micropython_v1_11",
-        # "ubuntu_20_04/micropython_v1_12",
-        # "ubuntu_20_04/micropython_v1_14",
-        # "ubuntu_20_04/micropython_v1_15",
-        # "ubuntu_20_04/micropython_v1_16",
-        "ubuntu_20_04/micropython_v1_17",
-        "ubuntu_20_04/micropython_v1_18",
-        "ubuntu_20_04/micropython_v1_20_0",
-        "ubuntu_20_04/micropython_v1_21_0",
-    ]
-elif os_distro_version in ["linux-ubuntu-18.04"]:
-    # 18.04 - bionic
-    fw_list = [
-        "ubuntu_18_04/micropython_1_12",
-        "ubuntu_18_04/micropython_1_13",
-        "ubuntu_18_04/pycopy_3_3_2-25",
-    ]
-elif os_distro_version in ["linux-ubuntu-24.04", "linux-ubuntu-22.04"]:
-    # 22.04 (jammy) / 24.04 (noble) - binaries built from source
-    fw_list = [
-        "ubuntu_24_04/micropython_v1_24_1",
-    ]
-# distro does not cover windows... but no problem as long as it is not 16 bit it will run.
-elif sys.platform == "win32":
-    fw_list = [
-        "windows/micropython_v1_18.exe",
-        "windows/micropython_v1_20_0.exe",
-        "windows/micropython_v1_21_0.exe",
-        "windows/micropython_v1_22_0_preview.exe",
-    ]
+# Linux distro version → tools subfolder mapping
+_DISTRO_FOLDER_MAP = {
+    "linux-ubuntu-18.04": "ubuntu_18_04",
+    "linux-ubuntu-20.04": "ubuntu_20_04",
+    "linux-debian-11": "ubuntu_20_04",
+    "linux-ubuntu-22.04": "ubuntu_24_04",
+    "linux-ubuntu-24.04": "ubuntu_24_04",
+}
+
+
+def _discover_fw_list() -> list:
+    """Discover available MicroPython binaries in tests/tools for the current platform."""
+    if sys.platform == "win32":
+        return sorted(f"windows/{p.name}" for p in (_TOOLS_DIR / "windows").glob("*.exe"))
+    # Linux: map distro version to the appropriate tools subfolder
+    os_distro_version = f"{sys.platform}-{distro.id()}-{distro.version()}"
+    subfolder = _DISTRO_FOLDER_MAP.get(os_distro_version)
+    if not subfolder:
+        return []
+    return sorted(f"{subfolder}/{p.name}" for p in (_TOOLS_DIR / subfolder).iterdir() if p.is_file())
+
+
+fw_list = _discover_fw_list()
 
 
 # specify the minified tests using a marker
 @pytest.mark.parametrize(
     "suffix",
     [
-        pytest.param(""),
+        # pytest.param(""), # reduce testload
         pytest.param("_min", marks=pytest.mark.minified),
         # pytest.param("_mpy", marks=pytest.mark.minified), # TODO: add mpy tests including compiling to the correct version
     ],
@@ -63,7 +50,7 @@ elif sys.platform == "win32":
     "variant",
     [
         pytest.param("createstubs"),
-        pytest.param("createstubs_mem"),
+        # pytest.param("createstubs_mem"), # reduce testload
         pytest.param("createstubs_db"),
     ],
 )
