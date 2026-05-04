@@ -472,8 +472,64 @@ class Stubber:
                 if params is None:
                     params = "{}*args, **kwargs".format(first)
                 # class method - add function decoration
-                if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                # On MicroPython the type/repr contains "bound_method"; on CPython a classmethod
+                # accessed via its class is a bound method and has a __func__ attribute.
+                if "bound_method" in item_type_txt or "bound_method" in item_repr or hasattr(item_instance, "__func__"):
+                    # Try to get actual parameter signature for the classmethod using inspect.
+                    # Use __func__ (the underlying function) when available so the signature
+                    # includes the cls parameter; on MicroPython __func__ may not exist and
+                    # the signature already exposes a dummy first param that represents cls.
+                    cls_params = None
+                    if self._use_inspect:
+                        try:
+                            _func = getattr(item_instance, "__func__", item_instance)
+                            sig = _inspect.signature(_func)
+                            _parts = []
+                            _saw_pos_only = False
+                            _saw_var_pos = False
+                            for _pname, _param in sig.parameters.items():
+                                _kind = getattr(_param, "kind", None)
+                                if _kind == 0:
+                                    _saw_pos_only = True
+                                    _parts.append(_pname)
+                                elif _kind == 1:
+                                    if _saw_pos_only:
+                                        _parts.append("/")
+                                        _saw_pos_only = False
+                                    _parts.append(_pname)
+                                elif _kind == 2:
+                                    if _saw_pos_only:
+                                        _parts.append("/")
+                                        _saw_pos_only = False
+                                    _saw_var_pos = True
+                                    _parts.append("*" + _pname)
+                                elif _kind == 3:
+                                    if _saw_pos_only:
+                                        _parts.append("/")
+                                        _saw_pos_only = False
+                                    if not _saw_var_pos:
+                                        _parts.append("*")
+                                        _saw_var_pos = True
+                                    _parts.append(_pname)
+                                elif _kind == 4:
+                                    if _saw_pos_only:
+                                        _parts.append("/")
+                                        _saw_pos_only = False
+                                    _parts.append("**" + _pname)
+                                else:
+                                    # MicroPython: param is a string (dummy name)
+                                    _parts.append(_pname)
+                            if _saw_pos_only:
+                                _parts.append("/")
+                            # Strip the leading cls / dummy-x0 parameter
+                            if _parts and _parts[0] not in ("*", "/"):
+                                _parts = _parts[1:]
+                            cls_params = "cls, " + ", ".join(_parts) if _parts else "cls"
+                        except Exception:
+                            pass
+                    if cls_params is None:
+                        cls_params = "cls, *args, **kwargs"
+                    s = "{}@classmethod\n".format(indent) + "{}def {}({}) -> {}:\n".format(indent, item_name, cls_params, ret)
                 elif is_async:
                     s = "{}async def {}({}) -> {}:\n".format(indent, item_name, params, ret)
                 elif is_async_gen:
