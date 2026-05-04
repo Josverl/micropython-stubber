@@ -221,41 +221,63 @@ def test_method_in_class_has_self(stubber_instance, tmp_path):
 
 
 def test_classmethod_uses_inspect_for_signature(stubber_instance, tmp_path):
-    """Classmethods should use inspect to extract the actual parameter signature."""
+    """bound_method items (MicroPython classmethods) should use inspect-derived params.
 
-    class MyClass:
-        @classmethod
-        def my_classmethod(cls, x, y):
-            pass
+    On MicroPython, classmethods appear as type 'bound_method'.  This test
+    simulates that by naming the mock class 'bound_method' so that
+    `"bound_method" in repr(type(item))` is True — the same condition
+    createstubs.py uses on device.
 
-        @classmethod
-        def no_extra_params(cls):
-            pass
+    On MicroPython, inspect.signature(classmethod_item) returns all params
+    including the cls dummy (x0, x1, x2, ...).  createstubs.py strips x0
+    (treated as cls) and adds 'cls' back.  Here the mock __call__ has an
+    extra leading param to mirror that: (x_cls, x0, x1) gives (x0, x1) after
+    CPython inspect strips self, then createstubs strips x_cls → (x1, ).
+    We give 3 extra params so the final signature is (cls, x1, x2).
+    """
 
-    mock = _make_mock_module(MyClass=MyClass)
+    class bound_method:
+        """Simulates a MicroPython classmethod (bound_method type)."""
+
+        # CPython inspect excludes 'self' from __call__; the remaining params
+        # (x_cls, x1, x2) mirror MicroPython's (x0, x1, x2) where x0=cls.
+        def __call__(self, x_cls, x1, x2):
+            return None
+
+    class MockClass:
+        pass
+
+    MockClass.my_classmethod = bound_method()
+
+    mock = _make_mock_module(MockClass=MockClass)
     content = _write_stub_for(stubber_instance, mock, tmp_path)
 
     # Should have @classmethod decorator
     assert "@classmethod" in content
-    # Should use actual parameter names, not *args, **kwargs
-    assert "def my_classmethod(cls, x, y)" in content, "classmethod should have actual params from inspect"
-    # A classmethod with only cls should produce just 'cls'
-    assert "def no_extra_params(cls)" in content
+    # Should use inspect-derived param names, not *args, **kwargs
+    assert "def my_classmethod(cls, x1, x2)" in content, (
+        "classmethod should have actual params from inspect, got:\n" + content
+    )
     # cls must not be doubled
     assert "cls, cls" not in content
 
 
 def test_classmethod_fallback_without_inspect(stubber_instance, tmp_path):
-    """Without inspect, classmethods should fall back to cls, *args, **kwargs."""
+    """Without inspect, bound_method items should fall back to cls, *args, **kwargs."""
 
-    class MyClass:
-        @classmethod
-        def my_classmethod(cls, x, y):
-            pass
+    class bound_method:
+        """Simulates a MicroPython classmethod (bound_method type)."""
 
+        def __call__(self, x_cls, x1, x2):
+            return None
+
+    class MockClass:
+        pass
+
+    MockClass.my_classmethod = bound_method()
     stubber_instance._use_inspect = False
 
-    mock = _make_mock_module(MyClass=MyClass)
+    mock = _make_mock_module(MockClass=MockClass)
     content = _write_stub_for(stubber_instance, mock, tmp_path)
 
     # Should still have @classmethod decorator
