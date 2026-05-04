@@ -33,9 +33,9 @@ def freeze_folders(stub_folder: str, mpy_folder: str, lib_folder: str, version: 
         # clean target folder
         shutil.rmtree(stub_folder, ignore_errors=True)
     for script in scripts:
-        port, board = get_portboard(Path(script))
+        port, board, variant = get_portboard(Path(script))
 
-        freeze_path, board = get_freeze_path(Path(stub_folder), port, board)
+        freeze_path, board = get_freeze_path(Path(stub_folder), port, board, variant)
         dest_path = freeze_path.as_posix()
         # if board == "":
         #     board = GENERIC
