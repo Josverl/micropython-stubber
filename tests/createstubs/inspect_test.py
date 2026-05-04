@@ -228,12 +228,12 @@ def test_classmethod_uses_inspect_for_signature(stubber_instance, tmp_path):
     `"bound_method" in repr(type(item))` is True — the same condition
     createstubs.py uses on device.
 
-    On MicroPython, inspect.signature(classmethod_item) returns all params
-    including the cls dummy (x0, x1, x2, ...).  createstubs.py strips x0
-    (treated as cls) and adds 'cls' back.  Here the mock __call__ has an
-    extra leading param to mirror that: (x_cls, x0, x1) gives (x0, x1) after
-    CPython inspect strips self, then createstubs strips x_cls → (x1, ).
-    We give 3 extra params so the final signature is (cls, x1, x2).
+    Parameter flow:
+      - On MicroPython, inspect.signature(classmethod) returns (x0, x1, x2) where
+        x0 represents cls.  createstubs.py strips x0 and re-adds 'cls'.
+      - Here __call__(self, x_cls, x1, x2) mirrors that: CPython inspect excludes
+        'self', giving (x_cls, x1, x2); createstubs strips x_cls (1st param) and
+        adds 'cls' back → final signature is (cls, x1, x2).
     """
 
     class bound_method:
@@ -241,6 +241,7 @@ def test_classmethod_uses_inspect_for_signature(stubber_instance, tmp_path):
 
         # CPython inspect excludes 'self' from __call__; the remaining params
         # (x_cls, x1, x2) mirror MicroPython's (x0, x1, x2) where x0=cls.
+        # createstubs strips the first (x_cls ↔ x0) and prepends 'cls'.
         def __call__(self, x_cls, x1, x2):
             return None
 

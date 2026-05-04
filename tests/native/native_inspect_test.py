@@ -203,7 +203,7 @@ def test_classmethod_params_use_inspect(tmp_path: Path, pytestconfig):
         "sig = inspect.signature(item)\n"
         "params = list(sig.parameters.keys())\n"
         "print('params:', params)\n"
-        "assert len(params) == 3, 'expected 3 params (cls, x, y), got ' + str(params)\n"
+        "assert len(params) == 3, 'expected 3 params (including cls dummy x0), got ' + str(params)\n"
         "print('OK')\n".format(lib=str(mod_dir))
     )
 
