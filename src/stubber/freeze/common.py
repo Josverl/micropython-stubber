@@ -7,36 +7,59 @@ from typing import Tuple
 
 from mpflash.logger import log
 
-from stubber.publish.defaults import GENERIC_U
+from stubber.publish.defaults import GENERIC_U, STAND_ALONE_PORTS, STANDARD_VARIANT
 
 
-def get_portboard(manifest_path: Path):
+def get_portboard(manifest_path: Path) -> Tuple[str, str, str]:
     """
-    returns a 2-tuple of the port and board in the provided manifest path
+    returns a 3-tuple of the port, board and variant in the provided manifest path.
 
-    raises an ValueError if neither a port or board can be found
+    Stand-alone ports (e.g. ``webassembly``, ``unix``, ``windows``) do not use
+    a ``boards/<board>/`` subfolder, but may have one or more
+    ``variants/<variant>/`` subfolders. For these the ``board`` field is empty
+    while ``variant`` will be set (e.g. ``pyscript``).
+
+    raises a ValueError if neither a port nor a board can be found
     """
     # https://regex101.com/r/tv7JX4/1
-    re_pb = r".*micropython[\/\\]ports[\/\\](?P<port>[\w_-]*)([\/\\]boards[\/\\](?P<board>\w*))?[\/\\]"
-    mpy_port = mpy_board = ""
+    re_pb = (
+        r".*micropython[\/\\]ports[\/\\](?P<port>[\w_-]*)"
+        r"(?:[\/\\](?:boards[\/\\](?P<board>\w*)|variants[\/\\](?P<variant>\w*)))?"
+        r"[\/\\]"
+    )
     if matches := re.search(re_pb, manifest_path.absolute().as_posix()):
-        # port and board
+        # port, board and (optionally) variant
         mpy_port = str(matches["port"] or "")
         mpy_board = str(matches["board"] or "")
-        return mpy_port, mpy_board
+        mpy_variant = str(matches["variant"] or "")
+        return mpy_port, mpy_board, mpy_variant
     log.error(f"no port or board found in {manifest_path}")
     raise (ValueError("Neither port or board found in path"))
 
 
-def get_freeze_path(stub_path: Path, port: str, board: str) -> Tuple[Path, str]:
+def get_freeze_path(stub_path: Path, port: str, board: str, variant: str = "") -> Tuple[Path, str]:
     """
-    get path to a folder to store the frozen stubs for the given port/board
+    get path to a folder to store the frozen stubs for the given port/board/variant.
+
+    For stand-alone ports (no ``boards/`` folder) the variant is used as the
+    folder name (e.g. ``webassembly/PYSCRIPT``). When neither board nor variant
+    is provided for a stand-alone port, the default variant name ``standard``
+    is used instead of the legacy ``GENERIC`` placeholder.
     """
     if not port:
         raise ValueError("port must be provided")
 
     if not board:
-        board = GENERIC_U
+        # Stand-alone ports use variants instead of boards.
+        # Prefer the explicit variant; fall back to "standard" for known
+        # stand-alone ports; otherwise fall back to GENERIC for backward
+        # compatibility.
+        if variant:
+            board = variant
+        elif port in STAND_ALONE_PORTS:
+            board = STANDARD_VARIANT
+        else:
+            board = GENERIC_U
 
     if board == "manifest_release":
         board = "RELEASE"
