@@ -24,7 +24,24 @@ def get_database(db_path: Path, production: bool = False) -> sqlite3.Connection:
         conn = create_database(db_path)
 
     conn.row_factory = sqlite3.Row  # return rows as dicts
+    _migrate_add_package_type(conn)
     return conn
+
+
+def _migrate_add_package_type(conn: sqlite3.Connection) -> None:
+    """
+    Add the ``package_type`` column to the packages table if it does not exist yet.
+
+    This is a forward migration for databases created before the column was introduced.
+    Existing rows will default to ``'poetry'``, which preserves backward-compatible
+    behaviour for all packages built before multi-backend support was added.
+    """
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(packages)")
+    columns = {row[1] for row in cursor.fetchall()}
+    if "package_type" not in columns:
+        cursor.execute("ALTER TABLE packages ADD COLUMN package_type TEXT DEFAULT 'poetry'")
+        conn.commit()
 
 
 def create_database(db_path: Path) -> sqlite3.Connection:
@@ -51,7 +68,8 @@ def create_database(db_path: Path) -> sqlite3.Connection:
             stub_hash TEXT,
             port TEXT DEFAULT "",
             board TEXT DEFAULT "",
-            variant TEXT DEFAULT ""
+            variant TEXT DEFAULT "",
+            package_type TEXT DEFAULT "poetry"
         )
     """
     conn.execute(SCHEMA)

@@ -3,6 +3,22 @@
 from enum import Enum
 
 
+class PackageType(str, Enum):
+    """The type of build tool used to package the stubs."""
+
+    POETRY = "poetry"
+    "Use Poetry as the build tool (default, backward-compatible)"
+
+    HATCH = "hatch"
+    "Use Hatchling as the build tool (modern PEP 517 build backend)"
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
+
+
 class StubSource(str, Enum):
     # NOTE: The literal values are persisted (e.g., databases/manifests). "MCU stubs" must remain unchanged.
     FIRMWARE = "MCU stubs"

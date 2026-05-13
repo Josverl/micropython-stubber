@@ -1,5 +1,5 @@
 import pytest
-from _pytest.python_api import RaisesContext
+from contextlib import AbstractContextManager
 
 from stubber.minify import get_whitespace_context, minify_script, python_minifier
 
@@ -49,8 +49,7 @@ def test_get_whitespace_context(content, index, expected):
         pytest.skip("Python minifier not available")
 
     # Act
-    if isinstance(expected, RaisesContext):
-        # error expected
+    if isinstance(expected, AbstractContextManager):
         with expected:
             result = list(get_whitespace_context(content, index))
         return
@@ -99,7 +98,7 @@ def test_minify_script(source_script, expected, keep_report):
     source = "\n".join(source_script)
 
     # Act
-    if isinstance(expected, RaisesContext):
+    if isinstance(expected, AbstractContextManager):
         with expected:
             minify_script(source, keep_report, diff=False)
     else:
