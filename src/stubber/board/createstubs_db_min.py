@@ -494,7 +494,9 @@ class Stubber:
                     params = "{}*args, **kwargs".format(first)
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}(cls, *args, **kwargs) -> {}:\n".format(indent, item_name, ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}({}) -> {}:\n".format(
+                        indent, item_name, params.replace("self", "cls", 1), ret
+                    )
                 elif is_async:
                     s = "{}async def {}({}) -> {}:\n".format(indent, item_name, params, ret)
                 elif is_async_gen:

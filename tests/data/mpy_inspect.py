@@ -39,6 +39,7 @@ class _Class:
 
 
 _Instance = _Class()
+_bound_method_type = type(_Instance.meth)
 
 
 def ismethod(obj):
@@ -138,6 +139,37 @@ def signature(f):
             A |= (z & 0x4) << n
             K |= ((z & 0x08) >> 3) << n
         num_args = A + K - num_closed_over
+    elif t is _bound_method_type:
+        # A bound method (classmethod on MicroPython).  mp_obj_bound_meth_t layout:
+        #   [0] base (type pointer), [1] fun (underlying function), [2] self (bound obj)
+        # Extract the underlying function from offset 1 of the bound_method struct.
+        # Safety-check that the inner function is a bytecode function (not a native/C
+        # function) by comparing its type pointer (first word) with that of a known
+        # bytecode function — prevents segfault when accessing native functions like
+        # int.from_bytes whose bytecode field doesn't hold valid bytecode.
+        bm = uctypes.struct(id(f), (uctypes.ARRAY | 0, uctypes.LONG | 3))
+        fun_ptr = bm[1]  # offset 1 = fun in mp_obj_bound_meth_t
+        _bytecode_type_id = id(type(signature))  # type addr of a known bytecode fn
+        fun_type_ptr = uctypes.struct(fun_ptr, (uctypes.ARRAY | 0, uctypes.LONG | 1))[0]
+        if fun_type_ptr != _bytecode_type_id:
+            raise NotImplementedError("bound_method wraps a non-bytecode function")
+        fun_obj = uctypes.struct(fun_ptr, (uctypes.ARRAY | 0, uctypes.LONG | 4))
+        bytecode = uctypes.bytearray_at(fun_obj[3], 8)  # offset 3 = bytecode ptr
+        # MP_BC_PRELUDE_SIG_DECODE_INTO (py/bc.h):
+        #   low 2 bits of first byte = positional arg count (A)
+        #   bit 7 set = more bytes follow; accumulated via K (keyword-only)
+        i = 0
+        z = bytecode[i]
+        i += 1
+        A = z & 0x3   # positional args (includes cls)
+        K = 0
+        n = 0
+        while z & 0x80:
+            z = bytecode[i]
+            i += 1
+            A |= (z & 0x4) << n
+            K |= ((z & 0x08) >> 3) << n
+        num_args = A + K  # total args including cls (no closed-over vars for classmethods)
     else:
         raise NotImplementedError("unsupported function type")
 
