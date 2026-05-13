@@ -59,7 +59,7 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
     m_clone = mocker.patch("stubber.commands.clone_cmd.git.clone", autospec=True, return_value=0)
 
     m_tag = mocker.patch("stubber.commands.clone_cmd.git.get_local_tag", autospec=True)
-    m_dir = mocker.patch("stubber.commands.clone_cmd.os.mkdir", autospec=True)  # type: ignore
+    mocker.patch("stubber.commands.clone_cmd.os.mkdir", autospec=True)  # type: ignore
 
     # now test with path specified
     result = runner.invoke(stubber.stubber_cli, ["clone", "--path", "foobar"])
@@ -75,6 +75,8 @@ def test_cmd_clone_path(mocker: MockerFixture, tmp_path: Path):
         path=Path("foobar/micropython-lib"),
     )
     assert m_tag.call_count >= 2
+
+
 
 
 ##########################################################################################

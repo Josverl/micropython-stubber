@@ -35,6 +35,13 @@ from stubber.utils.config import CONFIG
     help="Also clone the micropython-stubs repo",
 )
 @click.option(
+    "--typeshed/--no-typeshed",
+    "typeshed",
+    default=False,
+    is_flag=True,
+    help="Also clone the typeshed repo",
+)
+@click.option(
     "--mpy-repo",
     default="https://github.com/micropython/micropython.git",
     help="URL for MicroPython repository (default: official repo)",
@@ -47,6 +54,7 @@ from stubber.utils.config import CONFIG
 def cli_clone(
     path: Union[str, Path],
     stubs: bool = False,
+    typeshed: bool = False,
     mpy_repo: str = "https://github.com/micropython/micropython.git",
     mpy_lib_repo: str = "https://github.com/micropython/micropython-lib.git",
 ):
@@ -66,11 +74,13 @@ def cli_clone(
         mpy_path = CONFIG.mpy_path
         mpy_lib_path = CONFIG.mpy_lib_path
         mpy_stubs_path = CONFIG.mpy_stubs_path
+        typeshed_path = CONFIG.typeshed_path
     else:
         # repos are relative to provided path
         mpy_path = dest_path / "micropython"
         mpy_lib_path = dest_path / "micropython-lib"
         mpy_stubs_path = dest_path / "micropython-stubs"
+        typeshed_path = dest_path / "typeshed"
 
     repos: List[Tuple[Path, str, str]] = [
         (mpy_path, mpy_repo, "master"),
@@ -78,6 +88,8 @@ def cli_clone(
     ]
     if stubs:
         repos.append((mpy_stubs_path, "https://github.com/josverl/micropython-stubs.git", "main"))
+    if typeshed:
+        repos.append((typeshed_path, "https://github.com/python/typeshed.git", "main"))
 
     for _path, remote, branch in repos:
         log.info(f"Cloning {remote} branch {branch} to {_path}")
