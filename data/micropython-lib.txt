@@ -12,3 +12,6 @@ usb.device.cdc
 usb.device.keyboard 
 usb.device.midi
 usb.device.mouse
+
+# V1.29.0
+uuid
