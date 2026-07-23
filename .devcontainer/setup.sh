@@ -2,12 +2,12 @@
 
 # this script is referenced from the codespaces devcontainer dockerfile
 
-echo "install poetry before creating the venv" 
-pipx install poetry
+echo "install uv before creating the venv" 
+pipx install uv
 
-#poetry will re-use the active venv or create a new one
-echo "start: poetry install "
-poetry install --with dev --sync
+#uv will create/refresh the project venv in .venv
+echo "start: uv sync "
+uv sync --group dev
 
 echo "Activate virtual environment"
 source .venv/bin/activate

@@ -50,9 +50,9 @@ git clone  https://github.com/josverl/micropython-stubber.git
 git clone  https://github.com/josverl/micropython-stubs.git 
 
 cd micropython-stubber
-poetry install
+uv sync
 
-stubber clone
+uv run stubber clone
 
 ```
 

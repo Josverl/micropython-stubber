@@ -2,33 +2,31 @@
 
 # Publishing 
 
-Publishing is done using poetry 
+Publishing is done using [uv](https://docs.astral.sh/uv/) with the hatchling build backend.
 
 reqs: 
- - poetry installed and on path
-   `uv tool install poetry --with poetry-bumpversion` 
+ - uv installed and on path
+   `pipx install uv`  (or see https://docs.astral.sh/uv/getting-started/installation/)
 
-   - poetry config 
-    - poetry config repositories.test-pypi https://test.pypi.org/legacy/
-    - poetry config repositories.pypi https://upload.pypi.org/legacy/
+ - the `bump-my-version` tool is run on demand via `uvx bump-my-version`
 
-
- - poetry api key stored in systems secure store or in environment variable `PYPI_API_KEY`
-    - **PYPI test**
+ - a PyPI API token, provided via environment variable:
+    - **PyPI test**
         - get token from https://test.pypi.org/manage/account/token/
-        - store token using `poetry config pypi-token.pypi pypi-YYYYYYYY` 
-    - **PYPI Production**
+        - publish with `uv publish --publish-url https://test.pypi.org/legacy/ --token pypi-YYYYYYYY`
+    - **PyPI Production**
         - get token from https://pypi.org/manage/account/token/
-        - store token using `poetry config pypi-token.pypi pypi-XXXXXXXX` 
+        - set `UV_PUBLISH_TOKEN=pypi-XXXXXXXX` (or pass `--token`)
 
 
- - bump version 
+ - bump version (updates the package source, `package.json` and `mip/*.json`)
 
-    `poetry version prerelease` 
-    `poetry version patch` 
+    `uvx bump-my-version bump pre_release` 
+    `uvx bump-my-version bump patch` 
 
- - poetry publish 
-    `poetry publish --build -r test-pypi` 
-    `poetry publish --build`
+ - build & publish 
+    `uv build` 
+    `uv publish --publish-url https://test.pypi.org/legacy/`   # test PyPI 
+    `uv publish`                                                # production PyPI 
 
 

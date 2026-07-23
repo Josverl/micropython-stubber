@@ -11,14 +11,12 @@ build:
   tools:
     python: "3.11"
   commands:
-    # Install poetry
-    - pip install poetry
-    # Tell poetry to not use a virtual environment
-    - poetry config virtualenvs.create false
-    # Install dependencies with 'docs' dependency group
-    - poetry install --with docs
-    # Build documentation using Poetry-managed Sphinx
-    - poetry run sphinx-build -T -b html -d _build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
+    # Install uv
+    - pip install uv
+    # Install dependencies with the 'docs' dependency group
+    - uv sync --group docs
+    # Build documentation using uv-managed Sphinx
+    - uv run sphinx-build -T -b html -d _build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
 
 # Formats handled by custom commands above
 # formats:

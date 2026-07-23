@@ -6,13 +6,14 @@ repo-path = "./repos"
 # template-path = "./repos/micropython-stubs/publish/template"
 
 
-[tool.poetry]
+[project]
 name = "micropython-stubber"
-version = "1.28.3"
+dynamic = ["version"]
 description = "Tooling to create and maintain stubs for MicroPython"
-authors = ["Jos Verlinde <jos_verlinde@hotmail.com>"]
+authors = [{ name = "Jos Verlinde", email = "jos_verlinde@hotmail.com" }]
 license = "MIT"
 readme = "readme.md"
+requires-python = ">=3.10,<4.0"
 keywords = [
     "MicroPython",
     "stubs",
@@ -21,125 +22,155 @@ keywords = [
     "linting",
     "static type check",
 ]
-documentation = "https://micropython-stubber.readthedocs.io/"
-homepage = "https://github.com/Josverl/micropython-stubber#readme"
-repository = "https://github.com/Josverl/micropython-stubber"
 classifiers = [
     "Programming Language :: Python :: Implementation :: MicroPython",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Text Editors :: Integrated Development Environments (IDE)",
     "Topic :: Software Development :: Build Tools",
 ]
-packages = [{ include = "**/*.*", from = "src" }]
-include = []
+dependencies = [
+    "python-minifier>=2.7.0,<3.0.0; python_version < '3.14'",
+    "requests>=2.32.3,<3.0.0",
+    "mpflash>=1.28.0,<2.0.0",
+    "greenlet>=3.2.4,<3.2.5",                              # Constrain to version with pre-built wheels
+    "mpremote>=1.25.0",
+    # others
+    "autoflake>=1.7,<3.0",
+    "libcst>=1.1.0,<2.0.0",
+    "cachetools>=5.3.0,<6.0.0",
+    "click>=8.1.3,<9.0.0",
+    "executing>=2.0.1,<3.0.0",
+    "importlib-metadata>=1,<9; python_version < '3.8'",
+    "loguru>=0.6,<0.8",
+    "mypy-gitlab-code-quality>=1.1.0,<2.0.0",
+    "packaging>=24.2,<25.0.0",
+    "pygithub>=2.1.1,<3.0.0",
+    "pyserial>=3.5",
+    "pypi-simple>=1.0.0,<2.0.0",
+    "rich-click>=1.8.3,<2.0.0",
+    "tenacity==9.0.0",
+    "tomli>=2.0.1,<3.0.0; python_version < '3.11'",
+    "tomli-w>=1.0.0,<2.0.0",
+    "typed-config>=1.3.0,<2.0.0",
+    "urllib3>=2.2.2,<3.0.0",
+    "pydeps==3.0.1",
+    "pyright>=1.1.341",
+    "mypy>=1.10",
+    "mpy-cross>=1.25.0.post2,<2.0.0",
+    "ruff>=0.12.11,<0.13.0",
+]
+
+[project.urls]
+Documentation = "https://micropython-stubber.readthedocs.io/"
+Homepage = "https://github.com/Josverl/micropython-stubber#readme"
+Repository = "https://github.com/Josverl/micropython-stubber"
+
+[project.scripts]
+stubber = "stubber.stubber:stubber_cli"
+mpflash = "mpflash.cli_main:mpflash"
+mpremote = "mpremote.main:main"
+
+[dependency-groups]
+docs = [
+    "sphinx>=7.4.7,<8.0.0",
+    "myst-parser>=3.0.1,<4.0.0",
+    "sphinx_rtd_theme>=1,<3",
+    "sphinx-autoapi>=3.6.0,<4.0.0",
+    "sphinx-click==6.0.0",
+    "sphinxcontrib-mermaid>=1.0.0",
+]
+test = [
+    "coverage>=6.4.3,<8.0.0",
+    "pytest>=7.1.2,<8.0.0",
+    "pytest-github-actions-annotate-failures>=0.1.7,<0.3.0",
+    "pytest-json-report>=1.5.0,<2.0.0",
+    "pytest-metadata>=2.0.2,<4.0.0",
+    "pytest-mock>=3.10.0,<4.0.0",
+    "mock>=4.0.3,<5.0.0",
+    "distro>=1.8.0,<2.0.0",
+    "fasteners>=0.19,<0.20",
+    "jsons>=1.6.3,<2.0.0",
+    "pytest-cov>=6.0.0",
+]
+dev = [
+    "pydeps>=1.10.22,<4.0.0",
+    "ipykernel>=6.23.1,<7.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "pydocstyle>=6.3.0,<7.0.0",
+    "chime>=0.7.0,<0.8.0",
+    "bincopy>=20.0.0,<21.0.0",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/stubber/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stubber"]
 exclude = [
     "**/tests/**",
     "**/*-test",
     "**/samples.py",
     "**/OneOff",
     "**/.vscode",
-
 ]
 
-[tool.poetry.scripts]
-stubber = "stubber.stubber:stubber_cli"
-mpflash = "mpflash.cli_main:mpflash"
-mpremote = "mpremote.main:main"
+[tool.hatch.build.targets.sdist]
+include = ["src/stubber"]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-python-minifier = { version = "^2.7.0", python = "<3.14" }
-requests = "^2.32.3"
-mpflash = "^1.28.0"
-greenlet = ">=3.2.4,<3.2.5"  # Constrain to version with pre-built wheels
-mpremote = ">=1.25.0"
-# others
-autoflake = ">=1.7,<3.0"
-libcst = "^1.1.0"
-cachetools = "^5.3.0"
-click = "^8.1.3"
-executing = "^2.0.1"
-importlib-metadata = { version = ">=1,<9", python = "<3.8" }
-loguru = ">=0.6,<0.8"
-mypy-gitlab-code-quality = "^1.1.0"
-packaging = "^24.2"
-pygithub = "^2.1.1"
-pyserial = ">=3.5"
-pypi-simple = "^1.0.0"
-rich-click = "^1.8.3"
-tenacity = "9.0.0"
-tomli = { version = "^2.0.1", python = "<3.11" }
-tomli-w = "^1.0.0"
-typed-config = "^1.3.0"
-urllib3 = "^2.2.2"
-# poetry = "^2.1.1"
-pydeps = "3.0.1"
-pyright = ">=1.1.341"
-mypy = ">=1.10"
-mpy-cross = "^1.25.0.post2"
-ruff = "^0.12.11"
+# Version bumping across source, package manifests and mip metadata.
+# Run with: uvx bump-my-version bump patch   (or: minor / major / prerelease)
+[tool.bumpversion]
+current_version = "1.28.3"
+allow_dirty = true
 
+[[tool.bumpversion.files]]
+filename = "src/stubber/__init__.py"
 
-[tool.poetry.group.docs]
-optional = true
-[tool.poetry.group.docs.dependencies]
-sphinx = "^7.4.7"
-myst-parser = "^3.0.1"
-sphinx_rtd_theme = ">=1,<3"
-sphinx-autoapi = "^3.6.0"
-sphinx-click = "6.0.0"
-sphinxcontrib-mermaid = ">=1.0.0"
+[[tool.bumpversion.files]]
+filename = "src/stubber/board/createstubs.py"
 
-[tool.poetry.group.test]
-optional = true
-[tool.poetry.group.test.dependencies]
-coverage = ">=6.4.3,<8.0.0"
-pytest = "^7.1.2"
-pytest-github-actions-annotate-failures = ">=0.1.7,<0.3.0"
-pytest-json-report = "^1.5.0"
-pytest-metadata = ">=2.0.2,<4.0.0"
-pytest-mock = "^3.10.0"
-mock = "^4.0.3"
-distro = "^1.8.0"
-fasteners = "^0.19"
-jsons = "^1.6.3"
-pytest-cov = ">=6.0.0"
+[[tool.bumpversion.files]]
+filename = "src/stubber/board/createstubs_mem.py"
 
-[tool.poetry.group.dev]
-optional = true
-[tool.poetry.group.dev.dependencies]
-pydeps = ">=1.10.22,<4.0.0"
-ipykernel = "^6.23.1"
-python-dotenv = "^1.0.0"
-pydocstyle = "^6.3.0"
-chime = "^0.7.0"
-bincopy = "^20.0.0"
+[[tool.bumpversion.files]]
+filename = "src/stubber/board/createstubs_db.py"
 
+[[tool.bumpversion.files]]
+filename = "src/stubber/board/createstubs_min.py"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[[tool.bumpversion.files]]
+filename = "src/stubber/board/createstubs_mem_min.py"
 
-# Init with : 
-# uv tool install poetry --with poetry-bumpversion 
-# poetry self add poetry-bumpversion
+[[tool.bumpversion.files]]
+filename = "src/stubber/board/createstubs_db_min.py"
 
-[tool.poetry_bumpversion.file."src/stubber/__init__.py"]
-[tool.poetry_bumpversion.file."src/stubber/board/createstubs.py"]
-[tool.poetry_bumpversion.file."src/stubber/board/createstubs_mem.py"]
-[tool.poetry_bumpversion.file."src/stubber/board/createstubs_db.py"]
-[tool.poetry_bumpversion.file."src/stubber/board/createstubs_min.py"]
-[tool.poetry_bumpversion.file."src/stubber/board/createstubs_mem_min.py"]
-[tool.poetry_bumpversion.file."src/stubber/board/createstubs_db_min.py"]
+[[tool.bumpversion.files]]
+filename = "package.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
-[[tool.poetry_bumpversion.replacements]]
-files = [
-    "package.json",
-    "mip/full.json",
-    "mip/minified.json",
-    "mip/mpy_v5.json",
-    "mip/mpy_v6.json",
-]
+[[tool.bumpversion.files]]
+filename = "mip/full.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "mip/minified.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "mip/mpy_v5.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "mip/mpy_v6.json"
 search = '"version": "{current_version}"'
 replace = '"version": "{new_version}"'
 

@@ -6,8 +6,8 @@
 git clone https://github.com/Josverl/micropython-stubber.git
 cd micropython-stubber
 
-poetry install --with dev --with docs
-stubber clone
+uv sync --group dev --group docs
+uv run stubber clone
 ```
 
 ## Windows 10 

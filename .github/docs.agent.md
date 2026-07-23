@@ -38,7 +38,7 @@ You are a technical documentation specialist for the **micropython-stubber** pro
 ### 1. Understand the Change Request
 - Identify which doc file(s) need updating.
 - If a CLI command/flag is mentioned, **always** read the corresponding source in `src/stubber/commands/` first to verify the current signature, defaults, and behaviour.
-- Use `poetry run stubber <command> --help` (via terminal) to get the authoritative CLI output when source reading is ambiguous.
+- Use `uv run stubber <command> --help` (via terminal) to get the authoritative CLI output when source reading is ambiguous.
 
 ### 2. Audit Before Editing
 Before changing anything, search for:
@@ -71,14 +71,14 @@ If unknown words are genuine technical terms, add them to `.vscode/micropython-d
 After every edit, verify the Sphinx build does not have new warnings/errors:
 
 ```bash
-poetry run sphinx-build -b html docs docs/build -W --keep-going 2>&1 | tail -30
+uv run sphinx-build -b html docs docs/build -W --keep-going 2>&1 | tail -30
 ```
 
 If the build produces new warnings, fix them before finishing.
 
 ### 6. Consistency Checklist
 Run through this before marking a task done:
-- [ ] All CLI examples use `poetry run stubber …` (not bare `stubber …`) unless the docs explicitly address a globally installed version.
+- [ ] All CLI examples use `uv run stubber …` (not bare `stubber …`) unless the docs explicitly address a globally installed version.
 - [ ] Option names match actual Click option names (e.g., `--source-path` not `--source`).
 - [ ] Version numbers or "see version X" notes are not hard-coded unless versioning is intentional.
 - [ ] No orphan pages (every new `.md`/`.rst` is listed in `index.md` or a toctree directive).
@@ -116,7 +116,7 @@ src/stubber/commands/
     mcu_cmd.py        → stubber create-mcu-stubs
 ```
 
-Use `poetry run stubber <sub-command> --help` to get the live, authoritative output.
+Use `uv run stubber <sub-command> --help` to get the live, authoritative output.
 
 ## Tone and Style
 

@@ -49,20 +49,20 @@
             "label": "coverage",
             "detail": "run coverage for all tests",
             "type": "shell",
-            "command": "poetry run coverage run -m pytest tests -m 'not basicgit' --junitxml=results/test-results.xml"
+            "command": "uv run coverage run -m pytest tests -m 'not basicgit' --junitxml=results/test-results.xml"
         },
         {
             "label": "coverage html",
             "detail": "update coverage html report",
             "type": "shell",
-            "command": "poetry run coverage html",
+            "command": "uv run coverage html",
             "problemMatcher": []
         },
         {
             "label": "coverage ALL",
             "detail": "run coverage and create html report and .lcov file",
             "type": "shell",
-            "command": "poetry run coverage lcov -o results/coverage.lcov",
+            "command": "uv run coverage lcov -o results/coverage.lcov",
             "dependsOn": [
                 "coverage",
                 "coverage html"
@@ -79,7 +79,7 @@
         //     "type": "austin",
         //     "label": "Profile tests",
         //     "command": [
-        //         "poetry",
+        //         "uv",
         //         "run"
         //     ],
         //     "args": [

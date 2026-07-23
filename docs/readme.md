@@ -1,9 +1,8 @@
 ### Manual Build
 
-- `poetry install --with docs`
-- `poetry env activate`
-  - source .venv/bin/activate
-  - .venv/Scripts/activate.ps1
+- `uv sync --group docs`
+- `source .venv/bin/activate`
+  - `.venv/Scripts/activate.ps1` on Windows
 - `cd docs`
 - `make html`
 

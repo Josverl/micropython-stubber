@@ -174,7 +174,7 @@ This glossary defines common terms used throughout the MicroPython Stubber docum
 
 (pyprojecttoml)=
 **pyproject.toml**
-: A configuration file used by modern Python tools including Poetry for project metadata and dependencies.
+: A configuration file used by modern Python tools including uv and hatchling for project metadata and dependencies.
 
 (pylint)=
 **Pylint**

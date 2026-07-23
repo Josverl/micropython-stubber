@@ -18,7 +18,9 @@ def test_package_versions_are_in_sync():
     # Q&D Location
     path = Path(__file__).resolve().parents[1] / "pyproject.toml"
     pyproject = tomllib.loads(open(str(path)).read())
-    pyproject_version = pyproject["tool"]["poetry"]["version"]
+    # version is dynamic (hatchling reads it from stubber.__version__);
+    # the bump-my-version config tracks the same value across all managed files.
+    pyproject_version = pyproject["tool"]["bumpversion"]["current_version"]
 
     package_init_version = stubber.__version__
 

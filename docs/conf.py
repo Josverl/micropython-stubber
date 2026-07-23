@@ -13,23 +13,23 @@
 import sys
 from pathlib import Path
 
-try:
-    import tomllib  # type: ignore
-except ModuleNotFoundError:
-    import tomli as tomllib  # type: ignore
-
 src_path = str(Path("..") / "src" / "micropython-stubber")
 if src_path not in sys.path:
     sys.path.append(src_path)
 
-# from stubber.version import __version__ as MODULE_VERSION
+# Read the version from the installed package metadata, falling back to the
+# __version__ defined in the package source (single source of truth).
+try:
+    from importlib.metadata import version as _pkg_version
 
-# Q&D Location
-path = Path(__file__).resolve().parents[1] / "pyproject.toml"
-with open(path) as f:
-    pyproject = tomllib.loads(f.read())
-
-MODULE_VERSION = pyproject["tool"]["poetry"]["version"]
+    MODULE_VERSION = _pkg_version("micropython-stubber")
+except Exception:
+    init_path = Path(__file__).resolve().parents[1] / "src" / "stubber" / "__init__.py"
+    MODULE_VERSION = "0.0.0"
+    for line in init_path.read_text().splitlines():
+        if line.startswith("__version__"):
+            MODULE_VERSION = line.split("=", 1)[1].strip().strip('"').strip("'")
+            break
 
 # -- Project information -----------------------------------------------------
 

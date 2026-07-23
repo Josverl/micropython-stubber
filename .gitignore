@@ -49,7 +49,7 @@ scripts/bulk_stubber.json
 **/modulelist.db
 **/modulelist.done
 
-# no poetry packaging 
+# build / packaging output
 dist/
 
 # code modding output saved for tests / comparison

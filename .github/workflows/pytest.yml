@@ -19,7 +19,7 @@ on:
             - "src/stubber/**"
             - "tests/**"
             - "**/pyproject.toml"
-            - "**/poetry.lock"
+            - "**/uv.lock"
 
 env:
     PYTHONIOENCODING: utf-8
@@ -49,42 +49,41 @@ jobs:
                   # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
             #----------------------------------------------
-            # poetry is not in the default image
+            # uv is not in the default image
             #----------------------------------------------
-            - name: Install poetry
-              run: pipx install poetry==2.1
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
 
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
-                  #   cache: "poetry"
 
             #----------------------------------------------
             # install project
             #----------------------------------------------
             - name: Install test dependencies
               run: |
-                  poetry install --with test
+                  uv sync --group test
                   # use the latest source version of mpflash
 
             # - name: update mpflash to beta for testing
             #   if: ${{ matrix.mpflash-version == 'beta' }}
             #   run: |
-            #       # use poetry's environmnt
-            #       poetry run pip uninstall mpflash -y
-            #       poetry run pip install src/mpflash
+            #       # use uv's environment
+            #       uv run pip uninstall mpflash -y
+            #       uv run pip install src/mpflash
 
             #----------------------------------------------
             # stubber clone
             # repos needed for tests
             #----------------------------------------------
             - name: stubber clone
-              run: poetry run stubber clone --add-stubs
+              run: uv run stubber clone --add-stubs
 
             - name: Test stubber
               run: |
-                  poetry run pytest --cov --cov-branch --cov-report=xml
+                  uv run pytest --cov --cov-branch --cov-report=xml
             #----------------------------------------------
             # upload coverage stats
             # .XML  to Codecov
@@ -94,7 +93,7 @@ jobs:
               if: always()
               continue-on-error: true
               run: |
-                  poetry run coverage xml -o results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
+                  uv run coverage xml -o results/coverage-stubber-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
             - name: Upload coverage-stubber-*.xml to Codecov
               if: always() # ignore errors
