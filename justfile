@@ -16,6 +16,8 @@ default:
 # init the development environment
 init:
     uv sync --group dev --group test
+    uv run stubber clone --add-stubs
+    uv run stubber switch stable
 
 
 # update the dependencies
