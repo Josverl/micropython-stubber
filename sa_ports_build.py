@@ -1,19 +1,30 @@
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#   "mpbuild@git+https://github.com/josverl/mpbuild@build_sa_ports",
+#   "mpflash",
+#   "click"
+# ]
+# ///
+# requires MPBuild PR70 to build webassemby and windows versions using mpbuild
+
 from __future__ import annotations
 
 from pathlib import Path
 
+import click
 import mpbuild.build as mpb  # type: ignore
 import mpflash.basicgit as git
 from mpbuild.board_database import Board, Database  # type: ignore
 from mpflash.config import config as mpflash_config
 from mpflash.custom import add_custom_firmware
 from mpflash.versions import get_preview_mp_version, get_stable_mp_version
-from typing_extensions import Tuple
+import mpflash.db.core  # noqa: F401  # initializes the peewee database connection
 
-# Save the firmwares in the windows /downloads/firmware folder
-mpflash_config.firmware_folder = Path("/mnt/c/Users/josverl/Downloads/firmware")
+ROOT = Path("~/combo/micropython-stubs").expanduser().resolve()
 
-def copy_firmware(board: Board, variant: str | None, version: str, build: str, mpy_dir: Path, fw_path: Path):
+
+def copy_firmware(board: Board, variant: str | None, version: str, build: str, mpy_dir: Path, fw_path: Path, register: bool = True):
     """Copy the built firmware to the destination directory."""
     # find the build directory
     if board.physical_board:
@@ -33,34 +44,52 @@ def copy_firmware(board: Board, variant: str | None, version: str, build: str, m
     # create the destination directory
     if board.port.name in {"unix", "windows"}:
         # just a single file
-        add_custom_firmware(
-            fw_path=build_dir / fw_name,
-            force=True,
-            description="Stand Alone build using mpbuild",
-            custom=True,
-        )
+        if register:
+            add_custom_firmware(
+                fw_path=build_dir / fw_name,
+                force=True,
+                description="Stand Alone build using mpbuild",
+                custom=True,
+            )
     elif board.port.name == "webassembly":
         # all webassembly binaries need to be in a single folder
         # Create a zip file with the firmware files
+        import shutil
+        import zipfile
+
         zip_name = f"{board.name}-{variant}-{version}"
         zip_path = build_dir / zip_name
         # Create a zip file with only the micropython.mjs and micropython.wasm files
-        import zipfile
-
         with zipfile.ZipFile(zip_path.with_suffix(".zip"), "w") as zf:
             for pattern in ["micropython.mjs", "micropython.wasm"]:
                 for file in build_dir.glob(pattern):
                     zf.write(file, arcname=file.name)
-        add_custom_firmware(
-            fw_path=zip_path.with_suffix(".zip"),
-            force=True,
-            description="Built using mpbuild",
-            custom=True,
-        )
+        # copy the zip to the destination fw_path
+        fw_path.mkdir(parents=True, exist_ok=True)
+        dest_zip = fw_path / zip_path.with_suffix(".zip").name
+        shutil.copy2(zip_path.with_suffix(".zip"), dest_zip)
+        # add to mpflash list of custom firmwares using the build-dir path so
+        # port_and_boardid_from_path can extract port/board_id via the
+        # "/ports/{port}/build-{board_id}/" pattern in the path
+        if register:
+            add_custom_firmware(
+                fw_path=zip_path.with_suffix(".zip"),
+                force=True,
+                description="Built using mpbuild",
+                custom=True,
+            )
 
 
-def build_sa_port(build: Tuple, version: str, mpy_dir: Path, fw_path: Path):
-    """Build a single port for a stand alone board."""
+def build_sa_port(
+    port: str,
+    version: str,
+    mpy_dir: Path,
+    fw_path: Path,
+    variant: str | None = None,
+    extras: list[str] | None = None,
+    register: bool = True,
+):
+    """Build a single stand-alone port."""
     print("=" * 60)
     build_nr = ""
     if "preview" in version:
@@ -83,76 +112,83 @@ def build_sa_port(build: Tuple, version: str, mpy_dir: Path, fw_path: Path):
     print(f"Building {version}, build {build_nr}")
     print("=" * 60)
 
-    if len(build) == 1:
-        board, variant, extras = build[0], None, []
-    elif len(build) == 2:
-        board, variant, extras = build[0], build[1], []
-    else:
-        board, variant, extras = build
-        if isinstance(extras, str):
-            extras = extras.split(" ")
-
-    if board not in db.boards.keys():
-        print(f"Board '{board}' not found for version '{version}'")
+    if port not in db.boards.keys():
+        print(f"Board '{port}' not found for version '{version}'")
         return False
 
-    # resolve boardname
-    _board = db.boards[board]
-
-    if variant == "":
+    _board = db.boards[port]
+    if not variant:
         variant = None
 
     try:
         mpb.clean_board(board=_board.name, variant=variant, mpy_dir=str(mpy_dir))
-        mpb.build_board(board=_board.name, variant=variant, mpy_dir=mpy_dir, extra_args=extras)
+        mpb.build_board(board=_board.name, variant=variant, mpy_dir=mpy_dir, extra_args=extras or [])
     except SystemExit as e:
-        print(f"Failed to build {board} {variant} {version}: {e}")
+        print(f"Failed to build {port} {variant} {version}: {e}")
         return False
-
-    copy_firmware(fw_path=fw_path, board=_board, variant=variant, version=version, build=build_nr, mpy_dir=mpy_dir)
+    # for unix ports - mark the firmware as executable
+    if _board.port.name in {"unix"}:
+        for fw_file in fw_path.glob("micropython*"):
+            fw_file.chmod(fw_file.stat().st_mode | 0o111)
+    copy_firmware(fw_path=fw_path, board=_board, variant=variant, version=version, build=build_nr, mpy_dir=mpy_dir, register=register)
     return True
 
 
-def main():
-    mpy_dir = Path("./repos/micropython").resolve().absolute()
-    assert mpy_dir.exists()
-
-    builds = [
-        # ( port , [variant], [extra args])
-        # ("unix", "standard"),
-        # ("windows", "standard"),
-        ("windows", "dev"),
-        # ("webassembly", "standard"),
-        # ("webassembly", "pyscript"),
-        # ("webassembly", "pyscript", 'JSFLAGS+="-s NODERAWFS=1"'),
-    ]
-
-    versions = [
-        # "v1.23.0",
-        # "v1.24.0",
-        # "v1.24.1",
-        # "v1.25.0",
-        # "v1.26.0",
-        # "v1.26.1",
-        get_stable_mp_version(),
-        get_preview_mp_version(),
-    ]
-    # TODO: Use the same path as mpflash
-    fw_path = Path("./firmware")
-
-    for version in versions:
-        for build in builds:
-            success = build_sa_port(
-                build=build,
-                version=version,
-                mpy_dir=mpy_dir,
-                fw_path=fw_path,
-            )
-            if not success:
-                print(f"Build failed for {build} {version}")
+# Default variant per port — webassembly uses 'pyscript', everything else 'standard'
+_PORT_DEFAULT_VARIANT: dict[str, str] = {
+    "webassembly": "pyscript",
+}
 
 
-# requires MPBuild PR70 to build webassemby and windows versions using mpbuild
-# https://github.com/mattytrentini/mpbuild/pull/70
+@click.command()
+@click.argument("port")
+@click.option(
+    "--variant",
+    "-v",
+    default=None,
+    show_default=True,
+    help="Build variant (default: 'pyscript' for webassembly, 'standard' for all other ports).",
+)
+@click.option("--version", default=None, help="MicroPython version tag (default: stable).")
+@click.option("--extra", "-e", default="", show_default=True, help="Extra build arguments.")
+@click.option("--fw-path", default="./firmware", show_default=True, type=click.Path(), help="Destination folder for firmware files.")
+@click.option("--register/--no-register", default=True, show_default=True, help="Register the firmware with mpflash after building.")
+def main(port: str, variant: str | None, version: str | None, extra: str, fw_path: str, register: bool):
+    """Build a stand-alone MicroPython binary for PORT and register it with mpflash."""
+    # mpflash resolves firmware_folder from MPFLASH_FIRMWARE env var or platform default.
+    # Set MPFLASH_FIRMWARE in your shell to override (e.g. on WSL pointing to Windows Downloads).
+    print(f"Firmware folder: {mpflash_config.firmware_folder}")
+
+    # Apply per-port variant default when the user didn't specify one
+    if variant is None:
+        variant = _PORT_DEFAULT_VARIANT.get(port, "standard")
+    print(f"Using variant: {variant}")
+
+    if version is None or version == "stable":
+        version = get_stable_mp_version()
+        print(f"Using stable version: {version}")
+    elif version == "preview":
+        version = get_preview_mp_version()
+        print(f"Using preview version: {version}")
+
+    mpy_dir = ROOT / "repos/micropython"
+    mpy_dir = mpy_dir.resolve().absolute()
+    assert mpy_dir.exists(), f"Micropython repo not found in {mpy_dir}"
+
+    extras = extra.split() if extra else []
+
+    success = build_sa_port(
+        port=port,
+        version=version,
+        mpy_dir=mpy_dir,
+        fw_path=Path(fw_path),
+        variant=variant or None,
+        extras=extras,
+        register=register,
+    )
+    if not success:
+        raise SystemExit(1)
+
+
 if __name__ == "__main__":
     main()
