@@ -75,7 +75,13 @@ def test_board_candidates(family: str, versions: Union[str, List[str]]):
 )
 def test_merge_candidates(id, source, target, count):
 
+    # Skip when the (possibly live) source data has not been cloned locally.
+    if not Path(source).exists():
+        pytest.skip(f"Source path not available: {source}")
+
     result = merge_candidates(Path(source), Path(target))
-    if id >= 100:
-        pytest.mark.xfail(reason="Test with live data can go wrong")
+    # Tests with id >= 100 run against live data that can change over time;
+    # xfail (instead of hard-failing) when the count does not match.
+    if id >= 100 and len(result) != count:
+        pytest.xfail("Test with live data can go wrong")
     assert len(result) == count
