@@ -85,6 +85,7 @@
     "python.languageServer": "Pylance",
     "ruff.fixAll": false,
     "ruff.lint.enable": false,
-    "python-envs.pythonProjects": [],
-    "esbonio.server.enabled": false
+    "esbonio.server.enabled": false,
+    "python-envs.defaultEnvManager": "ms-python.python:poetry",
+    "python-envs.defaultPackageManager": "ms-python.python:poetry"
 }
