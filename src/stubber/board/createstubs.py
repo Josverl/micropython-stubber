@@ -1262,6 +1262,7 @@ def main():
         "utime",
         "utimeq",
         "uu",
+        "uuid",
         "uwebsocket",
         "uzlib",
         "version",

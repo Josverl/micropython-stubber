@@ -249,6 +249,7 @@ utelnetserver
 utime
 utimeq
 uu
+uuid
 uwebsocket
 uzlib
 version
