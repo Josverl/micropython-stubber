@@ -220,6 +220,73 @@ def test_method_in_class_has_self(stubber_instance, tmp_path):
     assert "async def my_async_method(self, z)" in content
 
 
+def test_classmethod_uses_inspect_for_signature(stubber_instance, tmp_path):
+    """bound_method items (MicroPython classmethods) should use inspect-derived params.
+
+    On MicroPython, classmethods appear as type 'bound_method'.  This test
+    simulates that by naming the mock class 'bound_method' so that
+    `"bound_method" in repr(type(item))` is True — the same condition
+    createstubs.py uses on device.
+
+    Parameter flow:
+      - On MicroPython, inspect.signature(classmethod) returns (x0, x1, x2) where
+        x0 represents cls.  createstubs.py strips x0 and re-adds 'cls'.
+      - Here __call__(self, x_cls, x1, x2) mirrors that: CPython inspect excludes
+        'self', giving (x_cls, x1, x2); createstubs strips x_cls (1st param) and
+        adds 'cls' back → final signature is (cls, x1, x2).
+    """
+
+    class bound_method:
+        """Simulates a MicroPython classmethod (bound_method type)."""
+
+        # CPython inspect excludes 'self' from __call__; the remaining params
+        # (x_cls, x1, x2) mirror MicroPython's (x0, x1, x2) where x0=cls.
+        # createstubs strips the first (x_cls ↔ x0) and prepends 'cls'.
+        def __call__(self, x_cls, x1, x2):
+            return None
+
+    class MockClass:
+        pass
+
+    MockClass.my_classmethod = bound_method()
+
+    mock = _make_mock_module(MockClass=MockClass)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    # Should have @classmethod decorator
+    assert "@classmethod" in content
+    # Should use inspect-derived param names, not *args, **kwargs
+    assert "def my_classmethod(cls, x1, x2)" in content, (
+        "classmethod should have actual params from inspect, got:\n" + content
+    )
+    # cls must not be doubled
+    assert "cls, cls" not in content
+
+
+def test_classmethod_fallback_without_inspect(stubber_instance, tmp_path):
+    """Without inspect, bound_method items should fall back to cls, *args, **kwargs."""
+
+    class bound_method:
+        """Simulates a MicroPython classmethod (bound_method type)."""
+
+        def __call__(self, x_cls, x1, x2):
+            return None
+
+    class MockClass:
+        pass
+
+    MockClass.my_classmethod = bound_method()
+    stubber_instance._use_inspect = False
+
+    mock = _make_mock_module(MockClass=MockClass)
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    # Should still have @classmethod decorator
+    assert "@classmethod" in content
+    # Without inspect, should fall back to *args, **kwargs
+    assert "def my_classmethod(cls, *args, **kwargs)" in content
+
+
 def test_stub_header_has_asyncgenerator_import(createstubs, tmp_path):
     """Generated stub files should import AsyncGenerator from typing."""
     stubber = createstubs.Stubber(path=str(tmp_path), firmware_id="test-fw")
