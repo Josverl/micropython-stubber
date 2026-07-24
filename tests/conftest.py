@@ -2,6 +2,7 @@
 Shared Test Fixtures
 """
 
+import builtins
 import logging
 import os
 import sys
@@ -50,11 +51,16 @@ def mock_pycopy_path(pytestconfig: Config):
     "Add pycopy-CPython, and machine to path  temporarily"
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "pycopy-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
+    original_open = builtins.open
+    modules_before = set(sys.modules.keys())
     if not source_path in sys.path:
         sys.path[1:1] = [source_path, machine_path]
     yield source_path
     sys.path.remove(source_path)
     sys.path.remove(machine_path)
+    builtins.open = original_open
+    for mod in set(sys.modules.keys()) - modules_before:
+        del sys.modules[mod]
     return
 
 
@@ -63,11 +69,16 @@ def mock_micropython_path(pytestconfig: Config):
     "Add micropython-CPython and machine to path  temporarily"
     source_path = str(pytestconfig.rootpath / "tests" / "mocks" / "micropython-cpython_core")
     machine_path = str(pytestconfig.rootpath / "tests" / "mocks" / "machine")
+    original_open = builtins.open
+    modules_before = set(sys.modules.keys())
     if not source_path in sys.path:
         sys.path[1:1] = [source_path, machine_path]
     yield source_path
     sys.path.remove(source_path)
     sys.path.remove(machine_path)
+    builtins.open = original_open
+    for mod in set(sys.modules.keys()) - modules_before:
+        del sys.modules[mod]
     return
 
 

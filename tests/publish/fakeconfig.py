@@ -2,6 +2,8 @@ from dataclasses import InitVar, dataclass
 from pathlib import Path
 from typing import Optional
 
+from stubber.publish.enums import PackageType
+
 
 @dataclass
 class FakeConfig:
@@ -10,6 +12,7 @@ class FakeConfig:
     publish_path: Path = Path(".override/publish")
     stub_path: Path = Path(".override/repos/mpy-stubs/stubs")
     template_path: Path = Path(".override/publish/template")
+    package_type: PackageType = PackageType.POETRY
     # init only variables
     tmp_path: InitVar[Path] = None  # type: ignore
     rootpath: InitVar[Path] = None  # type: ignore
