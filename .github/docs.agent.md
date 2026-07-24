@@ -107,7 +107,6 @@ src/stubber/commands/
     clone_cmd.py      → stubber clone
     switch_cmd.py     → stubber switch
     docstubs_cmd.py   → stubber get-docstubs
-    get_core_cmd.py   → stubber get-core
     get_frozen_cmd.py → stubber get-frozen
     stub_cmd.py       → stubber stub
     enrich_cmd.py     → stubber enrich-folder

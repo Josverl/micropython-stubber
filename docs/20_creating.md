@@ -12,7 +12,6 @@ If you just want to use the stubs, then you can skip this section and instead re
 | Generate doc stubs | `stubber docstubs` | `docs-stubs`, `docs`, `get-docstubs` | Create {ref}`doc stubs <doc-stubs>` from documentation |
 | Generate frozen stubs | `stubber frozen` | `frozen-stubs`, `get-frozen`, `get-frozen-stubs` | Create {ref}`frozen stubs <frozen-stubs>` from frozen modules |
 | Generate firmware stubs | `stubber firmware-stubs` | `firmware`, `mcu-stubs`, `mcu`, `get-mcu-stubs` | Create {ref}`firmware stubs <mcu-stubs>` (formerly MCU stubs; stored stub source name remains "MCU stubs" for compatibility) from connected device |
-| Get core stubs | `stubber get-core` | - | Download {ref}`CPython <cpython>` compatibility stubs |
 | Build packages | `stubber build` | - | Build stub packages for distribution |
 | Publish packages | `stubber publish-stubs` | - | Publish stubs to repository |
 | Merge stubs | `stubber merge` | - | Combine different stub types |

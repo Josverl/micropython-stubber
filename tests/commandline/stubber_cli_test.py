@@ -199,31 +199,6 @@ def test_cmd_get_frozen(mocker: MockerFixture, tmp_path: Path):
 
 
 ##########################################################################################
-# get-core
-##########################################################################################
-@pytest.mark.mocked
-def test_cmd_get_core(mocker: MockerFixture, tmp_path: Path):
-    # check basic command line sanity check
-    runner = CliRunner()
-    mock = mocker.patch("stubber.get_cpython.get_core", autospec=True)
-    mock_post = mocker.patch("stubber.utils.do_post_processing", autospec=True)
-
-    # fake run
-    result = runner.invoke(stubber.stubber_cli, ["get-core", "--stub-folder", tmp_path.as_posix()])
-    assert result.exit_code == 0
-    # process is called twice
-    assert mock.call_count == 2
-
-    # post is called one
-    mock_post.assert_called_with(
-        [tmp_path / "cpython_core-pycopy", tmp_path / "cpython_core-micropython"],
-        stubgen=True,
-        format=True,
-        autoflake=True,
-    )
-
-
-##########################################################################################
 # get-docstubs
 ##########################################################################################
 @pytest.mark.mocked
