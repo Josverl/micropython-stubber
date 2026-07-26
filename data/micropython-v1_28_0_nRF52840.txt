@@ -1,0 +1,14 @@
+# MicroPython v1.28.0 on 2026-07-19; SuperMini / Nice!Nano / Pro Micro nRF52840 with NRF52840
+
+__main__          ble               io                re
+_asyncio          board             json              select
+_boot             builtins          machine           struct
+array             cmath             math              sys
+asyncio/__init__  collections       micropython       time
+asyncio/core      deflate           music             uasyncio
+asyncio/event     errno             neopixel          ubluepy
+asyncio/funcs     framebuf          nrf               uctypes
+asyncio/lock      gc                os                vfs
+asyncio/stream    hashlib           platform
+binascii          heapq             random
+

@@ -34,7 +34,9 @@ asyncio/lock
 asyncio/stream
 base64
 binascii
+ble
 bluetooth
+board
 breakout_as7262
 breakout_bh1745
 breakout_bme280
@@ -134,6 +136,7 @@ mip/__main__
 motor
 mpu6500
 mpu9250
+music
 neopixel
 network
 nrf
@@ -202,6 +205,7 @@ uasyncio/lock
 uasyncio/stream
 uasyncio/tasks
 ubinascii
+ubluepy
 ubluetooth
 ucollections
 ucryptolib
