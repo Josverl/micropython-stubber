@@ -70,11 +70,15 @@ def read_micropython_lib_commits(filename: str = "data/micropython_tags.csv"):
 
 def sync_submodules(repo: Union[Path, str]) -> bool:
     """
-    make sure any submodules are in sync
+    make sure the submodules that stubber needs are in sync.
+
+    Stubber only needs 'lib/micropython-lib' (frozen modules) and 'lib/arduino-lib'
+    (frozen modules for some arduino boards). Scoping the submodule update to these
+    avoids cloning the many firmware-build-only submodules (CMSIS, psoc-edge, etc.).
     """
     cmds = [
-        ["git", "submodule", "sync", "--quiet"],
-        ["git", "submodule", "update", "--init"],  # revert any changes made through building firmwares
+        ["git", "submodule", "sync", "--quiet", "lib/micropython-lib"],
+        ["git", "submodule", "update", "--init", "lib/micropython-lib"],  # revert any changes made through building firmwares
     ]
     for cmd in cmds:
         if result := git._run_local_git(cmd, repo=repo, expect_stderr=True):
