@@ -10,9 +10,9 @@ import libcst as cst
 from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.merge_config import RM_MERGED, recreate_umodules, remove_modules
-from stubber.publish.candidates import board_candidates, filter_list
+from stubber.publish.candidates import board_candidates, filter_list, frozen_candidates, list_frozen_ports, best_matching_port
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
-from stubber.publish.pathnames import get_base, get_board_path, get_merged_path
+from stubber.publish.pathnames import get_base, get_board_path, get_merged_path, get_frozen_board_path
 from stubber.utils.config import CONFIG
 from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 
@@ -42,6 +42,42 @@ def merge_all_docstubs(
 
     candidates = list(board_candidates(versions=versions, family=family))
     candidates = filter_list(candidates, ports, boards)
+
+    # Track whether we're using frozen candidates (fallback for out-of-tree boards)
+    # and store the original board names to use in the output merged path
+    using_frozen = False
+    original_boards_map = {}  # Maps from generic candidate to original board name
+
+    # Fallback: if no candidates found and a specific board was requested, try with GENERIC frozen stubs
+    # This handles out-of-tree boards (e.g., PROMICRO_NRF52840) that are not in the official
+    # MicroPython repository. Instead of failing, we fall back to GENERIC frozen board stubs for that port.
+    if not candidates and boards and boards != [GENERIC_L]:
+        requested_boards = boards if isinstance(boards, list) else [boards]
+        # Check if any of the requested boards are not GENERIC variants
+        if not all(b.lower() in {g.lower() for g in GENERIC} for b in requested_boards):
+            # Out-of-tree boards may report a port name (e.g. 'nrf52') that is not a real
+            # MicroPython port. Reduce each reported port to the best matching MicroPython
+            # port (e.g. 'nrf52' -> 'nrf') so the GENERIC frozen stubs can be located.
+            frozen_ports = []
+            for p in ports:
+                matched = best_matching_port(p, family=family)
+                if matched and matched != p:
+                    log.warning(f"Port '{p}' is not a known MicroPython port; using best matching port '{matched}' for frozen stubs")
+                    frozen_ports.append(matched)
+                else:
+                    frozen_ports.append(matched or p)
+            log.warning(
+                f"No board-specific frozen stubs found for board(s): {requested_boards}. "
+                f"Falling back to GENERIC frozen board stubs for port(s): {frozen_ports}"
+            )
+            # Retry with GENERIC frozen stubs for the same port and version
+            candidates = list(frozen_candidates(versions=versions, family=family, ports=frozen_ports, boards=GENERIC_L))
+            candidates = filter_list(candidates, frozen_ports, [GENERIC_L])
+            # Map each candidate to the original board name so we can use it in the output path
+            for candidate in candidates:
+                original_boards_map[id(candidate)] = requested_boards[0] if requested_boards else GENERIC_L
+            using_frozen = True
+
     if not candidates:
         log.error("No candidates found")
         return
@@ -49,26 +85,43 @@ def merge_all_docstubs(
     log.info(f"checking {len(candidates)} possible board candidates")
     merged = 0
     for candidate in candidates:
+        # For frozen fallback, restore the original board name for the output merged path
+        original_board = original_boards_map.get(id(candidate))
+        if original_board:
+            candidate_for_path = dict(candidate)  # Copy to avoid modifying original
+            candidate_for_path["board"] = original_board
+            log.debug(f"Using original board name '{original_board}' for merged path (source: GENERIC frozen stubs)")
+        else:
+            candidate_for_path = candidate
+
         # use the default board for the port
         if candidate["board"] in GENERIC:
             candidate["board"] = default_board(port=candidate["port"], version=candidate["version"])
         # check if we have firmware stubs for this version and port
         doc_path = CONFIG.stub_path / f"{get_base(candidate)}-docstubs"
-        # src and dest paths
-        board_path = get_board_path(candidate)
-        merged_path = get_merged_path(candidate)
+        # src and dest paths - use frozen path if using frozen candidates
+        if using_frozen:
+            board_path = get_frozen_board_path(candidate)
+            log.debug(f"Using frozen board path: {board_path}")
+        else:
+            board_path = get_board_path(candidate)
+        # Use candidate_for_path for merged output (preserves original board name)
+        merged_path = get_merged_path(candidate_for_path)
 
         # only continue if both folders exist
         if not doc_path.exists():
             log.warning(f"No docstubs found for {candidate['version']}")
             continue
         if not board_path.exists():
-            log.debug(f"skipping {merged_path.name}, no firmware stubs found in {board_path}")
+            log.warning(f"No firmware stubs found at {board_path} (using_frozen={using_frozen})")
             continue
         log.info(f"Merge {candidate['version']} docstubs with boardstubs to {merged_path.name}")
+        log.debug(f"  from board_path: {board_path}")
+        log.debug(f"  to merged_path: {merged_path}")
         try:
             # TODO : webassembly: Need to merge from reference/pyscript as well
             result = copy_and_merge_docstubs(board_path, merged_path, doc_path, clean=clean)
+            log.debug(f"copy_and_merge_docstubs returned: {result}")
             if candidate["port"] == "webassembly":
                 # TODO : webassembly: Need to merge from reference/pyscript as well
                 # use enrich_folder to merge the docstubs
@@ -83,8 +136,12 @@ def merge_all_docstubs(
         except Exception as e:
             log.error(f"Error parsing {candidate['version']} docstubs: {e}")
             continue
-        if result:
+        # Count as merged if the destination folder was created, regardless of enrichment result
+        if merged_path.exists():
             merged += 1
+            log.debug(f"Successfully merged to {merged_path.name}")
+        else:
+            log.warning(f"Merge failed: destination folder not created at {merged_path}")
     log.info(f"merged {merged} of {len(candidates)} candidates")
     return merged
 

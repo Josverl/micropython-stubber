@@ -95,6 +95,28 @@ def list_micropython_port_boards(
     return list(subfolder_names(boards_path))
 
 
+def best_matching_port(
+    port: str,
+    family: str = "micropython",
+    mpy_path: Path = CONFIG.mpy_path,
+) -> Optional[str]:
+    """
+    Resolve a reported port name to a valid MicroPython port.
+
+    MicroPython ports are defined by the folder names in micropython/ports.
+    Some firmware reports a more specific name (e.g. 'nrf52') than the actual
+    port ('nrf'). If the reported port is not an exact match, return the known
+    port that is the longest prefix of the reported port (e.g. 'nrf52' -> 'nrf').
+    Returns the matched port name, or None if no match is found.
+    """
+    known_ports = list_micropython_ports(family=family, mpy_path=mpy_path)
+    if port in known_ports:
+        return port
+    # find known ports that are a prefix of the reported port and pick the longest
+    prefixes = [p for p in known_ports if port.startswith(p)]
+    return max(prefixes, key=len) if prefixes else None
+
+
 def frozen_candidates(
     family: str = "micropython",
     versions: Union[str, List[str]] = V_PREVIEW,
@@ -227,6 +249,75 @@ def board_candidates(
                         "port": port,
                         "board": board,
                     }
+
+
+def firmware_candidates(
+    family: str = "micropython",
+    versions: Union[str, List[str]] = V_PREVIEW,
+    ports: Union[str, List[str], None] = None,
+    boards: Union[str, List[str], None] = None,
+    *,
+    path: Path = CONFIG.stub_path,
+) -> Generator[Dict[str, Any], None, None]:
+    """
+    Generate a list of firmware stub candidates based on existing stubs in the file system.
+    This finds stubs that have already been generated and stored, including custom/out-of-tree boards.
+    Pattern: {family}-{version}-{port}-{board}
+    Example: micropython-v1_28_0-nrf-PROMICRO_NRF52840
+
+    Parameters:
+    - ports: specific port(s) to search, None to search all ports
+    - boards: specific board(s) to search, None to search all boards
+    """
+    auto_version = is_auto(versions)
+    auto_port = is_auto(ports) or ports is None
+    auto_board = is_auto(boards) or boards is None
+
+    if auto_version:
+        versions = list(version_candidates(suffix="", prefix=family, path=path)) + [V_PREVIEW]
+    else:
+        versions = [versions] if isinstance(versions, str) else versions
+    versions = [clean_version(v, flat=True) for v in versions]
+
+    if isinstance(ports, str):
+        ports = [ports] if not auto_port else None
+    if isinstance(boards, str):
+        boards = [boards] if not auto_board else None
+
+    for version in versions:
+        # Look for folders matching {family}-{version}-{port}-{board}
+        pattern = re.compile(rf"^{re.escape(family)}-{re.escape(version)}-([a-z0-9_]+)-([a-z0-9_]+)$", re.IGNORECASE)
+        for folder in subfolder_names(path):
+            if match := pattern.match(folder):
+                found_port = match.group(1)
+                found_board = match.group(2)
+
+                # Skip merged, docstubs, frozen folders
+                if found_board.endswith("-merged") or folder.endswith("-docstubs") or folder.endswith("-frozen"):
+                    continue
+
+                # Out-of-tree firmware may report a port name (e.g. 'nrf52') that is not a
+                # real MicroPython port. Normalize it to the best matching MicroPython port
+                # ('nrf') so downstream paths (merged/frozen) resolve consistently.
+                resolved_port = best_matching_port(found_port, family=family) or found_port
+
+                # Filter by requested ports (compare on the normalized port so a requested
+                # 'nrf' or 'nrf52' both match a folder stored under 'nrf52')
+                if ports:
+                    requested_ports = [best_matching_port(p, family=family) or p for p in ports]
+                    if resolved_port.lower() not in [p.lower() for p in requested_ports]:
+                        continue
+
+                # Filter by requested boards
+                if boards and found_board.lower() not in [b.lower() for b in boards]:
+                    continue
+
+                yield {
+                    "family": family,
+                    "version": version,
+                    "port": resolved_port,
+                    "board": found_board.upper(),
+                }
 
 
 def filter_list(

@@ -8,6 +8,7 @@ import pytest
 pytestmark = [pytest.mark.stubber]
 from stubber.publish.candidates import (  # DOC_STUBS,; docstub_candidates,
     # COMBO_STUBS,
+    best_matching_port,
     filter_list,
     frozen_candidates,
     subfolder_names,
@@ -173,3 +174,16 @@ def test_filter_list_default_alias_matches_generic_candidate():
     filtered = filter_list(worklist, ports=["rp2"], boards=["DEFAULT"])
     assert len(filtered) == 1
     assert filtered[0]["board"] == "GENERIC"
+
+
+@pytest.mark.parametrize(
+    "port, expected",
+    [
+        ("nrf", "nrf"),  # exact match of a real port
+        ("esp32", "esp32"),  # exact match of a real port
+        ("nrf52", "nrf"),  # out-of-tree port name reduced to best matching prefix
+        ("bogus", None),  # no matching MicroPython port
+    ],
+)
+def test_best_matching_port(port, expected):
+    assert best_matching_port(port) == expected

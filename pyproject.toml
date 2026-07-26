@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
 ]
 dependencies = [
-    "python-minifier>=2.7.0,<3.0.0; python_version < '3.14'",
+    "python-minifier>=2.7.0,<3.0.0",
     "requests>=2.32.3,<3.0.0",
     "mpflash>=1.28.0,<2.0.0",
     "greenlet>=3.2.4,<3.2.5",                              # Constrain to version with pre-built wheels

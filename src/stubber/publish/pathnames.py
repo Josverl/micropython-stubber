@@ -47,5 +47,15 @@ def get_board_path(candidate: Dict) -> Path:
     return board_path
 
 
+def get_frozen_board_path(candidate: Dict) -> Path:
+    """Get path to frozen board stubs (e.g., micropython-v1_28_0-frozen/nrf/GENERIC)"""
+    base = get_base(candidate)
+    version = clean_version(candidate["version"], flat=True)
+    # Frozen stubs use uppercase board names
+    board_upper = candidate["board"].upper()
+    frozen_path = CONFIG.stub_path / f"{candidate['family']}-{version}-frozen" / candidate["port"] / board_upper
+    return frozen_path
+
+
 def get_merged_path(fw: Dict) -> Path:
     return CONFIG.stub_path / (board_folder_name(fw) + "-merged")

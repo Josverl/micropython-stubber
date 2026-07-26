@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Union
 from mpflash.logger import log
 from mpflash.versions import V_PREVIEW
 
-from stubber.publish.candidates import board_candidates, filter_list
+from stubber.publish.candidates import board_candidates, best_matching_port, firmware_candidates, filter_list, is_auto
 from stubber.publish.database import get_database
 from stubber.publish.defaults import DEFAULT_L, GENERIC_L, GENERIC_U
 from stubber.publish.enums import PackageType
@@ -111,14 +111,36 @@ def build_worklist(
         boards = [boards]
     if family != "micropython":
         return []
-    # get all the candidates
+
+    # Correct any out-of-tree port names (e.g. 'nrf52' -> 'nrf') before looking up boards,
+    # so that both the source-tree lookup and the firmware-stub fallback use the real port.
+    if ports and not is_auto(ports):
+        corrected_ports = []
+        for p in ports:
+            matched = best_matching_port(p, family=family)
+            if matched and matched != p:
+                log.warning(f"Port '{p}' is not a known MicroPython port; using best matching port '{matched}'")
+            corrected_ports.append(matched or p)
+        ports = corrected_ports
+
+    # get all the candidates from the micropython source tree
     worklist = list(board_candidates(family=family, versions=versions))
     worklist = filter_list(worklist, ports, boards)
 
-    for b in boards:
-        if b in ["auto", "all", "*"]:
-            continue
+    # Check which requested boards were not found
+    requested_boards = boards if boards else [GENERIC_U]
+    requested_boards = [b for b in requested_boards if b.lower() not in ["auto", "all", "*"]]
+
+    for b in requested_boards:
         board_check = GENERIC_L if b.lower() == DEFAULT_L else b.lower()
         if not any(i for i in worklist if i["board"].lower() == board_check):
             log.warning(f"Could not find any package candidate for board {b}")
+
+            # Fallback: Look for firmware stubs that may have been generated for this board
+            # This handles out-of-tree custom boards
+            firmware_worklist = list(firmware_candidates(family=family, versions=versions, ports=ports, boards=[b]))
+            if firmware_worklist:
+                log.info(f"Found existing firmware stubs for custom board {b}, using those for build")
+                worklist.extend(firmware_worklist)
+
     return worklist

@@ -20,6 +20,7 @@ from rich.table import Table
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from stubber import utils
+from stubber.publish.candidates import best_matching_port
 from stubber.publish.merge_docstubs import merge_all_docstubs
 from stubber.publish.pathnames import board_folder_name, get_merged_path
 from stubber.publish.publish import build_multiple
@@ -217,6 +218,16 @@ def generate_board_stubs(
     except FileNotFoundError:
         log.warning("Could not load modules.json, Assuming error in createstubs")
         return ERROR, None
+
+    # Some firmware reports a port name (e.g. 'nrf52') that is not a real MicroPython port.
+    # Correct it to the best matching MicroPython port ('nrf') so all downstream paths
+    # (raw stubs, merged stubs, package) use a consistent, valid port name. Out-of-tree
+    # boards are still handled via the GENERIC frozen fallback during merge.
+    reported_port = mcu.firmware.get("port", "")
+    real_port = best_matching_port(reported_port)
+    if real_port and real_port != reported_port:
+        log.warning(f"Port '{reported_port}' is not a known MicroPython port; using best matching port '{real_port}'")
+        mcu.firmware["port"] = real_port
 
     # check the number of stubs generated
     if len(list(stubs_path.glob("*.p*"))) < 10:

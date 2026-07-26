@@ -40,6 +40,71 @@ def test_merge_all_docstubs_mocked(mocker, tmp_path, pytestconfig):
 
 
 @pytest.mark.mocked
+def test_merge_all_docstubs_fallback_to_generic(mocker, tmp_path, pytestconfig):
+    """Test fallback to GENERIC frozen board when board-specific stubs are not found"""
+    # use the test config
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
+    mocker.patch("stubber.publish.merge_docstubs.CONFIG", config)
+
+    # First call (board_candidates): returns no candidates for the specific board
+    m_board_candidates: MagicMock = mocker.patch(
+        "stubber.publish.merge_docstubs.board_candidates",
+        autospec=True,
+        return_value=[],
+    )
+
+    # Second call (frozen_candidates): returns generic frozen candidates
+    m_frozen_candidates: MagicMock = mocker.patch(
+        "stubber.publish.merge_docstubs.frozen_candidates",
+        autospec=True,
+        return_value=[
+            {"family": "micropython", "version": "1.19.1", "port": "nrf", "board": "generic"},
+        ],
+    )
+
+    m_filter_list: MagicMock = mocker.patch(
+        "stubber.publish.merge_docstubs.filter_list",
+        autospec=True,
+        side_effect=[[], [{"family": "micropython", "version": "1.19.1", "port": "nrf", "board": "generic"}]],
+    )
+
+    m_copy_and_merge_docstubs: MagicMock = mocker.patch("stubber.publish.merge_docstubs.copy_and_merge_docstubs", autospec=True)
+    m_log_warning = mocker.patch("stubber.publish.merge_docstubs.log.warning", autospec=True)
+
+    # mock pathlib.Path.exists to return True so there is no dependency of folders existing on the test system
+    mocker.patch("stubber.publish.merge_docstubs.Path.exists", autospec=True, return_value=True)
+
+    # mock get_frozen_board_path to return a proper path
+    def mock_get_frozen_board_path(candidate):
+        return config.stub_path / f"micropython-{candidate['version']}-frozen" / candidate["port"] / candidate["board"].upper()
+
+    mocker.patch("stubber.publish.merge_docstubs.get_frozen_board_path", side_effect=mock_get_frozen_board_path)
+
+    # Call with a specific board that's not in the candidates
+    result = merge_all_docstubs(versions="1.19.1", ports="nrf", boards="PROMICRO_NRF52840")
+
+    # Should have called board_candidates once (initial attempt)
+    assert m_board_candidates.call_count == 1
+
+    # Should have called frozen_candidates once (fallback)
+    assert m_frozen_candidates.call_count == 1
+
+    # Should have called filter_list twice
+    assert m_filter_list.call_count == 2
+
+    # Should have logged a warning about falling back
+    m_log_warning.assert_called_once()
+    warning_msg = m_log_warning.call_args[0][0]
+    assert "No board-specific frozen stubs found" in warning_msg
+    assert "PROMICRO_NRF52840" in warning_msg
+    assert "Falling back to GENERIC" in warning_msg
+
+    # Should have merged the generic stubs
+    assert result == 1
+    assert m_copy_and_merge_docstubs.call_count == 1
+
+
+@pytest.mark.mocked
 def test_copydocstubs_mocked(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
     # use the test config
