@@ -25,8 +25,23 @@ def do_post_processing(stub_paths: List[Path], stubgen: bool, format: bool, auto
 
 def format_stubs(path: Path, capture_output: bool = False):
     """
-    run ruff format to format the code / stubs
+    run ruff to sort imports and format the code / stubs
     """
+    # First sort imports (`ruff check --select I --fix`) so the output import order
+    # is deterministic regardless of how the stubs were merged, then format.
+    log.debug("Sorting imports (ruff check --select I --fix) on: {}".format(path))
+    isort_cmd = [
+        sys.executable,
+        "-m",
+        "ruff",
+        "check",
+        "--select",
+        "I",
+        "--fix",
+        path.as_posix(),
+    ]
+    subprocess.run(isort_cmd, capture_output=True, text=True, encoding="utf-8")
+
     log.debug("Running ruff format on: {}".format(path))
     cmd = [
         sys.executable,

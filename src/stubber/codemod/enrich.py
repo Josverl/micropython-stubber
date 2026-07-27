@@ -12,7 +12,7 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
+from typing import Any, Dict, List, Optional, Tuple, Union  # noqa: UP035
 
 from diskcache import Cache
 from libcst import ParserSyntaxError
@@ -116,29 +116,31 @@ def _get_enrich_cache() -> Cache:
 
 
 def _enrich_cache_key(
-    source_text: str,
+    source_texts: List[str],
     target_text: str,
     module_name: str,
     copy_params: bool,
     copy_docstr: bool,
     copy_returns: bool,
 ) -> str:
-    """Build a content-based cache key for a single merge transform."""
+    """Build a content-based cache key for a merge transform (one or more sources)."""
     h = hashlib.sha256()
-    for part in (
+    parts = [
         ENRICH_CACHE_VERSION,
         module_name,
         f"{int(copy_params)}{int(copy_docstr)}{int(copy_returns)}",
-        source_text,
+        str(len(source_texts)),
+        *source_texts,
         target_text,
-    ):
+    ]
+    for part in parts:
         h.update(part.encode("utf-8"))
         h.update(b"\x00")
     return h.hexdigest()
 
 
 def _run_merge_transform(
-    source_path: Path,
+    source_paths: List[Path],
     target_text: str,
     module_name: str,
     filename: str,
@@ -146,12 +148,16 @@ def _run_merge_transform(
     copy_docstr: bool,
     copy_returns: bool,
 ) -> Optional[str]:
-    """Run the (expensive) libcst merge transform and return the new code, or None."""
+    """Run the (expensive) libcst merge transform and return the new code, or None.
+
+    All `source_paths` are merged into the target in a single transform pass, which
+    avoids re-parsing the (potentially large) target once per source doc-stub.
+    """
     config: Dict[str, Any] = _default_config()
     context = CodemodContext(filename=filename, full_module_name=module_name)
     codemod_instance = merge_docstub.MergeCommand(
         context,
-        docstub_file=source_path,
+        docstub_file=source_paths,
         copy_params=copy_params,
         copy_docstr=copy_docstr,
         copy_returns=copy_returns,
@@ -169,7 +175,7 @@ def _run_merge_transform(
 
 
 def _cached_merge_transform(
-    source_path: Path,
+    source_paths: List[Path],
     target_text: str,
     module_name: str,
     filename: str,
@@ -179,24 +185,20 @@ def _cached_merge_transform(
 ) -> Optional[str]:
     """Run `_run_merge_transform`, transparently caching the result on disk."""
     if not ENRICH_CACHE_ENABLED:
-        return _run_merge_transform(
-            source_path, target_text, module_name, filename, copy_params, copy_docstr, copy_returns
-        )
+        return _run_merge_transform(source_paths, target_text, module_name, filename, copy_params, copy_docstr, copy_returns)
 
     # Mask per-board volatile lines so stubs that differ only in those lines hit
     # the same cache entry; the transform runs on (and caches) the masked text.
     masked_target, restore = _mask_volatile(target_text)
-    source_text = source_path.read_text(encoding="utf-8")
-    key = _enrich_cache_key(source_text, masked_target, module_name, copy_params, copy_docstr, copy_returns)
+    source_texts = [p.read_text(encoding="utf-8") for p in source_paths]
+    key = _enrich_cache_key(source_texts, masked_target, module_name, copy_params, copy_docstr, copy_returns)
     cache = _get_enrich_cache()
     cached = cache.get(key, default=None)
     if cached is not None:
         log.trace(f"enrich cache hit for {filename}")
         return None if cached == _NO_CHANGE else _restore_volatile(str(cached), restore)
 
-    new_code = _run_merge_transform(
-        source_path, masked_target, module_name, filename, copy_params, copy_docstr, copy_returns
-    )
+    new_code = _run_merge_transform(source_paths, masked_target, module_name, filename, copy_params, copy_docstr, copy_returns)
     cache.set(key, new_code if new_code is not None else _NO_CHANGE)
     return _restore_volatile(new_code, restore) if new_code is not None else None
 
@@ -351,7 +353,7 @@ def source_target_candidates(
 
 #########################################################################################
 def enrich_file(
-    source_path: Path,
+    source_path: Union[Path, List[Path]],
     target_path: Path,
     diff: bool = False,
     write_back: bool = False,
@@ -367,25 +369,29 @@ def enrich_file(
     Any matching of source and target files should be done before calling this function.
 
     Parameters:
-        source_path: the  path to the firmware stub-file to enrich
-        docstub_path: the path to the file  containing the doc-stubs
+        source_path: the path (or list of paths) to the doc-stub file(s) to enrich from.
+            When several paths are given they are merged into the target in a single pass.
+        target_path: the path to the firmware stub-file to enrich
         diff: if True, return the diff between the original and the enriched source file
         write_back: if True, write the enriched source file back to the source_path
 
     Returns:
     - None or a string containing the diff between the original and the enriched source file
     """
+    source_paths = [source_path] if isinstance(source_path, Path) else list(source_path)
 
-    if not source_path.exists() or not target_path.exists():
+    if not source_paths or not target_path.exists():
         raise FileNotFoundError("Source or target file not found")
-    if not source_path.is_file() or not target_path.is_file():
+    if not all(p.exists() for p in source_paths):
+        raise FileNotFoundError("Source or target file not found")
+    if not all(p.is_file() for p in source_paths) or not target_path.is_file():
         raise FileNotFoundError("Source or target is not a file")
     log.info(f"Enriching file: {target_path}")
     # read target file
     old_code = current_code = target_path.read_text(encoding="utf-8")
-    # apply a single codemod to the target file (transparently cached on disk)
+    # apply the codemod to the target file (transparently cached on disk)
     new_code = _cached_merge_transform(
-        source_path,
+        source_paths,
         current_code,
         module_name=package_from_path(target_path),
         filename=target_path.as_posix(),
@@ -475,18 +481,25 @@ def enrich_folder(
     count = 0
 
     candidates = source_target_candidates(source_folder, target_folder, ext)
-    # sort by target_path , to show diffs
-    candidates = sorted(candidates, key=lambda m: m.target)
 
-    # for target in target_files:
+    # Group all matching doc-stubs per target so each (potentially large) target is
+    # parsed and transformed only once, merging all its sources in a single pass.
+    # This avoids re-parsing e.g. machine.pyi once per machine/*.pyi doc-stub.
+    sources_by_target: Dict[Path, List[Path]] = {}
     for mm in candidates:
+        sources_by_target.setdefault(mm.target, []).append(mm.source)
+
+    # sort by target (stable diffs) and sources per target (stable cache keys)
+    for target in sorted(sources_by_target):
+        sources = sorted(sources_by_target[target])
         try:
-            log.debug(f"Enriching {mm.target}")
-            log.debug(f"     from {mm.source}")
+            log.debug(f"Enriching {target}")
+            for s in sources:
+                log.debug(f"     from {s}")
             if diff := list(
                 enrich_file(
-                    mm.source,
-                    mm.target,
+                    sources,
+                    target,
                     diff=True,
                     write_back=write_back,
                     # package_name=mm.target_pkg,
@@ -502,9 +515,9 @@ def enrich_folder(
         except FileNotFoundError as e:
             # no docstub to enrich with
             if require_docstub:
-                raise (FileNotFoundError(f"No doc-stub or source  file found for {mm.target}")) from e
+                raise (FileNotFoundError(f"No doc-stub or source  file found for {target}")) from e
         except (Exception, ParserSyntaxError) as e:
-            log.error(f"Error parsing {mm.target}")
+            log.error(f"Error parsing {target}")
             log.exception(e)
             continue
 

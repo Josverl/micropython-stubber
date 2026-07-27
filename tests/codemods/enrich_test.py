@@ -87,7 +87,8 @@ def test_enrich_folder(
         show_diff=False,
         write_back=False,
     )
-    assert count >= expected_count, f"Expected at least {expected_count} files to be enriched but found {count}"
     m_format_stubs.assert_called_once()
-    m_enrich_file.call_count >= expected_count
-    assert m_enrich_file.call_count >= expected_count
+    # enrich_file is now called once per target, merging all matching doc-stubs in a
+    # single pass. Count the total number of doc-stubs merged across all calls.
+    total_sources = sum(len(call.args[0]) for call in m_enrich_file.call_args_list)
+    assert total_sources >= expected_count, f"Expected at least {expected_count} doc-stubs to be merged but found {total_sources}"

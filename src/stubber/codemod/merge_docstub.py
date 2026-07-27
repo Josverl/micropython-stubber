@@ -12,7 +12,7 @@ Merge documentation and type information
 
 import argparse
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import libcst as cst
 import libcst.matchers as m
@@ -79,6 +79,19 @@ def is_empty_mp_available_call(dec: cst.CSTNode) -> bool:
     return False
 
 
+def _typehelper_name(node: cst.CSTNode) -> Optional[str]:
+    """Return the simple target name of a type-helper assignment, or None.
+
+    Used to de-duplicate type-helpers (TypeVars, TypeAliases, constants) when
+    merging several doc-stubs into a single transform pass.
+    """
+    if isinstance(node, cst.AnnAssign) and isinstance(node.target, cst.Name):
+        return node.target.value
+    if isinstance(node, cst.Assign) and len(node.targets) == 1 and isinstance(node.targets[0].target, cst.Name):
+        return node.targets[0].target.value
+    return None
+
+
 class MergeCommand(VisitorBasedCodemodCommand):
     """
     A libcst transformer that merges the type-rich information from a doc-stub into
@@ -132,59 +145,84 @@ class MergeCommand(VisitorBasedCodemodCommand):
     def __init__(
         self,
         context: CodemodContext,
-        docstub_file: Union[Path, str],
+        docstub_file: Union[Path, str, Sequence[Union[Path, str]]],
         copy_params: bool = False,
         copy_docstr: bool = True,
         copy_returns: bool = False,
     ) -> None:
-        """initialize the base class with context, and save our args."""
+        """initialize the base class with context, and save our args.
+
+        `docstub_file` may be a single doc-stub path or a sequence of paths. When
+        several paths are given their annotations, imports and type-helpers are
+        collected and merged, so a single transform pass can enrich the target with
+        the information from all of them. This avoids re-parsing a large target file
+        once per doc-stub (e.g. machine.pyi enriched from ~23 machine/*.pyi files).
+        """
         super().__init__(context)
         self.replace_functiondef_with_classdef = True
         # stack for storing the canonical name of the current function/method
         self.stack: List[str] = []
-        # stubfile is the path to the doc-stub file
-        self.docstub_path = Path(docstub_file)
-        # read the stub file from the path
-        self.docstub_source = self.docstub_path.read_text(encoding="utf-8")
-        # store the annotations
+        # normalize to a list of doc-stub paths
+        if isinstance(docstub_file, (str, Path)):
+            self.docstub_paths: List[Path] = [Path(docstub_file)]
+        else:
+            self.docstub_paths = [Path(p) for p in docstub_file]
+        # keep the first path for backwards-compatible references / log messages
+        self.docstub_path = self.docstub_paths[0] if self.docstub_paths else None
+
+        self.copy_params = copy_params
+        self.copy_docstr = copy_docstr
+        self.copy_returns = copy_returns
+
+        # store the (merged) annotations
         self.annotations: Dict[
             Tuple[str, ...],  # key: tuple of canonical class/function name
             AnnoValue,
             # Union[TypeInfo, str, List[TypeInfo]],  # value: TypeInfo
         ] = {}
         self.comments: List[str] = []
-
-        self.copy_params = copy_params
-        self.copy_docstr = copy_docstr
-        self.copy_returns = copy_returns
-
         self.stub_imports: Dict[str, ImportItem] = {}
         self.all_imports: List[Union[cst.Import, cst.ImportFrom]] = []
         self.type_helpers = {}
-        # parse the doc-stub file
-        if self.docstub_source:
+
+        # collect and merge the type information from each doc-stub file
+        for docstub_path in self.docstub_paths:
+            docstub_source = docstub_path.read_text(encoding="utf-8")
+            if not docstub_source:
+                continue
             try:
                 # parse the doc-stub file
-                stub_tree = cst.parse_module(self.docstub_source)
+                stub_tree = cst.parse_module(docstub_source)
             except cst.ParserSyntaxError as e:
-                log.error(f"Error parsing {self.docstub_path}: {e}")
-                raise ValueError(f"Error parsing {self.docstub_path}: {e}") from e
-            # create the collectors
+                log.error(f"Error parsing {docstub_path}: {e}")
+                raise ValueError(f"Error parsing {docstub_path}: {e}") from e
+            # create fresh collectors for each doc-stub file
             typing_collector = StubTypingCollector()
             import_collector = GatherImportsVisitor(context)
             typevar_collector = GatherTypeHelpers(context)
-            # visit the source / doc-stub file with all collectors
+            # visit the doc-stub file with all collectors
             stub_tree.visit(typing_collector)
-            self.annotations = typing_collector.annotations
-            self.comments = typing_collector.comments
-            # Store the imports that were added to the source / doc-stub file
             stub_tree.visit(import_collector)
-            self.stub_imports = import_collector.symbol_mapping
-            self.all_imports = import_collector.all_imports
-            # Get typevars, type aliasses and ParamSpecs
             stub_tree.visit(typevar_collector)
-            self.type_helpers = typevar_collector.all_typehelpers
-            pass
+            # merge the collected information (later files win on key conflicts)
+            self.annotations.update(typing_collector.annotations)
+            self.comments.extend(typing_collector.comments)
+            self.stub_imports.update(import_collector.symbol_mapping)
+            self.all_imports.extend(import_collector.all_imports)
+            # Type-helpers are keyed by scope (e.g. `()` for module level), so many
+            # doc-stubs contribute to the same key. Extend (do not overwrite) the
+            # per-scope buckets, de-duplicating by target name - this matches the
+            # incremental behaviour where each helper was added at most once.
+            for scope, helpers in typevar_collector.all_typehelpers.items():
+                bucket = self.type_helpers.setdefault(scope, [])
+                seen = {n for n in (_typehelper_name(h) for h in bucket) if n}
+                for helper in helpers:
+                    name = _typehelper_name(helper)
+                    if name and name in seen:
+                        continue
+                    bucket.append(helper)
+                    if name:
+                        seen.add(name)
 
     # ------------------------------------------------------------------------
 
