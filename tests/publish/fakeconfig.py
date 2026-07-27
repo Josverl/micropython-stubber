@@ -12,7 +12,7 @@ class FakeConfig:
     publish_path: Path = Path(".override/publish")
     stub_path: Path = Path(".override/repos/mpy-stubs/stubs")
     template_path: Path = Path(".override/publish/template")
-    package_type: PackageType = PackageType.POETRY
+    package_type: PackageType = PackageType.HATCH
     # init only variables
     tmp_path: InitVar[Path] = None  # type: ignore
     rootpath: InitVar[Path] = None  # type: ignore

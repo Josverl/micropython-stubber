@@ -91,9 +91,9 @@ class StubberConfig(Config):
         key_name="package-type",
         cast=PackageType,
         required=False,
-        default=PackageType.POETRY,
+        default=PackageType.HATCH,
     )
-    "default package build tool to use when building/publishing stubs (poetry or hatch)"
+    "default package build tool to use when building/publishing stubs (hatch or poetry)"
 
     BLOCKED_PORTS = ["minimal", "bare-arm"]
     "ports that should be ignored as a source of stubs"

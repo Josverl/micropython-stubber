@@ -537,10 +537,16 @@ class Builder(VersionedPackage):
             stored_type = json_data["package_type"]
         except (KeyError, IndexError):
             stored_type = None
-        if stored_type:
+        # Hatch is the default going forward. Never convert a package that is
+        # already hatch on disk back to poetry, even when the stored DB value is
+        # still 'poetry' (there is never a need to go from hatch back to poetry).
+        inferred_type = self._infer_package_type()
+        if inferred_type == PackageType.HATCH:
+            self.package_type = PackageType.HATCH
+        elif stored_type:
             self.package_type = PackageType(stored_type)
         else:
-            self.package_type = self._infer_package_type()
+            self.package_type = inferred_type
 
         # create folder
         if not self.package_path.exists():
@@ -882,6 +888,9 @@ class HatchBuilder(Builder):
     ``[tool.hatch.build.targets.wheel] include``.
     """
 
+    # Shared glob include list used for both the wheel and sdist build targets.
+    STUB_INCLUDE_GLOBS = ["*.pyi", "**/*.pyi", "README.md", "LICENSE.md", "pyproject.toml"]
+
     def __init__(
         self,
         package_name: str,
@@ -936,11 +945,11 @@ class HatchBuilder(Builder):
     # -----------------------------------------------
 
     def hatch_build(self) -> bool:
-        """Build the package by running ``hatch build``."""
+        """Build the package by running ``uv build`` (using the hatchling backend)."""
         return self.run_hatch(["build"])
 
     def hatch_publish(self, production: bool = False) -> bool:
-        """Publish the package to PyPI or Test-PyPI using ``hatch publish``."""
+        """Publish the package to PyPI or Test-PyPI using ``uv publish``."""
         if not self._publish:
             log.warning(f"Publishing is disabled for {self.package_name}")
             return False
@@ -950,27 +959,31 @@ class HatchBuilder(Builder):
             params = ["publish"]
         else:
             log.debug("Publishing to TEST-PyPI https://test.pypi.org")
-            params = ["publish", "-r", "test"]
+            params = ["publish", "--publish-url", "https://test.pypi.org/legacy/"]
         r = self.run_hatch(params)
         print("")  # add a newline after the output
         return r
 
     def run_hatch(self, parameters: List[str]) -> bool:
-        """Run a hatch command-line in the package folder."""
+        """Run a ``uv`` command-line (build/publish) in the package folder.
+
+        The hatchling backend is declared in each package's ``pyproject.toml``; ``uv``
+        drives the actual build/publish so no separate ``hatch`` executable is required.
+        """
         if not (self.package_path / "pyproject.toml").exists():  # pragma: no cover
             log.error(f"No pyproject.toml file found in {self.package_path}")
             return False
         try:
-            log.debug(f"hatch {parameters} starting")
+            log.debug(f"uv {parameters} starting")
             subprocess.run(
-                ["hatch"] + parameters,
+                ["uv"] + parameters,
                 cwd=self.package_path,
                 check=True,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
                 encoding="utf-8",
             )
-            log.trace(f"hatch {parameters} completed")
+            log.trace(f"uv {parameters} completed")
         except (NotADirectoryError, FileNotFoundError) as e:  # pragma: no cover
             log.error("Exception on process, {}".format(e))
             return False
@@ -997,11 +1010,25 @@ class HatchBuilder(Builder):
         if (self.toml_path).exists():
             _pyproject = self.pyproject
             assert _pyproject is not None
-            # clear the include list so update_pyproject_stubs can repopulate it
-            try:
-                _pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"] = []
-            except KeyError:
-                pass
+            # Convert a legacy poetry pyproject.toml to hatch:
+            # drop the poetry-specific configuration so the file lists are not duplicated ...
+            if "tool" in _pyproject:
+                _pyproject["tool"].pop("poetry", None)
+            # ... and make sure the build backend is hatchling (not poetry-core)
+            _pyproject["build-system"] = {
+                "requires": ["hatchling"],
+                "build-backend": "hatchling.build",
+            }
+            # ensure the hatch target sections exist and clear the include list so
+            # update_pyproject_stubs can repopulate it
+            targets = (
+                _pyproject.setdefault("tool", {})
+                .setdefault("hatch", {})
+                .setdefault("build", {})
+                .setdefault("targets", {})
+            )
+            targets.setdefault("wheel", {})["include"] = list(self.STUB_INCLUDE_GLOBS)
+            targets.setdefault("sdist", {})["include"] = list(self.STUB_INCLUDE_GLOBS)
         else:
             try:
                 with open(CONFIG.template_path / "pyproject_hatch.toml", "rb") as f:
@@ -1026,26 +1053,28 @@ class HatchBuilder(Builder):
         self.pyproject = _pyproject
 
     def update_pyproject_stubs(self) -> int:
-        """Add the stub files to the ``[tool.hatch.build.targets.wheel] include`` list."""
+        """Ensure the wheel and sdist targets share the same glob include list."""
         _pyproject = self.pyproject
         assert _pyproject is not None, "No pyproject.toml file found"
 
-        pyi_files = sorted(self.package_path.rglob("*.pyi"))
-        include_patterns = [p.relative_to(self.package_path).as_posix() for p in pyi_files]
+        include_globs = list(self.STUB_INCLUDE_GLOBS)
 
         # Ensure the nested key hierarchy exists
-        _pyproject.setdefault("tool", {})
-        _pyproject["tool"].setdefault("hatch", {})
-        _pyproject["tool"]["hatch"].setdefault("build", {})
-        _pyproject["tool"]["hatch"]["build"].setdefault("targets", {})
-        _pyproject["tool"]["hatch"]["build"]["targets"].setdefault("wheel", {})
-        _pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"] = include_patterns
+        targets = (
+            _pyproject.setdefault("tool", {})
+            .setdefault("hatch", {})
+            .setdefault("build", {})
+            .setdefault("targets", {})
+        )
+        targets.setdefault("wheel", {})["include"] = include_globs
+        targets.setdefault("sdist", {})["include"] = include_globs
 
         self.pyproject = _pyproject
-        return len(include_patterns)
+        # report the number of stub files actually matched by the globs
+        return len(list(self.package_path.rglob("*.pyi")))
 
 
-class StubPackage(PoetryBuilder):
+class StubPackage(PoetryBuilder, HatchBuilder):
     """
     Create a stub-only package for a specific version , port and board of micropython
 
@@ -1214,6 +1243,12 @@ class StubPackage(PoetryBuilder):
             return HatchBuilder.update_pyproject_stubs(self)  # type: ignore[arg-type]
         return PoetryBuilder.update_pyproject_stubs(self)
 
+    def check(self) -> bool:
+        """Validate the package, dispatching to the correct builder."""
+        if self.package_type == PackageType.HATCH:
+            return HatchBuilder.check(self)  # type: ignore[arg-type]
+        return PoetryBuilder.check(self)
+
     # -----------------------------------------------
 
     def update_distribution(self, production: bool) -> bool:
@@ -1274,6 +1309,15 @@ class StubPackage(PoetryBuilder):
             else:
                 log.info(f"Found changes to package sources: {self.package_name} {self.pkg_version} ")
                 log.trace(f"Old hash {self.hash} != New hash {self.calculate_hash()}")
+            # A change requires an update: migrate legacy poetry packages to hatch
+            if self.package_type == PackageType.POETRY:
+                log.info(f"Converting {self.package_name} from a poetry to a hatch package")
+                self.package_type = PackageType.HATCH
+                # remove the poetry pyproject.toml so a fresh hatch one is generated from the template
+                if self.toml_path.exists():
+                    self.toml_path.unlink()
+                self.create_update_pyproject_toml()
+                self.update_pyproject_stubs()
             #  Build the distribution files
             old_ver = self.pkg_version
             self.pkg_version = self.next_package_version(production)

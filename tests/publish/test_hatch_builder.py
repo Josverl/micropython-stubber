@@ -36,13 +36,13 @@ def test_package_type_from_str():
 
 
 # -------------------------------------------------------------------------
-# StubPackage default package_type (poetry, backward compat)
+# StubPackage default package_type (hatch)
 # -------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("version, port, board", [("v1.24.1", "rp2", "RPI_PICO")])
 def test_stub_package_default_package_type(tmp_path, pytestconfig, version, port, board, mocker):
-    """StubPackage must default to poetry for backward compatibility."""
+    """StubPackage must default to hatch (the current default build backend)."""
     config = FakeConfig(
         publish_path=tmp_path / "publish",
         stub_path=Path("./repos/micropython-stubs/stubs"),
@@ -52,7 +52,7 @@ def test_stub_package_default_package_type(tmp_path, pytestconfig, version, port
 
     pkg = create_package(f"micropython-{port}-stubs", mpy_version=version, port=port, board=board)
     assert isinstance(pkg, StubPackage)
-    assert pkg.package_type == PackageType.POETRY
+    assert pkg.package_type == PackageType.HATCH
 
 
 # -------------------------------------------------------------------------
@@ -122,8 +122,10 @@ def test_hatch_update_pyproject_stubs(tmp_path, pytestconfig, mocker):
     pyproject = pkg.pyproject
     assert pyproject is not None
     include = pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"]
-    assert "machine.pyi" in include
-    assert "os.pyi" in include
+    # wheel and sdist share the same short glob list (no per-file enumeration)
+    assert include == ["*.pyi", "**/*.pyi", "README.md", "LICENSE.md", "pyproject.toml"]
+    sdist_include = pyproject["tool"]["hatch"]["build"]["targets"]["sdist"]["include"]
+    assert sdist_include == include
 
 
 # -------------------------------------------------------------------------
@@ -241,10 +243,10 @@ def test_hatch_check(tmp_path, pytestconfig, mocker):
 
 
 def test_config_package_type_is_default():
-    """CONFIG.package_type should be the canonical default (poetry by default)."""
+    """CONFIG.package_type should be the canonical default (hatch by default)."""
     assert isinstance(CONFIG.package_type, PackageType)
-    # The default shipped in config is PackageType.POETRY
-    assert CONFIG.package_type == PackageType.POETRY
+    # The default shipped in config is PackageType.HATCH
+    assert CONFIG.package_type == PackageType.HATCH
 
 
 def test_stub_package_uses_config_default(tmp_path, pytestconfig, mocker):
@@ -259,7 +261,7 @@ def test_stub_package_uses_config_default(tmp_path, pytestconfig, mocker):
     mocker.patch("stubber.publish.stubpackage.CONFIG", config)
     mocker.patch("stubber.publish.package.CONFIG", config)
 
-    # config.package_type is PackageType.POETRY (the FakeConfig default)
+    # config.package_type is PackageType.HATCH (the FakeConfig default)
     pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32")
     assert pkg.package_type == config.package_type
 
@@ -375,3 +377,77 @@ def test_database_migration_adds_column(tmp_path):
     columns = {row[1] for row in cursor.fetchall()}
     assert "package_type" in columns
     conn.close()
+
+
+# -------------------------------------------------------------------------
+# poetry -> hatch conversion on change during build
+# -------------------------------------------------------------------------
+
+
+def test_build_converts_poetry_to_hatch_on_change(tmp_path, pytestconfig, mocker):
+    """A changed poetry package must be converted to hatch during build_distribution."""
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+
+    pkg = create_package(
+        "micropython-esp32-stubs",
+        mpy_version="v1.24.1",
+        port="esp32",
+        package_type=PackageType.POETRY,
+    )
+    assert pkg.package_type == PackageType.POETRY
+
+    # Avoid heavy source/build work; simulate a package that needs updating
+    mocker.patch.object(pkg, "update_distribution", return_value=True)
+    mocker.patch.object(pkg, "is_changed", return_value=True)
+    mocker.patch.object(pkg, "calculate_hash", return_value="deadbeef")
+    mocker.patch.object(pkg, "next_package_version", return_value="1.24.1.post2")
+    mocker.patch.object(pkg, "write_package_json")
+    hatch_build = mocker.patch(
+        "stubber.publish.stubpackage.HatchBuilder.hatch_build", return_value=True
+    )
+
+    ok = pkg.build_distribution(production=False, force=False)
+
+    assert ok is True
+    # The package must have been converted to hatch and built with HatchBuilder
+    assert pkg.package_type == PackageType.HATCH
+    hatch_build.assert_called_once()
+
+    # The on-disk pyproject.toml must now be a hatchling package
+    pyproject = pkg.pyproject
+    assert pyproject is not None
+    build_sys = pyproject.get("build-system", {})
+    assert "hatchling" in build_sys.get("requires", [])
+    assert build_sys.get("build-backend") == "hatchling.build"
+
+
+def test_build_no_change_keeps_poetry(tmp_path, pytestconfig, mocker):
+    """An unchanged poetry package must NOT be converted to hatch."""
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+
+    pkg = create_package(
+        "micropython-esp32-stubs",
+        mpy_version="v1.24.1",
+        port="esp32",
+        package_type=PackageType.POETRY,
+    )
+
+    mocker.patch.object(pkg, "update_distribution", return_value=True)
+    mocker.patch.object(pkg, "is_changed", return_value=False)
+
+    ok = pkg.build_distribution(production=False, force=False)
+
+    assert ok is True
+    # No change -> stays poetry
+    assert pkg.package_type == PackageType.POETRY
+
