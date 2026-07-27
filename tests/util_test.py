@@ -52,7 +52,8 @@ def test_post_processing(tmp_path, pytestconfig, mocker: MockerFixture):
     utils.do_post_processing([dest], stubgen=True, format=True, autoflake=False)
 
     m_generate_pyi_files.assert_called_once()
-    m_spr.assert_called_once()
+    # format_stubs runs two subprocesses: `ruff check --select I --fix` then `ruff format`
+    assert m_spr.call_count == 2
 
 
 def test_stub_one_file(tmp_path, pytestconfig):

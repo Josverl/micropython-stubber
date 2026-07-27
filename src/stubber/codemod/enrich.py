@@ -4,17 +4,14 @@ Both (.py or .pyi) files are supported.
 """
 
 import hashlib
-import os
 import re
 import shutil
-import tempfile
 from collections.abc import Generator
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union  # noqa: UP035
 
-from diskcache import Cache
 from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
@@ -23,10 +20,11 @@ from mpflash.logger import log
 import stubber.codemod.merge_docstub as merge_docstub
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.modcat import U_MODULES
+from stubber.utils import cache as cache_cfg
 from stubber.utils.post import format_stubs
 
 # ---------------------------------------------------------------------------
-# Experimental disk cache for the (slow) libcst-based merge transform.
+# Disk cache for the (slow) libcst-based merge transform.
 #
 # `enrich_file` is called very often, frequently with the *same* source and
 # target content, and also repeatedly with a *different* source but the *same*
@@ -34,20 +32,14 @@ from stubber.utils.post import format_stubs
 # not sufficient - the cache key is derived from the *content* of both the
 # source and the target file, plus the copy_* flags and the target module name.
 #
-# Toggle / configure via environment variables:
-#   STUBBER_ENRICH_CACHE=0            -> disable the cache
-#   STUBBER_ENRICH_CACHE_DIR=<path>   -> override the cache location
+# Enable/disable via the shared `STUBBER_CACHE` toggle (see stubber.utils.cache).
 # ---------------------------------------------------------------------------
+
+# Name of this logical cache under the shared cache directory.
+_ENRICH_CACHE = "enrich"
 
 # Bump when the merge logic changes in a way that invalidates cached results.
 ENRICH_CACHE_VERSION = "2"
-
-ENRICH_CACHE_ENABLED = os.environ.get("STUBBER_ENRICH_CACHE", "1").lower() not in ("0", "false", "no")
-
-ENRICH_CACHE_DIR = os.environ.get(
-    "STUBBER_ENRICH_CACHE_DIR",
-    str(Path(tempfile.gettempdir()) / "stubber_enrich_cache"),
-)
 
 # Sentinel stored when the transform produced no change, so a cached "no change"
 # result can be told apart from a cache miss.
@@ -104,15 +96,6 @@ def _restore_volatile(text: str, restore: Dict[str, str]) -> str:
     for placeholder, original in restore.items():
         text = text.replace(placeholder, original)
     return text
-
-
-@lru_cache(maxsize=1)
-def _get_enrich_cache() -> Cache:
-    """Return the shared on-disk cache instance (created lazily)."""
-    cache = Cache(ENRICH_CACHE_DIR)
-    # Enable hit/miss statistics so `enrich_cache_stats()` can report them.
-    cache.stats(enable=True)
-    return cache
 
 
 def _enrich_cache_key(
@@ -184,7 +167,7 @@ def _cached_merge_transform(
     copy_returns: bool,
 ) -> Optional[str]:
     """Run `_run_merge_transform`, transparently caching the result on disk."""
-    if not ENRICH_CACHE_ENABLED:
+    if not cache_cfg.CACHE_ENABLED:
         return _run_merge_transform(source_paths, target_text, module_name, filename, copy_params, copy_docstr, copy_returns)
 
     # Mask per-board volatile lines so stubs that differ only in those lines hit
@@ -192,7 +175,7 @@ def _cached_merge_transform(
     masked_target, restore = _mask_volatile(target_text)
     source_texts = [p.read_text(encoding="utf-8") for p in source_paths]
     key = _enrich_cache_key(source_texts, masked_target, module_name, copy_params, copy_docstr, copy_returns)
-    cache = _get_enrich_cache()
+    cache = cache_cfg.get_cache(_ENRICH_CACHE)
     cached = cache.get(key, default=None)
     if cached is not None:
         log.trace(f"enrich cache hit for {filename}")
@@ -204,21 +187,13 @@ def _cached_merge_transform(
 
 
 def clear_enrich_cache() -> int:
-    """Clear the experimental enrich cache. Returns the number of removed entries."""
-    return _get_enrich_cache().clear()
+    """Clear the enrich cache. Returns the number of removed entries."""
+    return cache_cfg.clear_cache(_ENRICH_CACHE)
 
 
 def enrich_cache_stats() -> Dict[str, Any]:
-    """Return simple statistics about the experimental enrich cache."""
-    cache = _get_enrich_cache()
-    hits, misses = cache.stats(enable=True, reset=False)
-    return {
-        "enabled": ENRICH_CACHE_ENABLED,
-        "directory": ENRICH_CACHE_DIR,
-        "size": len(cache),
-        "hits": hits,
-        "misses": misses,
-    }
+    """Return simple statistics about the enrich cache."""
+    return cache_cfg.cache_stats(_ENRICH_CACHE)
 
 
 @dataclass
@@ -490,6 +465,7 @@ def enrich_folder(
         sources_by_target.setdefault(mm.target, []).append(mm.source)
 
     # sort by target (stable diffs) and sources per target (stable cache keys)
+    reported_errors: set = set()
     for target in sorted(sources_by_target):
         sources = sorted(sources_by_target[target])
         try:
@@ -517,8 +493,13 @@ def enrich_folder(
             if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub or source  file found for {target}")) from e
         except (Exception, ParserSyntaxError) as e:
-            log.error(f"Error parsing {target}")
-            log.exception(e)
+            # A malformed *source* doc-stub can affect many boards; report each
+            # distinct parse error once (concisely) instead of a full traceback
+            # for every affected target.
+            first_line = next((ln for ln in str(e).splitlines() if ln.strip()), repr(e))
+            if first_line not in reported_errors:
+                reported_errors.add(first_line)
+                log.warning(f"Skipped enriching (parse error): {first_line}")
             continue
 
     # run ruff on the target folder
@@ -528,10 +509,13 @@ def enrich_folder(
     # if copy_params:
     #     copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
 
-    # report how well the enrich cache performed for this run
-    if ENRICH_CACHE_ENABLED:
+    # report how well the enrich cache performed for this run.
+    # NOTE: logged at debug level - `enrich_folder` is often called in a loop
+    # (e.g. once per board in `get-frozen`), so the cumulative stats would spam
+    # the info log if reported at info level.
+    if cache_cfg.CACHE_ENABLED:
         stats = enrich_cache_stats()
-        log.info(
+        log.debug(
             f"enrich cache: {stats['hits']} hits, {stats['misses']} misses, "
             f"{stats['size']} entries in {stats['directory']}"
         )

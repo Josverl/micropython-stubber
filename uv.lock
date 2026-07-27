@@ -961,6 +961,15 @@ wheels = [
 ]
 
 [[package]]
+name = "importlib-resources"
+version = "7.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e4/06/b56dfa750b44e86157093bc8fca0ab81dccbf5260510de4eaf1cb69b5b99/importlib_resources-7.1.0.tar.gz", hash = "sha256:0722d4c6212489c530f2a145a34c0a7a3b4721bc96a15fada5930e2a0b760708", size = 44985, upload-time = "2026-04-12T16:36:09.232Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8a/db/55a262f3606bebcae07cc14095338471ad7c0bbcaa37707e6f0ee49725b7/importlib_resources-7.1.0-py3-none-any.whl", hash = "sha256:1bd7b48b4088eddb2cd16382150bb515af0bd2c70128194392725f82ad2c96a1", size = 37232, upload-time = "2026-04-12T16:36:08.219Z" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1308,16 +1317,15 @@ wheels = [
 ]
 
 [[package]]
-name = "libusb"
-version = "1.0.27"
+name = "libusb-package"
+version = "1.0.30.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pkg-about", marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
-    { name = "setuptools", marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
+    { name = "importlib-resources", marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/66/b4/4d15c5c3acd3537aa76b322261b9aa453cbab0efaf069737137147bd0f37/libusb-1.0.27.zip", hash = "sha256:3f8055df52d797d2da70ff3b9983e51ab6299c915afdea26988146ec7f6a4170", size = 663575, upload-time = "2024-02-05T22:39:40.744Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/75/bd/80bbc4ce553e34efaf2525c166e463c4b74e0daf430368e21df13128d9ff/libusb-1.0.27-py3-none-any.whl", hash = "sha256:cf547ebd01044014f2073ffea58a1b4c0172b958e3aed36c1d42e683eed71114", size = 581839, upload-time = "2024-02-05T22:39:38.013Z" },
+    { url = "https://files.pythonhosted.org/packages/e5/95/d166eeefe0d9dd5833d5724a97b023ec380c3a2d364040ec0485fd57703c/libusb_package-1.0.30.0-py3-none-win32.whl", hash = "sha256:79728146e1f01e525786900b2ccd8298a8eca53cd94b37fb0885e56aa6f9d60a", size = 78769, upload-time = "2026-06-30T07:41:08.432Z" },
+    { url = "https://files.pythonhosted.org/packages/60/4a/ff49bd77f33af05ca26fee29d601beb1e19ca791bb86efece82a3833885c/libusb_package-1.0.30.0-py3-none-win_amd64.whl", hash = "sha256:90808da724c8939a333d931d0c7226372ca5fefd98e2f2f3ef79fd918aa37522", size = 90711, upload-time = "2026-06-30T07:41:09.318Z" },
 ]
 
 [[package]]
@@ -1551,7 +1559,7 @@ requires-dist = [
     { name = "importlib-metadata", marker = "python_full_version < '3.8'", specifier = ">=1,<9" },
     { name = "libcst", specifier = ">=1.1.0,<2.0.0" },
     { name = "loguru", specifier = ">=0.6,<0.8" },
-    { name = "mpflash", specifier = ">=1.28.0,<2.0.0" },
+    { name = "mpflash", specifier = ">=1.28.3,<2.0.0" },
     { name = "mpremote", specifier = ">=1.25.0" },
     { name = "mpy-cross", specifier = ">=1.25.0.post2,<2.0.0" },
     { name = "mypy", specifier = ">=1.10" },
@@ -1566,7 +1574,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.3,<3.0.0" },
     { name = "rich-click", specifier = ">=1.8.3,<2.0.0" },
     { name = "ruff", specifier = ">=0.12.11,<0.13.0" },
-    { name = "tenacity", specifier = "==9.0.0" },
+    { name = "tenacity", specifier = ">=9.0.0,<10.0.0" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0.1,<3.0.0" },
     { name = "tomli-w", specifier = ">=1.0.0,<2.0.0" },
     { name = "typed-config", specifier = ">=1.3.0,<2.0.0" },
@@ -1615,7 +1623,7 @@ wheels = [
 
 [[package]]
 name = "mpflash"
-version = "1.28.0"
+version = "1.28.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -1627,7 +1635,7 @@ dependencies = [
     { name = "esptool", version = "5.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15' or platform_machine != 'x86_64' or sys_platform != 'darwin'" },
     { name = "jsonlines" },
     { name = "jsons" },
-    { name = "libusb", marker = "sys_platform == 'win32'" },
+    { name = "libusb-package", marker = "sys_platform == 'win32'" },
     { name = "loguru" },
     { name = "mpremote" },
     { name = "packaging" },
@@ -1636,6 +1644,7 @@ dependencies = [
     { name = "psutil" },
     { name = "pygithub" },
     { name = "pytest-cov" },
+    { name = "python-dotenv" },
     { name = "pyusb" },
     { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "questionary" },
@@ -1645,8 +1654,9 @@ dependencies = [
     { name = "tomli" },
     { name = "tomli-w" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/0d/24/0e873de3d7bd8962a3a260f7c810771f0b0811820ffad68eaebb74d65d37/mpflash-1.28.3.tar.gz", hash = "sha256:501c38905e5dee97ea2c41ea09c0550f2bd35621f027ba6b24e4bfc94914bac0", size = 3880378, upload-time = "2026-07-26T19:22:18.827Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/3a/f9e5dc261fc33b6354508e3c24a753730d30ac16916927fefb2f0db18c66/mpflash-1.28.0-py3-none-any.whl", hash = "sha256:7f079435d4951a6be98b44b236f61d322ef88ccd85e107054ac03d1e20c3eae1", size = 147408, upload-time = "2026-04-11T20:43:27.715Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/35/5863a0b5e2bd13772fbfc6ac6ad027caea2eb5192f93941929bebf78aa10/mpflash-1.28.3-py3-none-any.whl", hash = "sha256:8cd59deeaaa565639ec2388ab4f4f39246dfb4c59bcba436233f37653987a2b9", size = 199256, upload-time = "2026-07-26T19:22:16.971Z" },
 ]
 
 [[package]]
@@ -1835,20 +1845,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9e/c3/059298687310d527a58bb01f3b1965787ee3b40dce76752eda8b44e9a2c5/pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523", size = 63772, upload-time = "2023-11-25T06:56:14.81Z" },
-]
-
-[[package]]
-name = "pkg-about"
-version = "1.1.8"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging", marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
-    { name = "setuptools", marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'" },
-    { name = "tomli", marker = "(python_full_version < '3.11' and platform_machine != 'x86_64') or (python_full_version < '3.11' and sys_platform != 'darwin')" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/46/f59fb3214f44f12c6cc4e04391b0e7da8e7bcfbc1bfb1469e918b2c39e3e/pkg_about-1.1.8.zip", hash = "sha256:195577974ad4f2093179d3a2315540b746c4a82b723bed4b487c482a30656cf9", size = 18678, upload-time = "2024-08-13T18:46:23.616Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/0e/33568b7b778175e18a3c52a67c03bf013976cc06ac5f940a7b7503dd1a6d/pkg_about-1.1.8-py3-none-any.whl", hash = "sha256:8c43b301025abc9f1726b0170bb9422d27eb5e5b1c33100d50807a3ecd278f5d", size = 5972, upload-time = "2024-08-13T18:46:22.124Z" },
 ]
 
 [[package]]
@@ -2631,15 +2627,6 @@ wheels = [
 ]
 
 [[package]]
-name = "setuptools"
-version = "83.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz", hash = "sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef", size = 1154254, upload-time = "2026-07-04T15:31:22.699Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl", hash = "sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3", size = 1008090, upload-time = "2026-07-04T15:31:20.885Z" },
-]
-
-[[package]]
 name = "six"
 version = "1.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2842,11 +2829,11 @@ wheels = [
 
 [[package]]
 name = "tenacity"
-version = "9.0.0"
+version = "9.1.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cd/94/91fccdb4b8110642462e653d5dcb27e7b674742ad68efd146367da7bdb10/tenacity-9.0.0.tar.gz", hash = "sha256:807f37ca97d62aa361264d497b0e31e92b8027044942bfa756160d908320d73b", size = 47421, upload-time = "2024-07-29T12:12:27.547Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/c6/ee486fd809e357697ee8a44d3d69222b344920433d3b6666ccd9b374630c/tenacity-9.1.4.tar.gz", hash = "sha256:adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a", size = 49413, upload-time = "2026-02-07T10:45:33.841Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b6/cb/b86984bed139586d01532a587464b5805f12e397594f19f931c4c2fbfa61/tenacity-9.0.0-py3-none-any.whl", hash = "sha256:93de0c98785b27fcf659856aa9f54bfbd399e29969b0621bc7f762bd441b4539", size = 28169, upload-time = "2024-07-29T12:12:25.825Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/c1/eb8f9debc45d3b7918a32ab756658a0904732f75e555402972246b0b8e71/tenacity-9.1.4-py3-none-any.whl", hash = "sha256:6095a360c919085f28c6527de529e76a06ad89b23659fa881ae0649b867a9d55", size = 28926, upload-time = "2026-02-07T10:45:32.24Z" },
 ]
 
 [[package]]

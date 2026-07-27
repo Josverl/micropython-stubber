@@ -194,7 +194,10 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 # parse the doc-stub file
                 stub_tree = cst.parse_module(docstub_source)
             except cst.ParserSyntaxError as e:
-                log.error(f"Error parsing {docstub_path}: {e}")
+                # The caller (e.g. enrich_folder) reports this concisely; keep the
+                # detailed message at debug level to avoid duplicate error spam when
+                # the same malformed doc-stub is used by many boards.
+                log.debug(f"Error parsing {docstub_path}: {e}")
                 raise ValueError(f"Error parsing {docstub_path}: {e}") from e
             # create fresh collectors for each doc-stub file
             typing_collector = StubTypingCollector()

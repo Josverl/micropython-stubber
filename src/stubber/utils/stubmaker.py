@@ -1,5 +1,6 @@
 """Generate stub files for micropython modules using mypy/stubgen"""
 
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -7,6 +8,8 @@ from pathlib import Path
 from mpflash.logger import log
 import mypy.stubgen as stubgen
 from mypy.errors import CompileError
+
+from stubber.utils import cache as cache_cfg
 
 # default stubgen options
 STUBGEN_OPT = stubgen.Options(
@@ -31,6 +34,28 @@ STUBGEN_OPT = stubgen.Options(
     inspect=False,  # inspect needs to import the module in CPython, which is not possible for frozen modules
     include_docstrings=True,  # include existing docstrings with the stubs
 )
+
+# Logical name of the stubgen cache under the shared cache directory.
+_STUBGEN_CACHE = "stubgen"
+# Bump when STUBGEN_OPT (options that influence the generated .pyi) changes.
+STUBGEN_CACHE_VERSION = "1"
+
+
+def _stubgen_folder_key(folder: Path) -> str:
+    """Content hash of a folder's .py tree (relative path + bytes) -> stubgen cache key.
+
+    Frozen `.py` sources are highly duplicated across ports/boards/versions, so
+    identical folder contents map to the same key and can reuse cached .pyi.
+    """
+    h = hashlib.sha256()
+    h.update(STUBGEN_CACHE_VERSION.encode())
+    h.update(b"\x00")
+    for py in sorted(folder.rglob("*.py")):
+        h.update(py.relative_to(folder).as_posix().encode())
+        h.update(b"\x00")
+        h.update(py.read_bytes())
+        h.update(b"\x00")
+    return h.hexdigest()
 
 
 def generate_pyi_from_file(file: Path) -> bool:
@@ -76,21 +101,51 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         if f.is_file():
             with open(f, "r") as file:
                 data = file.read()
+            original = data
             # regex Search for const\(([\w_"']+)\) and replace with (\1)
             if rx_const.search(data):
                 log.debug(f"replace const() in {f}")
                 data = rx_const.sub(r"\1", data)
+            # TEMPORARY FIX 3 - escape the invalid `"\Z"` escape sequence (e.g. in the
+            # frozen fnmatch.py) as `"\\Z"` so the module can be parsed/processed
+            # without a SyntaxWarning. Behaviour is unchanged: both are the two
+            # characters `\` `Z`. The doubled `"\\Z"` form is left untouched.
+            if '"\\Z"' in data:
+                log.debug(f'escape invalid "\\Z" sequence in {f}')
+                data = data.replace('"\\Z"', '"\\\\Z"')
+            # TEMPORARY FIX 4 - escape the invalid `\]` escape sequence (e.g. in the
+            # frozen webassembly `string` module) as `\\]`, for the same reason as
+            # FIX 3. The negative lookbehind matches only a lone `\]`; an already
+            # doubled `\\]` is left untouched.
+            if re.search(r"(?<!\\)\\\]", data):
+                log.debug(f"escape invalid \\] sequence in {f}")
+                data = re.sub(r"(?<!\\)\\\]", lambda _m: "\\\\]", data)
+            if data != original:
                 with open(f, "w") as file:
                     file.write(data)
 
     module_list = list(modules_folder.glob("**/modules.json"))
     r = True
+    stubgen_cache_key = None
     if len(module_list) > 1:
         # try to process each module separately
         for mod_manifest in module_list:
             ## generate fyi files for folder
             r = r and generate_pyi_files(mod_manifest.parent)
     else:  # one or less module manifests
+        # stubgen cache: identical .py folder content (across boards / ports /
+        # versions / re-runs) reuses previously generated .pyi and skips stubgen.
+        if cache_cfg.CACHE_ENABLED and list(modules_folder.rglob("*.py")):
+            stubgen_cache_key = _stubgen_folder_key(modules_folder)
+            cached = cache_cfg.get_cache(_STUBGEN_CACHE).get(stubgen_cache_key, default=None)
+            if cached is not None:
+                log.debug(f"[stubgen] cache hit for {modules_folder}")
+                for rel, content in cached.items():
+                    out = modules_folder / rel
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    out.write_text(content, encoding="utf-8")
+                return True
+
         ## generate fyi files for folder
         log.debug("::group::[stubgen] running stubgen on {0}".format(modules_folder))
 
@@ -135,5 +190,13 @@ def generate_pyi_files(modules_folder: Path) -> bool:
         for py in py_files:
             r = r and generate_pyi_from_file(py)
             # todo: report failures by adding to module manifest
+
+    # populate the stubgen cache for this (freshly generated) leaf folder
+    if stubgen_cache_key is not None:
+        produced = {
+            p.relative_to(modules_folder).as_posix(): p.read_text(encoding="utf-8")
+            for p in sorted(modules_folder.rglob("*.pyi"))
+        }
+        cache_cfg.get_cache(_STUBGEN_CACHE).set(stubgen_cache_key, produced)
 
     return r
