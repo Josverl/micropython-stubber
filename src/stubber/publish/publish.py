@@ -22,7 +22,7 @@ def build_multiple(
     versions: Optional[List[str]] = None,
     ports: Optional[List[str]] = None,
     boards: Optional[List[str]] = None,
-    production: bool = False,
+    production: bool = True,
     clean: bool = False,
     force: bool = False,
     package_type: Union[PackageType, str] = CONFIG.package_type,

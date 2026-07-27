@@ -14,6 +14,17 @@ ALL_PUBLISH_RESULTS = {"Published to PyPi", "Published to Test-PyPi", "Build suc
 
 
 @pytest.mark.mocked
+def test_build_defaults_to_production(mocker: MockerFixture):
+    get_database = mocker.patch("stubber.publish.publish.get_database")
+    mocker.patch("stubber.publish.publish.build_worklist", return_value=[])
+
+    build_multiple()
+
+    get_database.assert_called_once()
+    assert get_database.call_args.kwargs["production"] is True
+
+
+@pytest.mark.mocked
 @pytest.mark.integration
 def test_build_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
     """Test build_multiple"""
