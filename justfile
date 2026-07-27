@@ -39,16 +39,24 @@ next_patch:
     @just variants
     uvx bump-my-version show current_version
 
+# create .mpy files for all variants
 variants:
     @echo "Building .mpy files..."
     uv run stubber make-variants
     uv run stubber make-variants --target ./mip/v6 --version 1.19.1
     # uv run stubber make-variants --target ./mip/v5 --version 1.18
-
+# Build MicroPython-stubber
 build:
     @echo "Building the project..."
     uv build
 
+# Build the stubs for a specific version of MicroPython (stable or preview)
+build_stubs version="stable" *ARGS:
+    uv run stubber build --version {{version}} {{ARGS}}
+
+
+
+# publish the micropython-stubber package to pypi, using a token stored in the system keyring
 [script]
 publish: build
     # /// script
