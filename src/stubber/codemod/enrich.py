@@ -3,13 +3,18 @@ Enrich firmware stubs by copying docstrings and parameter information from doc-s
 Both (.py or .pyi) files are supported.
 """
 
+import hashlib
+import os
+import re
 import shutil
+import tempfile
 from collections.abc import Generator
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple  # noqa: UP035
 
+from diskcache import Cache
 from libcst import ParserSyntaxError
 from libcst.codemod import CodemodContext, diff_code, exec_transform_with_prettyprint
 from libcst.tool import _default_config  # type: ignore
@@ -19,6 +24,199 @@ import stubber.codemod.merge_docstub as merge_docstub
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.modcat import U_MODULES
 from stubber.utils.post import format_stubs
+
+# ---------------------------------------------------------------------------
+# Experimental disk cache for the (slow) libcst-based merge transform.
+#
+# `enrich_file` is called very often, frequently with the *same* source and
+# target content, and also repeatedly with a *different* source but the *same*
+# target (incremental enrichment). Caching only on the target path is therefore
+# not sufficient - the cache key is derived from the *content* of both the
+# source and the target file, plus the copy_* flags and the target module name.
+#
+# Toggle / configure via environment variables:
+#   STUBBER_ENRICH_CACHE=0            -> disable the cache
+#   STUBBER_ENRICH_CACHE_DIR=<path>   -> override the cache location
+# ---------------------------------------------------------------------------
+
+# Bump when the merge logic changes in a way that invalidates cached results.
+ENRICH_CACHE_VERSION = "2"
+
+ENRICH_CACHE_ENABLED = os.environ.get("STUBBER_ENRICH_CACHE", "1").lower() not in ("0", "false", "no")
+
+ENRICH_CACHE_DIR = os.environ.get(
+    "STUBBER_ENRICH_CACHE_DIR",
+    str(Path(tempfile.gettempdir()) / "stubber_enrich_cache"),
+)
+
+# Sentinel stored when the transform produced no change, so a cached "no change"
+# result can be told apart from a cache miss.
+_NO_CHANGE = "\x00__enrich_no_change__\x00"
+
+# ---------------------------------------------------------------------------
+# Volatile-line masking.
+#
+# Every MCU stub carries a few lines that differ per board / firmware / stubber
+# build but do *not* influence how docstrings and type hints are merged, e.g.:
+#
+#   # MCU: {'variant': '', 'port': 'esp32', 'board': 'ESP32_GENERIC', ...}
+#   # Stubber: v1.28.0
+#   Module: 'machine' on micropython-v1.28.0-esp32-ESP32_GENERIC   (in the docstring)
+#
+# These lines pass through the merge as opaque text. By masking them with a
+# stable placeholder *before* hashing and *before* running the transform, stubs
+# that differ only in these lines share a single cache entry. The original lines
+# are restored in the output afterwards, so the result is byte-identical to an
+# unmasked run.
+# ---------------------------------------------------------------------------
+_VOLATILE_TOKEN = "__ENRICH_VOLATILE_{}__"
+
+# (pattern, placeholder-template). The comment patterns keep a leading `# ` so
+# the placeholder stays a valid comment; the docstring pattern replaces the
+# whole line (it lives inside a string literal).
+_VOLATILE_PATTERNS = (
+    (re.compile(r"^# MCU: .*$", re.MULTILINE), "# " + _VOLATILE_TOKEN),
+    (re.compile(r"^# Stubber: .*$", re.MULTILINE), "# " + _VOLATILE_TOKEN),
+    (re.compile(r"^Module: '.*' on .*$", re.MULTILINE), _VOLATILE_TOKEN),
+)
+
+
+def _mask_volatile(text: str) -> Tuple[str, Dict[str, str]]:
+    """Replace per-board volatile lines with stable placeholders.
+
+    Returns the masked text and a mapping of `placeholder -> original line` so the
+    original lines can be restored in the transform output.
+    """
+    restore: Dict[str, str] = {}
+    for idx, (pattern, template) in enumerate(_VOLATILE_PATTERNS):
+        placeholder = template.format(idx)
+
+        def _sub(match: "re.Match[str]", _ph: str = placeholder) -> str:
+            restore[_ph] = match.group(0)
+            return _ph
+
+        text = pattern.sub(_sub, text, count=1)
+    return text, restore
+
+
+def _restore_volatile(text: str, restore: Dict[str, str]) -> str:
+    """Restore the original volatile lines that `_mask_volatile` replaced."""
+    for placeholder, original in restore.items():
+        text = text.replace(placeholder, original)
+    return text
+
+
+@lru_cache(maxsize=1)
+def _get_enrich_cache() -> Cache:
+    """Return the shared on-disk cache instance (created lazily)."""
+    cache = Cache(ENRICH_CACHE_DIR)
+    # Enable hit/miss statistics so `enrich_cache_stats()` can report them.
+    cache.stats(enable=True)
+    return cache
+
+
+def _enrich_cache_key(
+    source_text: str,
+    target_text: str,
+    module_name: str,
+    copy_params: bool,
+    copy_docstr: bool,
+    copy_returns: bool,
+) -> str:
+    """Build a content-based cache key for a single merge transform."""
+    h = hashlib.sha256()
+    for part in (
+        ENRICH_CACHE_VERSION,
+        module_name,
+        f"{int(copy_params)}{int(copy_docstr)}{int(copy_returns)}",
+        source_text,
+        target_text,
+    ):
+        h.update(part.encode("utf-8"))
+        h.update(b"\x00")
+    return h.hexdigest()
+
+
+def _run_merge_transform(
+    source_path: Path,
+    target_text: str,
+    module_name: str,
+    filename: str,
+    copy_params: bool,
+    copy_docstr: bool,
+    copy_returns: bool,
+) -> Optional[str]:
+    """Run the (expensive) libcst merge transform and return the new code, or None."""
+    config: Dict[str, Any] = _default_config()
+    context = CodemodContext(filename=filename, full_module_name=module_name)
+    codemod_instance = merge_docstub.MergeCommand(
+        context,
+        docstub_file=source_path,
+        copy_params=copy_params,
+        copy_docstr=copy_docstr,
+        copy_returns=copy_returns,
+    )
+    # Do NOT format here (format_code=False). `enrich_folder` runs `ruff format`
+    # (format_stubs) exactly once at the end, so per-file black/ruff formatting
+    # would be redundant work. Keeping the transform output unformatted also makes
+    # the cached value formatter-independent.
+    return exec_transform_with_prettyprint(
+        codemod_instance,
+        target_text,
+        generated_code_marker=config["generated_code_marker"],
+        format_code=False,
+    )
+
+
+def _cached_merge_transform(
+    source_path: Path,
+    target_text: str,
+    module_name: str,
+    filename: str,
+    copy_params: bool,
+    copy_docstr: bool,
+    copy_returns: bool,
+) -> Optional[str]:
+    """Run `_run_merge_transform`, transparently caching the result on disk."""
+    if not ENRICH_CACHE_ENABLED:
+        return _run_merge_transform(
+            source_path, target_text, module_name, filename, copy_params, copy_docstr, copy_returns
+        )
+
+    # Mask per-board volatile lines so stubs that differ only in those lines hit
+    # the same cache entry; the transform runs on (and caches) the masked text.
+    masked_target, restore = _mask_volatile(target_text)
+    source_text = source_path.read_text(encoding="utf-8")
+    key = _enrich_cache_key(source_text, masked_target, module_name, copy_params, copy_docstr, copy_returns)
+    cache = _get_enrich_cache()
+    cached = cache.get(key, default=None)
+    if cached is not None:
+        log.trace(f"enrich cache hit for {filename}")
+        return None if cached == _NO_CHANGE else _restore_volatile(str(cached), restore)
+
+    new_code = _run_merge_transform(
+        source_path, masked_target, module_name, filename, copy_params, copy_docstr, copy_returns
+    )
+    cache.set(key, new_code if new_code is not None else _NO_CHANGE)
+    return _restore_volatile(new_code, restore) if new_code is not None else None
+
+
+def clear_enrich_cache() -> int:
+    """Clear the experimental enrich cache. Returns the number of removed entries."""
+    return _get_enrich_cache().clear()
+
+
+def enrich_cache_stats() -> Dict[str, Any]:
+    """Return simple statistics about the experimental enrich cache."""
+    cache = _get_enrich_cache()
+    hits, misses = cache.stats(enable=True, reset=False)
+    return {
+        "enabled": ENRICH_CACHE_ENABLED,
+        "directory": ENRICH_CACHE_DIR,
+        "size": len(cache),
+        "hits": hits,
+        "misses": misses,
+    }
 
 
 @dataclass
@@ -183,37 +381,22 @@ def enrich_file(
     if not source_path.is_file() or not target_path.is_file():
         raise FileNotFoundError("Source or target is not a file")
     log.info(f"Enriching file: {target_path}")
-    config: Dict[str, Any] = _default_config()
-    # fass the filename and module name to the codemod
-    context = CodemodContext(
-        filename=target_path.as_posix(),
-        full_module_name=package_from_path(target_path),
-    )
-    # apply a single codemod to the target file
-    success = False
     # read target file
     old_code = current_code = target_path.read_text(encoding="utf-8")
-    # read source file
-    codemod_instance = merge_docstub.MergeCommand(
-        context,
-        docstub_file=source_path,
+    # apply a single codemod to the target file (transparently cached on disk)
+    new_code = _cached_merge_transform(
+        source_path,
+        current_code,
+        module_name=package_from_path(target_path),
+        filename=target_path.as_posix(),
         copy_params=copy_params,
         copy_docstr=copy_docstr,
         copy_returns=copy_returns,
     )
-    if new_code := exec_transform_with_prettyprint(
-        codemod_instance,
-        current_code,
-        # include_generated=False,
-        generated_code_marker=config["generated_code_marker"],
-        # format_code=not args.no_format,
-        formatter_args=config["formatter"],
-        # python_version=args.python_version,
-    ):
+    if new_code:
         current_code = new_code
-        success = True
 
-    if not success:
+    if not new_code:
         raise FileNotFoundError(f"No doc-stub file found for {target_path}")
     if write_back:
         log.trace(f"Write back enriched file {target_path}")
@@ -331,6 +514,14 @@ def enrich_folder(
 
     # if copy_params:
     #     copy_type_modules(source_folder, target_folder, CP_REFERENCE_TO_DOCSTUB)
+
+    # report how well the enrich cache performed for this run
+    if ENRICH_CACHE_ENABLED:
+        stats = enrich_cache_stats()
+        log.info(
+            f"enrich cache: {stats['hits']} hits, {stats['misses']} misses, "
+            f"{stats['size']} entries in {stats['directory']}"
+        )
     return count
 
 

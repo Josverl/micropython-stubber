@@ -105,6 +105,42 @@ def test_merge_all_docstubs_fallback_to_generic(mocker, tmp_path, pytestconfig):
 
 
 @pytest.mark.mocked
+@pytest.mark.parametrize("ports, boards", [("all", "all"), ("all", "auto"), ("nrf", "all")])
+def test_merge_all_docstubs_no_fallback_for_all(mocker, tmp_path, pytestconfig, ports, boards):
+    """The out-of-tree fallback must NOT trigger for 'all'/'auto' boards.
+
+    Regression: `stubber merge --port all --board all` used to treat the literal
+    'all' as a board name and create bogus '<port>-all-merged' folders via the
+    frozen fallback when board_candidates returned no results.
+    """
+    # use the test config
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
+    mocker.patch("stubber.publish.merge_docstubs.CONFIG", config)
+
+    # board_candidates returns nothing (e.g. repo/version checkout produced no candidates)
+    m_board_candidates: MagicMock = mocker.patch(
+        "stubber.publish.merge_docstubs.board_candidates",
+        autospec=True,
+        return_value=[],
+    )
+    # frozen_candidates must NOT be called for 'all'/'auto'
+    m_frozen_candidates: MagicMock = mocker.patch(
+        "stubber.publish.merge_docstubs.frozen_candidates",
+        autospec=True,
+        return_value=[],
+    )
+    m_copy_and_merge_docstubs: MagicMock = mocker.patch("stubber.publish.merge_docstubs.copy_and_merge_docstubs", autospec=True)
+
+    result = merge_all_docstubs(versions="1.19.1", ports=ports, boards=boards)
+
+    # The fallback should be skipped entirely, so nothing is merged
+    assert m_board_candidates.call_count == 1
+    assert m_frozen_candidates.call_count == 0
+    assert m_copy_and_merge_docstubs.call_count == 0
+    assert not result
+
+
+@pytest.mark.mocked
 def test_copydocstubs_mocked(mocker, tmp_path, pytestconfig):
     """Test publish_multiple"""
     # use the test config

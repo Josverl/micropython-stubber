@@ -10,7 +10,7 @@ import libcst as cst
 from mpflash.logger import log
 from stubber.codemod.enrich import enrich_folder
 from stubber.merge_config import RM_MERGED, recreate_umodules, remove_modules
-from stubber.publish.candidates import board_candidates, filter_list, frozen_candidates, list_frozen_ports, best_matching_port
+from stubber.publish.candidates import board_candidates, filter_list, frozen_candidates, list_frozen_ports, best_matching_port, is_auto
 from stubber.publish.defaults import GENERIC, GENERIC_L, default_board
 from stubber.publish.pathnames import get_base, get_board_path, get_merged_path, get_frozen_board_path
 from stubber.utils.config import CONFIG
@@ -51,7 +51,9 @@ def merge_all_docstubs(
     # Fallback: if no candidates found and a specific board was requested, try with GENERIC frozen stubs
     # This handles out-of-tree boards (e.g., PROMICRO_NRF52840) that are not in the official
     # MicroPython repository. Instead of failing, we fall back to GENERIC frozen board stubs for that port.
-    if not candidates and boards and boards != [GENERIC_L]:
+    # Only trigger for a concrete port + board request; never for 'all'/'auto', otherwise the literal
+    # 'all' would be used as a board name and produce bogus '<port>-all-merged' folders.
+    if not candidates and boards and boards != [GENERIC_L] and not is_auto(boards) and not is_auto(ports):
         requested_boards = boards if isinstance(boards, list) else [boards]
         # Check if any of the requested boards are not GENERIC variants
         if not all(b.lower() in {g.lower() for g in GENERIC} for b in requested_boards):
