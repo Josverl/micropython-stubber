@@ -48,13 +48,41 @@ def pyright_results(rst_stubs, pytestconfig: pytest.Config) -> Dict[str, Dict]:
     return results
 
 
+def _current_git_ref(repo: str) -> str:
+    """Return the current branch name, or the commit sha if HEAD is detached.
+
+    Used to restore a repo to its original checkout after a test switches branches.
+    """
+    branch = subprocess.run(
+        ["git", "-C", repo, "symbolic-ref", "--short", "-q", "HEAD"],
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if branch:
+        return branch
+    return subprocess.run(
+        ["git", "-C", repo, "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
 @pytest.fixture(scope="module")
 def micropython_repo(testrepo_micropython: Path, testrepo_micropython_lib: Path):
-    "make sure a recent branch is checked out"
+    "make sure a recent branch is checked out, then restore the original checkout"
+    repo = testrepo_micropython.as_posix()
+    # capture the current checkout so these tests do not leave the (real) repo on
+    # another branch/version - see the reflog issue where it was left on 'master'.
+    original_ref = _current_git_ref(repo)
 
-    git.switch_branch("master", testrepo_micropython.as_posix())
-
-    yield git.get_local_tag(testrepo_micropython.as_posix()) or "xx_x"
+    git.switch_branch("master", repo)
+    try:
+        yield git.get_local_tag(repo) or "xx_x"
+    finally:
+        # restore the repo to the checkout it had before the tests ran (runs even
+        # if a test fails)
+        if original_ref:
+            subprocess.run(["git", "-C", repo, "checkout", "--quiet", original_ref], capture_output=True, text=True)
 
 
 @pytest.fixture(scope="module")
