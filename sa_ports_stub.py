@@ -27,6 +27,11 @@ import mpflash.db.core  # noqa: F401  # initializes the peewee database connecti
 
 set_loglevel("TRACE")
 
+# Workspace root that holds ./repos/micropython, ./repos/micropython-lib and
+# ./repos/micropython-stubs. stubber resolves its repo paths relative to its cwd,
+# so its sub-commands must run from here.
+ROOT = Path(__file__).resolve().parent
+
 CREATESTUBS_PY = importlib.resources.files("stubber.board").joinpath("createstubs.py")
 
 
@@ -39,6 +44,11 @@ def _find_stubs_root() -> Path | None:
     if candidate.is_dir():
         return candidate
     return None
+
+
+def _normalize_version(version: str) -> str:
+    """Strip a trailing '-dirty' marker so a build from a dirty tree matches its clean tag."""
+    return version[: -len("-dirty")] if version.endswith("-dirty") else version
 
 
 def get_sa_firmware_path(board_id: str, version: str) -> Path | None:
@@ -56,6 +66,18 @@ def get_sa_firmware_path(board_id: str, version: str) -> Path | None:
         custom=True,
         version=version,
     )
+    if not fws:
+        # A firmware built from a dirty working tree is registered as e.g. 'v1.28.0-dirty',
+        # which does not match the clean requested version. Fall back to matching on
+        # board_id with the version compared ignoring the '-dirty' suffix.
+        target = _normalize_version(version)
+        fws = [
+            fw
+            for fw in all_custom
+            if fw.board_id == board_id and _normalize_version(str(fw.version)) == target
+        ]
+        if fws:
+            print(f"  matched (ignoring '-dirty') : {[str(fw.version) for fw in fws]}")
     for fw in fws:
         fw_path = mpflash_config.firmware_folder / str(fw.firmware_file)
         print(f"  checking        : {fw_path} exists={fw_path.exists()}")
@@ -147,20 +169,20 @@ def main(port: str, variant: str, version: str | None, stubs_root: str, dest: st
         raise SystemExit(1)
 
     if merge:
-        print(f"Running stubber merge for {port} {version} (cwd={stubs_root_path})")
-        if not run_stubber("merge", version=version, port=port, cwd=stubs_root_path):
+        print(f"Running stubber merge for {port} {version} (cwd={ROOT})")
+        if not run_stubber("merge", version=version, port=port, cwd=ROOT):
             print(f"stubber merge failed for {port} {version}")
             raise SystemExit(1)
 
     if build:
-        print(f"Running stubber build for {port} {version} (cwd={stubs_root_path})")
-        if not run_stubber("build", version=version, port=port, cwd=stubs_root_path):
+        print(f"Running stubber build for {port} {version} (cwd={ROOT})")
+        if not run_stubber("build", version=version, port=port, cwd=ROOT):
             print(f"stubber build failed for {port} {version}")
             raise SystemExit(1)
 
     if publish:
-        print(f"Publishing stubs for {port} {version} (cwd={stubs_root_path})")
-        result = subprocess.run(["stubber", "publish", "--version", version, "--port", port, "--pypi"], cwd=str(stubs_root_path))
+        print(f"Publishing stubs for {port} {version} (cwd={ROOT})")
+        result = subprocess.run(["stubber", "publish", "--version", version, "--port", port, "--pypi"], cwd=str(ROOT))
         if result.returncode != 0:
             print(f"stubber publish failed for {port} {version}")
             raise SystemExit(1)

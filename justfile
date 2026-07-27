@@ -42,8 +42,8 @@ next_patch:
 variants:
     @echo "Building .mpy files..."
     uv run stubber make-variants
-    uv run stubber make-variants --target ./mip/v5 --version 1.18
     uv run stubber make-variants --target ./mip/v6 --version 1.19.1
+    # uv run stubber make-variants --target ./mip/v5 --version 1.18
 
 build:
     @echo "Building the project..."
@@ -86,14 +86,13 @@ store_token:
     keyring.set_password("{{ pypi_service }}", "{{ pypi_token_name }}", token)
     print("Stored pypi token in keyring ({{ pypi_service }} / {{ pypi_token_name }})")
 
-# build standalone ports
-sa_build v="stable":
-    uv run sa_ports_build.py --version {{v}} unix
-    uv run sa_ports_build.py --version {{v}} windows
+# build standalone ports <stable> <unix>
+sa_build v="stable" p="unix":
+    uv run sa_ports_build.py --version {{v}} {{p}}
 
 # stub standalone ports
 sa_stub v="stable" p="unix":
-    uv run sa_ports_stub.py --version {{v}} {{p}}
+    uv run sa_ports_stub.py --stubs-root ./repos/micropython-stubs --version {{v}} {{p}}
 
 
 # Prepare for wasm (manual stub) 

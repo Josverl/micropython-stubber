@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 import click
 import mpbuild.build as mpb  # type: ignore
@@ -20,8 +21,9 @@ from mpflash.config import config as mpflash_config
 from mpflash.custom import add_custom_firmware
 from mpflash.versions import get_preview_mp_version, get_stable_mp_version
 import mpflash.db.core  # noqa: F401  # initializes the peewee database connection
+from mpflash.logger import log
 
-ROOT = Path("~/combo/micropython-stubs").expanduser().resolve()
+ROOT = Path(__file__).resolve().parent
 
 
 def copy_firmware(board: Board, variant: str | None, version: str, build: str, mpy_dir: Path, fw_path: Path, register: bool = True):
@@ -174,6 +176,11 @@ def main(port: str, variant: str | None, version: str | None, extra: str, fw_pat
     mpy_dir = ROOT / "repos/micropython"
     mpy_dir = mpy_dir.resolve().absolute()
     assert mpy_dir.exists(), f"Micropython repo not found in {mpy_dir}"
+
+    if sys.platform == "win32":
+        # Builds only on linux / WSL
+        log.error("Building stand-alone ports is not supported on Windows. Use WSL or Linux.")
+        raise SystemExit(1)
 
     extras = extra.split() if extra else []
 
