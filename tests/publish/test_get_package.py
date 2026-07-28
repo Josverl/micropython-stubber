@@ -73,7 +73,7 @@ def test_get_package_info_no_match(test_db_conn, tmp_path):
         # ("1.23.0", "esp32", "generic"),
     ],
 )
-def test_get_package(test_db_conn, mpy_version, port, board):
+def test_get_package(test_db_conn, isolated_publish_config, mpy_version, port, board):
     package = get_package(test_db_conn, port=port, board=board, version=mpy_version)
     assert package is not None
     assert package.port == port
@@ -83,7 +83,7 @@ def test_get_package(test_db_conn, mpy_version, port, board):
     assert package.stub_hash, "Stub only hash not found"
 
 
-def test_qandd():
+def test_qandd(isolated_publish_config):
     pkg_name = "micropython-esp32-stubs"
     port = "esp32"
     board = "generic"

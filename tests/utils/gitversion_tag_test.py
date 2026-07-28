@@ -21,6 +21,11 @@ def test_get_version(path):
     assert short_hash is not None
     # tag should start with a v
     assert git_tag[0] == "v"
+    # `git describe --dirty` appends a `-dirty` marker when the working tree has
+    # uncommitted changes (e.g. modified submodules in CI); it is not part of the
+    # version scheme, so drop it before validating the tag structure.
+    if git_tag.endswith("-dirty"):
+        git_tag = git_tag[: -len("-dirty")]
     parts = git_tag.split("-")
 
     if len(parts) > 2:

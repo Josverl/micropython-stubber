@@ -134,7 +134,7 @@ def test_publish_package(
     monkeypatch.setenv("POETRY_VIRTUALENVS_CREATE", "false")
     pkg = fake_package
 
-    m_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_publish: MagicMock = mocker.patch("stubber.publish.package.StubPackage.hatch_publish", autospec=True, return_value=True)
 
     # allow the publishing logic to run during test
     pkg._publish = True  # type: ignore

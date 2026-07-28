@@ -27,16 +27,16 @@ def test_publish_no_change(mocker: MockerFixture, tmp_path: Path, pytestconfig: 
     m_is_changed = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)  # type: ignore
 
     m_check = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_p_build = mocker.patch("stubber.publish.package.StubPackage.hatch_build", autospec=True, return_value=True)
+    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.hatch_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
     # Test publish: not changed :--> should not build or publish
     # -----------------------------------------------------------------------------------------------
     result = publish_multiple(production=False, ports=["stm32"])
     assert len(result) > 0
-    assert m_p_build.call_count == 0, "should not call poetry build"
-    assert m_p_publish.call_count == 0, "should not call poetry publish"
+    assert m_p_build.call_count == 0, "should not call hatch build"
+    assert m_p_publish.call_count == 0, "should not call hatch publish"
 
 
 @pytest.mark.mocked
@@ -54,8 +54,8 @@ def test_publish_changed(mocker: MockerFixture, tmp_path: Path, pytestconfig: py
     m_is_changed = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
     m_check = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_p_build = mocker.patch("stubber.publish.package.StubPackage.hatch_build", autospec=True, return_value=True)
+    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.hatch_publish", autospec=True, return_value=True)
     # mock the package on disk
     mocker.patch("stubber.publish.package.StubPackage.are_package_sources_available", autospec=True, return_value=True)
     mocker.patch("stubber.publish.package.StubPackage.update_package_files", autospec=True, return_value=True)
@@ -88,8 +88,8 @@ def test_publish_build(mocker: MockerFixture, tmp_path: Path, pytestconfig: pyte
     m_is_changed = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
     m_check = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_p_build = mocker.patch("stubber.publish.package.StubPackage.hatch_build", autospec=True, return_value=True)
+    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.hatch_publish", autospec=True, return_value=True)
 
     # -----------------------------------------------------------------------------------------------
     # Test publish - unchanged + explicit build :--> should not build and not publish
@@ -116,8 +116,8 @@ def test_publish_build_force(mocker: MockerFixture, tmp_path: Path, pytestconfig
     m_is_changed = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
     m_check = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)  # type: ignore
-    m_p_build = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_p_build = mocker.patch("stubber.publish.package.StubPackage.hatch_build", autospec=True, return_value=True)
+    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.hatch_publish", autospec=True, return_value=True)
     # mock the package on disk
     mocker.patch("stubber.publish.package.StubPackage.are_package_sources_available", autospec=True, return_value=True)
     mocker.patch("stubber.publish.package.StubPackage.update_package_files", autospec=True, return_value=True)
@@ -149,8 +149,8 @@ def test_publish_force(mocker: MockerFixture, tmp_path: Path, pytestconfig: pyte
     m_is_changed = mocker.patch("stubber.publish.package.StubPackage.is_changed", autospec=True, return_value=False)
 
     m_check = mocker.patch("stubber.publish.package.StubPackage.check", autospec=True, return_value=True)
-    m_p_build = mocker.patch("stubber.publish.package.StubPackage.poetry_build", autospec=True, return_value=True)
-    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.poetry_publish", autospec=True, return_value=True)
+    m_p_build = mocker.patch("stubber.publish.package.StubPackage.hatch_build", autospec=True, return_value=True)
+    m_p_publish = mocker.patch("stubber.publish.package.StubPackage.hatch_publish", autospec=True, return_value=True)
     # mock the package on disk
     mocker.patch("stubber.publish.package.StubPackage.are_package_sources_available", autospec=True, return_value=True)
     mocker.patch("stubber.publish.package.StubPackage.update_package_files", autospec=True, return_value=True)

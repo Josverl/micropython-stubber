@@ -1014,6 +1014,19 @@ class HatchBuilder(Builder):
             # drop the poetry-specific configuration so the file lists are not duplicated ...
             if "tool" in _pyproject:
                 _pyproject["tool"].pop("poetry", None)
+            # A hatch package requires a [project] table (name/version/dependencies).
+            # Older or partially-converted files may be missing it entirely; restore
+            # it from the template so the package stays buildable and the version can
+            # be written back later.
+            if "project" not in _pyproject:
+                try:
+                    with open(CONFIG.template_path / "pyproject_hatch.toml", "rb") as f:
+                        _template = tomllib.load(f)
+                    _pyproject["project"] = _template.get("project", {})
+                    _pyproject["project"]["version"] = self.mpy_version
+                except FileNotFoundError as e:
+                    log.error(f"Could not find hatch template pyproject.toml file {e}")
+                    raise e
             # ... and make sure the build backend is hatchling (not poetry-core)
             _pyproject["build-system"] = {
                 "requires": ["hatchling"],
@@ -1327,7 +1340,7 @@ class StubPackage(PoetryBuilder, HatchBuilder):
             self.write_package_json()
             log.trace(f"New hash: {self.package_name} {self.pkg_version} {self.hash}")
             if self.package_type == PackageType.HATCH:
-                build_ok = HatchBuilder.hatch_build(self)  # type: ignore[arg-type]
+                build_ok = self.hatch_build()
                 build_tool = "Hatch"
             else:
                 build_ok = self.poetry_build()
@@ -1413,7 +1426,7 @@ class StubPackage(PoetryBuilder, HatchBuilder):
         self.update_hashes()  # resets is_changed to False
         if not dry_run:
             if self.package_type == PackageType.HATCH:
-                pub_ok = HatchBuilder.hatch_publish(self, production=production)  # type: ignore[arg-type]
+                pub_ok = self.hatch_publish(production=production)
             else:
                 pub_ok = self.poetry_publish(production=production)
         else:

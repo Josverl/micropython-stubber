@@ -14,6 +14,46 @@ from .fakeconfig import FakeConfig
 pytestmark = [pytest.mark.stubber]
 
 
+# Stub source folders referenced by the packages exercised in the publish tests.
+# They are copied into an isolated temp stub path so the tests never depend on -
+# or write to - the real ``repos/micropython-stubs`` checkout.
+ISOLATED_STUB_SOURCES = [
+    "micropython-core",
+    "micropython-v1_18-esp32-merged",
+    "micropython-v1_18-frozen/esp32/GENERIC",
+    "micropython-v1_20_0-rp2-PICO-merged",
+    "micropython-v1_20_0-frozen/rp2/GENERIC",
+    "micropython-v1_22_1-rp2-RPI_PICO-merged",
+]
+
+
+@pytest.fixture
+def isolated_publish_config(mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
+    """Redirect publish/stub/template paths to an isolated temp location.
+
+    Prevents tests that build packages from writing ``pyproject.toml`` (or any
+    other file) into the real ``repos/micropython-stubs`` checkout. A small set
+    of stub source folders is copied into the temp stub path so source/combo
+    resolution has real folders to find.
+    """
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
+    real_stubs = pytestconfig.rootpath / "repos/micropython-stubs/stubs"
+    config.stub_path = tmp_path / "stubs"
+    config.stub_path.mkdir(parents=True, exist_ok=True)
+    for rel in ISOLATED_STUB_SOURCES:
+        src = real_stubs / rel
+        if src.exists():
+            dst = config.stub_path / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+
+    mocker.patch("stubber.publish.publish.CONFIG", config)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+    mocker.patch("stubber.publish.package.CONFIG", config)
+    return config
+
+
+
 @pytest.fixture
 def fake_package(request, mocker: MockerFixture, tmp_path: Path, pytestconfig: pytest.Config):
     """\
