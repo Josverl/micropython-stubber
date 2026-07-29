@@ -177,7 +177,7 @@ search = '"version": "{current_version}"'
 replace = '"version": "{new_version}"'
 
 [tool.pyright]
-include = ["src", "tests"]
+include = ["src", "tests", "sa_ports_stub.py", "sa_ports_build.py"]
 exclude = [
     "snippets",
     "src/stubber/board",

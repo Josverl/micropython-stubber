@@ -4,7 +4,7 @@
 #   "micropython-stubber",
 #   "mpflash",
 #   "click",
-#   "poetry"
+#   "hatchling"
 # ]
 # ///
 # Run createstubs for stand-alone MicroPython ports (unix, windows).
