@@ -466,6 +466,7 @@ def enrich_folder(
 
     # sort by target (stable diffs) and sources per target (stable cache keys)
     reported_errors: set = set()
+    errors: List[Exception] = []
     for target in sorted(sources_by_target):
         sources = sorted(sources_by_target[target])
         try:
@@ -493,6 +494,7 @@ def enrich_folder(
             if require_docstub:
                 raise (FileNotFoundError(f"No doc-stub or source  file found for {target}")) from e
         except (Exception, ParserSyntaxError) as e:
+            errors.append(e)
             # A malformed *source* doc-stub can affect many boards; report each
             # distinct parse error once (concisely) instead of a full traceback
             # for every affected target.
@@ -501,6 +503,9 @@ def enrich_folder(
                 reported_errors.add(first_line)
                 log.warning(f"Skipped enriching (parse error): {first_line}")
             continue
+
+    if errors:
+        raise ValueError(f"Failed to enrich {len(errors)} file(s); first error: {errors[0]}") from errors[0]
 
     # run ruff on the target folder
     format_stubs(target_folder)
@@ -515,10 +520,7 @@ def enrich_folder(
     # the info log if reported at info level.
     if cache_cfg.CACHE_ENABLED:
         stats = enrich_cache_stats()
-        log.debug(
-            f"enrich cache: {stats['hits']} hits, {stats['misses']} misses, "
-            f"{stats['size']} entries in {stats['directory']}"
-        )
+        log.debug(f"enrich cache: {stats['hits']} hits, {stats['misses']} misses, {stats['size']} entries in {stats['directory']}")
     return count
 
 

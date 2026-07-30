@@ -100,6 +100,12 @@ not all constants are available on all ports.
 
 """
 
+ESPNOW_CONSTANT_RST = """
+.. data:: espnow.MAX_DATA_LEN(=250 or 1470 for ESPNow V1 or V2)
+
+    Maximum ESP-NOW payload size, depending on the protocol version.
+"""
+
 
 def test_module_constants():
     # test is module level constants can be processed
@@ -119,6 +125,18 @@ def test_module_constants():
     assert len(const_list) == 11
     # and 11 single line comments for docstrings
     assert len(doc_list) == 11
+
+
+def test_constant_prose_is_not_emitted_as_a_value():
+    r = RSTWriter()
+    load_rst(r, ESPNOW_CONSTANT_RST)
+    r.current_module = "espnow"
+
+    r.parse()
+    r.prepare_output()
+
+    assert "MAX_DATA_LEN: Incomplete\n" in r.output
+    assert not any("ESPNow V1 or V2" in line and line.startswith("MAX_DATA_LEN") for line in r.output)
 
 
 def test_class_constants():

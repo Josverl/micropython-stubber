@@ -92,3 +92,19 @@ def test_enrich_folder(
     # single pass. Count the total number of doc-stubs merged across all calls.
     total_sources = sum(len(call.args[0]) for call in m_enrich_file.call_args_list)
     assert total_sources >= expected_count, f"Expected at least {expected_count} doc-stubs to be merged but found {total_sources}"
+
+
+def test_enrich_folder_raises_after_file_error(mocker: MockerFixture, tmp_path: Path):
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    source.mkdir()
+    target.mkdir()
+    (source / "module.pyi").write_text("value: int\n", encoding="utf-8")
+    (target / "module.pyi").write_text("value = 1\n", encoding="utf-8")
+    mocker.patch("stubber.codemod.enrich.enrich_file", side_effect=ValueError("parse failed"), autospec=True)
+    m_format_stubs = mocker.patch("stubber.codemod.enrich.format_stubs", autospec=True)
+
+    with pytest.raises(ValueError, match="Failed to enrich 1 file"):
+        enrich_folder(source, target)
+
+    m_format_stubs.assert_not_called()

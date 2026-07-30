@@ -40,6 +40,27 @@ def test_merge_all_docstubs_mocked(mocker, tmp_path, pytestconfig):
 
 
 @pytest.mark.mocked
+def test_merge_all_docstubs_does_not_count_enrichment_error(mocker, tmp_path, pytestconfig):
+    config = FakeConfig(tmp_path=tmp_path, rootpath=pytestconfig.rootpath)
+    mocker.patch("stubber.publish.merge_docstubs.CONFIG", config)
+    mocker.patch(
+        "stubber.publish.merge_docstubs.board_candidates",
+        autospec=True,
+        return_value=[{"family": "micropython", "version": "1.29.0-preview", "port": "esp32", "board": "ESP32_GENERIC_C6"}],
+    )
+    mocker.patch("stubber.publish.merge_docstubs.Path.exists", autospec=True, return_value=True)
+    mocker.patch(
+        "stubber.publish.merge_docstubs.copy_and_merge_docstubs",
+        autospec=True,
+        side_effect=ValueError("Failed to enrich 1 file"),
+    )
+
+    result = merge_all_docstubs(versions="1.29.0-preview", ports="esp32", boards="ESP32_GENERIC_C6")
+
+    assert result == 0
+
+
+@pytest.mark.mocked
 def test_merge_all_docstubs_fallback_to_generic(mocker, tmp_path, pytestconfig):
     """Test fallback to GENERIC frozen board when board-specific stubs are not found"""
     # use the test config

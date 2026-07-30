@@ -33,6 +33,7 @@ SourceDict is the 'base class'
 
 from __future__ import annotations
 
+import ast
 from typing import List, Optional, OrderedDict, Union
 
 from .classsort import sort_classes
@@ -144,10 +145,14 @@ class SourceDict(OrderedDict):
                 # remove brackets from constant values
                 name = name.replace("(", "").replace(")", "")
                 name, value = name.split("=", 1)
+                try:
+                    ast.parse(value, mode="eval")
+                except SyntaxError:
+                    value = None
                 # determine more specific type from value
-                if type in {"Any", ""}:
+                if value is not None and type in {"Any", ""}:
                     try:
-                        value_ = eval(value)
+                        value_ = ast.literal_eval(value)
                         if isinstance(value_, bool):
                             type = "bool"
                         elif isinstance(value_, int):
