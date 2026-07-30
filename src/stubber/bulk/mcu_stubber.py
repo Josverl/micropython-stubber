@@ -259,7 +259,7 @@ def copy_boardname_to_board(mcu: MPRemoteBoard):
         log.info(f"Writing BOARD_ID='{mcu.board_id}' to boardname.py")
     else:
         cmd = ["rm", "boardname.py"]
-    rc, _ = mcu.run_command(cmd)
+    rc, _ = mcu.run_command(cmd, log_errors=False)
     if rc != OK and "rm" not in cmd:
         log.error(f"Error during copy createstubs running command: {cmd}")
 
