@@ -6,7 +6,6 @@
 #   "click"
 # ]
 # ///
-# requires MPBuild PR70 to build webassemby and windows versions using mpbuild
 
 from __future__ import annotations
 

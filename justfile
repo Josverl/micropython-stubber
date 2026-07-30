@@ -122,16 +122,59 @@ wasm_stub:
     # start webserver and browser
     uv run serve.py
 
+# copy from temp folder to micropython-stubs/stubs 
+wasm_copy: wasm_cleanup
+    cp -r webassembly-stubber/WASM-TEMP/micropython-* repos/micropython-stubs/stubs
+
+
+[script]
+wasm_cleanup path="webassembly-stubber/WASM-TEMP/micropython-v1_28_0-webassembly-pyscript":
+    # /// script
+    # requires-python = ">=3.9"
+    # ///
+    from pathlib import Path
+    import re
+
+    root = Path(r"{{path}}")
+    if not root.is_dir():
+        raise SystemExit(f"Stub directory does not exist: {root}")
+
+    replacements = (
+        (re.compile(r"<JsProxy \d+>"), "<JsProxy nn>"),
+        (re.compile(r"-preview"), ""),
+        (re.compile(r"-233"), ""),
+        (re.compile(r"233"), ""),
+    )
+    counts = [0] * len(replacements)
+    changed_files = 0
+    removed_zone_files = 0
+
+    for zone_path in sorted(root.rglob("*.*:Zone.Identifier")):
+        if zone_path.is_file():
+            zone_path.unlink()
+            removed_zone_files += 1
+
+    for stub_path in sorted(root.rglob("*.pyi")):
+        original = stub_path.read_text(encoding="utf-8")
+        cleaned = original
+        for index, (pattern, replacement) in enumerate(replacements):
+            cleaned, count = pattern.subn(replacement, cleaned)
+            counts[index] += count
+
+        if cleaned != original:
+            stub_path.write_text(cleaned, encoding="utf-8")
+            changed_files += 1
+
+    print(f"Cleaned {changed_files} .pyi file(s) in {root}")
+    print(f"Removed {removed_zone_files} Zone.Identifier file(s)")
+    print(f"Replacement counts: JsProxy={counts[0]}, -preview={counts[1]}, -233={counts[2]}, 233={counts[3]}")
+
+
+
 # Merge and package generated WebAssembly PyScript stubs.
 wasm_build v="stable":
-    # in all .pyi files
-    # re.replace <JsProxy \d+> with <JsProxy nn>
-    # re.replace -preview with ""
-    # re.replace -233 with ""
-    # re.replace 233 with ""
-    # copy from temp folder to micropython-stubs/stubs 
-    stubber merge --port webassembly --variant pyscript --version {{v}}
-    stubber build --port webassembly --variant pyscript --version {{v}}
+    stubber merge --port webassembly --board auto --version {{v}}
+    stubber build --port webassembly --board auto --version {{v}}
     
 # wasm_build:
 #     # uv run sa_ports_build.py --version stable webassembly --variant pyscript --fw-path webassembly-stubber/firmware/webassembly
