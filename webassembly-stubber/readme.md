@@ -1,58 +1,60 @@
-# WebAssembly Firmware Type Stubs Generator
+# WebAssembly Firmware Stub Generator
 
-This folder contains an HTML page that can be used to create initial firmware type stubs for **WebAssembly** and **PyScript** environments.
+The browser tool runs `createstubs.py` against a MicroPython WebAssembly interpreter and synchronizes the generated firmware stubs to a local directory.
 
-## Contents
+## Generate Stubs
 
-- **`createstubs-pyscript-hosted.html`** - Interactive HTML page that runs MicroPython's createstubs in the browser
-- **`mount_createstubs.py`** - Python script that handles the stub generation process
-- **`createstubs-req.toml`** - Configuration file for PyScript requirements
-- **`stubs/`** - Output directory where generated stubs are saved
+Run all recipes from the repository root.
 
-## Usage
+1. Start the ZIP-aware server:
 
-1. **Start the local server** (required for proper file access):
    ```bash
-   python -m http.server -d ./webassembly-stubber --bind 127.0.0.1
+   just wasm_stub
    ```
-2. Open `http://127.0.0.1:8000/createstubs-pyscript-hosted.html` in a web browser
-3. The page will automatically run the stub generation process using PyScript
-4. When prompted, select a local folder where the stubs should be saved
-5. The generated firmware stubs will be saved to a `stubs` subfolder in your selected location
 
-## Finding Available MicroPython Versions
+   This creates `webassembly-stubber/WASM-TEMP` and prints the page URL. Keep the server running and open that URL in a Chromium-based browser.
 
-To find available MicroPython WebAssembly versions, use the included query script:
+2. Select one interpreter source on the page:
+
+   - **MicroPython version** loads a published `@micropython/micropython-webassembly-pyscript` package.
+   - **PyScript release** uses the MicroPython interpreter bundled with that PyScript release.
+   - **Local build** loads a ZIP from `firmware/webassembly/`.
+
+3. Select **Generate stubs**. When the browser requests a directory, select the empty `webassembly-stubber/WASM-TEMP` directory created in step 1.
+
+4. Wait for the terminal output to report that `/stubs` was synchronized. The generated files are now under `webassembly-stubber/WASM-TEMP/stubs/`.
+
+5. Copy the generated firmware stub directory into `repos/micropython-stubs/stubs/`, review it, and build the package for the matching MicroPython version:
+
+   ```bash
+   just wasm_build <version>
+   ```
+
+   `wasm_build` runs `stubber merge` and `stubber build`; it does not copy the generated files.
+
+## Versions And Local Builds
+
+The page retrieves published MicroPython and PyScript versions automatically and lists them in the corresponding selectors. No separate version query is needed.
+
+To build stable or preview WebAssembly firmware locally, run:
 
 ```bash
-python query_jsdelivr_versions.py
+just sa_wasm stable
+just sa_wasm preview
 ```
 
-This will display all published versions of `@micropython/micropython-webassembly-pyscript` from jsDelivr CDN. You can then update the `createstubs-req.toml` file to use a specific version by modifying the `interpreter` line:
+For a manually supplied build, create a ZIP containing `micropython.mjs` and `micropython.wasm` at its root, then place it in `firmware/webassembly/`. Restart `just wasm_stub` if the server is already running; the ZIP filename appears under **Local build**.
 
-```toml
-# Use latest version
-interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@latest/micropython.mjs"
+## Troubleshooting
 
-# Use specific stable version
-interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@1.26.0/micropython.mjs"
+- Use `just wasm_stub`, not `python -m http.server`; local ZIP discovery requires `serve.py`.
+- Select an empty, dedicated output directory. Synchronizing a directory containing many files can be very slow.
+- The browser stores the selected directory handle. Use **Reset output folder** on the page to choose another directory. Close other tabs using the tool if the reset is blocked.
+- If port 8000 is already in use, stop the existing server before running `just wasm_stub`.
 
-# Use preview version
-interpreter = "https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@1.27.0-preview-282/micropython.mjs"
-```
+## Files
 
-## Features
-
-- **Browser-based**: No local MicroPython installation required
-- **Multiple versions**: Supports different MicroPython versions (v1.24.1, v1.25.0, v1.26-preview)
-- **Automatic sync**: Generated stubs are synchronized to your local filesystem
-- **Interactive**: Uses PyScript's persistent filesystem for easy file management
-
-## Notes
-
-- Generated stubs are compatible with IDEs and type checkers
-- Select an empty or dedicated folder for output to avoid sync performance issues
-- The selected folder path is saved in browser cookies for convenience
-- **Troubleshooting**: If the page becomes unresponsive, or you want to select a different folder; clear your browser cookies for the http://127.0.0.1:8000/ site.
-
-- Part of the [micropython-stubber](https://github.com/josverl/micropython-stubber) project
+- `createstubs-pyscript-hosted.html`: browser interface and PyScript configuration
+- `mount_createstubs.py`: mounts the output directory, runs the stubber, and synchronizes `/stubs`
+- `serve.py`: local server and ZIP-backed WebAssembly endpoints
+- `tests/`: Playwright regression tests

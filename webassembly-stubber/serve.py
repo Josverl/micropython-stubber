@@ -22,7 +22,8 @@ import urllib.parse
 import zipfile
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-WEBASSEMBLY_DIR = "firmware/webassembly"
+WEBASSEMBLY_ROUTE = "firmware/webassembly"
+FIRMWARE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "firmware")
 
 
 class ZipAwareHandler(SimpleHTTPRequestHandler):
@@ -38,9 +39,9 @@ class ZipAwareHandler(SimpleHTTPRequestHandler):
         qs     = urllib.parse.parse_qs(parsed.query)
 
         # ── JSON list of local firmware names ────────────────────────────────
-        if path.rstrip("/") == f"/{WEBASSEMBLY_DIR}" and qs.get("format") == ["json"]:
+        if path.rstrip("/") == f"/{WEBASSEMBLY_ROUTE}" and qs.get("format") == ["json"]:
             names = sorted(
-                f[:-4] for f in os.listdir(WEBASSEMBLY_DIR)
+                f[:-4] for f in os.listdir(FIRMWARE_DIR)
                 if f.endswith(".zip")
             )
             data = json.dumps(names).encode()
@@ -52,14 +53,14 @@ class ZipAwareHandler(SimpleHTTPRequestHandler):
             return
 
         # ── Serve micropython.mjs / .wasm from inside a zip ──────────────────
-        prefix = f"/{WEBASSEMBLY_DIR}/"
+        prefix = f"/{WEBASSEMBLY_ROUTE}/"
         if path.startswith(prefix):
             rest  = path[len(prefix):]          # "{name}/micropython.mjs"
             parts = rest.split("/")
             if len(parts) == 2:
                 name, filename = parts
                 if filename in ("micropython.mjs", "micropython.wasm"):
-                    zip_path = os.path.join(WEBASSEMBLY_DIR, name + ".zip")
+                    zip_path = os.path.join(FIRMWARE_DIR, name + ".zip")
                     if os.path.exists(zip_path):
                         try:
                             with zipfile.ZipFile(zip_path) as zf:
@@ -92,7 +93,7 @@ class ZipAwareHandler(SimpleHTTPRequestHandler):
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
     server = HTTPServer(("127.0.0.1", port), ZipAwareHandler)
-    print(f"Local WASM zips from: {os.path.abspath(WEBASSEMBLY_DIR)}")
+    print(f"Local WASM zips from: {os.path.abspath(FIRMWARE_DIR)}")
 
     print(f"\nServing on http://127.0.0.1:{port}/createstubs-pyscript-hosted.html\n")
     try:

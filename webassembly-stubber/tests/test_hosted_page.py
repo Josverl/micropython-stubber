@@ -219,7 +219,10 @@ class TestMpyConfig:
     def test_mpy_mode_has_packages(self, page: Page, page_url: str):
         page.goto(f"{page_url}?mode=mpy&version=1.24.1")
         page.wait_for_timeout(800)
-        assert "micropython-stubs" in mpy_config_text(page)
+        cfg = mpy_config_text(page)
+        assert "https://raw.githubusercontent.com/Josverl/micropython-stubs/main/mip/typing.json" in cfg
+        assert "https://raw.githubusercontent.com/Josverl/micropython-stubber/main/src/stubber/board/createstubs.py" in cfg
+        assert "github:" not in cfg
 
     def test_mpy_mode_has_cdn_interpreter(self, page: Page, page_url: str):
         page.goto(f"{page_url}?mode=mpy&version=1.24.1")
