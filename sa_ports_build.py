@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.9"
 # dependencies = [
-#   "mpbuild@git+https://github.com/josverl/mpbuild@build_sa_ports",
+#   "mpbuild",
 #   "mpflash",
 #   "click"
 # ]

@@ -1,10 +1,14 @@
 # https://just.systems
+# set allow-duplicate-variables 
+set allow-duplicate-recipes
 
-# Set shell for Windows OSs:
-set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+import ?'repos/micropython-stubs/justfile'
 
-# Run `[script]` recipes with uv so inline script metadata (dependencies) is honored
-set script-interpreter := ['uv', 'run', '--script']
+# # Set shell for Windows OSs:
+# set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+
+# # Run `[script]` recipes with uv so inline script metadata (dependencies) is honored
+# set script-interpreter := ['uv', 'run', '--script']
 
 # keyring entry used to store/retrieve the pypi token for publishing
 pypi_service := "pypi"
@@ -28,7 +32,7 @@ update:
     uv lock --upgrade
 
 # Build the project documentation
-docs:
+sphinx:
     @echo "Building documentation..."
     uv sync --group docs
     docs\make.bat html
@@ -95,8 +99,9 @@ store_token:
     print("Stored pypi token in keyring ({{ pypi_service }} / {{ pypi_token_name }})")
 
 # build standalone ports <stable> <unix>
-sa_build v="stable" p="unix":
-    uv run sa_ports_build.py --version {{v}} {{p}}
+sa_build v="stable" :
+    uv run sa_ports_build.py --version {{v}} unix
+    uv run sa_ports_build.py --version {{v}} windows
 
 # stub standalone ports
 sa_stub v="stable" p="unix":

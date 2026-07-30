@@ -1,12 +1,3 @@
-# /// script
-# requires-python = ">=3.9"
-# dependencies = [
-#   "micropython-stubber",
-#   "mpflash",
-#   "click",
-#   "hatchling"
-# ]
-# ///
 # Run createstubs for stand-alone MicroPython ports (unix, windows).
 # Firmware must already be built and registered with mpflash (see sa_ports_build.py).
 # webassembly support to be added later.
