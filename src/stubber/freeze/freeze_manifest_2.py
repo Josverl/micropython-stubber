@@ -65,9 +65,11 @@ def make_path_vars(
         vars["ARDUINO_LIB_DIR"] = (mpy_path / "lib/arduino-lib").absolute().as_posix()
 
     if port == "alif":
-        # alif port uses MCU_CORE ?= M55_HP - see micropython/ports/alif/boards/manifest.py
-        log.warning(f"alif - Adding MCU_CORE='HP' to vars")
-        vars["MCU_CORE"] = "HP"
+        # alif's mpconfigport.mk derives the manifest var as tolower(2nd part of MCU_CORE);
+        # use the high performance core's manifest for the stub generation, since it has
+        # more modules than the standard variant.
+        log.warning(f"alif - Adding MCU_CORE='hp' to vars for frozen stub generation.")
+        vars["MCU_CORE"] = "hp"
     elif port == "zephyr":
         # make sure the port/zephyr/modules folder exists
         (mpy_path / "ports/zephyr/modules").mkdir(parents=True, exist_ok=True)
