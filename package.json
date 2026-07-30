@@ -18,5 +18,8 @@
     ]
   ],
   "deps": [],
-"version": "1.28.3"
+  "version": "1.28.3",
+  "dependencies": {
+    "playwright": "^1.62.0"
+  }
 }

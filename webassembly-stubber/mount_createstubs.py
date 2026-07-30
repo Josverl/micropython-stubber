@@ -14,10 +14,35 @@ def create_stubs():
 # May ask for permission from the user, and select the local target.
 path = "/stubs"
 
+
+async def _unmount(path):
+    """Remove tracked and partially-created mounts without syncing stale handles."""
+    mounted = getattr(fs, "mounted", {})
+    if path in mounted:
+        try:
+            await fs.unmount(path)
+            return
+        except Exception:
+            pass
+
+    try:
+        from _pyscript import interpreter  # type: ignore
+
+        interpreter._module.FS.unmount(path)
+    except Exception:
+        pass
+
+    if path in mounted:
+        del mounted[path]
+
+
 async def _revoke_mount(path):
     """Remove the stored IDB handle for path, works across PyScript versions."""
     if hasattr(fs, "revoke"):
-        await fs.revoke(path)
+        try:
+            await fs.revoke(path)
+        except Exception:
+            pass
     else:
         # Older PyScript: delete just the entry for this path from the IDB store.
         # deleteDatabase is blocked because PyScript keeps the connection open,
@@ -36,6 +61,7 @@ async def _revoke_mount(path):
                 req.onerror = (e) => resolve('open failed: ' + e.target.error);
             }})
         """)
+    await _unmount(path)
 
 
 try:

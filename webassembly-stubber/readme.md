@@ -18,7 +18,7 @@ Run all recipes from the repository root.
 
    - **MicroPython version** loads a published `@micropython/micropython-webassembly-pyscript` package.
    - **PyScript release** uses the MicroPython interpreter bundled with that PyScript release.
-   - **Local build** loads a ZIP from `firmware/webassembly/`.
+   - **Local build** loads a ZIP from the repository's `firmware/` directory.
 
 3. Select **Generate stubs**. When the browser requests a directory, select the empty `webassembly-stubber/WASM-TEMP` directory created in step 1.
 
@@ -43,7 +43,7 @@ just sa_wasm stable
 just sa_wasm preview
 ```
 
-For a manually supplied build, create a ZIP containing `micropython.mjs` and `micropython.wasm` at its root, then place it in `firmware/webassembly/`. Restart `just wasm_stub` if the server is already running; the ZIP filename appears under **Local build**.
+For a manually supplied build, create a ZIP containing `micropython.mjs` and `micropython.wasm` at its root, then place it in `firmware/`. Restart `just wasm_stub` if the server is already running; the ZIP filename appears under **Local build**.
 
 ## Troubleshooting
 

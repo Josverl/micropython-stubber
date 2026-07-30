@@ -4,6 +4,8 @@ It is possible to create MicroPython firmware stubs using the `stubber firmware-
 
 For a complete end-to-end example that includes firmware stubs alongside doc stubs and frozen stubs, see the [Quick Start](05_quick_start.md) guide.
 
+The Unix, Windows, and WebAssembly PyScript ports do not use a serially connected device. See [Build Standalone Port Stubs](42_standalone_stubs.md) for their build and stub-generation workflows.
+
 ## Quick Examples
 
 ```bash

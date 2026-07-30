@@ -98,12 +98,17 @@ store_token:
     keyring.set_password("{{ pypi_service }}", "{{ pypi_token_name }}", token)
     print("Stored pypi token in keyring ({{ pypi_service }} / {{ pypi_token_name }})")
 
-# build standalone ports <stable> <unix>
+# Build and register the Unix and Windows standalone interpreters.
 sa_build v="stable" :
     uv run sa_ports_build.py --version {{v}} unix
     uv run sa_ports_build.py --version {{v}} windows
 
-# stub standalone ports
+
+# Build the WebAssembly PyScript interpreter bundle.
+sa_wasm v="stable" :
+    uv run sa_ports_build.py --version {{v}} webassembly --variant pyscript
+
+# Generate, merge, and package Unix or Windows standalone stubs.
 sa_stub v="stable" p="unix":
     uv run sa_ports_stub.py --stubs-root ./repos/micropython-stubs --version {{v}} {{p}}
 
@@ -117,8 +122,7 @@ wasm_stub:
     # start webserver and browser
     uv run serve.py
 
-# TODO
-# Build stable and preview wasm binaries, using the 'pyscript'
+# Merge and package generated WebAssembly PyScript stubs.
 wasm_build v="stable":
     # in all .pyi files
     # re.replace <JsProxy \d+> with <JsProxy nn>
