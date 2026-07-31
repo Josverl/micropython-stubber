@@ -128,7 +128,7 @@ def test_frozen_candidates_err(pytestconfig, family, versions, ports, boards, co
     [
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
         ("nono", "auto", "auto", "auto", 0),  # find no candidates
-        ("micropython", "v1.18", "auto", "GENERIC", 16),  # find v1.18 ports
+        ("micropython", "v1.18", "auto", "GENERIC", 17),  # find v1.18 ports
         ("micropython", "v1.18", "esp32", "GENERIC", 1),  # find v1.18 ESP32 ports
         ("micropython", "v1.19.1", "esp8266", "GENERIC", 1),  # find v1.18 ESP8266 ports
         ("micropython", "v1.19.1", "esp8266", "generic", 1),  # find v1.18 ESP8266 ports

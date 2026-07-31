@@ -48,6 +48,29 @@ def test_known_params(params: str):
     assert not _is_unknown_params(params)
 
 
+def test_existing_overloads_are_not_duplicated(tmp_path: Path):
+    docstub = tmp_path / "source.pyi"
+    docstub.write_text(
+        """from typing import overload
+
+class Element:
+    @overload
+    def __getitem__(self, key: int) -> Element: ...
+    @overload
+    def __getitem__(self, key: slice) -> list[Element]: ...
+    @overload
+    def __getitem__(self, key: str) -> Element | None: ...
+""",
+        encoding="utf-8",
+    )
+    tree = parse_module("class Element:\n    def __getitem__(self, key): ...\n")
+
+    for _ in range(2):
+        tree = MergeCommand(CodemodContext(), docstub_file=docstub).transform_module(tree)
+
+    assert tree.code.count("@overload") == 3
+
+
 def print_diff(before: str, after: str):
     diff = difflib.unified_diff(
         before.splitlines(keepends=True),

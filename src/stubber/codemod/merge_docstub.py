@@ -663,7 +663,17 @@ class MergeCommand(VisitorBasedCodemodCommand):
             return updated_node
         if updated_node.decorators and any(is_decorator(dec, "overload") for dec in updated_node.decorators):
             # do not overwrite existing @overload functions
-            # ASSUME: they are OK as they are
+            # Consume its source counterpart so add_missed_overloads does not
+            # append the complete overload group again on repeated merges.
+            overloads = self.annotations[stack_id].overloads
+            for index, overload in enumerate(overloads):
+                params_match = overload.params is not None and updated_node.params.deep_equals(overload.params)
+                returns_match = (updated_node.returns is None and overload.returns is None) or (
+                    updated_node.returns is not None and overload.returns is not None and updated_node.returns.deep_equals(overload.returns)
+                )
+                if params_match and returns_match:
+                    overloads.pop(index)
+                    break
             return updated_node
         # Force-merge when firmware stub marks with @mp_available() (no args)
         if updated_node.decorators and any(is_empty_mp_available_call(dec) for dec in updated_node.decorators):
