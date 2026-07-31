@@ -39,7 +39,7 @@ from stubber.utils.post import format_stubs
 _ENRICH_CACHE = "enrich"
 
 # Bump when the merge logic changes in a way that invalidates cached results.
-ENRICH_CACHE_VERSION = "3"
+ENRICH_CACHE_VERSION = "5"
 
 # Sentinel stored when the transform produced no change, so a cached "no change"
 # result can be told apart from a cache miss.

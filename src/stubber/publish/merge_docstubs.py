@@ -16,6 +16,27 @@ from stubber.publish.pathnames import get_base, get_board_path, get_merged_path,
 from stubber.utils.config import CONFIG
 from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 
+PYSCRIPT_TOP_LEVEL_MODULES = {"_pyscript.pyi", "polyscript.pyi"}
+
+
+def copy_missing_pyscript_stubs(source_path: Path, target_path: Path) -> int:
+    """Copy PyScript reference files that are absent from firmware stubs."""
+    copied = 0
+    for source_file in source_path.rglob("*"):
+        if not source_file.is_file():
+            continue
+        relative_path = source_file.relative_to(source_path)
+        if relative_path.as_posix() in PYSCRIPT_TOP_LEVEL_MODULES:
+            target_file = target_path / relative_path
+        else:
+            target_file = target_path / "pyscript" / relative_path
+        if target_file.exists():
+            continue
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_file, target_file)
+        copied += 1
+    return copied
+
 
 def merge_all_docstubs(
     versions: Optional[Union[List[str], str]] = None,
@@ -125,10 +146,11 @@ def merge_all_docstubs(
             result = copy_and_merge_docstubs(board_path, merged_path, doc_path, clean=clean)
             log.debug(f"copy_and_merge_docstubs returned: {result}")
             if candidate["port"] == "webassembly":
-                # TODO : webassembly: Need to merge from reference/pyscript as well
-                # use enrich_folder to merge the docstubs
+                pyscript_reference = CONFIG.mpy_stubs_path / "reference/pyscript"
+                copied = copy_missing_pyscript_stubs(pyscript_reference, merged_path)
+                log.debug(f"Copied {copied} missing PyScript reference stubs")
                 enrich_folder(
-                    source_folder=CONFIG.mpy_stubs_path / "reference/pyscript",
+                    source_folder=pyscript_reference,
                     target_folder=merged_path,
                     write_back=True,
                     copy_params=True,

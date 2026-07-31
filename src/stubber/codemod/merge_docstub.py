@@ -758,13 +758,22 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 if _code(decorator) not in [_code(d) for d in new_decorators]:
                     new_decorators.append(decorator)
 
+            if len(stack_id) == 1:
+                new_decorators = [
+                    decorator
+                    for decorator in new_decorators
+                    if not (is_decorator(decorator, "classmethod") or is_decorator(decorator, "staticmethod"))
+                ]
+
             # if the method is both a static and a class method, we remove the @classmethod decorator to avoid inconsistencies
             if any(is_decorator(dec, "staticmethod") for dec in new_decorators) and any(
                 is_decorator(dec, "classmethod") for dec in new_decorators
             ):
                 new_decorators = [dec for dec in new_decorators if dec.decorator.value != "classmethod"]
 
+            source_asynchronous = doc_stub.def_node.asynchronous if isinstance(doc_stub.def_node, cst.FunctionDef) else None
             return updated_node.with_changes(
+                asynchronous=source_asynchronous or updated_node.asynchronous,
                 decorators=new_decorators,
                 params=doc_stub.params if overwrite_params else updated_node.params,
                 returns=doc_stub.returns if overwrite_return else updated_node.returns,

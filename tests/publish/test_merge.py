@@ -2,11 +2,29 @@ from pathlib import Path
 
 import pytest
 from mock import MagicMock
-from stubber.publish.merge_docstubs import copy_and_merge_docstubs, merge_all_docstubs
+from stubber.publish.merge_docstubs import copy_and_merge_docstubs, copy_missing_pyscript_stubs, merge_all_docstubs
 
 from .fakeconfig import FakeConfig
 
 pytestmark = [pytest.mark.stubber]
+
+
+def test_copy_missing_pyscript_stubs_preserves_existing_files(tmp_path):
+    source = tmp_path / "reference" / "pyscript"
+    source.mkdir(parents=True)
+    (source / "__init__.pyi").write_text("reference init", encoding="utf-8")
+    (source / "web.pyi").write_text("web", encoding="utf-8")
+    (source / "polyscript.pyi").write_text("polyscript", encoding="utf-8")
+    target = tmp_path / "merged"
+    (target / "pyscript").mkdir(parents=True)
+    (target / "pyscript" / "__init__.pyi").write_text("firmware init", encoding="utf-8")
+
+    copied = copy_missing_pyscript_stubs(source, target)
+
+    assert copied == 2
+    assert (target / "pyscript" / "__init__.pyi").read_text(encoding="utf-8") == "firmware init"
+    assert (target / "pyscript" / "web.pyi").read_text(encoding="utf-8") == "web"
+    assert (target / "polyscript.pyi").read_text(encoding="utf-8") == "polyscript"
 
 
 @pytest.mark.mocked

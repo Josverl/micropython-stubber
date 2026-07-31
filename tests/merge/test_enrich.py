@@ -150,6 +150,30 @@ def test_enrich_replaces_inspect_placeholder_params(tmp_path):
     assert "def recv(self, timeout_ms: int | None = None)" in target_file.read_text(encoding="utf-8")
 
 
+def test_enrich_removes_method_decorator_from_module_function(tmp_path):
+    source_file = tmp_path / "source.pyi"
+    source_file.write_text("async def py_import(*args: str) -> tuple[Any, ...]: ...\n", encoding="utf-8")
+    target_file = tmp_path / "target.pyi"
+    target_file.write_text("@classmethod\ndef py_import(*args, **kwargs) -> Incomplete: ...\n", encoding="utf-8")
+
+    list(enrich_file(source_file, target_file, write_back=True, copy_params=False))
+
+    merged = target_file.read_text(encoding="utf-8")
+    assert "@classmethod" not in merged
+    assert "async def py_import(*args: str) -> tuple[Any, ...]" in merged
+
+
+def test_enrich_does_not_demote_async_firmware_function(tmp_path):
+    source_file = tmp_path / "source.pyi"
+    source_file.write_text("def fetch(url: str) -> Response: ...\n", encoding="utf-8")
+    target_file = tmp_path / "target.pyi"
+    target_file.write_text("async def fetch(x1) -> Incomplete: ...\n", encoding="utf-8")
+
+    list(enrich_file(source_file, target_file, write_back=True, copy_params=False))
+
+    assert "async def fetch(url: str) -> Response" in target_file.read_text(encoding="utf-8")
+
+
 def test_enrich_file(tmp_path):
     target_file = tmp_path / "target.pyi"
     target_file.touch()
