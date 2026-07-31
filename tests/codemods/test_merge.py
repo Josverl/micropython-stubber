@@ -13,13 +13,39 @@ from libcst.codemod._testing import (
     _CodemodTest,  # type: ignore
 )
 
-from stubber.codemod.merge_docstub import MergeCommand
+from stubber.codemod.merge_docstub import MergeCommand, _is_inspect_placeholder_params, _is_unknown_params
 
 from .codemodcollector import TestCase as MyTestCase
 from .codemodcollector import collect_test_cases
 
 # mark all tests
 pytestmark = [pytest.mark.stubber, pytest.mark.codemod]
+
+
+@pytest.mark.parametrize("params", ["x0", "x1", "x1, x2, x3", "self, x1", "cls, x1, x2"])
+def test_inspect_placeholder_params(params: str):
+    assert _is_inspect_placeholder_params(params)
+
+
+@pytest.mark.parametrize(
+    "params",
+    ["self", "self, timeout_ms", "self, x1, y1, x2, y2", "self, x1: int", "self, x1=None", "self, *, x1"],
+)
+def test_non_placeholder_params(params: str):
+    assert not _is_inspect_placeholder_params(params)
+
+
+@pytest.mark.parametrize(
+    "params",
+    ["", "...", "*args, **kwargs", "self", "self, *args, **kwargs", "cls", "cls, *args, **kwargs", "self, x1"],
+)
+def test_unknown_params(params: str):
+    assert _is_unknown_params(params)
+
+
+@pytest.mark.parametrize("params", ["self, timeout_ms", "self, x1, y1, x2, y2"])
+def test_known_params(params: str):
+    assert not _is_unknown_params(params)
 
 
 def print_diff(before: str, after: str):

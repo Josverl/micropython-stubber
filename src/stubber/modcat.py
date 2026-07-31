@@ -114,6 +114,7 @@ but can also be imported with a `u` prefix
 ########################################################
 
 CP_REFERENCE_TO_DOCSTUB: Final = [
+    "aioespnow",
     "asyncio",  # just for documentation
     # stdlib stubs are using the version from stdlib/asyncio
     # Handcoded stubs for the rp2 PIO assembler

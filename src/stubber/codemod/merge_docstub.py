@@ -11,6 +11,7 @@ Merge documentation and type information
 #
 
 import argparse
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
@@ -40,6 +41,24 @@ Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 
 empty_module = cst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
 _code = empty_module.code_for_node
+
+
+def _is_inspect_placeholder_params(params: str) -> bool:
+    """Return whether params contains only MicroPython inspect dummy names."""
+    return re.fullmatch(r"(?:(?:self|cls), )?x\d+(?:, x\d+)*", params) is not None
+
+
+def _is_unknown_params(params: str) -> bool:
+    """Return whether params lacks meaningful parameter information."""
+    return params in {
+        "",
+        "...",
+        "*args, **kwargs",
+        "self",
+        "self, *args, **kwargs",
+        "cls",
+        "cls, *args, **kwargs",
+    } or _is_inspect_placeholder_params(params)
 
 
 def is_decorator(dec: cst.CSTNode, name: str) -> bool:
@@ -714,15 +733,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 overwrite_params = True
             else:
                 params_txt = _code(original_node.params)
-                overwrite_params = params_txt in [
-                    "",
-                    "...",
-                    "*args, **kwargs",
-                    "self",
-                    "self, *args, **kwargs",
-                    "cls",
-                    "cls, *args, **kwargs",
-                ]
+                overwrite_params = _is_unknown_params(params_txt)
 
             # return that should not be overwritten by the doc-stub ?
             # copy_returns=True explicitly prefers source return annotations.

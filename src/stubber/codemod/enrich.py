@@ -39,7 +39,7 @@ from stubber.utils.post import format_stubs
 _ENRICH_CACHE = "enrich"
 
 # Bump when the merge logic changes in a way that invalidates cached results.
-ENRICH_CACHE_VERSION = "2"
+ENRICH_CACHE_VERSION = "3"
 
 # Sentinel stored when the transform produced no change, so a cached "no change"
 # result can be told apart from a cache miss.
@@ -305,8 +305,10 @@ def source_target_candidates(
     for s in sources:
         is_match: bool = False
         best_match_len = 0
+        best_is_exact = False
         mm = None
         s_pkg = package_from_path(s)
+        exact_source_pkg = s_pkg.removesuffix(".__init__").lower()
         for t in targets:
             # find the best match
             if t.stem.startswith("u") and t.stem[1:] in U_MODULES:
@@ -318,8 +320,10 @@ def source_target_candidates(
             if "_mpy_shed" in str(s) or "_mpy_shed" in str(t):
                 log.trace(f"Skip _mpy_shed file {s}")
                 continue
-            if is_match and match_len > best_match_len:
+            is_exact = exact_source_pkg == t_pkg.removesuffix(".__init__").lower()
+            if is_match and (match_len > best_match_len or (match_len == best_match_len and is_exact and not best_is_exact)):
                 best_match_len = match_len
+                best_is_exact = is_exact
                 mm = MergeMatch(t, s, t_pkg, s_pkg, is_match)
         if not mm:
             continue

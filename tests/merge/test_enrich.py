@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from stubber.codemod.enrich import enrich_file, enrich_folder, package_from_path, source_target_candidates, upackage_equal
+from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 
 
 def test_package_from_path(tmp_path):
@@ -110,6 +111,43 @@ def test_target_source_candidates(tmp_path, test_id, target_files, source_files,
         target_file.touch()
     candidates = list(source_target_candidates(source_dir, target_dir))
     assert len(candidates) == expected_matches, f"Expected {expected_matches} matches, got {len(candidates)}"
+
+
+def test_package_source_prefers_exact_target_over_private_alias(tmp_path):
+    source_file = tmp_path / "source" / "espnow" / "__init__.pyi"
+    source_file.parent.mkdir(parents=True)
+    source_file.touch()
+    target_dir = tmp_path / "target"
+    target_dir.mkdir()
+    (target_dir / "_espnow.pyi").touch()
+    (target_dir / "espnow.pyi").touch()
+
+    candidates = list(source_target_candidates(source_file.parent.parent, target_dir))
+
+    assert [candidate.target.name for candidate in candidates] == ["espnow.pyi"]
+
+
+def test_aioespnow_reference_is_copied_to_docstubs():
+    assert "aioespnow" in CP_REFERENCE_TO_DOCSTUB
+
+
+def test_enrich_replaces_inspect_placeholder_params(tmp_path):
+    source_file = tmp_path / "source.pyi"
+    source_file.write_text(
+        "class ESPNow:\n"
+        "    def recv(self, timeout_ms: int | None = None) -> tuple[bytes | None, bytes | None]: ...\n",
+        encoding="utf-8",
+    )
+    target_file = tmp_path / "target.pyi"
+    target_file.write_text(
+        "class ESPNow:\n"
+        "    def recv(self, x1) -> Incomplete: ...\n",
+        encoding="utf-8",
+    )
+
+    list(enrich_file(source_file, target_file, write_back=True, copy_params=False))
+
+    assert "def recv(self, timeout_ms: int | None = None)" in target_file.read_text(encoding="utf-8")
 
 
 def test_enrich_file(tmp_path):
