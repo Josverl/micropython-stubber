@@ -23,6 +23,11 @@ from stubber.utils.config import CONFIG
 from .common import apply_frozen_module_fixes, get_freeze_path, get_portboard
 
 
+def _warn_ignored_c_modules(manifest: ManifestFile) -> None:
+    for module_path in manifest.c_modules():
+        log.warning(f"C module is not processed: {module_path}")
+
+
 def make_path_vars(
     *,
     mpy_path: Path = CONFIG.mpy_path,
@@ -93,9 +98,7 @@ def freeze_one_manifest_2(
 
     log.info(f"port-board-variant: {'-'.join(p for p in (port, board, variant) if p)}")
 
-    path_vars = make_path_vars(
-        port=port, board=board, variant=variant, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path
-    )
+    path_vars = make_path_vars(port=port, board=board, variant=variant, mpy_path=mpy_path, mpy_lib_path=mpy_lib_path)
     upy_manifest = ManifestFile(MODE_FREEZE, path_vars)
     try:
         # manifest needs to be run from the port's folder
@@ -104,14 +107,13 @@ def freeze_one_manifest_2(
     except ManifestFileError as er:
         log.error('freeze error executing "{}": {}'.format(manifest, er.args[0]))
         raise er
+    _warn_ignored_c_modules(upy_manifest)
     log.debug(f"total {len(upy_manifest.files())} files")
 
     # restore working directory
     os.chdir(cwd)
     # save the frozen files to the stubs
-    copy_frozen_to_stubs(
-        frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path, variant=variant
-    )
+    copy_frozen_to_stubs(frozen_stub_path, port, board, upy_manifest.files(), version, mpy_path=mpy_path, variant=variant)
 
 
 def copy_frozen_to_stubs(
