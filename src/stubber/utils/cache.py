@@ -38,6 +38,20 @@ def clear_cache(name: str) -> int:
     return get_cache(name).clear()
 
 
+def clear_all_caches() -> int:
+    """Clear every logical cache. Returns the total number of removed entries."""
+    cache_dir = Path(CACHE_DIR)
+    if not cache_dir.exists():
+        return 0
+
+    removed = 0
+    for path in cache_dir.iterdir():
+        if path.is_dir():
+            with Cache(str(path)) as cache:
+                removed += cache.clear()
+    return removed
+
+
 def cache_stats(name: str) -> Dict[str, Any]:
     """Return simple statistics about a named cache."""
     cache = get_cache(name)

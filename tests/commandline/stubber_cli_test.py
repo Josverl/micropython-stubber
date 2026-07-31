@@ -25,6 +25,27 @@ def test_cmd_get_config():
     assert result.exit_code == 0
 
 
+@pytest.mark.parametrize("option", ["--clear-cache", "--cc"])
+def test_clear_cache_global_option(mocker: MockerFixture, option: str):
+    clear_all_caches = mocker.patch("stubber.commands.cli.cache_cfg.clear_all_caches", return_value=3)
+
+    result = CliRunner().invoke(stubber.stubber_cli, [option, "show-config"])
+
+    assert result.exit_code == 0
+    assert "Cleared 3 cached entries." in result.output
+    clear_all_caches.assert_called_once_with()
+
+
+def test_clear_cache_without_command(mocker: MockerFixture):
+    clear_all_caches = mocker.patch("stubber.commands.cli.cache_cfg.clear_all_caches", return_value=2)
+
+    result = CliRunner().invoke(stubber.stubber_cli, ["--cc"])
+
+    assert result.exit_code == 0
+    assert "Cleared 2 cached entries." in result.output
+    clear_all_caches.assert_called_once_with()
+
+
 ##########################################################################################
 # clone
 ##########################################################################################

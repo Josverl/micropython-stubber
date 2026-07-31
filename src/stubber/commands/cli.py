@@ -2,17 +2,16 @@
 command line interface - main group
 """
 
-import sys
-
 import rich_click as click
 from mpflash.logger import log
 from mpflash.logger import set_loglevel as mpf_set_loglevel
 from mpflash.vendor.click_aliases import ClickAliasedGroup
 
 from stubber import __version__
+from stubber.utils import cache as cache_cfg
 
 
-@click.group(chain=True, cls=ClickAliasedGroup)
+@click.group(chain=True, cls=ClickAliasedGroup, invoke_without_command=True, no_args_is_help=True)
 @click.version_option(package_name="micropython-stubber", prog_name="micropython-stubber✏️ ")
 @click.option(
     "-V",
@@ -22,10 +21,20 @@ from stubber import __version__
     help="-V for DEBUG, -VV for TRACE",
     is_eager=True,
 )
+@click.option(
+    "--clear-cache",
+    "--cc",
+    is_flag=True,
+    help="Clear all disk caches before running.",
+    is_eager=True,
+)
 @click.pass_context
-def stubber_cli(ctx: click.Context, verbose: int = 0) -> None:
+def stubber_cli(ctx: click.Context, verbose: int = 0, clear_cache: bool = False) -> None:
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     ctx.ensure_object(dict)
+    if clear_cache:
+        removed = cache_cfg.clear_all_caches()
+        click.echo(f"Cleared {removed} cached entries.")
     # replace std log handler with a custom one capped on INFO level
     level = set_loglevel(verbose)
 
