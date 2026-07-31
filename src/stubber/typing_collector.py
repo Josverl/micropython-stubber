@@ -1,11 +1,40 @@
 """helper functions for stub transformations"""
 
 # sourcery skip: snake-case-functions
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import libcst as cst
 from libcst import matchers as m
+
+# A leading `# mp_available` comment marks a module- or class-level attribute
+# assignment that must be force-merged into the firmware stub, even when it is
+# not detectable on-device (the decorator-based `@mp_available` equivalent for
+# attributes). See https://github.com/Josverl/micropython-stubber/issues/743.
+MP_AVAILABLE_COMMENT = re.compile(r"^#\s*mp_available\b")
+
+
+def has_mp_available_comment(node: cst.CSTNode) -> bool:
+    """True if the statement has a leading `# mp_available` marker comment."""
+    for line in getattr(node, "leading_lines", ()) or ():
+        comment = getattr(line, "comment", None)
+        if comment is not None and MP_AVAILABLE_COMMENT.match(comment.value):
+            return True
+    return False
+
+
+def ensure_mp_available_comment(node: cst.SimpleStatementLine) -> cst.SimpleStatementLine:
+    """Return a copy of the statement with a `# mp_available` marker directly above it.
+
+    The marker is propagated to the target so it survives further source>dest>final
+    merge steps. If the statement already carries the marker it is returned unchanged.
+    """
+    if has_mp_available_comment(node):
+        return node
+    leading = list(getattr(node, "leading_lines", ()) or ())
+    marker = cst.EmptyLine(comment=cst.Comment("# mp_available"))
+    return node.with_changes(leading_lines=[*leading, marker])
 
 
 @dataclass
@@ -37,6 +66,8 @@ class AnnoValue:
     "function / method `overloads` read from the docstub source"
     literal_docstrings: Dict[str, cst.SimpleStatementLine] = field(default_factory=dict)
     "literal/constant name -> docstring node mappings for literal docstrings"
+    mp_available_attributes: Dict[str, cst.SimpleStatementLine] = field(default_factory=dict)
+    "attribute name -> assignment statement for attributes marked with a `# mp_available` comment"
 
 
 class TransformError(Exception):
@@ -128,6 +159,30 @@ class StubTypingCollector(cst.CSTVisitor):
 
         return literal_docstrings
 
+    def _collect_mp_available_attributes(self, body: Sequence[cst.BaseStatement]) -> Dict[str, cst.SimpleStatementLine]:
+        """
+        Collect attribute assignments marked with a leading `# mp_available` comment.
+        These are force-merged into the firmware stub even when not detectable on-device.
+        The marker comment is kept so it propagates through further source>dest>final merges.
+        """
+        result: Dict[str, cst.SimpleStatementLine] = {}
+        for stmt in body:
+            if not (isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1):
+                continue
+            if not has_mp_available_comment(stmt):
+                continue
+            inner = stmt.body[0]
+            name = None
+            if isinstance(inner, cst.Assign):
+                targets = inner.targets
+                if len(targets) == 1 and isinstance(targets[0].target, cst.Name):
+                    name = targets[0].target.value
+            elif isinstance(inner, cst.AnnAssign) and isinstance(inner.target, cst.Name):
+                name = inner.target.value
+            if name:
+                result[name] = ensure_mp_available_comment(stmt)
+        return result
+
     # ------------------------------------------------------------
     def visit_Module(self, node: cst.Module) -> bool:
         """Store the module docstring and collect literal docstrings"""
@@ -142,6 +197,13 @@ class StubTypingCollector(cst.CSTVisitor):
             if MODULE_KEY not in self.annotations:
                 self.annotations[MODULE_KEY] = AnnoValue()
             self.annotations[MODULE_KEY].literal_docstrings.update(literal_docstrings)
+
+        # Collect module-level `# mp_available` attributes
+        mp_attributes = self._collect_mp_available_attributes(node.body)
+        if mp_attributes:
+            if MODULE_KEY not in self.annotations:
+                self.annotations[MODULE_KEY] = AnnoValue()
+            self.annotations[MODULE_KEY].mp_available_attributes.update(mp_attributes)
 
         return True
 
@@ -182,6 +244,12 @@ class StubTypingCollector(cst.CSTVisitor):
         anno_value = AnnoValue(type_info=ti)
         if literal_docstrings:
             anno_value.literal_docstrings.update(literal_docstrings)
+
+        # Collect class-level `# mp_available` attributes
+        if isinstance(node.body, cst.IndentedBlock):
+            mp_attributes = self._collect_mp_available_attributes(node.body.body)
+            if mp_attributes:
+                anno_value.mp_available_attributes.update(mp_attributes)
 
         key = tuple(self.stack)
         self.annotations[key] = anno_value

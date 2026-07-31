@@ -26,6 +26,7 @@ from stubber.typing_collector import (
     MODULE_KEY,
     AnnoValue,
     StubTypingCollector,
+    ensure_mp_available_comment,
     is_deleter,
     is_getter,
     is_property,
@@ -109,6 +110,23 @@ def _typehelper_name(node: cst.CSTNode) -> Optional[str]:
     if isinstance(node, cst.Assign) and len(node.targets) == 1 and isinstance(node.targets[0].target, cst.Name):
         return node.targets[0].target.value
     return None
+
+
+def _assign_target_name(stmt: cst.CSTNode) -> Optional[str]:
+    """Return the target name of a simple assignment statement, or None."""
+    if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
+        return _typehelper_name(stmt.body[0])
+    return None
+
+
+def _is_docstring_stmt(stmt: cst.CSTNode) -> bool:
+    """Return whether the statement is a bare string expression (docstring)."""
+    return (
+        isinstance(stmt, cst.SimpleStatementLine)
+        and len(stmt.body) == 1
+        and isinstance(stmt.body[0], cst.Expr)
+        and isinstance(stmt.body[0].value, (cst.SimpleString, cst.ConcatenatedString))
+    )
 
 
 class MergeCommand(VisitorBasedCodemodCommand):
@@ -341,6 +359,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
         updated_node = self.add_missed_overloads(updated_node, stack_id=())
         # Add any missing @mp_available
         updated_node = self.add_missed_mp_available(updated_node, stack_id=())
+        # Add any missing `# mp_available` attributes
+        updated_node = self.add_missed_mp_available_attributes(updated_node, stack_id=())
         # Add any missing literal docstrings
         updated_node = self.add_missed_literal_docstrings(updated_node, stack_id=())
         return updated_node
@@ -499,6 +519,65 @@ class MergeCommand(VisitorBasedCodemodCommand):
                 # cst.IndentedBlock(body=tuple(updated_body)))  # type: ignore
         return updated_node
 
+    def add_missed_mp_available_attributes(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
+        """
+        Add attribute assignments marked with a `# mp_available` comment that are
+        missing from the target. This is the attribute equivalent of the
+        `@mp_available` decorator: it force-merges documented module- or class-level
+        attributes that createstubs cannot detect on-device.
+
+        When the attribute already exists in the target, the `# mp_available` marker
+        is propagated onto it so it survives further source>dest>final merge steps.
+        """
+        lookup_key = MODULE_KEY if len(stack_id) == 0 else stack_id
+        if lookup_key not in self.annotations:
+            return updated_node
+        mp_attributes = self.annotations[lookup_key].mp_available_attributes
+        if not mp_attributes:
+            return updated_node
+
+        if isinstance(updated_node, cst.Module):
+            updated_body = list(updated_node.body)
+        elif isinstance(updated_node, cst.ClassDef):
+            updated_body = list(updated_node.body.body)
+        else:
+            raise ValueError(f"Unsupported node type: {updated_node}")
+
+        # propagate the marker onto attributes already present in the target scope
+        existing = set()
+        changed = False
+        for idx, stmt in enumerate(updated_body):
+            name = _assign_target_name(stmt)
+            if name and name in mp_attributes:
+                existing.add(name)
+                marked = ensure_mp_available_comment(stmt)
+                if marked is not stmt:
+                    log.trace(f"Propagate # mp_available marker to existing attribute {name}")
+                    updated_body[idx] = marked
+                    changed = True
+
+        # insert after a leading docstring, if any
+        insert_at = 1 if updated_body and _is_docstring_stmt(updated_body[0]) else 0
+
+        added = False
+        for name, stmt in mp_attributes.items():
+            if name in existing:
+                continue
+            log.trace(f"Add # mp_available attribute {name}")
+            updated_body.insert(insert_at, stmt)
+            insert_at += 1
+            added = True
+
+        if not (added or changed):
+            return updated_node
+
+        if isinstance(updated_node, cst.Module):
+            updated_node = updated_node.with_changes(body=tuple(updated_body))
+        elif isinstance(updated_node, cst.ClassDef):
+            b1 = updated_node.body.with_changes(body=tuple(updated_body))
+            updated_node = updated_node.with_changes(body=b1)
+        return updated_node
+
     def add_missed_literal_docstrings(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
         """
         Add any missing literal docstrings to the updated_node
@@ -635,6 +714,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
         updated_node = self.add_missed_overloads(updated_node, stack_id)
         # Add any missing @mp_available
         updated_node = self.add_missed_mp_available(updated_node, stack_id)
+        # Add any missing `# mp_available` attributes
+        updated_node = self.add_missed_mp_available_attributes(updated_node, stack_id)
         # Add any missing literal docstrings
         updated_node = self.add_missed_literal_docstrings(updated_node, stack_id)
         return updated_node
