@@ -84,7 +84,8 @@ jobs:
 
             - name: Test stubber
               run: |
-                  uv run pytest --cov --cov-branch --cov-report=xml
+                  uv run pytest --cov --cov-branch --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
+
             #----------------------------------------------
             # upload coverage stats
             # .XML  to Codecov
@@ -100,6 +101,12 @@ jobs:
               if: always() # ignore errors
               continue-on-error: true
               uses: codecov/codecov-action@v5
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+
+            - name: Upload test results to Codecov
+              if: ${{ !cancelled() }}
+              uses: codecov/test-results-action@v1
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
