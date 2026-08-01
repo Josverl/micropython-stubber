@@ -2,13 +2,13 @@
 # set allow-duplicate-variables 
 set allow-duplicate-recipes
 
-import ?'repos/micropython-stubs/justfile'
+# import ?'repos/micropython-stubs/justfile'
 
-# # Set shell for Windows OSs:
-# set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+# Set shell for Windows OSs:
+set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
-# # Run `[script]` recipes with uv so inline script metadata (dependencies) is honored
-# set script-interpreter := ['uv', 'run', '--script']
+# Run `[script]` recipes with uv so inline script metadata (dependencies) is honored
+set script-interpreter := ['uv', 'run', '--script']
 
 # keyring entry used to store/retrieve the pypi token for publishing
 pypi_service := "pypi"
@@ -179,3 +179,7 @@ wasm_build v="stable":
 # wasm_build:
 #     # uv run sa_ports_build.py --version stable webassembly --variant pyscript --fw-path webassembly-stubber/firmware/webassembly
 #     uv run sa_ports_build.py --version preview webassembly --variant pyscript --fw-path webassembly-stubber/firmware/webassembly
+
+
+stdlib:
+    python repos/micropython-stubs/publish/micropython-stdlib-stubs/build.py
