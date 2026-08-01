@@ -2,11 +2,24 @@ from pathlib import Path
 
 import pytest
 from mock import MagicMock
-from stubber.publish.merge_docstubs import copy_and_merge_docstubs, copy_missing_pyscript_stubs, merge_all_docstubs
+from stubber.publish.merge_docstubs import copy_and_merge_docstubs, copy_missing_pyscript_stubs, merge_all_docstubs, patch_rp2_init_pyi
 
 from .fakeconfig import FakeConfig
 
 pytestmark = [pytest.mark.stubber]
+
+
+def test_patch_rp2_init_adds_missing_pio_asm_program(tmp_path):
+    rp2_init = tmp_path / "__init__.pyi"
+    rp2_init.write_text(
+        "from __future__ import annotations\n\ndef asm_pio() -> _PIO_ASM_Program: ...\n",
+        encoding="utf-8",
+    )
+
+    patch_rp2_init_pyi(rp2_init)
+
+    patched = rp2_init.read_text(encoding="utf-8")
+    assert patched.count("class _PIO_ASM_Program:") == 1
 
 
 def test_copy_missing_pyscript_stubs_preserves_existing_files(tmp_path):

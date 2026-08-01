@@ -346,7 +346,8 @@ def patch_rp2_init_pyi(rp2_init_file: Path) -> None:
     if not transformer.found_pioasmemit:
         log.warning(" - could not find class PIOASMEmit in rp2/__init__.pyi")
     if not transformer.found_program:
-        log.warning(" - could not find class _PIO_ASM_Program in rp2/__init__.pyi")
+        updated_module = updated_module.with_changes(body=(*updated_module.body, program_replacement))
+        log.info(" - add class _PIO_ASM_Program to rp2/__init__.pyi")
 
     updated = updated_module.code
     if updated != source:
