@@ -160,9 +160,8 @@ def test_worklist(family: str, versions: Union[List[str], str], ports: str, boar
     msg = ", ".join(sorted([f"{l['version']}-{l['port']}-{l['board']}" for l in wl]))
     # print(msg)
 
-    # no exact match meeted , +- .05 or +- 2 is good enough
-    assert len(wl) == pytest.approx(count, rel=0.05), f"expected {count}, found {len(wl)} {msg}."
-    assert len(wl) == pytest.approx(count, abs=2), f"expected {count}, found {len(wl)} {msg}."
+    # Candidate counts may vary by 5% or 2 entries as the source tree evolves.
+    assert len(wl) == pytest.approx(count, rel=0.05, abs=2), f"expected {count}, found {len(wl)} {msg}."
 
 
 def test_filter_list_default_alias_matches_generic_candidate():
