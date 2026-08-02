@@ -228,7 +228,7 @@ class TestMpyConfig:
         page.goto(f"{page_url}?mode=mpy&version=1.24.1")
         page.wait_for_timeout(800)
         cfg = mpy_config_text(page)
-        assert "cdn.jsdelivr.net" in cfg
+        assert "https://cdn.jsdelivr.net/" in cfg
         assert "1.24.1"           in cfg
 
     def test_ps_mode_injects_config(self, page: Page, page_url: str):
