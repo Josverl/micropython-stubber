@@ -9,25 +9,34 @@ on:
     paths:
       - .github/workflows/mip.yml
       - "src/stubber/board/**"
-      
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mip-${{ github.ref_type == 'branch' && github.ref_name || github.event.repository.default_branch }}
+  cancel-in-progress: false
+
 env:
-    PYTHONIOENCODING: utf-8
-    # fix:  DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
-    JUPYTER_PLATFORM_DIRS: "1"
-    
+  PYTHONIOENCODING: utf-8
+  # fix: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+  JUPYTER_PLATFORM_DIRS: "1"
+  TARGET_BRANCH: ${{ github.ref_type == 'branch' && github.ref_name || github.event.repository.default_branch }}
+
 jobs:
   mip:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
       #----------------------------------------------
 
       - name: Install uv # uv is not in the default image
-        uses: astral-sh/setup-uv@v5
-      - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.x" # Replace with the Python version you're using
+          python-version: "3.x"
+          enable-cache: true
 
       - name: Install stubber
         run: uv sync --group test
@@ -38,11 +47,18 @@ jobs:
           uv run stubber make-variants --target ./mip/v5 --version 1.18
           uv run stubber make-variants --target ./mip/v6 --version 1.19.1
 
-      - name: run test on minified/createstubs.by
-        run: |
-          uv run pytest -m minified
+      - name: run test on minified/createstubs.py
+        run: uv run pytest -m minified
 
       - name: Commit the changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: Update mip packages
+        run: |
+          git add --all
+          if git diff --cached --quiet; then
+            echo "No mip package changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "jos_verlinde+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update mip packages"
+          git push origin "HEAD:${TARGET_BRANCH}"
