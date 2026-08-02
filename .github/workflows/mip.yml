@@ -35,7 +35,7 @@ jobs:
       - name: Install uv # uv is not in the default image
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.x"
+          python-version: "3.13"
           enable-cache: true
 
       - name: Install stubber
