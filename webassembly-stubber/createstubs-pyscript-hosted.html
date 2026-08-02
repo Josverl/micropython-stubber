@@ -8,19 +8,17 @@
 
     <!-- Resolve selected versions from URL params and bootstrap PyScript + mpy-config -->
     <script>
-        // Sanitize URL parameters to prevent DOM-based XSS
-        function _sanitizeVersion(v) {
-            return (v || '').replace(/[^0-9a-zA-Z.\-]/g, '');
+        // Reject URL parameters containing characters unsafe for generated markup.
+        function _sanitizeParam(value, fallback, pattern) {
+            return pattern.test(value) ? value : fallback;
         }
-        function _sanitizePath(v) {
-            return (v || '').replace(/[^0-9a-zA-Z.\-_/]/g, '');
-        }
+
         var _params        = new URLSearchParams(window.location.search);
         var _rawMode       = _params.get('mode') || '';
         var _mode          = ['mpy', 'ps', 'local'].includes(_rawMode) ? _rawMode : '';  // 'mpy' | 'ps' | 'local'
-        var _mpyVersion    = _sanitizeVersion(_params.get('version') || '');
-        var _psVersion     = _sanitizeVersion(_params.get('psversion') || '2025.7.3');
-        var _localFirmware = _sanitizePath(_params.get('localfirmware') || '');
+        var _mpyVersion    = _sanitizeParam(_params.get('version') || '', '', /^[\w.-]+$/);
+        var _psVersion     = _sanitizeParam(_params.get('psversion') || '', '2025.7.3', /^[\w.-]+$/);
+        var _localFirmware = _sanitizeParam(_params.get('localfirmware') || '', '', /^[\w./-]+$/);
 
         // Always load PyScript core (version depends on psversion param)
         document.write('<link rel="stylesheet" href="https://pyscript.net/releases/' + _psVersion + '/core.css">');
