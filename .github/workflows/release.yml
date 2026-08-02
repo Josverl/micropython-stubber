@@ -1,0 +1,76 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# A tag push triggers a single release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Upload distribution artefacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  publish-pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    # The `pypi` environment matches the trusted-publisher config on PyPI.
+    # Pair this with an environment protection rule (Settings -> Environments
+    # -> pypi -> Required reviewers) for a manual approval gate.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/micropython-stubber/
+    permissions:
+      # Required for PyPI trusted publishing via OIDC. No PyPI token needed.
+      id-token: write
+    steps:
+      - name: Download distribution artefacts
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history so --generate-notes can resolve the previous tag.
+          fetch-depth: 0
+
+      - name: Download distribution artefacts
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --generate-notes \
+            --title "${GITHUB_REF_NAME}"

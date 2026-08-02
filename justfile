@@ -59,6 +59,42 @@ build_stubs version="stable" *ARGS:
     uv run stubber build --version {{version}} {{ARGS}}
 
 
+# -----------------------------------------------------------------------------------------------
+# Release process
+# Pushing a `v*` tag triggers .github/workflows/release.yml, which builds the sdist + wheel,
+# publishes to PyPI using trusted publishing (OIDC, no token) and creates a GitHub release
+# with auto-generated notes. Use `just release` to cut a release; do not publish manually.
+# -----------------------------------------------------------------------------------------------
+
+# run tests, bump the version (and .mpy variants), then commit, tag and push - triggering the PyPI release
+# bump = major | minor | patch (default) | prerelease
+[confirm("Run tests, bump the version and push a new tag? This triggers a PyPI release. Continue?")]
+[script]
+release bump="patch":
+    # /// script
+    # requires-python = ">=3.9"
+    # ///
+    import subprocess
+
+    def run(*args):
+        subprocess.run(args, check=True)
+
+    run("uv", "run", "pytest")
+    run("uvx", "bump-my-version", "bump", "{{ bump }}")
+
+    version = subprocess.run(
+        ["uvx", "bump-my-version", "show", "current_version"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    run("just", "variants")
+    run("git", "add", "-A")
+    run("git", "commit", "-m", f"Release v{version}")
+    run("git", "tag", "-a", f"v{version}", "-m", f"Release v{version}")
+    run("git", "push", "--follow-tags")
+
 
 # publish the micropython-stubber package to pypi, using a token stored in the system keyring
 [script]
