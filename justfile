@@ -61,14 +61,14 @@ build_stubs version="stable" *ARGS:
 
 # -----------------------------------------------------------------------------------------------
 # Release process
-# Pushing a `v*` tag triggers .github/workflows/release.yml, which builds the sdist + wheel,
-# publishes to PyPI using trusted publishing (OIDC, no token) and creates a GitHub release
-# with auto-generated notes. Use `just release` to cut a release; do not publish manually.
+# The release recipe pushes an untagged version commit and dispatches .github/workflows/release.yml.
+# CI tests that exact commit before creating its tag, publishing to PyPI using trusted publishing
+# (OIDC, no token), and creating a GitHub release. Do not publish manually.
 # -----------------------------------------------------------------------------------------------
 
-# run tests, bump the version (and .mpy variants), then commit, tag and push - triggering the PyPI release
+# bump the version and .mpy variants, then push the untagged commit for CI to test and release
 # bump = major | minor | patch (default) | prerelease
-[confirm("Run tests, bump the version and push a new tag? This triggers a PyPI release. Continue?")]
+[confirm("Bump the version and push a release commit for CI to test and publish? Continue?")]
 [script]
 release bump="patch":
     # /// script
@@ -79,7 +79,6 @@ release bump="patch":
     def run(*args):
         subprocess.run(args, check=True)
 
-    run("uv", "run", "pytest")
     run("uvx", "bump-my-version", "bump", "{{ bump }}")
 
     version = subprocess.run(
@@ -92,8 +91,30 @@ release bump="patch":
     run("just", "variants")
     run("git", "add", "-A")
     run("git", "commit", "-m", f"Release v{version}")
-    run("git", "tag", "-a", f"v{version}", "-m", f"Release v{version}")
-    run("git", "push", "--follow-tags")
+
+    branch = subprocess.run(
+        ["git", "branch", "--show-current"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if not branch:
+        raise SystemExit("Cannot release from a detached HEAD")
+
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    run("git", "push", "origin", branch)
+    run(
+        "gh", "workflow", "run", "release.yml",
+        "--ref", branch,
+        "--field", f"version={version}",
+        "--field", f"commit={commit}",
+    )
 
 
 # publish the micropython-stubber package to pypi, using a token stored in the system keyring

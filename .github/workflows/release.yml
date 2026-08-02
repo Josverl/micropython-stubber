@@ -1,17 +1,50 @@
 name: release
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish without the v prefix
+        required: true
+        type: string
+      commit:
+        description: Exact version commit to test and release
+        required: true
+        type: string
 
-# A tag push triggers a single release
+# The release recipe dispatches this workflow after pushing the version commit.
 
 jobs:
-  build:
+  prepare:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.commit }}
+
+      - name: Validate release version
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+
+          with open("pyproject.toml", "rb") as pyproject_file:
+              actual = tomllib.load(pyproject_file)["tool"]["bumpversion"]["current_version"]
+
+          expected = os.environ["EXPECTED_VERSION"]
+          if actual != expected:
+              raise SystemExit(f"Requested version {expected!r}, but commit contains {actual!r}")
+          PY
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.commit }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -28,8 +61,33 @@ jobs:
           name: dist
           path: dist/
 
+  tests:
+    needs: prepare
+    uses: ./.github/workflows/pytest.yml
+    with:
+      ref: ${{ inputs.commit }}
+    secrets: inherit
+
+  create-tag:
+    needs: [build, tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.commit }}
+
+      - name: Create release tag
+        env:
+          TAG: v${{ inputs.version }}
+        run: |
+          git tag --annotate "${TAG}" --message "Release ${TAG}"
+          git push origin "${TAG}"
+
   publish-pypi:
-    needs: build
+    needs: [build, create-tag]
     runs-on: ubuntu-latest
     # The `pypi` environment matches the trusted-publisher config on PyPI.
     # Pair this with an environment protection rule (Settings -> Environments
@@ -51,7 +109,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
-    needs: publish-pypi
+    needs: [publish-pypi, create-tag]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -70,7 +128,8 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v${{ inputs.version }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" dist/* \
+          gh release create "${TAG}" dist/* \
             --generate-notes \
-            --title "${GITHUB_REF_NAME}"
+            --title "${TAG}"
