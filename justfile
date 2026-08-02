@@ -62,8 +62,8 @@ build_stubs version="stable" *ARGS:
 # -----------------------------------------------------------------------------------------------
 # Release process
 # The release recipe pushes an untagged version commit and dispatches .github/workflows/release.yml.
-# CI tests that exact commit before creating its tag, publishing to PyPI using trusted publishing
-# (OIDC, no token), and creating a GitHub release. Do not publish manually.
+# CI tests that exact commit, creates a draft release with all assets, publishes to PyPI using
+# trusted publishing (OIDC, no token), then publishes the immutable GitHub release.
 # -----------------------------------------------------------------------------------------------
 
 # bump the version and .mpy variants, then push the untagged commit for CI to test and release
