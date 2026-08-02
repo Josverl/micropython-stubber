@@ -79,6 +79,15 @@ release bump="patch":
     def run(*args):
         subprocess.run(args, check=True)
 
+    branch = subprocess.run(
+        ["git", "branch", "--show-current"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if branch != "main":
+        raise SystemExit(f"Releases must be run from main, not {branch or 'detached HEAD'}")
+
     run("uvx", "bump-my-version", "bump", "{{ bump }}")
 
     version = subprocess.run(
@@ -91,15 +100,6 @@ release bump="patch":
     run("just", "variants")
     run("git", "add", "-A")
     run("git", "commit", "-m", f"Release v{version}")
-
-    branch = subprocess.run(
-        ["git", "branch", "--show-current"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    if not branch:
-        raise SystemExit("Cannot release from a detached HEAD")
 
     commit = subprocess.run(
         ["git", "rev-parse", "HEAD"],
