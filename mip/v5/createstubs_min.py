@@ -65,7 +65,7 @@ g=B
 if not AB:
 	try:import inspect as a;g=P
 	except S:g=B
-__version__='v1.28.4'
+__version__='v1.28.5'
 AC=2
 AD=44
 AE=2
