@@ -11,6 +11,11 @@ Requires serve.py (NOT plain http.server) for local-firmware tests:
 import pytest
 from playwright.sync_api import Page
 
+try:
+    import tomllib  # type: ignore
+except ImportError:
+    import tomli as tomllib  # type: ignore
+
 
 PAGE = "createstubs-pyscript-hosted.html"
 DROPDOWN_TIMEOUT = 8_000   # ms — long enough for live API + 5 s timeout fallback
@@ -227,9 +232,11 @@ class TestMpyConfig:
     def test_mpy_mode_has_cdn_interpreter(self, page: Page, page_url: str):
         page.goto(f"{page_url}?mode=mpy&version=1.24.1")
         page.wait_for_timeout(800)
-        cfg = mpy_config_text(page)
-        assert "https://cdn.jsdelivr.net/" in cfg
-        assert "1.24.1"           in cfg
+        cfg = tomllib.loads(mpy_config_text(page))
+        assert cfg["interpreter"] == (
+            "https://cdn.jsdelivr.net/npm/@micropython/"
+            "micropython-webassembly-pyscript@1.24.1/micropython.mjs"
+        )
 
     def test_ps_mode_injects_config(self, page: Page, page_url: str):
         page.goto(f"{page_url}?mode=ps&psversion=2025.7.3")
