@@ -60,7 +60,11 @@ class ZipAwareHandler(SimpleHTTPRequestHandler):
             if len(parts) == 2:
                 name, filename = parts
                 if filename in ("micropython.mjs", "micropython.wasm"):
-                    zip_path = os.path.join(FIRMWARE_DIR, name + ".zip")
+                    firmware_dir = os.path.normpath(FIRMWARE_DIR)
+                    zip_path = os.path.normpath(os.path.join(firmware_dir, name + ".zip"))
+                    if not zip_path.startswith(firmware_dir + os.sep):
+                        self.send_error(400, "Invalid firmware name")
+                        return
                     if os.path.exists(zip_path):
                         try:
                             with zipfile.ZipFile(zip_path) as zf:
