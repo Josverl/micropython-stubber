@@ -1,4 +1,4 @@
-'\nCreate stubs for (all) modules on a MicroPython board.\n\n    This variant of the createstubs.py script is optimized for use on very-low-memory devices.\n    Note: this version has undergone limited testing.\n\n    1) reads the list of modules from a text file `modulelist.txt` that should be uploaded to the device.\n    2) stored the already processed modules in a text file `modulelist.done`\n    3) process the modules in the database:\n        - stub the module\n        - update the modulelist.done file\n        - reboots the device if it runs out of memory\n    4) creates the modules.json\n\n    If that cannot be found then only a single module (micropython) is stubbed.\n    In order to run this on low-memory devices two additional steps are recommended:\n    - minification, using python-minifierto reduce overall size, and remove logging overhead.\n    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device\n\n\nThis variant was generated from createstubs.py by micropython-stubber v1.28.4\n'
+'\nCreate stubs for (all) modules on a MicroPython board.\n\n    This variant of the createstubs.py script is optimized for use on very-low-memory devices.\n    Note: this version has undergone limited testing.\n\n    1) reads the list of modules from a text file `modulelist.txt` that should be uploaded to the device.\n    2) stored the already processed modules in a text file `modulelist.done`\n    3) process the modules in the database:\n        - stub the module\n        - update the modulelist.done file\n        - reboots the device if it runs out of memory\n    4) creates the modules.json\n\n    If that cannot be found then only a single module (micropython) is stubbed.\n    In order to run this on low-memory devices two additional steps are recommended:\n    - minification, using python-minifierto reduce overall size, and remove logging overhead.\n    - cross compilation, using mpy-cross, to avoid the compilation step on the micropython device\n\n\nThis variant was generated from createstubs.py by micropython-stubber v1.28.5\n'
 AB='No report file'
 AA='Failed to create the report.'
 A9='method'
@@ -64,7 +64,7 @@ h=B
 if not AC:
 	try:import inspect as a;h=N
 	except T:h=B
-__version__='v1.28.4'
+__version__='v1.28.5'
 AD=2
 AE=44
 AF=2
