@@ -7,9 +7,14 @@
 
 name: pytest stubber
 on:
-    workflow_dispatch:
-    pull_request:
-        # branches: [main]
+    workflow_dispatch: {}
+    workflow_call:
+        inputs:
+            ref:
+                description: Git ref or commit SHA to test
+                required: false
+                type: string
+    pull_request: {}
 
     push:
         branches: [main, stubber/*, feat/*, fix/*]
@@ -38,14 +43,15 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ubuntu-latest, windows-latest] # , macos-latest ( most expensive) 
-                python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+                os: [ubuntu-latest, windows-latest] # , macos-latest ( most expensive)
+                python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+                  ref: ${{ inputs.ref || github.sha }}
                   # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
             #----------------------------------------------
