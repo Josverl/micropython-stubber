@@ -8,11 +8,17 @@
 
     <!-- Resolve selected versions from URL params and bootstrap PyScript + mpy-config -->
     <script>
+        // Sanitize a URL param to only allow safe version-string characters.
+        // Returns the value if it matches the allowed pattern, otherwise the fallback.
+        function _sanitizeParam(value, fallback) {
+            return /^[\w.-]+$/.test(value) ? value : fallback;
+        }
+
         var _params        = new URLSearchParams(window.location.search);
-        var _mode          = _params.get('mode') || '';         // 'mpy' | 'ps' | 'local'
-        var _mpyVersion    = _params.get('version') || '';
-        var _psVersion     = _params.get('psversion') || '2025.7.3';
-        var _localFirmware = _params.get('localfirmware') || '';
+        var _mode          = _sanitizeParam(_params.get('mode') || '', '');  // 'mpy' | 'ps' | 'local'
+        var _mpyVersion    = _sanitizeParam(_params.get('version') || '', '');
+        var _psVersion     = _sanitizeParam(_params.get('psversion') || '', '2025.7.3') || '2025.7.3';
+        var _localFirmware = _sanitizeParam(_params.get('localfirmware') || '', '');
 
         // Always load PyScript core (version depends on psversion param)
         document.write('<link rel="stylesheet" href="https://pyscript.net/releases/' + _psVersion + '/core.css">');
