@@ -180,19 +180,19 @@ wasm_stub:
     uv run serve.py
 
 # copy from temp folder to micropython-stubs/stubs 
-wasm_copy: wasm_cleanup
-    cp -r webassembly-stubber/WASM-TEMP/micropython-* repos/micropython-stubs/stubs
+wasm_copy source="WASM-TEMP" stubs-repo="../micropython-stubs": (wasm_cleanup source)
+    cp -r webassembly-stubber/{{source}}/micropython-* "{{ stubs-repo }}/stubs"
 
 
 [script]
-wasm_cleanup path="webassembly-stubber/WASM-TEMP/micropython-v1_28_0-webassembly-pyscript":
+wasm_cleanup source="WASM-TEMP":
     # /// script
     # requires-python = ">=3.9"
     # ///
     from pathlib import Path
     import re
 
-    root = Path(r"{{path}}")
+    root = Path("webassembly-stubber") / r"{{source}}"
     if not root.is_dir():
         raise SystemExit(f"Stub directory does not exist: {root}")
 
