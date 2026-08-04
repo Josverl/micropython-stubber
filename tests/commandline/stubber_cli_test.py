@@ -25,7 +25,7 @@ def test_cmd_get_config():
     # from stubber.commands.clone import git
     result = runner.invoke(stubber.stubber_cli, ["show-config"])
     assert result.exit_code == 0
-    output = unstyle(result.output)
+    output = "".join(unstyle(result.output).splitlines())
     assert str(CONFIG.repo_path.resolve()) in output
     assert str(CONFIG.mpy_stubs_path.resolve()) in output
     assert str(CONFIG.stub_path.resolve()) in output
