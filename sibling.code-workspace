@@ -1,0 +1,42 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../micropython-stubs"
+		}
+	],
+    "settings": {
+        "workbench.colorCustomizations": {
+            "activityBar.activeBackground": "#e0ccb1",
+            "activityBar.background": "#e0ccb1",
+            "activityBar.foreground": "#15202b",
+            "activityBar.inactiveForeground": "#15202b99",
+            "activityBarBadge.background": "#3fa077",
+            "activityBarBadge.foreground": "#e7e7e7",
+            "activityBarTop.activeBackground": "#e0ccb1",
+            "activityBarTop.background": "#e0ccb1",
+            "activityBarTop.foreground": "#15202b",
+            "activityBarTop.inactiveForeground": "#15202b99",
+            "commandCenter.border": "#15202b99",
+            "commandCenter.foreground": "#15202b",
+            "editorGroup.border": "#e0ccb1",
+            "panel.border": "#e0ccb1",
+            "sash.hoverBorder": "#e0ccb1",
+            "statusBar.background": "#d2b48c",
+            "statusBar.debuggingBackground": "#d2b48c",
+            "statusBar.debuggingForeground": "#15202b",
+            "statusBar.foreground": "#15202b",
+            "statusBarItem.hoverBackground": "#c49c67",
+            "statusBarItem.remoteBackground": "#368966",
+            "statusBarItem.remoteForeground": "#15202b",
+            "tab.activeBorder": "#e0ccb1",
+            "titleBar.activeBackground": "#d2b48c",
+            "titleBar.activeForeground": "#15202b",
+            "titleBar.inactiveBackground": "#d2b48c99",
+            "titleBar.inactiveForeground": "#15202b99"
+        },
+        "peacock.remoteColor": "tan"
+    }
+}
