@@ -1,6 +1,12 @@
 [tool.micropython-stubber]
-stub-path = "./repos/micropython-stubs/stubs"
-repo-path = "./repos"
+# repo-path = "./repos"
+# stub-path = "./repos/micropython-stubs/stubs"
+
+mpy-stubs-path = ".."
+repo-path = "../micropython-stubs/repos"
+
+# stub-path = "../micropython-stubs/stubs"
+
 # mpy-path = "./micropython"
 # mpy-liv-path = "./micropython-lib"
 # publish-path = "./repos/micropython-stubs/publish"
