@@ -1,16 +1,14 @@
 [tool.micropython-stubber]
-# repo-path = "./repos"
-# stub-path = "./repos/micropython-stubs/stubs"
 
-mpy-stubs-path = ".."
-repo-path = "../micropython-stubs/repos"
+# Config for CI 
+repo-path = "./repos"
+stub-path = "./repos/micropython-stubs/stubs"
 
-# stub-path = "../micropython-stubs/stubs"
 
-# mpy-path = "./micropython"
-# mpy-liv-path = "./micropython-lib"
-# publish-path = "./repos/micropython-stubs/publish"
-# template-path = "./repos/micropython-stubs/publish/template"
+# sibling repos
+# mpy-stubs-path = ".."
+# repo-path = "../micropython-stubs/repos"
+
 
 
 [project]
@@ -191,7 +189,10 @@ exclude = [
 
     "**/all-stubs",
     "src/stubber/board/stubs",
-    "**/.venv",
+    "**/.venv", 
+    "**/node_modules",
+    "**/__pycache__", 
+    "**/.*",
 ]
 ignore = [
     "tests/mocks",
