@@ -402,7 +402,7 @@ method_working_memory = 99
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 
-# Same as Black.
+# Shared maximum line length for formatting and linting.
 line-length = 140
 indent-width = 4
 
@@ -410,7 +410,7 @@ indent-width = 4
 target-version = "py39"
 
 [tool.ruff.format]
-# Like Black, use double quotes for strings.
+# Use double quotes for strings.
 quote-style = "double"
 exclude = [
     ".*", "__*", "dist", 
@@ -428,13 +428,13 @@ exclude = [
     "src/stubber/codemod/_partials"
 ]
 
-# Like Black, indent with spaces, rather than tabs.
+# Indent with spaces rather than tabs.
 indent-style = "space"
 
-# Like Black, respect magic trailing commas.
+# Respect magic trailing commas.
 skip-magic-trailing-comma = false
 
-# Like Black, automatically detect the appropriate line ending.
+# Automatically detect the appropriate line ending.
 line-ending = "auto"
 
 [tool.ruff.lint]

@@ -65,10 +65,7 @@ using a custom-built parser to read and process the micropython RST files
         - Note:  The parent class **Exeptions** is determined based on the rst hint `py:exception` and the Class Name.
 
 ### Code Formatting
-The generated stub files (`.py`) are formatted using `black` and checked for validity using `pyright`
-
-Note: black on python 3.7 does not like some function defs, this is not treated as an error. 
-    `def sizeof(struct, layout_type=NATIVE, /) -> int:` 
+The generated stub files (`.py`) are formatted using `ruff format` and checked for validity using `pyright`.
 
 
 ### Ordering of inter-dependent classes in the same module   
