@@ -146,7 +146,7 @@ def _run_merge_transform(
         copy_returns=copy_returns,
     )
     # Do NOT format here (format_code=False). `enrich_folder` runs `ruff format`
-    # (format_stubs) exactly once at the end, so per-file black/ruff formatting
+    # (format_stubs) exactly once at the end, so per-file formatting
     # would be redundant work. Keeping the transform output unformatted also makes
     # the cached value formatter-independent.
     return exec_transform_with_prettyprint(

@@ -110,7 +110,7 @@ def match_lib_with_mpy(version_tag: str, mpy_path: Path, lib_path: Path) -> bool
     micropython_lib_commits = read_micropython_lib_commits()
     # Make sure that the correct micropython-lib release is checked out
     #  check if micropython-lib has matching tags
-    if version_tag in SET_PREVIEW:
+    if version_tag in SET_PREVIEW or Version(version_tag).is_prerelease:
         # micropython-lib is now a submodule
         result = git.checkout_commit("master", lib_path)
         if not result:

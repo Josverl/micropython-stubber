@@ -108,7 +108,7 @@ def test_rst_all(tmp_path, micropython_repo, testrepo_micropython: Path):
     v_tag = micropython_repo
 
     rst_folder = Path(testrepo_micropython.as_posix()) / "docs/library"
-    dst_folder = tmp_path / "noblack"
+    dst_folder = tmp_path / "noformat"
     x = generate_from_rst(rst_folder, dst_folder, v_tag=v_tag, format=False)
     assert type(x) == int, "returns a number"
     assert x > 0, "should generate at least 1 file"
@@ -403,7 +403,6 @@ def test_doc_socket_class_def(rst_stubs: Path):
 
     found = any(line.startswith("class socket") for line in content)
     assert found, "(u)socket.socket classdef should be generated"
-
 
 
 @pytest.mark.parametrize(

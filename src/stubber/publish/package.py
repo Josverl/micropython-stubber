@@ -183,10 +183,16 @@ def combo_sources(family: str, port: str, board: str, ver_flat: str) -> StubSour
     else:
         merged_path = Path(f"{family}-{ver_flat}-{port}-{board}-merged".replace("--", "-"))
         merged_source_path = CONFIG.stub_path / merged_path
-        log.info(
-            f"Requested explicit board '{requested_board}', using merged path '{merged_path}', "
-            f"exists={merged_source_path.exists()} ({merged_source_path})"
-        )
+        if merged_source_path.exists():
+            log.info(
+                f"Requested explicit board '{requested_board}', using merged path '{merged_path}', "
+                f"exists={merged_source_path.exists()} ({merged_source_path})"
+            )
+        else:
+            log.debug(
+                f"Requested explicit board '{requested_board}' does not exist in the stubs repo, "
+                f"using merged path '{merged_path}', exists={merged_source_path.exists()} ({merged_source_path})"
+            )
 
     # BOARD in source frozen path needs to be UPPERCASE
     frozen_path = Path(f"{family}-{ver_flat}-frozen") / port / board_u.upper()

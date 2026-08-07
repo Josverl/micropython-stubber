@@ -22,14 +22,11 @@ def test_tool_installed(tool_name, tool_version):
     out = result.stdout.decode("utf-8").strip()
     assert tool_name in out
 
-    # Assume the last word is the version
-    if tool_name == "black":
-        # remove too much info
-        out = out.split("(")[0]
     ver = out.split()[-1]
     if version.parse(ver) >= version.parse(tool_version):
         # avoid issues with non-standard versions and 'latest'
         assert version.parse(ver) >= version.parse(tool_version)
+
 
 @pytest.mark.skip("Only needed to debug venv installation issues")
 def test_mpy_cross_bytecode_version():

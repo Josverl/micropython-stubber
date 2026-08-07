@@ -1,10 +1,14 @@
 [tool.micropython-stubber]
-stub-path = "./repos/micropython-stubs/stubs"
+
+# Config for CI 
 repo-path = "./repos"
-# mpy-path = "./micropython"
-# mpy-liv-path = "./micropython-lib"
-# publish-path = "./repos/micropython-stubs/publish"
-# template-path = "./repos/micropython-stubs/publish/template"
+stub-path = "./repos/micropython-stubs/stubs"
+
+
+# sibling repos
+# mpy-stubs-path = ".."
+# repo-path = "../micropython-stubs/repos"
+
 
 
 [project]
@@ -43,6 +47,7 @@ dependencies = [
     "click>=8.1.3,<9.0.0",
     "executing>=2.0.1,<3.0.0",
     "importlib-metadata>=1,<9; python_version < '3.8'",
+    "keyring>=25.0.0,<26.0.0",
     "loguru>=0.6,<0.8",
     "mypy-gitlab-code-quality>=1.1.0,<2.0.0",
     "packaging>=24.2,<25.0.0",
@@ -185,7 +190,10 @@ exclude = [
 
     "**/all-stubs",
     "src/stubber/board/stubs",
-    "**/.venv",
+    "**/.venv", 
+    "**/node_modules",
+    "**/__pycache__", 
+    "**/.*",
 ]
 ignore = [
     "tests/mocks",
@@ -396,7 +404,7 @@ method_working_memory = 99
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 
-# Same as Black.
+# Shared maximum line length for formatting and linting.
 line-length = 140
 indent-width = 4
 
@@ -404,7 +412,7 @@ indent-width = 4
 target-version = "py39"
 
 [tool.ruff.format]
-# Like Black, use double quotes for strings.
+# Use double quotes for strings.
 quote-style = "double"
 exclude = [
     ".*", "__*", "dist", 
@@ -422,13 +430,13 @@ exclude = [
     "src/stubber/codemod/_partials"
 ]
 
-# Like Black, indent with spaces, rather than tabs.
+# Indent with spaces rather than tabs.
 indent-style = "space"
 
-# Like Black, respect magic trailing commas.
+# Respect magic trailing commas.
 skip-magic-trailing-comma = false
 
-# Like Black, automatically detect the appropriate line ending.
+# Automatically detect the appropriate line ending.
 line-ending = "auto"
 
 [tool.ruff.lint]
