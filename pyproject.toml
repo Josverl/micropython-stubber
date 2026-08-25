@@ -132,7 +132,7 @@ include = ["src/stubber"]
 # Version bumping across source, package manifests and mip metadata.
 # Run with: uvx bump-my-version bump patch   (or: minor / major / prerelease)
 [tool.bumpversion]
-current_version = "1.28.5"
+current_version = "1.28.6"
 allow_dirty = true
 
 [[tool.bumpversion.files]]
