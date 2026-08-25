@@ -5,7 +5,7 @@ repo-path = "./repos"
 stub-path = "./repos/micropython-stubs/stubs"
 
 
-# sibling repos
+# Config for sibling repos
 # mpy-stubs-path = ".."
 # repo-path = "../micropython-stubs/repos"
 

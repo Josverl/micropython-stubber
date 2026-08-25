@@ -1,12 +1,15 @@
 {
 	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../micropython-stubs"
-		}
-	],
+        {
+            "path": "."
+        },
+        {
+            "path": "../micropython-stubs"
+        },
+        {
+            "path": "../mpflash"
+        }
+    ],
     "settings": {
         "workbench.colorCustomizations": {
             "activityBar.activeBackground": "#e0ccb1",

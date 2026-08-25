@@ -83,6 +83,12 @@ from stubber.utils.config import CONFIG
     show_default=True,
     help="Mount a host VFS during stub generation. Disable for boards where mount mode is unstable.",
 )
+@click.option(
+    "--safe-mount/--no-safe-mount",
+    default=True,
+    show_default=True,
+    help="Avoid mount VFS on transports known to corrupt mounted filesystem traffic.",
+)
 @click.option("--debug/--no-debug", default=False, show_default=True, help="Debug mode.")
 def cli_create_mcu_stubs(
     variant: str,
@@ -93,6 +99,7 @@ def cli_create_mcu_stubs(
     bluetooth: bool,
     exclude: List[str],
     mount_vfs: bool,
+    safe_mount: bool,
 ) -> int:
     """Run createstubs on one or more MCUs to collect firmware stubs (formerly MCU stubs)."""
     # check if all repos have been cloned
@@ -115,5 +122,6 @@ def cli_create_mcu_stubs(
             bluetooth=bluetooth,
             exclude=exclude,
             mount_vfs=mount_vfs,
+            safe_mount=safe_mount,
         )
     )
