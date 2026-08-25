@@ -2,14 +2,9 @@ import os
 from pathlib import Path
 
 import pytest
-from cache_to_disk import delete_old_disk_caches
 from stubber.utils.config import StubberConfig, TomlConfigSource, readconfig
 
 pytestmark = [pytest.mark.stubber]
-
-
-# avoid test pollution from previous incorrect results
-delete_old_disk_caches()
 
 
 def test_toplevel_config():
