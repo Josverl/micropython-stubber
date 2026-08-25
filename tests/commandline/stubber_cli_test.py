@@ -2,12 +2,14 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from click import unstyle
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 # module under test :
 import stubber.stubber as stubber
 from stubber.commands.switch_cmd import VERSION_LIST
+from stubber.utils.config import CONFIG
 
 # mark all tests
 pytestmark = [pytest.mark.stubber, pytest.mark.cli]
@@ -23,6 +25,12 @@ def test_cmd_get_config():
     # from stubber.commands.clone import git
     result = runner.invoke(stubber.stubber_cli, ["show-config"])
     assert result.exit_code == 0
+    output = "".join(unstyle(result.output).splitlines())
+    assert str(CONFIG.repo_path.resolve()) in output
+    assert str(CONFIG.mpy_stubs_path.resolve()) in output
+    assert str(CONFIG.stub_path.resolve()) in output
+    assert str(CONFIG.publish_path.resolve()) in output
+    assert str(CONFIG.template_path.resolve()) in output
 
 
 @pytest.mark.parametrize("option", ["--clear-cache", "--cc"])

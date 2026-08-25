@@ -56,7 +56,6 @@ from stubber.utils.repos import fetch_repos
 )
 @click.option(
     "--format/--no-format",
-    "--black/--no-black",
     "-b/-nb",
     default=True,
     help="Run formatter (ruff)",

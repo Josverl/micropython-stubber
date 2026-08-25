@@ -237,6 +237,48 @@ def test_hatch_check(tmp_path, pytestconfig, mocker):
     assert HatchBuilder.check(pkg) is True  # type: ignore[arg-type]
 
 
+def test_hatch_publish_uses_keyring_token(tmp_path, pytestconfig, mocker, monkeypatch):
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+    monkeypatch.delenv("UV_PUBLISH_TOKEN", raising=False)
+
+    pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32", package_type=PackageType.HATCH)
+    pkg._publish = True
+    mocker.patch("stubber.publish.stubpackage.keyring.get_password", return_value="secret-token")
+    run = mocker.patch("stubber.publish.stubpackage.subprocess.run")
+
+    assert pkg.hatch_publish(production=True) is True
+
+    command = run.call_args.args[0]
+    environment = run.call_args.kwargs["env"]
+    assert command == ["uv", "publish"]
+    assert "secret-token" not in command
+    assert environment["UV_PUBLISH_TOKEN"] == "secret-token"
+
+
+def test_hatch_publish_prefers_uv_token_environment(tmp_path, pytestconfig, mocker, monkeypatch):
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=Path("./repos/micropython-stubs/stubs"),
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+    monkeypatch.setenv("UV_PUBLISH_TOKEN", "environment-token")
+
+    pkg = create_package("micropython-esp32-stubs", mpy_version="v1.24.1", port="esp32", package_type=PackageType.HATCH)
+    pkg._publish = True
+    get_password = mocker.patch("stubber.publish.stubpackage.keyring.get_password")
+    run = mocker.patch("stubber.publish.stubpackage.subprocess.run")
+
+    assert pkg.hatch_publish(production=True) is True
+    get_password.assert_not_called()
+    assert run.call_args.kwargs["env"]["UV_PUBLISH_TOKEN"] == "environment-token"
+
+
 # -------------------------------------------------------------------------
 # CONFIG.package_type drives the default
 # -------------------------------------------------------------------------
@@ -407,9 +449,7 @@ def test_build_converts_poetry_to_hatch_on_change(tmp_path, pytestconfig, mocker
     mocker.patch.object(pkg, "calculate_hash", return_value="deadbeef")
     mocker.patch.object(pkg, "next_package_version", return_value="1.24.1.post2")
     mocker.patch.object(pkg, "write_package_json")
-    hatch_build = mocker.patch(
-        "stubber.publish.stubpackage.HatchBuilder.hatch_build", return_value=True
-    )
+    hatch_build = mocker.patch("stubber.publish.stubpackage.HatchBuilder.hatch_build", return_value=True)
 
     ok = pkg.build_distribution(production=False, force=False)
 
@@ -450,4 +490,3 @@ def test_build_no_change_keeps_poetry(tmp_path, pytestconfig, mocker):
     assert ok is True
     # No change -> stays poetry
     assert pkg.package_type == PackageType.POETRY
-

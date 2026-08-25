@@ -47,9 +47,10 @@ from stubber.utils.repos import fetch_repos
     show_default=True,
 )
 @click.option(
-    "--black/--no-black",
+    "--format/--no-format",
+    "-b/-nb",
     default=True,
-    help="Run black on the (new) frozen modules",
+    help="Run formatter (ruff) on the new frozen modules",
     show_default=True,
 )
 @click.option(
@@ -63,7 +64,7 @@ def cli_get_frozen(
     # path: str = config.repo_path.as_posix(),
     version: str = "",
     stubgen: bool = True,
-    black: bool = True,
+    format: bool = True,
     autoflake: bool = True,
     enrich: bool = True,
 ):
@@ -125,5 +126,5 @@ def cli_get_frozen(
     for stub_path in stub_paths:
         add_comment_to_path(stub_path, f"# Micropython {version} frozen stubs")
     log.info("::group:: start post processing of retrieved stubs")
-    utils.do_post_processing(stub_paths, stubgen=False, format=black, autoflake=autoflake)
+    utils.do_post_processing(stub_paths, stubgen=False, format=format, autoflake=autoflake)
     log.info("::group:: Done")

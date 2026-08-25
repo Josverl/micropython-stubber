@@ -308,6 +308,23 @@ def test_match_lib_with_mpy_preview(mocker):
         mock_sync.assert_called_once()
 
 
+def test_match_lib_with_mpy_versioned_preview(mocker):
+    """Test match_lib_with_mpy with a concrete preview release tag."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        mpy_path = Path(tmpdir) / "micropython"
+        lib_path = Path(tmpdir) / "micropython-lib"
+
+        mock_checkout_commit = mocker.patch("stubber.utils.repos.git.checkout_commit", return_value=True)
+        mock_checkout_tag = mocker.patch("stubber.utils.repos.git.checkout_tag")
+        mock_sync = mocker.patch("stubber.utils.repos.sync_submodules", return_value=True)
+
+        result = match_lib_with_mpy("v1.29.0-preview", mpy_path, lib_path)
+        assert result is True
+        mock_checkout_commit.assert_called_once_with("master", lib_path)
+        mock_checkout_tag.assert_not_called()
+        mock_sync.assert_called_once_with(mpy_path)
+
+
 def test_match_lib_with_mpy_recent_version(mocker):
     """Test match_lib_with_mpy with recent version (>= v1.20.0)."""
     with tempfile.TemporaryDirectory() as tmpdir:

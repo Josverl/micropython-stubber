@@ -53,13 +53,13 @@ Follow these exact commands in order:
 
 1. **Check code formatting**:
    ```bash
-   uv run black --check --diff src/stubber/
+   uv run ruff format --check --diff src/stubber/
    ```
    - Takes: ~4 seconds. Shows what would be reformatted.
 
 2. **Format code** (if needed):
    ```bash
-   uv run black src/stubber/
+   uv run ruff format src/stubber/
    ```
    - Takes: ~4-8 seconds. NEVER CANCEL. Set timeout to 2+ minutes.
 
@@ -90,7 +90,7 @@ The project uses a configuration system that may have GitHub API dependencies. I
    uv run pytest tests/rst/test_constants.py -v
    
    # Test code formatting
-   uv run black --check src/stubber/__init__.py
+   uv run ruff format --check src/stubber/__init__.py
    
    # Test configuration system
    uv run stubber show-config | head -3
@@ -193,7 +193,7 @@ Some tests may fail due to external dependencies:
 - **uv sync**: 5+ minutes timeout
 - **uv run commands**: 2+ minutes timeout  
 - **Test runs**: 5-10+ minutes timeout
-- **Black formatting**: 2+ minutes timeout
+- **Ruff formatting**: 2+ minutes timeout
 - **Stub generation**: 10+ minutes timeout (if implemented)
 
 **NEVER CANCEL** long-running operations. Build and test processes may legitimately take several minutes.
@@ -285,7 +285,7 @@ ls -la pyproject.toml src/stubber/
 
 **Setup**: `uv sync --group dev --group docs --group test` (17s, 5min timeout)  
 **Test**: `uv run pytest tests/rst/test_constants.py -v` (1s, 2min timeout)  
-**Format**: `uv run black --check src/stubber/` (4s, 2min timeout)  
+**Format**: `uv run ruff format --check src/stubber/` (4s, 2min timeout)  
 **Config**: `uv run stubber show-config` (2s, 2min timeout)  
 **Help**: `uv run stubber --help` (1s, 2min timeout)  
 **Type Check**: `uv run pyright --version` (1s, 2min timeout)

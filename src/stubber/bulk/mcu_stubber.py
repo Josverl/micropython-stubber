@@ -5,12 +5,12 @@ This script creates stubs on and for a connected micropython MCU board.
 import json
 import shutil
 import sys
-import time
 from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
 from typing import List, Optional, Tuple, Union
 
+import serial.tools.list_ports
 from mpflash.connected import list_mcus
 from mpflash.list import show_mcus
 from mpflash.logger import log
@@ -31,6 +31,8 @@ HERE = Path(__file__).parent
 # TODO: promote to cmdline params
 reset_before = True
 TESTING = False
+ESPRESSIF_USB_SERIAL_JTAG = (0x303A, 0x1001)
+USB_SERIAL_JTAG_CPUS = {"ESP32-C3", "ESP32-C5", "ESP32-C6"}
 ###############################################################################################
 
 
@@ -51,6 +53,23 @@ class Form(str, Enum):
     py = "py"
     min = "min"
     mpy = "mpy"
+
+
+def use_mount_vfs(mcu: MPRemoteBoard, mount_vfs: bool, safe_mount: bool = True) -> bool:
+    """Disable mount VFS for ESP32 boards using the unstable USB-Serial/JTAG transport."""
+    if not mount_vfs or not safe_mount:
+        return mount_vfs
+    usb_id = (mcu.vid, mcu.pid)
+    if usb_id == (0, 0):
+        port_info = next((port for port in serial.tools.list_ports.comports() if port.device == mcu.serialport), None)
+        if port_info:
+            usb_id = (port_info.vid, port_info.pid)
+    usb_id_matches = usb_id == ESPRESSIF_USB_SERIAL_JTAG
+    linux_usj_matches = mcu.serialport.startswith("/dev/ttyACM") and mcu.cpu.upper() in USB_SERIAL_JTAG_CPUS
+    if usb_id_matches or (mcu.port == "esp32" and linux_usj_matches):
+        log.warning("Disabling mount VFS for Espressif USB-Serial/JTAG transport; use --no-safe-mount to override this safeguard.")
+        return False
+    return True
 
 
 @retry(stop=stop_after_attempt(4), wait=wait_fixed(2))
@@ -77,7 +96,8 @@ def run_createstubs(
     if reset_before:
         log.info(f"Resetting {mcu.serialport} {mcu.description}")
         mcu.run_command("reset", timeout=5)
-        time.sleep(2)
+        # Wait for the board to re-attach (important on WSL2) without resetting it on every probe
+        mcu.wait_for_restart()
 
     log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
     if mount_vfs:
@@ -145,6 +165,7 @@ def generate_board_stubs(
     variant: Variant = Variant.db,
     form: Form = Form.mpy,
     mount_vfs: bool = True,
+    safe_mount: bool = True,
     exclude: Union[List[str], None] = None,
 ) -> Tuple[int, Optional[Path]]:
     """
@@ -157,6 +178,7 @@ def generate_board_stubs(
         The port the board is connected to
     """
     exclude = exclude or []
+    mount_vfs = use_mount_vfs(mcu, mount_vfs, safe_mount)
     # TODO: use remaining free memory to determine if we can afford to mount the vfs
     if mcu.cpu.lower() == "esp8266":
         # insuficcient memory on the board also mount a remote fs
@@ -353,6 +375,7 @@ def stub_connected_mcus(
     bluetooth: bool,
     exclude: Union[List[str], None] = None,
     mount_vfs: bool = True,
+    safe_mount: bool = True,
 ) -> int:
     """
     Runs the stubber to generate stubs for connected MicroPython boards.
@@ -397,7 +420,15 @@ def stub_connected_mcus(
         # remove the modulelist.done file before starting createstubs on each board
         (temp_path / "modulelist.done").unlink(missing_ok=True)
 
-        rc, my_stubs = generate_board_stubs(temp_path, board, variant, form, mount_vfs=mount_vfs, exclude=exclude)
+        rc, my_stubs = generate_board_stubs(
+            temp_path,
+            board,
+            variant,
+            form,
+            mount_vfs=mount_vfs,
+            safe_mount=safe_mount,
+            exclude=exclude,
+        )
         if rc != OK:
             log.error(f"Failed to generate stubs for {board.serialport}")
             continue

@@ -39,7 +39,7 @@ from stubber.utils.post import format_stubs
 _ENRICH_CACHE = "enrich"
 
 # Bump when the merge logic changes in a way that invalidates cached results.
-ENRICH_CACHE_VERSION = "8"
+ENRICH_CACHE_VERSION = "9"
 
 # Sentinel stored when the transform produced no change, so a cached "no change"
 # result can be told apart from a cache miss.
@@ -146,7 +146,7 @@ def _run_merge_transform(
         copy_returns=copy_returns,
     )
     # Do NOT format here (format_code=False). `enrich_folder` runs `ruff format`
-    # (format_stubs) exactly once at the end, so per-file black/ruff formatting
+    # (format_stubs) exactly once at the end, so per-file formatting
     # would be redundant work. Keeping the transform output unformatted also makes
     # the cached value formatter-independent.
     return exec_transform_with_prettyprint(
@@ -382,7 +382,15 @@ def enrich_file(
         current_code = new_code
 
     if not new_code:
-        raise FileNotFoundError(f"No doc-stub file found for {target_path}")
+        # Kept as FileNotFoundError so enrich_folder still treats it as "nothing to
+        # merge" and skips it. If a change was expected here, the enrich cache may be
+        # stale — bump ENRICH_CACHE_VERSION or clear the enrich cache to force a re-run.
+        srcs = ", ".join(p.as_posix() for p in source_paths)
+        raise FileNotFoundError(
+            f"Enriching {target_path} from [{srcs}] produced no change "
+            f"(doc-stub had nothing to merge, or the enrich cache is stale — "
+            f"bump ENRICH_CACHE_VERSION or clear the enrich cache)."
+        )
     if write_back:
         log.trace(f"Write back enriched file {target_path}")
         target_path.write_text(current_code, encoding="utf-8")

@@ -10,6 +10,7 @@ of micropython
 
 import hashlib
 import json
+import os
 import shutil
 import sqlite3
 import subprocess
@@ -18,7 +19,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import libcst as cst
+import keyring
 import tenacity
+from keyring.errors import KeyringError
 from libcst import ParserSyntaxError
 from mpflash.basicgit import get_git_describe
 
@@ -953,6 +956,21 @@ class HatchBuilder(Builder):
         if not self._publish:
             log.warning(f"Publishing is disabled for {self.package_name}")
             return False
+
+        publish_env = os.environ.copy()
+        if not publish_env.get("UV_PUBLISH_TOKEN"):
+            try:
+                token = keyring.get_password("pypi", "uv_publish")
+            except KeyringError as exc:
+                log.error(f"Could not read the PyPI token from keyring: {exc}")
+                return False
+            if not token:
+                log.error(
+                    "No PyPI token found. Set UV_PUBLISH_TOKEN or store one in keyring with service='pypi' and username='uv_publish'."
+                )
+                return False
+            publish_env["UV_PUBLISH_TOKEN"] = token
+
         self.write_package_json()
         if production:
             log.debug("Publishing to PRODUCTION https://pypi.org")
@@ -960,11 +978,11 @@ class HatchBuilder(Builder):
         else:
             log.debug("Publishing to TEST-PyPI https://test.pypi.org")
             params = ["publish", "--publish-url", "https://test.pypi.org/legacy/"]
-        r = self.run_hatch(params)
+        r = self.run_hatch(params, env=publish_env)
         print("")  # add a newline after the output
         return r
 
-    def run_hatch(self, parameters: List[str]) -> bool:
+    def run_hatch(self, parameters: List[str], env: Optional[Dict[str, str]] = None) -> bool:
         """Run a ``uv`` command-line (build/publish) in the package folder.
 
         The hatchling backend is declared in each package's ``pyproject.toml``; ``uv``
@@ -979,6 +997,7 @@ class HatchBuilder(Builder):
                 ["uv"] + parameters,
                 cwd=self.package_path,
                 check=True,
+                env=env,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
                 encoding="utf-8",
@@ -1034,12 +1053,7 @@ class HatchBuilder(Builder):
             }
             # ensure the hatch target sections exist and clear the include list so
             # update_pyproject_stubs can repopulate it
-            targets = (
-                _pyproject.setdefault("tool", {})
-                .setdefault("hatch", {})
-                .setdefault("build", {})
-                .setdefault("targets", {})
-            )
+            targets = _pyproject.setdefault("tool", {}).setdefault("hatch", {}).setdefault("build", {}).setdefault("targets", {})
             targets.setdefault("wheel", {})["include"] = list(self.STUB_INCLUDE_GLOBS)
             targets.setdefault("sdist", {})["include"] = list(self.STUB_INCLUDE_GLOBS)
         else:
@@ -1073,12 +1087,7 @@ class HatchBuilder(Builder):
         include_globs = list(self.STUB_INCLUDE_GLOBS)
 
         # Ensure the nested key hierarchy exists
-        targets = (
-            _pyproject.setdefault("tool", {})
-            .setdefault("hatch", {})
-            .setdefault("build", {})
-            .setdefault("targets", {})
-        )
+        targets = _pyproject.setdefault("tool", {}).setdefault("hatch", {}).setdefault("build", {}).setdefault("targets", {})
         targets.setdefault("wheel", {})["include"] = include_globs
         targets.setdefault("sdist", {})["include"] = include_globs
 
