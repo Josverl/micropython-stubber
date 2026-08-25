@@ -5,7 +5,6 @@ This script creates stubs on and for a connected micropython MCU board.
 import json
 import shutil
 import sys
-import time
 from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
@@ -77,7 +76,8 @@ def run_createstubs(
     if reset_before:
         log.info(f"Resetting {mcu.serialport} {mcu.description}")
         mcu.run_command("reset", timeout=5)
-        time.sleep(2)
+        # Wait for the board to re-attach (important on WSL2) without resetting it on every probe
+        mcu.wait_for_restart()
 
     log.info(f"Running createstubs {variant.value} on {mcu.serialport} {mcu.description} using temp path: {dest}")
     if mount_vfs:
