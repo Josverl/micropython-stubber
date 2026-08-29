@@ -8,6 +8,7 @@ from typing import Optional
 from packaging.version import Version, parse
 from pypi_simple import PyPISimple, NoSuchProjectError
 from mpflash.logger import log
+from requests.exceptions import RequestException
 
 
 def get_pypi_versions(package_name: str, base: Optional[Version] = None, production: bool = True):
@@ -23,6 +24,9 @@ def get_pypi_versions(package_name: str, base: Optional[Version] = None, product
             package_info = client.get_project_page(project=package_name)
     except NoSuchProjectError:
         log.debug(f"Package {package_name} not found on {endpoint}")
+        return []
+    except RequestException as exc:
+        log.error(f"Could not query {endpoint} for package {package_name}: {exc}. Continuing without remote version information.")
         return []
 
     if not package_info:
