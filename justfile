@@ -31,6 +31,11 @@ sync:
 update:
     uv lock --upgrade
 
+# run all tests
+test *PARAMS :
+    uv sync --group test
+    uv run pytest {{PARAMS}}
+
 # Build the project documentation
 sphinx:
     @echo "Building documentation..."
