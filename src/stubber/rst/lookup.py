@@ -97,7 +97,6 @@ RST_DOC_FIXES: List[Tuple[str, str]] = [
 # docstubs generation, exclude stub generation for below stubs.
 DOCSTUB_SKIP = [
     "uasyncio.rst",  # can create better stubs from frozen python modules.
-    "builtins.rst",  # conflicts with static type checking , has very little information anyway
     "re.rst",  # regex is too complex
 ]
 
@@ -111,7 +110,10 @@ Format: a dictionary with :
 """
 LOOKUP_LIST = {
     "builtins.bytes": ("bytes", 0.95),
+    "builtins.callable": ("TypeIs[Callable[..., object]]", 0.95),
+    "builtins.dir": ("List[str]", 0.95),
     "builtins.from_bytes": ("int", 0.95),
+    "builtins.hasattr": ("bool", 0.95),
     "builtins.to_bytes": ("bytes", 0.95),
     "bytearray_at": ("bytearray", 0.95),
     "collections.namedtuple": ("type[Tuple[Any, ...]]", 0.95),
@@ -258,6 +260,11 @@ ANY_BUF = ["from _mpy_shed import AnyReadableBuf, AnyWritableBuf"]
 MODULE_GLUE = {
     "array": ['_T = TypeVar("_T", int, float, str)'],
     "asyncio": ANY_BUF,
+    "builtins": ANY_BUF
+    + [
+        "import sys",
+        "from typing import TypeIs",
+    ],
     "bluetooth": ANY_BUF
     + [
         "from _mpy_shed import _IRQ",
