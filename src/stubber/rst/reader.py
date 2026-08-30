@@ -589,7 +589,7 @@ class RSTParser(RSTReader):
         log.trace(f"# {self.line.rstrip()}")
         this_class = self.line.split(SEPARATOR)[-1].strip()  # raw
         if "(" in this_class:
-            name, params = this_class.split("(", 2)
+            name, params = this_class.split("(", 1)
         else:
             name = this_class
             params = ""
