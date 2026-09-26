@@ -1,0 +1,13 @@
+from _typeshed import Incomplete
+
+
+class Parent:
+    def read(self, *args, **kwargs) -> Incomplete: ...
+
+
+class Child:
+    TOKEN: int = 1
+
+    def read(self, *args, **kwargs) -> Incomplete: ...
+    def status(self, *args, **kwargs) -> Incomplete: ...
+    def __init__(self, pin) -> None: ...

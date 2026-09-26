@@ -18,6 +18,7 @@ from libcst.tool import _default_config  # type: ignore
 from mpflash.logger import log
 
 import stubber.codemod.merge_docstub as merge_docstub
+from stubber.codemod.inheritance import InheritanceIndex, InheritanceSource, build_inheritance_index
 from stubber.merge_config import CP_REFERENCE_TO_DOCSTUB, copy_type_modules
 from stubber.modcat import U_MODULES
 from stubber.utils import cache as cache_cfg
@@ -105,6 +106,7 @@ def _enrich_cache_key(
     copy_params: bool,
     copy_docstr: bool,
     copy_returns: bool,
+    inheritance_fingerprint: str = "",
 ) -> str:
     """Build a content-based cache key for a merge transform (one or more sources)."""
     h = hashlib.sha256()
@@ -112,6 +114,7 @@ def _enrich_cache_key(
         ENRICH_CACHE_VERSION,
         module_name,
         f"{int(copy_params)}{int(copy_docstr)}{int(copy_returns)}",
+        inheritance_fingerprint,
         str(len(source_texts)),
         *source_texts,
         target_text,
@@ -130,6 +133,7 @@ def _run_merge_transform(
     copy_params: bool,
     copy_docstr: bool,
     copy_returns: bool,
+    inheritance_index: Optional[InheritanceIndex] = None,
 ) -> Optional[str]:
     """Run the (expensive) libcst merge transform and return the new code, or None.
 
@@ -144,6 +148,7 @@ def _run_merge_transform(
         copy_params=copy_params,
         copy_docstr=copy_docstr,
         copy_returns=copy_returns,
+        inheritance_index=inheritance_index,
     )
     # Do NOT format here (format_code=False). `enrich_folder` runs `ruff format`
     # (format_stubs) exactly once at the end, so per-file formatting
@@ -165,23 +170,37 @@ def _cached_merge_transform(
     copy_params: bool,
     copy_docstr: bool,
     copy_returns: bool,
+    inheritance_index: Optional[InheritanceIndex] = None,
 ) -> Optional[str]:
     """Run `_run_merge_transform`, transparently caching the result on disk."""
     if not cache_cfg.CACHE_ENABLED:
-        return _run_merge_transform(source_paths, target_text, module_name, filename, copy_params, copy_docstr, copy_returns)
+        return _run_merge_transform(
+            source_paths, target_text, module_name, filename, copy_params, copy_docstr, copy_returns, inheritance_index
+        )
 
     # Mask per-board volatile lines so stubs that differ only in those lines hit
     # the same cache entry; the transform runs on (and caches) the masked text.
     masked_target, restore = _mask_volatile(target_text)
     source_texts = [p.read_text(encoding="utf-8") for p in source_paths]
-    key = _enrich_cache_key(source_texts, masked_target, module_name, copy_params, copy_docstr, copy_returns)
+    inheritance_fingerprint = inheritance_index.fingerprint_for_module(module_name) if inheritance_index is not None else ""
+    key = _enrich_cache_key(
+        source_texts,
+        masked_target,
+        module_name,
+        copy_params,
+        copy_docstr,
+        copy_returns,
+        inheritance_fingerprint,
+    )
     cache = cache_cfg.get_cache(_ENRICH_CACHE)
     cached = cache.get(key, default=None)
     if cached is not None:
         log.trace(f"enrich cache hit for {filename}")
         return None if cached == _NO_CHANGE else _restore_volatile(str(cached), restore)
 
-    new_code = _run_merge_transform(source_paths, masked_target, module_name, filename, copy_params, copy_docstr, copy_returns)
+    new_code = _run_merge_transform(
+        source_paths, masked_target, module_name, filename, copy_params, copy_docstr, copy_returns, inheritance_index
+    )
     cache.set(key, new_code if new_code is not None else _NO_CHANGE)
     return _restore_volatile(new_code, restore) if new_code is not None else None
 
@@ -340,6 +359,7 @@ def enrich_file(
     copy_params: bool = False,
     copy_docstr: bool = False,
     copy_returns: bool = False,
+    inheritance_index: Optional[InheritanceIndex] = None,
 ) -> Generator[str, None, None]:
     """
     Enrich firmware stubs using the doc-stubs in another folder.
@@ -368,15 +388,21 @@ def enrich_file(
     log.info(f"Enriching file: {target_path}")
     # read target file
     old_code = current_code = target_path.read_text(encoding="utf-8")
+    module_name = package_from_path(target_path)
+    if inheritance_index is None:
+        inheritance_index = build_inheritance_index(
+            [InheritanceSource(path=path, source_module=package_from_path(path), target_module=module_name) for path in source_paths]
+        )
     # apply the codemod to the target file (transparently cached on disk)
     new_code = _cached_merge_transform(
         source_paths,
         current_code,
-        module_name=package_from_path(target_path),
+        module_name=module_name,
         filename=target_path.as_posix(),
         copy_params=copy_params,
         copy_docstr=copy_docstr,
         copy_returns=copy_returns,
+        inheritance_index=inheritance_index,
     )
     if new_code:
         current_code = new_code
@@ -467,7 +493,10 @@ def enrich_folder(
     log.info(f"Enriching from {source_folder} to {target_folder}/**/*{ext}")
     count = 0
 
-    candidates = source_target_candidates(source_folder, target_folder, ext)
+    candidates = list(source_target_candidates(source_folder, target_folder, ext))
+    inheritance_index = build_inheritance_index(
+        [InheritanceSource(path=match.source, source_module=match.source_pkg, target_module=match.target_pkg) for match in candidates]
+    )
 
     # Group all matching doc-stubs per target so each (potentially large) target is
     # parsed and transformed only once, merging all its sources in a single pass.
@@ -495,6 +524,7 @@ def enrich_folder(
                     copy_params=copy_params,
                     copy_docstr=copy_docstr,
                     copy_returns=copy_returns,
+                    inheritance_index=inheritance_index,
                 )
             ):
                 count += len(diff)

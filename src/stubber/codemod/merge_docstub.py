@@ -12,6 +12,7 @@ Merge documentation and type information
 
 import argparse
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
@@ -35,6 +36,7 @@ from stubber.typing_collector import (
     update_module_docstr,
 )
 
+from .inheritance import ClassId, InheritanceIndex
 from .visitors.type_helpers import AddTypeHelpers, GatherTypeHelpers
 
 Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
@@ -91,6 +93,44 @@ def _is_unknown_params(params: str) -> bool:
         "cls",
         "cls, *args, **kwargs",
     } or _is_inspect_placeholder_params(params)
+
+
+def _is_inherited_method_placeholder(node: cst.FunctionDef) -> bool:
+    """Return whether a method is a safe generated placeholder to inherit."""
+    params = node.params
+    positional = [*params.posonly_params, *params.params]
+    if (
+        node.name.value in {"__init__", "__new__"}
+        or node.asynchronous is not None
+        or node.decorators
+        or node.get_docstring() is not None
+        or len(positional) != 1
+        or positional[0].name.value not in {"self", "cls"}
+        or params.kwonly_params
+        or not isinstance(params.star_arg, cst.Param)
+        or params.star_arg.name.value not in {"args", "argv"}
+        or params.star_kwarg is None
+        or params.star_kwarg.name.value != "kwargs"
+    ):
+        return False
+    if node.returns is not None and _code(node.returns.annotation).strip() not in {"Any", "Incomplete", "..."}:
+        return False
+    return m.matches(node.body, m.SimpleStatementSuite(body=[m.Expr(value=m.Ellipsis())]))
+
+
+def _has_richer_method_contract(annotation: AnnoValue) -> bool:
+    """Return whether a documented method is more useful than a placeholder."""
+    candidates = [annotation.type_info, *annotation.overloads, *annotation.mp_available]
+    for candidate in candidates:
+        if candidate is None or not isinstance(candidate.def_node, cst.FunctionDef):
+            continue
+        if any(not (is_decorator(decorator, "overload") or is_mp_available_decorator(decorator)) for decorator in candidate.decorators):
+            continue
+        if candidate.params is not None and not _is_unknown_params(_code(candidate.params)):
+            return True
+        if candidate.returns is not None and _code(candidate.returns.annotation).strip() not in {"Any", "Incomplete", "..."}:
+            return True
+    return False
 
 
 def is_decorator(dec: cst.CSTNode, name: str) -> bool:
@@ -217,6 +257,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         copy_params: bool = False,
         copy_docstr: bool = True,
         copy_returns: bool = False,
+        inheritance_index: Optional[InheritanceIndex] = None,
     ) -> None:
         """initialize the base class with context, and save our args.
 
@@ -241,6 +282,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.copy_params = copy_params
         self.copy_docstr = copy_docstr
         self.copy_returns = copy_returns
+        self.inheritance_index = inheritance_index
+        self.inheritance_stats: Counter[str] = Counter()
 
         # store the (merged) annotations
         self.annotations: Dict[
@@ -402,6 +445,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         updated_node = self.add_missed_mp_available_attributes(updated_node, stack_id=())
         # Add any missing literal docstrings
         updated_node = self.add_missed_literal_docstrings(updated_node, stack_id=())
+        if self.inheritance_stats:
+            details = ", ".join(f"{reason}={count}" for reason, count in sorted(self.inheritance_stats.items()))
+            log.debug(f"Inherited method pruning for {self.context.full_module_name or self.context.filename}: {details}")
         return updated_node
 
     def add_missed_overloads(self, updated_node: Mod_Class_T, stack_id: tuple) -> Mod_Class_T:
@@ -711,6 +757,106 @@ class MergeCommand(VisitorBasedCodemodCommand):
         return matched, i
         # --------------------------------------------------------------------
 
+    def _remove_inherited_method_placeholders(
+        self,
+        updated_node: cst.ClassDef,
+        stack_id: Tuple[str, ...],
+        doc_stub,
+    ) -> cst.ClassDef:
+        """Remove child placeholders that hide a richer local parent method."""
+        if not isinstance(doc_stub.def_node, cst.ClassDef) or not isinstance(updated_node.body, cst.IndentedBlock):
+            return updated_node
+        method_groups: Dict[str, List[cst.FunctionDef]] = {}
+        for statement in updated_node.body.body:
+            if isinstance(statement, cst.FunctionDef):
+                method_groups.setdefault(statement.name.value, []).append(statement)
+
+        if len(doc_stub.def_node.bases) != 1:
+            if len(doc_stub.def_node.bases) > 1:
+                self.inheritance_stats["ambiguous-mro"] += sum(
+                    len(declarations)
+                    for declarations in method_groups.values()
+                    if all(_is_inherited_method_placeholder(declaration) for declaration in declarations)
+                )
+            return updated_node
+
+        base = doc_stub.def_node.bases[0]
+        if base.keyword is not None:
+            return updated_node
+
+        parent_scope = (*stack_id[:-1], base.value.value) if isinstance(base.value, cst.Name) else None
+        removable_methods = set()
+        for method_name, declarations in method_groups.items():
+            child_method = (*stack_id, method_name)
+            if method_name in {"__init__", "__new__"}:
+                self.inheritance_stats["constructor"] += len(declarations)
+                continue
+            if any(declaration.decorators or declaration.asynchronous is not None for declaration in declarations):
+                self.inheritance_stats["decorated"] += len(declarations)
+                continue
+            if child_method in self.annotations:
+                self.inheritance_stats["exact-child-doc"] += len(declarations)
+                continue
+            if not all(_is_inherited_method_placeholder(declaration) for declaration in declarations):
+                self.inheritance_stats["meaningful-child"] += len(declarations)
+                continue
+
+            parent_name = None
+            documented_arities = None
+            parent_method_found = False
+            if self.inheritance_index is not None and self.context.full_module_name:
+                inherited = self.inheritance_index.resolve_method(ClassId(self.context.full_module_name, stack_id), method_name)
+                if inherited is not None:
+                    parent_method_found = True
+                    if inherited[1].is_richer_than_placeholder:
+                        parent_name = inherited[0].display_name
+                        documented_arities = set(inherited[1].arities) if inherited[1].arities is not None else None
+
+            if parent_name is None and parent_scope is not None:
+                parent_method = (*parent_scope, method_name)
+                parent_annotation = self.annotations.get(parent_method)
+                if parent_annotation is not None:
+                    parent_method_found = True
+                    if _has_richer_method_contract(parent_annotation):
+                        parent_name = ".".join(parent_method)
+                        documented_arities = _get_documented_arities(parent_annotation)
+
+            if parent_name is None:
+                reason = "parent-not-richer" if parent_method_found else "unresolved-parent"
+                self.inheritance_stats[reason] += len(declarations)
+                continue
+
+            arity_mismatch = False
+            for declaration in declarations:
+                inspect_arity = _get_inspect_arity(declaration)
+                if inspect_arity is not None and documented_arities and inspect_arity not in documented_arities:
+                    self.warn(
+                        "inspect arity mismatch for {} inherited from {}: firmware reports {}, doc stub declares {}".format(
+                            ".".join(child_method),
+                            parent_name,
+                            inspect_arity,
+                            ", ".join(str(arity) for arity in sorted(documented_arities)),
+                        )
+                    )
+                    arity_mismatch = True
+                    self.inheritance_stats["arity-mismatch"] += 1
+            if not arity_mismatch:
+                removable_methods.add(method_name)
+                self.inheritance_stats["removed"] += len(declarations)
+
+        if not removable_methods:
+            return updated_node
+
+        new_body = [
+            statement
+            for statement in updated_node.body.body
+            if not (isinstance(statement, cst.FunctionDef) and statement.name.value in removable_methods)
+        ]
+        if not new_body:
+            new_body.append(cst.SimpleStatementLine(body=[cst.Expr(value=cst.Ellipsis())]))
+
+        return updated_node.with_changes(body=updated_node.body.with_changes(body=tuple(new_body)))
+
     # ------------------------------------------------------------
 
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
@@ -759,6 +905,7 @@ class MergeCommand(VisitorBasedCodemodCommand):
         updated_node = self.add_missed_mp_available_attributes(updated_node, stack_id)
         # Add any missing literal docstrings
         updated_node = self.add_missed_literal_docstrings(updated_node, stack_id)
+        updated_node = self._remove_inherited_method_placeholders(updated_node, stack_id, doc_stub)
         return updated_node
 
     # ------------------------------------------------------------------------
