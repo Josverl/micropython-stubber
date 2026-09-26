@@ -31,6 +31,8 @@ This command will do the following:
 10. The stubs are enriched with typing information from the reference stubs where matching.
 11. A new package is created in the publish folder ready for use in your {ref}`IDE <ide>` or publication to PyPI.
 
+During enrichment, redundant generated child-method placeholders are removed when a richer compatible method is available through an unambiguous documented parent. See {ref}`inherited-method-pruning` for the matching rules and safeguards.
+
 **Module duplication**
 
 Due to the module naming convention in MicroPython some modules will be duplicated, i.e. `uos` and `os` will both be included.

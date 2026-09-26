@@ -16,6 +16,23 @@ python -m libcst.tool list
  * add_comment.AddComment - Add comment(s) to each file
  * merge_docstub.MergeCommand - Merge the type-rich information from a doc-stub into a firmware stub
 
+(inherited-method-pruning)=
+### Inherited method placeholders
+
+During folder enrichment, the merge pipeline builds a module-qualified inheritance index from the matching doc-stub files. This supports parent and child classes in the same file or in separate files, including imported, aliased, and qualified base names.
+
+When a firmware child class contains a generated `*args, **kwargs` method with a weak return type such as `Any` or `Incomplete`, the merger removes that method if an unambiguous ancestor provides a richer, arity-compatible contract. Static type checkers then use normal inheritance to expose the ancestor's parameter and return types instead of the generic child placeholder. This behavior is generic and is not limited to particular classes or method names.
+
+The merger preserves the child declaration when it cannot prove that removal is safe. In particular, it does not remove:
+
+- `__init__` or `__new__` methods
+- methods with meaningful child parameters, return types, docstrings, or decorators
+- methods documented directly on the child
+- methods whose recorded firmware arity conflicts with the ancestor contract
+- methods with unresolved parents or ambiguous multiple inheritance
+
+The merger does not copy ancestor signatures into the child. It only removes proven generated shadows so ordinary Python inheritance provides the documented contract.
+
 To run a codemos use the `codemod` command:
 
 ``` bash
