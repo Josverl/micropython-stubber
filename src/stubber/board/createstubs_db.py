@@ -436,9 +436,13 @@ class Stubber:
                             pass
                 # Try to get parameter signature using inspect
                 params = None
+                inspect_arity = None
                 if self._use_inspect:
                     try:
                         sig = _inspect.signature(item_instance)
+                        if sig.parameters and not all(hasattr(param, "kind") for param in sig.parameters.values()):
+                            inspect_arity = len(sig.parameters)
+                            raise ValueError("inspect returned arity-only parameters")
                         param_parts = []
                         saw_positional_only = False
                         saw_var_positional = False
@@ -505,6 +509,8 @@ class Stubber:
                     s = "{}def {}({}) -> Generator:\n".format(indent, item_name, params)
                 else:
                     s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
+                if inspect_arity is not None:
+                    s = "{}# inspect: arity={}\n".format(indent, inspect_arity) + s
                 # add docstring if available
                 if self._capture_docstrings:
                     try:
@@ -550,6 +556,7 @@ class Stubber:
                         # parameter count and detect coroutines.
                         gen_first = "self, " if in_class > 0 else ""
                         gen_params = None
+                        gen_inspect_arity = None
                         gen_is_async = False
                         if self._use_inspect:
                             try:
@@ -558,6 +565,9 @@ class Stubber:
                                 pass
                             try:
                                 sig = _inspect.signature(item_instance)
+                                if sig.parameters and not all(hasattr(param, "kind") for param in sig.parameters.values()):
+                                    gen_inspect_arity = len(sig.parameters)
+                                    raise ValueError("inspect returned arity-only parameters")
                                 param_parts = []
                                 saw_positional_only = False
                                 saw_var_positional = False
@@ -611,6 +621,8 @@ class Stubber:
                             s = "{0}def {1}({2}) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
                                 indent, item_name, gen_params, t, item_repr
                             )
+                        if gen_inspect_arity is not None:
+                            s = "{}# inspect: arity={}\n".format(indent, gen_inspect_arity) + s
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"

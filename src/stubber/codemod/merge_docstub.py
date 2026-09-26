@@ -43,6 +43,37 @@ Mod_Class_T = TypeVar("Mod_Class_T", cst.Module, cst.ClassDef)
 empty_module = cst.parse_module("")  # Debugging aid : empty_module.code_for_node(node)
 _code = empty_module.code_for_node
 
+_INSPECT_ARITY_COMMENT = re.compile(r"^#\s*inspect:\s*arity=(\d+)\s*$")
+
+
+def _get_inspect_arity(node: cst.FunctionDef) -> Optional[int]:
+    """Return the raw MicroPython inspect arity stored above a function."""
+    for line in node.leading_lines:
+        if line.comment and (match := _INSPECT_ARITY_COMMENT.fullmatch(line.comment.value)):
+            return int(match.group(1))
+    return None
+
+
+def _get_parameter_arity(params: cst.Parameters) -> Optional[int]:
+    """Return a definite declared arity, or None for variadic parameters."""
+    if isinstance(params.star_arg, cst.Param) or params.star_kwarg is not None:
+        return None
+    return len(params.posonly_params) + len(params.params) + len(params.kwonly_params)
+
+
+def _get_documented_arities(annotation: AnnoValue) -> Optional[set[int]]:
+    """Return all definite doc-stub arities, or None if any candidate is variadic."""
+    candidates = [annotation.type_info, *annotation.overloads, *annotation.mp_available]
+    arities: set[int] = set()
+    for candidate in candidates:
+        if candidate is None or not isinstance(candidate.def_node, cst.FunctionDef):
+            continue
+        arity = _get_parameter_arity(candidate.def_node.params)
+        if arity is None:
+            return None
+        arities.add(arity)
+    return arities
+
 
 def _is_inspect_placeholder_params(params: str) -> bool:
     """Return whether params contains only MicroPython inspect dummy names."""
@@ -742,6 +773,15 @@ class MergeCommand(VisitorBasedCodemodCommand):
         if stack_id not in self.annotations:
             # no changes to the function in docstub
             return updated_node
+        inspect_arity = _get_inspect_arity(original_node)
+        documented_arities = _get_documented_arities(self.annotations[stack_id])
+        if inspect_arity is not None and documented_arities and inspect_arity not in documented_arities:
+            declared = ", ".join(str(arity) for arity in sorted(documented_arities))
+            self.warn(
+                "inspect arity mismatch for {}: firmware reports {}, doc stub declares {}".format(
+                    ".".join(stack_id), inspect_arity, declared
+                )
+            )
         if updated_node.decorators and any(is_decorator(dec, "overload") for dec in updated_node.decorators):
             # do not overwrite existing @overload functions
             # Consume its source counterpart so add_missed_overloads does not

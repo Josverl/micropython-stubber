@@ -1,12 +1,13 @@
 # type: ignore reportGeneralTypeIssues
 """Tests for inspect module integration in createstubs."""
+
 import sys
 from pathlib import Path
 from typing import Generator
 
 import pytest
 
-from shared import import_variant
+from shared import VARIANTS, import_variant
 
 pytestmark = [pytest.mark.stubber, pytest.mark.micropython]
 
@@ -149,6 +150,44 @@ def test_signature_positional_params(stubber_instance, tmp_path):
     assert "func_with_params(alpha, beta, gamma)" in content
 
 
+@pytest.mark.parametrize("variant", VARIANTS)
+def test_arity_only_signature_uses_generic_params(variant, tmp_path, monkeypatch):
+    """MicroPython's dummy inspect parameters preserve arity without becoming exact."""
+
+    createstubs = import_variant("board", variant)
+    stubber_instance = createstubs.Stubber(path=str(tmp_path), firmware_id="test-fw")
+
+    def func_with_optional_params(first, second=None):
+        pass
+
+    async def async_func_with_optional_params(first, second=None):
+        pass
+
+    def generator_func(first, second=None):
+        yield first
+
+    class Example:
+        def method_with_optional_params(self, value=None):
+            pass
+
+    class ArityOnlySignature:
+        parameters = {"x0": "x0", "x1": "x1"}
+
+    monkeypatch.setattr(createstubs._inspect, "signature", lambda _: ArityOnlySignature())
+    mock = _make_mock_module(
+        Example=Example,
+        async_func_with_optional_params=async_func_with_optional_params,
+        func_with_optional_params=func_with_optional_params,
+        generator_instance=generator_func(None),
+    )
+    content = _write_stub_for(stubber_instance, mock, tmp_path)
+
+    assert "# inspect: arity=2\ndef func_with_optional_params(*args, **kwargs)" in content
+    assert "# inspect: arity=2\nasync def async_func_with_optional_params(*args, **kwargs)" in content
+    assert "    # inspect: arity=2\n    def method_with_optional_params(self, *args, **kwargs)" in content
+    assert "# inspect: arity=2\ndef generator_instance(*args, **kwargs) -> Generator" in content
+
+
 def test_signature_with_variadic_params(stubber_instance, tmp_path):
     """Variadic parameters (*args, **kwargs) should be preserved in stub."""
 
@@ -256,9 +295,7 @@ def test_classmethod_uses_inspect_for_signature(stubber_instance, tmp_path):
     # Should have @classmethod decorator
     assert "@classmethod" in content
     # Should use inspect-derived param names, not *args, **kwargs
-    assert "def my_classmethod(cls, x1, x2)" in content, (
-        "classmethod should have actual params from inspect, got:\n" + content
-    )
+    assert "def my_classmethod(cls, x1, x2)" in content, "classmethod should have actual params from inspect, got:\n" + content
     # cls must not be doubled
     assert "cls, cls" not in content
 

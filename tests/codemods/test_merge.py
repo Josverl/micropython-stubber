@@ -48,6 +48,47 @@ def test_known_params(params: str):
     assert not _is_unknown_params(params)
 
 
+@pytest.mark.parametrize(
+    ("doc_params", "expected_warnings"),
+    [
+        ("first, second", []),
+        ("first, second, third", ["inspect arity mismatch for foo: firmware reports 2, doc stub declares 3"]),
+        ("first, *args, **kwargs", []),
+    ],
+)
+def test_inspect_arity_warning(tmp_path: Path, doc_params: str, expected_warnings: list[str]):
+    docstub = tmp_path / "source.pyi"
+    docstub.write_text(f"def foo({doc_params}): ...\n", encoding="utf-8")
+    tree = parse_module("from typing import Any\n\n# inspect: arity=2\ndef foo(*args, **kwargs) -> Any: ...\n")
+    context = CodemodContext()
+
+    MergeCommand(context, docstub_file=docstub).transform_module(tree)
+
+    assert context.warnings == expected_warnings
+
+
+@pytest.mark.parametrize(
+    ("doc_params", "expected_warnings"),
+    [
+        ("cls, first", []),
+        ("cls, first, second", ["inspect arity mismatch for Worker.create: firmware reports 2, doc stub declares 3"]),
+        ("cls, first, *args, **kwargs", []),
+    ],
+)
+def test_inspect_arity_warning_for_classmethod(tmp_path: Path, doc_params: str, expected_warnings: list[str]):
+    docstub = tmp_path / "source.pyi"
+    docstub.write_text(
+        f"class Worker:\n    @classmethod\n    def create({doc_params}): ...\n",
+        encoding="utf-8",
+    )
+    tree = parse_module("class Worker:\n    # inspect: arity=2\n    @classmethod\n    def create(cls, *args, **kwargs): ...\n")
+    context = CodemodContext()
+
+    MergeCommand(context, docstub_file=docstub).transform_module(tree)
+
+    assert context.warnings == expected_warnings
+
+
 def test_existing_overloads_are_not_duplicated(tmp_path: Path):
     docstub = tmp_path / "source.pyi"
     docstub.write_text(
