@@ -89,6 +89,23 @@ def test_inspect_arity_warning_for_classmethod(tmp_path: Path, doc_params: str, 
     assert context.warnings == expected_warnings
 
 
+def test_explicit_reexports_replace_module_definitions(tmp_path: Path):
+    docstub = tmp_path / "source.pyi"
+    docstub.write_text(
+        "from package.storage import Storage as Storage\nfrom package.display import display as display\n",
+        encoding="utf-8",
+    )
+    tree = parse_module("class Storage:\n    ...\n\ndef display(*args, **kwargs): ...\n\nclass Local:\n    ...\n")
+
+    result = MergeCommand(CodemodContext(), docstub_file=docstub).transform_module(tree).code
+
+    assert "from package.storage import Storage as Storage" in result
+    assert "from package.display import display as display" in result
+    assert "class Storage:" not in result
+    assert "def display(" not in result
+    assert "class Local:" in result
+
+
 def test_existing_overloads_are_not_duplicated(tmp_path: Path):
     docstub = tmp_path / "source.pyi"
     docstub.write_text(
