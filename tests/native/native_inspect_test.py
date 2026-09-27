@@ -8,7 +8,7 @@
 #
 # Tests verify that:
 #   1. createstubs.py runs without errors with inspect available.
-#   2. Functions get actual parameter counts (x0, x1, …) instead of *args/**kwargs.
+#   2. Functions retain inspect parameter counts as arity metadata.
 #   3. Class method stubs have 'self' exactly once (no duplication).
 #   4. Coroutine / async-generator functions are emitted as 'async def'.
 
@@ -124,14 +124,13 @@ def test_createstubs_with_inspect_runs(tmp_path: Path, pytestconfig):
 
 @_skip_no_mpy
 @_skip_no_inspect
-def test_inspect_improves_param_signatures(tmp_path: Path, pytestconfig):
-    """With inspect, functions should have concrete parameter names (x0, x1 …)
-    rather than the generic *args/**kwargs fallback.
+def test_inspect_preserves_param_arity(tmp_path: Path, pytestconfig):
+    """With arity-only inspect, functions retain generic parameters and metadata.
 
-    MicroPython's inspect.signature() returns dummy names x0, x1, … but the
-    count is correct.  At least some single-argument functions in 'uos'/'os'
-    should appear as ``def f(x0) -> Incomplete`` instead of
-    ``def f(*args, **kwargs) -> Incomplete``.
+    MicroPython's inspect.signature() returns dummy names that do not describe
+    defaults or parameter kinds. The generator therefore keeps ``*args`` and
+    ``**kwargs`` while recording the reliable parameter count in an adjacent
+    ``# inspect: arity=N`` comment.
     """
     script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
     stub_out = _run_createstubs(_MICROPYTHON, script_path, tmp_path)
@@ -140,10 +139,15 @@ def test_inspect_improves_param_signatures(tmp_path: Path, pytestconfig):
     assert uos_stub is not None, "uos.pyi / os.pyi should exist"
 
     content = uos_stub.read_text(encoding="utf-8")
-    # At least one function should have a concrete positional param (x0)
-    assert "(x0)" in content or "(x0," in content, (
-        "uos stub should have functions with concrete param names when inspect is available"
+    lines = content.splitlines()
+    has_arity_signature = any(
+        comment.startswith("# inspect: arity=")
+        and comment.removeprefix("# inspect: arity=").isdigit()
+        and signature.startswith("def ")
+        and "(*args, **kwargs)" in signature
+        for comment, signature in zip(lines, lines[1:])
     )
+    assert has_arity_signature, "uos stub should preserve inspect arity metadata next to a generic signature"
 
 
 @_skip_no_mpy
@@ -151,9 +155,9 @@ def test_inspect_improves_param_signatures(tmp_path: Path, pytestconfig):
 def test_class_method_no_double_self(tmp_path: Path, pytestconfig):
     """Class method stubs must not have 'self' listed twice.
 
-    On MicroPython, inspect.signature() uses dummy names (x0, x1, …) where
-    x0 represents 'self'.  The stub generator must strip that first parameter
-    and prepend exactly one explicit 'self', never producing 'self, x0, …'.
+    MicroPython's dummy inspect names carry arity only and must not leak into
+    generated parameters. The class-method fallback prepends exactly one
+    explicit 'self'.
     """
     script_path = (pytestconfig.rootpath / "src" / "stubber" / "board").absolute()
     stub_out = _run_createstubs(_MICROPYTHON, script_path, tmp_path)
