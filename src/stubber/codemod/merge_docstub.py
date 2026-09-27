@@ -295,6 +295,14 @@ class MergeCommand(VisitorBasedCodemodCommand):
                     if name:
                         seen.add(name)
 
+    def _is_explicit_reexport(self, stack_id: Tuple[str, ...]) -> bool:
+        """Return whether a module-level definition is owned by a doc-stub re-export."""
+        if len(stack_id) != 1:
+            return False
+        name = stack_id[0]
+        import_item = self.stub_imports.get(name)
+        return import_item is not None and import_item.obj_name == name and import_item.alias == name
+
     # ------------------------------------------------------------------------
 
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
@@ -709,9 +717,11 @@ class MergeCommand(VisitorBasedCodemodCommand):
         """keep track of the the (class, method) names to the stack"""
         self.stack.append(node.name.value)
 
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> Union[cst.ClassDef, cst.RemovalSentinel]:
         stack_id = tuple(self.stack)
         self.stack.pop()
+        if self._is_explicit_reexport(stack_id):
+            return cst.RemovalSentinel.REMOVE
         if stack_id not in self.annotations:
             # no changes to the class
             return updated_node
@@ -758,7 +768,9 @@ class MergeCommand(VisitorBasedCodemodCommand):
         self.stack.append(node.name.value)
         return True
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Union[cst.FunctionDef, cst.ClassDef]:
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> Union[cst.FunctionDef, cst.ClassDef, cst.RemovalSentinel]:
         "Update the function Parameters and return type, decorators and docstring"
         if is_getter(updated_node):
             extra = ["getter"]
@@ -770,6 +782,8 @@ class MergeCommand(VisitorBasedCodemodCommand):
             extra = []
         stack_id = tuple(self.stack + extra)
         self.stack.pop()
+        if self._is_explicit_reexport(stack_id):
+            return cst.RemovalSentinel.REMOVE
         if stack_id not in self.annotations:
             # no changes to the function in docstub
             return updated_node
