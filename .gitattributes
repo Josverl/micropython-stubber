@@ -1,0 +1,40 @@
+# Normalize line endings so Windows, WSL/Linux and CI produce identical worktrees.
+# Without this, running the test suite under WSL rewrites checked-in fixtures with
+# LF and git reports them as modified on Windows.
+
+* text=auto
+
+# Source and data formats are LF everywhere, including on Windows.
+*.py    text eol=lf
+*.pyi   text eol=lf
+*.sh    text eol=lf
+*.toml  text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.md    text eol=lf
+*.rst   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+Makefile text eol=lf
+
+# Windows shells expect CRLF.
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# Never touch these.
+*.mpy   binary
+*.wasm  binary
+*.exe   binary
+*.uf2   binary
+*.bin   binary
+*.db    binary
+*.zip   binary
+*.xlsx  binary
+*.pptx  binary
+*.png   binary
+*.PNG   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
