@@ -256,65 +256,71 @@ def refactor_rp2_module(dest_path: Path):
     patch_rp2_init_pyi(rp2_folder / "__init__.pyi")
 
 
-def patch_rp2_init_pyi(rp2_init_file: Path) -> None:
+def _extract_rp2_definitions(source_file: Path) -> tuple[cst.FunctionDef, cst.ClassDef, cst.ClassDef]:
+    module = cst.parse_module(source_file.read_text(encoding="utf-8"))
+    asm_pio_definition = None
+    pioasmemit_definition = None
+    program_definition = None
+    for statement in module.body:
+        if isinstance(statement, cst.FunctionDef) and statement.name.value == "asm_pio":
+            asm_pio_definition = statement
+        elif isinstance(statement, cst.ClassDef) and statement.name.value == "PIOASMEmit":
+            pioasmemit_definition = statement
+        elif isinstance(statement, cst.ClassDef) and statement.name.value == "_PIO_ASM_Program":
+            program_definition = statement
+    if asm_pio_definition is None:
+        raise ValueError(f"Could not find function asm_pio in {source_file}")
+    if pioasmemit_definition is None:
+        raise ValueError(f"Could not find class PIOASMEmit in {source_file}")
+    if program_definition is None:
+        raise ValueError(f"Could not find class _PIO_ASM_Program in {source_file}")
+    return asm_pio_definition, pioasmemit_definition, program_definition
+
+
+def _is_pioasmemit_import(statement: cst.CSTNode) -> bool:
+    if not isinstance(statement, cst.ImportFrom):
+        return False
+    module = statement.module
+    if isinstance(module, cst.Attribute):
+        return isinstance(module.value, cst.Name) and module.value.value == "rp2" and module.attr.value == "PIOASMEmit"
+    return bool(statement.relative) and isinstance(module, cst.Name) and module.value == "PIOASMEmit"
+
+
+def patch_rp2_init_pyi(rp2_init_file: Path, canonical_rp2_init_file: Optional[Path] = None) -> None:
     """
     Normalize generated rp2/__init__.pyi typing surface:
-    - suppress `_PIO_ASM_Program: TypeAlias = Callable`
-    - keep `PIOASMEmit` opaque (only __init__ + __getattr__)
-    - make `_PIO_ASM_Program` an opaque class without `__getitem__`
+    - suppress legacy `rp2.PIOASMEmit` imports and `_PIO_ASM_Program` aliases
+    - replace `asm_pio` with its canonical reference declaration
+    - replace `PIOASMEmit` with its canonical reference declaration
+    - replace `_PIO_ASM_Program` with its canonical opaque declaration
     """
     if not rp2_init_file.exists():
         return
 
     source = rp2_init_file.read_text(encoding="utf-8")
     module = cst.parse_module(source)
-
-    pioasmemit_replacement = cst.parse_statement(
-        '''class PIOASMEmit:
-    """
-    Internal emitter used by the ``@asm_pio`` decorator. Not intended for
-    direct use.
-
-    PIO instructions, directives, and modifiers are exposed via
-    :mod:`rp2.asm_pio` (which re-exports :mod:`rp2.asm_pio_rp2040`), and
-    that module is the single source of truth for their typing surface.
-    """
-    def __init__(
-        self,
-        *,
-        out_init: int | List | None = ...,
-        set_init: int | List | None = ...,
-        sideset_init: int | List | None = ...,
-        side_pindir: bool = ...,
-        in_shiftdir: int = ...,
-        out_shiftdir: int = ...,
-        autopush: bool = ...,
-        autopull: bool = ...,
-        push_thresh: int = ...,
-        pull_thresh: int = ...,
-        fifo_join: int = ...,
-    ) -> None: ...
-    def __getattr__(self, name: str) -> Incomplete: ...
-'''
-    )
-
-    program_replacement = cst.parse_statement(
-        '''class _PIO_ASM_Program:
-    """Opaque handle representing an assembled PIO program.
-
-    Returned by ``@asm_pio`` and consumed by ``StateMachine``/``PIO``.
-    Users should not introspect or index this object. The chainable
-    per-instruction expression that lives inside the decorator body is
-    a different type (``rp2.asm_pio._PIOInstr``).
-    """
-'''
-    )
+    canonical_rp2_init_file = canonical_rp2_init_file or (CONFIG.mpy_stubs_path / "reference" / "micropython" / "rp2" / "__init__.pyi")
+    asm_pio_replacement, pioasmemit_replacement, program_replacement = _extract_rp2_definitions(canonical_rp2_init_file)
 
     class RP2InitTransformer(cst.CSTTransformer):
         def __init__(self):
             self.changed = False
+            self.found_asm_pio = False
             self.found_pioasmemit = False
             self.found_program = False
+
+        def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
+            if updated_node.name.value == "asm_pio":
+                self.changed = True
+                self.found_asm_pio = True
+                return asm_pio_replacement
+            return updated_node
+
+        def leave_SimpleStatementLine(self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine):
+            if len(updated_node.body) == 1 and _is_pioasmemit_import(updated_node.body[0]):
+                self.changed = True
+                return cst.RemoveFromParent()
+            return updated_node
 
         def leave_AnnAssign(self, original_node: cst.AnnAssign, updated_node: cst.AnnAssign):
             if (
@@ -322,8 +328,6 @@ def patch_rp2_init_pyi(rp2_init_file: Path) -> None:
                 and updated_node.target.value == "_PIO_ASM_Program"
                 and isinstance(updated_node.annotation.annotation, cst.Name)
                 and updated_node.annotation.annotation.value == "TypeAlias"
-                and isinstance(updated_node.value, cst.Name)
-                and updated_node.value.value == "Callable"
             ):
                 self.changed = True
                 return cst.RemoveFromParent()
@@ -343,8 +347,11 @@ def patch_rp2_init_pyi(rp2_init_file: Path) -> None:
     transformer = RP2InitTransformer()
     updated_module = module.visit(transformer)
 
+    if not transformer.found_asm_pio:
+        log.warning(" - could not find function asm_pio in rp2/__init__.pyi")
     if not transformer.found_pioasmemit:
-        log.warning(" - could not find class PIOASMEmit in rp2/__init__.pyi")
+        updated_module = updated_module.with_changes(body=(*updated_module.body, pioasmemit_replacement))
+        log.info(" - add class PIOASMEmit to rp2/__init__.pyi")
     if not transformer.found_program:
         updated_module = updated_module.with_changes(body=(*updated_module.body, program_replacement))
         log.info(" - add class _PIO_ASM_Program to rp2/__init__.pyi")

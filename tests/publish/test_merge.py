@@ -2,11 +2,25 @@ from pathlib import Path
 
 import pytest
 from mock import MagicMock
+from stubber.modcat import CP_REFERENCE_TO_DOCSTUB
 from stubber.publish.merge_docstubs import copy_and_merge_docstubs, copy_missing_pyscript_stubs, merge_all_docstubs, patch_rp2_init_pyi
 
 from .fakeconfig import FakeConfig
 
 pytestmark = [pytest.mark.stubber]
+
+
+def canonical_rp2_init(tmp_path: Path) -> Path:
+    canonical = tmp_path / "canonical_rp2_init.pyi"
+    canonical.write_text(
+        "from typing import Callable\n\n"
+        "def asm_pio() -> Callable[[Callable[[], object]], _PIO_ASM_Program]: ...\n\n"
+        'class PIOASMEmit:\n    """Canonical emitter declaration."""\n\n'
+        "    def __init__(self, *, canonical_only: bool = ...) -> None: ...\n\n"
+        "class _PIO_ASM_Program: ...\n",
+        encoding="utf-8",
+    )
+    return canonical
 
 
 def test_patch_rp2_init_adds_missing_pio_asm_program(tmp_path):
@@ -16,10 +30,52 @@ def test_patch_rp2_init_adds_missing_pio_asm_program(tmp_path):
         encoding="utf-8",
     )
 
-    patch_rp2_init_pyi(rp2_init)
+    patch_rp2_init_pyi(rp2_init, canonical_rp2_init(tmp_path))
 
     patched = rp2_init.read_text(encoding="utf-8")
     assert patched.count("class _PIO_ASM_Program:") == 1
+    assert patched.count("class PIOASMEmit:") == 1
+
+
+def test_patch_rp2_init_uses_canonical_pio_asm_emit(tmp_path):
+    rp2_init = tmp_path / "__init__.pyi"
+    rp2_init.write_text(
+        "class PIOASMEmit:\n    def __init__(self, *, generated_only: bool = ...) -> None: ...\n",
+        encoding="utf-8",
+    )
+    canonical = canonical_rp2_init(tmp_path)
+
+    patch_rp2_init_pyi(rp2_init, canonical)
+
+    patched = rp2_init.read_text(encoding="utf-8")
+    assert "Canonical emitter declaration." in patched
+    assert "canonical_only" in patched
+    assert "generated_only" not in patched
+
+
+def test_patch_rp2_init_uses_precise_canonical_asm_pio(tmp_path):
+    rp2_init = tmp_path / "__init__.pyi"
+    rp2_init.write_text(
+        "from typing import Callable\nfrom typing_extensions import TypeAlias\nfrom _typeshed import Incomplete\n"
+        "from rp2.PIOASMEmit import PIOASMEmit\n\n"
+        "_PIO_ASM_Program: TypeAlias = Incomplete\n\n"
+        "def asm_pio() -> Callable[..., PIOASMEmit]: ...\n",
+        encoding="utf-8",
+    )
+
+    patch_rp2_init_pyi(rp2_init, canonical_rp2_init(tmp_path))
+
+    patched = rp2_init.read_text(encoding="utf-8")
+    assert "Callable[[Callable[[], object]], _PIO_ASM_Program]" in patched
+    assert "Callable[..., PIOASMEmit]" not in patched
+    assert "from rp2.PIOASMEmit import PIOASMEmit" not in patched
+    assert "_PIO_ASM_Program: TypeAlias" not in patched
+    assert patched.count("class PIOASMEmit:") == 1
+    assert patched.count("class _PIO_ASM_Program:") == 1
+
+
+def test_reference_copy_does_not_publish_pio_asm_emit_submodule():
+    assert "rp2/PIOASMEmit.pyi" not in CP_REFERENCE_TO_DOCSTUB
 
 
 def test_copy_missing_pyscript_stubs_preserves_existing_files(tmp_path):

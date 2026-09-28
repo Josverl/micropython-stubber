@@ -120,7 +120,6 @@ CP_REFERENCE_TO_DOCSTUB: Final = [
     # `tls` has no upstream .rst documentation, so the reference module is the only source
     "tls",
     # Handcoded stubs for the rp2 PIO assembler
-    "rp2/PIOASMEmit.pyi",
     "rp2/asm_pio.pyi",
     "rp2/asm_pio_rp2040.pyi",
     "rp2/asm_pio_rp2350.pyi",
