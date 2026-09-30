@@ -6,6 +6,7 @@ This is shared between stubber, and external build scripts.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Dict, Final, List
 
 from stubber.publish.enums import StubSource
@@ -30,6 +31,55 @@ STDLIB_ONLY_MODULES = [
 ]
 """Modules that should only be in stdlib, and not in the individual packages"""
 # and should not be in the individual packes as that causes duplication
+
+STDLIB_SHADOWING_MODULES: Final = frozenset(
+    {
+        "_thread",
+        "argparse",
+        "base64",
+        "binascii",
+        "cmath",
+        "copy",
+        "datetime",
+        "errno",
+        "fnmatch",
+        "functools",
+        "gc",
+        "gzip",
+        "hashlib",
+        "heapq",
+        "hmac",
+        "html",
+        "inspect",
+        "itertools",
+        "locale",
+        "logging",
+        "math",
+        "operator",
+        "pathlib",
+        "platform",
+        "random",
+        "select",
+        "socket",
+        "stat",
+        "string",
+        "tarfile",
+        "termios",
+        "time",
+        "unittest",
+        "uu",
+        "zlib",
+    }
+)
+"""Port-specific modules that replace modules in the reduced typeshed stdlib."""
+
+
+def package_stub_destination(relative_path: Path) -> Path:
+    """Return the canonical package-relative destination for a stub file."""
+    module_name = relative_path.stem if len(relative_path.parts) == 1 else relative_path.parts[0]
+    if module_name in STDLIB_SHADOWING_MODULES:
+        return Path("stdlib") / relative_path
+    return relative_path
 
 
 ########################################################
