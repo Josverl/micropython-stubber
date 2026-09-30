@@ -412,6 +412,8 @@ class Builder(VersionedPackage):
                 try:
                     log.debug(f"Copy {stub_type:<20} from {src_path}")
                     self.copy_folder(stub_type, src_path)
+                except FileExistsError:
+                    raise
                 except OSError as e:
                     if stub_type != StubSource.FROZEN:
                         raise FileNotFoundError(f"Could not find stub source folder {src_path}") from e

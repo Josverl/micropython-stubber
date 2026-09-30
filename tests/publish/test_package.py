@@ -1,7 +1,9 @@
 # sourcery skip: require-parameter-annotation, require-return-annotation
-""" Test the package creation and manipulation"""
+"""Test the package creation and manipulation"""
 
+from collections.abc import Iterable
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 from pytest_mock import MockerFixture
@@ -181,6 +183,99 @@ def test_package_from_json(tmp_path, pytestconfig, mocker: MockerFixture, json):
         stub_path=config.stub_path,
         test_build=False,
     )
+
+
+def create_synthetic_package(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    mocker: MockerFixture,
+    sources: Iterable[tuple[StubSource, Path]],
+) -> StubPackage:
+    config = FakeConfig(
+        publish_path=tmp_path / "publish",
+        stub_path=tmp_path / "stubs",
+        template_path=pytestconfig.rootpath / "tests/publish/data/template",
+    )
+    config.stub_path.mkdir(parents=True)
+    mocker.patch("stubber.publish.stubpackage.CONFIG", config)
+    return StubPackage(
+        "micropython-rp2-stubs",
+        port="rp2",
+        board="RPI_PICO",
+        version="v1.24.1",
+        stub_sources=list(sources),
+    )
+
+
+def test_stdlib_shadowing_stubs_use_canonical_layout(tmp_path, pytestconfig, mocker):
+    source = Path("synthetic")
+    package = create_synthetic_package(tmp_path, pytestconfig, mocker, [(StubSource.MERGED, source)])
+    source_path = tmp_path / "stubs" / source
+    (source_path / "html").mkdir(parents=True)
+    (source_path / "time.pyi").write_text("def ticks_ms() -> int: ...\n")
+    (source_path / "html" / "__init__.pyi").write_text("class HTMLParser: ...\n")
+    (source_path / "html" / "parser.pyi").write_text("class Parser: ...\n")
+    (source_path / "machine.pyi").write_text("class Pin: ...\n")
+
+    package.copy_stubs()
+
+    paths = {path.relative_to(package.package_path).as_posix() for path in package.package_path.rglob("*.pyi")}
+    assert paths == {
+        "machine.pyi",
+        "stdlib/html/__init__.pyi",
+        "stdlib/html/parser.pyi",
+        "stdlib/time.pyi",
+    }
+
+
+def test_stdlib_shadowing_collision_is_actionable(tmp_path, pytestconfig, mocker):
+    merged = Path("merged")
+    core = Path("core")
+    package = create_synthetic_package(
+        tmp_path,
+        pytestconfig,
+        mocker,
+        [(StubSource.MERGED, merged), (StubSource.CORE, core)],
+    )
+    (tmp_path / "stubs" / merged).mkdir(parents=True)
+    (tmp_path / "stubs" / merged / "time.pyi").write_text("def ticks_ms() -> int: ...\n")
+    (tmp_path / "stubs" / core / "stdlib").mkdir(parents=True)
+    (tmp_path / "stubs" / core / "stdlib" / "time.pyi").write_text("def time() -> int: ...\n")
+
+    with pytest.raises(FileExistsError, match=r"stdlib[/\\]time\.pyi already exists"):
+        package.copy_stubs()
+
+
+def test_copy_stubs_rejects_missing_source(tmp_path, pytestconfig, mocker):
+    missing = Path("missing")
+    package = create_synthetic_package(tmp_path, pytestconfig, mocker, [(StubSource.MERGED, missing)])
+
+    with pytest.raises(FileNotFoundError, match=r"Could not find stub source folder.*missing"):
+        package.copy_stubs()
+
+
+@pytest.mark.integration
+def test_hatch_wheel_contains_canonical_stdlib_payload_once(tmp_path, pytestconfig, mocker):
+    source = Path("synthetic")
+    package = create_synthetic_package(tmp_path, pytestconfig, mocker, [(StubSource.MERGED, source)])
+    source_path = tmp_path / "stubs" / source
+    source_path.mkdir(parents=True)
+    (source_path / "time.pyi").write_text("def ticks_ms() -> int: ...\n")
+    (source_path / "machine.pyi").write_text("class Pin: ...\n")
+
+    package.copy_stubs()
+    package.create_readme()
+    package.create_license()
+    assert package.update_pyproject_stubs() == 2
+    assert package.hatch_build()
+
+    wheels = list((package.package_path / "dist").glob("*.whl"))
+    assert len(wheels) == 1
+    with ZipFile(wheels[0]) as wheel:
+        names = wheel.namelist()
+    assert names.count("stdlib/time.pyi") == 1
+    assert names.count("machine.pyi") == 1
+    assert "time.pyi" not in names
 
 
 def run_common_package_tests(package: StubPackage, pkg_name, publish_path: Path, stub_path: Path, test_build=True):
