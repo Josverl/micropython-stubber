@@ -39,7 +39,7 @@ from mpflash.logger import log
 from mpflash.versions import SET_PREVIEW, V_PREVIEW, clean_version
 from packaging.version import Version, parse
 
-from stubber.modcat import COMPLEMENTARY_FROZEN_MODULES, STDLIB_UMODULES, STUBS_COPY_FILTER
+from stubber.modcat import COMPLEMENTARY_FROZEN_MODULES, STDLIB_UMODULES, STUBS_COPY_FILTER, package_stub_destination
 from stubber.publish.bump import bump_version
 from stubber.publish.defaults import GENERIC_U, default_board
 from stubber.publish.enums import PackageType, StubSource
@@ -313,6 +313,7 @@ class Builder(VersionedPackage):
         """Hash of all the files in the package"""
         self.stub_hash = None  # intial hash
         """Hash of all .pyi files"""
+        self._copied_stub_sources: Dict[Path, Path] = {}
 
     @property
     def package_path(self) -> Path:
@@ -398,6 +399,7 @@ class Builder(VersionedPackage):
          - 3 - remove *.py files from the package folder
         """
         try:
+            self._copied_stub_sources.clear()
             # Check if all stub source folders exist
             for stub_type, src_path in self.stub_sources:
                 if not (CONFIG.stub_path / src_path).exists():
@@ -465,9 +467,18 @@ class Builder(VersionedPackage):
                     log.trace(f"Skipping {item.name}")
                     continue
 
-                target = Path(self.package_path) / item.relative_to(CONFIG.stub_path / src_path)
+                relative_path = item.relative_to(CONFIG.stub_path / src_path)
+                destination = package_stub_destination(relative_path)
+                target = Path(self.package_path) / destination
+                previous_source = self._copied_stub_sources.get(destination)
+                if target.exists() and previous_source != relative_path:
+                    raise FileExistsError(
+                        f"Cannot copy stub {item}: install target {target} already exists"
+                        + (f" from source path {previous_source}" if previous_source is not None else "")
+                    )
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(item.read_bytes())
+                self._copied_stub_sources[destination] = relative_path
                 log.trace(f"Copied {item} to {target}")
 
     def update_package_files(self) -> None:
