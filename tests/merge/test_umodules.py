@@ -55,6 +55,23 @@ def test_recreate_umodules_replaces_package_alias(monkeypatch, tmp_path):
     )
 
 
+def test_recreate_umodules_uses_docstub_when_canonical_target_was_removed(monkeypatch, tmp_path):
+    target = tmp_path / "target"
+    target.mkdir()
+    source = tmp_path / "source"
+    package = source / "os"
+    package.mkdir(parents=True)
+    (package / "__init__.pyi").write_text("def stat(path: str, /) -> object: ...\n", encoding="utf-8")
+    monkeypatch.setattr(merge_config, "U_MODULES", ["os"])
+
+    merge_config.recreate_umodules(target, source_folder=source)
+
+    assert (target / "uos.pyi").read_text(encoding="utf-8") == (
+        "# This umodule is a MicroPython reference to os\n"
+        "from os import stat as stat\n"
+    )
+
+
 def test_make_docstubs_writes_explicit_aliases(monkeypatch, tmp_path):
     package = tmp_path / "binascii"
     package.mkdir()

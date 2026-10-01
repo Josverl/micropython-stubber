@@ -212,7 +212,7 @@ def copy_and_merge_docstubs(fw_path: Path, dest_path: Path, docstub_path: Path, 
     # remove unwanted modules
     remove_modules(dest_path, RM_MERGED)
     # fixup the umodules
-    recreate_umodules(dest_path)
+    recreate_umodules(dest_path, source_folder=docstub_path)
 
     # 2 - Enrich the firmware stubs with the document stubs
     result = enrich_folder(

@@ -71,18 +71,20 @@ def public_stub_names(stub_path: Path) -> list[str]:
     return list(dict.fromkeys(names))
 
 
-def _canonical_stub(target_folder: Path, module_name: str) -> Path | None:
-    for candidate in (target_folder / f"{module_name}.pyi", target_folder / module_name / "__init__.pyi"):
-        if candidate.is_file():
-            return candidate
+def _canonical_stub(module_name: str, folders: tuple[Path, ...]) -> Path | None:
+    for folder in folders:
+        for candidate in (folder / f"{module_name}.pyi", folder / module_name / "__init__.pyi"):
+            if candidate.is_file():
+                return candidate
     return None
 
 
-def write_umodule_stub(target_folder: Path, module_name: str) -> Path:
+def write_umodule_stub(target_folder: Path, module_name: str, *, source_folder: Path | None = None) -> Path:
     """Write a u-module stub that explicitly re-exports its canonical module."""
     target = target_folder / f"u{module_name}.pyi"
     lines = [f"# This umodule is a MicroPython reference to {module_name}"]
-    canonical = _canonical_stub(target_folder, module_name)
+    folders = (target_folder,) if source_folder is None else (target_folder, source_folder)
+    canonical = _canonical_stub(module_name, folders)
     if canonical is None:
         log.warning(f"Canonical stub for {module_name} not found in {target_folder}; using a wildcard alias")
         lines.append(f"from {module_name} import *")

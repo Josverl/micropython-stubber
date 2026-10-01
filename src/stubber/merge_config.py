@@ -36,7 +36,7 @@ def copy_type_modules(source_folder: Path, target_folder: Path, CP_REFERENCE_MOD
             log.error(f" - missing {src}")
 
 
-def recreate_umodules(target_folder: Path):
+def recreate_umodules(target_folder: Path, source_folder: Path | None = None):
     log.info("create umodules to refer to modules in the merged stubs")
     for name in U_MODULES:
         # delete complex or simple umodule
@@ -58,7 +58,7 @@ def recreate_umodules(target_folder: Path):
             log.error(f"Error removing {uname}: {e}")
             continue
 
-        uname = write_umodule_stub(target_folder, name)
+        uname = write_umodule_stub(target_folder, name, source_folder=source_folder)
         log.debug(f" - recreated {uname.name}")
 
 
