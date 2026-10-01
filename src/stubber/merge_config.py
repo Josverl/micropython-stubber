@@ -15,6 +15,7 @@ from stubber.modcat import (
     STDLIB_ONLY_MODULES,
     U_MODULES,
 )
+from stubber.umodules import write_umodule_stub
 
 EXT: Final = [".pyi", ".py", ""]
 
@@ -37,7 +38,6 @@ def copy_type_modules(source_folder: Path, target_folder: Path, CP_REFERENCE_MOD
 
 def recreate_umodules(target_folder: Path):
     log.info("create umodules to refer to modules in the merged stubs")
-    # Just `create an import * from module` in the umodule.pyi
     for name in U_MODULES:
         # delete complex or simple umodule
         uname = target_folder / f"u{name}"
@@ -58,10 +58,7 @@ def recreate_umodules(target_folder: Path):
             log.error(f"Error removing {uname}: {e}")
             continue
 
-        uname = target_folder / f"u{name}.pyi"
-        with uname.open("w") as f:
-            f.write(f"# This umodule is a MicroPython reference to {name}\n")
-            f.write(f"from {name} import *\n")
+        uname = write_umodule_stub(target_folder, name)
         log.debug(f" - recreated {uname.name}")
 
 

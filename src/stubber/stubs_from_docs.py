@@ -13,6 +13,7 @@ from stubber import utils
 from stubber.modcat import U_MODULES
 from stubber.rst import DOCSTUB_SKIP
 from stubber.rst.reader import RSTWriter
+from stubber.umodules import write_umodule_stub
 
 
 def generate_from_rst(
@@ -89,17 +90,7 @@ def make_docstubs(
         make_docstub(file, dst_path, v_tag, release, suffix, clean_rst)
 
     for name in U_MODULES:
-        # create a file "umodule.pyi" for each module
-        # and add a line : from module import *
-        # this is to allow the use of the u modules in the code
-
-        # create the file
-        target = dst_path / f"u{name}.pyi"
-        with open(target, "w") as f:
-            f.write(f"# {name} module\n")
-            f.write("# Allow the use of micro-module notation \n\n")
-            f.write(f"from {name} import *  # type: ignore\n")
-            f.flush()
+        write_umodule_stub(dst_path, name)
 
 
 def make_docstub(
