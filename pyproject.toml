@@ -34,9 +34,9 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
 ]
 dependencies = [
-    "mpflash==1.29.0",
+    "mpflash>=1.29.0,<1.31",
     "mpy-cross>=1.29.0",
-    "mpremote==1.29.0",
+    "mpremote>=1.30.0rc0.post101,<1.31",
     # stub transformation tools
     "libcst>=1.1.0,<2.0.0",
     "autoflake>=1.7,<3.0",

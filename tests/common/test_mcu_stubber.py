@@ -1,11 +1,12 @@
+import warnings
 from types import SimpleNamespace
 from typing import cast
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 from mpflash.mpremoteboard import MPRemoteBoard
 
-from stubber.bulk.mcu_stubber import ESPRESSIF_USB_SERIAL_JTAG, use_mount_vfs
+from stubber.bulk.mcu_stubber import ESPRESSIF_USB_SERIAL_JTAG, Variant, hard_reset, run_createstubs, use_mount_vfs
 
 
 @pytest.mark.parametrize(
@@ -49,3 +50,35 @@ def test_use_mount_vfs_resolves_linux_usb_id(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr("stubber.bulk.mcu_stubber.serial.tools.list_ports.comports", lambda: [port_info])
 
     assert use_mount_vfs(board, mount_vfs=True, safe_mount=True) is False
+
+
+def test_hard_reset_uses_explicit_reset_command() -> None:
+    board = Mock(spec=MPRemoteBoard)
+    board.run_command.return_value = (0, [])
+    board.connected = True
+
+    assert hard_reset.retry_with(wait=lambda _: 0)(board) is True
+
+    board.run_command.assert_called_once_with(["reset"], timeout=5)
+    assert board.connected is False
+
+
+def test_run_createstubs_resets_then_preserves_command_state(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("stubber.bulk.mcu_stubber.reset_before", True)
+    board = Mock(spec=MPRemoteBoard)
+    board.serialport = "COM7"
+    board.description = "Test board"
+    board.port = "rp2"
+    board.run_command.side_effect = [(0, []), (0, ["done"])]
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = run_createstubs.retry_with(wait=lambda _: 0)(tmp_path, board, Variant.db)
+
+    assert result == (0, ["done"])
+    assert board.run_command.call_args_list == [
+        call("reset", timeout=5),
+        call(["mount", str(tmp_path), "exec", "import createstubs_db"], timeout=360),
+    ]
+    board.wait_for_restart.assert_called_once_with()
+    assert not [warning for warning in caught if issubclass(warning.category, DeprecationWarning)]

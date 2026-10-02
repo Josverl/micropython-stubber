@@ -1747,8 +1747,8 @@ requires-dist = [
     { name = "keyring", specifier = ">=25.0.0,<26.0.0" },
     { name = "libcst", specifier = ">=1.1.0,<2.0.0" },
     { name = "loguru", specifier = ">=0.6,<0.8" },
-    { name = "mpflash", specifier = "==1.29.0" },
-    { name = "mpremote", specifier = "==1.29.0" },
+    { name = "mpflash", specifier = ">=1.29.0,<1.31" },
+    { name = "mpremote", specifier = ">=1.30.0rc0.post101,<1.31" },
     { name = "mpy-cross", specifier = ">=1.29.0" },
     { name = "mypy", specifier = ">=1.10" },
     { name = "mypy-gitlab-code-quality", specifier = ">=1.1.0,<2.0.0" },
@@ -1856,15 +1856,15 @@ wheels = [
 
 [[package]]
 name = "mpremote"
-version = "1.29.0"
+version = "1.30.0rc0.post101"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "platformdirs" },
     { name = "pyserial" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/b7/8c44eb606b0e53517fd6ddda3f598b3bdb180c181f4e0bcbb9b7743f4cb5/mpremote-1.29.0.tar.gz", hash = "sha256:ab0b6f21059698e573ca076fe9a0299e5fe7bbc3ca3f5b2f00007e22e51c7b80", size = 33808, upload-time = "2026-08-24T13:54:53.108Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/62/91/1495ced5e9509af405a13a8368dc95646d8f72dcba6093565d815b99cc77/mpremote-1.30.0rc0.post101.tar.gz", hash = "sha256:4e048bb58a01724bdc9ad777129dd027442b6e1978f9113f46c70cf9de11eafb", size = 34180, upload-time = "2026-10-01T02:40:35.269Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/85/f68fbcfe4d1ce32a7f2154a48f68195d4f256e3700b69ad0d5b758ee3b37/mpremote-1.29.0-py3-none-any.whl", hash = "sha256:dedac688bcd65b9d4d5b7a66119332f2830000088321107994959333f53e41c8", size = 38653, upload-time = "2026-08-24T13:54:51.674Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/f1/3b39c53d65e42f10b3da9ce9adc89b47f220123c1400f56161c36ce689ae/mpremote-1.30.0rc0.post101-py3-none-any.whl", hash = "sha256:1e3dd137d020c3f64a21b12aa53f0091ba4bb09f23e536315551f6a3fa21f5c1", size = 39175, upload-time = "2026-10-01T02:40:33.632Z" },
 ]
 
 [[package]]
