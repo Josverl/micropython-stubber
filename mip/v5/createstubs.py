@@ -17,9 +17,11 @@ except:
 try:
     from machine import reset  # type: ignore
 except ImportError:
+
     def reset():
         print("Reset called - exiting")
         sys.exit(0)
+
 
 try:
     from collections import OrderedDict
@@ -37,7 +39,7 @@ if not _is_low_mem_port:
     except ImportError:
         _has_inspect = False
 
-__version__ = "v1.28.5"
+__version__ = "v1.29.0"
 ENOENT = 2  # on most ports
 ENOMESSAGE = 44  # on pyscript
 _MAX_CLASS_LEVEL = 2  # Max class nesting
@@ -415,9 +417,13 @@ class Stubber:
                             pass
                 # Try to get parameter signature using inspect
                 params = None
+                inspect_arity = None
                 if self._use_inspect:
                     try:
                         sig = _inspect.signature(item_instance)
+                        if sig.parameters and not all(hasattr(param, "kind") for param in sig.parameters.values()):
+                            inspect_arity = len(sig.parameters)
+                            raise ValueError("inspect returned arity-only parameters")
                         param_parts = []
                         saw_positional_only = False
                         saw_var_positional = False
@@ -473,7 +479,9 @@ class Stubber:
                     params = "{}*args, **kwargs".format(first)
                 # class method - add function decoration
                 if "bound_method" in item_type_txt or "bound_method" in item_repr:
-                    s = "{}@classmethod\n".format(indent) + "{}def {}({}) -> {}:\n".format(indent, item_name, params.replace("self", "cls", 1), ret)
+                    s = "{}@classmethod\n".format(indent) + "{}def {}({}) -> {}:\n".format(
+                        indent, item_name, params.replace("self", "cls", 1), ret
+                    )
                 elif is_async:
                     s = "{}async def {}({}) -> {}:\n".format(indent, item_name, params, ret)
                 elif is_async_gen:
@@ -482,6 +490,8 @@ class Stubber:
                     s = "{}def {}({}) -> Generator:\n".format(indent, item_name, params)
                 else:
                     s = "{}def {}({}) -> {}:\n".format(indent, item_name, params, ret)
+                if inspect_arity is not None:
+                    s = "{}# inspect: arity={}\n".format(indent, inspect_arity) + s
                 # add docstring if available
                 if self._capture_docstrings:
                     try:
@@ -527,6 +537,7 @@ class Stubber:
                         # parameter count and detect coroutines.
                         gen_first = "self, " if in_class > 0 else ""
                         gen_params = None
+                        gen_inspect_arity = None
                         gen_is_async = False
                         if self._use_inspect:
                             try:
@@ -535,6 +546,9 @@ class Stubber:
                                 pass
                             try:
                                 sig = _inspect.signature(item_instance)
+                                if sig.parameters and not all(hasattr(param, "kind") for param in sig.parameters.values()):
+                                    gen_inspect_arity = len(sig.parameters)
+                                    raise ValueError("inspect returned arity-only parameters")
                                 param_parts = []
                                 saw_positional_only = False
                                 saw_var_positional = False
@@ -588,6 +602,8 @@ class Stubber:
                             s = "{0}def {1}({2}) -> Generator:  ## = {4}\n{0}    ...\n\n".format(
                                 indent, item_name, gen_params, t, item_repr
                             )
+                        if gen_inspect_arity is not None:
+                            s = "{}# inspect: arity={}\n".format(indent, gen_inspect_arity) + s
                     else:
                         # Requires Python 3.6 syntax, which is OK for the stubs/pyi
                         t = "Incomplete"
