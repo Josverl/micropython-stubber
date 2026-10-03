@@ -1,6 +1,6 @@
 import warnings
 from types import SimpleNamespace
-from typing import cast
+from typing import Any, cast
 from unittest.mock import Mock, call
 
 import pytest
@@ -57,7 +57,7 @@ def test_hard_reset_uses_explicit_reset_command() -> None:
     board.run_command.return_value = (0, [])
     board.connected = True
 
-    assert hard_reset.retry_with(wait=lambda _: 0)(board) is True
+    assert cast(Any, hard_reset).retry_with(wait=lambda _: 0)(board) is True
 
     board.run_command.assert_called_once_with(["reset"], timeout=5)
     assert board.connected is False
@@ -73,7 +73,7 @@ def test_run_createstubs_resets_then_preserves_command_state(tmp_path, monkeypat
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        result = run_createstubs.retry_with(wait=lambda _: 0)(tmp_path, board, Variant.db)
+        result = cast(Any, run_createstubs).retry_with(wait=lambda _: 0)(tmp_path, board, Variant.db)
 
     assert result == (0, ["done"])
     assert board.run_command.call_args_list == [
