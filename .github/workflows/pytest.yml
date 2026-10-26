@@ -39,12 +39,16 @@ jobs:
     test_stubber:
         name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
+        env:
+            UV_GROUP: test
+            # python-minifier 2.x only supports Python through 3.13.
+            UV_NO_DEV: ${{ matrix.python-version == '3.14' || matrix.python-version == '3.15' }}
 
         strategy:
             fail-fast: false
             matrix:
                 os: [ubuntu-latest, windows-latest] # , macos-latest ( most expensive)
-                python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+                python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
         steps:
             - name: Checkout repository
@@ -65,6 +69,7 @@ jobs:
               uses: actions/setup-python@v7
               with:
                   python-version: ${{ matrix.python-version }}
+                  allow-prereleases: true
 
             #----------------------------------------------
             # install project
