@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10, <4.0"
 resolution-markers = [
     "python_full_version >= '3.15' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
@@ -1693,7 +1693,6 @@ dependencies = [
     { name = "pypi-simple" },
     { name = "pyright" },
     { name = "pyserial" },
-    { name = "python-minifier" },
     { name = "requests" },
     { name = "rich-click" },
     { name = "ruff" },
@@ -1712,6 +1711,7 @@ dev = [
     { name = "pydeps" },
     { name = "pydocstyle" },
     { name = "python-dotenv" },
+    { name = "python-minifier" },
 ]
 docs = [
     { name = "myst-parser" },
@@ -1758,7 +1758,6 @@ requires-dist = [
     { name = "pypi-simple", specifier = ">=1.0.0,<2.0.0" },
     { name = "pyright", specifier = ">=1.1.341" },
     { name = "pyserial", specifier = ">=3.5" },
-    { name = "python-minifier", specifier = ">=2.7.0,<3.0.0" },
     { name = "requests", specifier = ">=2.32.3,<3.0.0" },
     { name = "rich-click", specifier = ">=1.8.3,<2.0.0" },
     { name = "ruff", specifier = ">=0.12.11,<0.13.0" },
@@ -1777,6 +1776,7 @@ dev = [
     { name = "pydeps", specifier = ">=1.10.22,<4.0.0" },
     { name = "pydocstyle", specifier = ">=6.3.0,<7.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.0,<2.0.0" },
+    { name = "python-minifier", specifier = ">=2.7.0,<3.0.0" },
 ]
 docs = [
     { name = "myst-parser", specifier = ">=3.0.1,<4.0.0" },

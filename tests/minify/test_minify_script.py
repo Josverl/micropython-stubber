@@ -1,9 +1,24 @@
 import pytest
 from contextlib import AbstractContextManager
+from io import StringIO
 
 from stubber.minify import get_whitespace_context, minify_script, python_minifier
 
 pytestmark = [pytest.mark.stubber]
+
+
+@pytest.mark.parametrize("source_type", ["str", "path", "stream"])
+def test_minify_script_without_minifier(monkeypatch, tmp_path, source_type):
+    monkeypatch.setattr("stubber.minify.python_minifier", None)
+    content = "# Keep the original source\nvalue = 1\nprint(value)\n"
+    source = content
+    if source_type == "path":
+        source = tmp_path / "source.py"
+        source.write_text(content, encoding="utf-8")
+    elif source_type == "stream":
+        source = StringIO(content)
+
+    assert minify_script(source) == content
 
 
 @pytest.mark.parametrize(

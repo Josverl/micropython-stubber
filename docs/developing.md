@@ -45,7 +45,13 @@ Pylance natively supports [multi-root workspaces](https://code.visualstudio.com/
 
 ## Minification 
 
-If you make changes to the createstubs.py script , you should also update the minified version by running `python process.py minify` at some point.
+If you make changes to the createstubs.py script, regenerate its variants with `uv run stubber variants` (alias `make-variants`).
+
+`python-minifier` is a development dependency, installed by the setup command above.
+It is not required for normal Stubber installs or commands. Without it, variant
+generation skips minification and cross-compiles the unchanged source instead.
+Use a development environment with Python 3.10–3.13 when regenerating minified
+board scripts, as the pinned python-minifier 2.x does not support newer Python versions.
 
 If you forget to do this there is a github action that should do this for you and create a PR for your branch.
 
