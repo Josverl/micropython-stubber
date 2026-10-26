@@ -45,7 +45,6 @@ dependencies = [
     # Checkers
     "pyright>=1.1.341",    
     # others
-    "python-minifier>=2.7.0,<3.0.0",
     "requests>=2.32.3,<3.0.0",    
     "greenlet>=3.2.4,<3.2.5",                              # Constrain to version with pre-built wheels
     "cachetools>=5.3.0,<6.0.0",
@@ -110,6 +109,7 @@ dev = [
     "pydocstyle>=6.3.0,<7.0.0",
     "chime>=0.7.0,<0.8.0",
     "bincopy>=20.0.0,<21.0.0",
+    "python-minifier>=2.7.0,<3.0.0",
 ]
 
 
