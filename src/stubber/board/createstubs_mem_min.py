@@ -1,4 +1,4 @@
-'Create stubs for (all) modules on a MicroPython board.\n\n    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file\n    `modulelist.txt` in the root or `libs` folder that should be uploaded to the device.\n    If that cannot be found then only a single module (micropython) is stubbed.\n    In order to run this on low-memory devices two additional steps are recommended:\n    - minifification, using python-minifier\n      to reduce overall size, and remove logging overhead.\n    - cross compilation, using mpy-cross,\n      to avoid the compilation step on the micropython device\n\nThis variant was generated from createstubs.py by micropython-stubber v1.29.0\n'
+'Create stubs for (all) modules on a MicroPython board.\n\n    This variant of the createstubs.py script is optimised for use on low-memory devices, and reads the list of modules from a text file\n    `modulelist.txt` in the root or `libs` folder that should be uploaded to the device.\n    If that cannot be found then only a single module (micropython) is stubbed.\n    In order to run this on low-memory devices two additional steps are recommended:\n    - minifification, using python-minifier\n      to reduce overall size, and remove logging overhead.\n    - cross compilation, using mpy-cross,\n      to avoid the compilation step on the micropython device\n\nThis variant was generated from createstubs.py by micropython-stubber v1.29.1\n'
 A7='No report file'
 A6='Failed to create the report.'
 A5='method'
@@ -61,7 +61,7 @@ g=B
 if not A8:
 	try:import inspect as c;g=N
 	except S:g=B
-__version__='v1.29.0'
+__version__='v1.29.1'
 A9=2
 AA=44
 AI=2
