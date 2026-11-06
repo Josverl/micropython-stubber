@@ -15,7 +15,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict
 
-from diskcache import Cache
+from diskcache_community import Cache, SafeDisk
 
 # Single combined toggle for every stubber disk cache.
 CACHE_ENABLED = os.environ.get("STUBBER_CACHE", "1").lower() not in ("0", "false", "no")
@@ -27,7 +27,7 @@ CACHE_DIR = os.environ.get("STUBBER_CACHE_DIR", str(Path(tempfile.gettempdir()) 
 @lru_cache(maxsize=None)
 def get_cache(name: str) -> Cache:
     """Return the shared on-disk cache for the given logical name (created lazily)."""
-    cache = Cache(str(Path(CACHE_DIR) / name))
+    cache = Cache(str(Path(CACHE_DIR) / name), disk=SafeDisk.with_options(on_error="miss"))
     # Enable hit/miss statistics so `cache_stats()` can report them.
     cache.stats(enable=True)
     return cache
